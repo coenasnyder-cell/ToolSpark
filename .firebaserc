@@ -1,0 +1,22 @@
+{
+  "projects": {
+    "default": "toolspark-2d62d"
+  },
+  "targets": {
+    "local-list-wski21": {
+      "hosting": {
+        "toolspark": [
+          "toolspark"
+        ]
+      }
+    },
+    "toolspark-2d62d": {
+      "hosting": {
+        "toolspark": [
+          "toolspark-c8830"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

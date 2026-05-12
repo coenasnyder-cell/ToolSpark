@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Clarity Session — ToolSpark</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0F0E0C;
+    --surface: #1A1916;
+    --surface2: #242220;
+    --border: #2E2C28;
+    --text: #F0EDE6;
+    --text2: #9E9891;
+    --text3: #5C5A55;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.15);
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 2rem 1rem;
+  }
+
+  .page-wrap {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: fadeIn 0.6s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .logo::before, .logo::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .header p {
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* START SCREEN */
+  .start-screen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1rem;
+  }
+  .start-screen label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .start-screen input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 1.25rem;
+  }
+  .start-screen input:focus { border-color: var(--gold); }
+  .start-screen input::placeholder { color: var(--text3); }
+
+  .what-to-expect {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .what-to-expect p {
+    font-size: 13px;
+    color: var(--gold-light);
+    line-height: 1.6;
+  }
+  .what-to-expect strong { color: var(--gold); font-weight: 700; }
+
+  .start-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0F0E0C;
+    border: none;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .start-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* CHAT */
+  .chat-container {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+  .chat-container.active { display: flex; }
+
+  .chat-messages {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.5rem;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .bubble-wrap {
+    display: flex;
+    animation: bubbleIn 0.3s ease;
+  }
+  @keyframes bubbleIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .bubble-wrap.user { justify-content: flex-end; }
+  .bubble-wrap.ai { justify-content: flex-start; }
+
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    border-radius: 4px 16px 16px 16px;
+  }
+  .bubble.ai {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px 16px 16px 16px;
+  }
+  .bubble.user {
+    background: var(--gold);
+    color: #0F0E0C;
+    border-radius: 16px 4px 16px 16px;
+    font-weight: 400;
+  }
+
+  .ai-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  .typing-wrap { display: flex; justify-content: flex-start; }
+  .typing-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px 16px 16px 16px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:0.3} 40%{opacity:1} }
+
+  .chat-input-area {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .chat-input-area textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    line-height: 1.6;
+    padding: 8px 0;
+  }
+  .chat-input-area textarea::placeholder { color: var(--text3); }
+  .send-btn {
+    background: var(--gold);
+    color: #0F0E0C;
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--gold-light); transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* PROGRESS */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* COMPLETE */
+  .complete-screen {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  .complete-screen.active { display: block; }
+  .complete-icon {
+    font-size: 32px;
+    margin-bottom: 1rem;
+  }
+  .complete-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .complete-screen p {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  .summary-box h3 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .summary-box p {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+
+  .done-msg {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    font-size: 14px;
+    color: var(--gold-light);
+    text-align: center;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="header">
+    <div class="logo">ToolSpark</div>
+    <h1>Let's get <em>clarity</em><br>on your business</h1>
+    <p>Answer a few questions and we'll figure out exactly what kind of tool would help your clients get better results.</p>
+  </div>
+
+  <!-- START SCREEN -->
+  <div class="start-screen" id="start-screen">
+    <label>Your name or business name</label>
+    <input type="text" id="s_name" placeholder="e.g. Sarah's Storytelling Method" />
+    <label>Your email address</label>
+    <input type="email" id="s_email" placeholder="you@example.com" />
+
+    <div class="what-to-expect">
+      <p><strong>What to expect:</strong> A short friendly conversation — about 6–8 questions. No right or wrong answers. Just tell me about your business in your own words. Takes about 5 minutes.</p>
+    </div>
+
+    <button class="start-btn" onclick="startInterview()">Start my clarity session →</button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar" id="progress-bar" style="display:none;">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-container" id="chat-container">
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-area" id="chat-input-area">
+      <textarea id="chat-input" placeholder="Type your answer..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="complete-screen" id="complete-screen">
+    <div class="complete-icon">✦</div>
+    <h2>You're all done!</h2>
+    <p>Here's a summary of what we covered. Your consultant will use this to find the right tool for your business.</p>
+    <div class="summary-box" id="summary-box">
+      <h3>Session summary</h3>
+      <p id="summary-text">Building summary...</p>
+    </div>
+    <div class="done-msg">
+      Your responses have been recorded. Your consultant will be in touch soon with tool recommendations.
+    </div>
+  </div>
+
+  <div class="footer">Powered by ToolSpark · Business-to-Tool Discovery</div>
+</div>
+
+<script>
+if (typeof emailjs !== 'undefined') emailjs.init('i9Oz0ibL_775xDsSb');
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+let chatHistory = [];
+let exchangeCount = 0;
+let isDone = false;
+let clientName = '';
+let clientEmail = '';
+
+function startInterview() {
+  clientName = document.getElementById('s_name').value.trim() || 'there';
+  clientEmail = document.getElementById('s_email').value.trim();
+  if (!clientEmail) { alert('Please enter your email address so we can follow up with you.'); return; }
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('progress-bar').style.display = 'block';
+  document.getElementById('chat-container').classList.add('active');
+
+  const firstMsg = `Hi ${clientName}! I'm excited to learn about your business. Let's start simple — in one or two sentences, what do you teach or help people do?`;
+  addBubble('ai', firstMsg);
+  chatHistory.push({ role: 'assistant', content: firstMsg });
+  updateProgress(1);
+}
+
+function updateProgress(count) {
+  const pct = Math.min((count / 8) * 100, 95);
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function addBubble(role, text) {
+  const messages = document.getElementById('chat-messages');
+  const wrap = document.createElement('div');
+  wrap.className = `bubble-wrap ${role}`;
+
+  if (role === 'ai') {
+    wrap.innerHTML = `<div><div class="ai-label">ToolSpark</div><div class="bubble ai">${text}</div></div>`;
+  } else {
+    wrap.innerHTML = `<div class="bubble user">${text}</div>`;
+  }
+
+  messages.appendChild(wrap);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+  const messages = document.getElementById('chat-messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'typing-wrap';
+  wrap.id = 'typing-indicator';
+  wrap.innerHTML = `<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  messages.appendChild(wrap);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typing-indicator')?.remove();
+}
+
+async function sendMessage() {
+  if (isDone) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addBubble('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+  exchangeCount++;
+  updateProgress(exchangeCount + 1);
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  showTyping();
+
+  const systemPrompt = `You are a warm, encouraging business clarity coach. You're having a friendly conversation to understand someone's business so you can figure out what AI tool would help their clients most. Ask ONE short question at a time. Be conversational, warm, and encouraging. Never use bullet points or lists in your responses.
+
+Your goal is to naturally discover:
+1. What the business teaches or helps people do
+2. How they currently deliver it (course, coaching, etc.)
+3. Who their ideal client is and their starting point
+4. What success looks like for clients
+5. Where clients get stuck or give up most often
+6. What the creator ends up explaining or repeating over and over
+
+After 6-8 exchanges when you feel you have a good picture, wrap up warmly and end your message with exactly: CLARITY_COMPLETE
+
+Keep all responses under 3 sentences. Be specific in your follow-up questions based on what they share.`;
+
+  try {
+    const response = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 250,
+        system: systemPrompt,
+        messages: chatHistory
+      })
+    });
+    const data = await response.json();
+    const reply = data.content[0].text;
+
+    removeTyping();
+
+    if (reply.includes('CLARITY_COMPLETE')) {
+      const cleanReply = reply.replace('CLARITY_COMPLETE', '').trim();
+      if (cleanReply) {
+        addBubble('ai', cleanReply);
+        chatHistory.push({ role: 'assistant', content: cleanReply });
+      }
+      isDone = true;
+      document.getElementById('progress-fill').style.width = '100%';
+      document.getElementById('chat-input-area').style.display = 'none';
+      setTimeout(() => showCompleteScreen(), 1000);
+    } else {
+      addBubble('ai', reply);
+      chatHistory.push({ role: 'assistant', content: reply });
+    }
+  } catch(err) {
+    removeTyping();
+    addBubble('ai', 'Sorry, something went wrong. Please try refreshing and starting again.');
+  }
+
+  btn.disabled = false;
+}
+
+async function showCompleteScreen() {
+  document.getElementById('complete-screen').classList.add('active');
+
+  const conversation = chatHistory.map(m => `${m.role === 'user' ? 'Client' : 'Coach'}: ${m.content}`).join('\n');
+
+  try {
+    const response = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `Based on this business clarity interview, write a 2-3 sentence plain English summary of what this business does, who it serves, and where the biggest opportunity for an AI tool is. Be specific and warm. No bullet points.\n\nINTERVIEW:\n${conversation}`
+        }]
+      })
+    });
+    const data = await response.json();
+    document.getElementById('summary-text').textContent = data.content[0].text;
+
+    const summaryText = data.content[0].text;
+
+    // Store in localStorage as backup
+    const session = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      clientName,
+      clientEmail,
+      transcript: chatHistory,
+      summary: summaryText
+    };
+    const sessions = JSON.parse(localStorage.getItem('toolspark_clarity_sessions') || '[]');
+    sessions.push(session);
+    localStorage.setItem('toolspark_clarity_sessions', JSON.stringify(sessions));
+
+    // Save to Firestore
+    try {
+      await db.collection('clarity_sessions').add({
+        clientName,
+        clientEmail,
+        summary: summaryText,
+        transcript: chatHistory,
+        date: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'completed'
+      });
+      console.log('Session saved to Firestore');
+    } catch(e) {
+      console.log('Firestore save failed:', e);
+    }
+
+    // Send email notification via EmailJS
+    const transcript = chatHistory.map(m => (m.role === 'user' ? clientName : 'ToolSpark') + ': ' + m.content).join('\n\n');
+    emailjs.send('service_c6gz0qv', 'template_866vz7q', {
+      client_name: clientName,
+      client_email: clientEmail || 'Not provided',
+      summary: summaryText,
+      transcript: transcript,
+      date: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    }).catch(err => console.log('Email send failed:', err));
+
+  } catch(err) {
+    document.getElementById('summary-text').textContent = 'Summary unavailable — your consultant will review the full conversation.';
+  }
+}
+</script>
+</body>
+</html>
