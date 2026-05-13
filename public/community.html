@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 100;
+    border-right: 1px solid var(--border-dark);
+  }
+
+  .sidebar-logo {
+    padding: 1.5rem 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--border-dark);
+  }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: #F0EDE6;
+    letter-spacing: 0.01em;
+  }
+  .logo-text span { color: var(--gold); }
+  .logo-tag {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 3px;
+    font-weight: 700;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--border-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0.75rem 0.5rem 0.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    color: #9A9488;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active {
+    background: var(--gold-dim);
+    color: var(--gold);
+    font-weight: 700;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid var(--border-dark);
+  }
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sidebar-user:hover { background: rgba(255,255,255,0.05); }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--gold);
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* ── MAIN LAYOUT ── */
+  .main-wrap {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── TOP HEADER ── */
+  .top-header {
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border-dark);
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: 1.5rem;
+  }
+
+  .header-title-block { flex-shrink: 0; }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #F0EDE6;
+    line-height: 1.2;
+  }
+  .header-subtitle {
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 300;
+    margin-top: 1px;
+  }
+
+  .header-search {
+    flex: 1;
+    max-width: 380px;
+    position: relative;
+  }
+  .header-search input {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid var(--border-dark);
+    border-radius: 100px;
+    padding: 8px 16px 8px 38px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: #F0EDE6;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .header-search input::placeholder { color: #4A4840; }
+  .header-search input:focus { border-color: rgba(201,168,76,0.4); }
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%; transform: translateY(-50%);
+    color: #4A4840;
+    pointer-events: none;
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .header-btn {
+    background: none;
+    border: 1px solid var(--border-dark);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: #9A9488;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .header-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--dark3);
+    border: 1px solid var(--border-dark);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: #9A9488;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 1px solid var(--dark2);
+  }
+
+  /* ── PAGE CONTENT ── */
+  .page-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+    padding: 1.75rem 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  /* ── FEED COLUMN ── */
+  .feed-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  /* WELCOME CARD */
+  .welcome-card {
+    background: var(--dark);
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 220px; height: 100%;
+    background: radial-gradient(ellipse at right, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .welcome-pin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 100px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .welcome-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #F0EDE6;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .welcome-card p {
+    font-size: 13px;
+    color: #9A9488;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 380px;
+  }
+  .welcome-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-shrink: 0;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--gold);
+    font-weight: 400;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: #5C5A55;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* CREATE THREAD CARD */
+  .create-card { padding: 1.5rem 1.75rem; }
+  .create-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .create-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--gold);
+    flex-shrink: 0;
+  }
+  .create-title-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 10px;
+  }
+  .create-title-input::placeholder { color: var(--text3); font-weight: 400; }
+  .create-title-input:focus { border-color: var(--gold); }
+
+  .create-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    resize: none;
+    min-height: 90px;
+    transition: border-color 0.15s;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  .create-textarea::placeholder { color: var(--text3); }
+  .create-textarea:focus { border-color: var(--gold); }
+
+  .create-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .create-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .category-select {
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 7px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--text2);
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .category-select:focus { border-color: var(--gold); }
+
+  .media-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    background: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .media-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  .post-btn {
+    background: var(--gold);
+    color: #0C0B09;
+    border: none;
+    border-radius: 100px;
+    padding: 9px 22px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .post-btn:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.25); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+  .filter-chip {
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .filter-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
+
+  /* THREAD CARD */
+  .thread-card { padding: 1.5rem 1.75rem; transition: box-shadow 0.2s; cursor: pointer; }
+  .thread-card:hover { box-shadow: var(--shadow-md); }
+  .thread-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .thread-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2A5C45, #3D8A65);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 900; color: white;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+  .thread-meta { flex: 1; }
+  .thread-author-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .thread-author { font-size: 14px; font-weight: 700; color: var(--text); }
+  .thread-category {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--gold-dim);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+  .thread-time { font-size: 12px; color: var(--text3); margin-left: auto; white-space: nowrap; }
+
+  .thread-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--text);
+    margin: 10px 0 8px;
+    line-height: 1.4;
+  }
+  .thread-body {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+  .thread-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    background: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .action-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .action-btn.liked { border-color: rgba(201,168,76,0.4); color: var(--gold); background: var(--gold-dim); }
+  .action-spacer { flex: 1; }
+  .thread-views { font-size: 12px; color: var(--text3); }
+
+  /* ── RIGHT SIDEBAR ── */
+  .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .widget-card { padding: 1.25rem 1.5rem; }
+  .widget-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .widget-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* MEMBERS */
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .member-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .member-av {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .member-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .member-tag { font-size: 11px; color: var(--text3); }
+  .member-online {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #3D8A65;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* CATEGORIES */
+  .cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .cat-item:last-child { border-bottom: none; }
+  .cat-left { display: flex; align-items: center; gap: 8px; }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .cat-name { font-size: 13px; color: var(--text); font-weight: 400; }
+  .cat-count { font-size: 12px; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 1px 8px; }
+
+  /* EVENTS */
+  .event-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-date-block {
+    width: 36px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .event-month { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 0.1em; }
+  .event-day { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1; }
+  .event-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 3px; }
+  .event-sub { font-size: 12px; color: var(--text3); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
+    .main-wrap { margin-left: 60px; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .nav-icon { opacity: 0.7; }
+    .nav-item.active .nav-icon { opacity: 1; }
+    .page-content { grid-template-columns: 1fr; }
+    .right-col { display: none; }
+    .welcome-stats { display: none; }
+    .sidebar-user { justify-content: center; padding: 8px; }
+    .user-avatar { margin: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .top-header { padding: 0 1rem; }
+    .header-search { display: none; }
+    .page-content { padding: 1rem; }
+    .welcome-card { padding: 1.25rem; }
+    .create-card, .thread-card, .widget-card { padding: 1.25rem; }
+    .header-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+
+    <a href="#" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="#" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+
+    <a href="#" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+
+    <a href="#" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Resources</span>
+    </a>
+
+    <div class="nav-section-label">Account</div>
+
+    <a href="#" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">Y</div>
+      <div class="user-info">
+        <div class="user-name">Your Name</div>
+        <div class="user-role">Builder</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN WRAP ── -->
+<div class="main-wrap">
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <div class="header-title-block">
+      <div class="header-title">Community</div>
+      <div class="header-subtitle">Builders creating smarter systems and experiences.</div>
+    </div>
+
+    <div class="header-search">
+      <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search threads, topics, members..." />
+    </div>
+
+    <div class="header-actions">
+      <button class="header-btn">Following</button>
+      <div class="notif-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <div class="page-content">
+
+    <!-- FEED COLUMN -->
+    <div class="feed-col">
+
+      <!-- WELCOME CARD -->
+      <div class="welcome-card">
+        <div>
+          <div class="welcome-pin">📌 Pinned</div>
+          <h2>👋 Welcome to ToolSpark Community</h2>
+          <p>A space for builders creating AI tools, automations, and smarter client experiences. Share your progress, ask questions, and learn from others doing the same.</p>
+        </div>
+        <div class="welcome-stats">
+          <div class="stat-item">
+            <div class="stat-num">214</div>
+            <div class="stat-label">Members</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">48</div>
+            <div class="stat-label">Threads</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATE THREAD CARD -->
+      <div class="card create-card">
+        <div class="create-header">
+          <div class="create-avatar">Y</div>
+          <span style="font-size:14px;color:var(--text2);font-weight:300;">Share something with the community...</span>
+        </div>
+        <input class="create-title-input" type="text" placeholder="Thread title" />
+        <textarea class="create-textarea" placeholder="What's on your mind? Share a question, win, idea, or update..."></textarea>
+        <div class="create-row">
+          <div class="create-left">
+            <select class="category-select">
+              <option value="" disabled selected>Category</option>
+              <option>Questions</option>
+              <option>Wins</option>
+              <option>Announcements</option>
+              <option>Build Progress</option>
+              <option>Tool Ideas</option>
+              <option>Feedback</option>
+            </select>
+            <button class="media-btn">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Add Image
+            </button>
+            <button class="media-btn">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              Add YouTube
+            </button>
+          </div>
+          <button class="post-btn">Post Thread →</button>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter</span>
+        <div class="filter-chip active">All</div>
+        <div class="filter-chip">Questions</div>
+        <div class="filter-chip">Wins</div>
+        <div class="filter-chip">Tool Ideas</div>
+        <div class="filter-chip">Build Progress</div>
+        <div class="filter-chip">Feedback</div>
+      </div>
+
+      <!-- THREAD CARD -->
+      <div class="card thread-card">
+        <div class="thread-top">
+          <div class="thread-avatar">BP</div>
+          <div class="thread-meta">
+            <div class="thread-author-row">
+              <span class="thread-author">BrightPath Media</span>
+              <span class="thread-category">Tool Ideas</span>
+              <span class="thread-time">2 hours ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="thread-title">Thinking about building a client onboarding tool</div>
+        <div class="thread-body">"We are exploring ways to automate onboarding and improve the client experience using AI workflows. The idea is to reduce the back-and-forth we do manually with every new client and let the tool guide them through the first steps automatically."</div>
+        <div class="thread-actions">
+          <button class="action-btn liked">
+            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            14
+          </button>
+          <button class="action-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            7 Comments
+          </button>
+          <button class="action-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+            Share
+          </button>
+          <div class="action-spacer"></div>
+          <span class="thread-views">142 views</span>
+        </div>
+      </div>
+
+      <!-- SECOND PLACEHOLDER THREAD -->
+      <div class="card thread-card">
+        <div class="thread-top">
+          <div class="thread-avatar" style="background:linear-gradient(135deg,#4B3F8A,#7B6FBA);">CK</div>
+          <div class="thread-meta">
+            <div class="thread-author-row">
+              <span class="thread-author">Clarity Kings</span>
+              <span class="thread-category" style="background:rgba(75,63,138,0.12);color:#8B7FD4;border-color:rgba(75,63,138,0.25);">Wins</span>
+              <span class="thread-time">Yesterday</span>
+            </div>
+          </div>
+        </div>
+        <div class="thread-title">Just launched our first AI intake form — clients love it</div>
+        <div class="thread-body">"After two weeks of building, we finally shipped our AI-powered intake form. It asks the right questions, adapts based on answers, and sends us a summary automatically. Saved us 4 hours in the first week alone."</div>
+        <div class="thread-actions">
+          <button class="action-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            31
+          </button>
+          <button class="action-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            12 Comments
+          </button>
+          <button class="action-btn">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+            Share
+          </button>
+          <div class="action-spacer"></div>
+          <span class="thread-views">289 views</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-col">
+
+      <!-- ACTIVE MEMBERS -->
+      <div class="card widget-card">
+        <div class="widget-title">Active Now</div>
+        <div class="member-item">
+          <div class="member-av" style="background:linear-gradient(135deg,#2A5C45,#3D8A65);">BM</div>
+          <div>
+            <div class="member-name">BrightPath Media</div>
+            <div class="member-tag">Building tools</div>
+          </div>
+          <div class="member-online"></div>
+        </div>
+        <div class="member-item">
+          <div class="member-av" style="background:linear-gradient(135deg,#C4622D,#E0875A);">SL</div>
+          <div>
+            <div class="member-name">Sarah Laurent</div>
+            <div class="member-tag">Asking questions</div>
+          </div>
+          <div class="member-online"></div>
+        </div>
+        <div class="member-item">
+          <div class="member-av" style="background:linear-gradient(135deg,#4B3F8A,#7B6FBA);">TF</div>
+          <div>
+            <div class="member-name">TheFlowLab</div>
+            <div class="member-tag">Sharing wins</div>
+          </div>
+          <div class="member-online"></div>
+        </div>
+        <div class="member-item">
+          <div class="member-av" style="background:linear-gradient(135deg,#1A4A6B,#2D7AB5);">MK</div>
+          <div>
+            <div class="member-name">MindsetKit</div>
+            <div class="member-tag">Exploring resources</div>
+          </div>
+          <div class="member-online"></div>
+        </div>
+      </div>
+
+      <!-- CATEGORIES -->
+      <div class="card widget-card">
+        <div class="widget-title">Categories</div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#C9A84C;"></div><span class="cat-name">Questions</span></div>
+          <span class="cat-count">18</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#3D8A65;"></div><span class="cat-name">Wins</span></div>
+          <span class="cat-count">11</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#E0875A;"></div><span class="cat-name">Announcements</span></div>
+          <span class="cat-count">4</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#7B6FBA;"></div><span class="cat-name">Build Progress</span></div>
+          <span class="cat-count">9</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#2D7AB5;"></div><span class="cat-name">Tool Ideas</span></div>
+          <span class="cat-count">14</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#9A9488;"></div><span class="cat-name">Feedback</span></div>
+          <span class="cat-count">6</span>
+        </div>
+      </div>
+
+      <!-- UPCOMING EVENTS -->
+      <div class="card widget-card">
+        <div class="widget-title">Upcoming Events</div>
+        <div class="event-item">
+          <div class="event-date-block">
+            <div class="event-month">May</div>
+            <div class="event-day">20</div>
+          </div>
+          <div>
+            <div class="event-title">Live Build Session</div>
+            <div class="event-sub">AI onboarding tools · Zoom</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-date-block">
+            <div class="event-month">Jun</div>
+            <div class="event-day">3</div>
+          </div>
+          <div>
+            <div class="event-title">Tool Showcase</div>
+            <div class="event-sub">Member demos · Online</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <div class="event-date-block">
+            <div class="event-month">Jun</div>
+            <div class="event-day">17</div>
+          </div>
+          <div>
+            <div class="event-title">Q&A with the ToolSpark Team</div>
+            <div class="event-sub">Open office hours · Zoom</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Filter chip interaction
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

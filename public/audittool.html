@@ -601,7 +601,7 @@ function saveAudits(audits) {
 async function saveAuditToFirestore(audit) {
   try {
     await db.collection('audits').add({
-      clientName: audit.clientName,
+      displayName: audit.displayName,
       coreMethod: audit.coreMethod,
       delivery: audit.delivery,
       clientProfile: audit.clientProfile,
@@ -637,6 +637,38 @@ function clearForm() {
   document.getElementById('analyze-btn').innerHTML = '✦ Analyze & Recommend Tools';
 }
 
+async function loadSessionFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session');
+  if (!sessionId) return;
+
+  try {
+    const doc = await db.collection('clarity_sessions').doc(sessionId).get();
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    const e = data.extracted;
+
+    if (data.displayName) document.getElementById('f_client').value = data.displayName;
+    if (e.coreMethod) document.getElementById('f_core').value = e.coreMethod;
+    if (e.delivery) document.getElementById('f_delivery').value = e.delivery;
+    if (e.clientProfile) document.getElementById('f_client_profile').value = e.clientProfile;
+    if (e.success) document.getElementById('f_success').value = e.success;
+    if (e.friction) document.getElementById('f_friction').value = e.friction;
+    if (e.repetition) document.getElementById('f_repetition').value = e.repetition;
+    if (e.extra) document.getElementById('f_extra').value = e.extra;
+
+    // Show a welcome message
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:var(--accent-light);border:1px solid rgba(42,92,69,0.2);border-radius:var(--radius);padding:1rem 1.5rem;margin-bottom:1.25rem;font-size:14px;color:var(--accent);';
+    banner.innerHTML = '✦ Your clarity session answers have been loaded. Review them below and hit Analyze when ready.';
+    document.querySelector('.form-header').after(banner);
+
+  } catch(err) {
+    console.log('Could not load session:', err);
+  }
+}
+
 function renderDashboard() {
   const audits = getAudits();
   const now = new Date();
@@ -644,7 +676,7 @@ function renderDashboard() {
     const d = new Date(a.date);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
-  const clients = new Set(audits.map(a => a.clientName.toLowerCase().trim()));
+  const clients = new Set(audits.map(a => a.displayName.toLowerCase().trim()));
 
   document.getElementById('stat-total').textContent = audits.length;
   document.getElementById('stat-month').textContent = thisMonth.length;
@@ -662,7 +694,7 @@ function renderDashboard() {
     const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     return `<div class="audit-item" onclick="viewAudit(${i})">
       <div class="audit-item-left">
-        <div class="audit-item-name">${a.clientName || 'Untitled client'}</div>
+        <div class="audit-item-name">${a.displayName || 'Untitled client'}</div>
         <div class="audit-item-meta">${a.coreMethod || '—'} · ${dateStr}</div>
       </div>
       <div class="audit-item-actions" onclick="event.stopPropagation()">
@@ -680,6 +712,9 @@ function deleteAudit(i) {
   audits.splice(i, 1);
   saveAudits(audits);
   renderDashboard();
+const hasSession = new URLSearchParams(window.location.search).get('session');
+if (hasSession) showPage('new-audit');
+loadSessionFromURL();
 }
 
 function viewAudit(i) {
@@ -715,7 +750,7 @@ function renderViewHTML(a, i) {
     <div class="view-header">
       <div>
         <div class="tag">Audit Report</div>
-        <h1>${a.clientName || 'Untitled client'}</h1>
+        <h1>${a.displayName || 'Untitled client'}</h1>
         <div class="view-header-meta">${a.coreMethod || ''} · ${dateStr}</div>
       </div>
       <div class="view-actions">
@@ -755,7 +790,7 @@ function exportPDF(i) {
 }
 
 async function runAudit() {
-  const clientName = document.getElementById('f_client').value.trim();
+  const displayName = document.getElementById('f_client').value.trim();
   const coreMethod = document.getElementById('f_core').value.trim();
   const delivery = document.getElementById('f_delivery').value.trim();
   const clientProfile = document.getElementById('f_client_profile').value.trim();
@@ -813,7 +848,7 @@ Respond ONLY with valid JSON, no markdown, no preamble:
     const audit = {
       id: Date.now(),
       date: new Date().toISOString(),
-      clientName: clientName || 'Untitled client',
+      displayName: displayName || 'Untitled client',
       coreMethod, delivery, clientProfile, success, friction, repetition, extra,
       results: parsed
     };
@@ -880,8 +915,8 @@ function initClarity() {
   document.getElementById('clarity-result').innerHTML = '';
   document.getElementById('clarity-actions').style.display = 'none';
   document.getElementById('chat-input').value = '';
-  const clientName = document.getElementById('c_client').value.trim() || 'your client';
-  const firstMsg = `Hi! I'm going to ask you a few questions to understand ${clientName}'s business so we can figure out what kind of AI tool would help them most. Let's start simple: in one or two sentences, what does this business teach or help people do?`;
+  const displayName = document.getElementById('c_client').value.trim() || 'your client';
+  const firstMsg = `Hi! I'm going to ask you a few questions to understand ${displayName}'s business so we can figure out what kind of AI tool would help them most. Let's start simple: in one or two sentences, what does this business teach or help people do?`;
   addBubble('ai', firstMsg);
   chatHistory.push({ role: 'assistant', content: firstMsg });
 }
@@ -965,7 +1000,7 @@ async function sendMessage() {
 }
 
 async function buildAuditFromClarity() {
-  const clientName = document.getElementById('c_client').value.trim() || 'Untitled client';
+  const displayName = document.getElementById('c_client').value.trim() || 'Untitled client';
   const btn = document.querySelector('#clarity-actions .analyze-btn');
   btn.disabled = true;
   btn.innerHTML = 'Building audit...';
@@ -997,7 +1032,7 @@ ${conversation}`;
     const audit = {
       id: Date.now(),
       date: new Date().toISOString(),
-      clientName,
+      displayName,
       coreMethod: parsed.coreMethod,
       delivery: parsed.delivery,
       clientProfile: parsed.clientProfile,

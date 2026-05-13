@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Results — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0B09;
+    --surface: #141210;
+    --surface2: #1C1A17;
+    --border: #2A2720;
+    --text: #F2EEE6;
+    --text2: #9A9488;
+    --text3: #4A4840;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.1);
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --purple: #4B3F8A;
+    --coral: #C4622D;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(12,11,9,0.95);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-tag {
+    font-size: 12px;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* LOADING */
+  .loading-screen {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  .loading-ring {
+    width: 56px; height: 56px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .loading-screen p {
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .loading-steps {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 300px;
+  }
+  .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text3);
+    transition: color 0.3s;
+  }
+  .loading-step.active { color: var(--gold); }
+  .loading-step.done { color: var(--green-light); }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .loading-step.active .step-dot { background: var(--gold); }
+  .loading-step.done .step-dot { background: var(--green-light); }
+
+  /* RESULTS */
+  .results-page {
+    display: none;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .results-page.active { display: block; }
+
+  /* HERO */
+  .results-hero {
+    text-align: center;
+    padding: 2rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .results-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1.5rem;
+  }
+  .results-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .results-hero h1 em { font-style: italic; color: var(--gold); }
+  .results-hero p {
+    color: var(--text2);
+    font-size: 16px;
+    font-weight: 300;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* SUMMARY */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+  }
+  .summary-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .summary-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .summary-card p {
+    font-size: 15px;
+    color: var(--text2);
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  /* TOOL CARDS */
+  .tools-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tools-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .tool-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .tool-card:hover { border-color: rgba(201,168,76,0.3); }
+
+  .tool-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .tool-header.p1 { background: rgba(42,92,69,0.15); border-bottom: 1px solid rgba(42,92,69,0.2); }
+  .tool-header.p2 { background: rgba(75,63,138,0.15); border-bottom: 1px solid rgba(75,63,138,0.2); }
+  .tool-header.p3 { background: rgba(196,98,45,0.15); border-bottom: 1px solid rgba(196,98,45,0.2); }
+
+  .tool-priority {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .p1 .tool-priority { background: var(--green); color: white; }
+  .p2 .tool-priority { background: var(--purple); color: white; }
+  .p3 .tool-priority { background: var(--coral); color: white; }
+
+  .tool-name { font-weight: 700; font-size: 17px; }
+  .p1 .tool-name { color: var(--green-light); }
+  .p2 .tool-name { color: #8B7FD4; }
+  .p3 .tool-name { color: #E0875A; }
+
+  .complexity-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tool-body { padding: 1.5rem; background: var(--surface); }
+  .tool-what {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .tool-why {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .tool-example {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text2);
+    border-left: 2px solid var(--border);
+    font-style: italic;
+  }
+  .tool-example strong {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    font-style: normal;
+  }
+
+  /* CTA */
+  .cta-card {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  .cta-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .cta-card h2 em { font-style: italic; color: var(--gold); }
+  .cta-card p {
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 300;
+    margin-bottom: 1.75rem;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+  .book-btn {
+    display: inline-block;
+    background: var(--gold);
+    color: #0C0B09;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .book-btn:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201,168,76,0.2);
+  }
+  .cta-note {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 1rem;
+    font-weight: 300;
+  }
+
+  /* ERROR */
+  .error-screen {
+    display: none;
+    min-height: 80vh;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .error-screen.active { display: flex; }
+  .error-screen h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; }
+  .error-screen p { color: var(--text2); font-size: 14px; }
+  .error-screen a { color: var(--gold); text-decoration: none; }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text3);
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Tool<span>Spark</span></div>
+  <div class="nav-tag">Your Results</div>
+</nav>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-ring"></div>
+  <h2>Analyzing your business...</h2>
+  <p>This takes about 15 seconds</p>
+  <div class="loading-steps">
+    <div class="loading-step active" id="step-1">
+      <div class="step-dot"></div>
+      Loading your clarity session
+    </div>
+    <div class="loading-step" id="step-2">
+      <div class="step-dot"></div>
+      Finding tool opportunities
+    </div>
+    <div class="loading-step" id="step-3">
+      <div class="step-dot"></div>
+      Ranking recommendations
+    </div>
+    <div class="loading-step" id="step-4">
+      <div class="step-dot"></div>
+      Building your report
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-page" id="results-page">
+  <div class="results-hero">
+    <div class="results-badge">✦ Your Tool Report</div>
+    <h1>Here's what your business <em>needs</em></h1>
+    <p id="hero-name">Based on your clarity session, here are the AI tools that would have the biggest impact on your clients' results.</p>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-label">Business summary</div>
+    <p id="summary-text"></p>
+  </div>
+
+  <div class="tools-label">Recommended tools — ranked by impact</div>
+  <div id="tools-container"></div>
+
+  <div class="cta-card">
+    <h2>Ready to <em>build</em> this?</h2>
+    <p>We handle everything — design, development, and launch. You focus on your clients while we build the tool that transforms your program.</p>
+    <a href="https://calendly.com/your-link-here" class="book-btn" target="_blank">Book a free strategy call →</a>
+    <div class="cta-note">Free 30-minute call · No commitment required</div>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div class="error-screen" id="error-screen">
+  <h2>Something went wrong</h2>
+  <p>We couldn't load your results. Please <a href="clarity.html">start a new clarity session</a> or contact us for help.</p>
+</div>
+
+<footer>Powered by <span>ToolSpark</span> · Clarity. Build. Launch.</footer>
+
+<script>
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+
+function setStep(num) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step-' + i);
+    if (i < num) { el.className = 'loading-step done'; }
+    else if (i === num) { el.className = 'loading-step active'; }
+    else { el.className = 'loading-step'; }
+  }
+}
+
+function showError() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('error-screen').classList.add('active');
+}
+
+async function loadAndAnalyze() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session');
+
+  if (!sessionId) { showError(); return; }
+
+  try {
+    // Step 1 — Load session from Firestore
+    setStep(1);
+    const doc = await db.collection('clarity_sessions').doc(sessionId).get();
+    if (!doc.exists) { showError(); return; }
+
+    const session = doc.data();
+    const extracted = session.extracted;
+
+    // If results already exist don't re-analyze
+    if (session.toolResults) {
+      renderResults(session.displayName, session.summary, session.toolResults);
+      return;
+    }
+
+    // Step 2 — Run AI analysis
+    setStep(2);
+    const prompt = `You are an expert product strategist who helps online course creators and coaches turn their programs into AI-powered tools.
+
+Analyze this business information and recommend the TOP 3 most impactful AI tools this business could build. Be specific and practical.
+
+BUSINESS INFO:
+- Core method: ${extracted.coreMethod}
+- Delivery: ${extracted.delivery}
+- Ideal client: ${extracted.clientProfile}
+- Success outcome: ${extracted.success}
+- Where clients get stuck: ${extracted.friction}
+- What creator repeats most: ${extracted.repetition}
+- Extra context: ${extracted.extra || 'None'}
+
+Respond ONLY with valid JSON, no markdown:
+{"summary":"2-3 sentence opportunity summary","tools":[{"name":"Short name (5 words max)","priority":"Start here","what_it_does":"One sentence what it does for the client","why_it_fits":"2 sentences why it fits this specific friction point","complexity":"Low","example_prompt":"Example of what a client would type into this tool"},{"name":"Short name","priority":"Build next","what_it_does":"One sentence","why_it_fits":"2 sentences","complexity":"Medium","example_prompt":"Example"},{"name":"Short name","priority":"Long term","what_it_does":"One sentence","why_it_fits":"2 sentences","complexity":"High","example_prompt":"Example"}]}`;
+
+    setStep(3);
+    const response = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+
+    // Step 4 — Save results back to Firestore
+    setStep(4);
+    await db.collection('clarity_sessions').doc(sessionId).update({
+      toolResults: parsed,
+      analysisDate: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Save to clientresults collection
+    await db.collection('clientresults').add({
+      displayName: session.displayName || '',
+      businessName: session.businessName || '',
+      clientEmail: session.clientEmail || '',
+      clientResults: parsed,
+      sessionId: sessionId,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    renderResults(session.displayName, session.summary, parsed);
+
+  } catch(err) {
+    console.log('Error:', err);
+    showError();
+  }
+}
+
+function renderResults(displayName, summary, parsed) {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('results-page').classList.add('active');
+
+  if (displayName) {
+    document.getElementById('hero-name').textContent = `Hi ${displayName} — based on your clarity session, here are the AI tools that would have the biggest impact on your clients' results.`;
+  }
+
+  document.getElementById('summary-text').textContent = parsed.summary || summary;
+
+  const priorityClass = ['p1', 'p2', 'p3'];
+  const toolsHTML = parsed.tools.map((t, i) => `
+    <div class="tool-card">
+      <div class="tool-header ${priorityClass[i]}">
+        <div>
+          <div style="margin-bottom:6px;"><span class="tool-priority">${t.priority}</span></div>
+          <div class="tool-name">${t.name}</div>
+        </div>
+        <span class="complexity-badge">Complexity: ${t.complexity}</span>
+      </div>
+      <div class="tool-body">
+        <div class="tool-what">${t.what_it_does}</div>
+        <div class="tool-why">${t.why_it_fits}</div>
+        <div class="tool-example">
+          <strong>Example client prompt</strong>
+          "${t.example_prompt}"
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('tools-container').innerHTML = toolsHTML;
+}
+
+loadAndAnalyze();
+</script>
+</body>
+</html>

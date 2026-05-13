@@ -387,10 +387,10 @@
 
   <!-- START SCREEN -->
   <div class="start-screen" id="start-screen">
-    <label>Your name or business name</label>
-    <input type="text" id="s_name" placeholder="e.g. Sarah's Storytelling Method" />
-    <label>Your email address</label>
-    <input type="email" id="s_email" placeholder="you@example.com" />
+    <label>Your first name</label>
+    <input type="text" id="s_displayName" placeholder="e.g. Sarah" />
+    <label>Your business or program name</label>
+    <input type="text" id="s_businessName" placeholder="e.g. Sarah's Storytelling Method" />
 
     <div class="what-to-expect">
       <p><strong>What to expect:</strong> A short friendly conversation — about 6–8 questions. No right or wrong answers. Just tell me about your business in your own words. Takes about 5 minutes.</p>
@@ -427,6 +427,9 @@
     <div class="done-msg">
       Your responses have been recorded. Your consultant will be in touch soon with tool recommendations.
     </div>
+    <label style="display:block;color:var(--text2);font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Where do you want us to send your results?</label>
+    <input type="email" id="result_email" placeholder="you@example.com" style="width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:Lato,sans-serif;font-size:15px;margin-bottom:1rem;" />
+    <a id="results-btn" href="results.html" style="display:none;background:#C9A84C;color:#0C0B09;font-family:Lato,sans-serif;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;text-decoration:none;letter-spacing:0.02em;">See Your Results →</a>
   </div>
 
   <div class="footer">Powered by ToolSpark · Business-to-Tool Discovery</div>
@@ -438,18 +441,20 @@ const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
 let chatHistory = [];
 let exchangeCount = 0;
 let isDone = false;
-let clientName = '';
+let displayName = '';
+let businessName = '';
 let clientEmail = '';
+let sessionSummary = '';
+let sessionExtracted = {};
 
 function startInterview() {
-  clientName = document.getElementById('s_name').value.trim() || 'there';
-  clientEmail = document.getElementById('s_email').value.trim();
-  if (!clientEmail) { alert('Please enter your email address so we can follow up with you.'); return; }
+  displayName = document.getElementById('s_displayName').value.trim() || 'there';
+  businessName = document.getElementById('s_businessName').value.trim();
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('progress-bar').style.display = 'block';
   document.getElementById('chat-container').classList.add('active');
 
-  const firstMsg = `Hi ${clientName}! I'm excited to learn about your business. Let's start simple — in one or two sentences, what do you teach or help people do?`;
+  const firstMsg = `Hi ${displayName}! I'm excited to learn about your business. Let's start simple — in one or two sentences, what do you teach or help people do?`;
   addBubble('ai', firstMsg);
   chatHistory.push({ role: 'assistant', content: firstMsg });
   updateProgress(1);
@@ -561,10 +566,13 @@ Keep all responses under 3 sentences. Be specific in your follow-up questions ba
 async function showCompleteScreen() {
   document.getElementById('complete-screen').classList.add('active');
 
-  const conversation = chatHistory.map(m => `${m.role === 'user' ? 'Client' : 'Coach'}: ${m.content}`).join('\n');
+  const conversation = chatHistory.map(m => 
+    (m.role === 'user' ? displayName : 'ToolSpark') + ': ' + m.content
+  ).join('\n\n');
 
   try {
-    const response = await fetch(FUNCTION_URL, {
+    // Call 1 — Generate friendly summary for client
+    const summaryResponse = await fetch(FUNCTION_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -576,50 +584,95 @@ async function showCompleteScreen() {
         }]
       })
     });
-    const data = await response.json();
-    document.getElementById('summary-text').textContent = data.content[0].text;
+    const summaryData = await summaryResponse.json();
+    const summaryText = summaryData.content[0].text;
+    sessionSummary = summaryText;
+    document.getElementById('summary-text').textContent = summaryText;
 
-    const summaryText = data.content[0].text;
+    // Call 2 — Extract structured data for audit form
+    const extractResponse = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: `Based on this business clarity interview extract the following information. Respond ONLY with valid JSON, no markdown:\n{"coreMethod":"what they teach or help people do","delivery":"how they currently deliver it","clientProfile":"who their ideal client is and starting point","success":"what success looks like for clients","friction":"where clients get stuck or give up","repetition":"what the creator repeats or explains most often","extra":"any other useful context"}\n\nINTERVIEW:\n${conversation}`
+        }]
+      })
+    });
+    const extractData = await extractResponse.json();
+    const extracted = JSON.parse(extractData.content[0].text.replace(/```json|```/g, '').trim());
+    sessionExtracted = extracted;
 
-    // Store in localStorage as backup
-    const session = {
-      id: Date.now(),
-      date: new Date().toISOString(),
-      clientName,
-      clientEmail,
-      transcript: chatHistory,
-      summary: summaryText
-    };
-    const sessions = JSON.parse(localStorage.getItem('toolspark_clarity_sessions') || '[]');
-    sessions.push(session);
-    localStorage.setItem('toolspark_clarity_sessions', JSON.stringify(sessions));
+    // Generate unique session ID
+    const sessionId = 'session_' + Date.now();
 
     // Save to Firestore
-    try {
-      await db.collection('clarity_sessions').add({
-        clientName,
-        clientEmail,
-        summary: summaryText,
-        transcript: chatHistory,
-        date: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'completed'
-      });
-      console.log('Session saved to Firestore');
-    } catch(e) {
-      console.log('Firestore save failed:', e);
-    }
-
-    // Send email notification via EmailJS
-    const transcript = chatHistory.map(m => (m.role === 'user' ? clientName : 'ToolSpark') + ': ' + m.content).join('\n\n');
-    emailjs.send('service_c6gz0qv', 'template_866vz7q', {
-      client_name: clientName,
-      client_email: clientEmail || 'Not provided',
+    await db.collection('clarity_sessions').doc(sessionId).set({
+      sessionId,
+      displayName,
+      businessName,
+      clientEmail,
       summary: summaryText,
-      transcript: transcript,
-      date: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-    }).catch(err => console.log('Email send failed:', err));
+      extracted,
+      transcript: chatHistory,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'completed'
+    });
+
+    // Save to localStorage as backup
+    const sessions = JSON.parse(localStorage.getItem('toolspark_clarity_sessions') || '[]');
+    sessions.push({ sessionId, displayName, clientEmail, summary: summaryText, extracted });
+    localStorage.setItem('toolspark_clarity_sessions', JSON.stringify(sessions));
+
+    // Show See Your Results button and send email on click
+    const resultsBtn = document.getElementById('results-btn');
+    resultsBtn.href = 'results.html?session=' + sessionId;
+    resultsBtn.style.display = 'inline-block';
+    resultsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = resultsBtn.href;
+      clientEmail = document.getElementById('result_email').value.trim();
+      if (clientEmail) {
+        db.collection('clarity_sessions').doc(sessionId).update({ clientEmail });
+      }
+      resultsBtn.textContent = 'Sending your results...';
+      resultsBtn.style.opacity = '0.7';
+      resultsBtn.style.cursor = 'not-allowed';
+      resultsBtn.style.pointerEvents = 'none';
+      if (typeof emailjs !== 'undefined') {
+        const formattedSummary = [
+          sessionSummary,
+          '',
+          'What you do: ' + (sessionExtracted.coreMethod || ''),
+          'How you deliver it: ' + (sessionExtracted.delivery || ''),
+          'Your ideal client: ' + (sessionExtracted.clientProfile || ''),
+          'What success looks like: ' + (sessionExtracted.success || ''),
+          'Where clients get stuck: ' + (sessionExtracted.friction || ''),
+          'What you repeat most: ' + (sessionExtracted.repetition || '')
+        ].join('\n');
+        emailjs.send('service_c6gz0qv', 'template_866vz7q', {
+          client_name: displayName,
+          business_name: businessName,
+          client_email: clientEmail || 'Not provided',
+          summary: formattedSummary,
+          results_url: 'https://toolspark.co/results.html?session=' + href.split('session=')[1],
+          date: new Date().toLocaleDateString('en-US', {
+            weekday: 'long', year: 'numeric', month: 'long',
+            day: 'numeric', hour: '2-digit', minute: '2-digit'
+          })
+        }).finally(() => {
+          window.location.href = href;
+        });
+      } else {
+        window.location.href = href;
+      }
+    });
 
   } catch(err) {
+    console.log('Error:', err);
     document.getElementById('summary-text').textContent = 'Summary unavailable — your consultant will review the full conversation.';
   }
 }
