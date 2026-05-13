@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events — ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 100;
+    border-right: 1px solid var(--border-dark);
+  }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    color: #9A9488; font-size: 14px; font-weight: 400;
+    cursor: pointer; text-decoration: none; transition: all 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 8px 12px; margin-top: 4px;
+    background: none; border: none; border-radius: var(--radius-sm);
+    color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif;
+    cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left;
+  }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header {
+    background: var(--dark2); border-bottom: 1px solid var(--border-dark);
+    height: var(--header-height); display: flex; align-items: center;
+    justify-content: space-between; padding: 0 2rem;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.3);
+    color: #E0875A; border-radius: 100px; padding: 4px 12px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; }
+
+  /* SECTION CARD */
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .admin-card-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* BACK LINK */
+  .back-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 700; color: var(--text3);
+    text-decoration: none; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* ADD BUTTON */
+  .btn-add {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--gold); border: none; border-radius: var(--radius-sm);
+    padding: 8px 16px; font-family: 'Lato', sans-serif;
+    font-size: 13px; font-weight: 700; color: #1A1714;
+    cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+    margin-left: auto;
+  }
+  .btn-add:hover { opacity: 0.88; }
+
+  /* FORM */
+  .event-form { display: flex; flex-direction: column; gap: 1.125rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label {
+    font-size: 12px; font-weight: 700; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .form-label span { color: #C0392B; margin-left: 2px; }
+  .form-input, .form-textarea, .form-select {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 13px;
+    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text);
+    outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--gold); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.55; }
+
+  /* TOGGLE */
+  .toggle-group { display: flex; align-items: center; gap: 12px; }
+  .toggle-label-text { font-size: 14px; color: var(--text2); }
+  .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; cursor: pointer;
+    background: var(--border); border-radius: 100px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--gold); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  /* FORM ACTIONS */
+  .form-actions { display: flex; align-items: center; gap: 10px; padding-top: 0.25rem; border-top: 1px solid var(--border); margin-top: 0.25rem; }
+  .btn-save {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--gold); border: none; border-radius: var(--radius-sm);
+    padding: 10px 22px; font-family: 'Lato', sans-serif;
+    font-size: 14px; font-weight: 700; color: #1A1714;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-save:hover { opacity: 0.88; }
+  .btn-save:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-cancel {
+    display: inline-flex; align-items: center;
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 18px; font-family: 'Lato', sans-serif;
+    font-size: 14px; font-weight: 700; color: var(--text2);
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--text3); color: var(--text); }
+
+  /* MESSAGES */
+  .save-msg { font-size: 13px; padding: 9px 14px; border-radius: var(--radius-sm); display: none; }
+  .save-msg.success { background: #EBF7F2; color: #2A7A55; border: 1px solid #A8D9C4; }
+  .save-msg.error { background: #FEF0ED; color: #C0392B; border: 1px solid #F5C6C0; }
+
+  /* SPINNER */
+  .btn-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(26,23,20,0.2); border-top-color: #1A1714;
+    border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ACCESS DENIED */
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+
+  /* CALENDAR */
+  .calendar-wrap { max-width: 420px; }
+  .calendar-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .cal-nav-btn {
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 18px; line-height: 1;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .cal-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .cal-month-label { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); font-weight: 500; }
+  .cal-day-headers { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 3px; }
+  .cal-dh { text-align: center; font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-day {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 5px 2px; border-radius: var(--radius-sm);
+    transition: background 0.12s; min-height: 46px; justify-content: center;
+  }
+  .cal-day-num {
+    font-size: 13px; color: var(--text); width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+    transition: outline 0.1s;
+  }
+  .cal-day.past .cal-day-num { opacity: 0.38; }
+  .cal-day.today .cal-day-num { background: var(--gold); color: #1A1714; font-weight: 700; }
+  .cal-day.has-events { cursor: pointer; }
+  .cal-day.has-events:hover { background: var(--gold-dim); }
+  .cal-day.highlighted .cal-day-num { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .cal-day.past .cal-dot { opacity: 0.38; }
+
+  /* EVENT LIST */
+  .evt-section-label {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.12em; padding-bottom: 0.625rem;
+  }
+  .evt-list { display: flex; flex-direction: column; gap: 0.625rem; }
+  .evt-list-empty { text-align: center; padding: 1.75rem 1rem; color: var(--text3); font-size: 13px; }
+  .evt-list-loading { text-align: center; padding: 1.25rem; color: var(--text3); font-size: 13px; }
+
+  .evt-card {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem 1.125rem; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--bg);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .evt-card.past { opacity: 0.68; }
+  .evt-card.event-highlight { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+
+  .evt-date-badge {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
+    border-radius: var(--radius-sm); padding: 7px 11px;
+    min-width: 50px; flex-shrink: 0; text-align: center;
+  }
+  .evt-badge-month { font-size: 9px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+  .evt-badge-day { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1.1; font-family: 'Playfair Display', serif; }
+
+  .evt-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .evt-title { font-weight: 700; font-size: 14px; color: var(--text); }
+  .evt-desc { font-size: 13px; color: var(--text2); line-height: 1.45; margin-top: 1px; }
+  .evt-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; font-size: 12px; color: var(--text3); }
+
+  .evt-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .btn-join {
+    display: inline-flex; align-items: center;
+    background: var(--gold); color: #1A1714; border: none;
+    border-radius: var(--radius-sm); padding: 6px 12px;
+    font-size: 12px; font-weight: 700; font-family: 'Lato', sans-serif;
+    text-decoration: none; cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .btn-join:hover { opacity: 0.85; }
+  .btn-edit-evt, .btn-del-evt {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 5px 10px; font-size: 11px; font-weight: 700;
+    font-family: 'Lato', sans-serif; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; color: var(--text2);
+  }
+  .btn-edit-evt:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-del-evt { color: #C0392B; border-color: rgba(220,50,50,0.2); background: rgba(220,50,50,0.04); }
+  .btn-del-evt:hover { background: rgba(220,50,50,0.1); border-color: rgba(220,50,50,0.4); }
+
+  .evt-past-toggle-wrap { padding: 1.25rem 0 0.25rem; border-top: 1px solid var(--border); }
+  .btn-past-toggle {
+    background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 7px 16px; font-size: 12px; font-weight: 700; color: var(--text2);
+    cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.15s;
+  }
+  .btn-past-toggle:hover { border-color: var(--gold); color: var(--gold); }
+
+  .replay-wrap { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
+  .btn-add-replay {
+    background: none; border: 1px dashed var(--border); border-radius: var(--radius-sm);
+    padding: 4px 10px; font-size: 11px; color: var(--text3);
+    cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.15s; text-align: left;
+  }
+  .btn-add-replay:hover { border-color: var(--gold); color: var(--gold); }
+  .replay-input-row { display: flex; gap: 6px; align-items: center; }
+  .replay-input { font-size: 12px !important; padding: 6px 10px !important; flex: 1; }
+  .btn-save-replay {
+    background: var(--gold); color: #1A1714; border: none; border-radius: var(--radius-sm);
+    padding: 6px 12px; font-size: 12px; font-weight: 700; font-family: 'Lato', sans-serif;
+    cursor: pointer; transition: opacity 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  .btn-save-replay:hover { opacity: 0.85; }
+  .btn-watch-replay {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--gold); font-size: 12px; font-weight: 700; text-decoration: none;
+  }
+  .btn-watch-replay:hover { text-decoration: underline; }
+
+  /* RESPONSIVE */
+  .hamburger-btn {
+    display: none; background: none; border: none;
+    cursor: pointer; padding: 6px; flex-direction: column;
+    gap: 5px; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .hamburger-btn span {
+    display: block; width: 20px; height: 2px;
+    background: #F0EDE6; border-radius: 2px;
+  }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 99;
+  }
+  .sidebar-overlay.active { display: block; }
+
+  @media (max-width: 768px) {
+    .hamburger-btn { display: flex; }
+
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.22s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    .main-wrap { margin-left: 0; }
+
+    .top-header { padding: 0 1rem; gap: 10px; }
+    .header-title { font-size: 17px; }
+    .header-subtitle { display: none; }
+
+    .page-content { padding: 1.25rem 1rem; gap: 1.125rem; }
+
+    .admin-card-header { padding: 1rem 1.125rem; flex-wrap: wrap; }
+    .btn-add { margin-left: 0; width: 100%; justify-content: center; }
+
+    .admin-card-body { padding: 1rem 1.125rem; }
+
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Event cards: date+body on top row, actions below body */
+    .evt-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      column-gap: 0.875rem;
+      row-gap: 0.625rem;
+    }
+    .evt-date-badge { grid-row: 1; grid-column: 1; }
+    .evt-body       { grid-row: 1; grid-column: 2; }
+    .evt-actions    {
+      grid-row: 2; grid-column: 2;
+      flex-direction: row; flex-wrap: wrap; gap: 6px;
+      align-items: center; justify-content: flex-start;
+    }
+    .btn-join {
+      min-height: 40px; padding: 8px 14px;
+      font-size: 13px; order: -1;
+    }
+    .btn-edit-evt, .btn-del-evt {
+      min-height: 36px; padding: 6px 11px; font-size: 12px;
+    }
+
+    .calendar-wrap { max-width: 100%; }
+    .cal-day-num { width: 24px; height: 24px; font-size: 12px; }
+    .cal-day { min-height: 38px; }
+  }
+
+  @media (max-width: 420px) {
+    .evt-badge-day { font-size: 18px; }
+    .evt-date-badge { padding: 6px 9px; min-width: 44px; }
+    .cal-dh { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <div class="nav-section-label">Admin</div>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="adminuserprofiles.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Members
+    </a>
+    <a href="adminuserclarity.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Clarity Sessions
+    </a>
+    <a href="adminthreads.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
+      Community Threads
+    </a>
+    <a href="adminevents.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Events
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div>
+      <div class="header-title">Events</div>
+      <div class="header-subtitle">Create and manage upcoming community events and sessions</div>
+    </div>
+    <div class="admin-badge">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin
+    </div>
+  </header>
+
+  <!-- ACCESS DENIED -->
+  <div id="access-denied" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:1rem;padding:3rem;text-align:center;">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">You need admin privileges to view this page.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <div>
+      <a href="admindashboard.html" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Admin Dashboard
+      </a>
+    </div>
+
+    <!-- ADD EVENT CARD -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">📅</div>
+        <div style="flex:1;">
+          <div class="admin-card-title">Add New Event</div>
+          <div class="admin-card-desc">Schedule a new community event or session.</div>
+        </div>
+        <button class="btn-add" id="toggle-form-btn" onclick="toggleEventForm()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Event
+        </button>
+      </div>
+
+      <div id="event-form-wrap" style="display:none;">
+        <div class="admin-card-body">
+          <div id="evt-msg" class="save-msg"></div>
+
+          <form class="event-form" id="event-form" onsubmit="submitEvent(event)">
+
+            <div class="form-row single">
+              <div class="form-group">
+                <label class="form-label" for="evt-title">Event Title <span>*</span></label>
+                <input class="form-input" id="evt-title" type="text"
+                  placeholder="e.g. Monthly Community Call" required maxlength="120">
+              </div>
+            </div>
+
+            <div class="form-row single">
+              <div class="form-group">
+                <label class="form-label" for="evt-desc">Description</label>
+                <textarea class="form-textarea" id="evt-desc"
+                  placeholder="What is this event about? Who should attend?"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="evt-date">Date <span>*</span></label>
+                <input class="form-input" id="evt-date" type="date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="evt-start">Start Time <span>*</span></label>
+                <input class="form-input" id="evt-start" type="time" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="evt-length">Duration (minutes)</label>
+                <input class="form-input" id="evt-length" type="number"
+                  min="5" max="600" step="5" value="60" placeholder="60">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="evt-location">Location</label>
+                <input class="form-input" id="evt-location" type="text"
+                  placeholder="e.g. Zoom, Studio 4B, Online">
+              </div>
+            </div>
+
+            <div class="form-row single">
+              <div class="form-group">
+                <label class="form-label" for="evt-url">Zoom / Meeting Link</label>
+                <input class="form-input" id="evt-url" type="url"
+                  placeholder="https://zoom.us/j/...">
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Paste your Zoom, Google Meet, or any meeting link. Works on mobile and desktop automatically.</div>
+              </div>
+            </div>
+
+            <div class="form-row single">
+              <div class="form-group">
+                <label class="form-label">Recurring Event</label>
+                <div class="toggle-group">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="evt-recurring">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label-text" id="recurring-label">No</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-save" type="submit" id="evt-save-btn">
+                <div class="btn-spinner" id="evt-spinner"></div>
+                Save Event
+              </button>
+              <button class="btn-cancel" type="button" onclick="cancelEventForm()">
+                Cancel
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINI CALENDAR CARD -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">🗓️</div>
+        <div>
+          <div class="admin-card-title">Event Calendar</div>
+          <div class="admin-card-desc">Overview of scheduled events by month.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div class="calendar-wrap">
+          <div class="calendar-nav">
+            <button class="cal-nav-btn" onclick="prevMonth()" aria-label="Previous month">&#8249;</button>
+            <div class="cal-month-label" id="cal-month-label"></div>
+            <button class="cal-nav-btn" onclick="nextMonth()" aria-label="Next month">&#8250;</button>
+          </div>
+          <div class="cal-day-headers">
+            <div class="cal-dh">Su</div>
+            <div class="cal-dh">Mo</div>
+            <div class="cal-dh">Tu</div>
+            <div class="cal-dh">We</div>
+            <div class="cal-dh">Th</div>
+            <div class="cal-dh">Fr</div>
+            <div class="cal-dh">Sa</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTS LIST CARD -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">📋</div>
+        <div>
+          <div class="admin-card-title">All Events</div>
+          <div class="admin-card-desc">Manage upcoming and past community events.</div>
+        </div>
+      </div>
+      <div class="admin-card-body" style="gap:1rem;">
+
+        <div>
+          <div class="evt-section-label">Upcoming</div>
+          <div id="upcoming-list"><div class="evt-list-loading">Loading…</div></div>
+        </div>
+
+        <div>
+          <div class="evt-past-toggle-wrap">
+            <button class="btn-past-toggle" id="past-toggle-btn" onclick="togglePast()">
+              Show past events (0)
+            </button>
+          </div>
+          <div id="past-list" style="display:none; margin-top:0.75rem;"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let editingEventId = null;
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      const role = snap.exists ? snap.data().userRole : 'member';
+      if (role !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+    } catch (e) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
+
+    currentUser = user;
+    document.getElementById('admin-content').style.display = 'flex';
+
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = `<img src="${user.photoURL}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    initCalendar();
+    loadEvents();
+  });
+
+  /* ── RECURRING TOGGLE LABEL ── */
+  document.getElementById('evt-recurring').addEventListener('change', function () {
+    document.getElementById('recurring-label').textContent = this.checked ? 'Yes' : 'No';
+  });
+
+  /* ── FORM TOGGLE ── */
+  let formOpen = false;
+
+  function toggleEventForm() {
+    formOpen = !formOpen;
+    const wrap = document.getElementById('event-form-wrap');
+    const btn = document.getElementById('toggle-form-btn');
+    wrap.style.display = formOpen ? 'block' : 'none';
+    btn.innerHTML = formOpen
+      ? `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg> Cancel`
+      : `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Event`;
+    if (formOpen) {
+      document.getElementById('evt-title').focus();
+    }
+  }
+
+  function cancelEventForm() {
+    if (!formOpen) return;
+    editingEventId = null;
+    resetForm();
+    toggleEventForm();
+  }
+
+  function resetForm() {
+    document.getElementById('event-form').reset();
+    document.getElementById('recurring-label').textContent = 'No';
+    document.getElementById('evt-save-btn').innerHTML =
+      '<div class="btn-spinner" id="evt-spinner" style="display:none;"></div>Save Event';
+    hideMsg();
+  }
+
+  /* ── SAVE EVENT ── */
+  async function submitEvent(e) {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const title = document.getElementById('evt-title').value.trim();
+    const description = document.getElementById('evt-desc').value.trim();
+    const dateVal = document.getElementById('evt-date').value;
+    const startVal = document.getElementById('evt-start').value;
+    const lengthVal = parseInt(document.getElementById('evt-length').value, 10) || 60;
+    const location = document.getElementById('evt-location').value.trim();
+    const url = document.getElementById('evt-url').value.trim();
+    const isRecurring = document.getElementById('evt-recurring').checked;
+
+    if (!title || !dateVal || !startVal) {
+      showMsg('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    const eventEnd = computeEndTime(startVal, lengthVal);
+
+    const saveBtn = document.getElementById('evt-save-btn');
+    const spinner = document.getElementById('evt-spinner');
+    saveBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+      const eventDate = firebase.firestore.Timestamp.fromDate(new Date(dateVal + 'T00:00:00'));
+
+      if (editingEventId) {
+        const updatePayload = {
+          eventTitle: title, description, eventDate,
+          eventStart: startVal, eventEnd: eventEnd, eventLength: lengthVal,
+          eventLocation: location, eventURL: url, isRecurring: isRecurring
+        };
+        await db.collection('Events').doc(editingEventId).update(updatePayload);
+        editingEventId = null;
+        showMsg('Event updated!', 'success');
+      } else {
+        const createPayload = {
+          eventTitle: title, description, eventDate,
+          eventStart: startVal, eventEnd: eventEnd, eventLength: lengthVal,
+          eventLocation: location, eventURL: url, isRecurring: isRecurring,
+          status: 'upcoming',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdBy: currentUser.uid
+        };
+        await db.collection('Events').add(createPayload);
+        showMsg('Event saved successfully!', 'success');
+      }
+
+      loadEvents();
+      resetForm();
+      setTimeout(() => { if (formOpen) toggleEventForm(); }, 1200);
+    } catch (err) {
+      console.error('Failed to save event', err);
+      showMsg('Failed to save event. Please try again.', 'error');
+    } finally {
+      saveBtn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function computeEndTime(startTime, durationMinutes) {
+    const [h, m] = startTime.split(':').map(Number);
+    const total = h * 60 + m + durationMinutes;
+    const endH = Math.floor(total / 60) % 24;
+    const endM = total % 60;
+    return String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('evt-msg');
+    el.textContent = text;
+    el.className = 'save-msg ' + type;
+    el.style.display = 'block';
+  }
+
+  function hideMsg() {
+    const el = document.getElementById('evt-msg');
+    el.style.display = 'none';
+  }
+
+  /* ── EVENTS DATA ── */
+  let allEvents = [];
+
+  async function loadEvents() {
+    try {
+      const snap = await db.collection('Events').orderBy('eventDate', 'asc').get();
+      allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderCalendar();
+      renderEventsList();
+    } catch (e) {
+      console.error('Failed to load events', e);
+      const upEl = document.getElementById('upcoming-list');
+      if (upEl) upEl.innerHTML =
+        '<div class="evt-list-empty" style="color:#C0392B;">Could not load events — check Firestore rules.</div>';
+    }
+  }
+
+  /* ── CALENDAR ── */
+  const CAL_MONTHS = ['January','February','March','April','May','June','July',
+    'August','September','October','November','December'];
+  let calYear, calMonth;
+
+  function initCalendar() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    document.getElementById('cal-month-label').textContent =
+      CAL_MONTHS[calMonth] + ' ' + calYear;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const eventDaySet = new Set();
+    allEvents.forEach(ev => {
+      if (!ev.eventDate) return;
+      const d = ev.eventDate.toDate ? ev.eventDate.toDate() : new Date(ev.eventDate);
+      eventDaySet.add(
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0')
+      );
+    });
+
+    const firstWeekday = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth  = new Date(calYear, calMonth + 1, 0).getDate();
+
+    let html = '';
+    for (let i = 0; i < firstWeekday; i++) {
+      html += '<div class="cal-day" style="visibility:hidden;"></div>';
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const thisDate = new Date(calYear, calMonth, d);
+      const dateKey  = calYear + '-' +
+        String(calMonth + 1).padStart(2, '0') + '-' +
+        String(d).padStart(2, '0');
+
+      const isToday   = thisDate.getTime() === today.getTime();
+      const isPast    = thisDate < today;
+      const hasEvents = eventDaySet.has(dateKey);
+
+      let cls = 'cal-day';
+      if (isToday)    cls += ' today';
+      else if (isPast) cls += ' past';
+      if (hasEvents)  cls += ' has-events';
+
+      const click = hasEvents ? `onclick="calDayClick('${dateKey}')"` : '';
+      const dot   = hasEvents ? '<div class="cal-dot"></div>' : '';
+
+      html += `<div class="${cls}" ${click} data-date="${dateKey}">
+        <div class="cal-day-num">${d}</div>${dot}
+      </div>`;
+    }
+
+    document.getElementById('cal-grid').innerHTML = html;
+  }
+
+  function prevMonth() {
+    if (--calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function nextMonth() {
+    if (++calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  }
+
+  function calDayClick(dateKey) {
+    document.querySelectorAll('.cal-day.highlighted')
+      .forEach(el => el.classList.remove('highlighted'));
+    const calCell = document.querySelector(`.cal-day[data-date="${dateKey}"]`);
+    if (calCell) calCell.classList.add('highlighted');
+
+    const target = document.querySelector(`[data-event-date="${dateKey}"]`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('event-highlight');
+    setTimeout(() => target.classList.remove('event-highlight'), 1500);
+  }
+
+  /* ── EVENT LIST ── */
+  const BADGE_MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  let pastVisible = false;
+
+  function isEventPast(ev) {
+    if (!ev.eventDate) return true;
+    const d = ev.eventDate.toDate ? ev.eventDate.toDate() : new Date(ev.eventDate);
+    let endH = 23, endM = 59;
+    if (ev.eventEnd) {
+      const p = ev.eventEnd.split(':').map(Number);
+      endH = p[0]; endM = p[1];
+    }
+    const endDT = new Date(d.getFullYear(), d.getMonth(), d.getDate(), endH, endM, 0);
+    return endDT.getTime() < Date.now() - 86400000;
+  }
+
+  function renderEventsList() {
+    const upcoming = allEvents.filter(ev => !isEventPast(ev));
+    const past     = allEvents.filter(ev =>  isEventPast(ev)).slice().reverse();
+
+    const btn = document.getElementById('past-toggle-btn');
+    btn.textContent = (pastVisible ? 'Hide past events' : 'Show past events') +
+      ' (' + past.length + ')';
+
+    const upEl = document.getElementById('upcoming-list');
+    upEl.innerHTML = upcoming.length
+      ? '<div class="evt-list">' + upcoming.map(ev => renderEventCard(ev, false)).join('') + '</div>'
+      : '<div class="evt-list-empty">No upcoming events. Add one above.</div>';
+
+    const pastEl = document.getElementById('past-list');
+    pastEl.innerHTML = past.length
+      ? '<div class="evt-list">' + past.map(ev => renderEventCard(ev, true)).join('') + '</div>'
+      : '<div class="evt-list-empty">No past events.</div>';
+  }
+
+  function renderEventCard(ev, isPast) {
+    const id    = ev.id;
+    const title = escHtml(ev.eventTitle || 'Untitled Event');
+    const desc  = ev.description
+      ? '<div class="evt-desc">' + escHtml(ev.description) + '</div>' : '';
+
+    let badgeMonth = '—', badgeDay = '—', dateKey = '';
+    if (ev.eventDate) {
+      const d = ev.eventDate.toDate ? ev.eventDate.toDate() : new Date(ev.eventDate);
+      badgeMonth = BADGE_MONTHS[d.getMonth()];
+      badgeDay   = d.getDate();
+      dateKey    = d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    }
+
+    let metaHtml = '';
+    if (ev.eventStart) {
+      const dur = ev.eventLength ? ' &middot; ' + ev.eventLength + ' min' : '';
+      metaHtml += '<span>' + formatTime(ev.eventStart) + dur + '</span>';
+    }
+    if (ev.eventLocation) {
+      metaHtml += '<span>📍 ' + escHtml(ev.eventLocation) + '</span>';
+    }
+    const meta = metaHtml ? '<div class="evt-meta">' + metaHtml + '</div>' : '';
+
+    const joinBtn = (!isPast && ev.eventURL)
+      ? `<a class="btn-join" href="${escHtml(ev.eventURL)}" target="_blank" rel="noopener">Join on Zoom →</a>`
+      : '';
+
+    const editBtn = `<button class="btn-edit-evt" onclick="editEvent('${id}')">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+      Edit</button>`;
+
+    const delBtn = `<button class="btn-del-evt" onclick="deleteEvent('${id}')">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      Delete</button>`;
+
+    let replayHtml = '';
+    if (isPast) {
+      if (ev.replayLink) {
+        replayHtml = `<div class="replay-wrap">
+          <a class="btn-watch-replay" href="${escHtml(ev.replayLink)}" target="_blank" rel="noopener">▶ Watch Replay →</a>
+        </div>`;
+      } else {
+        replayHtml = `<div class="replay-wrap">
+          <button class="btn-add-replay" onclick="showReplayInput('${id}')">+ Add Replay Link</button>
+          <div class="replay-input-row" id="replay-input-${id}" style="display:none;">
+            <input class="form-input replay-input" id="replay-url-${id}" type="url" placeholder="https://...">
+            <button class="btn-save-replay" onclick="saveReplay('${id}')">Save</button>
+          </div>
+        </div>`;
+      }
+    }
+
+    return `<div class="evt-card${isPast ? ' past' : ''}" id="evt-${id}" data-event-date="${dateKey}">
+      <div class="evt-date-badge">
+        <div class="evt-badge-month">${badgeMonth}</div>
+        <div class="evt-badge-day">${badgeDay}</div>
+      </div>
+      <div class="evt-body">
+        <div class="evt-title">${title}</div>
+        ${desc}${meta}${replayHtml}
+      </div>
+      <div class="evt-actions">
+        ${joinBtn}${editBtn}${delBtn}
+      </div>
+    </div>`;
+  }
+
+  function formatTime(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+  }
+
+  function togglePast() {
+    pastVisible = !pastVisible;
+    document.getElementById('past-list').style.display = pastVisible ? 'block' : 'none';
+    const past = allEvents.filter(ev => isEventPast(ev));
+    document.getElementById('past-toggle-btn').textContent =
+      (pastVisible ? 'Hide past events' : 'Show past events') + ' (' + past.length + ')';
+  }
+
+  /* ── EDIT EVENT ── */
+  function editEvent(id) {
+    const ev = allEvents.find(e => e.id === id);
+    if (!ev) return;
+    editingEventId = id;
+
+    if (!formOpen) toggleEventForm();
+
+    document.getElementById('evt-title').value    = ev.eventTitle    || '';
+    document.getElementById('evt-desc').value     = ev.description   || '';
+    document.getElementById('evt-start').value    = ev.eventStart    || '';
+    document.getElementById('evt-length').value   = ev.eventLength   || 60;
+    document.getElementById('evt-location').value = ev.eventLocation || '';
+    document.getElementById('evt-url').value      = ev.eventURL      || '';
+
+    if (ev.eventDate) {
+      const d = ev.eventDate.toDate ? ev.eventDate.toDate() : new Date(ev.eventDate);
+      document.getElementById('evt-date').value =
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+    }
+
+    const recurring = !!ev.isRecurring;
+    document.getElementById('evt-recurring').checked = recurring;
+    document.getElementById('recurring-label').textContent = recurring ? 'Yes' : 'No';
+
+    document.getElementById('evt-save-btn').innerHTML =
+      '<div class="btn-spinner" id="evt-spinner" style="display:none;"></div>Update Event';
+
+    document.getElementById('event-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── DELETE EVENT ── */
+  async function deleteEvent(id) {
+    const ev = allEvents.find(e => e.id === id);
+    const label = ev ? ev.eventTitle : 'this event';
+    if (!confirm('Delete "' + label + '"? This cannot be undone.')) return;
+
+    const card = document.getElementById('evt-' + id);
+    if (card) card.style.opacity = '0.35';
+
+    try {
+      await db.collection('Events').doc(id).delete();
+      allEvents = allEvents.filter(e => e.id !== id);
+      if (card) card.remove();
+      renderCalendar();
+      renderEventsList();
+    } catch (e) {
+      console.error('Delete failed', e);
+      if (card) card.style.opacity = '1';
+      alert('Failed to delete event. Please try again.');
+    }
+  }
+
+  /* ── REPLAY LINK ── */
+  function showReplayInput(id) {
+    const row = document.getElementById('replay-input-' + id);
+    if (row) {
+      row.style.display = 'flex';
+      document.getElementById('replay-url-' + id).focus();
+    }
+  }
+
+  async function saveReplay(id) {
+    const input = document.getElementById('replay-url-' + id);
+    const url = input ? input.value.trim() : '';
+    if (!url) { alert('Please enter a URL.'); return; }
+
+    try {
+      await db.collection('Events').doc(id).update({ replayLink: url });
+      const ev = allEvents.find(e => e.id === id);
+      if (ev) ev.replayLink = url;
+      renderEventsList();
+    } catch (e) {
+      console.error('Save replay failed', e);
+      alert('Failed to save replay link. Please try again.');
+    }
+  }
+</script>
+</body>
+</html>
