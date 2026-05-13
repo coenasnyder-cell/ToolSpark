@@ -1,0 +1,426 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  document.addEventListener('DOMContentLoaded', () => {
+    firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  });
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0B09;
+    --surface: #141210;
+    --surface2: #1C1A17;
+    --border: #2A2720;
+    --text: #F0EDE6;
+    --text2: #9A9488;
+    --text3: #4A4840;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --red: #C4622D;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse at top, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .auth-wrap {
+    width: 100%;
+    max-width: 420px;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .auth-logo { text-align: center; margin-bottom: 2rem; }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+  .logo-text span { color: var(--gold); }
+  .logo-tag {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+  }
+
+  .auth-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .auth-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+  }
+
+  .google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 1.25rem;
+  }
+  .google-btn:hover { border-color: rgba(201,168,76,0.3); background: #222018; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+  }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input::placeholder { color: var(--text3); }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input.error { border-color: var(--red); }
+
+  .password-wrap { position: relative; }
+  .password-wrap .form-input { padding-right: 42px; }
+  .toggle-pw {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text3);
+    padding: 4px;
+    line-height: 0;
+    transition: color 0.15s;
+  }
+  .toggle-pw:hover { color: var(--text2); }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0C0B09;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    margin-top: 1.25rem;
+  }
+  .submit-btn:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.2); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .msg {
+    display: none;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+  .msg.error { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.25); color: #E0875A; display: block; }
+  .msg.success { background: rgba(61,138,101,0.1); border: 1px solid rgba(61,138,101,0.25); color: #3D8A65; display: block; }
+
+  .terms-note {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+  .auth-footer a { color: var(--gold); text-decoration: none; font-weight: 700; }
+  .auth-footer a:hover { color: var(--gold-light); }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 1.25rem;
+    font-size: 12px;
+    color: var(--text3);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--text2); }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+
+  <div class="auth-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+
+  <div class="auth-card">
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-subtitle">Join ToolSpark and start building smarter tools for your clients.</p>
+
+    <div id="msg" class="msg"></div>
+
+    <button class="google-btn" onclick="signUpWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 2.9l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3 0 5.8 1.1 7.9 2.9l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-1.9 13.6-5l-6.3-5.2C29.5 35.5 26.9 36 24 36c-5.2 0-9.6-2.9-11.3-7l-6.6 5C9.7 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.5-2.6 4.6-4.7 6l6.3 5.2C40.6 35.6 44 30.2 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider"><span>or</span></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" type="text" id="firstName" placeholder="Jane" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" type="text" id="lastName" placeholder="Smith" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="email" placeholder="you@example.com" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-wrap">
+        <input class="form-input" type="password" id="password" placeholder="Min. 8 characters"
+          onkeydown="if(event.key==='Enter') signUp()" />
+        <button class="toggle-pw" type="button" onclick="togglePassword()" aria-label="Toggle password visibility">
+          <svg id="eye-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="signUp()">Create Account &rarr;</button>
+
+    <p class="terms-note">By creating an account you agree to our Terms of Service and Privacy Policy.</p>
+  </div>
+
+  <div class="auth-footer">
+    Already have an account? <a href="signon.html">Sign in</a>
+  </div>
+
+  <a href="index.html" class="back-link">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Back to ToolSpark
+  </a>
+
+</div>
+
+<script>
+let signingIn = false;
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+function setLoading(loading) {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Creating account...' : 'Create Account →';
+}
+
+function togglePassword() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+async function signUp() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!firstName) { showMsg('Please enter your first name.', 'error'); return; }
+  if (!email) { showMsg('Please enter your email address.', 'error'); return; }
+  if (!password || password.length < 8) { showMsg('Password must be at least 8 characters.', 'error'); return; }
+
+  signingIn = true;
+  setLoading(true);
+  try {
+    const displayName = firstName + (lastName ? ' ' + lastName : '');
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    await cred.user.updateProfile({ displayName });
+    await createUserDoc(cred.user, displayName);
+    showMsg('Account created! Redirecting...', 'success');
+    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+  } catch(err) {
+    signingIn = false;
+    setLoading(false);
+    showMsg(friendlyError(err.code), 'error');
+  }
+}
+
+async function signUpWithGoogle() {
+  signingIn = true;
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    await createUserDoc(result.user, result.user.displayName || '');
+    showMsg('Account created! Redirecting...', 'success');
+    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+  } catch(err) {
+    signingIn = false;
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showMsg(friendlyError(err.code), 'error');
+    }
+  }
+}
+
+async function createUserDoc(user, displayName) {
+  const ref = db.collection('users').doc(user.uid);
+  const snap = await ref.get();
+  if (!snap.exists) {
+    await ref.set({
+      displayName: displayName || user.displayName || '',
+      userEmail: user.email || '',
+      clientEmail: user.email || '',
+      photoURL: user.photoURL || '',
+      userRole: 'member',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+}
+
+function friendlyError(code) {
+  const map = {
+    'auth/email-already-in-use': 'An account with that email already exists. Try signing in.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/weak-password': 'Password is too weak. Use at least 8 characters.',
+    'auth/too-many-requests': 'Too many attempts. Please wait and try again.',
+    'auth/network-request-failed': 'Network error — check your connection.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+auth.onAuthStateChanged(user => {
+  if (user && !signingIn) window.location.href = 'community.html';
+});
+</script>
+</body>
+</html>

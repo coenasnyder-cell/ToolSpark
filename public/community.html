@@ -38,6 +38,9 @@
     display: flex;
     font-size: 15px;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* ── SIDEBAR ── */
@@ -132,6 +135,14 @@
     transition: background 0.15s;
   }
   .sidebar-user:hover { background: rgba(255,255,255,0.05); }
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 8px 12px; margin-top: 4px;
+    background: none; border: none; border-radius: var(--radius-sm);
+    color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif;
+    cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left;
+  }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
   .user-avatar {
     width: 32px; height: 32px;
     border-radius: 50%;
@@ -179,9 +190,10 @@
   }
   .header-subtitle {
     font-size: 12px;
-    color: var(--text3);
-    font-weight: 300;
+    color: #9A9488;
+    font-weight: 400;
     margin-top: 1px;
+    display: none;
   }
 
   .header-search {
@@ -201,7 +213,8 @@
     outline: none;
     transition: border-color 0.15s;
   }
-  .header-search input::placeholder { color: #4A4840; }
+  .header-search input::placeholder { color: #7A7670; }
+  .header-search input { color: #F0EDE6; }
   .header-search input:focus { border-color: rgba(201,168,76,0.4); }
   .search-icon {
     position: absolute;
@@ -258,6 +271,7 @@
 
   /* ── FEED COLUMN ── */
   .feed-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  #threads-feed { display: flex; flex-direction: column; gap: 1rem; }
 
   /* ── CARDS ── */
   .card {
@@ -267,10 +281,57 @@
     box-shadow: var(--shadow);
   }
 
+  /* QUOTE OF THE DAY */
+  .quote-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+    position: relative;
+    box-shadow: var(--shadow);
+    display: none;
+  }
+  .quote-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    color: var(--gold-dim);
+    line-height: 0.6;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    user-select: none;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    padding-right: 2rem;
+  }
+  .quote-author {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .quote-author::before { content: '— '; }
+
   /* WELCOME CARD */
   .welcome-card {
-    background: var(--dark);
-    border: 1px solid var(--border-dark);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.5rem 1.75rem;
     display: flex;
@@ -279,13 +340,14 @@
     gap: 1rem;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow);
   }
   .welcome-card::before {
     content: '';
     position: absolute;
     top: 0; right: 0;
     width: 220px; height: 100%;
-    background: radial-gradient(ellipse at right, rgba(201,168,76,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse at right, rgba(201,168,76,0.06) 0%, transparent 70%);
     pointer-events: none;
   }
   .welcome-pin {
@@ -307,14 +369,14 @@
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     font-weight: 400;
-    color: #F0EDE6;
+    color: var(--text);
     line-height: 1.3;
     margin-bottom: 8px;
   }
   .welcome-card p {
     font-size: 13px;
-    color: #9A9488;
-    font-weight: 300;
+    color: var(--text2);
+    font-weight: 400;
     line-height: 1.6;
     max-width: 380px;
   }
@@ -333,7 +395,7 @@
   }
   .stat-label {
     font-size: 11px;
-    color: #5C5A55;
+    color: var(--text3);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 700;
@@ -453,15 +515,16 @@
   .filter-bar {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
-  .filter-label { font-size: 12px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+  .filter-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 2px; white-space: nowrap; }
   .filter-chip {
-    padding: 5px 14px;
+    padding: 3px 9px;
     border: 1px solid var(--border);
     border-radius: 100px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text2);
     background: var(--surface);
@@ -522,7 +585,7 @@
   .thread-body {
     font-size: 14px;
     color: var(--text2);
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1.7;
     margin-bottom: 1rem;
   }
@@ -550,9 +613,246 @@
     letter-spacing: 0.05em;
   }
   .action-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-  .action-btn.liked { border-color: rgba(201,168,76,0.4); color: var(--gold); background: var(--gold-dim); }
+  .action-btn.reacted { border-color: var(--gold); background: var(--gold-dim); color: var(--text); font-size: 15px; }
+
+  /* Reaction picker */
+  .reaction-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+  .reaction-picker-popup {
+    position: absolute; bottom: calc(100% + 8px); left: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 32px;
+    padding: 5px 8px; display: flex; gap: 2px; box-shadow: var(--shadow-md);
+    opacity: 0; pointer-events: none;
+    transform: translateY(6px) scale(0.9); transform-origin: bottom left;
+    transition: opacity 0.15s, transform 0.15s; z-index: 200;
+  }
+  .reaction-wrap:hover .reaction-picker-popup,
+  .reaction-picker-popup.open { opacity: 1; pointer-events: all; transform: none; }
+  .reaction-picker-popup button {
+    font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center;
+    justify-content: center; background: none; border: none; border-radius: 50%;
+    cursor: pointer; transition: transform 0.12s, background 0.12s;
+  }
+  .reaction-picker-popup button:hover { transform: scale(1.35); background: var(--bg); }
+  .reaction-picker-popup button.active { background: var(--gold-dim); }
+  .reaction-counts { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .reaction-pill {
+    display: inline-flex; align-items: center; gap: 3px; font-size: 12px;
+    padding: 2px 7px; border-radius: 10px; background: var(--bg);
+    border: 1px solid var(--border); cursor: pointer; line-height: 1.4;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .reaction-pill:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .reaction-pill.mine { border-color: var(--gold); background: var(--gold-dim); }
+
+  /* Comment reaction */
+  .comment-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+  .comment-reaction-wrap { position: relative; display: inline-flex; }
+  .comment-rx-trigger {
+    font-size: 14px; background: none; border: none; cursor: pointer;
+    padding: 2px 5px; border-radius: 6px; color: var(--text3); line-height: 1;
+    transition: background 0.12s;
+  }
+  .comment-rx-trigger:hover { background: var(--bg); }
+  .comment-reaction-popup {
+    position: absolute; bottom: calc(100% + 6px); right: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 28px;
+    padding: 4px 6px; display: flex; gap: 1px; box-shadow: var(--shadow-md);
+    opacity: 0; pointer-events: none;
+    transform: translateY(4px) scale(0.9); transform-origin: bottom right;
+    transition: opacity 0.15s, transform 0.15s; z-index: 200;
+  }
+  .comment-reaction-popup.open { opacity: 1; pointer-events: all; transform: none; }
+  .comment-reaction-popup button {
+    font-size: 16px; width: 30px; height: 30px; display: flex; align-items: center;
+    justify-content: center; background: none; border: none; border-radius: 50%;
+    cursor: pointer; transition: transform 0.12s, background 0.12s;
+  }
+  .comment-reaction-popup button:hover { transform: scale(1.3); background: var(--bg); }
+  .comment-reaction-popup button.active { background: var(--gold-dim); }
+  .comment-rx-pills { display: flex; gap: 3px; align-items: center; }
   .action-spacer { flex: 1; }
   .thread-views { font-size: 12px; color: var(--text3); }
+
+  .mod-btn {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 7px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .mod-btn:hover { color: var(--text2); background: var(--bg); }
+  .mod-btn.danger:hover { color: #C4622D; background: rgba(196,98,45,0.08); }
+
+  /* COMMENTS */
+  .comment-section {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .comment-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .comment-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--gold);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .comment-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .comment-bubble {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
+    padding: 8px 12px;
+  }
+  .comment-author { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .comment-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .comment-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .comment-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 0.25rem;
+  }
+  .comment-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .comment-input:focus { border-color: var(--gold); }
+  .comment-input::placeholder { color: var(--text3); }
+  .comment-submit {
+    background: var(--gold);
+    color: #0C0B09;
+    border: none;
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .comment-submit:hover { background: var(--gold-light); }
+  .comment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .gif-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .gif-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .gif-picker {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin-top: 8px;
+    box-shadow: var(--shadow-md);
+  }
+  .gif-search {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .gif-search:focus { border-color: var(--gold); }
+  .gif-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .gif-grid img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    border: 2px solid transparent;
+  }
+  .gif-grid img:hover { opacity: 0.85; border-color: var(--gold); }
+  .gif-preview-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+  }
+  .gif-preview-wrap img { height: 48px; border-radius: 4px; }
+  .gif-preview-wrap span { font-size: 12px; color: var(--text2); flex: 1; }
+  .gif-remove { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 0 4px; }
+  .gif-remove:hover { color: #C4622D; }
+
+  .edit-input {
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-sm);
+    outline: none;
+    padding: 7px 10px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .edit-textarea {
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    color: var(--text2);
+    background: var(--bg);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-sm);
+    outline: none;
+    padding: 8px 10px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 8px;
+  }
 
   /* ── RIGHT SIDEBAR ── */
   .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -667,7 +967,7 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
 
-    <a href="#" class="nav-item">
+    <a href="dashboard.html" class="nav-item">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span>Dashboard</span>
     </a>
@@ -693,16 +993,25 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
       <span>Profile</span>
     </a>
+
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
   </nav>
 
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="user-avatar">Y</div>
+      <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
-        <div class="user-name">Your Name</div>
-        <div class="user-role">Builder</div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
       </div>
     </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
   </div>
 </aside>
 
@@ -745,40 +1054,54 @@
         </div>
         <div class="welcome-stats">
           <div class="stat-item">
-            <div class="stat-num">214</div>
+            <div class="stat-num" id="stat-members">—</div>
             <div class="stat-label">Members</div>
           </div>
           <div class="stat-item">
-            <div class="stat-num">48</div>
+            <div class="stat-num" id="stat-threads">—</div>
             <div class="stat-label">Threads</div>
           </div>
           <div class="stat-item">
-            <div class="stat-num">12</div>
+            <div class="stat-num" id="stat-online">—</div>
             <div class="stat-label">Online</div>
           </div>
         </div>
       </div>
 
+      <!-- QUOTE OF THE DAY -->
+      <div class="quote-card" id="quote-card">
+        <div class="quote-mark">"</div>
+        <div class="quote-label">✦ Quote of the Day</div>
+        <div class="quote-text" id="quote-text"></div>
+        <div class="quote-author" id="quote-author"></div>
+      </div>
+
       <!-- CREATE THREAD CARD -->
       <div class="card create-card">
         <div class="create-header">
-          <div class="create-avatar">Y</div>
+          <div class="create-avatar" id="create-avatar">?</div>
           <span style="font-size:14px;color:var(--text2);font-weight:300;">Share something with the community...</span>
         </div>
-        <input class="create-title-input" type="text" placeholder="Thread title" />
-        <textarea class="create-textarea" placeholder="What's on your mind? Share a question, win, idea, or update..."></textarea>
+        <div id="post-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:0.75rem;"></div>
+        <input class="create-title-input" id="thread-title" type="text" placeholder="Thread title" />
+        <textarea class="create-textarea" id="thread-content" placeholder="What's on your mind? Share a question, win, idea, or update..."></textarea>
+        <input type="file" id="image-file-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)" />
+        <div id="image-preview-wrap" style="display:none;margin-bottom:0.75rem;position:relative;">
+          <img id="image-preview" style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1px solid var(--border);" />
+          <button onclick="removeImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;color:#fff;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
+        </div>
         <div class="create-row">
           <div class="create-left">
-            <select class="category-select">
+            <select class="category-select" id="thread-category">
               <option value="" disabled selected>Category</option>
+              <option>General</option>
               <option>Questions</option>
               <option>Wins</option>
               <option>Announcements</option>
-              <option>Build Progress</option>
               <option>Tool Ideas</option>
               <option>Feedback</option>
             </select>
-            <button class="media-btn">
+            <button class="media-btn" onclick="document.getElementById('image-file-input').click()">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
               Add Image
             </button>
@@ -787,7 +1110,7 @@
               Add YouTube
             </button>
           </div>
-          <button class="post-btn">Post Thread →</button>
+          <button class="post-btn" id="post-btn" onclick="postThread()">Post Thread →</button>
         </div>
       </div>
 
@@ -795,75 +1118,17 @@
       <div class="filter-bar">
         <span class="filter-label">Filter</span>
         <div class="filter-chip active">All</div>
+        <div class="filter-chip">General</div>
         <div class="filter-chip">Questions</div>
         <div class="filter-chip">Wins</div>
+        <div class="filter-chip">Announcements</div>
         <div class="filter-chip">Tool Ideas</div>
-        <div class="filter-chip">Build Progress</div>
         <div class="filter-chip">Feedback</div>
       </div>
 
-      <!-- THREAD CARD -->
-      <div class="card thread-card">
-        <div class="thread-top">
-          <div class="thread-avatar">BP</div>
-          <div class="thread-meta">
-            <div class="thread-author-row">
-              <span class="thread-author">BrightPath Media</span>
-              <span class="thread-category">Tool Ideas</span>
-              <span class="thread-time">2 hours ago</span>
-            </div>
-          </div>
-        </div>
-        <div class="thread-title">Thinking about building a client onboarding tool</div>
-        <div class="thread-body">"We are exploring ways to automate onboarding and improve the client experience using AI workflows. The idea is to reduce the back-and-forth we do manually with every new client and let the tool guide them through the first steps automatically."</div>
-        <div class="thread-actions">
-          <button class="action-btn liked">
-            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            14
-          </button>
-          <button class="action-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            7 Comments
-          </button>
-          <button class="action-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
-            Share
-          </button>
-          <div class="action-spacer"></div>
-          <span class="thread-views">142 views</span>
-        </div>
-      </div>
-
-      <!-- SECOND PLACEHOLDER THREAD -->
-      <div class="card thread-card">
-        <div class="thread-top">
-          <div class="thread-avatar" style="background:linear-gradient(135deg,#4B3F8A,#7B6FBA);">CK</div>
-          <div class="thread-meta">
-            <div class="thread-author-row">
-              <span class="thread-author">Clarity Kings</span>
-              <span class="thread-category" style="background:rgba(75,63,138,0.12);color:#8B7FD4;border-color:rgba(75,63,138,0.25);">Wins</span>
-              <span class="thread-time">Yesterday</span>
-            </div>
-          </div>
-        </div>
-        <div class="thread-title">Just launched our first AI intake form — clients love it</div>
-        <div class="thread-body">"After two weeks of building, we finally shipped our AI-powered intake form. It asks the right questions, adapts based on answers, and sends us a summary automatically. Saved us 4 hours in the first week alone."</div>
-        <div class="thread-actions">
-          <button class="action-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            31
-          </button>
-          <button class="action-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            12 Comments
-          </button>
-          <button class="action-btn">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
-            Share
-          </button>
-          <div class="action-spacer"></div>
-          <span class="thread-views">289 views</span>
-        </div>
+      <!-- LIVE THREADS FEED -->
+      <div id="threads-feed">
+        <div id="feed-loading" style="text-align:center;padding:2rem;color:var(--text3);font-size:13px;">Loading threads...</div>
       </div>
 
     </div>
@@ -873,38 +1138,9 @@
 
       <!-- ACTIVE MEMBERS -->
       <div class="card widget-card">
-        <div class="widget-title">Active Now</div>
-        <div class="member-item">
-          <div class="member-av" style="background:linear-gradient(135deg,#2A5C45,#3D8A65);">BM</div>
-          <div>
-            <div class="member-name">BrightPath Media</div>
-            <div class="member-tag">Building tools</div>
-          </div>
-          <div class="member-online"></div>
-        </div>
-        <div class="member-item">
-          <div class="member-av" style="background:linear-gradient(135deg,#C4622D,#E0875A);">SL</div>
-          <div>
-            <div class="member-name">Sarah Laurent</div>
-            <div class="member-tag">Asking questions</div>
-          </div>
-          <div class="member-online"></div>
-        </div>
-        <div class="member-item">
-          <div class="member-av" style="background:linear-gradient(135deg,#4B3F8A,#7B6FBA);">TF</div>
-          <div>
-            <div class="member-name">TheFlowLab</div>
-            <div class="member-tag">Sharing wins</div>
-          </div>
-          <div class="member-online"></div>
-        </div>
-        <div class="member-item">
-          <div class="member-av" style="background:linear-gradient(135deg,#1A4A6B,#2D7AB5);">MK</div>
-          <div>
-            <div class="member-name">MindsetKit</div>
-            <div class="member-tag">Exploring resources</div>
-          </div>
-          <div class="member-online"></div>
+        <div class="widget-title">Recently Active</div>
+        <div id="active-now-list">
+          <div style="font-size:12px;color:var(--text3);padding:4px 0;">Loading...</div>
         </div>
       </div>
 
@@ -912,28 +1148,28 @@
       <div class="card widget-card">
         <div class="widget-title">Categories</div>
         <div class="cat-item">
+          <div class="cat-left"><div class="cat-dot" style="background:#6B6560;"></div><span class="cat-name">General</span></div>
+          <span class="cat-count" id="cat-count-General">0</span>
+        </div>
+        <div class="cat-item">
           <div class="cat-left"><div class="cat-dot" style="background:#C9A84C;"></div><span class="cat-name">Questions</span></div>
-          <span class="cat-count">18</span>
+          <span class="cat-count" id="cat-count-Questions">0</span>
         </div>
         <div class="cat-item">
           <div class="cat-left"><div class="cat-dot" style="background:#3D8A65;"></div><span class="cat-name">Wins</span></div>
-          <span class="cat-count">11</span>
+          <span class="cat-count" id="cat-count-Wins">0</span>
         </div>
         <div class="cat-item">
           <div class="cat-left"><div class="cat-dot" style="background:#E0875A;"></div><span class="cat-name">Announcements</span></div>
-          <span class="cat-count">4</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#7B6FBA;"></div><span class="cat-name">Build Progress</span></div>
-          <span class="cat-count">9</span>
+          <span class="cat-count" id="cat-count-Announcements">0</span>
         </div>
         <div class="cat-item">
           <div class="cat-left"><div class="cat-dot" style="background:#2D7AB5;"></div><span class="cat-name">Tool Ideas</span></div>
-          <span class="cat-count">14</span>
+          <span class="cat-count" id="cat-count-Tool Ideas">0</span>
         </div>
         <div class="cat-item">
           <div class="cat-left"><div class="cat-dot" style="background:#9A9488;"></div><span class="cat-name">Feedback</span></div>
-          <span class="cat-count">6</span>
+          <span class="cat-count" id="cat-count-Feedback">0</span>
         </div>
       </div>
 
@@ -976,14 +1212,756 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
-  // Filter chip interaction
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+
+  let currentUser = null;
+  let currentUserRole = 'member';
+  let activeFilter = 'All';
+  let unsubscribeThreads = null;
+  let selectedImageFile = null;
+  let lastSnapshot = null;
+
+  const CATEGORY_STYLES = {
+    'General':        { bg: 'rgba(26,23,20,0.07)',    color: '#6B6560', border: 'rgba(107,101,96,0.25)' },
+    'Questions':      { bg: 'rgba(201,168,76,0.12)',  color: '#C9A84C', border: 'rgba(201,168,76,0.25)' },
+    'Wins':           { bg: 'rgba(75,63,138,0.12)',   color: '#8B7FD4', border: 'rgba(75,63,138,0.25)' },
+    'Announcements':  { bg: 'rgba(196,98,45,0.12)',   color: '#E0875A', border: 'rgba(196,98,45,0.25)' },
+    'Tool Ideas':     { bg: 'rgba(45,122,181,0.12)',  color: '#2D7AB5', border: 'rgba(45,122,181,0.25)' },
+    'Feedback':       { bg: 'rgba(154,148,136,0.12)', color: '#9A9488', border: 'rgba(154,148,136,0.25)' },
+  };
+
+  const AVATAR_GRADIENTS = [
+    'linear-gradient(135deg,#2A5C45,#3D8A65)',
+    'linear-gradient(135deg,#C4622D,#E0875A)',
+    'linear-gradient(135deg,#4B3F8A,#7B6FBA)',
+    'linear-gradient(135deg,#1A4A6B,#2D7AB5)',
+    'linear-gradient(135deg,#6B3A1A,#C9A84C)',
+  ];
+
+  function avatarGradient(str) {
+    let n = 0;
+    for (let i = 0; i < str.length; i++) n += str.charCodeAt(i);
+    return AVATAR_GRADIENTS[n % AVATAR_GRADIENTS.length];
+  }
+
+  function initials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return '';
+    const now = Date.now();
+    const diff = now - ts.toMillis();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return days + 'd ago';
+    return ts.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function renderThread(doc) {
+    const d = doc.data();
+    const id = doc.id;
+    const userReaction = currentUser && d.reactions && typeof d.reactions[currentUser.uid] === 'string' ? d.reactions[currentUser.uid] : null;
+    const rxCounts = computeReactionCounts(d.reactions);
+    const pillsHtml = EMOJIS.filter(e => rxCounts[e]).map(e =>
+      `<span class="reaction-pill${e === userReaction ? ' mine' : ''}" onclick="setReaction('${id}','${e}')">${e} ${rxCounts[e]}</span>`
+    ).join('');
+    const pickerBtns = EMOJIS.map(e =>
+      `<button onclick="setReaction('${id}','${e}')" class="${e === userReaction ? 'active' : ''}">${e}</button>`
+    ).join('');
+    const cat = CATEGORY_STYLES[d.category] || CATEGORY_STYLES['Questions'];
+    const name = d.displayName || 'Builder';
+    const avatarContent = d.authorPhotoURL
+      ? '<img src="' + d.authorPhotoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">'
+      : initials(name);
+    const avatarBg = d.authorPhotoURL ? 'transparent' : avatarGradient(name);
+
+    return `
+      <div class="card thread-card" id="thread-${id}">
+        <div class="thread-top">
+          <div class="thread-avatar" style="background:${avatarBg}">${avatarContent}</div>
+          <div class="thread-meta">
+            <div class="thread-author-row">
+              <span class="thread-author">${escHtml(name)}</span>
+              <span class="thread-category" style="background:${cat.bg};color:${cat.color};border-color:${cat.border};">${escHtml(d.category || '')}</span>
+              <span class="thread-time">${timeAgo(d.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="thread-title">${escHtml(d.title || '')}</div>
+        <div class="thread-body">${escHtml(d.content || '')}</div>
+        ${d.imageURL ? `<img src="${d.imageURL}" onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'280px':'100%'" style="max-width:280px;max-height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-bottom:0.75rem;cursor:pointer;display:block;" loading="lazy" title="Click to expand" />` : ''}
+        <div class="thread-actions">
+          <div class="reaction-wrap" onclick="event.stopPropagation()">
+            <button class="action-btn${userReaction ? ' reacted' : ''}" id="reaction-trigger-${id}" data-reaction="${userReaction || ''}" onclick="toggleReactionPicker('${id}')">
+              <span class="reaction-label">${userReaction || '🙂'}</span>${!userReaction ? '&nbsp;React' : ''}
+            </button>
+            <div class="reaction-picker-popup" id="reaction-picker-${id}">${pickerBtns}</div>
+          </div>
+          ${pillsHtml ? `<div class="reaction-counts" onclick="event.stopPropagation()">${pillsHtml}</div>` : ''}
+          <button class="action-btn" onclick="toggleComments('${id}')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span id="comment-count-${id}">${d.commentCount || 0}</span> Comments
+          </button>
+
+          <div class="action-spacer"></div>
+          ${currentUser && d.authorId === currentUser.uid ? `<button class="mod-btn" onclick="editThread('${id}')">Edit</button>` : ''}
+          ${currentUser && (d.authorId === currentUser.uid || currentUserRole === 'admin') ? `<button class="mod-btn danger" onclick="deleteThread('${id}')">Delete</button>` : ''}
+        </div>
+        <div class="comment-section" id="comments-${id}" style="display:none;">
+          <div id="comments-list-${id}"></div>
+          <div class="comment-input-row">
+            <div class="comment-avatar">${currentUser && currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="avatar">` : (currentUser ? initials(currentUser.displayName || currentUser.email || 'U') : '?')}</div>
+            <input class="comment-input" id="comment-input-${id}" type="text" placeholder="Write a comment..." onkeydown="if(event.key==='Enter') postComment('${id}')" />
+            <button class="gif-btn" onclick="toggleGifPicker('${id}')">GIF</button>
+            <button class="comment-submit" onclick="postComment('${id}')">Post</button>
+          </div>
+          <div id="gif-picker-${id}" style="display:none;">
+            <div class="gif-picker">
+              <input class="gif-search" id="gif-search-${id}" type="text" placeholder="Search GIFs..." oninput="searchGifs('${id}')" />
+              <div class="gif-grid" id="gif-grid-${id}"></div>
+            </div>
+          </div>
+          <div id="gif-preview-${id}" style="display:none;" class="gif-preview-wrap">
+            <img id="gif-preview-img-${id}" src="" alt="GIF" />
+            <span>GIF selected</span>
+            <button class="gif-remove" onclick="clearGif('${id}')">×</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderFeed(snapshot) {
+    const feed = document.getElementById('threads-feed');
+
+    // Category counts (always from full unfiltered set)
+    const counts = {};
+    snapshot.docs.forEach(d => {
+      const cat = d.data().category || '';
+      if (cat) counts[cat] = (counts[cat] || 0) + 1;
+    });
+    ['General','Questions','Wins','Announcements','Tool Ideas','Feedback'].forEach(cat => {
+      const el = document.getElementById('cat-count-' + cat);
+      if (el) el.textContent = counts[cat] || 0;
+    });
+
+    const threadCountEl = document.getElementById('stat-threads');
+    if (threadCountEl) threadCountEl.textContent = snapshot.docs.length;
+
+    updateActiveNow(snapshot.docs);
+
+    let docs = snapshot.docs;
+    if (activeFilter !== 'All') {
+      docs = docs.filter(d => d.data().category === activeFilter);
+    }
+
+    if (docs.length === 0) {
+      feed.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px;">No threads in this category yet.</div>';
+      return;
+    }
+
+    feed.innerHTML = docs.map(renderThread).join('');
+  }
+
+  function loadThreads() {
+    if (unsubscribeThreads) unsubscribeThreads();
+    const query = db.collection('threads').orderBy('createdAt', 'desc').limit(50);
+
+    unsubscribeThreads = query.onSnapshot(snapshot => {
+      document.getElementById('feed-loading').style.display = 'none';
+      lastSnapshot = snapshot;
+      renderFeed(snapshot);
+    }, err => {
+      console.error(err);
+      document.getElementById('threads-feed').innerHTML =
+        '<div style="text-align:center;padding:2rem;color:#C4622D;font-size:13px;">Could not load threads. Please refresh.</div>';
+    });
+  }
+
+  const EMOJIS = ['👍', '😊', '❤️', '😂', '🔥'];
+
+  function computeReactionCounts(reactions) {
+    const counts = {};
+    for (const val of Object.values(reactions || {})) {
+      if (typeof val === 'string') counts[val] = (counts[val] || 0) + 1;
+    }
+    return counts;
+  }
+
+  function toggleReactionPicker(threadId) {
+    const picker = document.getElementById('reaction-picker-' + threadId);
+    if (!picker) return;
+    const isOpen = picker.classList.contains('open');
+    document.querySelectorAll('.reaction-picker-popup.open, .comment-reaction-popup.open').forEach(p => p.classList.remove('open'));
+    if (!isOpen) picker.classList.add('open');
+  }
+
+  async function setReaction(threadId, emoji) {
+    if (!currentUser) return;
+    const uid = currentUser.uid;
+    const picker = document.getElementById('reaction-picker-' + threadId);
+    if (picker) picker.classList.remove('open');
+    const trigger = document.getElementById('reaction-trigger-' + threadId);
+    const currentEmoji = trigger?.dataset.reaction || null;
+    const removing = currentEmoji === emoji;
+
+    if (trigger) {
+      trigger.dataset.reaction = removing ? '' : emoji;
+      trigger.className = 'action-btn' + (removing ? '' : ' reacted');
+      const label = trigger.querySelector('.reaction-label');
+      if (label) label.textContent = removing ? '🙂' : emoji;
+      trigger.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = removing ? ' React' : ''; });
+    }
+
+    try {
+      await db.collection('threads').doc(threadId).update({
+        ['reactions.' + uid]: removing ? firebase.firestore.FieldValue.delete() : emoji
+      });
+    } catch (err) {
+      if (trigger) {
+        trigger.dataset.reaction = currentEmoji || '';
+        trigger.className = 'action-btn' + (currentEmoji ? ' reacted' : '');
+        const label = trigger.querySelector('.reaction-label');
+        if (label) label.textContent = currentEmoji || '🙂';
+      }
+      console.error(err);
+    }
+  }
+
+  function toggleCommentReactionPicker(threadId, commentId) {
+    const picker = document.getElementById('comment-rx-' + commentId);
+    if (!picker) return;
+    const isOpen = picker.classList.contains('open');
+    document.querySelectorAll('.reaction-picker-popup.open, .comment-reaction-popup.open').forEach(p => p.classList.remove('open'));
+    if (!isOpen) picker.classList.add('open');
+  }
+
+  async function setCommentReaction(threadId, commentId, emoji) {
+    if (!currentUser) return;
+    const uid = currentUser.uid;
+    const picker = document.getElementById('comment-rx-' + commentId);
+    if (picker) picker.classList.remove('open');
+    const trigger = document.getElementById('comment-rx-trigger-' + commentId);
+    const currentEmoji = trigger?.dataset.reaction || null;
+    const removing = currentEmoji === emoji;
+
+    if (trigger) {
+      trigger.dataset.reaction = removing ? '' : emoji;
+      trigger.textContent = removing ? '🙂' : emoji;
+    }
+
+    try {
+      await db.collection('threads').doc(threadId).collection('comments').doc(commentId).update({
+        ['reactions.' + uid]: removing ? firebase.firestore.FieldValue.delete() : emoji
+      });
+    } catch (err) {
+      if (trigger) {
+        trigger.dataset.reaction = currentEmoji || '';
+        trigger.textContent = currentEmoji || '🙂';
+      }
+      console.error(err);
+    }
+  }
+
+  async function loadQuote() {
+    try {
+      const snap = await db.collection('settings').doc('quoteOfDay').get();
+      if (!snap.exists) return;
+      const data = snap.data();
+      if (!data.text) return;
+      document.getElementById('quote-text').textContent = data.text;
+      const authorEl = document.getElementById('quote-author');
+      authorEl.textContent = data.author || '';
+      authorEl.style.display = data.author ? '' : 'none';
+      document.getElementById('quote-card').style.display = 'block';
+    } catch (e) { /* quote is optional, fail silently */ }
+  }
+
+  async function loadCommunityStats() {
+    try {
+      // Member count
+      const usersSnap = await db.collection('users').get();
+      const memberEl = document.getElementById('stat-members');
+      if (memberEl) memberEl.textContent = usersSnap.size;
+
+      // Online = users with lastSeen in last 10 minutes
+      const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const onlineSnap = await db.collection('users')
+        .where('lastSeen', '>', tenMinsAgo)
+        .get();
+      const onlineEl = document.getElementById('stat-online');
+      if (onlineEl) onlineEl.textContent = onlineSnap.size;
+    } catch (e) {
+      console.error('Stats error:', e);
+    }
+  }
+
+  function updateActiveNow(allDocs) {
+    const listEl = document.getElementById('active-now-list');
+    if (!listEl) return;
+
+    // Extract unique recent authors (up to 5)
+    const seen = new Set();
+    const recent = [];
+    for (const doc of allDocs) {
+      const d = doc.data();
+      if (!d.authorId || seen.has(d.authorId)) continue;
+      seen.add(d.authorId);
+      recent.push(d);
+      if (recent.length >= 5) break;
+    }
+
+    if (recent.length === 0) {
+      listEl.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0;">No activity yet.</div>';
+      return;
+    }
+
+    const categoryVerbs = {
+      'General': 'Chatting', 'Questions': 'Asking questions', 'Wins': 'Sharing wins',
+      'Build Progress': 'Building', 'Tool Ideas': 'Sharing ideas',
+      'Announcements': 'Announcing', 'Feedback': 'Giving feedback'
+    };
+
+    listEl.innerHTML = recent.map(d => {
+      const name = d.displayName || 'Builder';
+      const verb = categoryVerbs[d.category] || 'Active in community';
+      const avatarContent = d.authorPhotoURL
+        ? `<img src="${d.authorPhotoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">`
+        : initials(name);
+      const avatarBg = d.authorPhotoURL ? 'transparent' : avatarGradient(name);
+      return `
+        <div class="member-item">
+          <div class="member-av" style="background:${avatarBg}">${avatarContent}</div>
+          <div>
+            <div class="member-name">${escHtml(name)}</div>
+            <div class="member-tag">${verb}</div>
+          </div>
+          <div class="member-online"></div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleComments(threadId) {
+    const section = document.getElementById('comments-' + threadId);
+    if (!section) return;
+    const isHidden = section.style.display === 'none';
+    section.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden) loadComments(threadId);
+  }
+
+  const GIPHY_KEY = 'IjXUXgNt4Tjy7n2KPghYZHJaJKEZMVGJ';
+  const gifSelections = {};
+  let gifSearchTimers = {};
+
+  function toggleGifPicker(threadId) {
+    const picker = document.getElementById('gif-picker-' + threadId);
+    if (!picker) return;
+    const isHidden = picker.style.display === 'none';
+    picker.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      loadTrendingGifs(threadId);
+      setTimeout(() => document.getElementById('gif-search-' + threadId)?.focus(), 50);
+    }
+  }
+
+  async function loadTrendingGifs(threadId) {
+    const grid = document.getElementById('gif-grid-' + threadId);
+    if (!grid || grid.children.length > 0) return;
+    grid.innerHTML = '<div style="font-size:11px;color:var(--text3);grid-column:span 3;padding:4px;">Loading...</div>';
+    try {
+      const res = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=12&rating=g`);
+      const data = await res.json();
+      renderGifGrid(threadId, data.data);
+    } catch(e) { grid.innerHTML = ''; }
+  }
+
+  function searchGifs(threadId) {
+    clearTimeout(gifSearchTimers[threadId]);
+    const q = document.getElementById('gif-search-' + threadId)?.value.trim();
+    if (!q) { loadTrendingGifs(threadId); return; }
+    gifSearchTimers[threadId] = setTimeout(async () => {
+      const grid = document.getElementById('gif-grid-' + threadId);
+      if (!grid) return;
+      grid.innerHTML = '<div style="font-size:11px;color:var(--text3);grid-column:span 3;padding:4px;">Searching...</div>';
+      try {
+        const res = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=12&rating=g`);
+        const data = await res.json();
+        renderGifGrid(threadId, data.data);
+      } catch(e) { grid.innerHTML = ''; }
+    }, 400);
+  }
+
+  function renderGifGrid(threadId, gifs) {
+    const grid = document.getElementById('gif-grid-' + threadId);
+    if (!grid) return;
+    if (!gifs || gifs.length === 0) {
+      grid.innerHTML = '<div style="font-size:11px;color:var(--text3);grid-column:span 3;padding:4px;">No GIFs found.</div>';
+      return;
+    }
+    grid.innerHTML = gifs.map(g => {
+      const url = g.images.fixed_height_small.url;
+      const original = g.images.downsized.url;
+      return `<img src="${url}" loading="lazy" onclick="selectGif('${threadId}', '${original}')" title="${escHtml(g.title)}" />`;
+    }).join('');
+  }
+
+  function selectGif(threadId, url) {
+    gifSelections[threadId] = url;
+    document.getElementById('gif-picker-' + threadId).style.display = 'none';
+    const preview = document.getElementById('gif-preview-' + threadId);
+    const img = document.getElementById('gif-preview-img-' + threadId);
+    img.src = url;
+    preview.style.display = 'flex';
+  }
+
+  function clearGif(threadId) {
+    delete gifSelections[threadId];
+    document.getElementById('gif-preview-' + threadId).style.display = 'none';
+    document.getElementById('gif-preview-img-' + threadId).src = '';
+  }
+
+  function loadComments(threadId) {
+    const listEl = document.getElementById('comments-list-' + threadId);
+    if (!listEl) return;
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0;">Loading...</div>';
+
+    db.collection('threads').doc(threadId).collection('comments')
+      .orderBy('createdAt', 'asc')
+      .onSnapshot(snapshot => {
+        if (snapshot.empty) {
+          listEl.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0;">No comments yet. Be the first!</div>';
+          return;
+        }
+        listEl.innerHTML = snapshot.docs.map(doc => {
+          const c = doc.data();
+          const name = c.displayName || 'Builder';
+          const avatarContent = c.authorPhotoURL
+            ? `<img src="${c.authorPhotoURL}" alt="avatar">`
+            : initials(name);
+          const avatarBg = c.authorPhotoURL ? 'transparent' : avatarGradient(name);
+          const gifHtml = c.gifUrl
+            ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:200px;max-height:140px;border-radius:8px;margin-top:6px;display:block;">`
+            : '';
+          const textHtml = c.content ? `<div class="comment-text">${escHtml(c.content)}</div>` : '';
+          const commentId = doc.id;
+          const commentRx = c.reactions || {};
+          const commentUserRx = currentUser && typeof commentRx[currentUser.uid] === 'string' ? commentRx[currentUser.uid] : null;
+          const commentRxCounts = computeReactionCounts(commentRx);
+          const commentPills = EMOJIS.filter(e => commentRxCounts[e]).map(e =>
+            `<span class="reaction-pill${e === commentUserRx ? ' mine' : ''}" style="font-size:11px;padding:1px 5px;" onclick="setCommentReaction('${threadId}','${commentId}','${e}')">${e} ${commentRxCounts[e]}</span>`
+          ).join('');
+          const commentPickerBtns = EMOJIS.map(e =>
+            `<button onclick="setCommentReaction('${threadId}','${commentId}','${e}')" class="${e === commentUserRx ? 'active' : ''}">${e}</button>`
+          ).join('');
+          return `
+            <div class="comment-item">
+              <div class="comment-avatar" style="background:${avatarBg}">${avatarContent}</div>
+              <div class="comment-bubble">
+                <div class="comment-author">${escHtml(name)}</div>
+                ${textHtml}
+                ${gifHtml}
+                <div class="comment-footer">
+                  <div class="comment-time">${timeAgo(c.createdAt)}</div>
+                  <div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">
+                    <div class="comment-rx-pills">${commentPills}</div>
+                    <div class="comment-reaction-wrap">
+                      <button class="comment-rx-trigger" id="comment-rx-trigger-${commentId}" data-reaction="${commentUserRx || ''}" onclick="toggleCommentReactionPicker('${threadId}','${commentId}')">${commentUserRx || '🙂'}</button>
+                      <div class="comment-reaction-popup" id="comment-rx-${commentId}">${commentPickerBtns}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      });
+  }
+
+  async function postComment(threadId) {
+    if (!currentUser) return;
+    const input = document.getElementById('comment-input-' + threadId);
+    if (!input) return;
+    const content = input.value.trim();
+    const gifUrl = gifSelections[threadId] || '';
+    if (!content && !gifUrl) return;
+
+    const btn = input.nextElementSibling;
+    btn.disabled = true;
+    input.disabled = true;
+
+    try {
+      await db.collection('threads').doc(threadId).collection('comments').add({
+        content,
+        gifUrl,
+        authorId: currentUser.uid,
+        displayName: currentUser.displayName || currentUser.email || 'Builder',
+        authorPhotoURL: currentUser.photoURL || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db.collection('threads').doc(threadId).update({
+        commentCount: firebase.firestore.FieldValue.increment(1)
+      });
+      input.value = '';
+      clearGif(threadId);
+      const countEl = document.getElementById('comment-count-' + threadId);
+      if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+    } catch (err) {
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
+  }
+
+
+  // Close all reaction pickers when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.reaction-picker-popup.open, .comment-reaction-popup.open').forEach(p => p.classList.remove('open'));
+  });
+
+  // Filter chips
   document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
+    chip.addEventListener('click', e => {
+      e.stopPropagation();
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
+      activeFilter = chip.textContent.trim();
+      if (lastSnapshot) renderFeed(lastSnapshot);
     });
   });
+
+  async function deleteThread(threadId) {
+    if (!currentUser) return;
+    if (!confirm('Delete this thread? This cannot be undone.')) return;
+    try {
+      await db.collection('threads').doc(threadId).delete();
+    } catch (err) {
+      console.error(err);
+      alert('Could not delete thread. Please try again.');
+    }
+  }
+
+  function editThread(threadId) {
+    const card = document.getElementById('thread-' + threadId);
+    if (!card) return;
+    const titleEl = card.querySelector('.thread-title');
+    const bodyEl = card.querySelector('.thread-body');
+    const originalTitle = titleEl.textContent;
+    const originalBody = bodyEl.textContent;
+
+    titleEl.outerHTML = `<input class="edit-input" id="edit-title-${threadId}" value="${escHtml(originalTitle)}" />`;
+    bodyEl.outerHTML = `<textarea class="edit-textarea" id="edit-body-${threadId}">${escHtml(originalBody)}</textarea>`;
+
+    const actionsEl = card.querySelector('.thread-actions');
+    actionsEl.innerHTML = `
+      <button class="mod-btn" style="color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:5px 12px;" onclick="saveEdit('${threadId}')">Save</button>
+      <button class="mod-btn" style="margin-left:6px;" onclick="cancelEdit('${threadId}', \`${escHtml(originalTitle)}\`, \`${escHtml(originalBody)}\`)">Cancel</button>`;
+  }
+
+  async function saveEdit(threadId) {
+    const titleInput = document.getElementById('edit-title-' + threadId);
+    const bodyInput = document.getElementById('edit-body-' + threadId);
+    if (!titleInput || !bodyInput) return;
+    const newTitle = titleInput.value.trim();
+    const newBody = bodyInput.value.trim();
+    if (!newTitle || !newBody) { alert('Title and content cannot be empty.'); return; }
+
+    try {
+      await db.collection('threads').doc(threadId).update({
+        title: newTitle,
+        content: newBody,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Could not save changes. Please try again.');
+    }
+  }
+
+  function cancelEdit(threadId, originalTitle, originalBody) {
+    const card = document.getElementById('thread-' + threadId);
+    if (!card) return;
+    const titleInput = card.querySelector('.edit-input');
+    const bodyInput = card.querySelector('.edit-textarea');
+    if (titleInput) titleInput.outerHTML = `<div class="thread-title">${originalTitle}</div>`;
+    if (bodyInput) bodyInput.outerHTML = `<div class="thread-body">${originalBody}</div>`;
+    // onSnapshot will re-render the actions row automatically
+  }
+
+  // Auth — populate UI or redirect
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = 'signon.html';
+      return;
+    }
+    currentUser = user;
+
+    // Fetch role and update lastSeen
+    try {
+      const userSnap = await db.collection('users').doc(user.uid).get();
+      if (userSnap.exists) currentUserRole = userSnap.data().userRole || 'member';
+      await db.collection('users').doc(user.uid).update({
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) { /* stay as member */ }
+
+    loadCommunityStats();
+    loadQuote();
+
+    const name = user.displayName || user.email || 'Builder';
+    const initial = name.charAt(0).toUpperCase();
+
+    // Sidebar
+    document.getElementById('sidebar-name').textContent = name;
+    document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Builder';
+    if (currentUserRole === 'admin') document.getElementById('admin-nav-link').style.display = 'flex';
+    const sidebarAv = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      sidebarAv.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">';
+    } else {
+      sidebarAv.textContent = initial;
+    }
+
+    // Create card avatar
+    const createAv = document.getElementById('create-avatar');
+    if (user.photoURL) {
+      createAv.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">';
+    } else {
+      createAv.textContent = initial;
+    }
+
+    loadThreads();
+  });
+
+  function showPostMsg(text, type) {
+    const el = document.getElementById('post-msg');
+    el.textContent = text;
+    el.style.display = 'block';
+    if (type === 'error') {
+      el.style.background = 'rgba(196,98,45,0.08)';
+      el.style.border = '1px solid rgba(196,98,45,0.25)';
+      el.style.color = '#C4622D';
+    } else {
+      el.style.background = 'rgba(61,138,101,0.08)';
+      el.style.border = '1px solid rgba(61,138,101,0.25)';
+      el.style.color = '#3D8A65';
+    }
+  }
+
+  function hidePostMsg() {
+    document.getElementById('post-msg').style.display = 'none';
+  }
+
+  function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showPostMsg('Image must be under 5 MB.', 'error');
+      return;
+    }
+    selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('image-preview').src = ev.target.result;
+      document.getElementById('image-preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    selectedImageFile = null;
+    document.getElementById('image-file-input').value = '';
+    document.getElementById('image-preview').src = '';
+    document.getElementById('image-preview-wrap').style.display = 'none';
+  }
+
+  async function uploadImage() {
+    if (!selectedImageFile || !currentUser) return '';
+    const ext = selectedImageFile.name.split('.').pop();
+    const filename = `thread-images/${currentUser.uid}_${Date.now()}.${ext}`;
+    const ref = storage.ref(filename);
+    await ref.put(selectedImageFile);
+    return await ref.getDownloadURL();
+  }
+
+  async function postThread() {
+    if (!currentUser) return;
+
+    const title = document.getElementById('thread-title').value.trim();
+    const content = document.getElementById('thread-content').value.trim();
+    const category = document.getElementById('thread-category').value;
+
+    if (!title) { showPostMsg('Please add a thread title.', 'error'); return; }
+    if (!content) { showPostMsg('Please add some content to your thread.', 'error'); return; }
+    if (!category) { showPostMsg('Please select a category.', 'error'); return; }
+
+    const btn = document.getElementById('post-btn');
+    btn.disabled = true;
+    btn.textContent = selectedImageFile ? 'Uploading...' : 'Posting...';
+    hidePostMsg();
+
+    try {
+      const imageURL = await uploadImage();
+      btn.textContent = 'Posting...';
+
+      await db.collection('threads').add({
+        title,
+        content,
+        category,
+        authorId: currentUser.uid,
+        displayName: currentUser.displayName || currentUser.email || 'Builder',
+        authorPhotoURL: currentUser.photoURL || '',
+        reactionCount: 0,
+        commentCount: 0,
+        imageURL,
+        isPinned: false,
+        isAnnouncement: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Clear form
+      document.getElementById('thread-title').value = '';
+      document.getElementById('thread-content').value = '';
+      document.getElementById('thread-category').value = '';
+      removeImage();
+      showPostMsg('Thread posted!', 'success');
+      setTimeout(hidePostMsg, 3000);
+    } catch (err) {
+      console.error(err);
+      showPostMsg('Failed to post. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Post Thread →';
+    }
+  }
 </script>
 
 </body>
