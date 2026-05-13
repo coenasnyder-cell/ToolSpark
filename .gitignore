@@ -71,3 +71,6 @@ node_modules/
 # Claude Code
 .agents/
 skills-lock.json
+
+# Local only
+chat-prompts.txt
