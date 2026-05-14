@@ -3,668 +3,681 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ToolSpark — Turn Your Program Into a Tool</title>
+<title>ToolSpark — Build the AI Tool Your Business Needs</title>
+<meta name="description" content="ToolSpark is where coaches, creators, and consultants learn to build AI-powered tools — with a community, courses, and done-for-you support all in one place.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #0C0B09;
-    --surface: #141210;
-    --surface2: #1C1A17;
-    --border: #2A2720;
-    --text: #F2EEE6;
-    --text2: #9A9488;
-    --text3: #4A4840;
-    --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.1);
-    --gold-dim2: rgba(201,168,76,0.06);
-    --green: #2A5C45;
-    --green-light: #3D8A65;
-    --coral: #C4622D;
-  }
+:root {
+  --bg: #0C0B09;
+  --surface: #141210;
+  --surface2: #1C1A17;
+  --border: #2A2720;
+  --text: #F2EEE6;
+  --text2: #9A9488;
+  --text3: #4A4840;
+  --gold: #C9A84C;
+  --gold-light: #E8D5A3;
+  --gold-dim: rgba(201,168,76,0.10);
+  --gold-dim2: rgba(201,168,76,0.05);
+  --coral: #C4622D;
+  --r: 14px;
+  --r-sm: 8px;
+}
 
-  html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
 
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 16px;
-    line-height: 1.7;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2.5rem;
-    height: 64px;
-    background: rgba(12,11,9,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-  .nav-logo span { color: var(--gold); }
-  .nav-links { display: flex; align-items: center; gap: 8px; }
-  .nav-link {
-    color: var(--text2);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 400;
-    padding: 8px 14px;
-    border-radius: 8px;
-    transition: all 0.15s;
-  }
-  .nav-link:hover { color: var(--text); background: var(--surface2); }
-  .nav-cta {
-    background: var(--gold);
-    color: #0C0B09;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 9px 18px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.15s;
-    letter-spacing: 0.02em;
-  }
-  .nav-cta:hover { background: var(--gold-light); }
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center;
+  padding: 0 1.25rem; height: 60px;
+  background: rgba(12,11,9,0.96);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; color: var(--text);
+  letter-spacing: -0.2px; text-decoration: none;
+  flex-shrink: 0;
+}
+.nav-logo span { color: var(--gold); }
+.nav-links {
+  display: none;
+  align-items: center; gap: 2px; margin: 0 auto;
+}
+.nav-link {
+  color: var(--text2); text-decoration: none;
+  font-size: 14px; padding: 7px 13px;
+  border-radius: var(--r-sm);
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.nav-signin {
+  display: none; color: var(--text2); text-decoration: none;
+  font-size: 14px; padding: 7px 12px; border-radius: var(--r-sm);
+  transition: color 0.15s; white-space: nowrap;
+}
+.nav-signin:hover { color: var(--text); }
+.nav-join {
+  background: var(--gold); color: #0C0B09;
+  font-size: 13px; font-weight: 700;
+  padding: 8px 16px; border-radius: var(--r-sm);
+  text-decoration: none; white-space: nowrap;
+  transition: background 0.15s;
+}
+.nav-join:hover { background: var(--gold-light); }
+.hamburger {
+  display: flex; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 6px; margin-left: 8px; flex-shrink: 0;
+}
+.hamburger span {
+  display: block; width: 20px; height: 2px;
+  background: var(--text); border-radius: 2px; transition: all 0.22s;
+}
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; width: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -5px); }
 
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 8rem 2rem 4rem;
-    position: relative;
-    overflow: hidden;
-  }
+/* MOBILE MENU */
+.mobile-menu {
+  display: none; position: fixed;
+  top: 60px; left: 0; right: 0; z-index: 199;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.25rem 1.25rem;
+  flex-direction: column; gap: 2px;
+}
+.mobile-menu.open { display: flex; }
+.mob-link {
+  color: var(--text2); text-decoration: none;
+  font-size: 15px; padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.15s;
+}
+.mob-link:hover { color: var(--text); }
+.mob-link:last-of-type { border-bottom: none; }
+.mob-join {
+  display: block; margin-top: 10px;
+  background: var(--gold); color: #0C0B09;
+  font-weight: 700; font-size: 15px;
+  border-radius: var(--r-sm); text-align: center;
+  padding: 14px; text-decoration: none;
+  transition: background 0.15s;
+}
+.mob-join:hover { background: var(--gold-light); }
 
-  .hero-glow {
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -60%);
-    pointer-events: none;
-  }
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--gold); color: #0C0B09;
+  font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 15px 28px; border-radius: 10px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  min-height: 52px; white-space: nowrap; letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; color: var(--text2);
+  font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 400;
+  padding: 15px 24px; border-radius: 10px;
+  text-decoration: none; border: 1px solid var(--border); cursor: pointer;
+  transition: border-color 0.15s, color 0.15s; min-height: 52px; white-space: nowrap;
+}
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
 
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--gold-dim);
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 2rem;
-    animation: fadeUp 0.6s ease both;
-  }
-  .badge-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--gold);
-    animation: blink 2s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* ── HERO ── */
+.hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 7rem 1.5rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; width: 640px; height: 640px;
+  background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 68%);
+  top: 45%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 100px; padding: 5px 15px;
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1.75rem;
+  animation: fadeUp 0.55s ease both;
+}
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); animation: blink 2.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
 
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(42px, 7vw, 78px);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.6s ease 0.1s both;
-    max-width: 900px;
-  }
-  .hero h1 em {
-    font-style: italic;
-    color: var(--gold);
-  }
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 8vw, 72px);
+  font-weight: 500; line-height: 1.1;
+  letter-spacing: -1.5px; margin-bottom: 1.25rem; max-width: 800px;
+  animation: fadeUp 0.55s ease 0.1s both;
+}
+.hero h1 em { font-style: italic; color: var(--gold); }
 
-  .hero-sub {
-    font-size: clamp(16px, 2vw, 20px);
-    color: var(--text2);
-    font-weight: 400;
-    max-width: 560px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.7;
-    animation: fadeUp 0.6s ease 0.2s both;
-  }
+.hero-sub {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text2); font-weight: 300;
+  max-width: 560px; margin: 0 auto 2.25rem; line-height: 1.75;
+  animation: fadeUp 0.55s ease 0.2s both;
+}
+.hero-actions {
+  display: flex; flex-direction: column;
+  gap: 10px; width: 100%; max-width: 340px;
+  margin-bottom: 1.25rem;
+  animation: fadeUp 0.55s ease 0.3s both;
+}
+.hero-note {
+  font-size: 12px; color: var(--text3); letter-spacing: 0.03em;
+  animation: fadeUp 0.55s ease 0.4s both;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
-  .hero-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.6s ease 0.3s both;
-  }
-  .btn-primary {
-    background: var(--gold);
-    color: #0C0B09;
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 14px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
-    border: none;
-    cursor: pointer;
-  }
-  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.2); }
+/* ── PROOF BAR ── */
+.proof-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex; flex-wrap: wrap;
+  justify-content: center; align-items: center; gap: 0.5rem 1.5rem;
+}
+.proof-item {
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap;
+}
+.proof-dot { color: var(--text3); font-size: 10px; }
 
-  .btn-secondary {
-    background: transparent;
-    color: var(--text2);
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    padding: 14px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    border: 1px solid var(--border);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+/* ── SECTION BASE ── */
+.section { padding: 4.5rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem;
+}
+.section-label::before { content:''; width:20px; height:1px; background:var(--gold); }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 400; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 0.875rem;
+}
+.section-title em { font-style: italic; color: var(--gold); }
+.section-sub {
+  font-size: clamp(14px, 2vw, 16px);
+  color: var(--text2); max-width: 540px; line-height: 1.7; margin-bottom: 2.5rem;
+}
 
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* ── THREE PATHS ── */
+.paths-wrap {
+  background: var(--surface2);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 4.5rem 1.5rem;
+}
+.paths-inner { max-width: 1100px; margin: 0 auto; }
+.paths-grid { display: flex; flex-direction: column; gap: 1rem; }
+.path-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1.75rem;
+  display: flex; flex-direction: column; gap: 1rem;
+  transition: border-color 0.2s;
+}
+.path-card:hover { border-color: rgba(201,168,76,0.35); }
+.path-card.featured {
+  border-color: rgba(201,168,76,0.22);
+  background: rgba(201,168,76,0.025);
+}
+.path-badge {
+  display: inline-flex; align-items: center;
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; width: fit-content;
+}
+.badge-free { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+.badge-community { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.badge-premium { background: rgba(196,98,45,0.12); color: #E0875A; border: 1px solid rgba(196,98,45,0.3); }
+.path-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 500; color: var(--text);
+}
+.path-desc { font-size: 14px; color: var(--text2); line-height: 1.65; flex: 1; }
+.path-cta {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--gold); font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: gap 0.15s; width: fit-content;
+}
+.path-cta:hover { gap: 9px; }
 
-  /* DIVIDER */
-  .divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-    margin: 0 auto;
-  }
+/* ── FEATURES ── */
+.features-grid {
+  display: grid; grid-template-columns: 1fr; gap: 0.75rem;
+}
+.feature-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1.5rem; transition: border-color 0.2s;
+}
+.feature-card:hover { border-color: rgba(201,168,76,0.2); }
+.feature-icon {
+  font-size: 20px; margin-bottom: 0.875rem;
+  width: 42px; height: 42px;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+}
+.feature-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; color: var(--text); }
+.feature-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
-  /* SECTION */
-  section {
-    padding: 6rem 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
+/* ── FOUNDER ── */
+.founder-wrap {
+  background: var(--surface);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.founder-inner {
+  max-width: 720px; margin: 0 auto;
+  padding: 4.5rem 1.5rem; text-align: center;
+}
+.founder-label {
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.25rem;
+}
+.founder-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(26px, 5vw, 40px);
+  font-style: italic; font-weight: 400; line-height: 1.2;
+  color: var(--text); margin-bottom: 1.75rem;
+}
+.founder-body {
+  font-size: clamp(14px, 2vw, 16px);
+  color: var(--text2); line-height: 1.85;
+  max-width: 620px; margin: 0 auto 1.75rem;
+}
+.founder-sig {
+  font-size: 13px; color: var(--text3); font-style: italic; margin-bottom: 2rem;
+}
+.founder-cta {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--gold); font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: gap 0.15s;
+}
+.founder-cta:hover { gap: 9px; }
 
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-label::before {
-    content: '';
-    width: 24px; height: 1px;
-    background: var(--gold);
-  }
+/* ── WHO IT'S FOR ── */
+.who-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.who-col {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 1.75rem;
+}
+.who-col-title {
+  font-size: 12px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 1.25rem; padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.who-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.who-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--text2); line-height: 1.45;
+}
+.who-item .check { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+.who-item .cross { color: #5A3333; flex-shrink: 0; margin-top: 2px; }
 
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(30px, 4vw, 46px);
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
-    margin-bottom: 1rem;
-  }
-  .section-title em { font-style: italic; color: var(--gold); }
+/* ── TESTIMONIAL ── */
+.testimonial-wrap {
+  padding: 4rem 1.5rem; max-width: 620px; margin: 0 auto; text-align: center;
+}
+.testimonial-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 2.25rem 1.75rem;
+}
+.testimonial-mark {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px; line-height: 1; color: var(--gold);
+  opacity: 0.35; margin-bottom: 0.5rem;
+}
+.testimonial-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(16px, 3vw, 20px);
+  font-style: italic; color: var(--text2); line-height: 1.55; margin-bottom: 1.25rem;
+}
+.testimonial-author { font-size: 13px; color: var(--text3); font-weight: 700; }
 
-  .section-sub {
-    color: var(--text2);
-    font-size: 17px;
-    font-weight: 400;
-    max-width: 560px;
-    line-height: 1.7;
-    margin-bottom: 3rem;
-  }
+/* ── FINAL CTA ── */
+.final-cta-wrap {
+  padding: 5rem 1.5rem; text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1.25rem;
+  max-width: 560px; margin: 0 auto;
+}
+.final-cta-wrap h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 6vw, 50px);
+  font-weight: 400; line-height: 1.15; letter-spacing: -0.5px;
+}
+.final-cta-wrap h2 em { font-style: italic; color: var(--gold); }
+.final-cta-wrap > p { font-size: 15px; color: var(--text2); line-height: 1.65; }
+.final-cta-actions {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 320px;
+}
+.final-cta-note { font-size: 12px; color: var(--text3); letter-spacing: 0.03em; }
 
-  /* PROBLEM */
-  .problem-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .problem-item {
-    background: var(--surface);
-    padding: 2rem;
-  }
-  .problem-icon {
-    font-size: 24px;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-  }
-  .problem-item h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .problem-item p {
-    font-size: 14px;
-    color: var(--text2);
-    line-height: 1.6;
-    font-weight: 400;
-  }
+/* ── FOOTER ── */
+footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 2rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+}
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); }
+.footer-logo span { color: var(--gold); }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.footer-link {
+  color: var(--text3); text-decoration: none;
+  font-size: 13px; padding: 5px 10px;
+  border-radius: var(--r-sm); transition: color 0.15s;
+}
+.footer-link:hover { color: var(--gold); }
+.footer-copy { font-size: 12px; color: var(--text3); text-align: center; }
 
-  /* HOW IT WORKS */
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .step {
-    display: grid;
-    grid-template-columns: 64px 1fr;
-    gap: 2rem;
-    padding: 2.5rem 0;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .step:last-child { border-bottom: none; }
-  .step-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 48px;
-    font-weight: 400;
-    color: var(--gold);
-    opacity: 0.3;
-    line-height: 1;
-    padding-top: 4px;
-  }
-  .step-content h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .step-content p {
-    font-size: 15px;
-    color: var(--text2);
-    font-weight: 400;
-    line-height: 1.7;
-  }
-  .step-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    background: var(--gold-dim);
-    border: 1px solid rgba(201,168,76,0.2);
-    padding: 3px 10px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-  }
+/* ── DIVIDER ── */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
 
-  /* WHAT YOU GET */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-  }
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.75rem;
-    transition: border-color 0.2s;
-  }
-  .feature-card:hover { border-color: rgba(201,168,76,0.3); }
-  .feature-icon {
-    width: 40px; height: 40px;
-    background: var(--gold-dim);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    margin-bottom: 1rem;
-  }
-  .feature-card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .feature-card p {
-    font-size: 14px;
-    color: var(--text2);
-    font-weight: 400;
-    line-height: 1.6;
-  }
+/* ── SCROLL ANIMATIONS ── */
+.fade-up {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.d1 { transition-delay: 0.08s; }
+.d2 { transition-delay: 0.16s; }
+.d3 { transition-delay: 0.24s; }
+.d4 { transition-delay: 0.32s; }
+.d5 { transition-delay: 0.40s; }
+.d6 { transition-delay: 0.48s; }
 
-  /* WHO IT'S FOR */
-  .who-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 3rem;
-  }
-  .who-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--text2);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .who-card::before {
-    content: '✦';
-    color: var(--gold);
-    font-size: 10px;
-    flex-shrink: 0;
-  }
+/* ── DESKTOP ── */
+@media (min-width: 640px) {
+  nav { padding: 0 2.5rem; height: 64px; }
+  .mobile-menu { top: 64px; }
+  .nav-links { display: flex; }
+  .nav-signin { display: block; }
+  .hamburger { display: none; }
 
-  /* CTA */
-  .cta-section {
-    text-align: center;
-    padding: 6rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .cta-glow {
-    position: absolute;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  }
-  .cta-inner {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .cta-section h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 400;
-    line-height: 1.2;
-    margin-bottom: 1rem;
-  }
-  .cta-section h2 em { font-style: italic; color: var(--gold); }
-  .cta-section p {
-    color: var(--text2);
-    font-size: 17px;
-    font-weight: 400;
-    margin-bottom: 2.5rem;
-    line-height: 1.7;
-  }
+  .hero { padding: 9rem 2rem 5rem; }
+  .hero-actions { flex-direction: row; width: auto; max-width: none; }
 
-  .cta-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    max-width: 560px;
-    margin: 0 auto;
-  }
-  .cta-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.75rem;
-    text-align: left;
-    text-decoration: none;
-    color: var(--text);
-    transition: all 0.2s;
-    display: block;
-  }
-  .cta-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-  .cta-card.featured {
-    border-color: rgba(201,168,76,0.4);
-    background: var(--gold-dim2);
-  }
-  .cta-card.featured:hover { border-color: var(--gold); }
-  .cta-card-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-  .cta-card h3 {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .cta-card p {
-    font-size: 13px;
-    color: var(--text2);
-    font-weight: 400;
-    line-height: 1.5;
-    margin-bottom: 1rem;
-  }
-  .cta-card-arrow {
-    font-size: 18px;
-    color: var(--gold);
-  }
+  .proof-bar { padding: 1.25rem 2.5rem; gap: 0.5rem 2.5rem; }
 
-  /* FOOTER */
+  .section { padding: 6rem 2rem; }
+  .paths-wrap { padding: 6rem 2rem; }
+
+  .paths-grid { flex-direction: row; }
+  .path-card { flex: 1; }
+
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .who-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .final-cta-actions { flex-direction: row; max-width: none; width: auto; }
+
   footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    font-size: 13px;
-    color: var(--text3);
-    font-weight: 400;
-    letter-spacing: 0.04em;
+    flex-direction: row; justify-content: space-between;
+    padding: 2rem 2.5rem; flex-wrap: wrap; align-items: center;
   }
-  footer span { color: var(--gold); }
+  .footer-links { justify-content: flex-start; }
+}
+
+@media (min-width: 960px) {
+  .features-grid { grid-template-columns: repeat(3, 1fr); }
+  .mobile-menu { display: none !important; }
+}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <div class="nav-logo">Tool<span>Spark</span></div>
+  <a href="index.html" class="nav-logo">Tool<span>Spark</span></a>
   <div class="nav-links">
+    <a href="community-landing.html" class="nav-link">Community</a>
     <a href="#how-it-works" class="nav-link">How it works</a>
-    <a href="#who" class="nav-link">Who it's for</a>
-    <a href="clarity.html" class="nav-cta">Start clarity session →</a>
+    <a href="services.html" class="nav-link">Services</a>
+  </div>
+  <div class="nav-right">
+    <a href="signon.html" class="nav-signin">Sign in</a>
+    <a href="signup.html" class="nav-join">Join free →</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="community-landing.html" class="mob-link">Community</a>
+  <a href="#how-it-works" class="mob-link">How it works</a>
+  <a href="services.html" class="mob-link">Services</a>
+  <a href="signon.html" class="mob-link">Sign in</a>
+  <a href="signup.html" class="mob-join">Join free →</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
   <div class="hero-glow"></div>
-  <div class="hero-badge"><div class="badge-dot"></div>Business-to-Tool Discovery</div>
-  <h1>Your program is great.<br>Your clients need a <em>tool.</em></h1>
-  <p class="hero-sub">Most coaches sell knowledge. ToolSpark helps you turn what you teach into an AI-powered tool your clients actually use — so they get real results, not just information.</p>
+  <div class="hero-badge"><div class="badge-dot"></div>Community · Courses · Done For You</div>
+  <h1>Build the <em>AI tool</em><br>your business needs</h1>
+  <p class="hero-sub">ToolSpark is where coaches, creators, and consultants learn to build AI-powered tools — with a community, courses, and done-for-you support all in one place.</p>
   <div class="hero-actions">
-    <a href="clarity.html" class="btn-primary">Start my clarity session →</a>
-    <a href="#how-it-works" class="btn-secondary">See how it works</a>
+    <a href="signup.html" class="btn-primary">Join free →</a>
+    <a href="#how-it-works" class="btn-secondary">See how it works ↓</a>
+  </div>
+  <p class="hero-note">Free to join · No credit card required</p>
+</div>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <span class="proof-item">Community of builders</span>
+  <span class="proof-dot">·</span>
+  <span class="proof-item">AI tools being built</span>
+  <span class="proof-dot">·</span>
+  <span class="proof-item">Clarity. Build. Launch.</span>
+</div>
+
+<!-- THREE PATHS -->
+<div class="paths-wrap" id="how-it-works">
+  <div class="paths-inner">
+    <div class="section-label fade-up">Choose your path</div>
+    <h2 class="section-title fade-up d1">Three ways to <em>get started</em></h2>
+    <p class="section-sub fade-up d2">Whether you want to learn, build yourself, or have it done for you — there's a path for you.</p>
+    <div class="paths-grid">
+      <div class="path-card featured fade-up d1">
+        <div class="path-badge badge-free">Free to join</div>
+        <div class="path-title">Learn &amp; Build</div>
+        <p class="path-desc">Join the community, take courses, complete your clarity session, and build your first AI tool with support from other builders.</p>
+        <a href="signup.html" class="path-cta">Join the community →</a>
+      </div>
+      <div class="path-card fade-up d2">
+        <div class="path-badge badge-community">Inside the community</div>
+        <div class="path-title">Guided Workflow</div>
+        <p class="path-desc">Follow our step-by-step Clarity. Build. Launch. workflow with templates, tool recommendations, and community accountability.</p>
+        <a href="signup.html" class="path-cta">Get started →</a>
+      </div>
+      <div class="path-card fade-up d3">
+        <div class="path-badge badge-premium">Premium service</div>
+        <div class="path-title">Done For You</div>
+        <p class="path-desc">We handle everything — clarity session, tool build, marketing, and launch. You focus on your clients.</p>
+        <a href="services.html" class="path-cta">Learn more →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT'S INSIDE -->
+<div class="section">
+  <div class="section-label fade-up">What's inside</div>
+  <h2 class="section-title fade-up d1">Everything <em>in one place</em></h2>
+  <p class="section-sub fade-up d2">No more juggling five different tools and platforms</p>
+  <div class="features-grid">
+    <div class="feature-card fade-up d1">
+      <div class="feature-icon">💬</div>
+      <div class="feature-title">Community</div>
+      <p class="feature-desc">Real conversations with builders who get it. Ask questions, share wins, get feedback.</p>
+    </div>
+    <div class="feature-card fade-up d2">
+      <div class="feature-icon">🎓</div>
+      <div class="feature-title">Courses &amp; Training</div>
+      <p class="feature-desc">Step-by-step programs covering clarity, building, marketing, and launching your tool.</p>
+    </div>
+    <div class="feature-card fade-up d3">
+      <div class="feature-icon">✨</div>
+      <div class="feature-title">Clarity Session</div>
+      <p class="feature-desc">Our AI-powered interview identifies exactly what tool your business needs and why.</p>
+    </div>
+    <div class="feature-card fade-up d1">
+      <div class="feature-icon">📅</div>
+      <div class="feature-title">Live Events</div>
+      <p class="feature-desc">Weekly build sessions, Q&amp;As, and workshops. Join live or watch the replay.</p>
+    </div>
+    <div class="feature-card fade-up d2">
+      <div class="feature-icon">🛠️</div>
+      <div class="feature-title">Resources &amp; Tools</div>
+      <p class="feature-desc">Curated tools, templates, and affiliate resources we actually use every day.</p>
+    </div>
+    <div class="feature-card fade-up d3">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Private &amp; Focused</div>
+      <p class="feature-desc">A focused community of serious builders — not a noisy feed of random content.</p>
+    </div>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<!-- PROBLEM -->
-<section>
-  <div class="section-label">The problem</div>
-  <h2 class="section-title">Courses teach. Tools <em>do.</em></h2>
-  <p class="section-sub">Most online programs have a completion rate under 15%. Not because the content is bad — because knowing something and being able to do it are two very different things.</p>
-
-  <div class="problem-grid">
-    <div class="problem-item">
-      <div class="problem-icon">📚</div>
-      <h3>Clients watch but don't apply</h3>
-      <p>They consume the content, feel inspired, then freeze when it's time to actually use what they learned.</p>
-    </div>
-    <div class="problem-item">
-      <div class="problem-icon">🔁</div>
-      <h3>You answer the same questions over and over</h3>
-      <p>Every week you're explaining the same concepts to different people. It's exhausting and doesn't scale.</p>
-    </div>
-    <div class="problem-item">
-      <div class="problem-icon">📉</div>
-      <h3>Results are inconsistent</h3>
-      <p>Some clients get it, most don't. The difference isn't your teaching — it's the gap between knowing and doing.</p>
-    </div>
+<!-- FOUNDER STORY -->
+<div class="founder-wrap">
+  <div class="founder-inner">
+    <div class="founder-label fade-up">Founder</div>
+    <h2 class="founder-title fade-up d1">"I built this in less than 24 hours."</h2>
+    <p class="founder-body fade-up d2">ToolSpark started as a way to help coaches and creators turn their programs into AI tools. To prove the process works, I used it to build ToolSpark itself — a fully functioning community platform, clarity session tool, AI analysis engine, and member dashboard. All in less than 24 hours. It's my second app. This is what's possible when you have the right process and the right support.</p>
+    <div class="founder-sig fade-up d3">— Coena Snyder, Founder of ToolSpark</div>
+    <a href="community-landing.html" class="founder-cta fade-up d4">See what we built →</a>
   </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- HOW IT WORKS -->
-<section id="how-it-works">
-  <div class="section-label">How it works</div>
-  <h2 class="section-title">From program to <em>product</em></h2>
-  <p class="section-sub">We audit your business, find the friction point where clients get stuck, and build a focused AI tool that bridges the gap.</p>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-content">
-        <div class="step-tag">Clarity Session</div>
-        <h3>We learn your business</h3>
-        <p>Through a guided interview we understand what you teach, who your clients are, and exactly where they get stuck. No long forms — just a real conversation that uncovers what matters.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-content">
-        <div class="step-tag">Audit & Strategy</div>
-        <h3>We find the tool opportunity</h3>
-        <p>Using your answers we identify the single biggest friction point in your client journey — the place where an AI tool would have the most impact. You get a ranked list of tool recommendations with a clear starting point.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-content">
-        <div class="step-tag">Build</div>
-        <h3>We build your tool</h3>
-        <p>We take the top recommendation and build it — a focused AI tool your clients can use alongside your program. Not a 10-feature app, just the one thing that eliminates the biggest obstacle to their success.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <div class="step-content">
-        <div class="step-tag">Results</div>
-        <h3>Your program becomes a product</h3>
-        <p>Your clients get better results. Your program becomes more valuable. You spend less time answering the same questions. And you have something competitors can't easily copy.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- WHAT YOU GET -->
-<section>
-  <div class="section-label">What you get</div>
-  <h2 class="section-title">Everything you need to <em>ship</em></h2>
-  <p class="section-sub">From discovery to a live tool — handled for you.</p>
-
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🎯</div>
-      <h3>Business clarity audit</h3>
-      <p>A full analysis of your program, your clients, and where the biggest tool opportunity lives — delivered as a clear report.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h3>AI tool recommendation</h3>
-      <p>Three ranked tool ideas with complexity ratings, what each would do for clients, and which one to build first.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🛠️</div>
-      <h3>Built and deployed</h3>
-      <p>Your tool built and live — not a prototype, a real working product your clients can use immediately.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📈</div>
-      <h3>More valuable program</h3>
-      <p>A tool makes your program worth more, justifies higher prices, and gives clients a reason to stick around.</p>
-    </div>
-  </div>
-</section>
+</div>
 
 <div class="divider"></div>
 
 <!-- WHO IT'S FOR -->
-<section id="who">
-  <div class="section-label">Who it's for</div>
-  <h2 class="section-title">Built for <em>creators</em> who teach</h2>
-  <p class="section-sub">If you have a method, framework, or repeatable process you teach — there's probably a tool hiding inside it.</p>
-
+<div class="section">
+  <div class="section-label fade-up">Who it's for</div>
+  <h2 class="section-title fade-up d1">Built for <em>creators who teach</em></h2>
+  <p class="section-sub fade-up d2">If you have a method, framework, or process that gets people results — there's a tool hiding inside it.</p>
   <div class="who-grid">
-    <div class="who-card">Online course creators</div>
-    <div class="who-card">Business coaches</div>
-    <div class="who-card">Consultants with frameworks</div>
-    <div class="who-card">Authors with systems</div>
-    <div class="who-card">Membership site owners</div>
-    <div class="who-card">Workshop facilitators</div>
-    <div class="who-card">Productivity trainers</div>
-    <div class="who-card">Niche educators</div>
-  </div>
-
-  <p style="color:var(--text2);font-size:15px;font-weight:300;">If clients pay you to learn how to do something — and they still struggle to do it — you're a good fit.</p>
-</section>
-
-<div class="divider"></div>
-
-<!-- CTA -->
-<div class="cta-section">
-  <div class="cta-glow"></div>
-  <div class="cta-inner">
-    <h2>Ready to turn your program<br>into a <em>tool?</em></h2>
-    <p>Start with a free clarity session. No commitment — just a conversation that helps us understand your business and what's possible.</p>
-
-    <div class="cta-options">
-      <a href="clarity.html" class="cta-card featured">
-        <div class="cta-card-label">Most popular</div>
-        <h3>Clarity Session</h3>
-        <p>Answer a few guided questions and get a tool recommendation report.</p>
-        <div class="cta-card-arrow">→</div>
-      </a>
-      <a href="mailto:hello@toolspark.com" class="cta-card">
-        <div class="cta-card-label">Talk first</div>
-        <h3>Contact Us</h3>
-        <p>Rather have a real conversation before getting started? Reach out directly.</p>
-        <div class="cta-card-arrow">→</div>
-      </a>
+    <div class="who-col fade-up d1">
+      <div class="who-col-title">This is for you if you're a…</div>
+      <div class="who-list">
+        <div class="who-item"><span class="check">✦</span>Online course creator</div>
+        <div class="who-item"><span class="check">✦</span>Business coach</div>
+        <div class="who-item"><span class="check">✦</span>Consultant with frameworks</div>
+        <div class="who-item"><span class="check">✦</span>Author with systems</div>
+        <div class="who-item"><span class="check">✦</span>Membership site owner</div>
+        <div class="who-item"><span class="check">✦</span>Workshop facilitator</div>
+        <div class="who-item"><span class="check">✦</span>Productivity trainer</div>
+        <div class="who-item"><span class="check">✦</span>Service provider</div>
+      </div>
+    </div>
+    <div class="who-col fade-up d2">
+      <div class="who-col-title">This is NOT for you if…</div>
+      <div class="who-list">
+        <div class="who-item"><span class="cross">✗</span>You're looking for a get rich quick shortcut</div>
+        <div class="who-item"><span class="cross">✗</span>Your business has no existing offer or audience</div>
+        <div class="who-item"><span class="cross">✗</span>You're not willing to put in the work</div>
+        <div class="who-item"><span class="cross">✗</span>You want perfection before you start</div>
+      </div>
     </div>
   </div>
 </div>
 
+<div class="divider"></div>
+
+<!-- TESTIMONIAL -->
+<div class="testimonial-wrap">
+  <!-- Replace with real testimonial when available -->
+  <div class="testimonial-card fade-up">
+    <div class="testimonial-mark">"</div>
+    <p class="testimonial-text">Add your first testimonial here once founding members share their experience.</p>
+    <div class="testimonial-author">— Founding Member, ToolSpark</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FINAL CTA -->
+<div class="final-cta-wrap">
+  <h2 class="fade-up">Ready to build<br>something <em>real?</em></h2>
+  <p class="fade-up d1">Join free today. Complete your clarity session inside the community and discover exactly what AI tool your business needs.</p>
+  <div class="final-cta-actions fade-up d2">
+    <a href="signup.html" class="btn-primary">Create your free account →</a>
+    <a href="services.html" class="btn-secondary">Or book a strategy call</a>
+  </div>
+  <p class="final-cta-note fade-up d3">Free to join · Upgrade anytime · Cancel anytime</p>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  © 2026 <span>ToolSpark</span> · Turning programs into products
+  <div class="footer-logo">Tool<span>Spark</span></div>
+  <div class="footer-links">
+    <a href="community-landing.html" class="footer-link">Community</a>
+    <a href="services.html" class="footer-link">Services</a>
+    <a href="clarity.html" class="footer-link">Clarity Session</a>
+    <a href="signon.html" class="footer-link">Sign in</a>
+  </div>
+  <div class="footer-copy">© 2026 ToolSpark · Clarity. Build. Launch.</div>
 </footer>
 
+<script>
+  // Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }));
+
+  // Scroll-triggered fade-up animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>

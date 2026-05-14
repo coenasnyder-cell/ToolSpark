@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses - ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 100;
+    border-right: 1px solid var(--border-dark);
+  }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    color: #9A9488; font-size: 14px; font-weight: 400;
+    cursor: pointer; text-decoration: none; transition: all 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 8px 12px; margin-top: 4px;
+    background: none; border: none; border-radius: var(--radius-sm);
+    color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif;
+    cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left;
+  }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header {
+    background: var(--dark2); border-bottom: 1px solid var(--border-dark);
+    height: var(--header-height); display: flex; align-items: center;
+    justify-content: space-between; padding: 0 2rem;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.3);
+    color: #E0875A; border-radius: 100px; padding: 4px 12px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; }
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .admin-card-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 13px; font-weight: 700; color: var(--text3);
+    text-decoration: none; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  .course-form { display: flex; flex-direction: column; gap: 1.125rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label {
+    font-size: 12px; font-weight: 700; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .form-label span { color: #C0392B; margin-left: 2px; }
+  .form-input, .form-textarea {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 13px;
+    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text);
+    outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-textarea { resize: vertical; min-height: 96px; line-height: 1.55; }
+  .form-help { font-size: 11px; color: var(--text3); }
+
+  .toggle-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .toggle-group { display: inline-flex; align-items: center; gap: 10px; }
+  .toggle-text { font-size: 13px; color: var(--text2); font-weight: 700; }
+  .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; cursor: pointer;
+    background: var(--border); border-radius: 100px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--gold); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  .form-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 0.25rem; border-top: 1px solid var(--border); }
+  .btn-primary, .btn-secondary, .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border-radius: var(--radius-sm); padding: 10px 18px;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap;
+  }
+  .btn-primary { background: var(--gold); color: #1A1714; border: none; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-secondary {
+    background: none; border: 1px solid var(--border); color: var(--text2);
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger {
+    background: rgba(220,50,50,0.06); border: 1px solid rgba(220,50,50,0.2); color: #C0392B;
+  }
+  .btn-danger:hover { background: rgba(220,50,50,0.12); border-color: rgba(220,50,50,0.35); }
+  .btn-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(26,23,20,0.2); border-top-color: #1A1714;
+    border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .save-msg { font-size: 13px; padding: 9px 14px; border-radius: var(--radius-sm); display: none; }
+  .save-msg.success { background: #EBF7F2; color: #2A7A55; border: 1px solid #A8D9C4; }
+  .save-msg.error { background: #FEF0ED; color: #C0392B; border: 1px solid #F5C6C0; }
+
+  .section-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .count-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2);
+    color: var(--gold); border-radius: 100px; padding: 3px 12px;
+    font-size: 12px; font-weight: 700;
+  }
+  .showing-text { font-size: 12px; color: var(--text3); }
+
+  .course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .course-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .course-copy { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .course-title { font-family: 'Playfair Display', serif; font-size: 19px; line-height: 1.2; color: var(--text); }
+  .course-desc {
+    font-size: 13px; color: var(--text2); line-height: 1.55;
+    display: -webkit-box; line-clamp: 3; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .course-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .course-badge {
+    display: inline-flex; align-items: center;
+    border-radius: 100px; padding: 3px 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    background: #fff;
+  }
+  .course-badge.live { background: rgba(42,122,85,0.08); border-color: rgba(42,122,85,0.2); color: #2A7A55; }
+  .course-badge.draft { background: rgba(192,57,43,0.06); border-color: rgba(192,57,43,0.18); color: #C0392B; }
+  .course-badge.meta { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.16); color: #8F7432; }
+  .course-meta {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text3);
+  }
+  .course-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .course-id { font-size: 11px; color: var(--text3); word-break: break-all; }
+  #course-empty { display: none; text-align: center; padding: 1.5rem; color: var(--text3); font-size: 13px; }
+
+  .hamburger-btn {
+    display: none; background: none; border: none;
+    cursor: pointer; padding: 6px; flex-direction: column;
+    gap: 5px; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .hamburger-btn span {
+    display: block; width: 20px; height: 2px;
+    background: #F0EDE6; border-radius: 2px;
+  }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 99;
+  }
+  .sidebar-overlay.active { display: block; }
+
+  #access-denied {
+    display: none; flex: 1; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem; padding: 3rem; text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .course-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .hamburger-btn { display: flex; }
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.22s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; gap: 10px; }
+    .header-title { font-size: 17px; }
+    .header-subtitle { display: none; }
+    .page-content { padding: 1.25rem 1rem; gap: 1.125rem; }
+    .admin-card-header { padding: 1rem 1.125rem; }
+    .admin-card-body { padding: 1rem 1.125rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <div class="nav-section-label">Admin</div>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="admincourses.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+      Courses
+    </a>
+    <a href="adminuserprofiles.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Members
+    </a>
+    <a href="adminuserclarity.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Clarity Sessions
+    </a>
+    <a href="adminthreads.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
+      Community Threads
+    </a>
+    <a href="adminevents.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Events
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div>
+      <div class="header-title">Courses</div>
+      <div class="header-subtitle">Create new courses, manage publishing, and open the lesson editor</div>
+    </div>
+    <div class="admin-badge">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin
+    </div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">&#128274;</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">You need admin privileges to view this page.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">&larr; Back to Dashboard</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+    <div>
+      <a href="admindashboard.html" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Admin Dashboard
+      </a>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">&#10010;</div>
+        <div>
+          <div class="admin-card-title">Create New Course</div>
+          <div class="admin-card-desc">This creates the course document and seeds a first blank lesson so the editor opens cleanly.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div id="course-msg" class="save-msg"></div>
+        <form class="course-form" id="course-form" onsubmit="createCourse(event)">
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label" for="course-title">Course Title <span>*</span></label>
+              <input class="form-input" id="course-title" type="text" maxlength="120" placeholder="e.g. AI Foundations for Coaches" required>
+            </div>
+          </div>
+
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label" for="course-description">Description</label>
+              <textarea class="form-textarea" id="course-description" placeholder="Short description for the dashboard card and course page."></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="course-category">Category</label>
+              <input class="form-input" id="course-category" type="text" maxlength="40" placeholder="e.g. Foundations">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="course-order">Display Order</label>
+              <input class="form-input" id="course-order" type="number" min="0" step="1" placeholder="0">
+              <div class="form-help">Lower numbers appear first on the member dashboard.</div>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="course-free" checked>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text" id="course-free-label">Free course</span>
+            </div>
+            <div class="toggle-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="course-published">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text" id="course-published-label">Draft only</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" type="submit" id="course-save-btn">
+              <span class="btn-spinner" id="course-spinner"></span>
+              Create Course
+            </button>
+            <button class="btn-secondary" type="button" onclick="resetCourseForm()">
+              Reset
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">&#127891;</div>
+        <div>
+          <div class="admin-card-title">Course Library</div>
+          <div class="admin-card-desc">Manage published visibility and jump into the existing lesson editor for each course.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div class="section-toolbar">
+          <span class="count-badge" id="course-count-badge">Loading...</span>
+          <span class="showing-text">Published courses can appear on the member dashboard once linked into its display flow.</span>
+        </div>
+        <div class="course-grid" id="course-grid">
+          <div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:13px;">Loading courses...</div>
+        </div>
+        <div id="course-empty">No courses found yet.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let allCourses = [];
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      const role = snap.exists ? snap.data().userRole : 'member';
+      if (role !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+    } catch (e) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
+
+    currentUser = user;
+    document.getElementById('admin-content').style.display = 'flex';
+
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    bindFormToggles();
+    await loadCourses();
+    resetCourseForm();
+  });
+
+  function bindFormToggles() {
+    document.getElementById('course-free').addEventListener('change', function() {
+      document.getElementById('course-free-label').textContent = this.checked ? 'Free course' : 'Members only';
+    });
+    document.getElementById('course-published').addEventListener('change', function() {
+      document.getElementById('course-published-label').textContent = this.checked ? 'Published now' : 'Draft only';
+    });
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function showCourseMsg(text, type) {
+    const el = document.getElementById('course-msg');
+    el.textContent = text;
+    el.className = 'save-msg ' + type;
+    el.style.display = 'block';
+  }
+
+  function hideCourseMsg() {
+    const el = document.getElementById('course-msg');
+    el.style.display = 'none';
+  }
+
+  function nextCourseOrder() {
+    if (!allCourses.length) return 0;
+    let maxOrder = -1;
+    allCourses.forEach(function(course) {
+      const orderNum = typeof course.order === 'number' ? course.order : parseInt(course.order, 10);
+      if (!isNaN(orderNum) && orderNum > maxOrder) maxOrder = orderNum;
+    });
+    return maxOrder + 1;
+  }
+
+  function resetCourseForm() {
+    document.getElementById('course-form').reset();
+    document.getElementById('course-free').checked = true;
+    document.getElementById('course-published').checked = false;
+    document.getElementById('course-free-label').textContent = 'Free course';
+    document.getElementById('course-published-label').textContent = 'Draft only';
+    document.getElementById('course-order').value = nextCourseOrder();
+    hideCourseMsg();
+  }
+
+  async function loadCourses() {
+    try {
+      const snap = await db.collection('courses').get();
+      allCourses = snap.docs.map(function(doc) {
+        return { id: doc.id, data: doc.data() };
+      }).sort(function(a, b) {
+        const aOrder = typeof a.data.order === 'number' ? a.data.order : parseInt(a.data.order, 10);
+        const bOrder = typeof b.data.order === 'number' ? b.data.order : parseInt(b.data.order, 10);
+        const aSafe = isNaN(aOrder) ? 999999 : aOrder;
+        const bSafe = isNaN(bOrder) ? 999999 : bOrder;
+        if (aSafe !== bSafe) return aSafe - bSafe;
+        return String(a.data.title || '').localeCompare(String(b.data.title || ''));
+      });
+      renderCourses();
+    } catch (e) {
+      console.error('Failed to load courses', e);
+      document.getElementById('course-grid').innerHTML =
+        '<div style="text-align:center;padding:1.5rem;color:#C0392B;font-size:13px;">Could not load courses. Check Firestore rules.</div>';
+      document.getElementById('course-count-badge').textContent = 'Load failed';
+    }
+  }
+
+  function renderCourses() {
+    const grid = document.getElementById('course-grid');
+    const empty = document.getElementById('course-empty');
+    document.getElementById('course-count-badge').textContent = allCourses.length + (allCourses.length === 1 ? ' course' : ' courses');
+
+    if (!allCourses.length) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    grid.innerHTML = allCourses.map(function(entry) {
+      const course = entry.data;
+      const published = !!course.isPublished;
+      const editorUrl = 'course.html?courseId=' + entry.id;
+      const category = course.category || 'Uncategorized';
+      const totalLessons = course.totallessons || 0;
+      const orderNum = course.order != null && course.order !== '' ? course.order : '-';
+      return '' +
+        '<div class="course-card">' +
+          '<div class="course-top">' +
+            '<div class="course-copy">' +
+              '<div class="course-title">' + escHtml(course.title || 'Untitled Course') + '</div>' +
+              '<div class="course-desc">' + escHtml(course.description || 'No description yet.') + '</div>' +
+            '</div>' +
+            '<div class="course-badges">' +
+              '<span class="course-badge ' + (published ? 'live' : 'draft') + '">' + (published ? 'Published' : 'Draft') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="course-badges">' +
+            '<span class="course-badge meta">' + escHtml(category) + '</span>' +
+            '<span class="course-badge">' + (course.isFree ? 'Free' : 'Members') + '</span>' +
+          '</div>' +
+          '<div class="course-meta">' +
+            '<span>' + totalLessons + ' lessons</span>' +
+            '<span>Order ' + escHtml(orderNum) + '</span>' +
+          '</div>' +
+          '<div class="course-actions">' +
+            '<a class="btn-primary" href="' + editorUrl + '">Open Editor</a>' +
+            '<button class="btn-secondary" type="button" onclick="toggleCoursePublished(\'' + entry.id + '\', ' + (!published) + ', this)">' + (published ? 'Unpublish' : 'Publish') + '</button>' +
+          '</div>' +
+          '<div class="course-id">Course ID: ' + escHtml(entry.id) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  async function createCourse(event) {
+    event.preventDefault();
+    if (!currentUser) return;
+
+    const title = document.getElementById('course-title').value.trim();
+    const description = document.getElementById('course-description').value.trim();
+    const category = document.getElementById('course-category').value.trim();
+    const orderInput = document.getElementById('course-order').value;
+    const isFree = document.getElementById('course-free').checked;
+    const isPublished = document.getElementById('course-published').checked;
+    const order = orderInput === '' ? nextCourseOrder() : parseInt(orderInput, 10);
+
+    if (!title) {
+      showCourseMsg('Please enter a course title.', 'error');
+      return;
+    }
+    if (isNaN(order)) {
+      showCourseMsg('Display order must be a number.', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('course-save-btn');
+    const spinner = document.getElementById('course-spinner');
+    saveBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+      const ts = firebase.firestore.FieldValue.serverTimestamp;
+      const courseRef = await db.collection('courses').add({
+        title: title,
+        description: description,
+        category: category || 'Foundations',
+        isFree: isFree,
+        isPublished: isPublished,
+        order: order,
+        thumbnail: '',
+        totallessons: 1,
+        createdAt: ts()
+      });
+
+      await db.collection('courses').doc(courseRef.id).collection('lessons').add({
+        lessonTitle: 'New Lesson',
+        lessonDescription: '',
+        lessonContent: '',
+        lessonOrder: 1,
+        lessonDuration: '',
+        lessonType: 'written',
+        videoUrl: '',
+        linkedThreadId: '',
+        isFree: true,
+        createdAt: ts()
+      });
+
+      await loadCourses();
+      resetCourseForm();
+      showCourseMsg('Course created. You can open it below and start editing lessons.', 'success');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      console.error('Course create failed', e);
+      showCourseMsg('Failed to create course. Please try again.', 'error');
+    } finally {
+      saveBtn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  async function toggleCoursePublished(courseId, nextState, buttonEl) {
+    if (!courseId) return;
+    if (buttonEl) buttonEl.disabled = true;
+    try {
+      await db.collection('courses').doc(courseId).update({ isPublished: nextState });
+      await loadCourses();
+    } catch (e) {
+      console.error('Publish toggle failed', e);
+      alert('Could not update publish status.');
+    } finally {
+      if (buttonEl) buttonEl.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

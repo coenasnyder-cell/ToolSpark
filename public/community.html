@@ -1582,7 +1582,7 @@
     if (unsubscribeThreads) unsubscribeThreads();
     const query = db.collection('threads').orderBy('createdAt', 'desc').limit(50);
 
-    unsubscribeThreads = query.onSnapshot(snapshot => {
+    unsubscribeThreads = query.onSnapshot({ includeMetadataChanges: true }, snapshot => {
       document.getElementById('feed-loading').style.display = 'none';
       lastSnapshot = snapshot;
       renderFeed(snapshot);

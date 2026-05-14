@@ -19,7 +19,7 @@
     measurementId: "G-F6NVJRMHV6"
   };
   firebase.initializeApp(firebaseConfig);
-  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -532,7 +532,7 @@ Keep all responses under 3 sentences. Be specific in your follow-up questions ba
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 250,
         system: systemPrompt,
         messages: chatHistory
@@ -578,7 +578,7 @@ async function showCompleteScreen() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -596,7 +596,7 @@ async function showCompleteScreen() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 500,
         messages: [{
           role: 'user',
@@ -676,6 +676,26 @@ async function showCompleteScreen() {
   } catch(err) {
     console.log('Error:', err);
     document.getElementById('summary-text').textContent = 'Summary unavailable — your consultant will review the full conversation.';
+
+    // Still save the session and show the button even if AI summary fails
+    try {
+      const sessionId = 'session_' + Date.now();
+      await db.collection('clarity_sessions').doc(sessionId).set({
+        sessionId,
+        displayName,
+        businessName,
+        clientEmail,
+        summary: 'Summary unavailable',
+        transcript: chatHistory,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'completed'
+      });
+      const resultsBtn = document.getElementById('results-btn');
+      resultsBtn.href = 'results.html?session=' + sessionId;
+      resultsBtn.style.display = 'inline-block';
+    } catch(saveErr) {
+      console.log('Save error:', saveErr);
+    }
   }
 }
 </script>

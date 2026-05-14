@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seed Welcome Course — ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0C0B09;
+  --surface: #141210;
+  --surface2: #1C1A17;
+  --border: #2A2720;
+  --text: #F2EEE6;
+  --text2: #9A9488;
+  --text3: #4A4840;
+  --gold: #C9A84C;
+  --gold-light: #E8D5A3;
+  --gold-dim: rgba(201,168,76,0.1);
+  --green: #2A5C45;
+  --green-light: #3D8A65;
+  --red: #C0392B;
+  --red-dim: rgba(192,57,43,0.1);
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 60px;
+  background: rgba(12,11,9,0.96);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-logo { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--text); }
+.nav-logo span { color: var(--gold); }
+.nav-back {
+  font-size: 13px; color: var(--text2); text-decoration: none;
+  font-weight: 700; transition: color 0.15s;
+}
+.nav-back:hover { color: var(--gold); }
+
+.page-wrap {
+  max-width: 600px; margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.page-header { margin-bottom: 2rem; }
+.page-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.page-header p { font-size: 14px; color: var(--text2); }
+
+/* WARNING BOX */
+.warning-box {
+  background: var(--red-dim);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.75rem;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.warning-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.warning-text { font-size: 13px; color: #E07060; line-height: 1.5; }
+.warning-text strong { display: block; margin-bottom: 3px; color: #F08070; font-size: 13px; }
+
+/* COURSE PREVIEW CARD */
+.preview-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+.preview-label {
+  font-size: 10px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.preview-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 500;
+  color: var(--text); margin-bottom: 0.375rem;
+}
+.preview-desc { font-size: 13px; color: var(--text2); margin-bottom: 0.875rem; }
+.lesson-preview-list { display: flex; flex-direction: column; gap: 4px; }
+.lesson-preview-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text2);
+  padding: 5px 0;
+  border-top: 1px solid var(--border);
+}
+.lesson-preview-item:first-child { border-top: none; }
+.lpi-num {
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  width: 20px; flex-shrink: 0;
+}
+.lpi-title { flex: 1; color: var(--text2); }
+.lpi-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.lpi-dur { font-size: 10px; color: var(--text3); }
+.lpi-type { font-size: 11px; }
+
+/* SEED BUTTON */
+.seed-btn {
+  width: 100%;
+  background: var(--gold); color: #0C0B09;
+  font-family: 'Lato', sans-serif;
+  font-size: 15px; font-weight: 700;
+  padding: 15px 24px; border-radius: 10px;
+  border: none; cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  margin-bottom: 1.5rem;
+}
+.seed-btn:hover:not(:disabled) { background: var(--gold-light); }
+.seed-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* PROGRESS LOG */
+.progress-log {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Lato', sans-serif;
+}
+.progress-log.visible { display: block; }
+.log-heading {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.log-entry {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--text2);
+  padding: 4px 0;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+.log-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+.log-dot.pending { background: var(--text3); }
+.log-dot.working {
+  background: var(--gold);
+  animation: pulse 0.8s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.log-dot.done { background: var(--green-light); }
+.log-dot.error { background: var(--red); }
+.log-text.done { color: var(--text); }
+.log-text.error { color: #E07060; }
+
+/* SUCCESS BOX */
+.success-box {
+  display: none;
+  background: rgba(42,92,69,0.15);
+  border: 1px solid rgba(61,138,101,0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+.success-box.visible { display: block; }
+.success-icon { font-size: 36px; margin-bottom: 0.75rem; }
+.success-box h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 500;
+  color: var(--text); margin-bottom: 0.375rem;
+}
+.success-box p { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; }
+.course-id-wrap {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.course-id-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+.course-id-value {
+  font-size: 13px; color: var(--gold);
+  font-family: monospace;
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.copy-btn {
+  font-family: 'Lato', sans-serif;
+  font-size: 12px; font-weight: 700;
+  padding: 5px 12px; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text2);
+  cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+.copy-btn.copied { border-color: var(--green); color: var(--green-light); }
+.success-link {
+  display: inline-block;
+  font-size: 13px; color: var(--gold); font-weight: 700;
+  text-decoration: none; margin-top: 0.25rem;
+  transition: opacity 0.15s;
+}
+.success-link:hover { opacity: 0.75; }
+
+/* LOADING */
+#auth-loading {
+  min-height: 60vh;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Tool<span>Spark</span> <span style="font-family:Lato,sans-serif;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-left:8px;">Admin</span></div>
+  <a href="admindashboard.html" class="nav-back">← Admin Dashboard</a>
+</nav>
+
+<div id="auth-loading">Checking access...</div>
+
+<div class="page-wrap" id="page-wrap" style="display:none;">
+
+  <div class="page-header">
+    <h1>Seed Welcome Course</h1>
+    <p>Creates the "Welcome to ToolSpark" course and its 5 lessons in Firestore.</p>
+  </div>
+
+  <div class="warning-box">
+    <div class="warning-icon">⚠️</div>
+    <div class="warning-text">
+      <strong>Only run this once.</strong>
+      Check Firestore first to make sure a "Welcome to ToolSpark" course doesn't already exist in the <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;">courses</code> collection. Running this again will create a duplicate.
+    </div>
+  </div>
+
+  <!-- Course preview -->
+  <div class="preview-card">
+    <div class="preview-label">Will create</div>
+    <div class="preview-title">Welcome to ToolSpark</div>
+    <div class="preview-desc">Get started with the community and discover your first AI tool — step by step.</div>
+    <div class="lesson-preview-list">
+      <div class="lesson-preview-item">
+        <div class="lpi-num">01</div>
+        <div class="lpi-title">Welcome to the Community</div>
+        <div class="lpi-meta"><span class="lpi-dur">5 min</span><span class="lpi-type">🎬</span></div>
+      </div>
+      <div class="lesson-preview-item">
+        <div class="lpi-num">02</div>
+        <div class="lpi-title">What is an AI Tool and Why Your Business Needs One</div>
+        <div class="lpi-meta"><span class="lpi-dur">8 min</span><span class="lpi-type">📝</span></div>
+      </div>
+      <div class="lesson-preview-item">
+        <div class="lpi-num">03</div>
+        <div class="lpi-title">How to Complete Your Clarity Session</div>
+        <div class="lpi-meta"><span class="lpi-dur">10 min</span><span class="lpi-type">🎬</span></div>
+      </div>
+      <div class="lesson-preview-item">
+        <div class="lpi-num">04</div>
+        <div class="lpi-title">Reading Your Results</div>
+        <div class="lpi-meta"><span class="lpi-dur">8 min</span><span class="lpi-type">🎬</span></div>
+      </div>
+      <div class="lesson-preview-item">
+        <div class="lpi-num">05</div>
+        <div class="lpi-title">Your Next Steps</div>
+        <div class="lpi-meta"><span class="lpi-dur">6 min</span><span class="lpi-type">🎯</span></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="seed-btn" id="seed-btn" onclick="runSeed()">Seed Welcome Course →</button>
+
+  <!-- Progress log -->
+  <div class="progress-log" id="progress-log">
+    <div class="log-heading">Progress</div>
+    <div id="log-entries"></div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-box" id="success-box">
+    <div class="success-icon">✅</div>
+    <h2>Course created successfully!</h2>
+    <p>Copy the Course ID below and paste it wherever you need to link to this course (e.g. the dashboard). Video URLs are empty — paste real YouTube or Loom URLs into Firestore.</p>
+    <div class="course-id-wrap">
+      <span class="course-id-label">Course ID</span>
+      <span class="course-id-value" id="course-id-display"></span>
+      <button class="copy-btn" id="copy-btn" onclick="copyCourseId()">Copy</button>
+    </div>
+    <a id="course-link" href="#" class="success-link">Preview course →</a>
+  </div>
+
+</div>
+
+<script>
+let createdCourseId = null;
+
+// ── AUTH CHECK ──
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signon.html'; return; }
+
+  try {
+    const userSnap = await db.collection('users').doc(user.uid).get();
+    if (!userSnap.exists || userSnap.data().userRole !== 'admin') {
+      document.getElementById('auth-loading').innerHTML =
+        '<div style="text-align:center;padding:2rem;">' +
+        '<div style="font-size:32px;margin-bottom:1rem;">🔒</div>' +
+        '<div style="color:#9A9488;">Admin access required.</div>' +
+        '<a href="dashboard.html" style="color:#C9A84C;font-size:13px;font-weight:700;display:block;margin-top:1rem;">Back to Dashboard</a>' +
+        '</div>';
+      return;
+    }
+  } catch(e) {
+    console.error(e);
+  }
+
+  document.getElementById('auth-loading').style.display = 'none';
+  document.getElementById('page-wrap').style.display = 'block';
+});
+
+// ── LOG HELPERS ──
+function addLog(text, state) {
+  const entries = document.getElementById('log-entries');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.id = 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+  entry.innerHTML =
+    '<div class="log-dot ' + state + '"></div>' +
+    '<div class="log-text ' + state + '">' + text + '</div>';
+  entries.appendChild(entry);
+  return entry;
+}
+
+function setLogState(entry, state, text) {
+  entry.querySelector('.log-dot').className = 'log-dot ' + state;
+  entry.querySelector('.log-text').className = 'log-text ' + state;
+  if (text) entry.querySelector('.log-text').textContent = text;
+}
+
+// ── SEED FUNCTION ──
+async function runSeed() {
+  const btn = document.getElementById('seed-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating course...';
+
+  const log = document.getElementById('progress-log');
+  log.classList.add('visible');
+
+  const ts = firebase.firestore.FieldValue.serverTimestamp;
+
+  // ── COURSE DATA ──
+  const courseDoc = {
+    title: 'Welcome to ToolSpark',
+    description: 'Get started with the community and discover your first AI tool — step by step.',
+    category: 'foundations',
+    isFree: true,
+    isPublished: true,
+    order: 0,
+    thumbnail: '',
+    totallessons: 5,
+    createdAt: ts()
+  };
+
+  // ── LESSON DATA ── (uses actual Firestore field names)
+  const lessons = [
+    {
+      lessonTitle: 'Welcome to the Community',
+      lessonDescription: 'Who this community is for, what you will build, and how to get the most out of ToolSpark.',
+      lessonOrder: 1,
+      lessonType: 'video',
+      videoUrl: '',
+      lessonContent: '<p>Welcome to ToolSpark! In this lesson we cover who this community is for and how to navigate the platform.</p>',
+      isFree: true,
+      linkedThreadId: '',
+      lessonDuration: 5,
+      createdAt: ts()
+    },
+    {
+      lessonTitle: 'What is an AI Tool and Why Your Business Needs One',
+      lessonDescription: 'The difference between teaching and tooling — and why your clients need both.',
+      lessonOrder: 2,
+      lessonType: 'written',
+      videoUrl: '',
+      lessonContent: '<p>Most coaches and creators sell knowledge. But knowing something and being able to do it are two very different things. An AI tool bridges that gap.</p><p>In this lesson we look at real examples of AI tools built for coaches and creators — and what becomes possible for your business when you have one.</p>',
+      isFree: true,
+      linkedThreadId: '',
+      lessonDuration: 8,
+      createdAt: ts()
+    },
+    {
+      lessonTitle: 'How to Complete Your Clarity Session',
+      lessonDescription: 'A live walkthrough of the ToolSpark clarity session tool — what each question means and how to get the best results.',
+      lessonOrder: 3,
+      lessonType: 'video',
+      videoUrl: '',
+      lessonContent: '<p>The Clarity Session is your starting point. In this walkthrough we go through each question live so you know exactly what to say and why it matters.</p><p><a href="clarity.html" style="color:#C9A84C;">→ Start your Clarity Session here</a></p>',
+      isFree: true,
+      linkedThreadId: '',
+      lessonDuration: 10,
+      createdAt: ts()
+    },
+    {
+      lessonTitle: 'Reading Your Results',
+      lessonDescription: 'How to understand your tool recommendations and decide what to build first.',
+      lessonOrder: 4,
+      lessonType: 'video',
+      videoUrl: '',
+      lessonContent: '<p>Once you complete your Clarity Session you get three tool recommendations ranked by impact. In this lesson we walk through how to read them and what to do next.</p>',
+      isFree: true,
+      linkedThreadId: '',
+      lessonDuration: 8,
+      createdAt: ts()
+    },
+    {
+      lessonTitle: 'Your Next Steps',
+      lessonDescription: 'Three paths forward — learn, build yourself, or done for you. Plus how to introduce yourself in the community.',
+      lessonOrder: 5,
+      lessonType: 'mixed',
+      videoUrl: '',
+      lessonContent: '<p>You have three paths from here. Choose the one that fits where you are right now.</p><ul><li><strong>Learn and build yourself</strong> — use the courses and community to build your tool step by step</li><li><strong>Guided workflow</strong> — follow the Clarity. Build. Launch. process inside the community</li><li><strong>Done for you</strong> — <a href="services.html" style="color:#C9A84C;">book a strategy call</a> and we handle everything</li></ul>',
+      isFree: true,
+      linkedThreadId: '',
+      lessonDuration: 6,
+      createdAt: ts()
+    }
+  ];
+
+  try {
+    // Step 1 — Create course document
+    const courseEntry = addLog('Creating course document...', 'working');
+    const courseRef = await db.collection('courses').add(courseDoc);
+    createdCourseId = courseRef.id;
+    setLogState(courseEntry, 'done', '✓ Course document created — ID: ' + createdCourseId);
+
+    // Step 2-6 — Create each lesson
+    for (let i = 0; i < lessons.length; i++) {
+      const lesson = lessons[i];
+      const entry = addLog('Creating lesson ' + (i + 1) + ': ' + lesson.lessonTitle + '...', 'working');
+      await db.collection('courses').doc(createdCourseId)
+        .collection('lessons').add(lesson);
+      setLogState(entry, 'done', '✓ Lesson ' + (i + 1) + ': ' + lesson.lessonTitle);
+    }
+
+    // Done
+    addLog('All documents created successfully.', 'done');
+    showSuccess(createdCourseId);
+
+  } catch(err) {
+    console.error(err);
+    addLog('Error: ' + (err.message || 'Something went wrong. Check console.'), 'error');
+    btn.disabled = false;
+    btn.textContent = 'Retry Seed →';
+  }
+}
+
+// ── SUCCESS STATE ──
+function showSuccess(courseId) {
+  document.getElementById('seed-btn').style.display = 'none';
+
+  const box = document.getElementById('success-box');
+  document.getElementById('course-id-display').textContent = courseId;
+  const link = document.getElementById('course-link');
+  link.href = 'course.html?courseId=' + courseId;
+  link.textContent = 'Preview course →';
+  box.classList.add('visible');
+}
+
+// ── COPY COURSE ID ──
+function copyCourseId() {
+  if (!createdCourseId) return;
+  navigator.clipboard.writeText(createdCourseId).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const el = document.createElement('textarea');
+    el.value = createdCourseId;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

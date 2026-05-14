@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.email != null;
+    }
+
+    match /course-thumbnails/{filename} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+
+    match /user-avatars/{userId}/{filename} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == userId;
+    }
+  }
+}

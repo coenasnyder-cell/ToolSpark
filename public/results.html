@@ -19,7 +19,7 @@
     measurementId: "G-F6NVJRMHV6"
   };
   firebase.initializeApp(firebaseConfig);
-  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
 </script>
 <style>
@@ -452,12 +452,13 @@
   <div class="tools-label">Recommended tools — ranked by impact</div>
   <div id="tools-container"></div>
 
-  <div class="cta-card">
-    <h2>Ready to <em>build</em> this?</h2>
-    <p>We handle everything — design, development, and launch. You focus on your clients while we build the tool that transforms your program.</p>
-    <a href="https://calendly.com/your-link-here" class="book-btn" target="_blank">Book a free strategy call →</a>
-    <div class="cta-note">Free 30-minute call · No commitment required</div>
+  <div class="cta-card" style="background:var(--surface);border-color:var(--border);margin-bottom:1rem;">
+    <h2>Ready to Build?</h2>
+    <p>Join the ToolSpark community and get the resources, guidance, and accountability to build your first AI tool — surrounded by people doing the same thing.</p>
+    <a href="signup.html" class="book-btn">Join the community free →</a>
+    <div class="cta-note">Free to join · No credit card required</div>
   </div>
+
 </div>
 
 <!-- ERROR -->
@@ -529,7 +530,7 @@ Respond ONLY with valid JSON, no markdown:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })

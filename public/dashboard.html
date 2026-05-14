@@ -416,6 +416,33 @@
     padding: 3px 8px;
     border-radius: 100px;
   }
+  .course-thumb.live::after { display: none; }
+  .course-thumb.live { cursor: pointer; }
+
+  .course-card.live { cursor: pointer; }
+  .course-btn.active {
+    color: var(--gold);
+    border-color: rgba(201,168,76,0.4);
+    background: var(--gold-dim);
+    cursor: pointer;
+    opacity: 1;
+    font-weight: 700;
+  }
+  .course-btn.active:hover {
+    background: var(--gold);
+    color: #0C0B09;
+    border-color: var(--gold);
+  }
+  .course-progress-wrap { margin-top: 8px; }
+  .course-progress-track {
+    height: 3px; background: var(--border);
+    border-radius: 100px; overflow: hidden; margin-bottom: 3px;
+  }
+  .course-progress-fill {
+    height: 100%; background: var(--gold);
+    border-radius: 100px; transition: width 0.4s ease;
+  }
+  .course-progress-label { font-size: 10px; color: var(--text3); }
   .course-thumb-1 { background: linear-gradient(135deg, #1a1410 0%, #2d1f0a 100%); }
   .course-thumb-2 { background: linear-gradient(135deg, #0d1a14 0%, #0a2018 100%); }
   .course-thumb-3 { background: linear-gradient(135deg, #12101a 0%, #1a1030 100%); }
@@ -468,6 +495,143 @@
     .courses-grid { grid-template-columns: 1fr; }
     .welcome-card { padding: 1.5rem; }
   }
+
+  /* ADD COURSE BUTTON */
+  .add-course-btn {
+    display: none;
+    align-items: center; gap: 6px;
+    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+    padding: 7px 13px; border-radius: var(--radius-sm);
+    border: 1px solid rgba(201,168,76,0.3);
+    background: var(--gold-dim); color: var(--gold);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .add-course-btn:hover { background: rgba(201,168,76,0.2); border-color: rgba(201,168,76,0.5); }
+
+  /* COURSES EMPTY */
+  .courses-empty {
+    display: none; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 2.5rem;
+    text-align: center; color: var(--text3); font-size: 14px;
+  }
+
+  /* COURSE CARD — DYNAMIC ENHANCEMENTS */
+  .course-badge-draft {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.25); color: #C0392B;
+    border-radius: 100px; padding: 2px 8px;
+  }
+  .course-edit-btn {
+    font-size: 11px; font-weight: 700;
+    color: var(--gold); border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 100px; padding: 4px 12px;
+    background: var(--gold-dim); cursor: pointer; transition: all 0.15s;
+  }
+  .course-edit-btn:hover { background: var(--gold); color: #0C0B09; }
+  .course-delete-btn {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(192,57,43,0.18);
+    background: rgba(192,57,43,0.06);
+    color: #C0392B; font-size: 13px;
+    cursor: pointer; display: inline-flex;
+    align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .course-delete-btn:hover { background: rgba(192,57,43,0.14); border-color: rgba(192,57,43,0.4); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(12,11,9,0.72);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+    animation: modalFadeIn 0.15s ease;
+  }
+  @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    width: 100%; max-width: 480px;
+    animation: modalSlideUp 0.2s ease;
+  }
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 500; color: var(--text);
+  }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid var(--border); background: none;
+    color: var(--text3); font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { border-color: var(--text2); color: var(--text); }
+  .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .modal-field { display: flex; flex-direction: column; gap: 5px; }
+  .modal-label {
+    font-size: 12px; font-weight: 700; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .modal-label span { color: #C0392B; margin-left: 2px; }
+  .modal-input, .modal-textarea {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 12px;
+    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text);
+    outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  .modal-input:focus, .modal-textarea:focus { border-color: var(--gold); }
+  .modal-input::placeholder, .modal-textarea::placeholder { color: var(--text3); }
+  .modal-textarea { resize: vertical; min-height: 88px; line-height: 1.55; }
+  .modal-help { font-size: 11px; color: var(--text3); }
+  .thumb-preview {
+    display: none; width: 100%; height: 90px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--bg) center/cover no-repeat;
+    margin-top: 6px;
+  }
+  .modal-err { font-size: 12px; color: #C0392B; display: none; padding: 6px 10px; background: #FEF0ED; border-radius: 6px; }
+  .modal-footer {
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  }
+  .modal-cancel-btn {
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 9px 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: none; color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .modal-cancel-btn:hover { border-color: var(--text2); color: var(--text); }
+  .modal-submit-btn {
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    border: none; background: var(--gold); color: #1A1714;
+    cursor: pointer; transition: opacity 0.15s;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .modal-submit-btn:hover { opacity: 0.88; }
+  .modal-submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .modal-spinner {
+    width: 13px; height: 13px;
+    border: 2px solid rgba(26,23,20,0.2); border-top-color: #1A1714;
+    border-radius: 50%; animation: dashSpin 0.7s linear infinite; display: none;
+  }
+  @keyframes dashSpin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -649,65 +813,61 @@
           <div class="section-title">Courses &amp; Training</div>
           <div class="section-sub">Step-by-step programs to help you build and sell AI tools.</div>
         </div>
-        <a href="#" class="section-link">View all</a>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="add-course-btn" id="add-course-btn" onclick="openAddCourseModal()">+ Add Course</button>
+          <a href="#" class="section-link">View all</a>
+        </div>
       </div>
 
-      <div class="courses-grid">
-
-        <div class="course-card">
-          <div class="course-thumb course-thumb-1">
-            <svg width="40" height="40" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <div class="course-body">
-            <div class="course-tag">Foundations</div>
-            <div class="course-title">AI Tool Builder Bootcamp</div>
-            <div class="course-desc">Learn the end-to-end process of identifying, designing, and deploying AI tools for your clients.</div>
-            <div class="course-footer">
-              <span class="course-meta">12 lessons &middot; Beginner</span>
-              <button class="course-btn">Coming Soon</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="course-card">
-          <div class="course-thumb course-thumb-2">
-            <svg width="40" height="40" fill="none" stroke="rgba(61,138,101,0.5)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          </div>
-          <div class="course-body">
-            <div class="course-tag">Systems</div>
-            <div class="course-title">Automate Your Client Delivery</div>
-            <div class="course-desc">Build repeatable systems that deliver results to clients without trading more of your time.</div>
-            <div class="course-footer">
-              <span class="course-meta">8 lessons &middot; Intermediate</span>
-              <button class="course-btn">Coming Soon</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="course-card">
-          <div class="course-thumb course-thumb-3">
-            <svg width="40" height="40" fill="none" stroke="rgba(100,80,180,0.5)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <div class="course-body">
-            <div class="course-tag">Growth</div>
-            <div class="course-title">Sell Your AI Services</div>
-            <div class="course-desc">Position and price your tool-building expertise so clients immediately see the value.</div>
-            <div class="course-footer">
-              <span class="course-meta">10 lessons &middot; Advanced</span>
-              <button class="course-btn">Coming Soon</button>
-            </div>
-          </div>
-        </div>
-
+      <div class="courses-grid" id="courses-grid">
+        <div style="color:var(--text3);font-size:13px;padding:0.5rem 0;">Loading courses...</div>
       </div>
+      <div id="courses-empty" class="courses-empty">No courses have been published yet. Check back soon!</div>
     </div>
 
   </div><!-- /page-content -->
 </div><!-- /main-wrap -->
 
+<!-- ADD COURSE MODAL -->
+<div id="add-course-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">New Course</div>
+      <button class="modal-close" onclick="closeAddCourseModal()">&#10005;</button>
+    </div>
+    <form id="add-course-form" onsubmit="submitAddCourse(event)">
+      <div class="modal-body">
+        <div class="modal-err" id="ac-err"></div>
+        <div class="modal-field">
+          <label class="modal-label" for="ac-title">Course Title <span>*</span></label>
+          <input class="modal-input" id="ac-title" type="text" maxlength="120" placeholder="e.g. Welcome to ToolSpark" required>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="ac-thumbnail">Thumbnail</label>
+          <input class="modal-input" id="ac-thumbnail" type="file" accept="image/*" style="padding:6px 12px;">
+          <div class="modal-help">JPG, PNG, or WebP · Will be stored in Firebase Storage</div>
+          <div class="thumb-preview" id="ac-thumb-preview"></div>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" for="ac-description">Description</label>
+          <textarea class="modal-textarea" id="ac-description" placeholder="What will students learn in this course?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-cancel-btn" onclick="closeAddCourseModal()">Cancel</button>
+        <button type="submit" class="modal-submit-btn" id="ac-submit-btn">
+          <span class="modal-spinner" id="ac-spinner"></span>
+          Create &amp; Open Editor →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
@@ -719,14 +879,18 @@
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
-  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
 
-  auth.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = 'signon.html';
-      return;
-    }
+  let currentUser = null;
+  let isAdmin = false;
+
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+
     const name = user.displayName || user.email || 'Builder';
     const first = name.split(' ')[0];
     document.getElementById('welcome-heading').textContent = 'Welcome back, ' + first;
@@ -740,12 +904,236 @@
     }
 
     try {
-      const snap = await firebase.firestore().collection('users').doc(user.uid).get();
+      const snap = await db.collection('users').doc(user.uid).get();
       if (snap.exists && snap.data().userRole === 'admin') {
+        isAdmin = true;
         document.getElementById('admin-nav-link').style.display = 'flex';
+        document.getElementById('add-course-btn').style.display = 'inline-flex';
       }
     } catch (e) { /* non-critical */ }
+
+    loadAllCourses();
   });
+
+  // ── COURSES ──
+  async function loadAllCourses() {
+    const grid = document.getElementById('courses-grid');
+    const empty = document.getElementById('courses-empty');
+    try {
+      let snap;
+      if (isAdmin) {
+        snap = await db.collection('courses').orderBy('order').get();
+      } else {
+        snap = await db.collection('courses').where('isPublished', '==', true).orderBy('order').get();
+      }
+
+      if (snap.empty) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      const progressPromises = snap.docs.map(function(doc) {
+        return db.collection('userProgress').doc(currentUser.uid + '_' + doc.id).get().catch(function() { return null; });
+      });
+      const progressDocs = await Promise.all(progressPromises);
+
+      grid.innerHTML = snap.docs.map(function(doc, i) {
+        const course = doc.data();
+        const courseId = doc.id;
+        const progress = progressDocs[i] && progressDocs[i].exists ? progressDocs[i].data() : null;
+        return renderCourseCard(course, courseId, progress);
+      }).join('');
+
+    } catch (e) {
+      console.error('Courses load error:', e);
+      grid.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:0.5rem 0;">Could not load courses.</div>';
+    }
+  }
+
+  function renderCourseCard(course, courseId, progress) {
+    const isDraft = isAdmin && !course.isPublished;
+    const total = course.totallessons || 0;
+    const pct = progress ? (progress.percentComplete || 0) : 0;
+    const done = progress ? (progress.completedLessons || []).length : 0;
+    const lastLessonId = progress ? (progress.lastLessonId || '') : '';
+
+    let courseUrl = 'course.html?courseId=' + courseId;
+    if (lastLessonId) courseUrl += '&lessonId=' + lastLessonId;
+
+    let btnLabel = 'Start Course →';
+    if (progress && progress.completedAt) btnLabel = 'Review →';
+    else if (pct > 0) btnLabel = 'Continue →';
+
+    const gradients = ['course-thumb-1', 'course-thumb-2', 'course-thumb-3'];
+    const thumbGradClass = gradients[courseId.charCodeAt(0) % 3];
+    let thumbStyle = '';
+    let thumbContent = '';
+    if (course.thumbnail) {
+      thumbStyle = 'background-image:url("' + course.thumbnail.replace(/"/g, '%22') + '");background-size:cover;background-position:center;';
+    } else {
+      thumbContent = '<svg width="40" height="40" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/><path d="M8 7h8M8 11h5"/></svg>';
+    }
+
+    const draftBadge = isDraft ? '<span class="course-badge-draft">Draft</span>' : '';
+    const progressHtml = (pct > 0) ?
+      '<div class="course-progress-wrap">' +
+      '<div class="course-progress-track"><div class="course-progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="course-progress-label">' + done + ' of ' + total + ' lessons complete</div>' +
+      '</div>' : '';
+    const safeTitle = (course.title || 'Untitled Course').replace(/'/g, "\\'");
+    const adminBtns = isAdmin ?
+      '<button class="course-edit-btn" onclick="event.stopPropagation();window.location.href=\'course.html?courseId=' + courseId + '\'">Edit</button>' +
+      '<button class="course-delete-btn" title="Delete course" onclick="deleteCourse(event,\'' + courseId + '\',\'' + safeTitle + '\')">&#128465;</button>' : '';
+
+    return '<div class="course-card live" onclick="window.location.href=\'' + courseUrl + '\'">' +
+      '<div class="course-thumb ' + thumbGradClass + ' live" style="' + thumbStyle + '">' +
+      thumbContent + draftBadge +
+      '</div>' +
+      '<div class="course-body">' +
+      '<div class="course-tag">' + escHtml(course.category || 'Foundations') + '</div>' +
+      '<div class="course-title">' + escHtml(course.title || 'Untitled Course') + '</div>' +
+      '<div class="course-desc">' + escHtml(course.description || '') + '</div>' +
+      '<div class="course-footer">' +
+      '<span class="course-meta">' + total + ' lesson' + (total !== 1 ? 's' : '') + ' &middot; ' + (course.isFree ? 'Free' : 'Members') + '</span>' +
+      '<div style="display:flex;align-items:center;gap:6px;">' + adminBtns +
+      '<button class="course-btn active" onclick="event.stopPropagation();window.location.href=\'' + courseUrl + '\'">' + btnLabel + '</button>' +
+      '</div></div>' +
+      progressHtml +
+      '</div></div>';
+  }
+
+  // ── DELETE COURSE ──
+  async function deleteCourse(event, courseId, courseTitle) {
+    event.stopPropagation();
+    if (!isAdmin) return;
+    if (!confirm('Delete "' + courseTitle + '"?\n\nThis will permanently remove the course and all its lessons. This cannot be undone.')) return;
+
+    try {
+      // Delete all lessons in the subcollection first (Firestore doesn't cascade)
+      const lessonsSnap = await db.collection('courses').doc(courseId).collection('lessons').get();
+      const batch = db.batch();
+      lessonsSnap.docs.forEach(function(doc) { batch.delete(doc.ref); });
+      batch.delete(db.collection('courses').doc(courseId));
+      await batch.commit();
+      await loadAllCourses();
+    } catch (e) {
+      console.error('Delete failed:', e);
+      alert('Could not delete course. Please try again.');
+    }
+  }
+
+  // ── ADD COURSE MODAL ──
+  function openAddCourseModal() {
+    document.getElementById('add-course-modal').style.display = 'flex';
+    setTimeout(function() { document.getElementById('ac-title').focus(); }, 80);
+  }
+
+  function closeAddCourseModal() {
+    document.getElementById('add-course-modal').style.display = 'none';
+    document.getElementById('add-course-form').reset();
+    document.getElementById('ac-thumb-preview').style.display = 'none';
+    document.getElementById('ac-err').style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Thumbnail file preview
+    document.getElementById('ac-thumbnail').addEventListener('change', function() {
+      const file = this.files[0];
+      const preview = document.getElementById('ac-thumb-preview');
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.style.backgroundImage = 'url(' + e.target.result + ')';
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+    // Close on backdrop click
+    document.getElementById('add-course-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeAddCourseModal();
+    });
+  });
+
+  async function submitAddCourse(event) {
+    event.preventDefault();
+    if (!isAdmin || !currentUser) return;
+
+    const title = document.getElementById('ac-title').value.trim();
+    const description = document.getElementById('ac-description').value.trim();
+    const fileInput = document.getElementById('ac-thumbnail');
+    const file = fileInput.files[0] || null;
+    const errEl = document.getElementById('ac-err');
+    const spinner = document.getElementById('ac-spinner');
+    const submitBtn = document.getElementById('ac-submit-btn');
+
+    if (!title) { errEl.textContent = 'Please enter a course title.'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    submitBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+      // Upload thumbnail if a file was chosen
+      let thumbnailUrl = '';
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const path = 'course-thumbnails/' + Date.now() + '-' + currentUser.uid + '.' + ext;
+        const ref = storage.ref(path);
+        await ref.put(file);
+        thumbnailUrl = await ref.getDownloadURL();
+      }
+
+      // Determine next display order
+      const orderSnap = await db.collection('courses').orderBy('order', 'desc').limit(1).get();
+      const nextOrder = orderSnap.empty ? 0 : ((orderSnap.docs[0].data().order || 0) + 1);
+      const ts = firebase.firestore.FieldValue.serverTimestamp;
+
+      const courseRef = await db.collection('courses').add({
+        title: title,
+        description: description,
+        thumbnail: thumbnailUrl,
+        category: 'Foundations',
+        isFree: true,
+        isPublished: false,
+        order: nextOrder,
+        totallessons: 1,
+        createdAt: ts(),
+        createdBy: currentUser.uid
+      });
+
+      // Seed first lesson so the editor opens cleanly
+      await db.collection('courses').doc(courseRef.id).collection('lessons').add({
+        lessonTitle: 'New Lesson',
+        lessonDescription: '',
+        lessonContent: '',
+        lessonOrder: 1,
+        lessonDuration: '',
+        lessonType: 'written',
+        videoUrl: '',
+        linkedThreadId: '',
+        isFree: true,
+        createdAt: ts()
+      });
+
+      window.location.href = 'course.html?courseId=' + courseRef.id;
+    } catch (e) {
+      console.error('Create course failed:', e);
+      errEl.textContent = 'Failed to create course. Please try again.';
+      errEl.style.display = 'block';
+      submitBtn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 </script>
 </body>
 </html>
