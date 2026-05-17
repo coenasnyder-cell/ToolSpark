@@ -19,6 +19,8 @@ import {
   onSnapshot,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../../services/firebase';
@@ -36,7 +38,9 @@ interface Thread {
   content: string;
   authorId: string;
   authorName: string;
+  displayName: string;
   authorPhotoURL: string;
+  authorPhoto: string; 
   category: string;
   likes: number;
   commentCount: number;
@@ -181,12 +185,17 @@ export default function CommunityScreen() {
     if (!title.trim() || !content.trim() || !user) return;
     setPosting(true);
     try {
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      const photoURL = userSnap.exists()
+        ? (userSnap.data().photoURL || user.photoURL || '')
+        : (user.photoURL || '');
+
       await addDoc(collection(db, 'threads'), {
         title: title.trim(),
         content: content.trim(),
         authorId: user.uid,
         authorName: user.displayName || 'Member',
-        authorPhotoURL: user.photoURL || '',
+        authorPhotoURL: photoURL,
         category: 'General',
         likes: 0,
         commentCount: 0,
@@ -219,7 +228,7 @@ export default function CommunityScreen() {
       style={styles.threadCard}
       activeOpacity={0.7}
       onPress={() => router.push({
-        pathname: '/(app)/thread-detail',
+        pathname: '/thread-detail',
         params: { threadId: item.id }
       } as any)}
     >
@@ -229,13 +238,9 @@ export default function CommunityScreen() {
         </View>
       )}
       <View style={styles.threadHeader}>
-        <View style={styles.avatar}>
-  {item.authorPhotoURL ? (
-  <Image
-    source={{ uri: item.authorPhotoURL }}
-      style={styles.avatarImage}
-      contentFit="cover"
-    />
+       <View style={styles.avatar}>{(item.authorPhotoURL || item.authorPhoto) ? (
+    <Image source={{ uri: item.authorPhotoURL || item.authorPhoto }}
+      style={styles.avatarImage} contentFit="cover"/>
   ) : (
     <Text style={styles.avatarText}>
       {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
@@ -244,9 +249,9 @@ export default function CommunityScreen() {
 </View>
         <View style={styles.threadMeta}>
   <Text style={styles.authorName}>
-    {item.authorName}
-    <Text style={styles.timeText}> · {formatTime(item.createdAt)}</Text>
-  </Text>
+  {item.authorName || item.displayName || 'Member'}
+  <Text style={styles.timeText}> · {formatTime(item.createdAt)}</Text>
+</Text>
 </View>
 
         {item.category && (
@@ -267,7 +272,13 @@ export default function CommunityScreen() {
             ♥ {item.likes || 0}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerAction}>
+        <TouchableOpacity
+          style={styles.footerAction}
+          onPress={() => router.push({
+            pathname: '/thread-detail',
+            params: { threadId: item.id }
+          } as any)}
+        >
           <Text style={styles.footerActionText}>
             💬 {item.commentCount || 0}
           </Text>

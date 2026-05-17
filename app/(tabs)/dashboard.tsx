@@ -8,12 +8,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {
-  doc,
-  getDoc,
   collection,
   query,
   where,
-  getCountFromServer,
+  getDocs,
+  orderBy,
+  doc,
+  getDoc,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRouter } from 'expo-router';
@@ -21,154 +22,95 @@ import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import Header from '../../components/Shared/Header';
 
-interface UserProfile {
-  displayName: string;
-  userEmail: string;
-  userRole: string;
-  createdAt: any;
-  photoURL: string;
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  isFree: boolean;
+  isPublished: boolean;
+  order: number;
+  totallessons: number;
 }
 
-interface ChecklistItem {
-  id: string;
-  label: string;
-  description: string;
-  status: 'done' | 'ready' | 'coming-soon';
-  route?: string;
+interface UserProgress {
+  completedLessons: string[];
+  percentComplete: number;
+  lastLessonId: string;
 }
 
 export default function DashboardScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [progress, setProgress] = useState<Record<string, UserProgress>>({});
   const [loading, setLoading] = useState(true);
-  const [threadCount, setThreadCount] = useState(0);
-  const [sessionCount, setSessionCount] = useState(0);
-  const [daysActive, setDaysActive] = useState(0);
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        await loadProfile(u);
-        await loadStats(u);
+        await loadCourses(u);
       }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
-  const loadProfile = async (u: User) => {
-    const userRef = doc(db, 'users', u.uid);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      const data = snap.data() as UserProfile;
-      setProfile(data);
-
-      // Calculate days active
-      if (data.createdAt) {
-        const created = data.createdAt.toDate?.() ||
-          new Date(data.createdAt);
-        const days = Math.floor(
-          (new Date().getTime() - created.getTime()) /
-          (1000 * 60 * 60 * 24)
-        );
-        setDaysActive(days);
-      }
-    }
-  };
-
-  const loadStats = async (u: User) => {
+  const loadCourses = async (u: User) => {
     try {
-      // Thread count
-      const threadsQuery = query(
-        collection(db, 'threads'),
-        where('authorId', '==', u.uid)
+      // Load published courses
+      const coursesQuery = query(
+        collection(db, 'courses'),
+        where('isPublished', '==', true),
+        orderBy('order', 'asc')
       );
-      const threadsSnap = await getCountFromServer(threadsQuery);
-      setThreadCount(threadsSnap.data().count);
+      const coursesSnap = await getDocs(coursesQuery);
+      const coursesData = coursesSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Course[];
+      setCourses(coursesData);
 
-      // Clarity sessions count
-      const sessionsQuery = query(
-        collection(db, 'clarity_sessions'),
-        where('userId', '==', u.uid)
-      );
-      const sessionsSnap = await getCountFromServer(sessionsQuery);
-      setSessionCount(sessionsSnap.data().count);
-    } catch (err) {
-      console.log('Stats error:', err);
+      // Load progress for each course
+      const progressData: Record<string, UserProgress> = {};
+      for (const course of coursesData) {
+        const progressId = `${u.uid}_${course.id}`;
+        const progressRef = doc(db, 'userProgress', progressId);
+        const progressSnap = await getDoc(progressRef);
+        if (progressSnap.exists()) {
+          progressData[course.id] = progressSnap.data() as UserProgress;
+        }
+      }
+      setProgress(progressData);
+    } catch (err: any) {
+      console.error('Load courses error:', err);
+      setError(err?.message ?? 'Failed to load courses');
     }
   };
 
-  const buildChecklist = (
-    u: User,
-    threadCount: number,
-    sessionCount: number
-  ): ChecklistItem[] => [
-    {
-      id: 'account',
-      label: 'Create your account',
-      description: "You're in. Welcome to ToolSpark.",
-      status: 'done',
-    },
-    {
-      id: 'clarity',
-      label: 'Complete your Clarity Session',
-      description:
-        'Tell us about your business so we can identify the right tools for you.',
-      status: sessionCount > 0 ? 'done' : 'ready',
-      route: '/(app)/clarity-session',
-    },
-    {
-      id: 'results',
-      label: 'Review your tool recommendations',
-      description:
-        'See the AI tools best matched to your workflow and clients.',
-      status: sessionCount > 0 ? 'ready' : 'coming-soon',
-      route: '/(app)/results',
-    },
-    {
-      id: 'community',
-      label: 'Join the community discussion',
-      description:
-        'Connect with other builders, share wins, and get support.',
-      status: threadCount > 0 ? 'done' : 'ready',
-      route: '/(tabs)',
-    },
-    {
-      id: 'call',
-      label: 'Book a strategy call',
-      description:
-        'Work 1-on-1 to map out your tool-building roadmap.',
-      status: 'coming-soon',
-    },
-  ];
-
-  useEffect(() => {
-    if (user) {
-      setChecklist(
-        buildChecklist(user, threadCount, sessionCount)
-      );
+  const getCategoryColor = (category: string) => {
+    switch (category?.toLowerCase()) {
+      case 'foundations': return Colors.green;
+      case 'systems': return Colors.purple;
+      case 'growth': return Colors.coral;
+      default: return Colors.gold;
     }
-  }, [user, threadCount, sessionCount]);
-
-  const getStatusColor = (status: string) => {
-    if (status === 'done') return Colors.green;
-    if (status === 'ready') return Colors.gold;
-    return Colors.text3;
   };
 
-  const getStatusLabel = (status: string) => {
-    if (status === 'done') return 'DONE';
-    if (status === 'ready') return 'READY';
-    return 'COMING SOON';
+  const getCompletedCount = (courseId: string, totalLessons: number) => {
+    const p = progress[courseId];
+    if (!p || !p.completedLessons) return 0;
+    return p.completedLessons.length;
   };
 
-  const getStatusIcon = (status: string, index: number) => {
-    if (status === 'done') return '✓';
-    return String(index + 1);
+  const getProgressPercent = (courseId: string, totalLessons: number) => {
+    const completed = getCompletedCount(courseId, totalLessons);
+    if (!totalLessons) return 0;
+    return Math.round((completed / totalLessons) * 100);
   };
 
   if (loading) {
@@ -179,222 +121,130 @@ export default function DashboardScreen() {
     );
   }
 
-  const firstName = profile?.displayName?.split(' ')[0] ||
-    user?.displayName?.split(' ')[0] || 'there';
-
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Welcome hero */}
-      <View style={styles.hero}>
-        <View style={styles.heroBadge}>
-          <Text style={styles.heroBadgeText}>✦ MEMBERS AREA</Text>
-        </View>
-        <Text style={styles.welcomeText}>
-          Welcome back,{' '}
-          <Text style={styles.welcomeName}>{firstName}</Text>
-        </Text>
-        <Text style={styles.welcomeSub}>
-          You're building something real. Everything you need to
-          create, launch, and grow your AI-powered tools is
-          right here.
-        </Text>
+    <View style={styles.container}>
+      <Header subtitle="Builder Platform" />
 
-        {/* Stats row */}
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{threadCount}</Text>
-            <Text style={styles.statLabel}>Threads Posted</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{sessionCount}</Text>
-            <Text style={styles.statLabel}>Sessions</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{daysActive}</Text>
-            <Text style={styles.statLabel}>Days Active</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Onboarding checklist */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Start Here</Text>
-        <Text style={styles.sectionSubtitle}>
-          Complete these steps to get the most out of ToolSpark
-        </Text>
-
-        <View style={styles.checklistCard}>
-          <View style={styles.checklistHeader}>
-            <Text style={styles.checklistHeaderText}>
-              Your Onboarding Checklist
-            </Text>
-            <Text style={styles.checklistHeaderSub}>
-              Get set up and ready to build your first AI tool
-            </Text>
-          </View>
-
-          {checklist.map((item, index) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.checklistItem,
-                index < checklist.length - 1 &&
-                  styles.checklistItemBorder,
-              ]}
-              onPress={() => {
-                if (item.route && item.status !== 'coming-soon') {
-                  router.push(item.route as any);
-                }
-              }}
-              disabled={item.status === 'coming-soon'}
-              activeOpacity={
-                item.status === 'coming-soon' ? 1 : 0.7
-              }
-            >
-              <View style={[
-                styles.checklistIcon,
-                {
-                  backgroundColor:
-                    item.status === 'done'
-                      ? Colors.green
-                      : item.status === 'ready'
-                      ? Colors.gold
-                      : Colors.surface2,
-                  borderColor:
-                    item.status === 'done'
-                      ? Colors.green
-                      : item.status === 'ready'
-                      ? Colors.gold
-                      : Colors.border,
-                }
-              ]}>
-                <Text style={[
-                  styles.checklistIconText,
-                  {
-                    color:
-                      item.status === 'coming-soon'
-                        ? Colors.text3
-                        : Colors.bg,
-                  }
-                ]}>
-                  {getStatusIcon(item.status, index)}
-                </Text>
-              </View>
-
-              <View style={styles.checklistContent}>
-                <Text style={[
-                  styles.checklistLabel,
-                  item.status === 'coming-soon' && styles.mutedText
-                ]}>
-                  {item.label}
-                </Text>
-                <Text style={styles.checklistDesc}>
-                  {item.description}
-                </Text>
-              </View>
-
-              <View style={[
-                styles.statusBadge,
-                { borderColor: getStatusColor(item.status) }
-              ]}>
-                <Text style={[
-                  styles.statusBadgeText,
-                  { color: getStatusColor(item.status) }
-                ]}>
-                  {getStatusLabel(item.status)}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Courses section */}
-      <View style={styles.section}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Section title */}
         <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>
-              Courses & Training
-            </Text>
-            <Text style={styles.sectionSubtitle}>
-              Step-by-step programs to help you build and sell
-              AI tools
-            </Text>
-          </View>
-          <TouchableOpacity>
-            <Text style={styles.viewAllText}>View all</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Courses & Training</Text>
+          <Text style={styles.sectionSubtitle}>
+            Step-by-step programs to help you build and sell AI tools
+          </Text>
         </View>
 
-        {/* Welcome course card */}
-        <TouchableOpacity
-          style={styles.welcomeCourseCard}
-          activeOpacity={0.8}
-          onPress={() => router.push('/(app)/course' as any)}
-        >
-          <View style={styles.welcomeCourseBadge}>
-            <Text style={styles.welcomeCourseBadgeText}>
-              ⭐ START HERE — Free for all members
+        {/* Course cards */}
+        {error ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>⚠️</Text>
+            <Text style={styles.emptyTitle}>Error loading courses</Text>
+            <Text style={styles.emptySubtitle}>{error}</Text>
+          </View>
+        ) : courses.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>📚</Text>
+            <Text style={styles.emptyTitle}>No courses yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Check back soon — courses are coming
             </Text>
           </View>
-          <Text style={styles.welcomeCourseTitle}>
-            Welcome to ToolSpark
-          </Text>
-          <Text style={styles.welcomeCourseSub}>
-            Get clarity on your business and discover your
-            first AI tool
-          </Text>
-          <View style={styles.progressRow}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '0%' }]} />
-            </View>
-            <Text style={styles.progressText}>0 of 5 lessons</Text>
-          </View>
-        </TouchableOpacity>
+        ) : (
+          courses.map((course) => {
+            const completed = getCompletedCount(
+              course.id,
+              course.totallessons
+            );
+            const percent = getProgressPercent(
+              course.id,
+              course.totallessons
+            );
+            const total = course.totallessons || 0;
+            const isStarted = completed > 0;
+            const isComplete = completed >= total && total > 0;
 
-        {/* Placeholder courses */}
-        {[
-          {
-            tag: 'FOUNDATIONS',
-            title: 'AI Tool Builder Bootcamp',
-            desc: 'Learn the end-to-end process of identifying, designing, and deploying AI tools.',
-            lessons: '12 lessons · Beginner',
-          },
-          {
-            tag: 'SYSTEMS',
-            title: 'Automate Your Client Delivery',
-            desc: 'Build repeatable systems that deliver results to clients without trading more time.',
-            lessons: '8 lessons · Intermediate',
-          },
-          {
-            tag: 'GROWTH',
-            title: 'Sell Your AI Services',
-            desc: 'Position and price your tool-building expertise so clients immediately see the value.',
-            lessons: '10 lessons · Advanced',
-          },
-        ].map((course, index) => (
-          <View key={index} style={styles.courseCard}>
-            <View style={styles.courseCardTop}>
-              <Text style={styles.courseTag}>{course.tag}</Text>
-              <View style={styles.comingSoonBadge}>
-                <Text style={styles.comingSoonText}>
-                  COMING SOON
+            return (
+              <TouchableOpacity
+                key={course.id}
+                style={styles.courseCard}
+                activeOpacity={0.8}
+                onPress={() => router.push({
+                  pathname: '/course-player',
+                  params: { courseId: course.id }
+                } as any)}
+              >
+                {/* Category tag */}
+                <View style={styles.courseTop}>
+                  <View style={[
+                    styles.categoryTag,
+                    { borderColor: getCategoryColor(course.category) }
+                  ]}>
+                    <Text style={[
+                      styles.categoryTagText,
+                      { color: getCategoryColor(course.category) }
+                    ]}>
+                      {course.category?.toUpperCase() || 'COURSE'}
+                    </Text>
+                  </View>
+
+                  {/* Status badge */}
+                  {isComplete ? (
+                    <View style={styles.completeBadge}>
+                      <Text style={styles.completeBadgeText}>
+                        ✓ Complete
+                      </Text>
+                    </View>
+                  ) : isStarted ? (
+                    <View style={styles.inProgressBadge}>
+                      <Text style={styles.inProgressBadgeText}>
+                        In Progress
+                      </Text>
+                    </View>
+                  ) : course.isFree ? (
+                    <View style={styles.freeBadge}>
+                      <Text style={styles.freeBadgeText}>Free</Text>
+                    </View>
+                  ) : null}
+                </View>
+
+                {/* Title and description */}
+                <Text style={styles.courseTitle}>{course.title}</Text>
+                <Text style={styles.courseDesc} numberOfLines={2}>
+                  {course.description}
                 </Text>
-              </View>
-            </View>
-            <Text style={styles.courseTitle}>{course.title}</Text>
-            <Text style={styles.courseDesc}>{course.desc}</Text>
-            <Text style={styles.courseMeta}>{course.lessons}</Text>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+
+                {/* Progress bar */}
+                <View style={styles.progressSection}>
+                  <View style={styles.progressBar}>
+                    <View style={[
+                      styles.progressFill,
+                      { width: `${percent}%` }
+                    ]} />
+                  </View>
+                  <Text style={styles.progressText}>
+                    {completed} of {total} lessons
+                  </Text>
+                </View>
+
+                {/* CTA */}
+                <View style={styles.courseFooter}>
+                  <Text style={styles.courseAction}>
+                    {isComplete
+                      ? 'Review course →'
+                      : isStarted
+                      ? 'Continue →'
+                      : 'Start course →'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -410,90 +260,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
+    padding: Layout.md,
     paddingBottom: Layout.tabBarHeight + Layout.xl,
   },
-  hero: {
-  backgroundColor: Colors.sidebar,  // dark header
-  // text inside hero stays light — override locally
-    padding: Layout.lg,
-    paddingTop: 60,
-    marginBottom: Layout.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  heroBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.goldDim,
-    borderWidth: 1,
-    borderColor: Colors.gold,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.md,
-    paddingVertical: 4,
-    marginBottom: Layout.md,
-  },
-  heroBadgeText: {
-    fontSize: Typography.xs,
-    fontWeight: '700',
-    color: Colors.gold,
-    letterSpacing: 0.5,
-  },
-  welcomeText: {
-    fontSize: Typography.xxl,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: Layout.sm,
-  },
-  welcomeName: {
-    color: Colors.gold,
-  },
-  welcomeSub: {
-    fontSize: Typography.base,
-    color: Colors.text2,
-    lineHeight: Typography.base * 1.6,
-    marginBottom: Layout.lg,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface2,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: Typography.xl,
-    fontWeight: '700',
-    color: Colors.gold,
-  },
-  statLabel: {
-    fontSize: Typography.xs,
-    color: Colors.text3,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: Colors.border,
-  },
-  section: {
-    paddingHorizontal: Layout.md,
-    marginBottom: Layout.xl,
-  },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: Layout.md,
+    marginBottom: Layout.lg,
+    paddingTop: Layout.sm,
   },
   sectionTitle: {
-    fontSize: Typography.lg,
+    fontSize: Typography.xl,
     fontWeight: '700',
     color: Colors.text,
     marginBottom: 4,
@@ -501,129 +276,91 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: Typography.sm,
     color: Colors.text2,
-    marginBottom: Layout.md,
     lineHeight: Typography.sm * 1.6,
   },
-  viewAllText: {
-    fontSize: Typography.sm,
-    color: Colors.gold,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  checklistCard: {
+  courseCard: {
     backgroundColor: Colors.surface,
-    borderRadius: Layout.radius,
+    borderRadius: Layout.radiusLg,
+    padding: Layout.md,
+    marginBottom: Layout.md,
     borderWidth: 1,
     borderColor: Colors.border,
-    overflow: 'hidden',
   },
-  checklistHeader: {
-    padding: Layout.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    backgroundColor: Colors.surface2,
-  },
-  checklistHeaderText: {
-    fontSize: Typography.base,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  checklistHeaderSub: {
-    fontSize: Typography.sm,
-    color: Colors.text2,
-  },
-  checklistItem: {
+  courseTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Layout.md,
-    gap: Layout.md,
+    justifyContent: 'space-between',
+    marginBottom: Layout.sm,
   },
-  checklistItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  checklistIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    flexShrink: 0,
-  },
-  checklistIconText: {
-    fontSize: Typography.sm,
-    fontWeight: '700',
-  },
-  checklistContent: {
-    flex: 1,
-  },
-  checklistLabel: {
-    fontSize: Typography.base,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  checklistDesc: {
-    fontSize: Typography.sm,
-    color: Colors.text2,
-    lineHeight: Typography.sm * 1.5,
-  },
-  mutedText: {
-    color: Colors.text3,
-  },
-  statusBadge: {
+  categoryTag: {
     borderWidth: 1,
     borderRadius: Layout.radiusFull,
     paddingHorizontal: Layout.sm,
     paddingVertical: 3,
-    flexShrink: 0,
   },
-  statusBadgeText: {
+  categoryTagText: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
-  welcomeCourseCard: {
-    backgroundColor: Colors.goldDim,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    marginBottom: Layout.md,
-    borderWidth: 1,
-    borderColor: `${Colors.gold}40`,
+  completeBadge: {
+    backgroundColor: Colors.green,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 3,
   },
-  welcomeCourseBadge: {
-    marginBottom: Layout.sm,
-  },
-  welcomeCourseBadgeText: {
-    fontSize: Typography.xs,
-    color: Colors.gold,
+  completeBadgeText: {
+    fontSize: 11,
     fontWeight: '700',
+    color: '#FFFFFF',
   },
-  welcomeCourseTitle: {
+  inProgressBadge: {
+    backgroundColor: Colors.goldDim,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+  },
+  inProgressBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.gold,
+  },
+  freeBadge: {
+    backgroundColor: Colors.surface2,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  freeBadgeText: {
+    fontSize: 11,
+    color: Colors.text2,
+    fontWeight: '600',
+  },
+  courseTitle: {
     fontSize: Typography.lg,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-  welcomeCourseSub: {
+  courseDesc: {
     fontSize: Typography.sm,
     color: Colors.text2,
-    marginBottom: Layout.md,
     lineHeight: Typography.sm * 1.6,
+    marginBottom: Layout.md,
   },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.sm,
+  progressSection: {
+    marginBottom: Layout.md,
   },
   progressBar: {
-    flex: 1,
     height: 4,
     backgroundColor: Colors.border,
     borderRadius: 2,
     overflow: 'hidden',
+    marginBottom: 6,
   },
   progressFill: {
     height: '100%',
@@ -632,57 +369,35 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: Typography.xs,
-    color: Colors.text2,
-    flexShrink: 0,
+    color: Colors.text3,
   },
-  courseCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    marginBottom: Layout.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  courseFooter: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: Layout.sm,
   },
-  courseCardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Layout.sm,
-  },
-  courseTag: {
-    fontSize: Typography.xs,
+  courseAction: {
+    fontSize: Typography.sm,
     fontWeight: '700',
     color: Colors.gold,
-    letterSpacing: 0.5,
   },
-  comingSoonBadge: {
-    backgroundColor: Colors.surface2,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.sm,
-    paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: Layout.xxl,
   },
-  comingSoonText: {
-    fontSize: 10,
-    color: Colors.text3,
-    fontWeight: '600',
-    letterSpacing: 0.3,
+  emptyIcon: {
+    fontSize: 40,
+    marginBottom: Layout.md,
   },
-  courseTitle: {
-    fontSize: Typography.md,
+  emptyTitle: {
+    fontSize: Typography.lg,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 4,
-  },
-  courseDesc: {
-    fontSize: Typography.sm,
-    color: Colors.text2,
-    lineHeight: Typography.sm * 1.6,
     marginBottom: Layout.sm,
   },
-  courseMeta: {
-    fontSize: Typography.xs,
-    color: Colors.text3,
+  emptySubtitle: {
+    fontSize: Typography.base,
+    color: Colors.text2,
+    textAlign: 'center',
   },
 });

@@ -28,6 +28,11 @@ import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 interface Comment {
   id: string;
@@ -35,6 +40,8 @@ interface Comment {
   authorId: string;
   authorName: string;
   authorPhoto: string;
+  parentId?: string;
+  likes?: number;
   createdAt: any;
 }
 
@@ -44,9 +51,15 @@ interface Thread {
   content: string;
   authorId: string;
   authorName: string;
+  authorPhotoURL: string;
+  authorPhoto: string;
+  displayName: string;
   category: string;
   likes: number;
   commentCount: number;
+  pinned: boolean;
+  reactions: Record<string, string>;
+  reactionCount: number;
   createdAt: any;
 }
 
@@ -60,7 +73,20 @@ export default function ThreadDetailScreen() {
   const [newComment, setNewComment] = useState('');
   const [posting, setPosting] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ id: string; authorName: string } | null>(null);
+  const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(new Set());
   const flatListRef = useRef<FlatList>(null);
+const insets = useSafeAreaInsets();
+  const handleCommentLike = async (commentId: string) => {
+    if (!user || !threadId || likedCommentIds.has(commentId)) return;
+    setLikedCommentIds(prev => new Set(prev).add(commentId));
+    await updateDoc(doc(db, 'threads', threadId, 'comments', commentId), {
+      likes: increment(1),
+    });
+    setComments(prev => prev.map(c =>
+      c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c
+    ));
+  };
 
   // Auth state
   useEffect(() => {
@@ -90,12 +116,11 @@ export default function ThreadDetailScreen() {
       orderBy('createdAt', 'asc')
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const data = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       })) as Comment[];
       setComments(data);
-      // Auto scroll to bottom on new comment
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -107,7 +132,6 @@ export default function ThreadDetailScreen() {
     if (!newComment.trim() || !user || !threadId) return;
     setPosting(true);
     try {
-      // Add comment to subcollection
       await addDoc(
         collection(db, 'threads', threadId, 'comments'),
         {
@@ -115,14 +139,15 @@ export default function ThreadDetailScreen() {
           authorId: user.uid,
           authorName: user.displayName || 'Member',
           authorPhoto: user.photoURL || '',
+          parentId: replyTo?.id || null,
           createdAt: serverTimestamp(),
         }
       );
-      // Update comment count on thread
       await updateDoc(doc(db, 'threads', threadId), {
         commentCount: increment(1),
       });
       setNewComment('');
+      setReplyTo(null);
     } catch (err) {
       console.log('Comment error:', err);
     } finally {
@@ -146,60 +171,124 @@ export default function ThreadDetailScreen() {
     if (!timestamp) return '';
     const date = timestamp.toDate?.() || new Date(timestamp);
     const now = new Date();
-    const diff = Math.floor(
-      (now.getTime() - date.getTime()) / 1000
-    );
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
     if (diff < 60) return 'just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const renderComment = ({ item }: { item: Comment }) => (
-    <View style={styles.commentCard}>
-      <View style={styles.commentHeader}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
-          </Text>
+  const renderComment = ({ item }: { item: Comment }) => {
+    const commentLiked = likedCommentIds.has(item.id);
+    const replies = comments.filter(c => c.parentId === item.id);
+
+    return (
+      <View style={styles.commentCard}>
+        <View style={styles.commentHeader}>
+          <View style={styles.avatar}>
+            {item.authorPhoto ? (
+              <Image
+                source={{ uri: item.authorPhoto }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
+            ) : (
+              <Text style={styles.avatarText}>
+                {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
+              </Text>
+            )}
+          </View>
+          <View style={styles.commentMeta}>
+            <Text style={styles.commentAuthor}>{item.authorName}</Text>
+            <Text style={styles.commentTime}>{formatTime(item.createdAt)}</Text>
+          </View>
         </View>
-        <View style={styles.commentMeta}>
-          <Text style={styles.commentAuthor}>
-            {item.authorName}
-          </Text>
-          <Text style={styles.commentTime}>
-            {formatTime(item.createdAt)}
-          </Text>
+
+        <Text style={styles.commentContent}>{item.content}</Text>
+
+        {/* Action buttons */}
+        <View style={styles.commentActions}>
+          <TouchableOpacity
+            style={styles.commentActionBtn}
+            onPress={() => handleCommentLike(item.id)}
+          >
+            <MaterialCommunityIcons
+              name={commentLiked ? 'thumb-up' : 'thumb-up-outline'}
+              size={14}
+              color={commentLiked ? Colors.gold : Colors.text3}
+            />
+            {(item.likes || 0) > 0 && (
+              <Text style={[styles.commentActionBtnText, commentLiked && styles.commentActionBtnTextActive]}>
+                {item.likes}
+              </Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.commentActionBtn}
+            onPress={() => setReplyTo({ id: item.id, authorName: item.authorName })}
+          >
+            <Ionicons name="chatbubble-outline" size={14} color={Colors.text3} />
+          </TouchableOpacity>
         </View>
+
+        {/* Replies */}
+        {replies.length > 0 && (
+          <View style={styles.repliesContainer}>
+            {replies.map(reply => (
+              <View key={reply.id} style={styles.replyCard}>
+                <View style={styles.commentHeader}>
+                  <View style={styles.avatar}>
+                    {reply.authorPhoto ? (
+                      <Image
+                        source={{ uri: reply.authorPhoto }}
+                        style={styles.avatarImage}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <Text style={styles.avatarText}>
+                        {reply.authorName?.charAt(0)?.toUpperCase() || 'M'}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.commentMeta}>
+                    <Text style={styles.commentAuthor}>{reply.authorName}</Text>
+                    <Text style={styles.commentTime}>{formatTime(reply.createdAt)}</Text>
+                  </View>
+                </View>
+                <Text style={styles.commentContent}>{reply.content}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
-      <Text style={styles.commentContent}>{item.content}</Text>
-    </View>
-  );
+    );
+  };
 
   const renderHeader = () => (
     <View>
-      {/* Thread content */}
       {thread && (
         <View style={styles.threadCard}>
           <View style={styles.threadHeader}>
             <View style={styles.avatarLarge}>
-              <Text style={styles.avatarLargeText}>
-                {thread.authorName?.charAt(0)?.toUpperCase() || 'M'}
-              </Text>
+              {(thread.authorPhotoURL || thread.authorPhoto) ? (
+                <Image
+                  source={{ uri: thread.authorPhotoURL || thread.authorPhoto }}
+                  style={styles.avatarLargeImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text style={styles.avatarLargeText}>
+                  {thread.authorName?.charAt(0)?.toUpperCase() || 'M'}
+                </Text>
+              )}
             </View>
             <View style={styles.threadMeta}>
-              <Text style={styles.authorName}>
-                {thread.authorName}
-              </Text>
-              <Text style={styles.timeText}>
-                {formatTime(thread.createdAt)}
-              </Text>
+              <Text style={styles.authorName}>{thread.authorName}</Text>
+              <Text style={styles.timeText}>{formatTime(thread.createdAt)}</Text>
             </View>
             {thread.category && (
               <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>
-                  {thread.category}
-                </Text>
+                <Text style={styles.categoryText}>{thread.category}</Text>
               </View>
             )}
           </View>
@@ -207,35 +296,29 @@ export default function ThreadDetailScreen() {
           <Text style={styles.threadTitle}>{thread.title}</Text>
           <Text style={styles.threadContent}>{thread.content}</Text>
 
+          {/* Actions bar */}
           <View style={styles.threadActions}>
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                liked && styles.actionButtonActive
-              ]}
-              onPress={handleLike}
-            >
-              <Text style={[
-                styles.actionText,
-                liked && styles.actionTextActive
-              ]}>
-                ♥ {thread.likes || 0}
+            <TouchableOpacity style={styles.actionBtn} onPress={handleLike}>
+              <MaterialCommunityIcons
+                name={liked ? 'thumb-up' : 'thumb-up-outline'}
+                size={16}
+                color={liked ? Colors.gold : Colors.text2}
+              />
+              <Text style={[styles.actionText, liked && styles.actionTextActive]}>
+                {thread?.likes || 0}
               </Text>
             </TouchableOpacity>
-            <View style={styles.actionButton}>
-              <Text style={styles.actionText}>
-                💬 {thread.commentCount || 0} comments
-              </Text>
+
+            <View style={styles.actionBtn}>
+              <Ionicons name="chatbubble-outline" size={16} color={Colors.text2} />
+              <Text style={styles.actionText}>{thread?.commentCount || 0}</Text>
             </View>
           </View>
         </View>
       )}
 
-      {/* Comments label */}
       <View style={styles.commentsLabel}>
-        <Text style={styles.commentsLabelText}>
-          Comments
-        </Text>
+        <Text style={styles.commentsLabelText}>Comments</Text>
       </View>
     </View>
   );
@@ -250,15 +333,13 @@ export default function ThreadDetailScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+  style={styles.container}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={insets.top + 44}
+>
       {/* Back button header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Thread</Text>
@@ -268,7 +349,7 @@ export default function ThreadDetailScreen() {
       {/* Comments list */}
       <FlatList
         ref={flatListRef}
-        data={comments}
+        data={comments.filter(c => !c.parentId)}
         keyExtractor={(item) => item.id}
         renderItem={renderComment}
         ListHeaderComponent={renderHeader}
@@ -278,39 +359,50 @@ export default function ThreadDetailScreen() {
         keyboardDismissMode="on-drag"
         ListEmptyComponent={
           <View style={styles.emptyComments}>
-            <Text style={styles.emptyText}>
-              No comments yet — be the first!
-            </Text>
+            <Text style={styles.emptyText}>No comments yet — be the first!</Text>
           </View>
         }
       />
 
       {/* Comment input */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.commentInput}
-          placeholder="Add a comment..."
-          placeholderTextColor={Colors.text3}
-          value={newComment}
-          onChangeText={setNewComment}
-          multiline
-          maxLength={500}
-          blurOnSubmit={false}
-        />
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            (!newComment.trim() || posting) && styles.sendButtonDisabled
-          ]}
-          onPress={handlePostComment}
-          disabled={!newComment.trim() || posting}
-        >
-          {posting ? (
-            <ActivityIndicator color={Colors.bg} size="small" />
-          ) : (
-            <Text style={styles.sendButtonText}>Post</Text>
-          )}
-        </TouchableOpacity>
+      <View style={[
+  styles.inputContainer,
+  { paddingBottom: insets.bottom + Layout.sm }
+]}>
+        {replyTo && (
+          <View style={styles.replyBanner}>
+            <Text style={styles.replyBannerText}>Replying to @{replyTo.authorName}</Text>
+            <TouchableOpacity onPress={() => setReplyTo(null)}>
+              <Text style={styles.replyBannerClose}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.commentInput}
+            placeholder={replyTo ? `Reply to ${replyTo.authorName}...` : 'Add a comment...'}
+            placeholderTextColor={Colors.text3}
+            value={newComment}
+            onChangeText={setNewComment}
+            multiline
+            maxLength={500}
+            submitBehavior="newline"
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton,
+              (!newComment.trim() || posting) && styles.sendButtonDisabled,
+            ]}
+            onPress={handlePostComment}
+            disabled={!newComment.trim() || posting}
+          >
+            {posting ? (
+              <ActivityIndicator color={Colors.bg} size="small" />
+            ) : (
+              <Text style={styles.sendButtonText}>Post</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -319,11 +411,11 @@ export default function ThreadDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
+    backgroundColor: Colors.surface,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: Colors.bg,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -334,7 +426,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.md,
     paddingTop: 60,
     paddingBottom: Layout.md,
-    backgroundColor: Colors.bg,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -357,7 +449,7 @@ const styles = StyleSheet.create({
     width: 60,
   },
   listContent: {
-    paddingBottom: Layout.md,
+    paddingBottom: 0,
   },
   threadCard: {
     backgroundColor: Colors.surface,
@@ -379,6 +471,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gold,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarLargeImage: {
+    width: Layout.avatarMd,
+    height: Layout.avatarMd,
+    borderRadius: Layout.avatarMd / 2,
   },
   avatarLargeText: {
     color: Colors.bg,
@@ -425,25 +523,29 @@ const styles = StyleSheet.create({
   },
   threadActions: {
     flexDirection: 'row',
-    gap: Layout.md,
+    gap: Layout.xs,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    paddingTop: Layout.md,
+    paddingTop: Layout.sm,
+    marginTop: Layout.sm,
   },
-  actionButton: {
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 6,
     minHeight: Layout.minTouchTarget,
     justifyContent: 'center',
-    paddingRight: Layout.md,
-  },
-  actionButtonActive: {
-    opacity: 0.8,
   },
   actionText: {
-    fontSize: Typography.base,
+    fontSize: Typography.xs,
     color: Colors.text2,
+    fontWeight: '500',
   },
   actionTextActive: {
     color: Colors.gold,
+    fontWeight: '700',
   },
   commentsLabel: {
     paddingHorizontal: Layout.md,
@@ -460,14 +562,15 @@ const styles = StyleSheet.create({
   },
   commentCard: {
     paddingHorizontal: Layout.md,
-    paddingVertical: Layout.md,
+    paddingVertical: Layout.sm,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+    backgroundColor: Colors.surface,
   },
   commentHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Layout.sm,
+    marginBottom: 4,
     gap: Layout.sm,
   },
   avatar: {
@@ -479,6 +582,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: Layout.avatarSm,
+    height: Layout.avatarSm,
+    borderRadius: Layout.avatarSm / 2,
   },
   avatarText: {
     color: Colors.gold,
@@ -502,6 +611,88 @@ const styles = StyleSheet.create({
     color: Colors.text2,
     lineHeight: Typography.base * 1.6,
   },
+  commentActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 4,
+    flexWrap: 'wrap',
+  },
+  commentReactionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: Colors.surface2,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  commentReactionChipActive: {
+    backgroundColor: Colors.goldDim,
+    borderColor: Colors.gold,
+  },
+  commentReactionEmoji: {
+    fontSize: 12,
+  },
+  commentReactionCount: {
+    fontSize: 10,
+    color: Colors.text2,
+    fontWeight: '600',
+  },
+  commentReactionCountActive: {
+    color: Colors.gold,
+  },
+  commentActionBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    minHeight: Layout.minTouchTarget,
+    justifyContent: 'center',
+  },
+  commentActionBtnText: {
+    fontSize: Typography.xs,
+    color: Colors.text3,
+    fontWeight: '500',
+  },
+  commentActionBtnTextActive: {
+    color: Colors.gold,
+    fontWeight: '700',
+  },
+  commentReactionPicker: {
+    flexDirection: 'row',
+    gap: 4,
+    backgroundColor: Colors.surface2,
+    borderRadius: Layout.radius,
+    padding: Layout.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginTop: Layout.sm,
+    alignSelf: 'flex-start',
+  },
+  repliesContainer: {
+    marginTop: Layout.sm,
+    marginLeft: Layout.md,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.border,
+    paddingLeft: Layout.sm,
+  },
+  replyCard: {
+    paddingVertical: 6,
+  },
+  reactionOption: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Layout.radiusSm,
+  },
+  reactionOptionActive: {
+    backgroundColor: Colors.goldDim,
+  },
+  reactionOptionEmoji: {
+    fontSize: 20,
+  },
   emptyComments: {
     padding: Layout.xl,
     alignItems: 'center',
@@ -511,13 +702,42 @@ const styles = StyleSheet.create({
     color: Colors.text3,
     textAlign: 'center',
   },
-  inputContainer: {
+inputContainer: {
+  flexDirection: 'row',
+  alignItems: 'flex-end',
+  padding: Layout.md,
+  borderTopWidth: 1,
+  borderTopColor: Colors.border,
+  backgroundColor: Colors.surface,
+  gap: Layout.sm,
+},
+  replyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+    backgroundColor: Colors.surface2,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  replyBannerText: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
+    fontWeight: '500',
+  },
+  replyBannerClose: {
+    fontSize: Typography.base,
+    color: Colors.text3,
+    paddingLeft: Layout.md,
+    lineHeight: Layout.minTouchTarget,
+  },
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: Layout.md,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.surface,
+    paddingHorizontal: Layout.md,
+    paddingTop: Layout.sm,
+    paddingBottom: Platform.OS === 'ios' ? Layout.lg : Layout.md,
     gap: Layout.sm,
   },
   commentInput: {
@@ -534,7 +754,7 @@ const styles = StyleSheet.create({
     minHeight: Layout.buttonHeight,
   },
   sendButton: {
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.sidebar,
     borderRadius: Layout.radiusSm,
     paddingHorizontal: Layout.md,
     paddingVertical: Layout.sm,
@@ -546,7 +766,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   sendButtonText: {
-    color: Colors.bg,
+    color: Colors.gold,
     fontWeight: '700',
     fontSize: Typography.base,
   },
