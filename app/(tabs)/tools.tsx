@@ -17,6 +17,7 @@ import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 
 interface Tool {
   id: string;
@@ -43,6 +44,7 @@ export default function ToolsScreen() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const unreadCount = useUnreadCount();
 
   useEffect(() => {
     loadTools();
@@ -88,7 +90,7 @@ export default function ToolsScreen() {
 
   return (
     <View style={styles.container}>
-      <Header subtitle="Resources & Tools" />
+      <Header subtitle="Resources & Tools" notificationCount={unreadCount} />
 
       <ScrollView
         contentContainerStyle={styles.content}

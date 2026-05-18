@@ -157,7 +157,7 @@ const insets = useSafeAreaInsets();
   }, [threadId]);
 
   const handlePostComment = async () => {
-    if ((!newComment.trim() && !pendingGifUrl) || !user || !threadId) return;
+    if (!newComment.trim() || !user || !threadId) return;
     setPosting(true);
     try {
       await addDoc(
@@ -166,18 +166,30 @@ const insets = useSafeAreaInsets();
           content: newComment.trim(),
           authorId: user.uid,
           authorName: user.displayName || 'Member',
-          authorPhoto: user.photoURL || '',
-          parentId: replyTo?.id || null,
-          ...(pendingGifUrl ? { gifUrl: pendingGifUrl } : {}),
+          authorPhotoURL: user.photoURL || '',
+          displayName: user.displayName || 'Member',
           createdAt: serverTimestamp(),
+          likes: 0,
         }
       );
+
       await updateDoc(doc(db, 'threads', threadId), {
         commentCount: increment(1),
       });
+
+      if (thread && thread.authorId !== user.uid) {
+        await addDoc(collection(db, 'notifications'), {
+          userId: thread.authorId,
+          type: 'comment',
+          message: `${user.displayName || 'Someone'} commented on your thread`,
+          threadId: threadId,
+          threadTitle: thread.title,
+          read: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+
       setNewComment('');
-      setReplyTo(null);
-      setPendingGifUrl(null);
     } catch (err) {
       console.log('Comment error:', err);
     } finally {
@@ -195,6 +207,18 @@ const insets = useSafeAreaInsets();
       ? { ...prev, likes: (prev.likes || 0) + 1 }
       : prev
     );
+
+    if (thread && thread.authorId !== user?.uid) {
+      await addDoc(collection(db, 'notifications'), {
+        userId: thread.authorId,
+        type: 'like',
+        message: `${user?.displayName || 'Someone'} liked your thread`,
+        threadId: threadId,
+        threadTitle: thread.title,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+    }
   };
 
   const fetchGifs = async (q: string) => {

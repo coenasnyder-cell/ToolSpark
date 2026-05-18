@@ -27,6 +27,10 @@ import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -45,10 +49,18 @@ export default function LoginScreen() {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com',
+      iosClientId: '82966513396-80ak77ileqnvd3i5objrdu58eo4nc8ii.apps.googleusercontent.com',
+    });
+  }, []);
+
+  useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
+  
 
   function routeAfterAuth() {
     if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
@@ -95,6 +107,21 @@ export default function LoginScreen() {
     }
 
     routeAfterAuth();
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signIn();
+      const { idToken } = await GoogleSignin.getTokens();
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      await handleAuthSuccess(userCredential.user);
+    } catch (error: any) {
+      if (error.code !== statusCodes.SIGN_IN_CANCELLED) {
+        console.log('Google sign in error:', error);
+      }
+    }
   };
 
   const handleEmailLogin = async () => {
@@ -223,10 +250,9 @@ export default function LoginScreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.googleButton}
-          onPress={() => {}}
-          disabled={submitting || googleBusy}
-        >
+         style={styles.googleButton}
+         onPress={handleGoogleLogin}
+          >
           <AntDesign name="google" size={18} color={Colors.gold} />
           <Text style={styles.googleButtonText}>
             Continue with Google
@@ -234,11 +260,10 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <View style={styles.bottomLinks}>
-          <TouchableOpacity 
-            onPress={() => router.push('/(auth)/forgot-password' as any)}
-          >
-            <Text style={styles.linkText}>Forgot password?</Text>
-          </TouchableOpacity>
+         <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password' as any)}
+        >
+        <Text style={styles.linkText}>Forgot password?</Text>
+        </TouchableOpacity>
 
           <View style={styles.signupRow}>
             <Text style={styles.mutedText}>

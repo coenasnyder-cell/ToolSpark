@@ -37,7 +37,7 @@ import FormInput from '../../components/Shared/FormInput';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import ListHeader from '../../components/Community/ListHeader';
-
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 interface Thread {
   id: string;
   title: string;
@@ -162,14 +162,30 @@ export default function CommunityScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [nextEvent, setNextEvent] = useState<any>(null);
+  const unreadCount = useUnreadCount();
 
   const handleLike = async (threadId: string) => {
     if (likedThreadIds.has(threadId)) return;
     setLikedThreadIds(prev => new Set(prev).add(threadId));
+
+    const thread = threads.find(t => t.id === threadId);
+
     await updateDoc(doc(db, 'threads', threadId), { likes: increment(1) });
     setThreads(prev => prev.map(t =>
       t.id === threadId ? { ...t, likes: (t.likes || 0) + 1 } : t
     ));
+
+    if (thread && thread.authorId !== user?.uid) {
+      await addDoc(collection(db, 'notifications'), {
+        userId: thread.authorId,
+        type: 'like',
+        message: `${user?.displayName || 'Someone'} liked your thread`,
+        threadId: threadId,
+        threadTitle: thread.title,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+    }
   };
 
   useEffect(() => {
@@ -392,7 +408,7 @@ export default function CommunityScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Header
-
+        notificationCount={unreadCount}
         showSearch
         isSearching={isSearching}
         searchQuery={searchQuery}

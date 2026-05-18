@@ -27,6 +27,7 @@ import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 
 interface UserProfile {
   displayName: string;
@@ -56,6 +57,7 @@ export default function DashboardHubScreen() {
   const [sessionCount, setSessionCount] = useState(0);
   const [daysActive, setDaysActive] = useState(0);
   const [events, setEvents] = useState<Event[]>([]);
+  const unreadCount = useUnreadCount();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -176,7 +178,7 @@ export default function DashboardHubScreen() {
 
   return (
     <View style={styles.container}>
-      <Header subtitle="Dashboard" />
+      <Header subtitle="Dashboard" notificationCount={unreadCount} />
 
       <ScrollView
         contentContainerStyle={styles.content}

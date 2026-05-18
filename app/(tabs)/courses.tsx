@@ -23,6 +23,7 @@ import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
 
 interface Course {
   id: string;
@@ -48,6 +49,7 @@ export default function DashboardScreen() {
   const [progress, setProgress] = useState<Record<string, UserProgress>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const unreadCount = useUnreadCount();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -123,7 +125,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Header subtitle="Builder Platform" />
+      <Header subtitle="Builder Platform" notificationCount={unreadCount} />
 
       <ScrollView
         contentContainerStyle={styles.content}

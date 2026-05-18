@@ -9,14 +9,38 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mycompany.toolspark"
+      "bundleIdentifier": "com.mycompany.toolspark",
+      "associatedDomains": [
+        "applinks:toolspark.co"
+      ],
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a profile picture.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.mycompany.toolspark",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#0C0B09"
-      }
+        "backgroundColor": "#F5F3EF"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "toolspark.co",
+              "pathPrefix": "/auth-action"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -32,10 +56,17 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0C0B09",
+          "backgroundColor": "#F5F3EF",
           "dark": {
-            "backgroundColor": "#0C0B09"
+            "backgroundColor": "#1A1916"
           }
+        }
+      ],
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.82966513396-80ak77ileqnvd3i5objrdu58eo4nc8ii"
         }
       ]
     ],
