@@ -34,7 +34,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="dashboard"
+        name="courses"
         options={{
           title: 'Courses',
           tabBarIcon: ({ color }) => (
@@ -52,11 +52,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="dashboard"
         options={{
-          title: 'Profile',
+          title: 'Dashboard',
           tabBarIcon: ({ color }) => (
-            <TabIcon symbol="👤" color={color} />
+            <TabIcon symbol="⊞" color={color} />
           ),
         }}
       />

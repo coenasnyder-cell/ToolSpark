@@ -6,113 +6,125 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {
+  doc,
+  getDoc,
   collection,
   query,
   where,
+  getCountFromServer,
   getDocs,
   orderBy,
-  doc,
-  getDoc,
+  limit,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
 
-interface Course {
+interface UserProfile {
+  displayName: string;
+  userEmail: string;
+  userRole: string;
+  createdAt: any;
+  photoURL: string;
+  bio: string;
+}
+
+interface Event {
   id: string;
-  title: string;
-  description: string;
-  category: string;
-  isFree: boolean;
-  isPublished: boolean;
-  order: number;
-  totallessons: number;
+  eventTitle: string;
+  eventStart: string;
+  eventURL: string;
+  eventLocation: string;
+  status: string;
+  isRecurring: boolean;
 }
 
-interface UserProgress {
-  completedLessons: string[];
-  percentComplete: number;
-  lastLessonId: string;
-}
-
-export default function DashboardScreen() {
+export default function DashboardHubScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [progress, setProgress] = useState<Record<string, UserProgress>>({});
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [threadCount, setThreadCount] = useState(0);
+  const [sessionCount, setSessionCount] = useState(0);
+  const [daysActive, setDaysActive] = useState(0);
+  const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        await loadCourses(u);
+        await loadProfile(u);
+        await loadStats(u);
+        await loadEvents();
       }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
-  const loadCourses = async (u: User) => {
-    try {
-      // Load published courses
-      const coursesQuery = query(
-        collection(db, 'courses'),
-        where('isPublished', '==', true),
-        orderBy('order', 'asc')
-      );
-      const coursesSnap = await getDocs(coursesQuery);
-      const coursesData = coursesSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Course[];
-      setCourses(coursesData);
-
-      // Load progress for each course
-      const progressData: Record<string, UserProgress> = {};
-      for (const course of coursesData) {
-        const progressId = `${u.uid}_${course.id}`;
-        const progressRef = doc(db, 'userProgress', progressId);
-        const progressSnap = await getDoc(progressRef);
-        if (progressSnap.exists()) {
-          progressData[course.id] = progressSnap.data() as UserProgress;
-        }
+  const loadProfile = async (u: User) => {
+    const userRef = doc(db, 'users', u.uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      const data = snap.data() as UserProfile;
+      setProfile(data);
+      if (data.createdAt) {
+        const created = data.createdAt.toDate?.() ||
+          new Date(data.createdAt);
+        const days = Math.floor(
+          (new Date().getTime() - created.getTime()) /
+          (1000 * 60 * 60 * 24)
+        );
+        setDaysActive(days);
       }
-      setProgress(progressData);
-    } catch (err: any) {
-      console.error('Load courses error:', err);
-      setError(err?.message ?? 'Failed to load courses');
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category?.toLowerCase()) {
-      case 'foundations': return Colors.green;
-      case 'systems': return Colors.purple;
-      case 'growth': return Colors.coral;
-      default: return Colors.gold;
+  const loadStats = async (u: User) => {
+    try {
+      const threadsQuery = query(
+        collection(db, 'threads'),
+        where('authorId', '==', u.uid)
+      );
+      const threadsSnap = await getCountFromServer(threadsQuery);
+      setThreadCount(threadsSnap.data().count);
+
+      const sessionsQuery = query(
+        collection(db, 'clarity_sessions'),
+        where('userId', '==', u.uid)
+      );
+      const sessionsSnap = await getCountFromServer(sessionsQuery);
+      setSessionCount(sessionsSnap.data().count);
+    } catch (err) {
+      console.log('Stats error:', err);
     }
   };
 
-  const getCompletedCount = (courseId: string, totalLessons: number) => {
-    const p = progress[courseId];
-    if (!p || !p.completedLessons) return 0;
-    return p.completedLessons.length;
+  const loadEvents = async () => {
+    try {
+      const eventsQuery = query(
+        collection(db, 'Events'),
+        orderBy('date', 'asc'),
+        limit(3)
+      );
+      const snap = await getDocs(eventsQuery);
+      const data = snap.docs.map(d => ({
+        id: d.id,
+        ...d.data(),
+      })) as Event[];
+      setEvents(data);
+    } catch (err) {
+      console.log('Events error:', err);
+    }
   };
-
-  const getProgressPercent = (courseId: string, totalLessons: number) => {
-    const completed = getCompletedCount(courseId, totalLessons);
-    if (!totalLessons) return 0;
-    return Math.round((completed / totalLessons) * 100);
-  };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -121,128 +133,185 @@ export default function DashboardScreen() {
     );
   }
 
+  const firstName = profile?.displayName?.split(' ')[0] ||
+    user?.displayName?.split(' ')[0] || 'there';
+  const photoURL = profile?.photoURL || user?.photoURL;
+
+  const hubCards = [
+    {
+      id: 'profile',
+      title: 'My Profile',
+      subtitle: profile?.displayName || 'Edit your profile',
+      icon: 'person-outline' as const,
+      color: Colors.gold,
+      route: '/edit-profile',
+    },
+    {
+      id: 'members',
+      title: 'Members',
+      subtitle: 'View the community',
+      icon: 'people-outline' as const,
+      color: Colors.green,
+      route: '/members',
+    },
+    {
+      id: 'events',
+      title: 'Events',
+      subtitle: events.length > 0
+        ? `${events.length} upcoming`
+        : 'No upcoming events',
+      icon: 'calendar-outline' as const,
+      color: Colors.purple,
+      route: '/events',
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      subtitle: 'Account & preferences',
+      icon: 'settings-outline' as const,
+      color: Colors.text2,
+      route: '/settings',
+    },
+  ];
+
   return (
     <View style={styles.container}>
-      <Header subtitle="Builder Platform" />
+      <Header subtitle="Dashboard" />
 
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Section title */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Courses & Training</Text>
-          <Text style={styles.sectionSubtitle}>
-            Step-by-step programs to help you build and sell AI tools
-          </Text>
+        {/* Welcome + avatar row */}
+        <View style={styles.welcomeRow}>
+          <View style={styles.welcomeText}>
+            <Text style={styles.welcomeLabel}>Welcome back</Text>
+            <Text style={styles.welcomeName}>{firstName} 👋</Text>
+          </View>
+          {photoURL ? (
+            <Image
+              source={{ uri: photoURL }}
+              style={styles.welcomeAvatar}
+            />
+          ) : (
+            <View style={styles.welcomeAvatarFallback}>
+              <Text style={styles.welcomeAvatarText}>
+                {firstName.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Course cards */}
-        {error ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>⚠️</Text>
-            <Text style={styles.emptyTitle}>Error loading courses</Text>
-            <Text style={styles.emptySubtitle}>{error}</Text>
+        {/* Stats row */}
+        <View style={styles.statsCard}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{threadCount}</Text>
+            <Text style={styles.statLabel}>Threads</Text>
           </View>
-        ) : courses.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={styles.emptyTitle}>No courses yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Check back soon — courses are coming
-            </Text>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{sessionCount}</Text>
+            <Text style={styles.statLabel}>Sessions</Text>
           </View>
-        ) : (
-          courses.map((course) => {
-            const completed = getCompletedCount(
-              course.id,
-              course.totallessons
-            );
-            const percent = getProgressPercent(
-              course.id,
-              course.totallessons
-            );
-            const total = course.totallessons || 0;
-            const isStarted = completed > 0;
-            const isComplete = completed >= total && total > 0;
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{daysActive}</Text>
+            <Text style={styles.statLabel}>Days Active</Text>
+          </View>
+        </View>
 
-            return (
-              <TouchableOpacity
-                key={course.id}
-                style={styles.courseCard}
-                activeOpacity={0.8}
-                onPress={() => router.push({
-                  pathname: '/course-player',
-                  params: { courseId: course.id }
-                } as any)}
-              >
-                {/* Category tag */}
-                <View style={styles.courseTop}>
-                  <View style={[
-                    styles.categoryTag,
-                    { borderColor: getCategoryColor(course.category) }
-                  ]}>
-                    <Text style={[
-                      styles.categoryTagText,
-                      { color: getCategoryColor(course.category) }
-                    ]}>
-                      {course.category?.toUpperCase() || 'COURSE'}
-                    </Text>
-                  </View>
+        {/* Hub cards grid */}
+        <View style={styles.cardGrid}>
+          {hubCards.map(card => (
+            <TouchableOpacity
+              key={card.id}
+              style={styles.hubCard}
+              activeOpacity={0.8}
+              onPress={() => router.push(card.route as any)}
+            >
+              <View style={[
+                styles.hubCardIcon,
+                { backgroundColor: card.color + '20' }
+              ]}>
+                <Ionicons
+                  name={card.icon}
+                  size={24}
+                  color={card.color}
+                />
+              </View>
+              <Text style={styles.hubCardTitle}>{card.title}</Text>
+              <Text style={styles.hubCardSubtitle} numberOfLines={1}>
+                {card.subtitle}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-                  {/* Status badge */}
-                  {isComplete ? (
-                    <View style={styles.completeBadge}>
-                      <Text style={styles.completeBadgeText}>
-                        ✓ Complete
-                      </Text>
-                    </View>
-                  ) : isStarted ? (
-                    <View style={styles.inProgressBadge}>
-                      <Text style={styles.inProgressBadgeText}>
-                        In Progress
-                      </Text>
-                    </View>
-                  ) : course.isFree ? (
-                    <View style={styles.freeBadge}>
-                      <Text style={styles.freeBadgeText}>Free</Text>
-                    </View>
-                  ) : null}
-                </View>
+        {/* Upcoming events */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Upcoming Events</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/events' as any)}
+            >
+              <Text style={styles.sectionLink}>View all</Text>
+            </TouchableOpacity>
+          </View>
 
-                {/* Title and description */}
-                <Text style={styles.courseTitle}>{course.title}</Text>
-                <Text style={styles.courseDesc} numberOfLines={2}>
-                  {course.description}
-                </Text>
+          {events.length === 0 ? (
+            <View style={styles.emptyEvents}>
+              <Text style={styles.emptyEventsText}>
+                No upcoming events · Check back soon
+              </Text>
+            </View>
+          ) : (
+        events.map(event => (
+      <TouchableOpacity
+      key={event.id}
+      style={styles.eventCard}
+      activeOpacity={0.8}
+      >
+    <View style={styles.eventDateBadge}>
+      <Ionicons
+        name="calendar-outline"
+        size={16}
+        color={Colors.gold}
+      />
+    </View>
+    <View style={styles.eventInfo}>
+      <Text style={styles.eventTitle}>
+        {event.eventTitle}
+      </Text>
+      <Text style={styles.eventDate}>
+        {event.eventStart} · {event.eventLocation}
+      </Text>
+    </View>
+    <Text style={styles.eventArrow}>→</Text>
+    </TouchableOpacity>
+    ))
+          )}
+        </View>
 
-                {/* Progress bar */}
-                <View style={styles.progressSection}>
-                  <View style={styles.progressBar}>
-                    <View style={[
-                      styles.progressFill,
-                      { width: `${percent}%` }
-                    ]} />
-                  </View>
-                  <Text style={styles.progressText}>
-                    {completed} of {total} lessons
-                  </Text>
-                </View>
-
-                {/* CTA */}
-                <View style={styles.courseFooter}>
-                  <Text style={styles.courseAction}>
-                    {isComplete
-                      ? 'Review course →'
-                      : isStarted
-                      ? 'Continue →'
-                      : 'Start course →'}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })
+        {/* Admin link */}
+        {profile?.userRole === 'admin' && (
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={styles.adminCard}
+              onPress={() => router.push('/admin' as any)}
+            >
+              <Ionicons
+                name="shield-outline"
+                size={20}
+                color={Colors.gold}
+              />
+              <Text style={styles.adminCardText}>
+                Admin Dashboard
+              </Text>
+              <Text style={styles.eventArrow}>→</Text>
+            </TouchableOpacity>
+          </View>
         )}
+
       </ScrollView>
     </View>
   );
@@ -260,144 +329,198 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: Layout.md,
     paddingBottom: Layout.tabBarHeight + Layout.xl,
   },
-  sectionHeader: {
-    marginBottom: Layout.lg,
-    paddingTop: Layout.sm,
+  welcomeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.lg,
+    backgroundColor: Colors.sidebar,
   },
-  sectionTitle: {
+  welcomeText: {
+    flex: 1,
+  },
+  welcomeLabel: {
+    fontSize: Typography.sm,
+    color: Colors.text3,
+    marginBottom: 2,
+  },
+  welcomeName: {
     fontSize: Typography.xl,
     fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 4,
+    color: '#F5F3EF',
   },
-  sectionSubtitle: {
-    fontSize: Typography.sm,
-    color: Colors.text2,
-    lineHeight: Typography.sm * 1.6,
+  welcomeAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: Colors.gold,
   },
-  courseCard: {
+  welcomeAvatarFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  welcomeAvatarText: {
+    fontSize: Typography.lg,
+    fontWeight: '700',
+    color: Colors.bg,
+  },
+  statsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: Layout.radiusLg,
+    marginHorizontal: Layout.md,
+    marginTop: Layout.md,
+    borderRadius: Layout.radius,
     padding: Layout.md,
-    marginBottom: Layout.md,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginBottom: Layout.md,
   },
-  courseTop: {
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: Typography.xl,
+    fontWeight: '700',
+    color: Colors.gold,
+  },
+  statLabel: {
+    fontSize: Typography.xs,
+    color: Colors.text3,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: Colors.border,
+  },
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: Layout.md,
+    gap: Layout.md,
+    marginBottom: Layout.lg,
+  },
+  hubCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    width: '47%',
+    minHeight: 110,
+  },
+  hubCardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: Layout.radiusSm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Layout.sm,
+  },
+  hubCardTitle: {
+    fontSize: Typography.base,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  hubCardSubtitle: {
+    fontSize: Typography.xs,
+    color: Colors.text2,
+  },
+  section: {
+    paddingHorizontal: Layout.md,
+    marginBottom: Layout.lg,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Layout.sm,
   },
-  categoryTag: {
-    borderWidth: 1,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.sm,
-    paddingVertical: 3,
-  },
-  categoryTagText: {
-    fontSize: 10,
+  sectionTitle: {
+    fontSize: Typography.md,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    color: Colors.text,
   },
-  completeBadge: {
-    backgroundColor: Colors.green,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.sm,
-    paddingVertical: 3,
-  },
-  completeBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  inProgressBadge: {
-    backgroundColor: Colors.goldDim,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.sm,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: Colors.gold,
-  },
-  inProgressBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
+  sectionLink: {
+    fontSize: Typography.sm,
     color: Colors.gold,
-  },
-  freeBadge: {
-    backgroundColor: Colors.surface2,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.sm,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  freeBadgeText: {
-    fontSize: 11,
-    color: Colors.text2,
     fontWeight: '600',
   },
-  courseTitle: {
-    fontSize: Typography.lg,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 6,
+  emptyEvents: {
+    backgroundColor: Colors.surface,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
   },
-  courseDesc: {
+  emptyEventsText: {
     fontSize: Typography.sm,
-    color: Colors.text2,
-    lineHeight: Typography.sm * 1.6,
-    marginBottom: Layout.md,
-  },
-  progressSection: {
-    marginBottom: Layout.md,
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.gold,
-    borderRadius: 2,
-  },
-  progressText: {
-    fontSize: Typography.xs,
     color: Colors.text3,
   },
-  courseFooter: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: Layout.sm,
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Layout.sm,
+    gap: Layout.md,
   },
-  courseAction: {
-    fontSize: Typography.sm,
+  eventDateBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: Layout.radiusSm,
+    backgroundColor: Colors.goldDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eventInfo: {
+    flex: 1,
+  },
+  eventTitle: {
+    fontSize: Typography.base,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  eventDate: {
+    fontSize: Typography.xs,
+    color: Colors.text2,
+  },
+  eventArrow: {
+    fontSize: Typography.base,
+    color: Colors.text3,
+  },
+  adminCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.goldDim,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+    gap: Layout.md,
+  },
+  adminCardText: {
+    flex: 1,
+    fontSize: Typography.base,
     fontWeight: '700',
     color: Colors.gold,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: Layout.xxl,
-  },
-  emptyIcon: {
-    fontSize: 40,
-    marginBottom: Layout.md,
-  },
-  emptyTitle: {
-    fontSize: Typography.lg,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: Layout.sm,
-  },
-  emptySubtitle: {
-    fontSize: Typography.base,
-    color: Colors.text2,
-    textAlign: 'center',
   },
 });

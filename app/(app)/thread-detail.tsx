@@ -9,6 +9,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  Modal,
+  Image as RNImage,
 } from 'react-native';
 import {
   collection,
@@ -21,10 +24,12 @@ import {
   getDoc,
   updateDoc,
   increment,
+  deleteDoc,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { auth, db } from '../../services/firebase';
+import { GIPHY_API_KEY } from '../../constants/config';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
@@ -34,12 +39,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
+
 interface Comment {
   id: string;
   content: string;
   authorId: string;
   authorName: string;
+  displayName?: string;
   authorPhoto: string;
+  authorPhotoURL?: string;
+  gifUrl?: string;
   parentId?: string;
   likes?: number;
   createdAt: any;
@@ -75,6 +84,17 @@ export default function ThreadDetailScreen() {
   const [liked, setLiked] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; authorName: string } | null>(null);
   const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(new Set());
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [showEditThread, setShowEditThread] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [gifQuery, setGifQuery] = useState('');
+  const [gifResults, setGifResults] = useState<any[]>([]);
+  const [gifLoading, setGifLoading] = useState(false);
+  const [pendingGifUrl, setPendingGifUrl] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
 const insets = useSafeAreaInsets();
   const handleCommentLike = async (commentId: string) => {
@@ -88,9 +108,17 @@ const insets = useSafeAreaInsets();
     ));
   };
 
-  // Auth state
+  // Auth state + admin check
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      setUser(authUser);
+      if (authUser) {
+        const userSnap = await getDoc(doc(db, 'users', authUser.uid));
+        setIsAdmin(userSnap.data()?.userRole === 'admin');
+      } else {
+        setIsAdmin(false);
+      }
+    });
     return unsubscribe;
   }, []);
 
@@ -129,7 +157,7 @@ const insets = useSafeAreaInsets();
   }, [threadId]);
 
   const handlePostComment = async () => {
-    if (!newComment.trim() || !user || !threadId) return;
+    if ((!newComment.trim() && !pendingGifUrl) || !user || !threadId) return;
     setPosting(true);
     try {
       await addDoc(
@@ -140,6 +168,7 @@ const insets = useSafeAreaInsets();
           authorName: user.displayName || 'Member',
           authorPhoto: user.photoURL || '',
           parentId: replyTo?.id || null,
+          ...(pendingGifUrl ? { gifUrl: pendingGifUrl } : {}),
           createdAt: serverTimestamp(),
         }
       );
@@ -148,6 +177,7 @@ const insets = useSafeAreaInsets();
       });
       setNewComment('');
       setReplyTo(null);
+      setPendingGifUrl(null);
     } catch (err) {
       console.log('Comment error:', err);
     } finally {
@@ -165,6 +195,64 @@ const insets = useSafeAreaInsets();
       ? { ...prev, likes: (prev.likes || 0) + 1 }
       : prev
     );
+  };
+
+  const fetchGifs = async (q: string) => {
+    setGifLoading(true);
+    const endpoint = q.trim()
+      ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(q)}&limit=24&rating=g`
+      : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=24&rating=g`;
+    try {
+      const res = await fetch(endpoint);
+      const json = await res.json();
+      setGifResults(json.data || []);
+    } catch {
+      setGifResults([]);
+    } finally {
+      setGifLoading(false);
+    }
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    Alert.alert('Delete Comment', 'Are you sure you want to delete this comment?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive', onPress: async () => {
+          await deleteDoc(doc(db, 'threads', threadId!, 'comments', commentId));
+          await updateDoc(doc(db, 'threads', threadId!), { commentCount: increment(-1) });
+        },
+      },
+    ]);
+  };
+
+  const handleSaveEditComment = async (commentId: string) => {
+    if (!editingCommentText.trim()) return;
+    await updateDoc(doc(db, 'threads', threadId!, 'comments', commentId), {
+      content: editingCommentText.trim(),
+    });
+    setEditingCommentId(null);
+  };
+
+  const handleDeleteThread = () => {
+    Alert.alert('Delete Thread', 'Are you sure you want to delete this thread? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive', onPress: async () => {
+          await deleteDoc(doc(db, 'threads', threadId!));
+          router.back();
+        },
+      },
+    ]);
+  };
+
+  const handleSaveEditThread = async () => {
+    if (!editTitle.trim() || !editContent.trim()) return;
+    await updateDoc(doc(db, 'threads', threadId!), {
+      title: editTitle.trim(),
+      content: editContent.trim(),
+    });
+    setThread(prev => prev ? { ...prev, title: editTitle.trim(), content: editContent.trim() } : prev);
+    setShowEditThread(false);
   };
 
   const formatTime = (timestamp: any) => {
@@ -185,26 +273,65 @@ const insets = useSafeAreaInsets();
     return (
       <View style={styles.commentCard}>
         <View style={styles.commentHeader}>
-          <View style={styles.avatar}>
-            {item.authorPhoto ? (
-              <Image
-                source={{ uri: item.authorPhoto }}
-                style={styles.avatarImage}
-                contentFit="cover"
-              />
-            ) : (
+          {(item.authorPhotoURL || item.authorPhoto) ? (
+            <Image
+              source={{ uri: item.authorPhotoURL || item.authorPhoto }}
+              style={styles.avatarImage}
+              contentFit="cover"
+            />
+          ) : (
+            <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
+                {(item.displayName || item.authorName)?.charAt(0)?.toUpperCase() || 'M'}
               </Text>
-            )}
-          </View>
+            </View>
+          )}
           <View style={styles.commentMeta}>
-            <Text style={styles.commentAuthor}>{item.authorName}</Text>
+            <Text style={styles.commentAuthor}>
+              {item.displayName || item.authorName || 'Member'}
+            </Text>
             <Text style={styles.commentTime}>{formatTime(item.createdAt)}</Text>
           </View>
         </View>
 
-        <Text style={styles.commentContent}>{item.content}</Text>
+        {editingCommentId === item.id ? (
+          <View style={styles.inlineEditContainer}>
+            <TextInput
+              style={styles.inlineEditInput}
+              value={editingCommentText}
+              onChangeText={setEditingCommentText}
+              multiline
+              autoFocus
+            />
+            <View style={styles.inlineEditActions}>
+              <TouchableOpacity
+                style={styles.inlineEditCancel}
+                onPress={() => setEditingCommentId(null)}
+              >
+                <Text style={styles.inlineEditCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.inlineEditSave}
+                onPress={() => handleSaveEditComment(item.id)}
+              >
+                <Text style={styles.inlineEditSaveText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <>
+            {item.content ? (
+              <Text style={styles.commentContent}>{item.content}</Text>
+            ) : null}
+            {item.gifUrl ? (
+              <RNImage
+                source={{ uri: item.gifUrl }}
+                style={styles.gifImage}
+                resizeMode="contain"
+              />
+            ) : null}
+          </>
+        )}
 
         {/* Action buttons */}
         <View style={styles.commentActions}>
@@ -229,6 +356,25 @@ const insets = useSafeAreaInsets();
           >
             <Ionicons name="chatbubble-outline" size={14} color={Colors.text3} />
           </TouchableOpacity>
+          {user?.uid === item.authorId && (
+            <TouchableOpacity
+              style={styles.commentActionBtn}
+              onPress={() => {
+                setEditingCommentId(item.id);
+                setEditingCommentText(item.content);
+              }}
+            >
+              <Ionicons name="pencil-outline" size={14} color={Colors.text3} />
+            </TouchableOpacity>
+          )}
+          {(user?.uid === item.authorId || isAdmin) && (
+            <TouchableOpacity
+              style={styles.commentActionBtn}
+              onPress={() => handleDeleteComment(item.id)}
+            >
+              <Ionicons name="trash-outline" size={14} color={Colors.text3} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Replies */}
@@ -313,7 +459,64 @@ const insets = useSafeAreaInsets();
               <Ionicons name="chatbubble-outline" size={16} color={Colors.text2} />
               <Text style={styles.actionText}>{thread?.commentCount || 0}</Text>
             </View>
+
+            <View style={styles.threadManageActions}>
+              {user?.uid === thread.authorId && (
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => {
+                    setEditTitle(thread.title);
+                    setEditContent(thread.content);
+                    setShowEditThread(true);
+                  }}
+                >
+                  <Ionicons name="pencil-outline" size={16} color={Colors.text2} />
+                </TouchableOpacity>
+              )}
+              {(user?.uid === thread.authorId || isAdmin) && (
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={handleDeleteThread}
+                >
+                  <Ionicons name="trash-outline" size={16} color={Colors.text2} />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
+
+          {showEditThread && (
+            <View style={styles.threadEditContainer}>
+              <TextInput
+                style={styles.threadEditTitleInput}
+                value={editTitle}
+                onChangeText={setEditTitle}
+                placeholder="Thread title"
+                placeholderTextColor={Colors.text3}
+              />
+              <TextInput
+                style={styles.threadEditContentInput}
+                value={editContent}
+                onChangeText={setEditContent}
+                placeholder="Thread content"
+                placeholderTextColor={Colors.text3}
+                multiline
+              />
+              <View style={styles.inlineEditActions}>
+                <TouchableOpacity
+                  style={styles.inlineEditCancel}
+                  onPress={() => setShowEditThread(false)}
+                >
+                  <Text style={styles.inlineEditCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.inlineEditSave}
+                  onPress={handleSaveEditThread}
+                >
+                  <Text style={styles.inlineEditSaveText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       )}
 
@@ -365,10 +568,7 @@ const insets = useSafeAreaInsets();
       />
 
       {/* Comment input */}
-      <View style={[
-  styles.inputContainer,
-  { paddingBottom: insets.bottom + Layout.sm }
-]}>
+      <View style={[styles.inputContainer, { paddingBottom: insets.bottom }]}>
         {replyTo && (
           <View style={styles.replyBanner}>
             <Text style={styles.replyBannerText}>Replying to @{replyTo.authorName}</Text>
@@ -378,23 +578,38 @@ const insets = useSafeAreaInsets();
           </View>
         )}
         <View style={styles.inputRow}>
-          <TextInput
-            style={styles.commentInput}
-            placeholder={replyTo ? `Reply to ${replyTo.authorName}...` : 'Add a comment...'}
-            placeholderTextColor={Colors.text3}
-            value={newComment}
-            onChangeText={setNewComment}
-            multiline
-            maxLength={500}
-            submitBehavior="newline"
-          />
+          {pendingGifUrl ? (
+            <View style={styles.gifPreviewContainer}>
+              <RNImage source={{ uri: pendingGifUrl }} style={styles.gifPreview} resizeMode="cover" />
+              <TouchableOpacity style={styles.gifPreviewRemove} onPress={() => setPendingGifUrl(null)}>
+                <Ionicons name="close-circle" size={18} color={Colors.text2} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TextInput
+              style={styles.commentInput}
+              placeholder={replyTo ? `Reply to ${replyTo.authorName}...` : 'Add a comment...'}
+              placeholderTextColor={Colors.text3}
+              value={newComment}
+              onChangeText={setNewComment}
+              multiline
+              maxLength={500}
+              submitBehavior="newline"
+            />
+          )}
+          <TouchableOpacity
+            style={styles.gifButton}
+            onPress={() => { setShowGifPicker(true); fetchGifs(''); }}
+          >
+            <Text style={styles.gifButtonText}>GIF</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.sendButton,
-              (!newComment.trim() || posting) && styles.sendButtonDisabled,
+              (!newComment.trim() && !pendingGifUrl || posting) && styles.sendButtonDisabled,
             ]}
             onPress={handlePostComment}
-            disabled={!newComment.trim() || posting}
+            disabled={(!newComment.trim() && !pendingGifUrl) || posting}
           >
             {posting ? (
               <ActivityIndicator color={Colors.bg} size="small" />
@@ -404,6 +619,54 @@ const insets = useSafeAreaInsets();
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* GIF Picker Modal */}
+      <Modal visible={showGifPicker} animationType="slide" presentationStyle="pageSheet">
+        <View style={styles.gifModal}>
+          <View style={styles.gifModalHeader}>
+            <Text style={styles.gifModalTitle}>Choose a GIF</Text>
+            <TouchableOpacity onPress={() => setShowGifPicker(false)}>
+              <Ionicons name="close" size={24} color={Colors.text} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.gifSearchRow}>
+            <TextInput
+              style={styles.gifSearchInput}
+              placeholder="Search GIFs..."
+              placeholderTextColor={Colors.text3}
+              value={gifQuery}
+              onChangeText={(q) => { setGifQuery(q); fetchGifs(q); }}
+              autoFocus
+            />
+          </View>
+          {gifLoading ? (
+            <ActivityIndicator color={Colors.gold} style={{ marginTop: Layout.xl }} />
+          ) : (
+            <FlatList
+              data={gifResults}
+              keyExtractor={(g) => g.id}
+              numColumns={2}
+              columnWrapperStyle={styles.gifGrid}
+              contentContainerStyle={{ paddingBottom: insets.bottom + Layout.md }}
+              renderItem={({ item }) => {
+                const url = item.images?.fixed_width?.url;
+                return (
+                  <TouchableOpacity
+                    style={styles.gifCell}
+                    onPress={() => {
+                      setPendingGifUrl(item.images?.original?.url || url);
+                      setShowGifPicker(false);
+                      setGifQuery('');
+                    }}
+                  >
+                    <RNImage source={{ uri: url }} style={styles.gifCellImage} resizeMode="cover" />
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -426,9 +689,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.md,
     paddingTop: 60,
     paddingBottom: Layout.md,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    backgroundColor: Colors.sidebar,
+    borderBottomWidth: 0,
   },
   backButton: {
     minHeight: Layout.minTouchTarget,
@@ -443,7 +705,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.md,
     fontWeight: '700',
-    color: Colors.text,
+    color: Colors.gold,
   },
   headerRight: {
     width: 60,
@@ -703,13 +965,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 inputContainer: {
-  flexDirection: 'row',
-  alignItems: 'flex-end',
-  padding: Layout.md,
+  flexDirection: 'column',
   borderTopWidth: 1,
   borderTopColor: Colors.border,
   backgroundColor: Colors.surface,
-  gap: Layout.sm,
 },
   replyBanner: {
     flexDirection: 'row',
@@ -734,40 +993,207 @@ inputContainer: {
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: Layout.md,
-    paddingTop: Layout.sm,
-    paddingBottom: Platform.OS === 'ios' ? Layout.lg : Layout.md,
+    paddingVertical: Layout.sm,
     gap: Layout.sm,
   },
   commentInput: {
-    flex: 1,
-    backgroundColor: Colors.surface2,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: Layout.radius,
-    paddingHorizontal: Layout.md,
-    paddingVertical: Layout.sm,
-    fontSize: Typography.base,
-    color: Colors.text,
-    maxHeight: 100,
-    minHeight: Layout.buttonHeight,
+   flex: 1,
+  backgroundColor: Colors.bg,     // beige input
+  borderWidth: 1,
+  borderColor: Colors.border,
+  borderRadius: Layout.radiusFull, // pill shape like iMessage
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+  fontSize: Typography.base,
+  color: Colors.text,              // dark text
+  maxHeight: 100,
+  minHeight: Layout.buttonHeight,
   },
   sendButton: {
-    backgroundColor: Colors.sidebar,
-    borderRadius: Layout.radiusSm,
-    paddingHorizontal: Layout.md,
-    paddingVertical: Layout.sm,
-    minHeight: Layout.buttonHeight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: Colors.sidebar,  // dark button
+  borderRadius: Layout.radiusSm,
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+  minHeight: Layout.buttonHeight,
+  justifyContent: 'center',
+  alignItems: 'center',
   },
   sendButtonDisabled: {
     opacity: 0.4,
   },
   sendButtonText: {
-    color: Colors.gold,
+    color: '#F5F3EF',
     fontWeight: '700',
     fontSize: Typography.base,
+  },
+  threadManageActions: {
+    flexDirection: 'row',
+    marginLeft: 'auto',
+  },
+  threadEditContainer: {
+    marginTop: Layout.md,
+    paddingTop: Layout.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  threadEditTitleInput: {
+    backgroundColor: Colors.bg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    padding: Layout.sm,
+    fontSize: Typography.md,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: Layout.sm,
+  },
+  threadEditContentInput: {
+    backgroundColor: Colors.bg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    padding: Layout.sm,
+    fontSize: Typography.base,
+    color: Colors.text,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: Layout.sm,
+  },
+  inlineEditContainer: {
+    marginTop: 4,
+  },
+  inlineEditInput: {
+    backgroundColor: Colors.bg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    padding: Layout.sm,
+    fontSize: Typography.base,
+    color: Colors.text,
+    minHeight: 60,
+    textAlignVertical: 'top',
+    marginBottom: Layout.sm,
+  },
+  inlineEditActions: {
+    flexDirection: 'row',
+    gap: Layout.sm,
+  },
+  inlineEditCancel: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: Layout.radiusSm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface2,
+  },
+  inlineEditCancelText: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
+    fontWeight: '600',
+  },
+  inlineEditSave: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: Layout.radiusSm,
+    backgroundColor: Colors.gold,
+  },
+  inlineEditSaveText: {
+    fontSize: Typography.sm,
+    color: Colors.bg,
+    fontWeight: '700',
+  },
+  commentAvatar: {
+  width: Layout.avatarSm,
+  height: Layout.avatarSm,
+  borderRadius: Layout.avatarSm / 2,
+},
+gifImage: {
+  width: 160,
+  height: 120,
+  borderRadius: Layout.radiusSm,
+  marginTop: Layout.sm,
+  alignSelf: 'flex-start',
+  backgroundColor: 'transparent',
+  overflow: 'hidden',
+},
+  gifButton: {
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 6,
+    borderRadius: Layout.radiusSm,
+    backgroundColor: Colors.sidebar,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: Layout.buttonHeight,
+  },
+  gifButtonText: {
+    fontSize: Typography.xs,
+    fontWeight: '700',
+    color: '#F5F3EF',
+    letterSpacing: 0.5,
+  },
+  gifPreviewContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gifPreview: {
+    width: 72,
+    height: 52,
+    borderRadius: Layout.radiusSm,
+  },
+  gifPreviewRemove: {
+    marginLeft: 4,
+  },
+  gifModal: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+  },
+  gifModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.md,
+    paddingTop: Layout.lg,
+    paddingBottom: Layout.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  gifModalTitle: {
+    fontSize: Typography.md,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  gifSearchRow: {
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+  },
+  gifSearchInput: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+    fontSize: Typography.base,
+    color: Colors.text,
+  },
+  gifGrid: {
+    paddingHorizontal: Layout.sm,
+    gap: Layout.sm,
+  },
+  gifCell: {
+    flex: 1,
+    margin: Layout.xs,
+    borderRadius: Layout.radiusSm,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+  },
+  gifCellImage: {
+    width: '100%',
+    height: 120,
   },
 });

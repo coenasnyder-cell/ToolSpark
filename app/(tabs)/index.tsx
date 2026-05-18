@@ -10,6 +10,7 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import {
   collection,
@@ -21,6 +22,9 @@ import {
   serverTimestamp,
   doc,
   getDoc,
+  updateDoc,
+  increment,
+  getDocs,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../../services/firebase';
@@ -31,6 +35,8 @@ import { useRouter } from 'expo-router';
 import Header from '../../components/Shared/Header';
 import FormInput from '../../components/Shared/FormInput';
 import { Image } from 'expo-image';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import ListHeader from '../../components/Community/ListHeader';
 
 interface Thread {
   id: string;
@@ -45,6 +51,19 @@ interface Thread {
   likes: number;
   commentCount: number;
   pinned: boolean;
+  imageURL: string;
+  createdAt: any;
+}
+interface Comment {
+  id: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  authorPhotoURL: string;
+  displayName: string;
+  gifUrl: string;
+  likes: number;
+  likedBy: string[];
   createdAt: any;
 }
 
@@ -105,22 +124,16 @@ const ThreadComposer = ({
         value={content}
         onChangeText={setContent}
         multiline
-        numberOfLines={4}
+        numberOfLines={2}
         blurOnSubmit={false}
         textAlignVertical="top"
       />
       <View style={styles.composerActions}>
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={onClose}
-        >
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.postButton,
-            posting && styles.disabledButton
-          ]}
+          style={[styles.postButton, posting && styles.disabledButton]}
           onPress={() => onPost(title, content)}
           disabled={posting}
         >
@@ -144,37 +157,96 @@ export default function CommunityScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showComposer, setShowComposer] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [likedThreadIds, setLikedThreadIds] = useState<Set<string>>(new Set());
+  const [isBanned, setIsBanned] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [nextEvent, setNextEvent] = useState<any>(null);
+
+  const handleLike = async (threadId: string) => {
+    if (likedThreadIds.has(threadId)) return;
+    setLikedThreadIds(prev => new Set(prev).add(threadId));
+    await updateDoc(doc(db, 'threads', threadId), { likes: increment(1) });
+    setThreads(prev => prev.map(t =>
+      t.id === threadId ? { ...t, likes: (t.likes || 0) + 1 } : t
+    ));
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return unsubscribe;
+    const now = Date.now();
+    const q = query(
+      collection(db, 'Events'),
+      orderBy('eventDate'),
+      limit(10)
+    );
+    getDocs(q).then(snap => {
+      const upcoming = snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as any))
+        .find(e => {
+          const ms = e.eventDate?.toDate?.()?.getTime() ?? new Date(e.eventDate).getTime();
+          return ms >= now;
+        });
+      setNextEvent(upcoming ?? null);
+    }).catch(() => setNextEvent(null));
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const q = query(
-      collection(db, 'threads'),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Thread[];
-      setThreads(data);
-      setLoading(false);
-      setRefreshing(false);
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      setUser(authUser);
+      if (authUser) {
+        const userSnap = await getDoc(doc(db, 'users', authUser.uid));
+        setIsBanned(userSnap.data()?.banned === true);
+      } else {
+        setIsBanned(false);
+      }
     });
     return unsubscribe;
   }, []);
 
-  const filteredThreads = selectedCategory === 'All'
-    ? threads
-    : threads.filter(t =>
-        t.category?.toLowerCase() ===
-        selectedCategory.toLowerCase()
-      );
+  useEffect(() => {
+  setLoading(true);
+  
+  // Fallback — stop showing spinner after 5 seconds
+  const timeout = setTimeout(() => {
+    setLoading(false);
+  }, 5000);
+
+  const q = query(
+    collection(db, 'threads'),
+    orderBy('createdAt', 'desc'),
+    limit(20)
+  );
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    clearTimeout(timeout);  // cancel timeout if data arrives
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Thread[];
+    setThreads(data);
+    setLoading(false);
+    setRefreshing(false);
+  }, (error) => {
+    clearTimeout(timeout);
+    console.log('Firestore error:', error);
+    setLoading(false);
+  });
+
+  return () => {
+    unsubscribe();
+    clearTimeout(timeout);
+  };
+}, []);
+
+  const filteredThreads = threads.filter(t => {
+    const matchesCategory = selectedCategory === 'All' ||
+      t.category?.toLowerCase() === selectedCategory.toLowerCase();
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      t.title?.toLowerCase().includes(q) ||
+      t.content?.toLowerCase().includes(q) ||
+      t.authorName?.toLowerCase().includes(q);
+    return matchesCategory && matchesSearch;
+  });
 
   const allThreads = [
     ...filteredThreads.filter(t => t.pinned),
@@ -225,68 +297,87 @@ export default function CommunityScreen() {
 
   const renderThread = ({ item }: { item: Thread }) => (
     <TouchableOpacity
-      style={styles.threadCard}
+      style={[styles.threadCard, item.pinned && styles.threadCardPinned]}
       activeOpacity={0.7}
       onPress={() => router.push({
         pathname: '/thread-detail',
         params: { threadId: item.id }
       } as any)}
     >
-      {item.pinned && (
-        <View style={styles.pinnedBadge}>
-          <Text style={styles.pinnedText}>📌 PINNED</Text>
-        </View>
-      )}
-      <View style={styles.threadHeader}>
-       <View style={styles.avatar}>{(item.authorPhotoURL || item.authorPhoto) ? (
-    <Image source={{ uri: item.authorPhotoURL || item.authorPhoto }}
-      style={styles.avatarImage} contentFit="cover"/>
-  ) : (
-    <Text style={styles.avatarText}>
-      {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
-    </Text>
-  )}
-</View>
-        <View style={styles.threadMeta}>
-  <Text style={styles.authorName}>
-  {item.authorName || item.displayName || 'Member'}
-  <Text style={styles.timeText}> · {formatTime(item.createdAt)}</Text>
-</Text>
-</View>
-
-        {item.category && (
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>
-              {item.category}
-            </Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.threadTitle}>{item.title}</Text>
-      <Text style={styles.threadContent} numberOfLines={3}>
-        {item.content}
+     <View style={styles.threadHeader}>
+  <View style={styles.avatar}>
+    {(item.authorPhotoURL || item.authorPhoto) ? (
+      <Image source={{ uri: item.authorPhotoURL || item.authorPhoto }}
+        style={styles.avatarImage} contentFit="cover"/>
+    ) : (
+      <Text style={styles.avatarText}>
+        {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
       </Text>
+    )}
+  </View>
+
+  <View style={styles.threadMeta}>
+    <Text style={styles.authorName}>
+      {item.authorName || item.displayName || 'Member'}
+    </Text>
+    <Text style={styles.timeText}>
+      {formatTime(item.createdAt)}{item.category ? ` · ${item.category}` : ''}
+    </Text>
+  </View>
+  {item.pinned ? (
+    <View style={styles.pinnedBadge}>
+      <Text style={styles.pinnedText}>📌 Pinned</Text>
+    </View>
+  ) : null}
+</View>
+<View style={styles.contentRow}>
+  <View style={styles.contentLeft}>
+    <Text style={styles.threadTitle}>{item.title}</Text>
+    <Text style={styles.threadContent} numberOfLines={2}>
+      {item.content}
+    </Text>
+  </View>
+
+  {item.imageURL ? (
+    <Image
+      source={{ uri: item.imageURL }}
+      style={styles.threadThumbnail}
+      contentFit="cover"
+    />
+  ) : null}
+</View>
       <View style={styles.threadFooter}>
-        <TouchableOpacity style={styles.footerAction}>
-          <Text style={styles.footerActionText}>
-            ♥ {item.likes || 0}
+        <TouchableOpacity
+          style={styles.footerAction}
+          onPress={() => handleLike(item.id)}
+        >
+          <MaterialCommunityIcons
+            name={likedThreadIds.has(item.id) ? 'thumb-up' : 'thumb-up-outline'}
+            size={14}
+            color={likedThreadIds.has(item.id) ? Colors.gold : Colors.text2}
+          />
+          <Text style={[styles.footerActionText, likedThreadIds.has(item.id) && styles.footerActionTextActive]}>
+            {' '}{item.likes || 0}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.footerAction}
-          onPress={() => router.push({
-            pathname: '/thread-detail',
-            params: { threadId: item.id }
-          } as any)}
+        style={styles.footerAction}
+        onPress={() => router.push({
+        pathname: '/thread-detail',
+        params: { threadId: item.id }
+        } as any)}
         >
-          <Text style={styles.footerActionText}>
-            💬 {item.commentCount || 0}
-          </Text>
-        </TouchableOpacity>
+      <Ionicons name="chatbubble-outline"
+        size={14}
+        color={Colors.text2}
+        />
+      <Text style={styles.footerActionText}>
+      {' '}{item.commentCount || 0}
+      </Text>
+      </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -300,42 +391,42 @@ export default function CommunityScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header with Post button */}
-      <Header subtitle="Builder Platform" />
+      <Header
 
-      {/* Post button row */}
-      <View style={styles.postRow}>
-        <Text style={styles.postRowTitle}>Community</Text>
-        <TouchableOpacity
-          style={styles.newPostButton}
-          onPress={() => setShowComposer(!showComposer)}
-        >
-          <Text style={styles.newPostText}>
-            {showComposer ? '✕ Close' : '+ Post'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Composer */}
-      {showComposer && (
-        <ThreadComposer
-          onPost={handlePost}
-          onClose={() => setShowComposer(false)}
-          posting={posting}
-        />
-      )}
-
-      {/* Category filter */}
-      <CategoryFilter
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
+        showSearch
+        isSearching={isSearching}
+        searchQuery={searchQuery}
+        onSearchPress={() => setIsSearching(true)}
+        onSearchChange={setSearchQuery}
+        onSearchClose={() => { setIsSearching(false); setSearchQuery(''); }}
       />
 
-      {/* Thread list */}
+      {isBanned && (
+        <View style={styles.bannedBanner}>
+          <Text style={styles.bannedBannerText}>
+            Your account has been restricted from posting.
+          </Text>
+        </View>
+      )}
+
       <FlatList
         data={allThreads}
         keyExtractor={(item) => item.id}
         renderItem={renderThread}
+       ListHeaderComponent={() => (
+  <ListHeader
+    selectedCategory={selectedCategory}
+    setSelectedCategory={setSelectedCategory}
+    showComposer={showComposer}
+    setShowComposer={setShowComposer}
+    isBanned={isBanned}
+    user={user}
+    nextEvent={nextEvent}
+    handlePost={handlePost}
+    posting={posting}
+    ThreadComposer={ThreadComposer}
+  />
+)}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -343,7 +434,22 @@ export default function CommunityScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => setRefreshing(true)}
+            onRefresh={() => {
+              setRefreshing(true);
+              const q = query(
+                collection(db, 'threads'),
+                orderBy('createdAt', 'desc'),
+                limit(20)
+              );
+              getDocs(q).then(snapshot => {
+                const data = snapshot.docs.map(doc => ({
+                  id: doc.id,
+                  ...doc.data(),
+                })) as Thread[];
+                setThreads(data);
+                setRefreshing(false);
+              }).catch(() => setRefreshing(false));
+            }}
             tintColor={Colors.gold}
           />
         }
@@ -373,8 +479,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContent: {
-    paddingBottom: Layout.tabBarHeight + Layout.md,
-    paddingTop: Layout.sm,
+  paddingBottom: Layout.tabBarHeight + Layout.md,
+  paddingTop: 0, 
   },
   postRow: {
     flexDirection: 'row',
@@ -389,14 +495,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
   },
-  newPostButton: {
-    backgroundColor: Colors.gold,
-    paddingHorizontal: Layout.md,
-    paddingVertical: Layout.sm,
-    borderRadius: Layout.radiusFull,
-    minHeight: Layout.minTouchTarget,
-    justifyContent: 'center',
-  },
   newPostText: {
     color: Colors.bg,
     fontWeight: '700',
@@ -404,7 +502,10 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     paddingHorizontal: Layout.md,
-    paddingBottom: Layout.sm,
+  paddingVertical: Layout.sm,
+  backgroundColor: Colors.bg,  // match page background
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
   },
   composer: {
     backgroundColor: Colors.surface,
@@ -425,6 +526,16 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: Layout.sm,
   },
+  filterRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: Layout.md,
+  paddingVertical: 6,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+  backgroundColor: Colors.surface,
+  gap: Layout.sm,
+},
   composerContent: {
     backgroundColor: Colors.surface2,
     borderWidth: 1,
@@ -475,23 +586,39 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   threadCard: {
-    backgroundColor: Colors.surface,
-    borderColor: Colors.border,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    marginHorizontal: Layout.md,
-    marginBottom: Layout.md,
-    borderWidth: 1,
+  backgroundColor: Colors.surface,
+  paddingHorizontal: Layout.lg,
+  paddingVertical: Layout.md,
+  paddingTop: Layout.lg,
+  marginBottom: 6,
+  marginHorizontal: Layout.md,
+  borderRadius: Layout.radiusSm,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  },
+  threadCardPinned: {
+  borderWidth: 1.5,
+  borderColor: Colors.gold,
+  borderBottomWidth: 1.5,
+  borderBottomColor: Colors.gold,
+  shadowColor: Colors.gold,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.12,
+  shadowRadius: 4,
+  elevation: 2,
   },
   pinnedBadge: {
-    marginBottom: Layout.sm,
+  backgroundColor: Colors.goldDim,
+  borderRadius: Layout.radiusFull,
+  paddingHorizontal: Layout.sm,
+  paddingVertical: 2,
+  borderWidth: 1,
+  borderColor: Colors.gold,
   },
   pinnedText: {
     fontSize: Typography.xs,
-    color: Colors.gold,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  color: Colors.gold,
+  fontWeight: '700',
   },
   threadHeader: {
     flexDirection: 'row',
@@ -500,17 +627,18 @@ const styles = StyleSheet.create({
     gap: Layout.sm,
   },
   avatar: {
-    width: Layout.avatarSm,
-    height: Layout.avatarSm,
-    borderRadius: Layout.avatarSm / 2,
-    backgroundColor: Colors.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  width: 24,
+  height: 24,
+  borderRadius: 16,
+  backgroundColor: Colors.gold,
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+},
   avatarImage: {
-  width: Layout.avatarSm,
-  height: Layout.avatarSm,
-  borderRadius: Layout.avatarSm / 2,
+  width: 20,
+  height: 20,
+  borderRadius: 20,
 },
   avatarText: {
     color: Colors.bg,
@@ -543,33 +671,38 @@ timeText: {
     fontWeight: '500',
   },
   threadTitle: {
-    fontSize: Typography.md,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: Layout.sm,
-    lineHeight: Typography.md * 1.4,
+  fontSize: Typography.base,    // smaller than before
+  fontWeight: '700',
+  color: Colors.text,
+  marginBottom: 4,
+  lineHeight: Typography.base * 1.3,
   },
   threadContent: {
-    fontSize: Typography.base,
-    color: Colors.text2,
-    lineHeight: Typography.base * 1.6,
-    marginBottom: Layout.md,
+   fontSize: Typography.sm,      // smaller preview text
+  color: Colors.text2,
+  lineHeight: Typography.sm * 1.5,
+  marginBottom: Layout.sm,     // less margin
   },
   threadFooter: {
-    flexDirection: 'row',
-    gap: Layout.md,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: Layout.sm,
+  flexDirection: 'row',
+  gap: Layout.md,
+  paddingTop: Layout.xs, 
   },
   footerAction: {
-    minHeight: Layout.minTouchTarget,
-    justifyContent: 'center',
-    paddingRight: Layout.md,
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 4,
+  minHeight: 32,               // smaller touch target
+  justifyContent: 'center',
+  paddingRight: Layout.sm,
   },
   footerActionText: {
-    fontSize: Typography.sm,
-    color: Colors.text2,
+    fontSize: Typography.xs,     // smaller count text
+  color: Colors.text2
+  },
+  footerActionTextActive: {
+    color: Colors.gold,
+    fontWeight: '700',
   },
   emptyState: {
     alignItems: 'center',
@@ -592,4 +725,133 @@ timeText: {
     textAlign: 'center',
     lineHeight: Typography.base * 1.6,
   },
+  bannedBanner: {
+    marginHorizontal: Layout.md,
+    marginBottom: Layout.sm,
+    backgroundColor: Colors.surface2,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+  },
+  bannedBannerText: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
+    textAlign: 'center',
+  },
+  composerTrigger: {
+   flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: Colors.surface,
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.md,
+  borderBottomWidth: 1,
+  borderTopWidth: 1,
+  borderColor: Colors.border,
+  minHeight: 52,
+  gap: Layout.sm,
+},
+composerTriggerAvatarImage: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+},
+composerTriggerAvatar: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: Colors.gold,
+  alignItems: 'center',
+  justifyContent: 'center'
+},
+composerTriggerAvatarText: {
+  fontSize: Typography.sm,
+  fontWeight: '700',
+  color: Colors.bg,
+},
+composerTriggerText: {
+   fontSize: Typography.base,   
+  color: Colors.text2,         
+  flex: 1,
+},
+contentRow: {
+  flexDirection: 'row',
+  gap: Layout.sm,
+  marginBottom: Layout.sm,
+},
+contentLeft: {
+  flex: 1,
+},
+threadThumbnail: {
+  width: 72,
+  height: 72,
+  borderRadius: Layout.radiusSm,
+  flexShrink: 0,
+  backgroundColor: Colors.surface2,
+},
+eventBanner: {
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+  backgroundColor: Colors.bg,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+  minHeight: 36,
+  justifyContent: 'center',
+},
+eventBannerText: {
+  fontSize: Typography.xs,
+  color: Colors.text3,
+},
+eventBannerInner: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: Layout.sm,
+  justifyContent: 'center',
+},
+topTabScroll: {
+ backgroundColor: Colors.surface,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+},
+topTabList: {
+  paddingHorizontal: Layout.md,
+  gap: 0,
+},
+topTab: {
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+  paddingBottom: Layout.md,    // more bottom padding
+  minHeight: 44,               // taller
+  justifyContent: 'center',
+  borderBottomWidth: 3,        // thicker underline
+  borderBottomColor: 'transparent',
+},
+topTabActive: {
+  borderBottomColor: Colors.gold,
+},
+topTabText: {
+  fontSize: Typography.sm,
+  color: Colors.text2,
+  fontWeight: '500',
+},
+topTabTextActive: {
+  color: Colors.text,
+  fontWeight: '700',
+},
+filterDropdown: {
+  width: 100,
+},
+searchInput: {
+  flex: 1,
+  backgroundColor: Colors.surface2,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  borderRadius: Layout.radiusSm,
+  paddingHorizontal: Layout.md,
+  paddingVertical: 6,
+  fontSize: Typography.sm,
+  color: Colors.text,
+  minHeight: 36,
+},
 });
