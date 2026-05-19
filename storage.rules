@@ -1,22 +1,62 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function signedIn() {
+
+    // Helper functions
+    function isSignedIn() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return signedIn() && request.auth.token.email != null;
+      return isSignedIn() && 
+        firestore.get(
+          /databases/(default)/documents/users/$(request.auth.uid)
+        ).data.userRole == 'admin';
     }
 
-    match /course-thumbnails/{filename} {
-      allow read: if signedIn();
-      allow write: if signedIn();
+    // PROFILE PHOTOS
+    // Users can read anyone's profile photo
+    // Users can only upload their own profile photo
+    match /profile-images/{userId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && 
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 && // 5MB max
+        request.resource.contentType.matches('image/.*');
     }
 
-    match /user-avatars/{userId}/{filename} {
-      allow read: if signedIn();
-      allow write: if signedIn() && request.auth.uid == userId;
+    // THREAD IMAGES
+    // Anyone signed in can read
+    // Signed in users can upload
+    match /thread-images/{userId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 10 * 1024 * 1024 && // 10MB max
+        request.resource.contentType.matches('image/.*');
+    }
+
+    // COURSE CONTENT
+    // Anyone signed in can read
+    // Only admin can upload
+    match /course-content/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // TOOL IMAGES
+    // Anyone signed in can read
+    // Only admin can upload
+    match /tool-images/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // GENERAL ASSETS
+    // Public read for app assets
+    match /assets/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

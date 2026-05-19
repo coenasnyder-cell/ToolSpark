@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolSpark — Email Verified</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: #F5F3EF;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .card {
+          background: #fff;
+          border-radius: 16px;
+          padding: 40px 32px;
+          max-width: 420px;
+          width: 100%;
+          text-align: center;
+          border: 1px solid #E2DDD5;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+        .icon {
+          font-size: 56px;
+          margin-bottom: 20px;
+        }
+        .logo {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1A1714;
+          margin-bottom: 24px;
+        }
+        .logo span { color: #C9A84C; }
+        h1 {
+          font-size: 22px;
+          font-weight: 700;
+          color: #1A1714;
+          margin-bottom: 12px;
+        }
+        p {
+          font-size: 15px;
+          color: #6B6560;
+          line-height: 1.6;
+          margin-bottom: 24px;
+        }
+        .button {
+          display: inline-block;
+          background: #C9A84C;
+          color: #1A1714;
+          font-weight: 700;
+          font-size: 15px;
+          padding: 14px 32px;
+          border-radius: 8px;
+          text-decoration: none;
+          margin-bottom: 12px;
+          width: 100%;
+        }
+        .secondary {
+          display: inline-block;
+          color: #C9A84C;
+          font-size: 14px;
+          text-decoration: none;
+          font-weight: 600;
+        }
+        .error {
+          background: rgba(192,57,43,0.1);
+          border: 1px solid rgba(192,57,43,0.3);
+          border-radius: 8px;
+          padding: 12px;
+          color: #C0392B;
+          font-size: 14px;
+          margin-bottom: 20px;
+          display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="icon" id="icon">✉️</div>
+    <div class="logo">Tool<span>Spark</span></div>
+    <h1 id="title">Verifying your email...</h1>
+    <p id="message">Please wait while we verify your email address.</p>
+    <div class="error" id="error"></div>
+    <div id="actions" style="display:none">
+        <a href="/" class="button" id="primaryBtn">
+            Go to ToolSpark
+        </a>
+        <br><br>
+        <a href="/" class="secondary">Back to home</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import {
+      getAuth,
+      applyActionCode,
+      checkActionCode,
+      verifyPasswordResetCode,
+      confirmPasswordReset,
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain: "toolspark-2d62d.firebaseapp.com",
+      projectId: "toolspark-2d62d",
+      storageBucket: "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const oobCode = params.get('oobCode');
+
+    const icon = document.getElementById('icon');
+    const title = document.getElementById('title');
+    const message = document.getElementById('message');
+    const actions = document.getElementById('actions');
+    const errorDiv = document.getElementById('error');
+    const primaryBtn = document.getElementById('primaryBtn');
+
+    async function handleAction() {
+      if (!oobCode) {
+        showError('Invalid or expired link.');
+        return;
+      }
+
+      if (mode === 'verifyEmail') {
+        try {
+          await applyActionCode(auth, oobCode);
+          icon.textContent = '✅';
+          title.textContent = 'Email Verified!';
+          message.textContent = 'Your email has been verified. You can now sign in to ToolSpark.';
+          primaryBtn.textContent = 'Open ToolSpark';
+          primaryBtn.href = '/signon.html';
+          actions.style.display = 'block';
+        } catch (err) {
+          showError('This verification link has expired or already been used. Please request a new one from the app.');
+        }
+
+      } else if (mode === 'resetPassword') {
+        try {
+          await verifyPasswordResetCode(auth, oobCode);
+          icon.textContent = '🔑';
+          title.textContent = 'Reset Your Password';
+          message.textContent = 'Enter your new password below.';
+
+          // Show password reset form
+          document.querySelector('.card').innerHTML += `
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="New password (min 6 characters)"
+              style="width:100%;padding:14px;border:1px solid #E2DDD5;border-radius:8px;font-size:15px;margin-bottom:12px;outline:none;"
+            />
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Confirm new password"
+              style="width:100%;padding:14px;border:1px solid #E2DDD5;border-radius:8px;font-size:15px;margin-bottom:16px;outline:none;"
+            />
+            <button
+              onclick="resetPassword()"
+              style="width:100%;background:#C9A84C;color:#1A1714;font-weight:700;font-size:15px;padding:14px;border:none;border-radius:8px;cursor:pointer;"
+            >
+              Set New Password
+            </button>
+            <p id="resetMsg" style="margin-top:12px;font-size:14px;color:#6B6560;"></p>
+          `;
+
+          window.resetPassword = async () => {
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            const resetMsg = document.getElementById('resetMsg');
+
+            if (newPass.length < 6) {
+              resetMsg.textContent = 'Password must be at least 6 characters.';
+              resetMsg.style.color = '#C0392B';
+              return;
+            }
+            if (newPass !== confirmPass) {
+              resetMsg.textContent = 'Passwords do not match.';
+              resetMsg.style.color = '#C0392B';
+              return;
+            }
+
+            try {
+              await confirmPasswordReset(auth, oobCode, newPass);
+              document.querySelector('.card').innerHTML = `
+                <div style="text-align:center;padding:20px">
+                  <div style="font-size:56px;margin-bottom:20px">✅</div>
+                  <div class="logo">Tool<span style="color:#C9A84C">Spark</span></div>
+                  <h1 style="font-size:22px;font-weight:700;color:#1A1714;margin-bottom:12px">
+                    Password Reset!
+                  </h1>
+                  <p style="color:#6B6560;margin-bottom:24px">
+                    Your password has been reset successfully.
+                  </p>
+                  <a href="/signon.html"
+                    style="display:block;background:#C9A84C;color:#1A1714;font-weight:700;padding:14px;border-radius:8px;text-decoration:none">
+                    Sign In
+                  </a>
+                </div>
+              `;
+            } catch (err) {
+              resetMsg.textContent = 'Error resetting password. Please try again.';
+              resetMsg.style.color = '#C0392B';
+            }
+          };
+
+        } catch (err) {
+          showError('This password reset link has expired. Please request a new one.');
+        }
+
+      } else {
+        showError('Invalid action. Please try again.');
+      }
+    }
+
+    function showError(msg) {
+      icon.textContent = '❌';
+      title.textContent = 'Something went wrong';
+      message.textContent = '';
+      errorDiv.textContent = msg;
+      errorDiv.style.display = 'block';
+      actions.style.display = 'block';
+      primaryBtn.textContent = 'Go to ToolSpark';
+      primaryBtn.href = '/';
+    }
+
+    handleAction();
+</script>
+</body>
+</html>

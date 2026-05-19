@@ -1,83 +1,154 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
+
+    // Helper functions
+    function isSignedIn() {
       return request.auth != null;
     }
 
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function userExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function currentUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
-      return signedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == 'admin';
+      return isSignedIn() && userExists() &&
+        currentUserData().get('userRole', '') == 'admin';
     }
 
+    function isBanned() {
+      return isSignedIn() && userExists() &&
+        currentUserData().get('banned', false) == true;
+    }
+
+    // USERS collection
+    // Anyone signed in can read profiles
+    // Only owner or admin can write
     match /users/{userId} {
-      allow read: if signedIn();
-      allow write: if signedIn() && request.auth.uid == userId;
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
-    match /settings/{docId} {
-      allow read: if signedIn();
-      allow write: if isAdmin();
-    }
-
-    match /courses/{courseId} {
-      allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
-
-      match /lessons/{lessonId} {
-        allow read: if signedIn();
-        allow create, update, delete: if isAdmin();
-      }
-    }
-
-    match /userProgress/{progressId} {
-      allow create: if signedIn() &&
-        request.resource.data.userId == request.auth.uid;
-      allow read: if signedIn() &&
-        (resource == null || resource.data.userId == request.auth.uid);
-      allow update, delete: if signedIn() &&
-        resource != null && resource.data.userId == request.auth.uid;
-    }
-
+    // THREADS collection
     match /threads/{threadId} {
-      allow read: if signedIn();
-      allow create: if signedIn();
-      allow update: if signedIn() && (
-        request.auth.uid == resource.data.authorId ||
-        isAdmin() ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
-      );
-      allow delete: if signedIn() && (
-        request.auth.uid == resource.data.authorId ||
-        isAdmin()
-      );
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data.authorId) || isAdmin();
 
+      // COMMENTS subcollection
       match /comments/{commentId} {
-        allow read: if signedIn();
-        allow create: if signedIn();
-        allow update: if signedIn() && (
-          request.auth.uid == resource.data.authorId ||
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if isSignedIn() && (
+          resource.data.authorId == request.auth.uid || isAdmin()
         );
-        allow delete: if signedIn() && request.auth.uid == resource.data.authorId;
+        allow delete: if isOwner(resource.data.authorId) || isAdmin();
       }
     }
 
-    match /clarity_sessions/{sessionId} {
-      allow read, write: if true;
-    }
-
-    match /clientresults/{docId} {
-      allow read, write: if true;
-    }
-
-    match /Audit_reports/{docId} {
-      allow read, write: if true;
-    }
-
-    match /Events/{eventId} {
-      allow read: if signedIn();
+    // COURSES collection
+    // Anyone signed in can read
+    // Only admin can write
+    match /courses/{courseId} {
+      allow read: if isSignedIn();
       allow write: if isAdmin();
+
+      // LESSONS subcollection
+      match /lessons/{lessonId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+      }
+    }
+
+    // USER PROGRESS
+    // Only owner or admin can read/write
+    match /userProgress/{progressId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // TOOLS collection
+    // Anyone signed in can read
+    // Only admin can write
+    match /tools/{toolId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // CLARITY SESSIONS
+    // Only owner or admin can read
+    // Anyone signed in can create
+    match /clarity_sessions/{sessionId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // EVENTS
+    // Anyone signed in can read
+    // Only admin can write
+    match /Events/{eventId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // SETTINGS
+    // Anyone signed in can read
+    // Only admin can write
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // CLIENT RESULTS
+    // Only owner or admin can read
+    match /clientresults/{resultId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // AUDIT REPORTS
+    // Only admin can read/write
+    match /Audit_reports/{reportId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // NOTIFICATIONS
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
     }
   }
 }

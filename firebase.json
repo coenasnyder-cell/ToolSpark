@@ -5,10 +5,17 @@
   "hosting": {
     "target": "toolspark",
     "public": "public",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/auth-action",
+        "destination": "/auth-action.html"
+      }
     ]
   },
   "firestore": {
