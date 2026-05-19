@@ -21,13 +21,14 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { WebView } from 'react-native-webview';
+import { useWindowDimensions } from 'react-native';
 import { auth, db } from '../../services/firebase';
+import VideoPlayer from '../../components/Shared/VideoPlayer';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
-
+import RenderHtml from 'react-native-render-html';
 interface Lesson {
   id: string;
   lessonTitle: string;
@@ -49,6 +50,7 @@ interface Course {
 }
 
 export default function CoursePlayerScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const [user, setUser] = useState<User | null>(null);
@@ -163,32 +165,6 @@ export default function CoursePlayerScreen() {
     }
   };
 
-  const getVideoEmbed = (url: string) => {
-    if (!url) return null;
-    
-    let embedUrl = '';
-    
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be')
-        ? url.split('youtu.be/')[1]?.split('?')[0]
-        : url.split('v=')[1]?.split('&')[0];
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    } else if (url.includes('loom.com')) {
-      const videoId = url.split('share/')[1]?.split('?')[0];
-      embedUrl = `https://www.loom.com/embed/${videoId}`;
-    }
-
-    if (!embedUrl) return null;
-
-    return (
-      <WebView
-        source={{ uri: embedUrl }}
-        style={styles.video}
-        allowsFullscreenVideo
-        javaScriptEnabled
-      />
-    );
-  };
 
   const isCompleted = (lessonId: string) =>
     completedLessons.includes(lessonId);
@@ -290,11 +266,7 @@ export default function CoursePlayerScreen() {
         {currentLesson ? (
           <>
             {/* Video */}
-            {currentLesson.videoUrl && (
-              <View style={styles.videoContainer}>
-                {getVideoEmbed(currentLesson.videoUrl)}
-              </View>
-            )}
+            <VideoPlayer url={currentLesson.videoUrl} />
 
             {/* Lesson info */}
             <View style={styles.lessonInfo}>
@@ -317,9 +289,24 @@ export default function CoursePlayerScreen() {
                 </Text>
               )}
               {currentLesson.lessonContent && (
-                <Text style={styles.lessonContent}>
-                  {currentLesson.lessonContent.replace(/<[^>]*>/g, '')}
-                </Text>
+                <RenderHtml
+                  contentWidth={width - (Layout.md * 2)}
+                  source={{ html: currentLesson.lessonContent }}
+                  tagsStyles={{
+                    body: { color: Colors.text, fontSize: Typography.base, lineHeight: Typography.base * 1.7 },
+                    p: { marginBottom: Layout.md, color: Colors.text },
+                    h1: { fontSize: Typography.xl, fontWeight: '700', color: Colors.text, marginBottom: Layout.md },
+                    h2: { fontSize: Typography.lg, fontWeight: '700', color: Colors.text, marginBottom: Layout.sm },
+                    h3: { fontSize: Typography.md, fontWeight: '700', color: Colors.text, marginBottom: Layout.sm },
+                    strong: { fontWeight: '700', color: Colors.text },
+                    em: { fontStyle: 'italic', color: Colors.text },
+                    a: { color: Colors.gold, textDecorationLine: 'underline' },
+                    ul: { marginBottom: Layout.md },
+                    ol: { marginBottom: Layout.md },
+                    li: { color: Colors.text, marginBottom: Layout.sm, fontSize: Typography.base },
+                    blockquote: { borderLeftWidth: 3, borderLeftColor: Colors.gold, paddingLeft: Layout.md, marginLeft: 0, color: Colors.text2 },
+                  }}
+                />
               )}
             </View>
 
@@ -532,14 +519,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: Layout.tabBarHeight + Layout.xl,
-  },
-  videoContainer: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#000',
-  },
-  video: {
-    flex: 1,
   },
   lessonInfo: {
     padding: Layout.md,

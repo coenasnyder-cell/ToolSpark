@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
@@ -38,6 +37,7 @@ import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import ListHeader from '../../components/Community/ListHeader';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
+
 interface Thread {
   id: string;
   title: string;
@@ -91,62 +91,6 @@ const CategoryFilter = ({
   </View>
 );
 
-const ThreadComposer = ({
-  onPost,
-  onClose,
-  posting,
-}: {
-  onPost: (title: string, content: string) => void;
-  onClose: () => void;
-  posting: boolean;
-}) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const titleRef = useRef<TextInput>(null);
-
-  return (
-    <View style={styles.composer}>
-      <TextInput
-        ref={titleRef}
-        style={styles.composerTitle}
-        placeholder="Thread title..."
-        placeholderTextColor={Colors.text3}
-        value={title}
-        onChangeText={setTitle}
-        autoFocus
-        blurOnSubmit={false}
-        returnKeyType="next"
-      />
-      <TextInput
-        style={styles.composerContent}
-        placeholder="What's on your mind?"
-        placeholderTextColor={Colors.text3}
-        value={content}
-        onChangeText={setContent}
-        multiline
-        numberOfLines={2}
-        blurOnSubmit={false}
-        textAlignVertical="top"
-      />
-      <View style={styles.composerActions}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.postButton, posting && styles.disabledButton]}
-          onPress={() => onPost(title, content)}
-          disabled={posting}
-        >
-          {posting ? (
-            <ActivityIndicator color={Colors.bg} size="small" />
-          ) : (
-            <Text style={styles.postButtonText}>Post Thread</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 
 export default function CommunityScreen() {
   const router = useRouter();
@@ -264,34 +208,40 @@ export default function CommunityScreen() {
     ...filteredThreads.filter(t => !t.pinned),
   ];
 
-  const handlePost = async (title: string, content: string) => {
-    if (!title.trim() || !content.trim() || !user) return;
-    setPosting(true);
-    try {
-      const userSnap = await getDoc(doc(db, 'users', user.uid));
-      const photoURL = userSnap.exists()
-        ? (userSnap.data().photoURL || user.photoURL || '')
-        : (user.photoURL || '');
+  const handlePost = async (
+  title: string,
+  content: string,
+  category: string,
+  mediaUrl?: string
+) => {
+  if (!title.trim() || !content.trim() || !user) return;
+  setPosting(true);
+  try {
+    const userSnap = await getDoc(doc(db, 'users', user.uid));
+    const photoURL = userSnap.exists()
+      ? (userSnap.data().photoURL || user.photoURL || '')
+      : (user.photoURL || '');
 
-      await addDoc(collection(db, 'threads'), {
-        title: title.trim(),
-        content: content.trim(),
-        authorId: user.uid,
-        authorName: user.displayName || 'Member',
-        authorPhotoURL: photoURL,
-        category: 'General',
-        likes: 0,
-        commentCount: 0,
-        pinned: false,
-        createdAt: serverTimestamp(),
-      });
-      setShowComposer(false);
-    } catch (err) {
-      console.log('Post error:', err);
-    } finally {
-      setPosting(false);
-    }
-  };
+    await addDoc(collection(db, 'threads'), {
+      title: title.trim(),
+      content: content.trim(),
+      authorId: user.uid,
+      authorName: user.displayName || 'Member',
+      authorPhotoURL: photoURL,
+      category: category || 'General',
+      imageURL: mediaUrl || '',
+      likes: 0,
+      commentCount: 0,
+      pinned: false,
+      createdAt: serverTimestamp(),
+    });
+    setShowComposer(false);
+  } catch (err) {
+    console.log('Post error:', err);
+  } finally {
+    setPosting(false);
+  }
+};
 
   const formatTime = (timestamp: any) => {
     if (!timestamp) return '';
@@ -435,7 +385,6 @@ export default function CommunityScreen() {
     nextEvent={nextEvent}
     handlePost={handlePost}
     posting={posting}
-    ThreadComposer={ThreadComposer}
   />
 )}
         contentContainerStyle={styles.listContent}

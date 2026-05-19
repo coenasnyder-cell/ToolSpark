@@ -30,14 +30,6 @@ interface Tool {
   order: number;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'AI': Colors.purple,
-  'No-code': Colors.green,
-  'Marketing': Colors.coral,
-  'Community': Colors.gold,
-  'Payments': Colors.greenLight,
-  'Design': '#E91E8C',
-};
 
 export default function ToolsScreen() {
   const router = useRouter();
@@ -77,8 +69,6 @@ export default function ToolsScreen() {
   const featuredTools = filteredTools.filter(t => t.isFeatured);
   const regularTools = filteredTools.filter(t => !t.isFeatured);
 
-  const getCategoryColor = (category: string) =>
-    CATEGORY_COLORS[category] || Colors.gold;
 
   if (loading) {
     return (
@@ -165,6 +155,7 @@ export default function ToolsScreen() {
                   params: { toolId: tool.id }
                 } as any)}
               >
+                <Text style={styles.toolName}>{tool.name}</Text>
                 <View style={styles.cardRow}>
                   {tool.imageUrl ? (
                     <Image
@@ -173,39 +164,11 @@ export default function ToolsScreen() {
                       resizeMode="cover"
                     />
                   ) : null}
-                  <View style={styles.cardContent}>
-                    <View style={styles.toolCardTop}>
-                      <View style={[
-                        styles.categoryBadge,
-                        {
-                          backgroundColor:
-                            getCategoryColor(tool.category) + '20',
-                          borderColor:
-                            getCategoryColor(tool.category),
-                        }
-                      ]}>
-                        <Text style={[
-                          styles.categoryBadgeText,
-                          { color: getCategoryColor(tool.category) }
-                        ]}>
-                          {tool.category}
-                        </Text>
-                      </View>
-                      <View style={styles.affiliateBadge}>
-                        <Text style={styles.affiliateBadgeText}>
-                          Affiliate
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.toolName}>{tool.name}</Text>
-                    <Text style={styles.toolDesc} numberOfLines={2}>
-                      {tool.description}
-                    </Text>
-                    <Text style={styles.toolAction}>
-                      Learn more →
-                    </Text>
-                  </View>
+                  <Text style={styles.toolDesc}>
+                    {tool.description}
+                  </Text>
                 </View>
+                <Text style={styles.toolAction}>Learn more →</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -227,6 +190,7 @@ export default function ToolsScreen() {
                   params: { toolId: tool.id }
                 } as any)}
               >
+                <Text style={styles.toolName}>{tool.name}</Text>
                 <View style={styles.cardRow}>
                   {tool.imageUrl ? (
                     <Image
@@ -235,41 +199,11 @@ export default function ToolsScreen() {
                       resizeMode="cover"
                     />
                   ) : null}
-                  <View style={styles.cardContent}>
-                    <View style={styles.toolCardTop}>
-                      <View style={[
-                        styles.categoryBadge,
-                        {
-                          backgroundColor:
-                            getCategoryColor(tool.category) + '20',
-                          borderColor:
-                            getCategoryColor(tool.category),
-                        }
-                      ]}>
-                        <Text style={[
-                          styles.categoryBadgeText,
-                          { color: getCategoryColor(tool.category) }
-                        ]}>
-                          {tool.category}
-                        </Text>
-                      </View>
-                      {tool.affiliateUrl && (
-                        <View style={styles.affiliateBadge}>
-                          <Text style={styles.affiliateBadgeText}>
-                            Affiliate
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.toolName}>{tool.name}</Text>
-                    <Text style={styles.toolDesc} numberOfLines={2}>
-                      {tool.description}
-                    </Text>
-                    <Text style={styles.toolAction}>
-                      Learn more →
-                    </Text>
-                  </View>
+                  <Text style={styles.toolDesc}>
+                    {tool.description}
+                  </Text>
                 </View>
+                <Text style={styles.toolAction}>Learn more →</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -349,10 +283,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Layout.md,
+    marginVertical: Layout.sm,
   },
   toolThumbnail: {
-    width: 72,
-    height: 72,
+    width: 90,
+    height: 90,
     borderRadius: Layout.radiusSm,
     flexShrink: 0,
   },
@@ -404,13 +339,14 @@ const styles = StyleSheet.create({
     fontSize: Typography.lg,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 6,
+    textAlign: 'center',
   },
   toolDesc: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: Typography.sm,
     color: Colors.text2,
     lineHeight: Typography.sm * 1.6,
-    marginBottom: Layout.md,
   },
   toolAction: {
     fontSize: Typography.sm,

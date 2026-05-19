@@ -7,14 +7,16 @@ import {
   StyleSheet,
   ActivityIndicator,
   Linking,
+  useWindowDimensions,
 } from 'react-native';
 import { doc, getDoc } from 'firebase/firestore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { WebView } from 'react-native-webview';
 import { db } from '../../services/firebase';
+import VideoPlayer from '../../components/Shared/VideoPlayer';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import RenderHtml from 'react-native-render-html';
 
 interface Tool {
   id: string;
@@ -29,6 +31,7 @@ interface Tool {
 }
 
 export default function ToolDetailScreen() {
+  const { width } = useWindowDimensions();
   const router = useRouter();
   const { toolId } = useLocalSearchParams<{ toolId: string }>();
   const [tool, setTool] = useState<Tool | null>(null);
@@ -53,28 +56,6 @@ export default function ToolDetailScreen() {
     }
   };
 
-  const getVideoEmbed = (url: string) => {
-    if (!url) return null;
-    let embedUrl = '';
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be')
-        ? url.split('youtu.be/')[1]?.split('?')[0]
-        : url.split('v=')[1]?.split('&')[0];
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-    } else if (url.includes('loom.com')) {
-      const videoId = url.split('share/')[1]?.split('?')[0];
-      embedUrl = `https://www.loom.com/embed/${videoId}`;
-    }
-    if (!embedUrl) return null;
-    return (
-      <WebView
-        source={{ uri: embedUrl }}
-        style={styles.video}
-        allowsFullscreenVideo
-        javaScriptEnabled
-      />
-    );
-  };
 
   if (loading) {
     return (
@@ -113,41 +94,35 @@ export default function ToolDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Video */}
-        {tool.videoUrl && (
-          <View style={styles.videoContainer}>
-            {getVideoEmbed(tool.videoUrl)}
-          </View>
-        )}
+        <VideoPlayer url={tool.videoUrl} />
 
         {/* Tool info */}
         <View style={styles.toolInfo}>
-          <View style={styles.toolTopRow}>
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryBadgeText}>
-                {tool.category}
-              </Text>
-            </View>
-            {tool.isFeatured && (
-              <View style={styles.featuredBadge}>
-                <Text style={styles.featuredBadgeText}>
-                  ⭐ Featured
-                </Text>
-              </View>
-            )}
-          </View>
-
           <Text style={styles.toolName}>{tool.name}</Text>
           <Text style={styles.toolDesc}>{tool.description}</Text>
 
           {/* Article content */}
           {tool.articleContent && (
             <View style={styles.articleSection}>
-              <Text style={styles.articleTitle}>
-                How to use it
-              </Text>
-              <Text style={styles.articleContent}>
-                {tool.articleContent.replace(/<[^>]*>/g, '')}
-              </Text>
+              <Text style={styles.articleTitle}>How to use it</Text>
+              <RenderHtml
+                contentWidth={width - (Layout.md * 2)}
+                source={{ html: tool.articleContent }}
+                tagsStyles={{
+                  body: { color: Colors.text, fontSize: Typography.base, lineHeight: Typography.base * 1.7 },
+                  p: { marginBottom: Layout.md, color: Colors.text },
+                  h1: { fontSize: Typography.xl, fontWeight: '700', color: Colors.text, marginBottom: Layout.md },
+                  h2: { fontSize: Typography.lg, fontWeight: '700', color: Colors.text, marginBottom: Layout.sm },
+                  h3: { fontSize: Typography.md, fontWeight: '700', color: Colors.text, marginBottom: Layout.sm },
+                  strong: { fontWeight: '700', color: Colors.text },
+                  em: { fontStyle: 'italic', color: Colors.text },
+                  a: { color: Colors.gold, textDecorationLine: 'underline' },
+                  ul: { marginBottom: Layout.md },
+                  ol: { marginBottom: Layout.md },
+                  li: { color: Colors.text, marginBottom: Layout.sm, fontSize: Typography.base },
+                  blockquote: { borderLeftWidth: 3, borderLeftColor: Colors.gold, paddingLeft: Layout.md, marginLeft: 0, color: Colors.text2 },
+                }}
+              />
             </View>
           )}
         </View>
@@ -222,14 +197,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: Layout.xl,
-  },
-  videoContainer: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#000',
-  },
-  video: {
-    flex: 1,
   },
   toolInfo: {
     padding: Layout.md,

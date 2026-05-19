@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import {
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification 
 } from 'firebase/auth';
 import {
   doc,
@@ -88,7 +89,11 @@ export default function SignupScreen() {
         lastSeen: serverTimestamp(),
       });
 
-      router.replace('/(tabs)' as any);
+     // Send verification email
+await sendEmailVerification(userCredential.user, {
+  url: 'https://toolspark.co/auth-action',
+});
+router.replace('/(auth)/verify-email' as any);
     } catch (authError: any) {
       if (isMountedRef.current) {
         if (authError.code === 'auth/email-already-in-use') {

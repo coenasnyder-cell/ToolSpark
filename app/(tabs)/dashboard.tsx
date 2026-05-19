@@ -140,41 +140,68 @@ export default function DashboardHubScreen() {
   const photoURL = profile?.photoURL || user?.photoURL;
 
   const hubCards = [
+  {
+    id: 'profile',
+    title: 'My Profile',
+    subtitle: profile?.displayName || 'Edit your profile',
+    icon: 'person-outline' as const,
+    color: Colors.gold,
+    route: '/edit-profile',
+  },
+  {
+    id: 'members',
+    title: 'Members',
+    subtitle: 'View the community',
+    icon: 'people-outline' as const,
+    color: Colors.green,
+    route: '/members',
+  },
+  {
+    id: 'events',
+    title: 'Events',
+    subtitle: events.length > 0
+      ? `${events.length} upcoming`
+      : 'No upcoming events',
+    icon: 'calendar-outline' as const,
+    color: Colors.purple,
+    route: '/events',
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    subtitle: 'Account & preferences',
+    icon: 'settings-outline' as const,
+    color: Colors.text2,
+    route: '/settings',
+  },
+  // Admin only
+  ...(profile?.userRole === 'admin' ? [
     {
-      id: 'profile',
-      title: 'My Profile',
-      subtitle: profile?.displayName || 'Edit your profile',
-      icon: 'person-outline' as const,
-      color: Colors.gold,
-      route: '/edit-profile',
+      id: 'manage-tools',
+      title: 'Manage Tools',
+      subtitle: 'Add and edit tools',
+      icon: 'construct-outline' as const,
+      color: Colors.coral,
+      route: '/admin-tools',
     },
     {
-      id: 'members',
-      title: 'Members',
-      subtitle: 'View the community',
-      icon: 'people-outline' as const,
-      color: Colors.green,
-      route: '/members',
-    },
-    {
-      id: 'events',
-      title: 'Events',
-      subtitle: events.length > 0
-        ? `${events.length} upcoming`
-        : 'No upcoming events',
+      id: 'manage-events',
+      title: 'Manage Events',
+      subtitle: 'Add and edit events',
       icon: 'calendar-outline' as const,
-      color: Colors.purple,
-      route: '/events',
+      color: Colors.green,
+      route: '/admin-events',
     },
     {
-      id: 'settings',
-      title: 'Settings',
-      subtitle: 'Account & preferences',
-      icon: 'settings-outline' as const,
-      color: Colors.text2,
-      route: '/settings',
-    },
-  ];
+  id: 'manage-members',
+  title: 'Manage Members',
+  subtitle: 'Roles and permissions',
+  icon: 'people-outline' as const,
+  color: Colors.purple,
+  route: '/admin-members',
+},
+  ] : []),
+];
 
   return (
     <View style={styles.container}>
