@@ -168,6 +168,7 @@
   }
   .role-select:focus { border-color: var(--gold); }
   .role-select.is-admin { color: var(--gold); border-color: rgba(201,168,76,0.3); background: var(--gold-dim); }
+  .role-select.is-banned { color: #C0392B; border-color: rgba(192,57,43,0.3); background: rgba(192,57,43,0.06); }
 
   .member-table-wrap { overflow-x: auto; }
   #member-empty { display: none; text-align: center; padding: 2rem; color: var(--text3); font-size: 13px; }
@@ -558,6 +559,10 @@
       const avatarInner = m.photoURL ? `<img src="${m.photoURL}" alt="${name}">` : initials;
       const safeName = escHtml(name).replace(/'/g, '&#39;');
 
+      let roleClass = '';
+      if (role === 'admin') roleClass = 'is-admin';
+      else if (role === 'banned') roleClass = 'is-banned';
+
       return `<tr id="member-row-${m.uid}" data-uid="${m.uid}">
         <td>
           <div class="member-name-wrap">
@@ -568,11 +573,12 @@
         <td class="member-email-text">${escHtml(email)}</td>
         <td>
           <div class="role-cell">
-            <select class="role-select ${role === 'admin' ? 'is-admin' : ''}"
+            <select class="role-select ${roleClass}"
               data-uid="${m.uid}" data-name="${safeName}"
               onchange="changeRole(this)">
-              <option value="member" ${role !== 'admin' ? 'selected' : ''}>Member</option>
+              <option value="member" ${role === 'member' ? 'selected' : ''}>Member</option>
               <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+              <option value="banned" ${role === 'banned' ? 'selected' : ''}>Banned</option>
             </select>
             <span class="saved-badge" id="saved-${m.uid}">Saved</span>
           </div>
@@ -605,7 +611,12 @@
         const m = arr.find(x => x.uid === uid);
         if (m) m.userRole = newRole;
       }
-      selectEl.className = 'role-select' + (newRole === 'admin' ? ' is-admin' : '');
+
+      let roleClass = 'role-select';
+      if (newRole === 'admin') roleClass += ' is-admin';
+      else if (newRole === 'banned') roleClass += ' is-banned';
+      selectEl.className = roleClass;
+
       const badge = document.getElementById('saved-' + uid);
       if (badge) {
         badge.classList.add('show');

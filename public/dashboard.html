@@ -898,13 +898,19 @@
 
     const avatar = document.getElementById('sidebar-avatar');
     if (user.photoURL) {
-      avatar.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+      avatar.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
     } else {
       avatar.textContent = first.charAt(0).toUpperCase();
     }
 
     try {
       const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists && snap.data().userRole === 'banned') {
+        alert("Your account has been restricted.");
+        auth.signOut();
+        window.location.href = 'signon.html';
+        return;
+      }
       if (snap.exists && snap.data().userRole === 'admin') {
         isAdmin = true;
         document.getElementById('admin-nav-link').style.display = 'flex';

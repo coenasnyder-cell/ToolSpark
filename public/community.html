@@ -1302,7 +1302,9 @@
 
     <div class="header-search">
       <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" placeholder="Search threads, topics, members..." />
+      <label>
+        <input type="text" placeholder="Search threads, topics, members..." />
+      </label>
     </div>
 
     <div class="header-actions">
@@ -1358,16 +1360,16 @@
           <span style="font-size:14px;color:var(--text2);font-weight:300;">Share something with the community...</span>
         </div>
         <div id="post-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:0.75rem;"></div>
-        <input class="create-title-input" id="thread-title" type="text" placeholder="Thread title" />
-        <textarea class="create-textarea" id="thread-content" placeholder="What's on your mind? Share a question, win, idea, or update..."></textarea>
+        <label for="thread-title"></label><input class="create-title-input" id="thread-title" type="text" placeholder="Thread title" />
+        <label for="thread-content"></label><textarea class="create-textarea" id="thread-content" placeholder="What's on your mind? Share a question, win, idea, or update..."></textarea>
         <input type="file" id="image-file-input" accept="image/*" style="display:none;" onchange="handleImageSelect(event)" />
         <div id="image-preview-wrap" style="display:none;margin-bottom:0.75rem;position:relative;">
-          <img id="image-preview" style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1px solid var(--border);" />
+          <img id="image-preview" style="width:100%;max-height:240px;object-fit:cover;border-radius:8px;border:1px solid var(--border);"  src="" alt=""/>
           <button onclick="removeImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;color:#fff;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
         </div>
         <div class="create-row">
           <div class="create-left">
-            <select class="category-select" id="thread-category">
+            <label for="thread-category"></label><select class="category-select" id="thread-category">
               <option value="" disabled selected>Category</option>
               <option>General</option>
               <option>Questions</option>

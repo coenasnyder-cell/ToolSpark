@@ -2,7 +2,6 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
@@ -15,45 +14,37 @@ service firebase.storage {
     }
 
     // PROFILE PHOTOS
-    // Users can read anyone's profile photo
-    // Users can only upload their own profile photo
     match /profile-images/{userId}/{fileName} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && 
         request.auth.uid == userId &&
-        request.resource.size < 5 * 1024 * 1024 && // 5MB max
+        request.resource.size < 5 * 1024 * 1024 &&
         request.resource.contentType.matches('image/.*');
     }
 
     // THREAD IMAGES
-    // Anyone signed in can read
-    // Signed in users can upload
-    match /thread-images/{userId}/{fileName} {
+    // Any signed in member can upload
+    match /thread-images/{fileName} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() &&
-        request.auth.uid == userId &&
-        request.resource.size < 10 * 1024 * 1024 && // 10MB max
+        request.resource.size < 10 * 1024 * 1024 &&
         request.resource.contentType.matches('image/.*');
     }
 
-    // COURSE CONTENT
-    // Anyone signed in can read
-    // Only admin can upload
-    match /course-content/{fileName} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
-
     // TOOL IMAGES
-    // Anyone signed in can read
-    // Only admin can upload
+    // Admin only upload
     match /tool-images/{fileName} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
+    // COURSE CONTENT
+    match /course-content/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
     // GENERAL ASSETS
-    // Public read for app assets
     match /assets/{fileName} {
       allow read: if true;
       allow write: if isAdmin();
