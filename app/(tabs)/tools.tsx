@@ -18,7 +18,7 @@ import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
-
+import { Image } from 'react-native';
 interface Tool {
   id: string;
   name: string;
@@ -165,36 +165,47 @@ export default function ToolsScreen() {
                   params: { toolId: tool.id }
                 } as any)}
               >
-                <View style={styles.toolCardTop}>
-                  <View style={[
-                    styles.categoryBadge,
-                    {
-                      backgroundColor:
-                        getCategoryColor(tool.category) + '20',
-                      borderColor:
-                        getCategoryColor(tool.category),
-                    }
-                  ]}>
-                    <Text style={[
-                      styles.categoryBadgeText,
-                      { color: getCategoryColor(tool.category) }
-                    ]}>
-                      {tool.category}
+                <View style={styles.cardRow}>
+                  {tool.imageUrl ? (
+                    <Image
+                      source={{ uri: tool.imageUrl }}
+                      style={styles.toolThumbnail}
+                      resizeMode="cover"
+                    />
+                  ) : null}
+                  <View style={styles.cardContent}>
+                    <View style={styles.toolCardTop}>
+                      <View style={[
+                        styles.categoryBadge,
+                        {
+                          backgroundColor:
+                            getCategoryColor(tool.category) + '20',
+                          borderColor:
+                            getCategoryColor(tool.category),
+                        }
+                      ]}>
+                        <Text style={[
+                          styles.categoryBadgeText,
+                          { color: getCategoryColor(tool.category) }
+                        ]}>
+                          {tool.category}
+                        </Text>
+                      </View>
+                      <View style={styles.affiliateBadge}>
+                        <Text style={styles.affiliateBadgeText}>
+                          Affiliate
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.toolName}>{tool.name}</Text>
+                    <Text style={styles.toolDesc} numberOfLines={2}>
+                      {tool.description}
                     </Text>
-                  </View>
-                  <View style={styles.affiliateBadge}>
-                    <Text style={styles.affiliateBadgeText}>
-                      Affiliate
+                    <Text style={styles.toolAction}>
+                      Learn more →
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.toolName}>{tool.name}</Text>
-                <Text style={styles.toolDesc} numberOfLines={2}>
-                  {tool.description}
-                </Text>
-                <Text style={styles.toolAction}>
-                  Learn more →
-                </Text>
               </TouchableOpacity>
             ))}
           </>
@@ -216,38 +227,49 @@ export default function ToolsScreen() {
                   params: { toolId: tool.id }
                 } as any)}
               >
-                <View style={styles.toolCardTop}>
-                  <View style={[
-                    styles.categoryBadge,
-                    {
-                      backgroundColor:
-                        getCategoryColor(tool.category) + '20',
-                      borderColor:
-                        getCategoryColor(tool.category),
-                    }
-                  ]}>
-                    <Text style={[
-                      styles.categoryBadgeText,
-                      { color: getCategoryColor(tool.category) }
-                    ]}>
-                      {tool.category}
+                <View style={styles.cardRow}>
+                  {tool.imageUrl ? (
+                    <Image
+                      source={{ uri: tool.imageUrl }}
+                      style={styles.toolThumbnail}
+                      resizeMode="cover"
+                    />
+                  ) : null}
+                  <View style={styles.cardContent}>
+                    <View style={styles.toolCardTop}>
+                      <View style={[
+                        styles.categoryBadge,
+                        {
+                          backgroundColor:
+                            getCategoryColor(tool.category) + '20',
+                          borderColor:
+                            getCategoryColor(tool.category),
+                        }
+                      ]}>
+                        <Text style={[
+                          styles.categoryBadgeText,
+                          { color: getCategoryColor(tool.category) }
+                        ]}>
+                          {tool.category}
+                        </Text>
+                      </View>
+                      {tool.affiliateUrl && (
+                        <View style={styles.affiliateBadge}>
+                          <Text style={styles.affiliateBadgeText}>
+                            Affiliate
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.toolName}>{tool.name}</Text>
+                    <Text style={styles.toolDesc} numberOfLines={2}>
+                      {tool.description}
+                    </Text>
+                    <Text style={styles.toolAction}>
+                      Learn more →
                     </Text>
                   </View>
-                  {tool.affiliateUrl && (
-                    <View style={styles.affiliateBadge}>
-                      <Text style={styles.affiliateBadgeText}>
-                        Affiliate
-                      </Text>
-                    </View>
-                  )}
                 </View>
-                <Text style={styles.toolName}>{tool.name}</Text>
-                <Text style={styles.toolDesc} numberOfLines={2}>
-                  {tool.description}
-                </Text>
-                <Text style={styles.toolAction}>
-                  Learn more →
-                </Text>
               </TouchableOpacity>
             ))}
           </>
@@ -322,6 +344,20 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: Layout.sm,
     marginTop: Layout.sm,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Layout.md,
+  },
+  toolThumbnail: {
+    width: 72,
+    height: 72,
+    borderRadius: Layout.radiusSm,
+    flexShrink: 0,
+  },
+  cardContent: {
+    flex: 1,
   },
   toolCard: {
     backgroundColor: Colors.surface,

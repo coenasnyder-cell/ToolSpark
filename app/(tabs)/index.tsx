@@ -188,22 +188,17 @@ export default function CommunityScreen() {
     }
   };
 
-  useEffect(() => {
-    const now = Date.now();
-    const q = query(
-      collection(db, 'Events'),
-      orderBy('eventDate'),
-      limit(10)
-    );
-    getDocs(q).then(snap => {
-      const upcoming = snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as any))
-        .find(e => {
-          const ms = e.eventDate?.toDate?.()?.getTime() ?? new Date(e.eventDate).getTime();
-          return ms >= now;
-        });
-      setNextEvent(upcoming ?? null);
-    }).catch(() => setNextEvent(null));
+ useEffect(() => {
+  const q = query(
+    collection(db, 'Events'),
+    limit(10)
+  );
+  getDocs(q).then(snap => {
+    const upcoming = snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as any))
+      .find(e => e.status === 'upcoming');
+    setNextEvent(upcoming ?? null);
+  }).catch(() => setNextEvent(null));
   }, []);
 
   useEffect(() => {

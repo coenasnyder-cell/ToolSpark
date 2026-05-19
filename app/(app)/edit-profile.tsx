@@ -36,12 +36,20 @@ import { collection, query, where, getDocs, writeBatch } from 'firebase/firestor
 export default function EditProfileScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [photoURL, setPhotoURL] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
+  const [website, setWebsite] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [youtube, setYoutube] = useState('');
+  const [projectTitle, setProjectTitle] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [projectImageURL, setProjectImageURL] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -55,15 +63,23 @@ export default function EditProfileScreen() {
   }, []);
 
   const loadProfile = async (u: User) => {
-    const userRef = doc(db, 'users', u.uid);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      setDisplayName(data.displayName || u.displayName || '');
-      setBio(data.bio || '');
-      setPhotoURL(data.photoURL || u.photoURL || '');
-    }
-  };
+  const userRef = doc(db, 'users', u.uid);
+  const snap = await getDoc(userRef);
+  if (snap.exists()) {
+    const data = snap.data();
+    setDisplayName(data.displayName || u.displayName || '');
+    setBio(data.bio || '');
+    setPhotoURL(data.photoURL || u.photoURL || '');
+    setWebsite(data.website || '');
+    setInstagram(data.instagram || '');
+    setTwitter(data.twitter || '');
+    setLinkedin(data.linkedin || '');
+    setYoutube(data.youtube || '');
+    setProjectTitle(data.projectTitle || '');
+    setProjectDescription(data.projectDescription || '');
+    setProjectImageURL(data.projectImageURL || '');
+  }
+};
 
   const handlePickPhoto = async () => {
     const permission = await ImagePicker
@@ -122,10 +138,18 @@ export default function EditProfileScreen() {
 
       // Update Firestore user document
       await updateDoc(doc(db, 'users', user.uid), {
-        displayName: displayName.trim(),
-        bio: bio.trim(),
-        photoURL: photoURL || user.photoURL || '',
-      });
+  displayName: displayName.trim(),
+  bio: bio.trim(),
+  photoURL: photoURL || user.photoURL || '',
+  website: website.trim(),
+  instagram: instagram.trim(),
+  twitter: twitter.trim(),
+  linkedin: linkedin.trim(),
+  youtube: youtube.trim(),
+  projectTitle: projectTitle.trim(),
+  projectDescription: projectDescription.trim(),
+  projectImageURL: projectImageURL.trim(),
+});
 
       // Backfill photo on all user's threads
       if (photoURL) {
@@ -224,40 +248,157 @@ export default function EditProfileScreen() {
           </Text>
         </View>
 
-        {/* Form fields */}
-        <View style={styles.form}>
-          <View style={styles.fieldBlock}>
-            <Text style={styles.label}>Display Name</Text>
-            <TextInput
-              style={styles.input}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="Your name"
-              placeholderTextColor={Colors.text3}
-              autoCapitalize="words"
-              maxLength={50}
-            />
-          </View>
+     {/* Form fields */}
+<View style={styles.form}>
 
-          <View style={styles.fieldBlock}>
-            <Text style={styles.label}>Bio</Text>
-            <TextInput
-              style={[styles.input, styles.bioInput]}
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Tell the community about yourself..."
-              placeholderTextColor={Colors.text3}
-              multiline
-              numberOfLines={4}
-              maxLength={200}
-              textAlignVertical="top"
-            />
-            <Text style={styles.charCount}>
-              {bio.length}/200
-            </Text>
-          </View>
-        </View>
+  {/* Basic info */}
+  <Text style={styles.groupLabel}>Basic Info</Text>
 
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Display Name</Text>
+    <TextInput
+      style={styles.input}
+      value={displayName}
+      onChangeText={setDisplayName}
+      placeholder="Your name"
+      placeholderTextColor={Colors.text3}
+      autoCapitalize="words"
+      maxLength={50}
+    />
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Bio</Text>
+    <TextInput
+      style={[styles.input, styles.bioInput]}
+      value={bio}
+      onChangeText={setBio}
+      placeholder="Tell the community about yourself..."
+      placeholderTextColor={Colors.text3}
+      multiline
+      numberOfLines={4}
+      maxLength={200}
+      textAlignVertical="top"
+    />
+    <Text style={styles.charCount}>{bio.length}/200</Text>
+  </View>
+
+  {/* Social links */}
+  <Text style={styles.groupLabel}>Social Links</Text>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Website</Text>
+    <TextInput
+      style={styles.input}
+      value={website}
+      onChangeText={setWebsite}
+      placeholder="yourwebsite.com"
+      placeholderTextColor={Colors.text3}
+      autoCapitalize="none"
+      keyboardType="url"
+    />
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Instagram</Text>
+    <View style={styles.socialInput}>
+      <Text style={styles.socialPrefix}>@</Text>
+      <TextInput
+        style={styles.socialTextInput}
+        value={instagram}
+        onChangeText={setInstagram}
+        placeholder="username"
+        placeholderTextColor={Colors.text3}
+        autoCapitalize="none"
+      />
+    </View>
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Twitter / X</Text>
+    <View style={styles.socialInput}>
+      <Text style={styles.socialPrefix}>@</Text>
+      <TextInput
+        style={styles.socialTextInput}
+        value={twitter}
+        onChangeText={setTwitter}
+        placeholder="username"
+        placeholderTextColor={Colors.text3}
+        autoCapitalize="none"
+      />
+    </View>
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>LinkedIn</Text>
+    <TextInput
+      style={styles.input}
+      value={linkedin}
+      onChangeText={setLinkedin}
+      placeholder="linkedin.com/in/yourname"
+      placeholderTextColor={Colors.text3}
+      autoCapitalize="none"
+    />
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>YouTube</Text>
+    <TextInput
+      style={styles.input}
+      value={youtube}
+      onChangeText={setYoutube}
+      placeholder="youtube.com/@yourchannel"
+      placeholderTextColor={Colors.text3}
+      autoCapitalize="none"
+    />
+  </View>
+
+  {/* Project */}
+  <Text style={styles.groupLabel}>Project I'm Building</Text>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Project Title</Text>
+    <TextInput
+      style={styles.input}
+      value={projectTitle}
+      onChangeText={setProjectTitle}
+      placeholder="What are you building?"
+      placeholderTextColor={Colors.text3}
+      maxLength={100}
+    />
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Project Description</Text>
+    <TextInput
+      style={[styles.input, styles.bioInput]}
+      value={projectDescription}
+      onChangeText={setProjectDescription}
+      placeholder="Tell us about your project..."
+      placeholderTextColor={Colors.text3}
+      multiline
+      numberOfLines={4}
+      maxLength={300}
+      textAlignVertical="top"
+    />
+  </View>
+
+  <View style={styles.fieldBlock}>
+    <Text style={styles.label}>Project Image URL</Text>
+    <TextInput
+      style={styles.input}
+      value={projectImageURL}
+      onChangeText={setProjectImageURL}
+      placeholder="https://..."
+      placeholderTextColor={Colors.text3}
+      autoCapitalize="none"
+      keyboardType="url"
+    />
+    <Text style={styles.fieldHint}>
+      Paste a URL to an image of your project
+    </Text>
+  </View>
+</View>
         {/* Save button */}
         <TouchableOpacity
           style={[
@@ -432,4 +573,43 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.6,
   },
+  groupLabel: {
+  fontSize: Typography.sm,
+  fontWeight: '700',
+  color: Colors.text3,
+  textTransform: 'uppercase',
+  letterSpacing: 0.5,
+  marginBottom: Layout.sm,
+  marginTop: Layout.md,
+  paddingBottom: Layout.sm,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+},
+socialInput: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: Colors.surface,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  borderRadius: Layout.radiusSm,
+  minHeight: Layout.buttonHeight,
+},
+socialPrefix: {
+  paddingHorizontal: Layout.md,
+  fontSize: Typography.base,
+  color: Colors.text2,
+  fontWeight: '600',
+},
+socialTextInput: {
+  flex: 1,
+  paddingVertical: 14,
+  paddingRight: Layout.md,
+  fontSize: Typography.base,
+  color: Colors.text,
+},
+fieldHint: {
+  fontSize: Typography.xs,
+  color: Colors.text3,
+  marginTop: 4,
+},
 });

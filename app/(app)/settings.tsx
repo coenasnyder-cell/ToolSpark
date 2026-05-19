@@ -87,12 +87,8 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
@@ -109,9 +105,7 @@ export default function SettingsScreen() {
           <View style={styles.settingsCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>
-                  Push Notifications
-                </Text>
+                <Text style={styles.settingLabel}>Push Notifications</Text>
                 <Text style={styles.settingDesc}>
                   Get notified about new comments and activity
                 </Text>
@@ -119,10 +113,7 @@ export default function SettingsScreen() {
               <Switch
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
-                trackColor={{
-                  false: Colors.border,
-                  true: Colors.gold,
-                }}
+                trackColor={{ false: Colors.border, true: Colors.gold }}
                 thumbColor={Colors.surface}
               />
             </View>
@@ -131,20 +122,13 @@ export default function SettingsScreen() {
 
             <View style={styles.settingRow}>
               <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>
-                  Email Notifications
-                </Text>
-                <Text style={styles.settingDesc}>
-                  Receive updates via email
-                </Text>
+                <Text style={styles.settingLabel}>Email Notifications</Text>
+                <Text style={styles.settingDesc}>Coming soon</Text>
               </View>
               <Switch
                 value={false}
                 onValueChange={() => {}}
-                trackColor={{
-                  false: Colors.border,
-                  true: Colors.gold,
-                }}
+                trackColor={{ false: Colors.border, true: Colors.gold }}
                 thumbColor={Colors.surface}
                 disabled
               />
@@ -155,18 +139,14 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
-        {/* Purchases */}
+        {/* Membership */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Membership</Text>
           <View style={styles.settingsCard}>
             <TouchableOpacity style={styles.settingRowTap}>
               <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>
-                  Current Plan
-                </Text>
-                <Text style={styles.settingDesc}>
-                  Free Member
-                </Text>
+                <Text style={styles.settingLabel}>Current Plan</Text>
+                <Text style={styles.settingDesc}>Free Member</Text>
               </View>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
@@ -175,19 +155,13 @@ export default function SettingsScreen() {
 
             <TouchableOpacity style={styles.settingRowTap}>
               <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>
-                  Restore Purchases
-                </Text>
-                <Text style={styles.settingDesc}>
-                  Restore previous purchases
-                </Text>
+                <Text style={styles.settingLabel}>Restore Purchases</Text>
+                <Text style={styles.settingDesc}>Restore previous purchases</Text>
               </View>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.comingSoonNote}>
-            Paid membership coming soon
-          </Text>
+          <Text style={styles.comingSoonNote}>Paid membership coming soon</Text>
         </View>
 
         {/* Legal */}
@@ -196,13 +170,9 @@ export default function SettingsScreen() {
           <View style={styles.settingsCard}>
             <TouchableOpacity
               style={styles.settingRowTap}
-              onPress={() =>
-                Linking.openURL('https://toolspark.co/privacy-policy.html')
-              }
+              onPress={() => router.push('/privacy-policy' as any)}
             >
-              <Text style={styles.settingLabel}>
-                Privacy Policy
-              </Text>
+              <Text style={styles.settingLabel}>Privacy Policy</Text>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
 
@@ -210,19 +180,15 @@ export default function SettingsScreen() {
 
             <TouchableOpacity
               style={styles.settingRowTap}
-              onPress={() =>
-                Linking.openURL('https://toolspark.co/terms.html')
-              }
+              onPress={() => router.push('/terms' as any)}
             >
-              <Text style={styles.settingLabel}>
-                Terms of Use
-              </Text>
+              <Text style={styles.settingLabel}>Terms of Use</Text>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Danger zone */}
+        {/* Account */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.settingsCard}>
@@ -231,30 +197,18 @@ export default function SettingsScreen() {
               onPress={handleDeleteAccount}
               disabled={deleting}
             >
-              <Text style={[
-                styles.settingLabel,
-                { color: Colors.error }
-              ]}>
-                {deleting
-                  ? 'Deleting...'
-                  : 'Delete Account'}
+              <Text style={[styles.settingLabel, { color: Colors.error }]}>
+                {deleting ? 'Deleting...' : 'Delete Account'}
               </Text>
-              <Text style={[
-                styles.settingArrow,
-                { color: Colors.error }
-              ]}>→</Text>
+              <Text style={[styles.settingArrow, { color: Colors.error }]}>→</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.dangerNote}>
-            Permanently deletes your account and all data.
-            This cannot be undone.
+            Permanently deletes your account and all data. This cannot be undone.
           </Text>
         </View>
 
-        {/* App version */}
-        <Text style={styles.version}>
-          ToolSpark · Version 1.0.0
-        </Text>
+        <Text style={styles.version}>ToolSpark · Version 1.0.0</Text>
       </ScrollView>
     </View>
   );

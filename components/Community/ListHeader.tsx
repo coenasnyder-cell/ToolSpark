@@ -12,6 +12,9 @@ import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import { collection, query, limit, getDocs } from 'firebase/firestore';
+import { db } from '../../services/firebase';
+import { useEffect, useState } from 'react';
 
 const CATEGORIES = [
   'All', 'General', 'Questions', 'Wins',
@@ -53,21 +56,22 @@ export default function ListHeader({
 }: ListHeaderProps) {
   const router = useRouter();
   return (
-    <View>
-
-
+   
+   
+   <View>
       {/* Event banner */}
-      <TouchableOpacity style={styles.eventBanner} activeOpacity={0.8} onPress={() => router.push('/(app)/events' as any)}>
-        <View style={styles.eventBannerInner}>
-          <Ionicons name="calendar" size={16} color={Colors.text} />
-          <Text style={[styles.eventBannerText, nextEvent && styles.eventBannerTextActive]} numberOfLines={1}>
-            {nextEvent
-              ? `${nextEvent.eventTitle ?? 'Event'} · is happening ${formatEventTime(nextEvent.eventDate)}`
-              : 'No upcoming events · Check back soon'}
-          </Text>
-        </View>
-        <Text style={styles.viewAllText}>View all →</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={styles.eventBanner} activeOpacity={0.8} onPress={() => router.push('/events' as any)}>
+  <View style={styles.eventBannerInner}>
+    <Ionicons name="calendar" size={16} color={Colors.text} />
+    <Text style={styles.eventBannerText}>
+      {nextEvent
+       ? `${nextEvent.eventTitle} · ${nextEvent.eventStart}`
+
+        : 'No upcoming events · Check back soon'
+      }
+    </Text>
+  </View>
+</TouchableOpacity>
 
       {/* Write something */}
       {!isBanned && !showComposer && (
@@ -150,6 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   eventBannerInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Layout.sm,
@@ -158,10 +163,12 @@ const styles = StyleSheet.create({
   eventBannerText: {
     fontSize: Typography.sm,
     color: Colors.text,
+    alignItems: 'center',
   },
   eventBannerTextActive: {
     color: Colors.text,
     fontWeight: '600',
+     alignItems: 'center',
   },
   viewAllText: {
     fontSize: Typography.xs,

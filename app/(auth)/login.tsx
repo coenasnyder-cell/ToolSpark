@@ -1,4 +1,3 @@
-import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   GoogleAuthProvider,
@@ -9,7 +8,6 @@ import {
 import {
   doc,
   getDoc,
-  getFirestore,
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore';
@@ -27,10 +25,16 @@ import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+let GoogleSignin: any = null;
+let statusCodes: any = null;
+try {
+  const pkg = require('@react-native-google-signin/google-signin');
+  GoogleSignin = pkg.GoogleSignin;
+  statusCodes = pkg.statusCodes;
+} catch {
+  // native module not available in Expo Go
+}
+import { AntDesign } from '@expo/vector-icons';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -48,12 +52,16 @@ export default function LoginScreen() {
   const canUseNativeGoogle = Platform.OS !== 'web';
   const isMountedRef = useRef(true);
 
-  useEffect(() => {
+ useEffect(() => {
+  try {
     GoogleSignin.configure({
-      webClientId: '280253430618-89ca2lhmi2i1j7eim2sm3pggon01ett0.apps.googleusercontent.com',
       iosClientId: '82966513396-80ak77ileqnvd3i5objrdu58eo4nc8ii.apps.googleusercontent.com',
+      webClientId: '82966513396-e9ct0rji0pc0k43s0j1o9399pej3sqh8.apps.googleusercontent.com',
     });
-  }, []);
+  } catch (err) {
+    console.log('Google sign in not available in Expo Go');
+  }
+}, []);
 
   useEffect(() => {
     return () => {
@@ -110,6 +118,11 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
+    if (!GoogleSignin || !statusCodes) {
+      console.log('Google Sign-In is not available in this environment');
+      return;
+    }
+    setGoogleBusy(true);
     try {
       await GoogleSignin.hasPlayServices();
       await GoogleSignin.signIn();
@@ -121,6 +134,8 @@ export default function LoginScreen() {
       if (error.code !== statusCodes.SIGN_IN_CANCELLED) {
         console.log('Google sign in error:', error);
       }
+    } finally {
+      if (isMountedRef.current) setGoogleBusy(false);
     }
   };
 
