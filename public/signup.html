@@ -25,6 +25,7 @@
     firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
   });
 </script>
+<script src="/js/loops.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -307,10 +308,21 @@
       </div>
     </div>
 
-    <button class="submit-btn" id="submit-btn" onclick="signUp()">Create Account &rarr;</button>
+<div style="display:flex; gap:10px; align-items:flex-start; margin-top:1rem; margin-bottom:0.5rem;">
+  <input 
+    type="checkbox" 
+    id="emailOptIn" 
+    checked
+    style="margin-top:3px; accent-color:#C9A84C; width:16px; height:16px; flex-shrink:0; cursor:pointer;"
+  />
+  <label for="emailOptIn" style="font-size:12px; color:#9A9488; line-height:1.6; cursor:pointer;">
+    I'd like to receive emails about new content, community updates, and helpful resources
+  </label>
+</div>
 
-    <p class="terms-note">By creating an account you agree to our Terms of Service and Privacy Policy.</p>
-  </div>
+<button class="submit-btn" id="submit-btn" onclick="signUp()">Create Account &rarr;</button>
+
+<p class="terms-note">By creating an account you agree to our Terms of Service and Privacy Policy.</p>
 
   <div class="auth-footer">
     Already have an account? <a href="signon.html">Sign in</a>
@@ -367,6 +379,20 @@ async function signUp() {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName });
     await createUserDoc(cred.user, displayName);
+
+    const emailOptIn = document.getElementById('emailOptIn').checked;
+    const launchDate = new Date('2026-05-01');
+    const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
+
+    await onUserSignup({
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      userId: cred.user.uid,
+      optedIn: emailOptIn,
+      isEarlyMember: isEarlyMember,
+    });
     showMsg('Account created! Redirecting...', 'success');
     setTimeout(() => { window.location.href = 'community.html'; }, 800);
   } catch(err) {
@@ -382,6 +408,20 @@ async function signUpWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
     await createUserDoc(result.user, result.user.displayName || '');
+    const nameParts = (result.user.displayName || '').split(' ');
+    const emailOptIn = true; // Google signup assumes opt-in
+    const launchDate = new Date('2026-05-01');
+    const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
+
+    await onUserSignup({
+      email: result.user.email,
+      firstName: nameParts[0],
+      lastName: nameParts.slice(1).join(' ') || '',
+      userId: result.user.uid,
+      optedIn: emailOptIn,
+      isEarlyMember: isEarlyMember,
+    });
     showMsg('Account created! Redirecting...', 'success');
     setTimeout(() => { window.location.href = 'community.html'; }, 800);
   } catch(err) {

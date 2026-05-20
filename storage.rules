@@ -31,6 +31,14 @@ service firebase.storage {
         request.resource.contentType.matches('image/.*');
     }
 
+    // MESSAGE IMAGES
+    match /message-images/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // TOOL IMAGES
     // Admin only upload
     match /tool-images/{fileName} {
