@@ -179,13 +179,21 @@ export default function AdminMembersScreen() {
   };
 
   const renderMember = (item: Member) => (
-    <View
-      key={item.id}
-      style={[
-        styles.memberCard,
-        item.banned && styles.bannedCard,
-      ]}
-    >
+    <TouchableOpacity
+  key={item.id}
+  style={[
+    styles.memberCard,
+    item.banned && styles.bannedCard,
+  ]}
+  activeOpacity={0.7}
+  onPress={() => router.push({
+    pathname: '/admin-member-detail',
+    params: {
+      userId: item.id,
+      userEmail: item.userEmail,
+    }
+  } as any)}
+>
       {/* Avatar */}
       {item.photoURL ? (
         <Image
@@ -271,7 +279,7 @@ export default function AdminMembersScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   if (loading) {

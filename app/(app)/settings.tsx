@@ -26,18 +26,44 @@ import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import { useEffect } from 'react';
-
+import { getDoc, updateDoc } from 'firebase/firestore';
+import { updateContactTag, LOOPS_TAGS } from '../../services/loops';
 export default function SettingsScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [emailOptIn, setEmailOptIn] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] =
     useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) {
+        const snap = await getDoc(doc(db, 'users', u.uid));
+        if (snap.exists()) {
+          setEmailOptIn(snap.data().emailOptIn || false);
+        }
+      }
+    });
     return unsubscribe;
   }, []);
+
+  const handleEmailOptInToggle = async (value: boolean) => {
+    if (!user) return;
+    setEmailOptIn(value);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        emailOptIn: value,
+      });
+      await updateContactTag(user.email || '', {
+        [LOOPS_TAGS.OPT_IN]: value,
+      });
+    } catch (err) {
+      console.log('Email opt-in update error:', err);
+      setEmailOptIn(!value);
+    }
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -123,47 +149,20 @@ export default function SettingsScreen() {
             <View style={styles.settingRow}>
               <View style={styles.settingContent}>
                 <Text style={styles.settingLabel}>Email Notifications</Text>
-                <Text style={styles.settingDesc}>Coming soon</Text>
+                <Text style={styles.settingDesc}>
+                  Receive updates and tips via email
+                </Text>
               </View>
               <Switch
-                value={false}
-                onValueChange={() => {}}
+                value={emailOptIn}
+                onValueChange={handleEmailOptInToggle}
                 trackColor={{ false: Colors.border, true: Colors.gold }}
                 thumbColor={Colors.surface}
-                disabled
               />
             </View>
           </View>
-          <Text style={styles.comingSoonNote}>
-            More notification options coming soon
-          </Text>
         </View>
-
-        {/* Membership */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Membership</Text>
-          <View style={styles.settingsCard}>
-            <TouchableOpacity style={styles.settingRowTap}>
-              <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>Current Plan</Text>
-                <Text style={styles.settingDesc}>Free Member</Text>
-              </View>
-              <Text style={styles.settingArrow}>→</Text>
-            </TouchableOpacity>
-
-            <View style={styles.settingDivider} />
-
-            <TouchableOpacity style={styles.settingRowTap}>
-              <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>Restore Purchases</Text>
-                <Text style={styles.settingDesc}>Restore previous purchases</Text>
-              </View>
-              <Text style={styles.settingArrow}>→</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.comingSoonNote}>Paid membership coming soon</Text>
-        </View>
-
+     
         {/* Legal */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Legal</Text>
@@ -303,12 +302,6 @@ const styles = StyleSheet.create({
   settingDivider: {
     height: 1,
     backgroundColor: Colors.border,
-  },
-  comingSoonNote: {
-    fontSize: Typography.xs,
-    color: Colors.text3,
-    marginTop: 6,
-    paddingHorizontal: 4,
   },
   dangerNote: {
     fontSize: Typography.xs,

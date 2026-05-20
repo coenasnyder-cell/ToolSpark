@@ -31,6 +31,11 @@ interface Member {
   bio: string;
   createdAt: any;
   userEmail: string;
+  // Loops tags
+  doneForYou: boolean;
+  diyClient: boolean;
+  upgraded: boolean;
+  emailOptIn: boolean;
 }
 
 export default function MembersScreen() {
@@ -83,10 +88,10 @@ export default function MembersScreen() {
     <TouchableOpacity
       style={styles.memberCard}
       activeOpacity={0.7}
-      onPress={() => router.push({
-        pathname: '/member-profile',
-        params: { userId: item.id }
-      } as any)}
+     onPress={() => router.push({
+  pathname: '/member-profile',
+  params: { userId: item.id }
+} as any)}
     >
       {/* Avatar */}
       {item.photoURL ? (
@@ -129,6 +134,23 @@ export default function MembersScreen() {
         size={16}
         color={Colors.text3}
       />
+      <View style={styles.tagRow}>
+  {item.doneForYou && (
+    <View style={styles.tag}>
+      <Text style={styles.tagText}>DFY</Text>
+    </View>
+  )}
+  {item.diyClient && (
+    <View style={styles.tag}>
+      <Text style={styles.tagText}>DIY</Text>
+    </View>
+  )}
+  {item.upgraded && (
+    <View style={[styles.tag, styles.tagGold]}>
+      <Text style={[styles.tagText, styles.tagTextGold]}>Upgraded</Text>
+    </View>
+  )}
+</View>
     </TouchableOpacity>
   );
 
@@ -340,4 +362,30 @@ const styles = StyleSheet.create({
     fontSize: Typography.base,
     color: Colors.text3,
   },
+  tagRow: {
+  flexDirection: 'row',
+  gap: 4,
+  marginTop: 4,
+  flexWrap: 'wrap',
+},
+tag: {
+  backgroundColor: Colors.surface2,
+  borderRadius: Layout.radiusFull,
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  borderWidth: 1,
+  borderColor: Colors.border,
+},
+tagGold: {
+  backgroundColor: Colors.goldDim,
+  borderColor: Colors.gold,
+},
+tagText: {
+  fontSize: 10,
+  color: Colors.text3,
+  fontWeight: '700',
+},
+tagTextGold: {
+  color: Colors.gold,
+},
 });
