@@ -28,6 +28,7 @@ import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
+import { sendLikeNotification } from '../../services/notifications';
 
 interface UserProfile {
   displayName: string;
@@ -141,13 +142,22 @@ export default function DashboardHubScreen() {
 
   const hubCards = [
   {
-    id: 'profile',
-    title: 'My Profile',
-    subtitle: profile?.displayName || 'Edit your profile',
-    icon: 'person-outline' as const,
-    color: Colors.gold,
-    route: '/edit-profile',
-  },
+  id: 'profile',
+  title: 'My Profile',
+  subtitle: profile?.displayName || 'Edit your profile',
+  icon: 'person-outline' as const,
+  color: Colors.gold,
+  route: '/edit-profile',
+},
+{
+  id: 'view-profile',
+  title: 'Public Profile',
+  subtitle: 'See how others see you',
+  icon: 'eye-outline' as const,
+  color: Colors.gold,
+  route: `/member-profile?userId=${user?.uid}`,
+},
+ 
   {
     id: 'members',
     title: 'Members',
@@ -156,6 +166,14 @@ export default function DashboardHubScreen() {
     color: Colors.green,
     route: '/members',
   },
+  {
+  id: 'leaderboard',
+  title: 'Leaderboard',
+  subtitle: 'Top community members',
+  icon: 'trophy-outline' as const,
+  color: Colors.gold,
+  route: '/leaderboard',
+},
   {
     id: 'events',
     title: 'Events',
@@ -213,10 +231,6 @@ export default function DashboardHubScreen() {
       >
         {/* Welcome + avatar row */}
         <View style={styles.welcomeRow}>
-          <View style={styles.welcomeText}>
-            <Text style={styles.welcomeLabel}>Welcome back</Text>
-            <Text style={styles.welcomeName}>{firstName} 👋</Text>
-          </View>
           {photoURL ? (
             <Image
               source={{ uri: photoURL }}
@@ -229,6 +243,9 @@ export default function DashboardHubScreen() {
               </Text>
             </View>
           )}
+          <Text style={styles.welcomeName}>
+            Welcome back, {firstName} 👋
+          </Text>
         </View>
 
         {/* Stats row */}
@@ -248,6 +265,16 @@ export default function DashboardHubScreen() {
             <Text style={styles.statLabel}>Days Active</Text>
           </View>
         </View>
+
+        {/* View public profile link */}
+        <TouchableOpacity
+          style={styles.viewProfileLink}
+          onPress={() => router.push(`/member-profile?userId=${user?.uid}` as any)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="eye-outline" size={14} color={Colors.gold} />
+          <Text style={styles.viewProfileLinkText}>View Public Profile</Text>
+        </TouchableOpacity>
 
         {/* Hub cards grid */}
         <View style={styles.cardGrid}>
@@ -320,27 +347,7 @@ export default function DashboardHubScreen() {
     ))
           )}
         </View>
-
-        {/* Admin link */}
-        {profile?.userRole === 'admin' && (
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.adminCard}
-              onPress={() => router.push('/admin' as any)}
-            >
-              <Ionicons
-                name="shield-outline"
-                size={20}
-                color={Colors.gold}
-              />
-              <Text style={styles.adminCardText}>
-                Admin Dashboard
-              </Text>
-              <Text style={styles.eventArrow}>→</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
+    
       </ScrollView>
     </View>
   );
@@ -363,23 +370,16 @@ const styles = StyleSheet.create({
   welcomeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: Layout.md,
     paddingHorizontal: Layout.md,
     paddingVertical: Layout.lg,
-    backgroundColor: Colors.sidebar,
-  },
-  welcomeText: {
-    flex: 1,
-  },
-  welcomeLabel: {
-    fontSize: Typography.sm,
-    color: Colors.text3,
-    marginBottom: 2,
+    backgroundColor: Colors.surface,
   },
   welcomeName: {
-    fontSize: Typography.xl,
+    flex: 1,
+    fontSize: Typography.lg,
     fontWeight: '700',
-    color: '#F5F3EF',
+    color: Colors.text,
   },
   welcomeAvatar: {
     width: 48,
@@ -535,6 +535,20 @@ const styles = StyleSheet.create({
   eventArrow: {
     fontSize: Typography.base,
     color: Colors.text3,
+  },
+  viewProfileLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginHorizontal: Layout.md,
+    marginBottom: Layout.md,
+  },
+  viewProfileLinkText: {
+    fontSize: Typography.sm,
+    color: Colors.gold,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   adminCard: {
     flexDirection: 'row',

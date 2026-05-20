@@ -14,6 +14,7 @@ import {
 import {
   collection,
   query,
+  where,
   orderBy,
   limit,
   onSnapshot,
@@ -24,6 +25,7 @@ import {
   updateDoc,
   increment,
   getDocs,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../../services/firebase';
@@ -37,23 +39,34 @@ import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import ListHeader from '../../components/Community/ListHeader';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
+import { onThreadPosted, onLikeReceived } from '../../services/gamification';
+import { sendLikeNotification } from '../../services/notifications';
 
 interface Thread {
-  id: string;
+   id: string;
   title: string;
   content: string;
   authorId: string;
   authorName: string;
   displayName: string;
   authorPhotoURL: string;
-  authorPhoto: string; 
+  authorPhoto: string;
   category: string;
   likes: number;
   commentCount: number;
   pinned: boolean;
   imageURL: string;
+   gifUrl: string;
+  isPoll?: boolean;
+  poll?: {
+    question: string;
+    options: string[];
+    votes: Record<string, number>;
+    totalVotes: number;
+  };
   createdAt: any;
 }
+
 interface Comment {
   id: string;
   content: string;
@@ -120,15 +133,30 @@ export default function CommunityScreen() {
     ));
 
     if (thread && thread.authorId !== user?.uid) {
+      const recipientToken = await sendLikeNotification(
+        thread.authorId,
+        user?.displayName || 'Someone',
+        thread.title,
+        threadId
+      );
+
       await addDoc(collection(db, 'notifications'), {
         userId: thread.authorId,
         type: 'like',
         message: `${user?.displayName || 'Someone'} liked your thread`,
-        threadId: threadId,
+        threadId,
         threadTitle: thread.title,
         read: false,
+        recipientToken: recipientToken || '',
         createdAt: serverTimestamp(),
       });
+
+      const userSnap = await getDoc(doc(db, 'users', thread.authorId));
+      const totalLikes = (userSnap.data()?.totalLikesReceived || 0) + 1;
+      await updateDoc(doc(db, 'users', thread.authorId), {
+        totalLikesReceived: increment(1),
+      });
+      await onLikeReceived(thread.authorId, totalLikes);
     }
   };
 
@@ -212,7 +240,8 @@ export default function CommunityScreen() {
   title: string,
   content: string,
   category: string,
-  mediaUrl?: string
+  mediaUrl?: string,
+  poll?: any
 ) => {
   if (!title.trim() || !content.trim() || !user) return;
   setPosting(true);
@@ -222,6 +251,9 @@ export default function CommunityScreen() {
       ? (userSnap.data().photoURL || user.photoURL || '')
       : (user.photoURL || '');
 
+    const isGif = mediaUrl?.includes('giphy.com') || 
+                  mediaUrl?.endsWith('.gif');
+
     await addDoc(collection(db, 'threads'), {
       title: title.trim(),
       content: content.trim(),
@@ -229,12 +261,23 @@ export default function CommunityScreen() {
       authorName: user.displayName || 'Member',
       authorPhotoURL: photoURL,
       category: category || 'General',
-      imageURL: mediaUrl || '',
+      imageURL: !isGif ? (mediaUrl || '') : '',
+      gifUrl: isGif ? (mediaUrl || '') : '',
+      isPoll: !!poll,
+      poll: poll || null,
       likes: 0,
       commentCount: 0,
       pinned: false,
       createdAt: serverTimestamp(),
     });
+
+    const threadsQuery = query(
+      collection(db, 'threads'),
+      where('authorId', '==', user.uid)
+    );
+    const threadsSnap = await getCountFromServer(threadsQuery);
+    await onThreadPosted(user.uid, threadsSnap.data().count);
+
     setShowComposer(false);
   } catch (err) {
     console.log('Post error:', err);
@@ -254,6 +297,55 @@ export default function CommunityScreen() {
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
+  };
+
+  const renderPoll = (item: Thread, poll: NonNullable<Thread['poll']>) => {
+    const totalVotes = poll.totalVotes || 0;
+    const hasVoted = !!(user && poll.votes?.[user.uid] !== undefined);
+    const userVote = user ? poll.votes?.[user.uid] : undefined;
+
+    return (
+      <View style={styles.pollPreview}>
+        <View style={styles.pollBadge}>
+          <Ionicons name="stats-chart-outline" size={11} color={Colors.gold} />
+          <Text style={styles.pollBadgeText}>POLL</Text>
+        </View>
+        <Text style={styles.pollPreviewQuestion} numberOfLines={2}>
+          {poll.question}
+        </Text>
+        {poll.options.map((opt, i) => {
+          const optionVotes = Object.values(poll.votes || {}).filter(v => v === i).length;
+          const percent = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
+          const isSelected = userVote === i;
+          return (
+            <TouchableOpacity
+              key={i}
+              style={[styles.pollOption, isSelected && styles.pollOptionSelected]}
+              onPress={async () => {
+                if (!user || hasVoted) return;
+                await updateDoc(doc(db, 'threads', item.id), {
+                  [`poll.votes.${user.uid}`]: i,
+                  'poll.totalVotes': increment(1),
+                });
+              }}
+              disabled={hasVoted}
+              activeOpacity={hasVoted ? 1 : 0.7}
+            >
+              {hasVoted && <View style={[styles.pollProgressBar, { width: `${percent}%` as any }]} />}
+              <View style={styles.pollOptionInner}>
+                <Text style={[styles.pollOptionText, isSelected && styles.pollOptionTextSelected]} numberOfLines={1}>
+                  {isSelected ? '✓ ' : ''}{opt}
+                </Text>
+                {hasVoted && <Text style={styles.pollPercent}>{percent}%</Text>}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+        <Text style={styles.pollVoteCount}>
+          {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+        </Text>
+      </View>
+    );
   };
 
   const renderThread = ({ item }: { item: Thread }) => (
@@ -307,6 +399,17 @@ export default function CommunityScreen() {
     />
   ) : null}
 </View>
+
+      {item.gifUrl ? (
+        <Image
+          source={{ uri: item.gifUrl }}
+          style={styles.threadGif}
+          contentFit="cover"
+        />
+      ) : null}
+
+    {item.isPoll && item.poll && renderPoll(item, item.poll)}
+
       <View style={styles.threadFooter}>
         <TouchableOpacity
           style={styles.footerAction}
@@ -315,7 +418,7 @@ export default function CommunityScreen() {
           <MaterialCommunityIcons
             name={likedThreadIds.has(item.id) ? 'thumb-up' : 'thumb-up-outline'}
             size={14}
-            color={likedThreadIds.has(item.id) ? Colors.gold : Colors.text2}
+            color={likedThreadIds.has(item.id) ? Colors.gold : Colors.text}
           />
           <Text style={[styles.footerActionText, likedThreadIds.has(item.id) && styles.footerActionTextActive]}>
             {' '}{item.likes || 0}
@@ -330,7 +433,7 @@ export default function CommunityScreen() {
         >
       <Ionicons name="chatbubble-outline"
         size={14}
-        color={Colors.text2}
+        color={Colors.text}
         />
       <Text style={styles.footerActionText}>
       {' '}{item.commentCount || 0}
@@ -467,6 +570,13 @@ const styles = StyleSheet.create({
   borderBottomWidth: 1,
   borderBottomColor: Colors.border,
   },
+  threadGif: {
+  width: '100%',
+  height: 200,
+  borderRadius: Layout.radiusSm,
+  marginTop: Layout.sm,
+  backgroundColor: Colors.surface2,
+},
   composer: {
     backgroundColor: Colors.surface,
     borderRadius: Layout.radius,
@@ -657,8 +767,8 @@ timeText: {
   paddingRight: Layout.sm,
   },
   footerActionText: {
-    fontSize: Typography.xs,     // smaller count text
-  color: Colors.text2
+    fontSize: Typography.sm,     // smaller count text
+  color: Colors.text,
   },
   footerActionTextActive: {
     color: Colors.gold,
@@ -813,5 +923,78 @@ searchInput: {
   fontSize: Typography.sm,
   color: Colors.text,
   minHeight: 36,
+},
+pollPreview: {
+  backgroundColor: Colors.surface,
+  borderRadius: Layout.radiusSm,
+  padding: Layout.md,
+  marginTop: Layout.sm,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  gap: Layout.sm,
+},
+pollBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 4,
+},
+pollBadgeText: {
+  fontSize: 10,
+  fontWeight: '700',
+  color: Colors.gold,
+  letterSpacing: 0.5,
+},
+pollPreviewQuestion: {
+  fontSize: Typography.base,
+  fontWeight: '700',
+  color: Colors.text,
+},
+pollOption: {
+  borderRadius: Layout.radiusSm,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  backgroundColor: Colors.surface,
+  overflow: 'hidden',
+  minHeight: 40,
+  justifyContent: 'center',
+  position: 'relative',
+},
+pollOptionSelected: {
+  borderColor: Colors.gold,
+},
+pollProgressBar: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  bottom: 0,
+  backgroundColor: Colors.goldDim,
+  borderRadius: Layout.radiusSm,
+},
+pollOptionInner: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+},
+pollOptionText: {
+  fontSize: Typography.sm,
+  color: Colors.text,
+  flex: 1,
+},
+pollOptionTextSelected: {
+  color: Colors.gold,
+  fontWeight: '600',
+},
+pollPercent: {
+  fontSize: Typography.xs,
+  color: Colors.text2,
+  fontWeight: '600',
+  marginLeft: Layout.sm,
+},
+pollVoteCount: {
+  fontSize: Typography.xs,
+  color: Colors.text3,
+  marginTop: 4,
 },
 });

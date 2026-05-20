@@ -36,6 +36,7 @@ export default function ToolsScreen() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [showDropdown, setShowDropdown] = useState(false);
   const unreadCount = useUnreadCount();
 
   useEffect(() => {
@@ -97,33 +98,46 @@ export default function ToolsScreen() {
           </Text>
         </View>
 
-        {/* Category filter */}
+        {/* Category dropdown */}
         {categories.length > 1 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryList}
-          >
-            {categories.map(cat => (
-              <TouchableOpacity
-                key={cat}
-                style={[
-                  styles.categoryTab,
-                  selectedCategory === cat &&
-                    styles.categoryTabActive,
-                ]}
-                onPress={() => setSelectedCategory(cat)}
-              >
-                <Text style={[
-                  styles.categoryTabText,
-                  selectedCategory === cat &&
-                    styles.categoryTabTextActive,
-                ]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={styles.dropdownWrapper}>
+            <TouchableOpacity
+              style={styles.dropdownButton}
+              onPress={() => setShowDropdown(v => !v)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.dropdownButtonText}>
+                {selectedCategory}
+              </Text>
+              <Text style={styles.dropdownChevron}>
+                {showDropdown ? '▲' : '▼'}
+              </Text>
+            </TouchableOpacity>
+            {showDropdown && (
+              <View style={styles.dropdownList}>
+                {categories.map(cat => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[
+                      styles.dropdownItem,
+                      selectedCategory === cat && styles.dropdownItemActive,
+                    ]}
+                    onPress={() => {
+                      setSelectedCategory(cat);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.dropdownItemText,
+                      selectedCategory === cat && styles.dropdownItemTextActive,
+                    ]}>
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
         )}
 
         {/* Empty state */}
@@ -374,5 +388,56 @@ const styles = StyleSheet.create({
     fontSize: Typography.base,
     color: Colors.text2,
     textAlign: 'center',
+  },
+  dropdownWrapper: {
+    marginBottom: Layout.md,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+    minHeight: Layout.minTouchTarget,
+  },
+  dropdownButtonText: {
+    fontSize: Typography.base,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  dropdownChevron: {
+    fontSize: Typography.xs,
+    color: Colors.text3,
+  },
+  dropdownList: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusSm,
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+    minHeight: Layout.minTouchTarget,
+    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  dropdownItemActive: {
+    backgroundColor: Colors.goldDim,
+  },
+  dropdownItemText: {
+    fontSize: Typography.base,
+    color: Colors.text2,
+  },
+  dropdownItemTextActive: {
+    color: Colors.gold,
+    fontWeight: '700',
   },
 });

@@ -18,6 +18,8 @@ import {
   updateDoc,
   arrayUnion,
   serverTimestamp,
+  where,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -29,6 +31,12 @@ import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
 import RenderHtml from 'react-native-render-html';
+import { onUserCourseComplete } from '../../services/loops';
+import { 
+  onLessonCompleted, 
+  onCourseCompleted 
+} from '../../services/gamification';
+
 interface Lesson {
   id: string;
   lessonTitle: string;
@@ -150,6 +158,19 @@ export default function CoursePlayerScreen() {
       });
 
       setCompletedLessons(newCompleted);
+
+      await onLessonCompleted(user.uid);
+
+      if (percent === 100) {
+        const progressQuery = query(
+          collection(db, 'userProgress'),
+          where('userId', '==', user.uid),
+          where('percentComplete', '==', 100)
+        );
+        const progressSnap = await getCountFromServer(progressQuery);
+        await onCourseCompleted(user.uid, progressSnap.data().count);
+        await onUserCourseComplete(user.email || '', course?.title || '');
+      }
 
       // Auto advance to next lesson
       const currentIndex = lessons.findIndex(

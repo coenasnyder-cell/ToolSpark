@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "82966513396",
+    "project_id": "toolspark-2d62d",
+    "storage_bucket": "toolspark-2d62d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82966513396:android:d86fb0f22bf862087ac0a1",
+        "android_client_info": {
+          "package_name": "com.mycompany.toolspark"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82966513396-e9ct0rji0pc0k43s0j1o9399pej3sqh8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgX2wFVjx5ljYS8o1BRe7eCkkooWDUOn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82966513396-e9ct0rji0pc0k43s0j1o9399pej3sqh8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "82966513396-80ak77ileqnvd3i5objrdu58eo4nc8ii.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.toolspark"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,6 +23,7 @@ import { auth, db } from '../../services/firebase';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
+import { onUserSignup } from '../../services/loops';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -33,8 +34,8 @@ export default function SignupScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [emailOptIn, setEmailOptIn] = useState(true);
   const isMountedRef = useRef(true);
-
   const handleSignup = async () => {
     setError('');
     const normalizedEmail = email.trim().toLowerCase();
@@ -87,6 +88,26 @@ export default function SignupScreen() {
         userRole: 'member',
         createdAt: serverTimestamp(),
         lastSeen: serverTimestamp(),
+        emailOptIn,
+      });
+
+      const launchDate = new Date('2026-05-01');
+      const thirtyDaysAfterLaunch = new Date(
+        launchDate.getTime() + 30 * 24 * 60 * 60 * 1000
+      );
+      const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
+
+      const nameParts = trimmedName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      await onUserSignup({
+        email: normalizedEmail,
+        firstName,
+        lastName,
+        userId: userCredential.user.uid,
+        optedIn: emailOptIn,
+        isEarlyMember,
       });
 
      // Send verification email
@@ -204,7 +225,18 @@ router.replace('/(auth)/verify-email' as any);
             autoCorrect={false}
           />
         </View>
-
+<TouchableOpacity
+  style={styles.optInRow}
+  onPress={() => setEmailOptIn(!emailOptIn)}
+  activeOpacity={0.7}
+>
+  <View style={[styles.checkbox, emailOptIn && styles.checkboxChecked]}>
+    {emailOptIn && <Text style={styles.checkmark}>✓</Text>}
+  </View>
+  <Text style={styles.optInText}>
+    I'd like to receive emails about new content, community updates, and helpful resources
+  </Text>
+</TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.signupButton,
@@ -380,4 +412,37 @@ const styles = StyleSheet.create({
     fontSize: Typography.sm,
     textAlign: 'center',
   },
+  optInRow: {
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  gap: Layout.sm,
+  marginBottom: Layout.md,
+  marginTop: Layout.sm,
+},
+checkbox: {
+  width: 20,
+  height: 20,
+  borderRadius: 4,
+  borderWidth: 2,
+  borderColor: Colors.border,
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  marginTop: 2,
+},
+checkboxChecked: {
+  backgroundColor: Colors.gold,
+  borderColor: Colors.gold,
+},
+checkmark: {
+  fontSize: 12,
+  fontWeight: '700',
+  color: Colors.bg,
+},
+optInText: {
+  fontSize: Typography.sm,
+  color: Colors.text2,
+  flex: 1,
+  lineHeight: Typography.sm * 1.5,
+},
 });

@@ -22,6 +22,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { db } from '../../services/firebase';
+import { BADGE_INFO } from '../../services/gamification';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
@@ -41,6 +42,9 @@ interface Member {
   projectTitle: string;
   projectDescription: string;
   projectImageURL: string;
+  badges: string[];
+  points: number;
+  streak: number;
 }
 
 interface Thread {
@@ -60,7 +64,7 @@ export default function MemberProfileScreen() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
   const [threadCount, setThreadCount] = useState(0);
-
+  const [expandedBadge, setExpandedBadge] = useState<string | null>(null);
   useEffect(() => {
     if (userId) {
       loadMember();
@@ -70,11 +74,8 @@ export default function MemberProfileScreen() {
 
   const loadMember = async () => {
     try {
-      const userRef = doc(db, 'users', userId!);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        setMember(snap.data() as Member);
-      }
+      const snap = await getDoc(doc(db, 'users', userId!));
+      if (snap.exists()) setMember(snap.data() as Member);
     } catch (err) {
       console.log('Load member error:', err);
     } finally {
@@ -128,14 +129,6 @@ export default function MemberProfileScreen() {
     Linking.openURL(fullUrl);
   };
 
-  const hasSocials = member && (
-    member.website ||
-    member.instagram ||
-    member.twitter ||
-    member.linkedin ||
-    member.youtube
-  );
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -151,6 +144,10 @@ export default function MemberProfileScreen() {
       </View>
     );
   }
+
+  const hasSocials = member.website || member.instagram ||
+    member.twitter || member.linkedin || member.youtube;
+  const badges = member.badges || [];
 
   return (
     <View style={styles.container}>
@@ -170,8 +167,8 @@ export default function MemberProfileScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile hero */}
-        <View style={styles.hero}>
+        {/* Compact profile row */}
+        <View style={styles.profileRow}>
           {member.photoURL ? (
             <Image
               source={{ uri: member.photoURL }}
@@ -185,212 +182,183 @@ export default function MemberProfileScreen() {
             </View>
           )}
 
-          <Text style={styles.name}>{member.displayName}</Text>
-
-          <View style={[
-            styles.roleBadge,
-            member.userRole === 'admin' && styles.adminBadge
-          ]}>
-            <Text style={[
-              styles.roleBadgeText,
-              member.userRole === 'admin' && styles.adminBadgeText
-            ]}>
-              {member.userRole === 'admin' ? '★ Admin' : 'Member'}
+          <View style={styles.profileInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{member.displayName}</Text>
+              {member.userRole === 'admin' && (
+                <View style={styles.adminBadge}>
+                  <Text style={styles.adminBadgeText}>★ Admin</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.joined}>
+              Member since {formatJoined(member.createdAt)}
             </Text>
+            <View style={styles.statsRow}>
+              <Text style={styles.statText}>
+                <Text style={styles.statNumber}>{threadCount}</Text>
+                {' '}posts
+              </Text>
+              {(member.points || 0) > 0 && (
+                <Text style={styles.statText}>
+                  <Text style={styles.statNumber}>{member.points}</Text>
+                  {' '}pts
+                </Text>
+              )}
+              {(member.streak || 0) >= 3 && (
+                <Text style={styles.statText}>
+                  🔥 <Text style={styles.statNumber}>{member.streak}</Text>
+                  {' '}day streak
+                </Text>
+              )}
+            </View>
           </View>
 
-          {member.bio ? (
-            <Text style={styles.bio}>{member.bio}</Text>
-          ) : (
-            <Text style={styles.bioEmpty}>No bio yet</Text>
-          )}
-
-          <Text style={styles.joined}>
-            Joined {formatJoined(member.createdAt)}
-          </Text>
-
-          {/* Message button */}
           <TouchableOpacity
-            style={styles.messageButton}
-            onPress={() => {}}
-          >
-            <Ionicons
-              name="chatbubble-outline"
-              size={16}
-              color={Colors.bg}
-            />
-            <Text style={styles.messageButtonText}>
-              Message
-            </Text>
-          </TouchableOpacity>
+  style={styles.messageButton}
+  onPress={() => router.push({
+    pathname: '/conversation',
+    params: {
+      otherUserId: userId,
+      otherUserName: member.displayName,
+    }
+  } as any)}
+>
+  <Ionicons
+    name="chatbubble-outline"
+    size={18}
+    color={Colors.text2}
+  />
+</TouchableOpacity>
         </View>
+
+        {/* Bio */}
+        {member.bio ? (
+          <View style={styles.bioSection}>
+            <Text style={styles.bioText}>{member.bio}</Text>
+          </View>
+        ) : null}
 
         {/* Social links */}
         {hasSocials && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Connect</Text>
-            <View style={styles.socialsCard}>
-              {member.website && (
-                <TouchableOpacity
-                  style={styles.socialRow}
-                  onPress={() => openURL(member.website)}
-                >
-                  <View style={styles.socialIcon}>
-                    <Ionicons
-                      name="globe-outline"
-                      size={18}
-                      color={Colors.gold}
-                    />
-                  </View>
-                  <Text style={styles.socialText}>
-                    {member.website}
-                  </Text>
-                  <Ionicons
-                    name="open-outline"
-                    size={14}
-                    color={Colors.text3}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {member.instagram && (
-                <TouchableOpacity
-                  style={styles.socialRow}
-                  onPress={() => openURL(
-                    `https://instagram.com/${member.instagram}`
-                  )}
-                >
-                  <View style={styles.socialIcon}>
-                    <Ionicons
-                      name="logo-instagram"
-                      size={18}
-                      color='#E1306C'
-                    />
-                  </View>
-                  <Text style={styles.socialText}>
-                    @{member.instagram}
-                  </Text>
-                  <Ionicons
-                    name="open-outline"
-                    size={14}
-                    color={Colors.text3}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {member.twitter && (
-                <TouchableOpacity
-                  style={styles.socialRow}
-                  onPress={() => openURL(
-                    `https://twitter.com/${member.twitter}`
-                  )}
-                >
-                  <View style={styles.socialIcon}>
-                    <Ionicons
-                      name="logo-twitter"
-                      size={18}
-                      color='#1DA1F2'
-                    />
-                  </View>
-                  <Text style={styles.socialText}>
-                    @{member.twitter}
-                  </Text>
-                  <Ionicons
-                    name="open-outline"
-                    size={14}
-                    color={Colors.text3}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {member.linkedin && (
-                <TouchableOpacity
-                  style={styles.socialRow}
-                  onPress={() => openURL(
-                    `https://linkedin.com/in/${member.linkedin}`
-                  )}
-                >
-                  <View style={styles.socialIcon}>
-                    <Ionicons
-                      name="logo-linkedin"
-                      size={18}
-                      color='#0077B5'
-                    />
-                  </View>
-                  <Text style={styles.socialText}>
-                    {member.linkedin}
-                  </Text>
-                  <Ionicons
-                    name="open-outline"
-                    size={14}
-                    color={Colors.text3}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {member.youtube && (
-                <TouchableOpacity
-                  style={styles.socialRow}
-                  onPress={() => openURL(member.youtube)}
-                >
-                  <View style={styles.socialIcon}>
-                    <Ionicons
-                      name="logo-youtube"
-                      size={18}
-                      color='#FF0000'
-                    />
-                  </View>
-                  <Text style={styles.socialText}>
-                    {member.youtube}
-                  </Text>
-                  <Ionicons
-                    name="open-outline"
-                    size={14}
-                    color={Colors.text3}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
+          <View style={styles.socialsRow}>
+            {member.website && (
+              <TouchableOpacity
+                style={styles.socialIcon}
+                onPress={() => openURL(member.website)}
+              >
+                <Ionicons name="globe-outline" size={20} color={Colors.text2} />
+              </TouchableOpacity>
+            )}
+            {member.instagram && (
+              <TouchableOpacity
+                style={styles.socialIcon}
+                onPress={() => openURL(`https://instagram.com/${member.instagram}`)}
+              >
+                <Ionicons name="logo-instagram" size={20} color={Colors.text2} />
+              </TouchableOpacity>
+            )}
+            {member.twitter && (
+              <TouchableOpacity
+                style={styles.socialIcon}
+                onPress={() => openURL(`https://twitter.com/${member.twitter}`)}
+              >
+                <Ionicons name="logo-twitter" size={20} color={Colors.text2} />
+              </TouchableOpacity>
+            )}
+            {member.linkedin && (
+              <TouchableOpacity
+                style={styles.socialIcon}
+                onPress={() => openURL(`https://linkedin.com/in/${member.linkedin}`)}
+              >
+                <Ionicons name="logo-linkedin" size={20} color={Colors.text2} />
+              </TouchableOpacity>
+            )}
+            {member.youtube && (
+              <TouchableOpacity
+                style={styles.socialIcon}
+                onPress={() => openURL(member.youtube)}
+              >
+                <Ionicons name="logo-youtube" size={20} color={Colors.text2} />
+              </TouchableOpacity>
+            )}
           </View>
         )}
+
+        {/* ── Badges ── */}
+        {badges.length > 0 && (
+          <>
+            <View style={styles.divider} />
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                Badges · {badges.length}
+              </Text>
+              <View style={styles.badgeGrid}>
+                {badges.map((badgeId) => {
+                  const info = BADGE_INFO[badgeId];
+                  if (!info) return null;
+                  const isExpanded = expandedBadge === badgeId;
+                  return (
+                    <TouchableOpacity
+                      key={badgeId}
+                      style={[
+                        styles.badgeChip,
+                        isExpanded && styles.badgeChipExpanded,
+                      ]}
+                      onPress={() =>
+                        setExpandedBadge(isExpanded ? null : badgeId)
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.badgeEmoji}>{info.emoji}</Text>
+                      <View style={styles.badgeTextBlock}>
+                        <Text style={styles.badgeLabel}>{info.label}</Text>
+                        {isExpanded && (
+                          <Text style={styles.badgeDesc}>
+                            {info.description}
+                          </Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          </>
+        )}
+
+        <View style={styles.divider} />
 
         {/* Project */}
         {member.projectTitle && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Project I'm Building
-            </Text>
-            <View style={styles.projectCard}>
-              {member.projectImageURL && (
-                <Image
-                  source={{ uri: member.projectImageURL }}
-                  style={styles.projectImage}
-                  resizeMode="cover"
-                />
-              )}
-              <View style={styles.projectInfo}>
-                <Text style={styles.projectTitle}>
-                  {member.projectTitle}
-                </Text>
-                {member.projectDescription && (
-                  <Text style={styles.projectDesc}>
-                    {member.projectDescription}
-                  </Text>
+          <>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Project I'm Building</Text>
+              <View style={styles.projectCard}>
+                {member.projectImageURL && (
+                  <Image
+                    source={{ uri: member.projectImageURL }}
+                    style={styles.projectImage}
+                    resizeMode="cover"
+                  />
                 )}
+                <View style={styles.projectInfo}>
+                  <Text style={styles.projectTitle}>
+                    {member.projectTitle}
+                  </Text>
+                  {member.projectDescription && (
+                    <Text style={styles.projectDesc}>
+                      {member.projectDescription}
+                    </Text>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
+            <View style={styles.divider} />
+          </>
         )}
 
-        {/* Stats */}
-        <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{threadCount}</Text>
-            <Text style={styles.statLabel}>Threads</Text>
-          </View>
-        </View>
-
-        {/* Recent threads */}
+        {/* Recent posts */}
         {threads.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recent Posts</Text>
@@ -404,27 +372,31 @@ export default function MemberProfileScreen() {
                 } as any)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.threadTitle}>
-                  {thread.title}
-                </Text>
-                <Text
-                  style={styles.threadContent}
-                  numberOfLines={2}
-                >
-                  {thread.content}
-                </Text>
-                <View style={styles.threadFooter}>
-                  <Text style={styles.threadMeta}>
-                    {formatTime(thread.createdAt)}
-                  </Text>
-                  <View style={styles.threadStats}>
-                    <Text style={styles.threadStat}>
-                      ♥ {thread.likes || 0}
+                <View style={styles.threadCardInner}>
+                  <View style={styles.threadCardContent}>
+                    <Text style={styles.threadTitle}>{thread.title}</Text>
+                    <Text style={styles.threadContent} numberOfLines={2}>
+                      {thread.content}
                     </Text>
-                    <Text style={styles.threadStat}>
-                      💬 {thread.commentCount || 0}
-                    </Text>
+                    <View style={styles.threadFooter}>
+                      <Text style={styles.threadTime}>
+                        {formatTime(thread.createdAt)}
+                      </Text>
+                      <View style={styles.threadStats}>
+                        <Text style={styles.threadStat}>
+                          ♥ {thread.likes || 0}
+                        </Text>
+                        <Text style={styles.threadStat}>
+                          💬 {thread.commentCount || 0}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={Colors.text3}
+                  />
                 </View>
               </TouchableOpacity>
             ))}
@@ -481,202 +453,218 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: Layout.xl,
   },
-  hero: {
-    backgroundColor: Colors.sidebar,
+  profileRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Layout.md,
-    paddingTop: Layout.lg,
-    paddingBottom: Layout.xl,
-    marginBottom: Layout.md,
+    padding: Layout.md,
+    gap: Layout.md,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: Colors.gold,
-    marginBottom: Layout.md,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    flexShrink: 0,
   },
   avatarFallback: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: Colors.gold,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Layout.md,
+    flexShrink: 0,
   },
   avatarFallbackText: {
-    fontSize: Typography.xxxl,
+    fontSize: Typography.xl,
     fontWeight: '700',
     color: Colors.bg,
   },
-  name: {
-    fontSize: Typography.xl,
-    fontWeight: '700',
-    color: '#F5F3EF',
-    marginBottom: Layout.sm,
+  profileInfo: {
+    flex: 1,
   },
-  roleBadge: {
-    backgroundColor: Colors.surface2,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.md,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: Layout.md,
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.sm,
+    marginBottom: 4,
+    flexWrap: 'wrap',
+  },
+  name: {
+    fontSize: Typography.lg,
+    fontWeight: '700',
+    color: Colors.text,
   },
   adminBadge: {
     backgroundColor: Colors.goldDim,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 2,
+    borderWidth: 1,
     borderColor: Colors.gold,
   },
-  roleBadgeText: {
-    fontSize: Typography.xs,
-    color: Colors.text2,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
   adminBadgeText: {
+    fontSize: 10,
     color: Colors.gold,
-  },
-  bio: {
-    fontSize: Typography.base,
-    color: Colors.text2,
-    textAlign: 'center',
-    lineHeight: Typography.base * 1.6,
-    marginBottom: Layout.sm,
-    paddingHorizontal: Layout.lg,
-  },
-  bioEmpty: {
-    fontSize: Typography.sm,
-    color: Colors.text3,
-    marginBottom: Layout.sm,
-    fontStyle: 'italic',
+    fontWeight: '700',
   },
   joined: {
     fontSize: Typography.xs,
     color: Colors.text3,
-    marginBottom: Layout.md,
+    marginBottom: 4,
   },
-  messageButton: {
+  statsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.sm,
-    backgroundColor: Colors.gold,
-    borderRadius: Layout.radiusFull,
-    paddingHorizontal: Layout.lg,
-    paddingVertical: Layout.sm,
-    minHeight: Layout.minTouchTarget,
+    gap: Layout.md,
+    flexWrap: 'wrap',
   },
-  messageButtonText: {
-    color: Colors.bg,
-    fontWeight: '700',
-    fontSize: Typography.base,
+  statText: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
   },
-  section: {
-    paddingHorizontal: Layout.md,
-    marginBottom: Layout.lg,
-  },
-  sectionTitle: {
-    fontSize: Typography.md,
+  statNumber: {
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: Layout.md,
   },
-  socialsCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Layout.radius,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: 'hidden',
-  },
-  socialRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Layout.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    gap: Layout.md,
-    minHeight: Layout.minTouchTarget + 8,
-  },
-  socialIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  messageButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  socialText: {
-    flex: 1,
-    fontSize: Typography.base,
-    color: Colors.text,
-  },
-  projectCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Layout.radius,
     borderWidth: 1,
     borderColor: Colors.border,
+    flexShrink: 0,
+  },
+  bioSection: {
+    padding: Layout.md,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  bioText: {
+    fontSize: Typography.base,
+    color: Colors.text,
+    lineHeight: Typography.base * 1.6,
+  },
+  socialsRow: {
+    flexDirection: 'row',
+    gap: Layout.md,
+    padding: Layout.md,
+    backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  socialIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  divider: {
+    height: 8,
+    backgroundColor: Colors.bg,
+  },
+  section: {
+    padding: Layout.md,
+    backgroundColor: Colors.surface,
+  },
+  sectionTitle: {
+    fontSize: Typography.sm,
+    fontWeight: '700',
+    color: Colors.text3,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: Layout.md,
+  },
+
+  // Badge grid
+  badgeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Layout.sm,
+  },
+  badgeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.surface2,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 6,
+  },
+  badgeChipExpanded: {
+    borderColor: Colors.gold,
+    backgroundColor: Colors.goldDim,
+    borderRadius: Layout.radiusSm,
+  },
+  badgeEmoji: {
+    fontSize: 16,
+  },
+  badgeTextBlock: {
+    flexShrink: 1,
+  },
+  badgeLabel: {
+    fontSize: Typography.xs,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  badgeDesc: {
+    fontSize: Typography.xs,
+    color: Colors.text2,
+    marginTop: 2,
+  },
+
+  projectCard: {
+    borderRadius: Layout.radius,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   projectImage: {
     width: '100%',
-    height: 180,
+    height: 160,
     backgroundColor: Colors.surface2,
   },
   projectInfo: {
     padding: Layout.md,
   },
   projectTitle: {
-    fontSize: Typography.lg,
+    fontSize: Typography.md,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: Layout.sm,
+    marginBottom: 4,
   },
   projectDesc: {
-    fontSize: Typography.base,
+    fontSize: Typography.sm,
     color: Colors.text2,
-    lineHeight: Typography.base * 1.6,
-  },
-  statsCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    marginHorizontal: Layout.md,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: Layout.lg,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: Typography.xl,
-    fontWeight: '700',
-    color: Colors.gold,
-  },
-  statLabel: {
-    fontSize: Typography.xs,
-    color: Colors.text3,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 2,
+    lineHeight: Typography.sm * 1.6,
   },
   threadCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Layout.radius,
-    padding: Layout.md,
-    marginBottom: Layout.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: Layout.md,
+  },
+  threadCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.sm,
+  },
+  threadCardContent: {
+    flex: 1,
   },
   threadTitle: {
     fontSize: Typography.base,
-    fontWeight: '700',
+    fontWeight: '600',
     color: Colors.text,
     marginBottom: 4,
   },
@@ -690,11 +678,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: Layout.sm,
   },
-  threadMeta: {
+  threadTime: {
     fontSize: Typography.xs,
     color: Colors.text3,
   },

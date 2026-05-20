@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -17,18 +18,27 @@ import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../services/firebase';
 import { Image } from 'react-native';
+import { Modal, Image as RNImage } from 'react-native';
+import { GIPHY_API_KEY } from '../../constants/config';
 
 const CATEGORIES = [
   'All', 'General', 'Questions', 'Wins',
   'Announcements', 'Tool Ideas', 'Feedback',
 ];
 
+interface Poll {
+  question: string;
+  options: string[];
+  votes: Record<string, string>;
+  totalVotes: number;
+}
+
 const ThreadComposer = ({
   onPost,
   onClose,
   posting,
 }: {
-  onPost: (title: string, content: string, category: string, imageUrl?: string) => void;
+  onPost: (title: string, content: string, category: string, mediaUrl?: string, poll?: Poll) => void;
   onClose: () => void;
   posting: boolean;
 }) => {
@@ -41,7 +51,14 @@ const ThreadComposer = ({
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const titleRef = useRef<TextInput>(null);
-
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [gifQuery, setGifQuery] = useState('');
+  const [gifResults, setGifResults] = useState<any[]>([]);
+  const [gifLoading, setGifLoading] = useState(false);
+  const [pendingGifUrl, setPendingGifUrl] = useState<string | null>(null);
+  const [showPoll, setShowPoll] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState(['', '']);
   const handlePickImage = async () => {
     const permission = await ImagePicker
       .requestMediaLibraryPermissionsAsync();
@@ -71,7 +88,21 @@ const ThreadComposer = ({
       }
     }
   };
-
+const fetchGifs = async (q: string) => {
+  setGifLoading(true);
+  const endpoint = q.trim()
+    ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(q)}&limit=24&rating=g`
+    : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=24&rating=g`;
+  try {
+    const res = await fetch(endpoint);
+    const json = await res.json();
+    setGifResults(json.data || []);
+  } catch {
+    setGifResults([]);
+  } finally {
+    setGifLoading(false);
+  }
+};
   const canPost = title.trim().length > 0 && content.trim().length > 0;
 
   return (
@@ -81,11 +112,17 @@ const ThreadComposer = ({
         <View style={composerStyles.authorAvatar}>
           <Text style={composerStyles.authorAvatarText}>C</Text>
         </View>
-        <Text style={composerStyles.authorText}>
+        <Text style={[composerStyles.authorText, { flex: 1 }]}>
           posting in <Text style={composerStyles.authorBold}>
             ToolSpark
           </Text>
         </Text>
+        <TouchableOpacity
+          style={composerStyles.cancelBtn}
+          onPress={onClose}
+        >
+          <Text style={composerStyles.cancelBtnText}>CANCEL</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Title input */}
@@ -129,6 +166,82 @@ const ThreadComposer = ({
         </View>
       ) : null}
 
+      {pendingGifUrl && (
+        <View style={composerStyles.gifPreviewContainer}>
+          <RNImage
+            source={{ uri: pendingGifUrl }}
+            style={composerStyles.gifPreview}
+            resizeMode="cover"
+          />
+          <TouchableOpacity
+            style={composerStyles.gifPreviewRemove}
+            onPress={() => setPendingGifUrl(null)}
+          >
+            <Ionicons name="close-circle" size={18} color={Colors.text2} />
+          </TouchableOpacity>
+        </View>
+      )}
+
+{showPoll && (
+  <View style={composerStyles.pollContainer}>
+    <Text style={composerStyles.pollLabel}>Poll</Text>
+
+    <TextInput
+      style={composerStyles.pollQuestion}
+      placeholder="Ask a question..."
+      placeholderTextColor="#BBBAB6"
+      value={pollQuestion}
+      onChangeText={setPollQuestion}
+    />
+
+    {pollOptions.map((option, index) => (
+      <View key={index} style={composerStyles.pollOptionRow}>
+        <TextInput
+          style={composerStyles.pollOption}
+          placeholder={`Option ${index + 1}`}
+          placeholderTextColor="#BBBAB6"
+          value={option}
+          onChangeText={(text) => {
+            const updated = [...pollOptions];
+            updated[index] = text;
+            setPollOptions(updated);
+          }}
+        />
+        {pollOptions.length > 2 && (
+          <TouchableOpacity
+            onPress={() => {
+              setPollOptions(
+                pollOptions.filter((_, i) => i !== index)
+              );
+            }}
+          >
+            <Ionicons
+              name="close"
+              size={18}
+              color="#BBBAB6"
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+    ))}
+
+    {pollOptions.length < 6 && (
+      <TouchableOpacity
+        style={composerStyles.addOptionButton}
+        onPress={() => setPollOptions([...pollOptions, ''])}
+      >
+        <Ionicons
+          name="add"
+          size={16}
+          color="#BBBAB6"
+        />
+        <Text style={composerStyles.addOptionText}>
+          Add option
+        </Text>
+      </TouchableOpacity>
+    )}
+  </View>
+)}
       {/* Video URL input */}
       {showVideoInput && (
         <View style={composerStyles.videoInputRow}>
@@ -195,11 +308,21 @@ const ThreadComposer = ({
               <Ionicons
                 name="image-outline"
                 size={20}
-                color={imageUrl ? Colors.gold : '#BBBAB6'}
+                color={imageUrl ? Colors.gold : 'text2'}
               />
             )}
           </TouchableOpacity>
-
+          {/* Poll icon */}
+          <TouchableOpacity
+          style={composerStyles.toolbarIcon}
+          onPress={() => setShowPoll(!showPoll)}
+          >
+          <Ionicons
+            name="stats-chart-outline"
+            size={20}
+          color={showPoll ? Colors.gold : '#text2'}
+          />
+          </TouchableOpacity>
           {/* Video */}
           <TouchableOpacity
             style={composerStyles.toolbarIcon}
@@ -208,14 +331,23 @@ const ThreadComposer = ({
             <Ionicons
               name="play-circle-outline"
               size={20}
-              color={videoUrl ? Colors.gold : '#BBBAB6'}
+              color={videoUrl ? Colors.gold : 'text2'}
             />
           </TouchableOpacity>
 
-          {/* GIF placeholder */}
-          <TouchableOpacity style={composerStyles.toolbarIcon}>
-            <Text style={composerStyles.gifText}>GIF</Text>
-          </TouchableOpacity>
+          {/* GIF */}
+<TouchableOpacity
+  style={composerStyles.toolbarIcon}
+  onPress={() => {
+    setShowGifPicker(true);
+    fetchGifs('');
+  }}
+>
+  <Text style={[
+    composerStyles.gifText,
+    pendingGifUrl ? { color: Colors.gold } : null
+  ]}>GIF</Text>
+</TouchableOpacity>
 
           {/* Category */}
           <TouchableOpacity
@@ -228,22 +360,13 @@ const ThreadComposer = ({
             <Ionicons
               name="chevron-down"
               size={12}
-              color="#BBBAB6"
+              color="text2"
             />
           </TouchableOpacity>
         </View>
 
         {/* Right actions */}
         <View style={composerStyles.toolbarRight}>
-          <TouchableOpacity
-            style={composerStyles.cancelBtn}
-            onPress={onClose}
-          >
-            <Text style={composerStyles.cancelBtnText}>
-              CANCEL
-            </Text>
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[
               composerStyles.postBtn,
@@ -253,7 +376,15 @@ const ThreadComposer = ({
               title,
               content,
               category,
-              imageUrl || videoUrl || undefined
+              imageUrl || pendingGifUrl || videoUrl || undefined,
+              showPoll && pollQuestion && pollOptions.filter(o => o.trim()).length >= 2
+                ? {
+                    question: pollQuestion,
+                    options: pollOptions.filter(o => o.trim()),
+                    votes: {},
+                    totalVotes: 0,
+                  }
+                : undefined
             )}
             disabled={!canPost || posting}
           >
@@ -268,8 +399,63 @@ const ThreadComposer = ({
               </Text>
             )}
           </TouchableOpacity>
+
         </View>
       </View>
+      {/* GIF Picker Modal */}
+      <Modal
+        visible={showGifPicker}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={composerStyles.gifModal}>
+          <View style={composerStyles.gifModalHeader}>
+            <Text style={composerStyles.gifModalTitle}>Choose a GIF</Text>
+            <TouchableOpacity onPress={() => setShowGifPicker(false)}>
+              <Ionicons name="close" size={24} color={Colors.text} />
+            </TouchableOpacity>
+          </View>
+          <View style={composerStyles.gifSearchRow}>
+            <TextInput
+              style={composerStyles.gifSearchInput}
+              placeholder="Search GIFs..."
+              placeholderTextColor={Colors.text3}
+              value={gifQuery}
+              onChangeText={(q) => { setGifQuery(q); fetchGifs(q); }}
+              autoFocus
+            />
+          </View>
+          {gifLoading ? (
+            <ActivityIndicator color={Colors.gold} style={{ marginTop: Layout.xl }} />
+          ) : (
+            <FlatList
+              data={gifResults}
+              keyExtractor={(g) => g.id}
+              numColumns={2}
+              columnWrapperStyle={composerStyles.gifGrid}
+              renderItem={({ item }) => {
+                const url = item.images?.fixed_width?.url;
+                return (
+                  <TouchableOpacity
+                    style={composerStyles.gifCell}
+                    onPress={() => {
+                      setPendingGifUrl(item.images?.original?.url || url);
+                      setShowGifPicker(false);
+                      setGifQuery('');
+                    }}
+                  >
+                    <RNImage
+                      source={{ uri: url }}
+                      style={composerStyles.gifCellImage}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -374,16 +560,16 @@ const composerStyles = StyleSheet.create({
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Layout.md,
     paddingVertical: Layout.sm,
+    gap: Layout.sm,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
   toolbarLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.sm,
+    gap: 4,
   },
   toolbarRight: {
     flexDirection: 'row',
@@ -391,65 +577,60 @@ const composerStyles = StyleSheet.create({
     gap: Layout.sm,
   },
   toolbarIcon: {
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
   gifText: {
     fontSize: Typography.sm,
     fontWeight: '700',
-    color: '#BBBAB6',
+    color: 'Colors.text2',
     letterSpacing: 0.5,
   },
   categoryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Layout.sm,
-    paddingVertical: 6,
+    paddingVertical: 4,
     borderRadius: Layout.radiusFull,
     borderWidth: 1,
     borderColor: Colors.border,
-    gap: 4,
+    gap: 2,
   },
   categoryButtonText: {
     fontSize: Typography.xs,
-    color: '#BBBAB6',
+    color: 'Colors.text2',
     fontWeight: '500',
   },
   cancelBtn: {
     paddingHorizontal: Layout.sm,
-    paddingVertical: 6,
-    minHeight: 36,
+    paddingVertical: 4,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   cancelBtnText: {
     fontSize: Typography.xs,
-    color: '#BBBAB6',
+    color: Colors.gold,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   postBtn: {
     paddingHorizontal: Layout.md,
-    paddingVertical: 6,
+    paddingVertical: 4,
     borderRadius: Layout.radiusFull,
-    backgroundColor: Colors.text,
-    minHeight: 36,
+    backgroundColor: Colors.sidebar,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  postBtnDisabled: {
-    backgroundColor: Colors.border,
-  },
+  postBtnDisabled: {},
   postBtnText: {
     fontSize: Typography.xs,
-    color: '#F5F3EF',
+    color: Colors.gold,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  postBtnTextDisabled: {
-    color: Colors.text3,
-  },
+  postBtnTextDisabled: {},
   categoryOptions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -478,6 +659,115 @@ const composerStyles = StyleSheet.create({
     color: Colors.bg,
     fontWeight: '700',
   },
+  pollContainer: {
+  marginHorizontal: Layout.md,
+  marginBottom: Layout.sm,
+  backgroundColor: Colors.surface2,
+  borderRadius: Layout.radiusSm,
+  padding: Layout.md,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  gap: Layout.sm,
+},
+pollLabel: {
+  fontSize: Typography.xs,
+  fontWeight: '700',
+  color: Colors.text3,
+  textTransform: 'uppercase',
+  letterSpacing: 0.5,
+},
+pollQuestion: {
+  fontSize: Typography.base,
+  color: Colors.text,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+  paddingVertical: Layout.sm,
+},
+pollOptionRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: Layout.sm,
+},
+pollOption: {
+  flex: 1,
+  fontSize: Typography.base,
+  color: Colors.text,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+  paddingVertical: Layout.sm,
+},
+addOptionButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 4,
+  paddingTop: Layout.sm,
+},
+addOptionText: {
+  fontSize: Typography.sm,
+  color: '#BBBAB6',
+},
+gifPreviewContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginHorizontal: Layout.md,
+  marginBottom: Layout.sm,
+},
+gifPreview: {
+  width: 80,
+  height: 60,
+  borderRadius: Layout.radiusSm,
+},
+gifPreviewRemove: {
+  marginLeft: Layout.xs,
+},
+gifModal: {
+  flex: 1,
+  backgroundColor: Colors.bg,
+},
+gifModalHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: Layout.md,
+  paddingTop: Layout.lg,
+  paddingBottom: Layout.sm,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+},
+gifModalTitle: {
+  fontSize: Typography.md,
+  fontWeight: '700',
+  color: Colors.text,
+},
+gifSearchRow: {
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+},
+gifSearchInput: {
+  backgroundColor: Colors.surface,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  borderRadius: Layout.radiusFull,
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.sm,
+  fontSize: Typography.base,
+  color: Colors.text,
+},
+gifGrid: {
+  paddingHorizontal: Layout.sm,
+  gap: Layout.sm,
+},
+gifCell: {
+  flex: 1,
+  margin: Layout.xs,
+  borderRadius: Layout.radiusSm,
+  overflow: 'hidden',
+  backgroundColor: Colors.surface,
+},
+gifCellImage: {
+  width: '100%',
+  height: 120,
+},
 });
 
 interface ListHeaderProps {
@@ -487,9 +777,15 @@ interface ListHeaderProps {
   setShowComposer: (show: boolean) => void;
   isBanned: boolean;
   user: any;
-  handlePost: (title: string, content: string, category: string, imageUrl?: string) => void;
+  handlePost: (
+    title: string,
+    content: string,
+    category: string,
+    mediaUrl?: string,
+    poll?: any
+  ) => void;
   posting: boolean;
-  nextEvent?: any;
+  nextEvent: any;
 }
 
 export default function ListHeader({

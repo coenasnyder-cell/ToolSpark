@@ -25,6 +25,8 @@ import {
   updateDoc,
   increment,
   deleteDoc,
+  where,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -37,8 +39,8 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-
+import { onCommentPosted } from '../../services/gamification';
+import { sendCommentNotification } from '../../services/notifications';
 
 interface Comment {
   id: string;
@@ -70,6 +72,13 @@ interface Thread {
   reactions: Record<string, string>;
   reactionCount: number;
   createdAt: any;
+  isPoll?: boolean;
+  poll?: {
+    question: string;
+    options: string[];
+    votes: Record<string, number>;
+    totalVotes: number;
+  };
 }
 
 export default function ThreadDetailScreen() {
@@ -122,19 +131,27 @@ const insets = useSafeAreaInsets();
     return unsubscribe;
   }, []);
 
-  // Load thread
+  // Load thread (real-time so poll votes update live)
   useEffect(() => {
     if (!threadId) return;
-    const loadThread = async () => {
-      const threadRef = doc(db, 'threads', threadId);
-      const snap = await getDoc(threadRef);
+    const unsubscribe = onSnapshot(doc(db, 'threads', threadId), (snap) => {
       if (snap.exists()) {
         setThread({ id: snap.id, ...snap.data() } as Thread);
       }
       setLoading(false);
-    };
-    loadThread();
+    });
+    return unsubscribe;
   }, [threadId]);
+
+  const handleVote = async (optionIndex: number) => {
+    if (!user || !thread?.poll || !threadId) return;
+    const hasVoted = thread.poll.votes?.[user.uid] !== undefined;
+    if (hasVoted) return;
+    await updateDoc(doc(db, 'threads', threadId), {
+      [`poll.votes.${user.uid}`]: optionIndex,
+      'poll.totalVotes': increment(1),
+    });
+  };
 
   // Load comments real-time
   useEffect(() => {
@@ -178,6 +195,13 @@ const insets = useSafeAreaInsets();
       });
 
       if (thread && thread.authorId !== user.uid) {
+        const recipientToken = await sendCommentNotification(
+          thread.authorId,
+          user.displayName || 'Someone',
+          thread.title,
+          threadId
+        );
+
         await addDoc(collection(db, 'notifications'), {
           userId: thread.authorId,
           type: 'comment',
@@ -185,9 +209,17 @@ const insets = useSafeAreaInsets();
           threadId: threadId,
           threadTitle: thread.title,
           read: false,
+          recipientToken: recipientToken || '',
           createdAt: serverTimestamp(),
         });
       }
+
+      const commentsQuery = query(
+        collection(db, 'threads', threadId, 'comments'),
+        where('authorId', '==', user.uid)
+      );
+      const commentsSnap = await getCountFromServer(commentsQuery);
+      await onCommentPosted(user.uid, commentsSnap.data().count);
 
       setNewComment('');
     } catch (err) {
@@ -465,6 +497,53 @@ const insets = useSafeAreaInsets();
 
           <Text style={styles.threadTitle}>{thread.title}</Text>
           <Text style={styles.threadContent}>{thread.content}</Text>
+
+          {/* Poll */}
+          {thread.isPoll && thread.poll && (() => {
+            const poll = thread.poll!;
+            const totalVotes = poll.totalVotes || 0;
+            const hasVoted = !!(user && poll.votes?.[user.uid] !== undefined);
+            const userVote = user ? poll.votes?.[user.uid] : undefined;
+            return (
+              <View style={styles.pollContainer}>
+                <View style={styles.pollBadge}>
+                  <Ionicons name="stats-chart-outline" size={12} color={Colors.gold} />
+                  <Text style={styles.pollBadgeText}>POLL</Text>
+                </View>
+                <Text style={styles.pollQuestion}>{poll.question}</Text>
+                {poll.options.map((opt, i) => {
+                  const optionVotes = Object.values(poll.votes || {}).filter(v => v === i).length;
+                  const percent = totalVotes > 0 ? Math.round((optionVotes / totalVotes) * 100) : 0;
+                  const isSelected = userVote === i;
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={[styles.pollOption, isSelected && styles.pollOptionSelected]}
+                      onPress={() => handleVote(i)}
+                      disabled={hasVoted}
+                      activeOpacity={hasVoted ? 1 : 0.7}
+                    >
+                      {hasVoted && (
+                        <View style={[styles.pollProgressBar, { width: `${percent}%` as any }]} />
+                      )}
+                      <View style={styles.pollOptionInner}>
+                        <Text style={[styles.pollOptionText, isSelected && styles.pollOptionTextSelected]} numberOfLines={1}>
+                          {isSelected ? '✓ ' : ''}{opt}
+                        </Text>
+                        {hasVoted && (
+                          <Text style={styles.pollPercent}>{percent}%</Text>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+                <Text style={styles.pollVoteCount}>
+                  {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+                  {!hasVoted && <Text style={styles.pollHint}> · Tap an option to vote</Text>}
+                </Text>
+              </View>
+            );
+          })()}
 
           {/* Actions bar */}
           <View style={styles.threadActions}>
@@ -1219,5 +1298,84 @@ gifImage: {
   gifCellImage: {
     width: '100%',
     height: 120,
+  },
+  pollContainer: {
+    marginTop: Layout.sm,
+    marginBottom: Layout.md,
+    backgroundColor: Colors.surface,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: Layout.sm,
+  },
+  pollBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  pollBadgeText: {
+    fontSize: Typography.xs,
+    fontWeight: '700',
+    color: Colors.gold,
+    letterSpacing: 0.5,
+  },
+  pollQuestion: {
+    fontSize: Typography.base,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  pollOption: {
+    borderRadius: Layout.radiusSm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    overflow: 'hidden',
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  pollOptionSelected: {
+    borderColor: Colors.gold,
+    backgroundColor: Colors.goldDim,
+  },
+  pollProgressBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    backgroundColor: Colors.gold + '22',
+    borderRadius: Layout.radiusSm,
+  },
+  pollOptionInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.md,
+    paddingVertical: Layout.sm,
+  },
+  pollOptionText: {
+    flex: 1,
+    fontSize: Typography.base,
+    color: Colors.text2,
+  },
+  pollOptionTextSelected: {
+    color: Colors.gold,
+    fontWeight: '600',
+  },
+  pollPercent: {
+    fontSize: Typography.sm,
+    fontWeight: '600',
+    color: Colors.text3,
+    marginLeft: Layout.sm,
+  },
+  pollVoteCount: {
+    fontSize: Typography.xs,
+    color: Colors.text3,
+    marginTop: 2,
+  },
+  pollHint: {
+    color: Colors.text3,
+    fontStyle: 'italic',
   },
 });

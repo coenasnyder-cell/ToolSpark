@@ -7,41 +7,41 @@
     "icon": "./assets/icon.png",
     "scheme": "toolspark",
     "userInterfaceStyle": "automatic",
+    
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.mycompany.toolspark",
-      "associatedDomains": [
-        "applinks:toolspark.co"
-      ],
-      "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a profile picture.",
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "package": "com.mycompany.toolspark",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "backgroundColor": "#F5F3EF"
-      },
-      "intentFilters": [
+  "supportsTablet": true,
+  "bundleIdentifier": "com.mycompany.toolspark",
+  "associatedDomains": ["applinks:toolspark.co"],
+  "googleServicesFile": "./GoogleService-Info.plist",
+  "infoPlist": {
+    "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a profile picture.",
+    "ITSAppUsesNonExemptEncryption": false
+  }
+},
+   "android": {
+  "package": "com.mycompany.toolspark",
+  "versionCode": 1,
+  "googleServicesFile": "./google-services.json",
+  "adaptiveIcon": {
+    "foregroundImage": "./assets/android-icon-foreground.png",
+    "backgroundImage": "./assets/android-icon-background.png",
+    "backgroundColor": "#1A1916"
+  },
+  "intentFilters": [
+    {
+      "action": "VIEW",
+      "autoVerify": true,
+      "data": [
         {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "toolspark.co",
-              "pathPrefix": "/auth-action"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "scheme": "https",
+          "host": "toolspark.co",
+          "pathPrefix": "/auth-action"
         }
-      ]
-    },
+      ],
+      "category": ["BROWSABLE", "DEFAULT"]
+    }
+  ]
+},
     "web": {
       "output": "static",
       "favicon": "./assets/favicon.png"
@@ -56,19 +56,17 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F5F3EF",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#1A1916",
           "dark": {
             "backgroundColor": "#1A1916"
           }
         }
       ],
-      "expo-web-browser",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.82966513396-80ak77ileqnvd3i5objrdu58eo4nc8ii"
-        }
-      ]
+     
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
@@ -78,7 +76,7 @@
         "origin": "https://toolspark.co"
       },
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "8409b895-319c-450a-8e3b-4e795d0ca999"
       }
     }
   }
