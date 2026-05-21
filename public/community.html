@@ -606,6 +606,7 @@
     font-weight: 400;
     line-height: 1.7;
     margin-bottom: 1rem;
+    white-space: pre-wrap;
   }
   .thread-actions {
     display: flex;
@@ -739,7 +740,7 @@
     padding: 8px 12px;
   }
   .comment-author { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-  .comment-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .comment-text { font-size: 13px; color: var(--text2); line-height: 1.5; white-space: pre-wrap; }
   .comment-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
   .comment-input-row {
     display: flex;
@@ -1597,7 +1598,7 @@
           </div>
         </div>
         <div class="thread-title">${escHtml(d.title || '')}</div>
-<div class="thread-body">${escHtml(d.content || '').replace(/\n/g, '<br>')}</div>
+        <div class="thread-body">${formatPostText(d.content || '')}</div>
         ${d.imageURL ? `<img src="${d.imageURL}" onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'280px':'100%'" style="max-width:280px;max-height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-bottom:0.75rem;cursor:pointer;display:block;" loading="lazy" title="Click to expand" />` : ''}
         <div class="thread-actions">
           <div class="reaction-wrap" onclick="event.stopPropagation()">
@@ -1643,6 +1644,14 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function formatPostText(str) {
+    return escHtml(str || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/(\S)(\s*)(✨\s*Tool Name:|👥\s*Who it['’]s for:|⚡\s*What it does:)/g, '$1\n$3')
+      .replace(/(\S)(\s*)(✅\s*)/g, '$1\n$3');
+  }
+
   function renderFeed(snapshot) {
     const feed = document.getElementById('threads-feed');
 
@@ -1681,7 +1690,7 @@
     if (unsubscribePinned) unsubscribePinned();
     unsubscribePinned = db.collection('threads')
       .where('pinned', '==', true)
-      .orderBy('createdAt', 'desc')
+.orderBy('pinnedOrder', 'asc')
       .onSnapshot(snap => {
         const section = document.getElementById('pinned-section');
         const feed = document.getElementById('pinned-feed');
@@ -1976,7 +1985,7 @@
           const gifHtml = c.gifUrl
             ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:200px;max-height:140px;border-radius:8px;margin-top:6px;display:block;">`
             : '';
-          const textHtml = c.content ? `<div class="comment-text">${escHtml(c.content).replace(/\n/g, '<br>')}</div>` : '';
+          const textHtml = c.content ? `<div class="comment-text">${formatPostText(c.content)}</div>` : '';
           const commentId = doc.id;
           const commentRx = c.reactions || {};
           const commentUserRx = currentUser && typeof commentRx[currentUser.uid] === 'string' ? commentRx[currentUser.uid] : null;

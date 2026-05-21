@@ -61,10 +61,13 @@ service cloud.firestore {
 
     // THREADS collection
     match /threads/{threadId} {
-      allow read: if isActive();
-      allow create: if isActive();
-      allow update: if isActive();
-      allow delete: if (isOwner(resource.data.authorId) || isAdmin()) && !isBanned();
+     allow read: if isActive();
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.authorId == request.auth.uid ||
+    isAdmin()
+  );
+  allow delete: if (isOwner(resource.data.authorId) || isAdmin()) && !isBanned();
 
       // COMMENTS subcollection
       match /comments/{commentId} {
