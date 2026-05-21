@@ -37,10 +37,14 @@ const ThreadComposer = ({
   onPost,
   onClose,
   posting,
+  userPhotoURL,
+  userName,
 }: {
   onPost: (title: string, content: string, category: string, mediaUrl?: string, poll?: Poll) => void;
   onClose: () => void;
   posting: boolean;
+  userPhotoURL?: string;
+  userName?: string;
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -110,7 +114,13 @@ const fetchGifs = async (q: string) => {
       {/* Author row */}
       <View style={composerStyles.authorRow}>
         <View style={composerStyles.authorAvatar}>
-          <Text style={composerStyles.authorAvatarText}>C</Text>
+          {userPhotoURL ? (
+            <Image source={{ uri: userPhotoURL }} style={composerStyles.authorAvatarImage} />
+          ) : (
+            <Text style={composerStyles.authorAvatarText}>
+              {userName?.charAt(0)?.toUpperCase() || 'M'}
+            </Text>
+          )}
         </View>
         <Text style={[composerStyles.authorText, { flex: 1 }]}>
           posting in <Text style={composerStyles.authorBold}>
@@ -489,6 +499,11 @@ const composerStyles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.bg,
   },
+  authorAvatarImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
   authorText: {
     fontSize: Typography.sm,
     color: Colors.text2,
@@ -776,7 +791,9 @@ interface ListHeaderProps {
   showComposer: boolean;
   setShowComposer: (show: boolean) => void;
   isBanned: boolean;
+  isSearching?: boolean;
   user: any;
+  userPhotoURL?: string;
   handlePost: (
     title: string,
     content: string,
@@ -794,7 +811,9 @@ export default function ListHeader({
   showComposer,
   setShowComposer,
   isBanned,
+  isSearching,
   user,
+  userPhotoURL,
   handlePost,
   posting,
   nextEvent,
@@ -820,16 +839,20 @@ export default function ListHeader({
       </TouchableOpacity>
 
       {/* Write something trigger */}
-      {!isBanned && !showComposer && (
+      {!isBanned && !showComposer && !isSearching && (
         <TouchableOpacity
           style={styles.composerTrigger}
           onPress={() => setShowComposer(true)}
           activeOpacity={0.7}
         >
           <View style={styles.composerTriggerAvatar}>
-            <Text style={styles.composerTriggerAvatarText}>
-              {user?.displayName?.charAt(0)?.toUpperCase() || 'M'}
-            </Text>
+            {userPhotoURL ? (
+              <Image source={{ uri: userPhotoURL }} style={styles.composerTriggerAvatarImage} />
+            ) : (
+              <Text style={styles.composerTriggerAvatarText}>
+                {user?.displayName?.charAt(0)?.toUpperCase() || 'M'}
+              </Text>
+            )}
           </View>
           <Text style={styles.composerTriggerText}>
             Write something...
@@ -864,6 +887,8 @@ export default function ListHeader({
           onPost={handlePost}
           onClose={() => setShowComposer(false)}
           posting={posting}
+          userPhotoURL={userPhotoURL}
+          userName={user?.displayName || ''}
         />
       )}
     </View>
@@ -951,6 +976,11 @@ const styles = StyleSheet.create({
     fontSize: Typography.sm,
     fontWeight: '700',
     color: Colors.bg,
+  },
+  composerTriggerAvatarImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   composerTriggerText: {
     fontSize: Typography.sm,

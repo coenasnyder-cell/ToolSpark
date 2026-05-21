@@ -109,6 +109,7 @@ const CategoryFilter = ({
 export default function CommunityScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [userPhotoURL, setUserPhotoURL] = useState<string>('');
   const [threads, setThreads] = useState<Thread[]>([]);
   const [pinnedThreads, setPinnedThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,8 +182,10 @@ export default function CommunityScreen() {
       if (authUser) {
         const userSnap = await getDoc(doc(db, 'users', authUser.uid));
         setIsBanned(userSnap.data()?.banned === true);
+        setUserPhotoURL(userSnap.data()?.photoURL || authUser.photoURL || '');
       } else {
         setIsBanned(false);
+        setUserPhotoURL('');
       }
     });
     return unsubscribe;
@@ -379,9 +382,12 @@ export default function CommunityScreen() {
     >
      <View style={styles.threadHeader}>
   <View style={styles.avatar}>
-    {(item.authorPhotoURL || item.authorPhoto) ? (
-      <Image source={{ uri: item.authorPhotoURL || item.authorPhoto }}
-        style={styles.avatarImage} contentFit="cover"/>
+    {(item.authorPhotoURL || item.authorPhoto || (item.authorId === user?.uid && userPhotoURL)) ? (
+      <Image
+        source={{ uri: item.authorPhotoURL || item.authorPhoto || userPhotoURL }}
+        style={styles.avatarImage}
+        contentFit="cover"
+      />
     ) : (
       <Text style={styles.avatarText}>
         {item.authorName?.charAt(0)?.toUpperCase() || 'M'}
@@ -504,7 +510,9 @@ export default function CommunityScreen() {
     showComposer={showComposer}
     setShowComposer={setShowComposer}
     isBanned={isBanned}
+    isSearching={isSearching}
     user={user}
+    userPhotoURL={userPhotoURL}
     nextEvent={nextEvent}
     handlePost={handlePost}
     posting={posting}

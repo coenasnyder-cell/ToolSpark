@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import {
   collection,
@@ -173,6 +174,28 @@ export default function AdminEventsScreen() {
         renderItem={renderEvent}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View style={styles.adminBanner}>
+            <View style={styles.adminBannerText}>
+              <Text style={styles.adminBannerTitle}>Web Admin</Text>
+              <Text style={styles.adminBannerDesc}>
+                For advanced options, use the web admin panel.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.adminBannerButton}
+              activeOpacity={0.8}
+              onPress={async () => {
+                const url = 'https://toolspark.co/adminevents';
+                const ok = await Linking.canOpenURL(url);
+                if (ok) Linking.openURL(url);
+              }}
+            >
+              <Ionicons name="open-outline" size={14} color={Colors.bg} />
+              <Text style={styles.adminBannerButtonText}>Open Web Admin</Text>
+            </TouchableOpacity>
+          </View>
+        }
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Ionicons
@@ -347,5 +370,41 @@ const styles = StyleSheet.create({
     color: Colors.bg,
     fontWeight: '700',
     fontSize: Typography.base,
+  },
+  adminBanner: {
+    backgroundColor: Colors.surface,
+    borderRadius: Layout.radius,
+    padding: Layout.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Layout.lg,
+    gap: Layout.md,
+  },
+  adminBannerText: {
+    gap: 4,
+  },
+  adminBannerTitle: {
+    fontSize: Typography.base,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  adminBannerDesc: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
+    lineHeight: Typography.sm * 1.5,
+  },
+  adminBannerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Layout.sm,
+    backgroundColor: Colors.gold,
+    borderRadius: Layout.radiusSm,
+    paddingVertical: 12,
+  },
+  adminBannerButtonText: {
+    fontSize: Typography.base,
+    fontWeight: '700',
+    color: Colors.bg,
   },
 });

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Linking,
 } from 'react-native';
 import {
   collection,
@@ -226,6 +227,28 @@ export default function AdminPostsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Web admin banner */}
+        <View style={styles.adminBanner}>
+          <View style={styles.adminBannerText}>
+            <Text style={styles.adminBannerTitle}>Admin Dashboard</Text>
+            <Text style={styles.adminBannerDesc}>
+              For bulk management and analytics, use the web admin panel.
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.adminBannerButton}
+            activeOpacity={0.8}
+            onPress={async () => {
+              const url = 'https://toolspark.co/admindashboard';
+              const ok = await Linking.canOpenURL(url);
+              if (ok) Linking.openURL(url);
+            }}
+          >
+            <Ionicons name="open-outline" size={14} color={Colors.bg} />
+            <Text style={styles.adminBannerButtonText}>Open Web Admin</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Quick composer */}
         {showComposer && (
           <View style={styles.composerCard}>
@@ -429,18 +452,6 @@ export default function AdminPostsScreen() {
             ))}
         </View>
 
-        {/* Web admin note */}
-        <View style={styles.webNote}>
-          <Ionicons
-            name="information-circle-outline"
-            size={16}
-            color={Colors.text3}
-          />
-          <Text style={styles.webNoteText}>
-            For advanced options like bulk management and analytics, visit the web admin at{' '}
-            <Text style={styles.webNoteLink}>toolspark.co/adminthreads</Text>
-          </Text>
-        </View>
       </ScrollView>
     </View>
   );
@@ -714,26 +725,41 @@ const styles = StyleSheet.create({
     color: Colors.gold,
   },
 
-  // Web note
-  webNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Layout.sm,
+  // Admin banner
+  adminBanner: {
     backgroundColor: Colors.surface,
-    borderRadius: Layout.radiusSm,
+    borderRadius: Layout.radius,
     padding: Layout.md,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginTop: Layout.sm,
+    marginBottom: Layout.lg,
+    gap: Layout.md,
   },
-  webNoteText: {
-    flex: 1,
-    fontSize: Typography.xs,
-    color: Colors.text3,
-    lineHeight: Typography.xs * 1.6,
+  adminBannerText: {
+    gap: 4,
   },
-  webNoteLink: {
-    color: Colors.gold,
-    fontWeight: '600',
+  adminBannerTitle: {
+    fontSize: Typography.base,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  adminBannerDesc: {
+    fontSize: Typography.sm,
+    color: Colors.text2,
+    lineHeight: Typography.sm * 1.5,
+  },
+  adminBannerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Layout.sm,
+    backgroundColor: Colors.gold,
+    borderRadius: Layout.radiusSm,
+    paddingVertical: 12,
+  },
+  adminBannerButtonText: {
+    fontSize: Typography.base,
+    fontWeight: '700',
+    color: Colors.bg,
   },
 });

@@ -183,67 +183,75 @@ export default function DashboardHubScreen() {
   const photoURL = profile?.photoURL || user?.photoURL;
 
   const hubCards = [
-  {
-  id: 'profile',
-  title: 'My Profile',
-  subtitle: profile?.displayName || 'Edit your profile',
-  icon: 'person-outline' as const,
-  color: Colors.gold,
-  route: '/edit-profile',
-},
-{
-  id: 'view-profile',
-  title: 'Public Profile',
-  subtitle: 'See how others see you',
-  icon: 'eye-outline' as const,
-  color: Colors.gold,
-  route: `/member-profile?userId=${user?.uid}`,
-},
- 
-  {
-    id: 'members',
-    title: 'Members',
-    subtitle: 'View the community',
-    icon: 'people-outline' as const,
-    color: Colors.green,
-    route: '/members',
-  },
-  {
-  id: 'leaderboard',
-  title: 'Leaderboard',
-  subtitle: 'Top community members',
-  icon: 'trophy-outline' as const,
-  color: Colors.gold,
-  route: '/leaderboard',
-},
-  {
-    id: 'events',
-    title: 'Events',
-    subtitle: events.length > 0
-      ? `${events.length} upcoming`
-      : 'No upcoming events',
-    icon: 'calendar-outline' as const,
-    color: Colors.purple,
-    route: '/events',
-  },
-  {
-    id: 'settings',
-    title: 'Settings',
-    subtitle: 'Account & preferences',
-    icon: 'settings-outline' as const,
-    color: Colors.text2,
-    route: '/settings',
-  },
-  // Admin only
-  ...(profile?.userRole === 'admin' ? [
     {
-  id: 'manage-posts',
-  title: 'Manage Posts',
-  subtitle: 'Pin and order community threads',
-  icon: 'bookmark-outline' as const,
-  color: Colors.gold,
-  route: '/admin-posts',
-},
+      id: 'profile',
+      title: 'My Profile',
+      subtitle: profile?.displayName || 'Edit your profile',
+      icon: 'person-outline' as const,
+      color: Colors.gold,
+      route: '/edit-profile',
+    },
+    {
+      id: 'view-profile',
+      title: 'Public Profile',
+      subtitle: 'See how others see you',
+      icon: 'eye-outline' as const,
+      color: Colors.gold,
+      route: `/member-profile?userId=${user?.uid}`,
+    },
+    {
+      id: 'members',
+      title: 'Members',
+      subtitle: 'View the community',
+      icon: 'people-outline' as const,
+      color: Colors.green,
+      route: '/members',
+    },
+    {
+      id: 'leaderboard',
+      title: 'Leaderboard',
+      subtitle: 'Top community members',
+      icon: 'trophy-outline' as const,
+      color: Colors.gold,
+      route: '/leaderboard',
+    },
+    {
+      id: 'events',
+      title: 'Events',
+      subtitle: events.length > 0
+        ? `${events.length} upcoming`
+        : 'No upcoming events',
+      icon: 'calendar-outline' as const,
+      color: Colors.purple,
+      route: '/events',
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      subtitle: 'Account & preferences',
+      icon: 'settings-outline' as const,
+      color: Colors.text2,
+      route: '/settings',
+    },
+  ];
+
+  const adminCards = profile?.userRole === 'admin' ? [
+    {
+      id: 'manage-posts',
+      title: 'Manage Posts',
+      subtitle: 'Pin and order community threads',
+      icon: 'bookmark-outline' as const,
+      color: Colors.gold,
+      route: '/admin-posts',
+    },
+    {
+      id: 'manage-courses',
+      title: 'Manage Courses',
+      subtitle: 'Publish and order courses',
+      icon: 'book-outline' as const,
+      color: Colors.green,
+      route: '/admin-courses',
+    },
     {
       id: 'manage-tools',
       title: 'Manage Tools',
@@ -261,16 +269,14 @@ export default function DashboardHubScreen() {
       route: '/admin-events',
     },
     {
-  id: 'manage-members',
-  title: 'Manage Members',
-  subtitle: 'Roles and permissions',
-  icon: 'people-outline' as const,
-  color: Colors.purple,
-  route: '/admin-members',
-},
-
-  ] : []),
-];
+      id: 'manage-members',
+      title: 'Manage Members',
+      subtitle: 'Roles and permissions',
+      icon: 'people-outline' as const,
+      color: Colors.purple,
+      route: '/admin-members',
+    },
+  ] : [];
 
   return (
     <View style={styles.container}>
@@ -450,11 +456,7 @@ export default function DashboardHubScreen() {
                 styles.hubCardIcon,
                 { backgroundColor: card.color + '20' }
               ]}>
-                <Ionicons
-                  name={card.icon}
-                  size={24}
-                  color={card.color}
-                />
+                <Ionicons name={card.icon} size={24} color={card.color} />
               </View>
               <Text style={styles.hubCardTitle}>{card.title}</Text>
               <Text style={styles.hubCardSubtitle} numberOfLines={1}>
@@ -463,6 +465,34 @@ export default function DashboardHubScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Admin tools section */}
+        {adminCards.length > 0 && (
+          <View style={styles.adminSection}>
+            <Text style={styles.adminSectionTitle}>Admin Tools</Text>
+            <View style={styles.cardGrid}>
+              {adminCards.map(card => (
+                <TouchableOpacity
+                  key={card.id}
+                  style={styles.hubCard}
+                  activeOpacity={0.8}
+                  onPress={() => router.push(card.route as any)}
+                >
+                  <View style={[
+                    styles.hubCardIcon,
+                    { backgroundColor: card.color + '20' }
+                  ]}>
+                    <Ionicons name={card.icon} size={24} color={card.color} />
+                  </View>
+                  <Text style={styles.hubCardTitle}>{card.title}</Text>
+                  <Text style={styles.hubCardSubtitle} numberOfLines={1}>
+                    {card.subtitle}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Upcoming events */}
         <View style={styles.section}>
@@ -824,5 +854,17 @@ stepLabelDone: {
 stepDesc: {
   fontSize: Typography.xs,
   color: Colors.text3,
+},
+adminSection: {
+  marginBottom: Layout.lg,
+},
+adminSectionTitle: {
+  fontSize: Typography.base,
+  fontWeight: '700',
+  color: Colors.text3,
+  textTransform: 'uppercase',
+  letterSpacing: 0.8,
+  paddingHorizontal: Layout.md,
+  marginBottom: Layout.sm,
 },
 });
