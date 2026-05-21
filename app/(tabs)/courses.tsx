@@ -49,6 +49,8 @@ export default function DashboardScreen() {
   const [progress, setProgress] = useState<Record<string, UserProgress>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [welcomeCourseComplete, setWelcomeCourseComplete] = useState(false);
+  const WELCOME_COURSE_ID = 'JQYsP0RQUPWZ0twQtiQg';
   const unreadCount = useUnreadCount();
 
   useEffect(() => {
@@ -88,6 +90,15 @@ export default function DashboardScreen() {
         }
       }
       setProgress(progressData);
+
+      // Check if welcome course is complete
+      const userSnap = await getDoc(doc(db, 'users', u.uid));
+      if (userSnap.exists()) {
+        const onboarding = userSnap.data().onboarding;
+        setWelcomeCourseComplete(
+          onboarding?.steps?.welcomeCourse || false
+        );
+      }
     } catch (err: any) {
       console.error('Load courses error:', err);
       setError(err?.message ?? 'Failed to load courses');
@@ -156,54 +167,55 @@ export default function DashboardScreen() {
           </View>
         ) : (
           courses.map((course) => {
-            const completed = getCompletedCount(
-              course.id,
-              course.totallessons
-            );
-            const percent = getProgressPercent(
-              course.id,
-              course.totallessons
-            );
+            const completed = getCompletedCount(course.id, course.totallessons);
+            const percent = getProgressPercent(course.id, course.totallessons);
             const total = course.totallessons || 0;
             const isStarted = completed > 0;
             const isComplete = completed >= total && total > 0;
+            const isWelcomeCourse = course.id === WELCOME_COURSE_ID;
+            const isLocked = !isWelcomeCourse && !welcomeCourseComplete;
 
             return (
               <TouchableOpacity
                 key={course.id}
-                style={styles.courseCard}
-                activeOpacity={0.8}
-                onPress={() => router.push({
-                  pathname: '/course-player',
-                  params: { courseId: course.id }
-                } as any)}
+                style={[
+                  styles.courseCard,
+                  isLocked && styles.courseCardLocked,
+                ]}
+                activeOpacity={isLocked ? 1 : 0.8}
+                onPress={() => {
+                  if (isLocked) return;
+                  router.push({
+                    pathname: '/course-player',
+                    params: { courseId: course.id },
+                  } as any);
+                }}
               >
                 {/* Category tag */}
                 <View style={styles.courseTop}>
                   <View style={[
                     styles.categoryTag,
-                    { borderColor: getCategoryColor(course.category) }
+                    { borderColor: isLocked ? Colors.border : getCategoryColor(course.category) },
                   ]}>
                     <Text style={[
                       styles.categoryTagText,
-                      { color: getCategoryColor(course.category) }
+                      { color: isLocked ? Colors.text3 : getCategoryColor(course.category) },
                     ]}>
                       {course.category?.toUpperCase() || 'COURSE'}
                     </Text>
                   </View>
 
-                  {/* Status badge */}
-                  {isComplete ? (
+                  {isLocked ? (
+                    <View style={styles.lockedBadge}>
+                      <Text style={styles.lockedBadgeText}>🔒 Locked</Text>
+                    </View>
+                  ) : isComplete ? (
                     <View style={styles.completeBadge}>
-                      <Text style={styles.completeBadgeText}>
-                        ✓ Complete
-                      </Text>
+                      <Text style={styles.completeBadgeText}>✓ Complete</Text>
                     </View>
                   ) : isStarted ? (
                     <View style={styles.inProgressBadge}>
-                      <Text style={styles.inProgressBadgeText}>
-                        In Progress
-                      </Text>
+                      <Text style={styles.inProgressBadgeText}>In Progress</Text>
                     </View>
                   ) : course.isFree ? (
                     <View style={styles.freeBadge}>
@@ -213,28 +225,39 @@ export default function DashboardScreen() {
                 </View>
 
                 {/* Title and description */}
-                <Text style={styles.courseTitle}>{course.title}</Text>
+                <Text style={[
+                  styles.courseTitle,
+                  isLocked && { color: Colors.text3 },
+                ]}>
+                  {course.title}
+                </Text>
                 <Text style={styles.courseDesc} numberOfLines={2}>
-                  {course.description}
+                  {isLocked
+                    ? 'Complete the Welcome Course to unlock this content'
+                    : course.description}
                 </Text>
 
-                {/* Progress bar */}
-                <View style={styles.progressSection}>
-                  <View style={styles.progressBar}>
-                    <View style={[
-                      styles.progressFill,
-                      { width: `${percent}%` }
-                    ]} />
+                {/* Progress bar — only show if not locked */}
+                {!isLocked && (
+                  <View style={styles.progressSection}>
+                    <View style={styles.progressBar}>
+                      <View style={[styles.progressFill, { width: `${percent}%` }]} />
+                    </View>
+                    <Text style={styles.progressText}>
+                      {completed} of {total} lessons
+                    </Text>
                   </View>
-                  <Text style={styles.progressText}>
-                    {completed} of {total} lessons
-                  </Text>
-                </View>
+                )}
 
                 {/* CTA */}
                 <View style={styles.courseFooter}>
-                  <Text style={styles.courseAction}>
-                    {isComplete
+                  <Text style={[
+                    styles.courseAction,
+                    isLocked && { color: Colors.text3 },
+                  ]}>
+                    {isLocked
+                      ? 'Complete Welcome Course first'
+                      : isComplete
                       ? 'Review course →'
                       : isStarted
                       ? 'Continue →'
@@ -287,6 +310,22 @@ const styles = StyleSheet.create({
     marginBottom: Layout.md,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  courseCardLocked: {
+    opacity: 0.6,
+  },
+  lockedBadge: {
+    backgroundColor: Colors.surface2,
+    borderRadius: Layout.radiusFull,
+    paddingHorizontal: Layout.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  lockedBadgeText: {
+    fontSize: 11,
+    color: Colors.text3,
+    fontWeight: '600',
   },
   courseTop: {
     flexDirection: 'row',

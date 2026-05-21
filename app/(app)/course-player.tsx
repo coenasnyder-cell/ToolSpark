@@ -69,6 +69,17 @@ export default function CoursePlayerScreen() {
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const WELCOME_COURSE_ID = 'JQYsP0RQUPWZ0twQtiQg';
+
+  const markOnboardingStep = async (userId: string, step: string) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        [`onboarding.steps.${step}`]: true,
+      });
+    } catch (err) {
+      console.log('Onboarding step error:', err);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
@@ -170,6 +181,14 @@ export default function CoursePlayerScreen() {
         const progressSnap = await getCountFromServer(progressQuery);
         await onCourseCompleted(user.uid, progressSnap.data().count);
         await onUserCourseComplete(user.email || '', course?.title || '');
+
+        if (courseId === WELCOME_COURSE_ID && user) {
+          const userSnap = await getDoc(doc(db, 'users', user.uid));
+          const onboarding = userSnap.data()?.onboarding;
+          if (onboarding && !onboarding.steps?.welcomeCourse) {
+            await markOnboardingStep(user.uid, 'welcomeCourse');
+          }
+        }
       }
 
       // Auto advance to next lesson
@@ -287,6 +306,7 @@ export default function CoursePlayerScreen() {
         {currentLesson ? (
           <>
             {/* Video */}
+            <Text style={styles.videoTitle}>{currentLesson.lessonTitle}</Text>
             <VideoPlayer url={currentLesson.videoUrl} />
 
             {/* Lesson info */}
@@ -301,9 +321,6 @@ export default function CoursePlayerScreen() {
                   </Text>
                 )}
               </View>
-              <Text style={styles.lessonTitle}>
-                {currentLesson.lessonTitle}
-              </Text>
               {currentLesson.lessonDescription && (
                 <Text style={styles.lessonDesc}>
                   {currentLesson.lessonDescription}
@@ -631,5 +648,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: Typography.base,
     color: Colors.text3,
+  },
+  videoTitle: {
+    fontSize: Typography.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    paddingHorizontal: Layout.md,
+    paddingTop: Layout.md,
+    paddingBottom: Layout.sm,
   },
 });

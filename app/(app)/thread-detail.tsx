@@ -105,6 +105,37 @@ export default function ThreadDetailScreen() {
   const [gifLoading, setGifLoading] = useState(false);
   const [pendingGifUrl, setPendingGifUrl] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const WELCOME_THREAD_ID = 'xYncX74z03ukOFguxCWf';
+  const TOOL_IDEA_THREAD_ID = 'FjCJiSCT4QyRkhUJl2jr';
+
+  const markOnboardingStep = async (userId: string, step: string) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        [`onboarding.steps.${step}`]: true,
+      });
+    } catch (err) {
+      console.log('Onboarding step error:', err);
+    }
+  };
+
+  const checkOnboardingComplete = async (userId: string) => {
+    try {
+      const userSnap = await getDoc(doc(db, 'users', userId));
+      const onboarding = userSnap.data()?.onboarding;
+      if (onboarding && !onboarding.completed) {
+        const steps = onboarding.steps || {};
+        const allDone = steps.welcomePost && steps.welcomeCourse &&
+          steps.clarityTool && steps.toolIdeaPost;
+        if (allDone) {
+          await updateDoc(doc(db, 'users', userId), {
+            'onboarding.completed': true,
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Onboarding complete check error:', err);
+    }
+  };
 const insets = useSafeAreaInsets();
   const handleCommentLike = async (commentId: string) => {
     if (!user || !threadId || likedCommentIds.has(commentId)) return;
@@ -220,6 +251,24 @@ const insets = useSafeAreaInsets();
       );
       const commentsSnap = await getCountFromServer(commentsQuery);
       await onCommentPosted(user.uid, commentsSnap.data().count);
+
+      if (threadId === WELCOME_THREAD_ID && user) {
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        const onboarding = userSnap.data()?.onboarding;
+        if (onboarding && !onboarding.steps?.welcomePost) {
+          await markOnboardingStep(user.uid, 'welcomePost');
+          await checkOnboardingComplete(user.uid);
+        }
+      }
+
+      if (threadId === TOOL_IDEA_THREAD_ID && user) {
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        const onboarding = userSnap.data()?.onboarding;
+        if (onboarding && !onboarding.steps?.toolIdeaPost) {
+          await markOnboardingStep(user.uid, 'toolIdeaPost');
+          await checkOnboardingComplete(user.uid);
+        }
+      }
 
       setNewComment('');
     } catch (err) {

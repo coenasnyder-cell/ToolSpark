@@ -89,6 +89,18 @@ export default function SignupScreen() {
         createdAt: serverTimestamp(),
         lastSeen: serverTimestamp(),
         emailOptIn,
+        points: 0,
+        badges: [],
+        streak: 0,
+        onboarding: {
+          completed: false,
+          steps: {
+            welcomePost: false,
+            welcomeCourse: false,
+            clarityTool: false,
+            toolIdeaPost: false,
+          }
+        }
       });
 
       const launchDate = new Date('2026-05-01');
@@ -114,8 +126,8 @@ export default function SignupScreen() {
 await sendEmailVerification(userCredential.user, {
   url: 'https://toolspark.co/auth-action',
 });
-router.replace('/(auth)/verify-email' as any);
-    } catch (authError: any) {
+router.replace('/(auth)/welcome' as any);  
+  } catch (authError: any) {
       if (isMountedRef.current) {
         if (authError.code === 'auth/email-already-in-use') {
           setError(

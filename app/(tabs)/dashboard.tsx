@@ -11,6 +11,7 @@ import {
 import {
   doc,
   getDoc,
+  updateDoc,
   collection,
   query,
   where,
@@ -28,7 +29,6 @@ import { Typography } from '../../constants/typography';
 import { Layout } from '../../constants/layout';
 import Header from '../../components/Shared/Header';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
-import { sendLikeNotification } from '../../services/notifications';
 
 interface UserProfile {
   displayName: string;
@@ -57,6 +57,10 @@ export default function DashboardHubScreen() {
   const [threadCount, setThreadCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [daysActive, setDaysActive] = useState(0);
+  const [points, setPoints] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [onboarding, setOnboarding] = useState<any>(null);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const unreadCount = useUnreadCount();
 
@@ -79,6 +83,44 @@ export default function DashboardHubScreen() {
     if (snap.exists()) {
       const data = snap.data() as UserProfile;
       setProfile(data);
+      setPoints((data as any).points || 0);
+      setStreak((data as any).streak || 0);
+      const onboardingData = (data as any).onboarding;
+      if (onboardingData) {
+        setOnboarding(onboardingData.steps);
+        setOnboardingCompleted(onboardingData.completed || false);
+
+        if (!onboardingData.steps?.clarityTool) {
+          const clarityQuery = query(
+            collection(db, 'clarity_sessions'),
+            where('clientEmail', '==', data.userEmail),
+            where('status', '==', 'completed'),
+            limit(1)
+          );
+          const claritySnap = await getDocs(clarityQuery);
+          if (!claritySnap.empty) {
+            await updateDoc(doc(db, 'users', u.uid), {
+              'onboarding.steps.clarityTool': true,
+            });
+            await updateDoc(claritySnap.docs[0].ref, {
+              userId: u.uid,
+            });
+            setOnboarding((prev: any) => ({ ...prev, clarityTool: true }));
+          }
+        }
+      } else {
+        const defaultSteps = {
+          welcomePost: false,
+          welcomeCourse: false,
+          clarityTool: false,
+          toolIdeaPost: false,
+        };
+        await updateDoc(userRef, {
+          onboarding: { completed: false, steps: defaultSteps },
+        });
+        setOnboarding(defaultSteps);
+        setOnboardingCompleted(false);
+      }
       if (data.createdAt) {
         const created = data.createdAt.toDate?.() ||
           new Date(data.createdAt);
@@ -195,6 +237,14 @@ export default function DashboardHubScreen() {
   // Admin only
   ...(profile?.userRole === 'admin' ? [
     {
+  id: 'manage-posts',
+  title: 'Manage Posts',
+  subtitle: 'Pin and order community threads',
+  icon: 'bookmark-outline' as const,
+  color: Colors.gold,
+  route: '/admin-posts',
+},
+    {
       id: 'manage-tools',
       title: 'Manage Tools',
       subtitle: 'Add and edit tools',
@@ -218,6 +268,7 @@ export default function DashboardHubScreen() {
   color: Colors.purple,
   route: '/admin-members',
 },
+
   ] : []),
 ];
 
@@ -248,21 +299,38 @@ export default function DashboardHubScreen() {
           </Text>
         </View>
 
-        {/* Stats row */}
+        {/* Stats grid */}
         <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{threadCount}</Text>
-            <Text style={styles.statLabel}>Threads</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{threadCount}</Text>
+              <Text style={styles.statLabel}>Threads</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{sessionCount}</Text>
+              <Text style={styles.statLabel}>Sessions</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{daysActive}</Text>
+              <Text style={styles.statLabel}>Days Active</Text>
+            </View>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{sessionCount}</Text>
-            <Text style={styles.statLabel}>Sessions</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{daysActive}</Text>
-            <Text style={styles.statLabel}>Days Active</Text>
+          <View style={styles.statsRowDivider} />
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{points}</Text>
+              <Text style={styles.statLabel}>Points</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <View style={styles.statStreakRow}>
+                <Text style={styles.statNumber}>{streak}</Text>
+                <Ionicons name="flame" size={18} color={Colors.gold} />
+              </View>
+              <Text style={styles.statLabel}>Streak</Text>
+            </View>
           </View>
         </View>
 
@@ -275,7 +343,100 @@ export default function DashboardHubScreen() {
           <Ionicons name="eye-outline" size={14} color={Colors.gold} />
           <Text style={styles.viewProfileLinkText}>View Public Profile</Text>
         </TouchableOpacity>
+{/* Onboarding progress */}
+{!onboardingCompleted && onboarding && (
+  <View style={styles.onboardingCard}>
+    <View style={styles.onboardingHeader}>
+      <Text style={styles.onboardingTitle}>Getting Started</Text>
+      <Text style={styles.onboardingCount}>
+        {Object.values(onboarding).filter(Boolean).length} of 4 complete
+      </Text>
+    </View>
 
+    {/* Progress bar */}
+    <View style={styles.progressBarBg}>
+      <View style={[
+        styles.progressBarFill,
+        { width: `${(Object.values(onboarding).filter(Boolean).length / 4) * 100}%` as any }
+      ]} />
+    </View>
+
+    {/* Steps */}
+    {[
+      {
+        key: 'welcomePost',
+        label: 'Introduce yourself',
+        desc: 'Post in the welcome thread',
+        route: '/thread-detail',
+        params: { threadId: 'xYncX74z03ukOFguxCWf' },
+      },
+      {
+        key: 'welcomeCourse',
+        label: 'Complete "Welcome To Tool Spark"',
+        desc: 'Watch all 4 lessons',
+        route: '/course-player',
+        params: { courseId: 'JQYsP0RQUPWZ0twQtiQg' },
+      },
+      {
+        key: 'clarityTool',
+        label: 'Complete your Clarity Session',
+        desc: 'Discover your first tool idea',
+        route: '/clarity',
+        params: {},
+      },
+      {
+        key: 'toolIdeaPost',
+        label: 'Post your Tool Idea',
+        desc: 'Share in the Tool Ideas category',
+        route: '/(tabs)',
+        params: {},
+      },
+    ].map((step, index) => {
+      const done = onboarding[step.key];
+      return (
+        <TouchableOpacity
+          key={step.key}
+          style={styles.onboardingStep}
+          activeOpacity={done ? 1 : 0.7}
+          onPress={() => {
+            if (!done) {
+              router.push({
+                pathname: step.route,
+                params: step.params,
+              } as any);
+            }
+          }}
+        >
+          <View style={[
+            styles.stepCheck,
+            done && styles.stepCheckDone,
+          ]}>
+            {done
+              ? <Ionicons name="checkmark" size={14} color={Colors.bg} />
+              : <Text style={styles.stepNumber}>{index + 1}</Text>
+            }
+          </View>
+          <View style={styles.stepInfo}>
+            <Text style={[
+              styles.stepLabel,
+              done && styles.stepLabelDone,
+            ]}>
+              {step.label}
+            </Text>
+            <Text style={styles.stepDesc}>{step.desc}</Text>
+          </View>
+          {!done && (
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color={Colors.text3}
+            />
+          )}
+        </TouchableOpacity>
+      );
+    })}
+  </View>
+)}
         {/* Hub cards grid */}
         <View style={styles.cardGrid}>
           {hubCards.map(card => (
@@ -402,16 +563,25 @@ const styles = StyleSheet.create({
     color: Colors.bg,
   },
   statsCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: Colors.surface,
     marginHorizontal: Layout.md,
     marginTop: Layout.md,
     borderRadius: Layout.radius,
-    padding: Layout.md,
+    paddingVertical: Layout.md,
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: Layout.md,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Layout.md,
+  },
+  statsRowDivider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginHorizontal: Layout.md,
+    marginVertical: Layout.sm,
   },
   statItem: {
     flex: 1,
@@ -421,6 +591,11 @@ const styles = StyleSheet.create({
     fontSize: Typography.xl,
     fontWeight: '700',
     color: Colors.gold,
+  },
+  statStreakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   statLabel: {
     fontSize: Typography.xs,
@@ -566,4 +741,88 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.gold,
   },
+  onboardingCard: {
+  backgroundColor: Colors.surface,
+  borderRadius: Layout.radius,
+  marginHorizontal: Layout.md,
+  marginBottom: Layout.lg,
+  borderWidth: 1,
+  borderColor: Colors.border,
+  overflow: 'hidden',
+},
+onboardingHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: Layout.md,
+  borderBottomWidth: 1,
+  borderBottomColor: Colors.border,
+},
+onboardingTitle: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: Colors.text,
+},
+onboardingCount: {
+  fontSize: Typography.xs,
+  color: Colors.gold,
+  fontWeight: '600',
+},
+progressBarBg: {
+  height: 3,
+  backgroundColor: Colors.border,
+  marginHorizontal: Layout.md,
+  marginTop: Layout.sm,
+  borderRadius: 2,
+},
+progressBarFill: {
+  height: 3,
+  backgroundColor: Colors.gold,
+  borderRadius: 2,
+},
+onboardingStep: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: Layout.md,
+  paddingVertical: Layout.md,
+  borderTopWidth: 1,
+  borderTopColor: Colors.border,
+  gap: Layout.md,
+},
+stepCheck: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  borderWidth: 2,
+  borderColor: Colors.border,
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+},
+stepCheckDone: {
+  backgroundColor: Colors.gold,
+  borderColor: Colors.gold,
+},
+stepNumber: {
+  fontSize: Typography.xs,
+  fontWeight: '700',
+  color: Colors.text3,
+},
+stepInfo: {
+  flex: 1,
+},
+stepLabel: {
+  fontSize: Typography.sm,
+  fontWeight: '600',
+  color: Colors.text,
+  marginBottom: 2,
+},
+stepLabelDone: {
+  color: Colors.text3,
+  textDecorationLine: 'line-through',
+},
+stepDesc: {
+  fontSize: Typography.xs,
+  color: Colors.text3,
+},
 });

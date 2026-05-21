@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Colors } from '../../constants/colors';
 import { Typography } from '../../constants/typography';
@@ -9,11 +9,23 @@ import { auth, db } from '../../services/firebase';
 import { onDailyLogin, checkEarlyMember } from '../../services/gamification';
 import { registerForPushNotifications } from '../../services/notifications';
 import { useUnreadMessages } from '../../hooks/useUnreadMessages';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 export default function TabLayout() {
+
+  const router = useRouter();
   const unreadMessages = useUnreadMessages();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      const hasSeen = await AsyncStorage.getItem('hasSeenWelcome');
+      if (!hasSeen) {
+        router.replace('/(auth)/welcome' as any);
+        return;
+      }
+
       if (!u) return;
 
       const userRef = doc(db, 'users', u.uid);
@@ -72,7 +84,7 @@ export default function TabLayout() {
         options={{
           title: 'Community',
           tabBarIcon: ({ color }) => (
-            <TabIcon symbol="💬" color={color} />
+         <Ionicons name="chatbubbles-outline" size={22} color={color} />
           ),
         }}
       />
@@ -81,7 +93,7 @@ export default function TabLayout() {
         options={{
           title: 'Courses',
           tabBarIcon: ({ color }) => (
-            <TabIcon symbol="⊞" color={color} />
+  <Ionicons name="book-outline" size={22} color={color} />
           ),
         }}
       />
@@ -90,7 +102,7 @@ export default function TabLayout() {
         options={{
           title: 'Tools',
           tabBarIcon: ({ color }) => (
-            <TabIcon symbol="✦" color={color} />
+          <Ionicons name="construct-outline" size={22} color={color} />
           ),
         }}
       />
@@ -99,7 +111,7 @@ export default function TabLayout() {
   options={{
     title: 'Inbox',
     tabBarIcon: ({ color }) => (
-      <TabIcon symbol="✉️" color={color} />
+  <Ionicons name="mail-outline" size={22} color={color} />
     ),
     tabBarBadge: unreadMessages > 0 ? unreadMessages : undefined,
     tabBarBadgeStyle: {
@@ -115,7 +127,7 @@ export default function TabLayout() {
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color }) => (
-            <TabIcon symbol="⊞" color={color} />
+  <Ionicons name="grid-outline" size={22} color={color} />
           ),
         }}
       />

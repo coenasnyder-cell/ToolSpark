@@ -116,7 +116,7 @@ export default function AdminToolsScreen() {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => router.push({
-            pathname: '/admin-tool-edit',
+            pathname: '/admin-tools-edit',
             params: { toolId: item.id }
           } as any)}
         >
@@ -161,7 +161,7 @@ export default function AdminToolsScreen() {
         <Text style={styles.headerTitle}>Manage Tools</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => router.push('/admin-tool-edit' as any)}
+          onPress={() => router.push('/admin-tools-edit' as any)}
         >
           <Ionicons name="add" size={24} color={Colors.gold} />
         </TouchableOpacity>
@@ -186,7 +186,7 @@ export default function AdminToolsScreen() {
             </Text>
             <TouchableOpacity
               style={styles.addFirstButton}
-              onPress={() => router.push('/admin-tool-edit' as any)}
+              onPress={() => router.push('/admin-tools-edit' as any)}
             >
               <Text style={styles.addFirstButtonText}>
                 Add Tool

@@ -10,6 +10,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import {
   collection,
@@ -177,7 +178,7 @@ export default function ConversationScreen() {
 
       setNewMessage('');
     } catch (err) {
-      console.log('Send message error:', err);
+      Alert.alert('Error', 'Failed to send message. Please try again.');
     } finally {
       setSending(false);
     }
@@ -355,7 +356,7 @@ export default function ConversationScreen() {
             !newMessage.trim() && styles.sendButtonDisabled,
           ]}
           onPress={() => sendMessage(newMessage.trim())}
-          disabled={!newMessage.trim() || sending}
+          disabled={!newMessage.trim() || sending || !user}
         >
           {sending ? (
             <ActivityIndicator size="small" color={Colors.bg} />
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -473,11 +474,11 @@ const styles = StyleSheet.create({
     paddingVertical: Layout.sm,
   },
   bubbleMe: {
-    backgroundColor: Colors.gold,
+    backgroundColor: '#fff',
     borderBottomRightRadius: 4,
   },
   bubbleThem: {
-    backgroundColor: Colors.surface,
+    backgroundColor:'#ffffff',
     borderWidth: 1,
     borderColor: Colors.border,
     borderBottomLeftRadius: 4,
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     lineHeight: Typography.base * 1.4,
   },
   bubbleTextMe: {
-    color: Colors.bg,
+    color: Colors.text,
   },
   messageImage: {
     width: 200,
@@ -502,7 +503,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   messageTimeMe: {
-    color: Colors.bg,
+    color: Colors.text,
     opacity: 0.7,
   },
   emptyState: {
@@ -513,7 +514,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: Typography.base,
-    color: Colors.text3,
+    color: Colors.text,
   },
   inputBar: {
     flexDirection: 'row',
@@ -548,11 +549,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.gold,
+    backgroundColor: Colors.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sendButtonDisabled: {
     opacity: 0.4,
   },
+  
 });

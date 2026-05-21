@@ -55,6 +55,7 @@ interface Thread {
   likes: number;
   commentCount: number;
   pinned: boolean;
+  pinnedOrder?: number;
   imageURL: string;
    gifUrl: string;
   isPoll?: boolean;
@@ -109,6 +110,7 @@ export default function CommunityScreen() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [pinnedThreads, setPinnedThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -187,8 +189,26 @@ export default function CommunityScreen() {
   }, []);
 
   useEffect(() => {
+    const pinnedQ = query(
+      collection(db, 'threads'),
+      where('pinned', '==', true),
+      orderBy('pinnedOrder', 'asc')
+    );
+    const unsubscribePinned = onSnapshot(pinnedQ, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Thread[];
+      setPinnedThreads(data);
+    }, (error) => {
+      console.log('Pinned threads error:', error);
+    });
+    return unsubscribePinned;
+  }, []);
+
+  useEffect(() => {
   setLoading(true);
-  
+
   // Fallback — stop showing spinner after 5 seconds
   const timeout = setTimeout(() => {
     setLoading(false);
@@ -232,7 +252,7 @@ export default function CommunityScreen() {
   });
 
   const allThreads = [
-    ...filteredThreads.filter(t => t.pinned),
+    ...pinnedThreads,
     ...filteredThreads.filter(t => !t.pinned),
   ];
 
@@ -697,18 +717,18 @@ const styles = StyleSheet.create({
     gap: Layout.sm,
   },
   avatar: {
-  width: 24,
-  height: 24,
-  borderRadius: 16,
+  width: 36,
+  height: 36,
+  borderRadius: 18,
   backgroundColor: Colors.gold,
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
 },
   avatarImage: {
-  width: 20,
-  height: 20,
-  borderRadius: 20,
+  width: 36,
+  height: 36,
+  borderRadius: 18,
 },
   avatarText: {
     color: Colors.bg,
