@@ -1597,7 +1597,7 @@
           </div>
         </div>
         <div class="thread-title">${escHtml(d.title || '')}</div>
-        <div class="thread-body">${escHtml(d.content || '')}</div>
+<div class="thread-body">${escHtml(d.content || '').replace(/\n/g, '<br>')}</div>
         ${d.imageURL ? `<img src="${d.imageURL}" onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'280px':'100%'" style="max-width:280px;max-height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-bottom:0.75rem;cursor:pointer;display:block;" loading="lazy" title="Click to expand" />` : ''}
         <div class="thread-actions">
           <div class="reaction-wrap" onclick="event.stopPropagation()">
@@ -1976,7 +1976,7 @@
           const gifHtml = c.gifUrl
             ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:200px;max-height:140px;border-radius:8px;margin-top:6px;display:block;">`
             : '';
-          const textHtml = c.content ? `<div class="comment-text">${escHtml(c.content)}</div>` : '';
+          const textHtml = c.content ? `<div class="comment-text">${escHtml(c.content).replace(/\n/g, '<br>')}</div>` : '';
           const commentId = doc.id;
           const commentRx = c.reactions || {};
           const commentUserRx = currentUser && typeof commentRx[currentUser.uid] === 'string' ? commentRx[currentUser.uid] : null;
