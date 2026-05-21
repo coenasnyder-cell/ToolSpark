@@ -143,31 +143,27 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // CONVERSATIONS (direct messages)
-    match /conversations/{conversationId} {
-      allow read: if isActive() && (
-        resource == null || request.auth.uid in resource.data.participants
-      );
-      allow create: if isActive() &&
-        request.auth.uid in request.resource.data.participants;
-      allow update: if isActive() &&
-        request.auth.uid in resource.data.participants;
-      allow delete: if isAdmin();
+   // CONVERSATIONS (direct messages)
+match /conversations/{conversationId} {
+  allow read: if isActive() &&
+    request.auth.uid in resource.data.participants;
+  allow create: if isActive() &&
+    request.auth.uid in request.resource.data.participants;
+  allow update: if isActive() &&
+    request.auth.uid in resource.data.participants;
+  allow delete: if isAdmin();
 
-      match /messages/{messageId} {
-        // Allow read even if conversation doesn't exist yet (returns empty, no security risk)
-        allow read: if isActive() && (
-          !exists(/databases/$(database)/documents/conversations/$(conversationId)) ||
-          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
-        );
-        allow create: if isActive() &&
-          exists(/databases/$(database)/documents/conversations/$(conversationId)) &&
-          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
-        allow update: if isActive() &&
-          resource.data.senderId == request.auth.uid;
-        allow delete: if isAdmin();
-      }
-    }
+  match /messages/{messageId} {
+    allow read: if isActive() &&
+      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+    allow create: if isActive() &&
+      exists(/databases/$(database)/documents/conversations/$(conversationId)) &&
+      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+    allow update: if isActive() &&
+      resource.data.senderId == request.auth.uid;
+    allow delete: if isAdmin();
+  }
+}
 
     // NOTIFICATIONS
     match /notifications/{notificationId} {
