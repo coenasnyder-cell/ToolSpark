@@ -7,41 +7,45 @@
     "icon": "./assets/icon.png",
     "scheme": "toolspark",
     "userInterfaceStyle": "automatic",
-    
     "ios": {
-  "supportsTablet": true,
-  "bundleIdentifier": "com.mycompany.toolspark",
-  "associatedDomains": ["applinks:toolspark.co"],
-  "googleServicesFile": "./GoogleService-Info.plist",
-  "infoPlist": {
-    "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a profile picture.",
-    "ITSAppUsesNonExemptEncryption": false
-  }
-},
-   "android": {
-  "package": "com.mycompany.toolspark",
-  "versionCode": 1,
-  "googleServicesFile": "./google-services.json",
-  "adaptiveIcon": {
-    "foregroundImage": "./assets/android-icon-foreground.png",
-    "backgroundImage": "./assets/android-icon-background.png",
-    "backgroundColor": "#1A1916"
-  },
-  "intentFilters": [
-    {
-      "action": "VIEW",
-      "autoVerify": true,
-      "data": [
-        {
-          "scheme": "https",
-          "host": "toolspark.co",
-          "pathPrefix": "/auth-action"
-        }
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mycompany.toolspark",
+      "associatedDomains": [
+        "applinks:toolspark.co"
       ],
-      "category": ["BROWSABLE", "DEFAULT"]
-    }
-  ]
-},
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to upload a profile picture.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.mycompany.toolspark",
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "backgroundColor": "#1A1916"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "toolspark.co",
+              "pathPrefix": "/auth-action"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
     "web": {
       "output": "static",
       "favicon": "./assets/favicon.png"
@@ -65,8 +69,8 @@
           }
         }
       ],
-     
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
