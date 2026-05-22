@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-close-btn:hover { color: #F0EDE6; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .notif-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; position: relative; text-decoration: none; }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
+
+  /* SEARCH BAR */
+  .search-wrap { position: relative; flex: 1; max-width: 320px; }
+  .search-input { width: 100%; background: var(--dark3); border: 1px solid var(--border-dark); border-radius: 100px; padding: 8px 16px 8px 36px; font-family: 'Lato', sans-serif; font-size: 13px; color: #F0EDE6; outline: none; transition: border-color 0.15s; }
+  .search-input::placeholder { color: #7A7670; }
+  .search-input:focus { border-color: rgba(201,168,76,0.4); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #4A4840; pointer-events: none; }
+
+  /* PAGE */
+  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text3); }
+
+  /* FILTER BAR */
+  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-chip { padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .filter-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
+
+  /* FEATURED SECTION */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* TOOLS GRID */
+  .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+  /* TOOL CARD */
+  .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.875rem; transition: box-shadow 0.15s, transform 0.15s; }
+  .tool-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .tool-card-top { display: flex; align-items: flex-start; gap: 12px; }
+  .tool-img { width: 52px; height: 52px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); background: var(--bg); }
+  .tool-img-fallback { width: 52px; height: 52px; border-radius: var(--radius-sm); background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .tool-info { flex: 1; min-width: 0; }
+  .tool-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
+  .tool-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .featured-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); border-radius: 100px; padding: 2px 7px; }
+  .tool-category { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tool-desc { font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1; }
+  .tool-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 0.875rem; border-top: 1px solid var(--border); margin-top: auto; }
+  .tool-link { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 8px 16px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .tool-link:hover { background: var(--gold-light); }
+  .tool-video-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .tool-video-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalUp 0.2s ease; }
+  @keyframes modalUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .modal-tool-row { display: flex; align-items: center; gap: 12px; }
+  .modal-tool-img { width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--border); background: var(--bg); }
+  .modal-tool-img-fallback { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .modal-tool-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); }
+  .modal-tool-cat { font-size: 12px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .modal-close { background: none; border: 1px solid var(--border); border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text3); font-size: 14px; transition: all 0.15s; }
+  .modal-close:hover { border-color: var(--text2); color: var(--text); }
+  .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .modal-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
+  .modal-video-wrap { position: relative; padding-bottom: 56.25%; height: 0; border-radius: var(--radius-sm); overflow: hidden; background: var(--dark); }
+  .modal-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .modal-article { font-size: 14px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; }
+  .modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .modal-cta { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .modal-cta:hover { background: var(--gold-light); }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); grid-column: 1/-1; }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; }
+
+  /* MOBILE BOTTOM NAV */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
+    .main-wrap { margin-left: 60px; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; height: 54px; }
+    .search-wrap { display: none; }
+    .page-content { padding: 1rem 1rem 80px; gap: 1rem; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .mobile-bottom-nav { display: flex; }
+    .modal { max-height: 95vh; }
+  }
+  @media (max-width: 480px) {
+    .page-content { padding: 0.875rem 0.875rem 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+ <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="events.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="header-title">Tools</div>
+        <div class="header-subtitle">AI tools and resources for your business</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="search-input" id="search-input" type="text" placeholder="Search tools..." oninput="filterTools()" />
+      </div>
+      <a href="notifications.html" class="notif-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Tool Library</div>
+        <div class="page-sub">Discover AI tools and resources to build smarter client experiences</div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-chip active" data-filter="All">All</div>
+    </div>
+
+    <!-- Featured section -->
+    <div id="featured-section" style="display:none;">
+      <div class="section-label">Featured Tools</div>
+      <div class="tools-grid" id="featured-grid"></div>
+    </div>
+
+    <!-- All tools -->
+    <div>
+      <div class="section-label" id="all-tools-label">All Tools</div>
+      <div class="tools-grid" id="tools-grid">
+        <div style="color:var(--text3);font-size:13px;grid-column:1/-1;padding:1rem 0;">Loading tools...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOL DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-tool-row">
+        <div id="modal-img-wrap"></div>
+        <div>
+          <div class="modal-tool-name" id="modal-name"></div>
+          <div class="modal-tool-cat" id="modal-cat"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-desc" id="modal-desc"></div>
+      <div id="modal-video-wrap" style="display:none;">
+        <div class="modal-video-wrap">
+          <iframe id="modal-video" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        </div>
+      </div>
+      <div class="modal-article" id="modal-article" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" id="modal-cta" class="modal-cta" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Visit Tool →
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item active">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="inbox.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Inbox
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let allTools = [];
+  let activeFilter = 'All';
+  let searchQuery = '';
+  let currentTool = null;
+
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+
+    const name = user.displayName || user.email || 'Builder';
+    const first = name.split(' ')[0];
+    document.getElementById('sidebar-name').textContent = name;
+
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+    } else {
+      av.textContent = first.charAt(0).toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data.userRole === 'admin') {
+          document.getElementById('admin-nav-link').style.display = 'flex';
+          document.getElementById('sidebar-role').textContent = 'Admin';
+        }
+      }
+    } catch(e) {}
+
+    // Notifications
+    try {
+      const notifSnap = await db.collection('notifications')
+        .where('userId', '==', user.uid)
+        .where('read', '==', false)
+        .limit(1).get();
+      if (!notifSnap.empty) {
+        document.getElementById('notif-dot').style.display = 'block';
+      }
+    } catch(e) {}
+
+    loadTools();
+  });
+
+  async function loadTools() {
+    try {
+      const snap = await db.collection('tools')
+        .orderBy('order', 'asc')
+        .get();
+
+      allTools = snap.docs.map(function(doc) {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.name || '',
+          category: d.category || 'Other',
+          description: d.description || '',
+          imageUrl: d.imageUrl || '',
+          affiliateUrl: d.affiliateUrl || '',
+          videoUrl: d.videoUrl || '',
+          articleContent: d.articleContent || '',
+          isFeatured: d.isFeatured || false,
+          order: d.order || 0,
+        };
+      });
+
+      buildFilterChips();
+      renderTools();
+
+    } catch(e) {
+      console.error(e);
+      document.getElementById('tools-grid').innerHTML =
+        '<div style="color:var(--text3);font-size:13px;grid-column:1/-1;">Could not load tools. Please refresh.</div>';
+    }
+  }
+
+  function buildFilterChips() {
+    const categories = [...new Set(allTools.map(t => t.category))];
+    const bar = document.getElementById('filter-bar');
+    bar.innerHTML = '<div class="filter-chip active" data-filter="All">All</div>' +
+      categories.map(cat => '<div class="filter-chip" data-filter="' + escHtml(cat) + '">' + escHtml(cat) + '</div>').join('');
+
+    bar.querySelectorAll('.filter-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        bar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.filter;
+        renderTools();
+      });
+    });
+  }
+
+  function filterTools() {
+    searchQuery = document.getElementById('search-input').value.toLowerCase();
+    renderTools();
+  }
+
+  function getFilteredTools() {
+    return allTools.filter(function(t) {
+      const matchesCategory = activeFilter === 'All' || t.category === activeFilter;
+      const matchesSearch = !searchQuery ||
+        t.name.toLowerCase().includes(searchQuery) ||
+        t.description.toLowerCase().includes(searchQuery) ||
+        t.category.toLowerCase().includes(searchQuery);
+      return matchesCategory && matchesSearch;
+    });
+  }
+
+  function renderTools() {
+    const filtered = getFilteredTools();
+    const featured = filtered.filter(t => t.isFeatured);
+    const regular = filtered.filter(t => !t.isFeatured);
+
+    // Featured section
+    const featuredSection = document.getElementById('featured-section');
+    const featuredGrid = document.getElementById('featured-grid');
+    if (featured.length > 0 && activeFilter === 'All' && !searchQuery) {
+      featuredSection.style.display = 'block';
+      featuredGrid.innerHTML = featured.map(renderToolCard).join('');
+    } else {
+      featuredSection.style.display = 'none';
+    }
+
+    // All tools
+    const grid = document.getElementById('tools-grid');
+    const label = document.getElementById('all-tools-label');
+    const toolsToShow = (activeFilter === 'All' && !searchQuery) ? regular : filtered;
+
+    label.textContent = activeFilter === 'All' && !searchQuery ? 'All Tools' : 'Results';
+
+    if (toolsToShow.length === 0 && featured.length === 0) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">No tools found</div><div class="empty-sub">Try a different search or category</div></div>';
+      return;
+    }
+
+    if (toolsToShow.length === 0) {
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = toolsToShow.map(renderToolCard).join('');
+  }
+
+  function renderToolCard(tool) {
+    const imgHtml = tool.imageUrl
+      ? '<img class="tool-img" src="' + escHtml(tool.imageUrl) + '" alt="' + escHtml(tool.name) + '" />'
+      : '<div class="tool-img-fallback">🔧</div>';
+
+    const hasDetail = tool.description || tool.videoUrl || tool.articleContent || tool.affiliateUrl;
+    const hasVideo = !!tool.videoUrl;
+
+    return '<div class="tool-card">' +
+      '<div class="tool-card-top">' +
+      imgHtml +
+      '<div class="tool-info">' +
+      '<div class="tool-name-row"><span class="tool-name">' + escHtml(tool.name) + '</span>' +
+      (tool.isFeatured ? '<span class="featured-badge">Featured</span>' : '') +
+      '</div>' +
+      '<div class="tool-category">' + escHtml(tool.category) + '</div>' +
+      '</div></div>' +
+      '<div class="tool-desc">' + escHtml(tool.description) + '</div>' +
+      '<div class="tool-footer">' +
+      (tool.affiliateUrl
+        ? '<a class="tool-link" href="' + escHtml(tool.affiliateUrl) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Visit Tool <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>'
+        : '<span></span>') +
+      (hasDetail
+        ? '<button class="tool-video-btn" onclick="openModal(\'' + tool.id + '\')">' +
+          (hasVideo ? '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Watch' : 'Learn more') +
+          '</button>'
+        : '') +
+      '</div></div>';
+  }
+
+  function openModal(toolId) {
+    const tool = allTools.find(t => t.id === toolId);
+    if (!tool) return;
+    currentTool = tool;
+
+    // Image
+    const imgWrap = document.getElementById('modal-img-wrap');
+    imgWrap.innerHTML = tool.imageUrl
+      ? '<img class="modal-tool-img" src="' + escHtml(tool.imageUrl) + '" alt="' + escHtml(tool.name) + '">'
+      : '<div class="modal-tool-img-fallback">🔧</div>';
+
+    document.getElementById('modal-name').textContent = tool.name;
+    document.getElementById('modal-cat').textContent = tool.category;
+    document.getElementById('modal-desc').textContent = tool.description;
+
+    // Video
+    const videoWrap = document.getElementById('modal-video-wrap');
+    const videoIframe = document.getElementById('modal-video');
+    if (tool.videoUrl) {
+      const embedUrl = getEmbedUrl(tool.videoUrl);
+      if (embedUrl) {
+        videoIframe.src = embedUrl;
+        videoWrap.style.display = 'block';
+      } else {
+        videoWrap.style.display = 'none';
+      }
+    } else {
+      videoWrap.style.display = 'none';
+      videoIframe.src = '';
+    }
+
+    // Article
+    const articleEl = document.getElementById('modal-article');
+    if (tool.articleContent) {
+      articleEl.textContent = tool.articleContent;
+      articleEl.style.display = 'block';
+    } else {
+      articleEl.style.display = 'none';
+    }
+
+    // CTA
+    const ctaEl = document.getElementById('modal-cta');
+    if (tool.affiliateUrl) {
+      ctaEl.href = tool.affiliateUrl;
+      ctaEl.style.display = 'inline-flex';
+    } else {
+      ctaEl.style.display = 'none';
+    }
+
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('modal-video').src = '';
+    document.body.style.overflow = '';
+  }
+
+  function getEmbedUrl(url) {
+    if (!url) return null;
+    // YouTube
+    const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+    if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1] + '?rel=0';
+    // Loom
+    const loomMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+    if (loomMatch) return 'https://www.loom.com/embed/' + loomMatch[1];
+    return null;
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Close modal on overlay click
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Mobile sidebar
+  document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebar-overlay').addEventListener('click', function(e) {
+    if (!document.getElementById('modal-overlay').classList.contains('open')) closeSidebar();
+  });
+  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
+</script>
+</body>
+</html>

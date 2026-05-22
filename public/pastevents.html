@@ -1,0 +1,772 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Past Events — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --coral: #C4622D;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+    --event-list-width: 280px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-close-btn:hover { color: #F0EDE6; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; flex-shrink: 0; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .notif-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; position: relative; text-decoration: none; }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
+
+  /* SPLIT LAYOUT */
+  .split-layout { display: flex; flex: 1; height: calc(100vh - var(--header-height)); overflow: hidden; }
+
+  /* EVENT LIST PANEL */
+  .event-list-panel { width: var(--event-list-width); flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .event-list-header { padding: 1rem 1rem 0.75rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .event-list-title { font-size: 13px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .add-event-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 8px 14px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .add-event-btn:hover { background: var(--gold-light); }
+  .event-list-scroll { flex: 1; overflow-y: auto; padding: 0.5rem; }
+  .event-list-item { padding: 0.875rem 0.875rem; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; margin-bottom: 2px; border: 1px solid transparent; }
+  .event-list-item:hover { background: var(--bg); }
+  .event-list-item.selected { background: var(--gold-dim); border-color: rgba(201,168,76,0.25); }
+  .event-list-item-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .event-list-item.selected .event-list-item-title { color: var(--gold); }
+  .event-list-item-date { font-size: 12px; color: var(--text3); }
+  .event-list-empty { padding: 2rem 1rem; text-align: center; color: var(--text3); font-size: 13px; }
+
+  /* DETAIL PANEL */
+  .event-detail-panel { flex: 1; overflow-y: auto; background: var(--bg); }
+  .detail-inner { max-width: 800px; padding: 2rem; display: flex; flex-direction: column; gap: 1.75rem; padding-bottom: 4rem; }
+
+  /* EMPTY STATE */
+  .detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; text-align: center; color: var(--text3); padding: 2rem; }
+  .detail-empty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--gold-dim); display: flex; align-items: center; justify-content: center; color: var(--gold); margin: 0 auto 1.25rem; }
+  .detail-empty-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .detail-empty-sub { font-size: 14px; max-width: 280px; }
+
+  /* DETAIL SECTIONS */
+  .detail-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .detail-section-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .detail-section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+  .detail-section-body { padding: 1.25rem; }
+
+  /* SECTION 1 — Event Info */
+  .event-info-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 0.75rem; }
+  .event-info-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 1rem; }
+  .event-info-meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
+  .event-info-desc { font-size: 15px; color: var(--text2); line-height: 1.75; white-space: pre-wrap; }
+
+  /* SECTION 2 — Video */
+  .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-sm); background: #000; }
+  .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+  .video-placeholder { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-sm); background: var(--bg); border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; }
+  .video-placeholder-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text3); font-size: 13px; }
+
+  /* SECTION 4 — Links */
+  .links-list { display: flex; flex-direction: column; gap: 8px; }
+  .link-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; color: var(--text); transition: border-color 0.15s, background 0.15s; }
+  .link-item:hover { border-color: rgba(201,168,76,0.4); background: var(--gold-dim); color: var(--gold); }
+  .link-item-icon { color: var(--gold); flex-shrink: 0; }
+  .link-item-label { font-size: 14px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .link-item-url { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+  .no-links { font-size: 13px; color: var(--text3); font-style: italic; }
+
+  /* ADMIN ACTIONS */
+  .admin-action-bar { display: flex; align-items: center; gap: 8px; padding: 0.75rem 1.25rem; background: rgba(201,168,76,0.06); border-bottom: 1px solid rgba(201,168,76,0.15); }
+  .admin-label { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; flex: 1; }
+  .edit-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: none; border: 1px solid rgba(201,168,76,0.4); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); cursor: pointer; transition: all 0.15s; }
+  .edit-btn:hover { background: var(--gold-dim); }
+  .delete-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: none; border: 1px solid rgba(220,50,50,0.3); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: #C94444; cursor: pointer; transition: all 0.15s; }
+  .delete-btn:hover { background: rgba(220,50,50,0.08); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); box-shadow: 0 8px 60px rgba(0,0,0,0.2); width: 100%; max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text3); padding: 4px; border-radius: 6px; transition: color 0.15s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+
+  /* FORM */
+  .form-section-title { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 13px; font-weight: 700; color: var(--text2); }
+  .form-input, .form-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); transition: border-color 0.15s; outline: none; }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); background: var(--surface); }
+  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .form-hint { font-size: 11px; color: var(--text3); }
+
+  /* LINKS EDITOR */
+  .links-editor { display: flex; flex-direction: column; gap: 8px; }
+  .link-edit-row { display: flex; align-items: center; gap: 8px; }
+  .link-edit-row .form-input { flex: 1; }
+  .link-remove-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text3); flex-shrink: 0; transition: all 0.15s; }
+  .link-remove-btn:hover { border-color: rgba(220,50,50,0.4); color: #C94444; }
+  .add-link-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: none; border: 1px dashed var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.15s; align-self: flex-start; }
+  .add-link-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* BUTTONS */
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: var(--dark); color: #F0EDE6; padding: 12px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; box-shadow: var(--shadow-md); transform: translateY(80px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 3px solid var(--gold); }
+  .toast.error { border-left: 3px solid #C94444; }
+
+  /* MOBILE BOTTOM NAV */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
+    .main-wrap { margin-left: 60px; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .event-list-panel { width: 240px; }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; height: 54px; }
+    .event-list-panel { width: 100%; position: absolute; left: 0; top: 0; bottom: 0; z-index: 10; transform: translateX(-100%); transition: transform 0.3s; }
+    .event-list-panel.mobile-open { transform: translateX(0); }
+    .split-layout { position: relative; }
+    .detail-inner { padding: 1rem 1rem 80px; }
+    .mobile-bottom-nav { display: flex; }
+    .mobile-list-btn { display: flex !important; }
+  }
+  .mobile-list-btn { display: none; align-items: center; gap: 6px; padding: 6px 12px; background: var(--dark3); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); color: #9A9488; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; }
+  .mobile-list-btn:hover { color: #F0EDE6; }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="inbox.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>Inbox</span>
+    </a>
+    <a href="events.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+    <div class="nav-section-label">Account</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="mobile-list-btn" id="mobile-list-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Events
+      </button>
+      <div>
+        <div class="header-title">Past Events</div>
+        <div class="header-subtitle">Replay recordings and revisit resources</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="notifications.html" class="notif-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </a>
+    </div>
+  </header>
+
+  <div class="split-layout">
+    <!-- Event List Panel -->
+    <div class="event-list-panel" id="event-list-panel">
+      <div class="event-list-header">
+        <div class="event-list-title">All Past Events</div>
+        <button class="add-event-btn" id="add-event-btn" style="display:none;" onclick="openModal(null)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Past Event
+        </button>
+      </div>
+      <div class="event-list-scroll" id="event-list-scroll">
+        <div class="event-list-empty" id="event-list-loading">Loading events...</div>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="event-detail-panel" id="event-detail-panel">
+      <div class="detail-inner" id="detail-inner">
+        <div class="detail-empty" id="detail-empty">
+          <div class="detail-empty-icon">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M10 16l2 2 4-4"/></svg>
+          </div>
+          <div class="detail-empty-title">Select an event</div>
+          <div class="detail-empty-sub">Choose a past event from the list to view its recording and resources.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="events.html" class="mobile-nav-item active">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Events
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add Past Event</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Section 1: Event Info -->
+      <div class="form-section-title">Section 1 — Event Info</div>
+      <div class="form-group">
+        <label class="form-label" for="f-title">Event Title</label>
+        <input class="form-input" id="f-title" type="text" placeholder="e.g. Q1 Community Call">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-date">Event Date</label>
+        <input class="form-input" id="f-date" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-desc">Description</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="What was covered in this event?"></textarea>
+      </div>
+
+      <!-- Section 2: Video -->
+      <div class="form-section-title">Section 2 — Video</div>
+      <div class="form-group">
+        <label class="form-label" for="f-video">Video URL</label>
+        <input class="form-input" id="f-video" type="url" placeholder="https://youtu.be/... or https://vimeo.com/...">
+        <div class="form-hint">Supports YouTube and Vimeo links. Paste the share URL.</div>
+      </div>
+
+      <!-- Section 4: Links and Resources -->
+      <div class="form-section-title">Section 4 — Links &amp; Resources</div>
+      <div class="links-editor" id="links-editor"></div>
+      <button class="add-link-btn" onclick="addLinkRow()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Link
+      </button>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" id="modal-save-btn" onclick="saveEvent()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Event
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let isAdmin = false;
+  let allEvents = [];
+  let selectedEventId = null;
+  let editingEventId = null;
+
+  // ── AUTH ──────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+
+    const name = user.displayName || user.email || 'Builder';
+    document.getElementById('sidebar-name').textContent = name;
+
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + esc(user.photoURL) + '" alt="avatar">';
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data.userRole === 'admin') {
+          isAdmin = true;
+          document.getElementById('admin-nav-link').style.display = 'flex';
+          document.getElementById('sidebar-role').textContent = 'Admin';
+          document.getElementById('add-event-btn').style.display = 'flex';
+        }
+      }
+    } catch(e) {}
+
+    try {
+      const notifSnap = await db.collection('notifications')
+        .where('userId', '==', user.uid).where('read', '==', false).limit(1).get();
+      if (!notifSnap.empty) document.getElementById('notif-dot').style.display = 'block';
+    } catch(e) {}
+
+    loadEvents();
+  });
+
+  // ── LOAD EVENTS ───────────────────────────────────────────────────────────
+  async function loadEvents() {
+    try {
+      const snap = await db.collection('pastEvents').orderBy('eventDate', 'desc').get();
+      allEvents = snap.docs.map(function(doc) {
+        const d = doc.data();
+        let date = null;
+        if (d.eventDate) date = d.eventDate.toDate ? d.eventDate.toDate() : new Date(d.eventDate);
+        return { id: doc.id, title: d.title || 'Untitled', date, description: d.description || '', videoUrl: d.videoUrl || '', links: d.links || [] };
+      });
+      renderList();
+    } catch(e) {
+      document.getElementById('event-list-loading').textContent = 'Could not load events.';
+    }
+  }
+
+  function renderList() {
+    const scroll = document.getElementById('event-list-scroll');
+    if (allEvents.length === 0) {
+      scroll.innerHTML = '<div class="event-list-empty">No past events yet.</div>';
+      return;
+    }
+    scroll.innerHTML = allEvents.map(function(ev) {
+      const dateStr = ev.date ? ev.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBD';
+      const selected = ev.id === selectedEventId ? ' selected' : '';
+      return '<div class="event-list-item' + selected + '" data-id="' + esc(ev.id) + '" onclick="selectEvent(\'' + esc(ev.id) + '\')">' +
+        '<div class="event-list-item-title">' + esc(ev.title) + '</div>' +
+        '<div class="event-list-item-date">' + esc(dateStr) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function selectEvent(id) {
+    selectedEventId = id;
+    renderList();
+    const ev = allEvents.find(function(e) { return e.id === id; });
+    if (!ev) return;
+    renderDetail(ev);
+    // Close mobile list panel
+    document.getElementById('event-list-panel').classList.remove('mobile-open');
+  }
+
+  // ── RENDER DETAIL ─────────────────────────────────────────────────────────
+  function renderDetail(ev) {
+    const inner = document.getElementById('detail-inner');
+    const dateStr = ev.date ? ev.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'Date TBD';
+    const embedHtml = buildVideoEmbed(ev.videoUrl);
+    const linksHtml = buildLinksHtml(ev.links);
+
+    const adminBar = isAdmin
+      ? '<div class="admin-action-bar"><span class="admin-label">Admin</span>' +
+        '<button class="edit-btn" onclick="openModal(\'' + esc(ev.id) + '\')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>' +
+        '<button class="delete-btn" onclick="deleteEvent(\'' + esc(ev.id) + '\')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>Delete</button>' +
+        '</div>'
+      : '';
+
+    inner.innerHTML =
+      /* Section 1 — Event Info */
+      '<div class="detail-section">' +
+        adminBar +
+        '<div class="detail-section-header"><span class="detail-section-label">Section 1 — Event Info</span></div>' +
+        '<div class="detail-section-body">' +
+          '<div class="event-info-title">' + esc(ev.title) + '</div>' +
+          '<div class="event-info-meta">' +
+            '<div class="event-info-meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>' + esc(dateStr) + '</div>' +
+          '</div>' +
+          (ev.description ? '<div class="event-info-desc">' + esc(ev.description) + '</div>' : '<div class="event-info-desc" style="color:var(--text3);font-style:italic;">No description provided.</div>') +
+        '</div>' +
+      '</div>' +
+
+      /* Section 2 — Video */
+      '<div class="detail-section">' +
+        '<div class="detail-section-header"><span class="detail-section-label">Section 2 — Video</span></div>' +
+        '<div class="detail-section-body">' +
+          embedHtml +
+        '</div>' +
+      '</div>' +
+
+      /* Section 4 — Links and Resources */
+      '<div class="detail-section">' +
+        '<div class="detail-section-header"><span class="detail-section-label">Section 4 — Links &amp; Resources</span></div>' +
+        '<div class="detail-section-body">' +
+          linksHtml +
+        '</div>' +
+      '</div>';
+  }
+
+  function buildVideoEmbed(url) {
+    if (!url) {
+      return '<div class="video-placeholder"><div class="video-placeholder-inner">' +
+        '<svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>' +
+        '<span>No video added yet</span></div></div>';
+    }
+    const embedUrl = toEmbedUrl(url);
+    if (!embedUrl) {
+      return '<div class="video-placeholder"><div class="video-placeholder-inner">' +
+        '<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+        '<span>Unrecognized video URL</span>' +
+        '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" style="color:var(--gold);font-size:12px;margin-top:4px;">Open link →</a>' +
+        '</div></div>';
+    }
+    return '<div class="video-wrapper"><iframe src="' + esc(embedUrl) + '" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>';
+  }
+
+  function toEmbedUrl(url) {
+    if (!url) return null;
+    try {
+      const u = new URL(url);
+      // YouTube: youtu.be/<id> or youtube.com/watch?v=<id> or youtube.com/live/<id>
+      if (u.hostname === 'youtu.be') {
+        return 'https://www.youtube.com/embed' + u.pathname;
+      }
+      if (u.hostname.includes('youtube.com')) {
+        const v = u.searchParams.get('v');
+        if (v) return 'https://www.youtube.com/embed/' + v;
+        // youtube.com/live/<id>
+        const liveMatch = u.pathname.match(/\/live\/([^/?]+)/);
+        if (liveMatch) return 'https://www.youtube.com/embed/' + liveMatch[1];
+        // already an embed
+        if (u.pathname.startsWith('/embed/')) return url;
+      }
+      // Vimeo: vimeo.com/<id>
+      if (u.hostname === 'vimeo.com') {
+        const id = u.pathname.replace(/^\//, '').split('/')[0];
+        if (id && /^\d+$/.test(id)) return 'https://player.vimeo.com/video/' + id;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  function buildLinksHtml(links) {
+    if (!links || links.length === 0) {
+      return '<div class="no-links">No resources added for this event.</div>';
+    }
+    return '<div class="links-list">' +
+      links.map(function(link) {
+        if (!link.url) return '';
+        return '<a class="link-item" href="' + esc(link.url) + '" target="_blank" rel="noopener noreferrer">' +
+          '<div class="link-item-icon"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>' +
+          '<div class="link-item-label">' + esc(link.label || link.url) + '</div>' +
+          '<div class="link-item-url">' + esc(link.url) + '</div>' +
+          '</a>';
+      }).join('') +
+    '</div>';
+  }
+
+  // ── MODAL ─────────────────────────────────────────────────────────────────
+  function openModal(id) {
+    editingEventId = id;
+    document.getElementById('modal-title').textContent = id ? 'Edit Past Event' : 'Add Past Event';
+    document.getElementById('links-editor').innerHTML = '';
+
+    if (id) {
+      const ev = allEvents.find(function(e) { return e.id === id; });
+      if (ev) {
+        document.getElementById('f-title').value = ev.title;
+        document.getElementById('f-date').value = ev.date ? ev.date.toISOString().slice(0, 10) : '';
+        document.getElementById('f-desc').value = ev.description;
+        document.getElementById('f-video').value = ev.videoUrl;
+        (ev.links || []).forEach(function(link) { addLinkRow(link.label, link.url); });
+      }
+    } else {
+      document.getElementById('f-title').value = '';
+      document.getElementById('f-date').value = '';
+      document.getElementById('f-desc').value = '';
+      document.getElementById('f-video').value = '';
+    }
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    editingEventId = null;
+  }
+
+  function addLinkRow(label, url) {
+    const editor = document.getElementById('links-editor');
+    const row = document.createElement('div');
+    row.className = 'link-edit-row';
+    row.innerHTML =
+      '<input class="form-input" type="text" placeholder="Label" value="' + esc(label || '') + '" style="flex:0.9;">' +
+      '<input class="form-input" type="url" placeholder="https://..." value="' + esc(url || '') + '">' +
+      '<button class="link-remove-btn" onclick="this.parentElement.remove()" type="button">' +
+        '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+      '</button>';
+    editor.appendChild(row);
+  }
+
+  async function saveEvent() {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { showToast('Event title is required.', 'error'); return; }
+
+    const dateVal = document.getElementById('f-date').value;
+    const eventDate = dateVal ? firebase.firestore.Timestamp.fromDate(new Date(dateVal + 'T12:00:00')) : null;
+
+    const links = [];
+    document.querySelectorAll('#links-editor .link-edit-row').forEach(function(row) {
+      const inputs = row.querySelectorAll('input');
+      const label = inputs[0].value.trim();
+      const url = inputs[1].value.trim();
+      if (url) links.push({ label: label || url, url });
+    });
+
+    const data = {
+      title,
+      eventDate,
+      description: document.getElementById('f-desc').value.trim(),
+      videoUrl: document.getElementById('f-video').value.trim(),
+      links,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    const btn = document.getElementById('modal-save-btn');
+    btn.disabled = true;
+
+    try {
+      if (editingEventId) {
+        await db.collection('pastEvents').doc(editingEventId).update(data);
+        showToast('Event updated.', 'success');
+      } else {
+        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        await db.collection('pastEvents').add(data);
+        showToast('Event added.', 'success');
+      }
+      closeModal();
+      await loadEvents();
+      if (editingEventId || !editingEventId) {
+        // re-select updated event
+        if (editingEventId && allEvents.find(function(e) { return e.id === editingEventId; })) {
+          selectEvent(editingEventId);
+        } else if (allEvents.length > 0) {
+          selectEvent(allEvents[0].id);
+        }
+      }
+    } catch(e) {
+      showToast('Error saving event.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteEvent(id) {
+    if (!confirm('Delete this past event? This cannot be undone.')) return;
+    try {
+      await db.collection('pastEvents').doc(id).delete();
+      showToast('Event deleted.', 'success');
+      selectedEventId = null;
+      document.getElementById('detail-inner').innerHTML = '<div class="detail-empty"><div class="detail-empty-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M10 16l2 2 4-4"/></svg></div><div class="detail-empty-title">Select an event</div><div class="detail-empty-sub">Choose a past event from the list to view its recording and resources.</div></div>';
+      await loadEvents();
+    } catch(e) {
+      showToast('Error deleting event.', 'error');
+    }
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────────────────
+  let toastTimer = null;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '');
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  // ── UTIL ──────────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── SIDEBAR MOBILE ────────────────────────────────────────────────────────
+  document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
+
+  // Mobile event list panel toggle
+  document.getElementById('mobile-list-btn').addEventListener('click', function() {
+    document.getElementById('event-list-panel').classList.toggle('mobile-open');
+  });
+
+  // Close modal on overlay click
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>

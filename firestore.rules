@@ -46,7 +46,7 @@ service cloud.firestore {
         isOwner(userId) ||
         isAdmin() ||
         (isActive() && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['points', 'totalLikesReceived']))
+          .hasOnly(['points', 'totalLikesReceived', 'badges']))
       );
       allow delete: if isAdmin();
     }
@@ -120,6 +120,11 @@ service cloud.firestore {
 
     // EVENTS
     match /Events/{eventId} {
+      allow read: if isActive();
+      allow write: if isAdmin();
+    }
+
+    match /pastEvents/{eventId} {
       allow read: if isActive();
       allow write: if isAdmin();
     }

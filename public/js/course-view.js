@@ -316,7 +316,11 @@ async function toggleComplete() {
       update.completedAt = firebase.firestore.FieldValue.serverTimestamp();
     }
     await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
-    if (completedLessons.size === lessons.length) showCompletion();
+    onLessonComplete(currentUser.uid);
+    if (completedLessons.size === lessons.length) {
+      onCourseComplete(currentUser.uid);
+      showCompletion();
+    }
   }
 
   refreshMarkBtn();
@@ -353,7 +357,8 @@ async function nextLesson() {
       update.completedAt = firebase.firestore.FieldValue.serverTimestamp();
     }
     await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
-    if (completedLessons.size === lessons.length) { showCompletion(); return; }
+    onLessonComplete(currentUser.uid);
+    if (completedLessons.size === lessons.length) { onCourseComplete(currentUser.uid); showCompletion(); return; }
   }
   if (currentIndex < lessons.length - 1) loadLesson(currentIndex + 1);
 }

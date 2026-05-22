@@ -1,0 +1,531 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --purple: #4B3F8A;
+    --coral: #C4622D;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-close-btn:hover { color: #F0EDE6; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .notif-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; position: relative; text-decoration: none; }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
+
+  /* PAGE */
+  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 960px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text3); }
+
+  /* FILTER */
+  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-chip { padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .filter-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
+
+  /* SECTION */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* EVENT CARDS */
+  .events-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; display: flex; gap: 1.25rem; align-items: flex-start; transition: box-shadow 0.15s, transform 0.15s; cursor: pointer; text-decoration: none; color: inherit; }
+  .event-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .event-card.past { opacity: 0.6; cursor: default; }
+  .event-card.past:hover { box-shadow: var(--shadow); transform: none; }
+
+  .event-date-block { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); flex-shrink: 0; }
+  .event-month { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 0.1em; }
+  .event-day { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; }
+
+  .event-info { flex: 1; min-width: 0; }
+  .event-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .event-title { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .event-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 100px; }
+  .badge-upcoming { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .badge-live { background: rgba(196,98,45,0.12); border: 1px solid rgba(196,98,45,0.25); color: var(--coral); animation: pulse 2s infinite; }
+  .badge-past { background: var(--bg); border: 1px solid var(--border); color: var(--text3); }
+  .badge-recurring { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  .event-meta { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text3); margin-bottom: 8px; flex-wrap: wrap; }
+  .event-meta-item { display: flex; align-items: center; gap: 5px; }
+  .event-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  .event-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); gap: 10px; flex-wrap: wrap; }
+  .event-cta { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 8px 18px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .event-cta:hover { background: var(--gold-light); }
+  .event-cta.secondary { background: none; border: 1px solid var(--border); color: var(--text2); }
+  .event-cta.secondary:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .event-add-cal { font-size: 12px; color: var(--text3); cursor: pointer; text-decoration: none; transition: color 0.15s; }
+  .event-add-cal:hover { color: var(--gold); }
+
+  .past-events-card { background: linear-gradient(135deg, #FFFFFF 0%, #F8F3E8 100%); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; text-decoration: none; color: inherit; transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s; }
+  .past-events-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-color: rgba(201,168,76,0.45); }
+  .past-events-icon { width: 54px; height: 54px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0; }
+  .past-events-copy { flex: 1; min-width: 0; }
+  .past-events-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .past-events-sub { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .past-events-arrow { color: var(--gold); font-size: 20px; font-weight: 700; flex-shrink: 0; }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; }
+
+  /* MOBILE BOTTOM NAV */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
+    .main-wrap { margin-left: 60px; }
+    .nav-item { justify-content: center; padding: 10px; }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; height: 54px; }
+    .page-content { padding: 1rem 1rem 80px; gap: 1rem; }
+    .event-card { flex-direction: column; gap: 1rem; }
+    .past-events-card { align-items: flex-start; }
+    .event-date-block { flex-direction: row; width: auto; height: auto; padding: 6px 12px; gap: 8px; }
+    .event-day { font-size: 20px; }
+    .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .mobile-bottom-nav { display: flex; }
+  }
+  @media (max-width: 480px) {
+    .page-content { padding: 0.875rem 0.875rem 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="inbox.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>Inbox</span>
+    </a>
+    <a href="events.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="header-title">Events</div>
+        <div class="header-subtitle">Live sessions, workshops, and community calls</div>
+      </div>
+    </div>
+    <a href="notifications.html" class="notif-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <div class="notif-dot" id="notif-dot"></div>
+    </a>
+  </header>
+
+  <div class="page-content">
+    <div>
+      <div class="page-title">Upcoming Events</div>
+      <div class="page-sub">Live sessions, workshops, and community calls — join us</div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <div class="filter-chip active" data-filter="all">All</div>
+      <div class="filter-chip" data-filter="upcoming">Upcoming</div>
+      <div class="filter-chip" data-filter="past">Past</div>
+    </div>
+
+    <!-- Upcoming -->
+    <div id="upcoming-section">
+      <div class="section-label">Upcoming</div>
+      <div class="events-list" id="upcoming-list">
+        <div style="color:var(--text3);font-size:13px;">Loading events...</div>
+      </div>
+    </div>
+
+    <!-- Past -->
+    <div id="past-section">
+      <div class="section-label">Past Events</div>
+      <a class="past-events-card" href="pastevents.html">
+        <div class="past-events-icon">
+          <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 15h6"/></svg>
+        </div>
+        <div class="past-events-copy">
+          <div class="past-events-title">Browse Past Events</div>
+          <div class="past-events-sub">Revisit previous live sessions, workshops, and community events.</div>
+        </div>
+        <div class="past-events-arrow">→</div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="inbox.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Inbox
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let allEvents = [];
+  let activeFilter = 'all';
+
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+
+    const name = user.displayName || user.email || 'Builder';
+    const first = name.split(' ')[0];
+    document.getElementById('sidebar-name').textContent = name;
+
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+    } else {
+      av.textContent = first.charAt(0).toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data.userRole === 'admin') {
+          document.getElementById('admin-nav-link').style.display = 'flex';
+          document.getElementById('sidebar-role').textContent = 'Admin';
+        }
+      }
+    } catch(e) {}
+
+    // Notifications
+    try {
+      const notifSnap = await db.collection('notifications')
+        .where('userId', '==', user.uid)
+        .where('read', '==', false)
+        .limit(1).get();
+      if (!notifSnap.empty) {
+        document.getElementById('notif-dot').style.display = 'block';
+      }
+    } catch(e) {}
+
+    loadEvents();
+  });
+
+  async function loadEvents() {
+    try {
+      const snap = await db.collection('Events')
+        .orderBy('eventDate', 'asc')
+        .get();
+
+      const now = new Date();
+
+      allEvents = snap.docs.map(function(doc) {
+        const d = doc.data();
+        let eventDate = null;
+        const dateValue = d.eventDate || d.date;
+        if (dateValue) {
+          eventDate = dateValue.toDate ? dateValue.toDate() : new Date(dateValue);
+        }
+        const isPast = eventDate ? eventDate < now : false;
+        const isLive = d.status === 'live';
+
+        return {
+          id: doc.id,
+          title: d.eventTitle || d.title || 'Untitled Event',
+          description: d.description || '',
+          date: eventDate,
+          eventStart: d.eventStart || '',
+          eventLocation: d.eventLocation || '',
+          eventURL: d.eventURL || '',
+          status: d.status || (isPast ? 'past' : 'upcoming'),
+          isRecurring: d.isRecurring || false,
+          isPast,
+          isLive,
+        };
+      });
+
+      renderEvents();
+
+    } catch(e) {
+      console.error(e);
+      document.getElementById('upcoming-list').innerHTML =
+        '<div style="color:var(--text3);font-size:13px;">Could not load events. Please refresh.</div>';
+    }
+  }
+
+  function renderEvents() {
+    const upcoming = allEvents.filter(function(e) {
+      if (activeFilter === 'upcoming') return !e.isPast;
+      if (activeFilter === 'past') return e.isPast;
+      return true;
+    });
+
+    const upcomingEvents = upcoming.filter(e => !e.isPast);
+
+    // Upcoming section
+    const upcomingSection = document.getElementById('upcoming-section');
+    const upcomingList = document.getElementById('upcoming-list');
+
+    if (activeFilter === 'past') {
+      upcomingSection.style.display = 'none';
+    } else {
+      upcomingSection.style.display = 'block';
+      if (upcomingEvents.length === 0) {
+        upcomingList.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div><div class="empty-sub">Check back soon — new sessions are being planned</div></div>';
+      } else {
+        upcomingList.innerHTML = upcomingEvents.map(renderEventCard).join('');
+      }
+    }
+
+    // Past section
+    const pastSection = document.getElementById('past-section');
+
+    if (activeFilter === 'upcoming') {
+      pastSection.style.display = 'none';
+    } else {
+      pastSection.style.display = 'block';
+    }
+  }
+
+  function renderEventCard(event) {
+    const dateBlock = event.date
+      ? '<div class="event-date-block"><div class="event-month">' +
+        event.date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() +
+        '</div><div class="event-day">' +
+        event.date.getDate() +
+        '</div></div>'
+      : '<div class="event-date-block"><div class="event-month">TBD</div><div class="event-day">—</div></div>';
+
+    let badgeHtml = '';
+    if (event.isLive) {
+      badgeHtml = '<span class="event-badge badge-live">● Live Now</span>';
+    } else if (event.isPast) {
+      badgeHtml = '<span class="event-badge badge-past">Past</span>';
+    } else {
+      badgeHtml = '<span class="event-badge badge-upcoming">Upcoming</span>';
+    }
+    if (event.isRecurring) {
+      badgeHtml += '<span class="event-badge badge-recurring">Recurring</span>';
+    }
+
+    const metaHtml = [
+      event.eventStart ? '<span class="event-meta-item"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + escHtml(event.eventStart) + '</span>' : '',
+      event.eventLocation ? '<span class="event-meta-item"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' + escHtml(event.eventLocation) + '</span>' : '',
+    ].filter(Boolean).join('');
+
+    const footerHtml = event.isPast
+      ? ''
+      : '<div class="event-footer">' +
+        (event.eventURL
+          ? '<a class="event-cta" href="' + escHtml(event.eventURL) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Join Event →</a>'
+          : '<span></span>') +
+        '</div>';
+
+    return '<div class="event-card' + (event.isPast ? ' past' : '') + '">' +
+      dateBlock +
+      '<div class="event-info">' +
+      '<div class="event-title-row"><div class="event-title">' + escHtml(event.title) + '</div>' + badgeHtml + '</div>' +
+      (metaHtml ? '<div class="event-meta">' + metaHtml + '</div>' : '') +
+      (event.description ? '<div class="event-desc">' + escHtml(event.description) + '</div>' : '') +
+      footerHtml +
+      '</div></div>';
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      renderEvents();
+    });
+  });
+
+  // Mobile sidebar
+  document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
+</script>
+</body>
+</html>

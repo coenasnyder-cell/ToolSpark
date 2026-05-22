@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -55,6 +55,15 @@
     z-index: 100;
     border-right: 1px solid var(--border-dark);
   }
+ .sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #9A9488;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
   .sidebar-logo {
     padding: 1.5rem 1.25rem 1.25rem;
     border-bottom: 1px solid var(--border-dark);
@@ -175,6 +184,7 @@
   .badge-builder { background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.25); }
   .badge-member { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
   .badge-since { font-size: 11px; color: var(--text3); font-weight: 400; text-transform: none; letter-spacing: 0; padding: 0; border: none; background: none; display: inline-flex; align-items: center; gap: 4px; }
+  @media (min-width: 901px) { .badge-since { display: none; } }
   .edit-profile-btn {
     background: none; border: 1px solid var(--border); border-radius: 100px;
     padding: 7px 18px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
@@ -212,7 +222,7 @@
 
   /* ── STATS CARD ── */
   .stats-card { padding: 1.5rem 1.75rem; }
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
   .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--gold); font-weight: 400; line-height: 1; margin-bottom: 4px; }
   .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
 
@@ -266,7 +276,7 @@
     .user-avatar { margin: 0; }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     .sidebar { display: none; }
     .main-wrap { margin-left: 0; }
     .top-header { padding: 0 1rem; height: 54px; }
@@ -277,13 +287,20 @@
     .profile-body { padding: 0 1.25rem 1.25rem; }
     .profile-name { font-size: 19px; }
     .stats-card, .clarity-card { padding: 1.25rem; }
-
+   .stats-grid { grid-template-columns: repeat(3, 1fr); }
     .mobile-bottom-nav {
       display: flex; position: fixed; bottom: 0; left: 0; right: 0;
       height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark);
       z-index: 200; align-items: stretch;
       padding: 0 env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
-    }
+   .sidebar-close-btn { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 32px; 
+    height: 32px; 
+  }
+       }
     .mobile-nav-item {
       flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700;
@@ -294,7 +311,15 @@
     .mobile-nav-item:hover, .mobile-nav-item.active { color: var(--gold); }
     .mobile-nav-item.active svg { stroke: var(--gold); }
   }
-
+@media (max-width: 767px) {
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+  }
+}
   @media (max-width: 480px) {
     .top-header { padding: 0 0.875rem; }
     .page-content { padding: 0.75rem 0.75rem 80px; gap: 0.625rem; }
@@ -312,54 +337,55 @@
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- ── SIDEBAR ── -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-text">Tool<span>Spark</span></div>
-    <div class="logo-tag">Builder Platform</div>
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">  
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
-
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-
-    <a href="dashboard.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Dashboard</span>
-    </a>
-
+   
     <a href="community.html" class="nav-item">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
       <span>Community</span>
     </a>
-
-    <a href="#" class="nav-item">
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="events.html" class="nav-item">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
       <span>Events</span>
     </a>
-
-    <a href="#" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span>Resources</span>
-    </a>
-
-    <div class="nav-section-label">Account</div>
-
     <a href="profile.html" class="nav-item active">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
       <span>Profile</span>
     </a>
-
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
     <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       <span>Admin</span>
     </a>
   </nav>
-
   <div class="sidebar-footer">
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading…</div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
         <div class="user-role" id="sidebar-role">Builder</div>
       </div>
     </div>
@@ -373,18 +399,18 @@
 <!-- ── MAIN WRAP ── -->
 <div class="main-wrap">
 
-  <!-- TOP HEADER -->
-  <header class="top-header">
-    <div class="header-title-block">
-      <div class="header-title">My Profile</div>
-      <div class="header-subtitle">Manage your account and view your activity.</div>
-    </div>
-    <div class="header-actions">
-      <div class="notif-btn">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-      </div>
-    </div>
-  </header>
+ <!-- TOP HEADER -->
+<header class="top-header">
+  <div class="header-title-block">
+    <div class="header-title">My Profile</div>
+    <div class="header-subtitle">Manage your account and view your activity.</div>
+  </div>
+  <div class="header-actions">
+    <a href="notifications.html" class="notif-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+    </a>
+  </div>
+</header>
 
   <!-- PAGE CONTENT -->
   <div class="page-content">
@@ -433,27 +459,32 @@
               </div>
             </div>
           </div>
-
-        </div>
+      <!-- STATS -->
+      <div class="stats-grid" style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+      <div>
+      <div class="stat-num" id="stat-threads">—</div>
+      <div class="stat-label">Threads Posted</div>
       </div>
+    <div>
+    <div class="stat-num" id="stat-points">—</div>
+    <div class="stat-label">Points</div>
+  </div>
+  <div>
+     <div class="stat-num" id="stat-streak">—</div>
+    <div class="stat-label">Day Streak</div>
+  </div>
+  <div>
+    <div class="stat-num" id="stat-days">—</div>
+    <div class="stat-label">Days Active</div>
+  </div>
+        </div><!-- /stats-grid -->
+      </div><!-- /profile-body -->
+    </div><!-- /profile-hero -->
 
-      <!-- STATS CARD -->
-      <div class="card stats-card">
-        <div class="card-title">Activity</div>
-        <div class="stats-grid">
-          <div>
-            <div class="stat-num" id="stat-threads">—</div>
-            <div class="stat-label">Threads Posted</div>
-          </div>
-          <div>
-            <div class="stat-num" id="stat-days">—</div>
-            <div class="stat-label">Days Active</div>
-          </div>
-          <div>
-            <div class="stat-num" id="stat-year" style="font-size:17px;line-height:1.2;">—</div>
-            <div class="stat-label">Member Since</div>
-          </div>
-        </div>
+      <!-- BADGES CARD -->
+      <div class="card stats-card" id="badges-card" style="display:none;">
+        <div class="card-title">Badges Earned</div>
+        <div id="badges-grid" style="display:flex;flex-wrap:wrap;gap:0.75rem;"></div>
       </div>
 
       <!-- CLARITY SESSION CARD -->
@@ -520,25 +551,25 @@
 
 <!-- ── MOBILE BOTTOM NAV ── -->
 <nav class="mobile-bottom-nav">
-  <a href="dashboard.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Home
-  </a>
   <a href="community.html" class="mobile-nav-item">
     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
     Community
   </a>
-  <a href="clarity.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-    Clarity
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
   </a>
-  <a href="results.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    Results
+  <a href="tools.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
   </a>
-  <a href="profile.html" class="mobile-nav-item active">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg>
-    Profile
+  <a href="inbox.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Inbox
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
   </a>
 </nav>
 
@@ -556,7 +587,7 @@
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
-  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}  
   const auth = firebase.auth();
   const db = firebase.firestore();
 
@@ -649,7 +680,32 @@
       btn.textContent = 'Save Changes';
     }
   }
+const BADGE_DEFS = {
+  first_post:       { icon: '✍️',  name: 'First Post',         desc: 'Posted your first thread' },
+  getting_started:  { icon: '🚀',  name: 'Getting Started',    desc: 'Completed the welcome course' },
+  community_voice:  { icon: '🎙️', name: 'Community Voice',    desc: 'Made 10 posts' },
+  liked:            { icon: '❤️',  name: 'Liked',              desc: 'Received your first like' },
+  popular:          { icon: '⭐',  name: 'Popular',             desc: 'Received 10 likes' },
+  first_comment:    { icon: '💬',  name: 'First Comment',      desc: 'Posted your first comment' },
+  course_complete:  { icon: '🎓',  name: 'Course Complete',    desc: 'Completed a course' },
+  scholar:          { icon: '📚',  name: 'Scholar',            desc: 'Completed 3 courses' },
+  early_member:     { icon: '🌟',  name: 'Early Member',       desc: 'Joined in the first month' },
+};
 
+function renderBadges(badges) {
+  if (!badges || badges.length === 0) return;
+  document.getElementById('badges-card').style.display = 'block';
+  document.getElementById('badges-grid').innerHTML = badges.map(function(key) {
+    const def = BADGE_DEFS[key];
+    if (!def) return '';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;width:72px;">' +
+      '<div style="width:48px;height:48px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;">' +
+      def.icon +
+      '</div>' +
+      '<div style="font-size:10px;font-weight:700;color:var(--text2);line-height:1.3;">' + def.name + '</div>' +
+      '</div>';
+  }).join('');
+}
   /* ── Auth state + data load ── */
   auth.onAuthStateChanged(async user => {
     if (!user) {
@@ -666,12 +722,38 @@
       sidebarAv.textContent = (user.displayName || user.email || '?').charAt(0).toUpperCase();
     }
     document.getElementById('sidebar-name').textContent = user.displayName || user.email || 'Builder';
-    document.getElementById('profile-email').textContent = user.email || '';
+
+    // Check if viewing another user's profile
+    const viewUid = new URLSearchParams(window.location.search).get('uid');
+    const isOwnProfile = !viewUid || viewUid === user.uid;
+    const targetUid = isOwnProfile ? user.uid : viewUid;
+
+    if (!isOwnProfile) {
+      // Hide editable elements, show back link
+      document.getElementById('profile-email').textContent = '';
+      const editBtn = document.getElementById('edit-toggle-btn');
+      if (editBtn) editBtn.style.display = 'none';
+      const editForm = document.getElementById('edit-form');
+      if (editForm) editForm.style.display = 'none';
+      // Insert back link into header
+      const headerBlock = document.querySelector('.header-title-block');
+      if (headerBlock) {
+        const back = document.createElement('a');
+        back.href = 'javascript:history.back()';
+        back.style.cssText = 'display:inline-flex;align-items:center;gap:5px;color:#9A9488;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:4px;transition:color 0.15s;';
+        back.onmouseover = function() { this.style.color = '#F0EDE6'; };
+        back.onmouseout = function() { this.style.color = '#9A9488'; };
+        back.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back';
+        headerBlock.prepend(back);
+      }
+    } else {
+      document.getElementById('profile-email').textContent = user.email || '';
+    }
 
     // Load Firestore user doc
     let data = {};
     try {
-      const snap = await db.collection('users').doc(user.uid).get();
+      const snap = await db.collection('users').doc(targetUid).get();
       if (snap.exists) data = snap.data();
     } catch (err) {
       console.error('Failed to load user doc', err);
@@ -702,6 +784,12 @@
       photoEl.textContent = initials(displayName);
     }
 
+    // Update header for other-user view
+    if (!isOwnProfile) {
+      document.querySelector('.header-title').textContent = displayName + "'s Profile";
+      document.querySelector('.header-subtitle').textContent = 'Community member profile.';
+    }
+
     // Name + badges
     document.getElementById('profile-name').textContent = displayName;
     let badgeHTML = roleBadgeHTML(role);
@@ -726,24 +814,29 @@
 
     // Stats
     document.getElementById('stat-days').textContent = daysActive(createdAt);
-    const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-    document.getElementById('stat-year').textContent = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     document.getElementById('since-date').textContent = formatDate(createdAt);
     if (createdAt) {
       const days = daysActive(createdAt);
       document.getElementById('since-sub').textContent = days + ' days as a member';
     }
+  // Points, streak and badges
+    document.getElementById('stat-points').textContent = data.points || 0;
+    document.getElementById('stat-streak').textContent = (data.streak || 0) + ((data.streak || 0) >= 3 ? ' 🔥' : '');
+    renderBadges(data.badges || []);
 
     // Threads count
     try {
-      const tSnap = await db.collection('threads').where('authorId', '==', user.uid).get();
+      const tSnap = await db.collection('threads').where('authorId', '==', targetUid).get();
       document.getElementById('stat-threads').textContent = String(tSnap.size);
     } catch {
       document.getElementById('stat-threads').textContent = '0';
     }
 
-    // Clarity session
-    try {
+    // Clarity session — only shown on own profile
+    const clarityCard = document.querySelector('.clarity-card');
+    if (!isOwnProfile) {
+      if (clarityCard) clarityCard.style.display = 'none';
+    } else try {
       const cSnap = await db.collection('clarity_sessions')
         .where('clientEmail', '==', user.email)
         .orderBy('createdAt', 'desc')
@@ -767,6 +860,7 @@
       document.getElementById('clarity-empty').style.display = 'flex';
     }
   });
+
 </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
 <title>Your Results — ToolSpark</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
@@ -21,6 +22,7 @@
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
+  const auth = firebase.auth();
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -486,6 +488,43 @@ function showError() {
   document.getElementById('error-screen').classList.add('active');
 }
 
+function getCurrentUser() {
+  return new Promise(resolve => {
+    const unsub = auth.onAuthStateChanged(user => { unsub(); resolve(user); });
+  });
+}
+
+async function markClarityComplete(session) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !session.clientEmail) return;
+    if (user.email.toLowerCase() !== session.clientEmail.toLowerCase()) return;
+    await db.collection('users').doc(user.uid).update({
+      'onboarding.steps.clarityTool': true
+    });
+  } catch(e) { /* not a logged-in member — ignore */ }
+}
+
+async function ensureClientResult(sessionId, session, results) {
+  await db.collection('clientresults').doc(sessionId).set({
+    displayName: session.displayName || '',
+    businessName: session.businessName || '',
+    clientEmail: session.clientEmail || '',
+    clientResults: results,
+    sessionId: sessionId,
+    createdAt: session.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+}
+
+async function waitForSession(sessionId, maxAttempts = 6) {
+  for (let i = 0; i < maxAttempts; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 1500));
+    const snap = await db.collection('clarity_sessions').doc(sessionId).get();
+    if (snap.exists) return snap;
+  }
+  return null;
+}
+
 async function loadAndAnalyze() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session');
@@ -493,17 +532,19 @@ async function loadAndAnalyze() {
   if (!sessionId) { showError(); return; }
 
   try {
-    // Step 1 — Load session from Firestore
+    // Step 1 — Load session from Firestore (retries up to 6x with 1.5s delay)
     setStep(1);
-    const doc = await db.collection('clarity_sessions').doc(sessionId).get();
-    if (!doc.exists) { showError(); return; }
+    const doc = await waitForSession(sessionId);
+    if (!doc) { showError(); return; }
 
     const session = doc.data();
     const extracted = session.extracted;
 
     // If results already exist don't re-analyze
     if (session.toolResults) {
+      await ensureClientResult(sessionId, session, session.toolResults);
       renderResults(session.displayName, session.summary, session.toolResults);
+      await markClarityComplete(session);
       return;
     }
 
@@ -547,17 +588,9 @@ Respond ONLY with valid JSON, no markdown:
       analysisDate: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Save to clientresults collection
-    await db.collection('clientresults').add({
-      displayName: session.displayName || '',
-      businessName: session.businessName || '',
-      clientEmail: session.clientEmail || '',
-      clientResults: parsed,
-      sessionId: sessionId,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
+    await ensureClientResult(sessionId, session, parsed);
     renderResults(session.displayName, session.summary, parsed);
+    await markClarityComplete(session);
 
   } catch(err) {
     console.log('Error:', err);
