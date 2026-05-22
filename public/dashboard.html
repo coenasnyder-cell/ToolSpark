@@ -423,26 +423,6 @@
       </div>
       <div id="events-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
     </div>
-    <!-- CLARITY RESULTS -->
-    <div id="clarity-results-section" style="display:none;">
-      <div class="section-header">
-        <div>
-          <div class="section-title">Your Clarity Results</div>
-          <div class="section-sub">Your personalized AI tool recommendations.</div>
-        </div>
-      </div>
-      <a id="clarity-results-link" href="#" class="hub-card" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;text-decoration:none;">
-        <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);flex-shrink:0;">
-          <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        </div>
-        <div>
-          <div class="hub-card-title">View My Results</div>
-          <div class="hub-card-sub" id="clarity-results-sub">See your recommended AI tools</div>
-        </div>
-        <div style="margin-left:auto;color:var(--text3);font-size:18px;">→</div>
-      </a>
-    </div>
-
     <!-- HUB CARDS -->
     <div>
       <div class="section-header">
@@ -469,6 +449,13 @@
           </div>
           <div class="hub-card-title">Courses</div>
           <div class="hub-card-sub">Continue learning</div>
+        </a>
+        <a href="userclaritytools.html" class="hub-card">
+          <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
+          </div>
+          <div class="hub-card-title">Clarity Tools</div>
+          <div class="hub-card-sub">View Clarity and Spark results</div>
         </a>
         <a href="tools.html" class="hub-card">
           <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
@@ -644,19 +631,6 @@
         .where('clientEmail', '==', currentUser.email)
         .where('status', '==', 'completed').get();
       document.getElementById('stat-sessions').textContent = sessionsSnap.size;
-
-      if (!sessionsSnap.empty) {
-        const latest = sessionsSnap.docs.sort((a, b) => {
-          const aT = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
-          const bT = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
-          return bT - aT;
-        })[0];
-        const sid = latest.data().sessionId || latest.id;
-        document.getElementById('clarity-results-link').href = 'results.html?session=' + sid;
-        document.getElementById('clarity-results-sub').textContent =
-          'Based on your session · ' + (latest.data().businessName || 'your business');
-        document.getElementById('clarity-results-section').style.display = 'block';
-      }
     } catch(e) { console.error(e); }
   }
 

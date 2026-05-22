@@ -338,6 +338,12 @@
 <script>
 let signingIn = false;
 
+function getRedirectTarget() {
+  const allowed = { userclaritytools: 'userclaritytools.html' };
+  const param = new URLSearchParams(window.location.search).get('redirect');
+  return (param && allowed[param]) || 'community.html';
+}
+
 function showMsg(text, type) {
   const el = document.getElementById('msg');
   el.textContent = text;
@@ -379,6 +385,7 @@ async function signUp() {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName });
     await createUserDoc(cred.user, displayName);
+    await claimSparkSessionsForUser(cred.user);
 
     const emailOptIn = document.getElementById('emailOptIn').checked;
     const launchDate = new Date('2026-05-01');
@@ -394,7 +401,7 @@ async function signUp() {
       isEarlyMember: isEarlyMember,
     });
     showMsg('Account created! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
     setLoading(false);
@@ -408,6 +415,7 @@ async function signUpWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
     await createUserDoc(result.user, result.user.displayName || '');
+    await claimSparkSessionsForUser(result.user);
     const nameParts = (result.user.displayName || '').split(' ');
     const emailOptIn = true; // Google signup assumes opt-in
     const launchDate = new Date('2026-05-01');
@@ -423,7 +431,7 @@ async function signUpWithGoogle() {
       isEarlyMember: isEarlyMember,
     });
     showMsg('Account created! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
     if (err.code !== 'auth/popup-closed-by-user') {
@@ -460,6 +468,77 @@ emailOptIn: false, // set properly in signUp() and signUpWithGoogle() via Loops
   }
 }
 
+function buildSparkResultPayload(sessionId, data, user) {
+  return {
+    sessionId: data.sessionId || sessionId,
+    name: data.name || '',
+    email: data.email || user.email || '',
+    userId: user.uid,
+    accountEmail: user.email || data.accountEmail || '',
+    statement: data.statement || '',
+    whatYouKnow: data.whatYouKnow || '',
+    whoYouHelp: data.whoYouHelp || '',
+    aiSystems: Array.isArray(data.aiSystems) ? data.aiSystems : [],
+    closing: data.closing || '',
+    rawProfile: data.rawProfile || '',
+    transcript: Array.isArray(data.transcript) ? data.transcript : [],
+    source: data.source || 'find-your-spark',
+    linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+  };
+}
+
+async function claimSparkSessionsForUser(user) {
+  if (!user || !user.uid || !user.email) return;
+
+  const claimedIds = new Set();
+  const batch = db.batch();
+  const sessionsToClaim = [];
+  const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
+
+  if (latestSparkSessionId) {
+    try {
+      const latestRef = db.collection('spark_profiles').doc(latestSparkSessionId);
+      const latestSnap = await latestRef.get();
+      if (latestSnap.exists) {
+        sessionsToClaim.push({ id: latestSnap.id, ref: latestRef, data: latestSnap.data() || {} });
+        claimedIds.add(latestSnap.id);
+      }
+    } catch(err) {
+      console.log('Latest Spark session lookup failed:', err);
+    }
+  }
+
+  try {
+    const emailSnap = await db.collection('spark_profiles')
+      .where('email', '==', user.email)
+      .get();
+
+    emailSnap.forEach(doc => {
+      if (claimedIds.has(doc.id)) return;
+      sessionsToClaim.push({ id: doc.id, ref: doc.ref, data: doc.data() || {} });
+      claimedIds.add(doc.id);
+    });
+  } catch(err) {
+    console.log('Spark session email lookup failed:', err);
+  }
+
+  if (!sessionsToClaim.length) return;
+
+  sessionsToClaim.forEach(({ id, ref, data }) => {
+    batch.update(ref, {
+      userId: user.uid,
+      linkedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    const resultRef = db.collection('spark_results').doc(id);
+    batch.set(resultRef, buildSparkResultPayload(id, data || {}, user), { merge: true });
+  });
+
+  await batch.commit();
+  localStorage.removeItem('toolspark_latest_spark_session');
+}
+
 function friendlyError(code) {
   const map = {
     'auth/email-already-in-use': 'An account with that email already exists. Try signing in.',
@@ -472,7 +551,7 @@ function friendlyError(code) {
 }
 
 auth.onAuthStateChanged(user => {
-  if (user && !signingIn) window.location.href = 'community.html';
+  if (user && !signingIn) window.location.href = getRedirectTarget();
 });
 </script>
 </body>

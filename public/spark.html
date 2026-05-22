@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clarity Session — ToolSpark</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:       #0C0B09;
+    --dark2:      #141210;
+    --dark3:      #1C1A17;
+    --gold:       #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim:   rgba(201,168,76,0.10);
+    --gold-mid:   rgba(201,168,76,0.20);
+    --border:     rgba(201,168,76,0.15);
+    --border-mid: rgba(201,168,76,0.25);
+    --cream:      #F0EDE6;
+    --text3:      #9E9891;
+    --green-dim:  rgba(42,92,69,0.25);
+    --green-mid:  #3D8A65;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark);
+    color: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    text-align: center;
+    padding: 48px 24px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark2);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); opacity: 0.7;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text3);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .hero-sub b { color: var(--gold-light); font-weight: 700; }
+
+  /* progress */
+  .progress-wrap {
+    padding: 14px 24px;
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+    max-width: 100%;
+  }
+  .progress-track {
+    flex: 1; height: 3px;
+    background: rgba(201,168,76,0.1);
+    border-radius: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--gold);
+    border-radius: 10px;
+    transition: width 0.7s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-txt {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 1px; color: var(--text3);
+    white-space: nowrap;
+  }
+  .q-num {
+    font-size: 12px; font-weight: 700;
+    color: var(--gold); min-width: 40px;
+    text-align: right;
+  }
+
+  /* ── CHAT ── */
+  .chat-wrap {
+    flex: 1;
+    max-width: 700px; width: 100%;
+    margin: 0 auto;
+    padding: 32px 20px 170px;
+  }
+
+  .msg {
+    display: flex; gap: 12px;
+    margin-bottom: 22px;
+    animation: rise 0.38s ease both;
+  }
+  .msg.user { flex-direction: row-reverse; }
+  @keyframes rise {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .av {
+    width: 36px; height: 36px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .av.ai  {
+    background: var(--gold-dim);
+    border: 1px solid var(--border-mid);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+  }
+  .av.you {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,138,101,0.3);
+    color: var(--green-mid);
+  }
+
+  .bubble {
+    max-width: 86%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .bubble.ai {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.you {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,138,101,0.22);
+    color: #c6e4d4;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.ai b  { color: var(--gold); }
+  .bubble.ai em { color: var(--gold-light); opacity: 0.8; font-style: normal; }
+
+  /* thinking */
+  .thinking {
+    display: flex; gap: 12px; align-items: flex-end;
+    margin-bottom: 22px;
+    animation: rise 0.25s ease both;
+  }
+  .t-dots {
+    padding: 14px 18px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 18px 18px 18px 4px;
+    display: flex; gap: 5px; align-items: center;
+  }
+  .dot { width:6px; height:6px; border-radius:50%; background: var(--gold); }
+  .dot:nth-child(1){animation:blink 1.1s 0s    infinite;}
+  .dot:nth-child(2){animation:blink 1.1s 0.18s infinite;}
+  .dot:nth-child(3){animation:blink 1.1s 0.36s infinite;}
+  @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+
+  /* ── EMAIL GATE ── */
+  .email-gate {
+    background: var(--dark3);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    animation: rise 0.5s ease both;
+    text-align: center;
+  }
+  .email-gate .spark-icon {
+    font-size: 36px; margin-bottom: 14px;
+  }
+  .email-gate h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .email-gate p {
+    color: var(--text3); font-size: 14px;
+    line-height: 1.7; margin-bottom: 22px;
+    max-width: 400px; margin-left: auto; margin-right: auto;
+  }
+  .email-row {
+    display: flex; gap: 10px;
+    max-width: 440px; margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  .email-input {
+    flex: 1; min-width: 200px;
+    background: var(--dark2);
+    border: 1px solid var(--border-mid);
+    border-radius: 11px;
+    padding: 13px 16px;
+    color: var(--gold-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .email-input::placeholder { color: var(--text3); }
+  .email-input:focus { border-color: rgba(201,168,76,0.5); }
+  .email-btn {
+    padding: 13px 24px;
+    background: var(--gold); color: var(--dark);
+    border: none; border-radius: 11px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .email-btn:hover { background: var(--gold-light); }
+  .email-btn:disabled { background: rgba(201,168,76,0.3); cursor: not-allowed; }
+  .email-note {
+    font-size: 12px; color: var(--text3);
+    margin-top: 10px;
+  }
+
+  /* ── INPUT ── */
+  .input-area {
+    position: fixed; bottom:0; left:0; right:0;
+    padding: 14px 20px 22px;
+    background: linear-gradient(transparent, var(--dark) 30%);
+    z-index: 40;
+  }
+  .chips-row {
+    max-width: 700px; margin: 0 auto 10px;
+    display: flex; flex-wrap: wrap; gap: 7px;
+  }
+  .chip {
+    padding: 7px 15px;
+    background: var(--dark3);
+    border: 1px solid var(--border-mid);
+    border-radius: 100px;
+    color: var(--gold-light);
+    font-size: 13px; cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'Lato', sans-serif;
+  }
+  .chip:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+  .input-row {
+    max-width: 700px; margin: 0 auto;
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  .input-box {
+    flex: 1;
+    background: var(--dark3);
+    border: 1px solid var(--border-mid);
+    border-radius: 13px;
+    padding: 13px 17px;
+    color: var(--gold-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px; outline: none;
+    resize: none;
+    min-height: 50px; max-height: 130px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .input-box::placeholder { color: var(--text3); }
+  .input-box:focus { border-color: rgba(201,168,76,0.45); }
+  .send-btn {
+    width: 46px; height: 46px;
+    background: var(--gold); border: none;
+    border-radius: 11px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s; flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--gold-light); transform: scale(1.05); }
+  .send-btn:disabled { background: rgba(201,168,76,0.25); cursor: not-allowed; }
+  .send-btn svg { fill: var(--dark); }
+
+  /* ── FOOTER BRAND ── */
+  .brand-foot {
+    text-align: center;
+    padding: 12px;
+    font-size: 12px; color: var(--text3);
+    letter-spacing: 1px;
+  }
+  .brand-foot a { color: var(--gold); text-decoration: none; opacity: 0.7; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius:10px; }
+
+  @media(max-width:580px){
+    .hero { padding: 32px 16px 24px; }
+    .chat-wrap { padding: 20px 12px 160px; }
+    .email-row { flex-direction: column; }
+    .email-btn { width: 100%; }
+  }
+
+  /* ── SPARK WELCOME OVERLAY ── */
+  #sparkwelcome {
+    position: fixed;
+    inset: 0;
+    background: var(--dark);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    transition: opacity 0.45s ease;
+    overflow-y: auto;
+  }
+  #sparkwelcome.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sw-card {
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+  }
+  .sw-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .sw-eyebrow::before, .sw-eyebrow::after {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .sw-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: 400;
+    color: var(--gold-light);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .sw-card h1 em { font-style: italic; color: var(--gold); }
+  .sw-sub {
+    font-size: 15px;
+    color: var(--text3);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sw-promises {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .sw-promise {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--gold-light);
+    line-height: 1.5;
+  }
+  .sw-promise-icon { color: var(--gold); font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+  .sw-promise strong { color: var(--gold); }
+  .sw-time {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .sw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    padding: 16px 40px;
+    border-radius: 13px;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    width: 100%;
+    justify-content: center;
+  }
+  .sw-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .sw-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+</style>
+</head>
+<body>
+
+<!-- SPARK WELCOME -->
+<div id="sparkwelcome">
+  <div class="sw-card">
+    <div class="sw-eyebrow">ToolSpark · Free Tool</div>
+    <h1>Find Your <em>Spark</em></h1>
+    <p class="sw-sub">Most people are sitting on years of real experience and have no idea how to turn it into something. This finds it — in your words, in about 8 minutes.</p>
+
+    <div class="sw-promises">
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Your Spark Statement</strong> — a clear, personal description of what you know and who you help, in your own voice</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Your knowledge profile</strong> — what you've lived, who you're built for, and what makes your path different</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>3 AI system ideas</strong> — built specifically around your experience, not generic templates</span>
+      </div>
+    </div>
+
+    <div class="sw-time">⏱ About 8 minutes · Free · No account needed</div>
+    <button class="sw-btn" onclick="startSpark()">
+      Find My Spark →
+    </button>
+    <div class="sw-note">Already a member? Your results will save to your profile automatically.</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow">ToolSpark · Free Tool</div>
+  <h1>Find Your <em>Spark</em></h1>
+  <p class="hero-sub">You already have something valuable inside you. <b>Let's find it together</b> — and turn it into something that can change your life.</p>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <span class="progress-txt">YOUR JOURNEY</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="q-num" id="qNum">0 / 7</span>
+</div>
+
+<!-- CHAT -->
+<div class="chat-wrap" id="chatWrap"></div>
+
+<!-- INPUT -->
+<div class="input-area" id="inputArea">
+  <div class="chips-row" id="chips"></div>
+  <div class="input-row">
+    <textarea id="userInput" class="input-box" placeholder="Share your thoughts…" rows="1"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="handleSend()" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
+
+<script>
+// ─────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+const MODEL      = "claude-sonnet-4-6";
+const LOOPS_KEY  = "YOUR_LOOPS_API_KEY";
+const LOOPS_URL  = "https://app.loops.so/api/v1/contacts/upsert";
+const JOIN_URL   = "https://toolspark.co/community-landing";
+const Q_TOTAL    = 7;
+
+// ─────────────────────────────────────
+// STATE
+// ─────────────────────────────────────
+let history  = [];
+let qDone    = 0;
+let busy     = false;
+let finished = false;
+let rawResults = "";
+
+// ─────────────────────────────────────
+// SYSTEM PROMPT — your voice
+// ─────────────────────────────────────
+const SYSTEM = `You are the heart of "Find Your Spark" — a free tool created by ToolSpark to help people discover what they have to offer the world and turn it into income using AI.
+
+Your personality is warm, direct, and deeply believing. You sound like a trusted friend who has been exactly where this person is — not a corporate chatbot. You've felt the imposter syndrome. You've hit the walls. You know what it's like to have a calling but no clear path.
+
+Your core beliefs that should come through in every message:
+- Everyone has something valuable inside them — most people just can't see it yet
+- The feeling of having nothing to offer is fear, not truth — and you call it out gently
+- When people hit a wall they should stop and understand why, not start over with something new
+- You believe in them completely — and you walk them through every step
+- Financial freedom through AI is possible for anyone willing to do the inner work first
+
+## YOUR JOB
+Ask 7 questions one at a time to excavate their lived experience, skills, and desires. Then generate their Spark Profile.
+
+The questions are about LIVED EXPERIENCE — not job titles or credentials. You're looking for the gold they can't see in themselves.
+
+## THE 7 QUESTIONS — ask in this exact order, one at a time
+
+Q1: "Before we dive in — what's your first name?" (warm opener, personal)
+
+Q2: "Okay [name], I want you to think about the last time someone came to you for help or advice — what was it about? It doesn't have to be work related. Could be anything." (surface natural expertise)
+
+Q3: "What's something you've been through — a challenge, a hard season, a big change — that you came out the other side of? Something that changed how you see things?" (find their story)
+
+Q4: "If you could spend your days helping people with ONE thing — what would it feel like to do that? Don't think about money or whether it makes sense. Just the feeling." (uncover their calling)
+
+Q5: "When you imagine the person you most want to help — what does their life look like right now? What are they struggling with?" (define their audience)
+
+Q6: "What have you figured out about [topic from Q3 or Q2] that most people around you still haven't?" (find the insight gap — their real value)
+
+Q7: "Last one — if someone paid you $100 right now to help them with something for an hour, what would you actually be good at helping them with?" (ground it in real value)
+
+## CONVERSATION RULES
+- Start Q2 onwards by using their name occasionally — makes it personal
+- After each answer, give 1-2 sentences of genuine acknowledgment before the next question
+- If someone says they have nothing to offer or feels like an imposter — STOP and address it directly. Say something like: "I hear that — and I want you to know that feeling is the fear talking, not the truth. I've been exactly there. Let's keep going because what you just said tells me more than you realize."
+- If an answer is vague, dig one level deeper before moving on: "Tell me a little more about that — what specifically did that look like?"
+- Never rush. Each question deserves space.
+- Emit [Q:N] at the start of each reply (e.g. [Q:2] before asking question 2)
+- After Q7 is answered, emit [DONE] and generate the Spark Profile
+
+## SPARK PROFILE FORMAT
+After [DONE], generate exactly this — nothing else after it:
+
+SPARK_PROFILE_START
+NAME:[their first name]
+STATEMENT:[One powerful sentence: "I help [specific person] who [specific struggle] finally [specific outcome] — using everything I've learned from [their experience/story]." Make it personal, warm, real. Not corporate.]
+WHAT_YOU_KNOW:[2-3 sentences. Name their expertise in plain honest language. Reference what they actually said. Make them feel seen — not analyzed.]
+WHO_YOU_HELP:[2-3 sentences describing the specific person they're built to help. Paint a picture of that person's life and struggle. Use their words from Q5.]
+AI_SYSTEMS:[Generate 3 specific AI tool concepts tailored to what they shared. Format each as: TOOL_NAME: [creative name, not generic] | WHAT_IT_DOES: [one sentence what it does for their specific WHO] | WHY_THIS_FITS: [one sentence connecting to something they said in Q2, Q3, Q5, or Q6]. Separate each tool with a double line break. Make the names memorable and specific — not "Lead Qualifier" but something like "The Clarity Compass" or "The Path Finder". Reference their actual words and situation in the WHY_THIS_FITS.]
+CLOSING:[2 sentences in your warmest voice. Tell them what you see in them. Make it feel like a friend who truly believes in them is speaking directly to them.]
+SPARK_PROFILE_END`;
+
+// ─────────────────────────────────────
+// CHIPS PER QUESTION
+// ─────────────────────────────────────
+const CHIPS = {
+  2: ["Help with a problem they were having", "Advice about a life decision", "Help with their business", "Emotional support", "Technical help"],
+  3: ["Financial struggle", "Career change", "Health challenge", "Relationship difficulty", "Starting over from scratch"],
+  4: ["Freeing — like I was finally being myself", "Purposeful — like I was actually making a difference", "Energising — I could do it all day", "Peaceful — like everything made sense"],
+  5: ["Stuck in a job they hate", "Trying to make money online but failing", "Overwhelmed and don't know where to start", "Have skills but no idea how to monetise them"],
+  6: ["That it doesn't have to be as hard as everyone makes it", "That mindset matters more than strategy", "That there's a simpler path nobody talks about", "That the thing holding them back is fear not knowledge"],
+  7: ["Helping them get clear on their direction", "Teaching them something I know really well", "Helping them see their own value", "Walking them through a process step by step"],
+};
+
+// ─────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────
+function setProgress(n) {
+  document.getElementById("progressFill").style.width = Math.round((n/Q_TOTAL)*100) + "%";
+  document.getElementById("qNum").textContent = `${n} / ${Q_TOTAL}`;
+}
+
+// ─────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────
+function addMsg(role, content) {
+  const wrap = document.getElementById("chatWrap");
+  const div  = document.createElement("div");
+  div.className = `msg ${role === "user" ? "user" : "ai"}`;
+  const av  = document.createElement("div");
+  av.className  = `av ${role === "user" ? "you" : "ai"}`;
+  av.textContent = role === "user" ? "You" : "TS";
+  const bub = document.createElement("div");
+  bub.className  = `bubble ${role === "user" ? "you" : "ai"}`;
+  if (role === "user") {
+    bub.textContent = content;
+  } else {
+    bub.innerHTML = fmt(content);
+  }
+  div.appendChild(av);
+  div.appendChild(bub);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function fmt(t) {
+  return t
+    .replace(/\[Q:\d+\]/g, "")
+    .replace(/\[DONE\]/g, "")
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/\n/g, "<br>");
+}
+
+function showThinking() {
+  const wrap = document.getElementById("chatWrap");
+  const t = document.createElement("div");
+  t.className = "thinking"; t.id = "thinking";
+  t.innerHTML = `<div class="av ai">TS</div>
+    <div class="t-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>`;
+  wrap.appendChild(t);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function hideThinking() {
+  const el = document.getElementById("thinking");
+  if (el) el.remove();
+}
+
+function setChips(qNum) {
+  const c = document.getElementById("chips");
+  c.innerHTML = "";
+  (CHIPS[qNum] || []).forEach(txt => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = txt;
+    b.onclick = () => {
+      document.getElementById("userInput").value = txt;
+      handleSend();
+    };
+    c.appendChild(b);
+  });
+}
+
+// ─────────────────────────────────────
+// EMAIL GATE
+// ─────────────────────────────────────
+function showEmailGate() {
+  document.getElementById("inputArea").style.display = "none";
+  const wrap = document.getElementById("chatWrap");
+  const gate = document.createElement("div");
+  gate.className = "email-gate";
+  gate.id = "emailGate";
+  gate.innerHTML = `
+    <div class="spark-icon">✦</div>
+    <h3>Your Spark Profile is ready.</h3>
+    <p>Enter your email and I'll send it to you — plus show it to you right now on the next page.</p>
+    <div class="email-row">
+      <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" />
+      <button class="email-btn" id="emailBtn" onclick="submitEmail()">See My Results →</button>
+    </div>
+    <p class="email-note">No spam. Ever. Just your results and the occasional spark from ToolSpark.</p>
+  `;
+  wrap.appendChild(gate);
+  wrap.scrollTop = wrap.scrollHeight;
+
+  // Enter key submits
+  setTimeout(() => {
+    document.getElementById("emailInput")?.addEventListener("keydown", e => {
+      if (e.key === "Enter") submitEmail();
+    });
+    document.getElementById("emailInput")?.focus();
+  }, 400);
+}
+
+function extractProfileBlock(raw) {
+  const match = raw.match(/SPARK_PROFILE_START[\s\S]*?SPARK_PROFILE_END/);
+  return match ? match[0].trim() : raw.trim();
+}
+
+function parseProfile(raw) {
+  const profile = {};
+  const extract = (key) => {
+    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|SPARK_PROFILE_END|$)`);
+    const match = raw.match(regex);
+    return match ? match[1].trim() : "";
+  };
+
+  profile.name = extract("NAME");
+  profile.statement = extract("STATEMENT");
+  profile.whatYouKnow = extract("WHAT_YOU_KNOW");
+  profile.whoYouHelp = extract("WHO_YOU_HELP");
+  
+  // Parse AI_SYSTEMS into structured array
+  const aiSystemsRaw = extract("AI_SYSTEMS");
+  profile.aiSystems = [];
+  if (aiSystemsRaw) {
+    const toolBlocks = aiSystemsRaw.split(/\n\n+/);
+    toolBlocks.forEach(block => {
+      const nameMatch = block.match(/TOOL_NAME:\s*(.+?)(?=\s*\||$)/);
+      const doesMatch = block.match(/WHAT_IT_DOES:\s*(.+?)(?=\s*\||$)/);
+      const fitsMatch = block.match(/WHY_THIS_FITS:\s*(.+?)$/);
+      if (nameMatch && doesMatch && fitsMatch) {
+        profile.aiSystems.push({
+          name: nameMatch[1].trim(),
+          whatItDoes: doesMatch[1].trim(),
+          whyThisFits: fitsMatch[1].trim()
+        });
+      }
+    });
+  }
+  
+  profile.closing = extract("CLOSING");
+  return profile;
+}
+
+function buildSparkPayload(sessionId, profile, rawProfile, email, currentUser) {
+  return {
+    sessionId,
+    name: profile.name || "",
+    email,
+    userId: currentUser?.uid || null,
+    statement: profile.statement || "",
+    whatYouKnow: profile.whatYouKnow || "",
+    whoYouHelp: profile.whoYouHelp || "",
+    aiSystems: profile.aiSystems || [],
+    closing: profile.closing || "",
+    rawProfile,
+    transcript: history,
+    source: "find-your-spark",
+    linkedAt: currentUser ? firebase.firestore.FieldValue.serverTimestamp() : null,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+}
+
+function buildSparkResultPayload(payload, currentUser) {
+  return {
+    ...payload,
+    accountEmail: currentUser?.email || null
+  };
+}
+
+async function submitEmail() {
+  const emailEl = document.getElementById("emailInput");
+  const btnEl   = document.getElementById("emailBtn");
+  const email   = emailEl?.value?.trim();
+  const currentUser = auth.currentUser;
+  if (!email || !email.includes("@")) {
+    emailEl.style.borderColor = "rgba(200,80,60,0.5)";
+    emailEl.placeholder = "Please enter a valid email";
+    return;
+  }
+  btnEl.disabled = true;
+  btnEl.textContent = "Sending…";
+
+  // Save to Loops
+  try {
+    await fetch(LOOPS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${LOOPS_KEY}`
+      },
+      body: JSON.stringify({
+        email: email,
+        source: "find-your-spark",
+        mailingLists: { "cmpe68czf0de30jyivrs3mjdu": true }
+      })
+    });
+  } catch(e) {
+    console.log("Loops save failed:", e.message);
+  }
+
+  const sessionId = `spark_${Date.now()}`;
+  const rawProfile = extractProfileBlock(rawResults);
+  const profile = parseProfile(rawProfile);
+  const payload = buildSparkPayload(sessionId, profile, rawProfile, email, currentUser);
+
+  try {
+    const batch = db.batch();
+    const profileRef = db.collection("spark_profiles").doc(sessionId);
+    batch.set(profileRef, payload);
+
+    if (currentUser?.uid) {
+      const resultRef = db.collection("spark_results").doc(sessionId);
+      batch.set(resultRef, buildSparkResultPayload(payload, currentUser));
+    }
+
+    await batch.commit();
+
+    localStorage.setItem("toolspark_latest_spark_session", sessionId);
+    window.location.href = `spark-results.html?session=${encodeURIComponent(sessionId)}`;
+  } catch(e) {
+    console.log("Firestore save failed:", e);
+    const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(rawResults))));
+    window.location.href = `spark-results.html?data=${encoded}&email=${encodeURIComponent(email)}`;
+  }
+}
+
+// ─────────────────────────────────────
+// API
+// ─────────────────────────────────────
+async function callAI(userMsg) {
+  history.push({ role: "user", content: userMsg });
+  const resp = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1200,
+      system: SYSTEM,
+      messages: history
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  if (!Array.isArray(data.content)) {
+    throw new Error(data.error?.message || data.message || "Unexpected API response shape");
+  }
+
+  const text = data.content.map(b => b.type === "text" ? b.text : "").join("");
+  history.push({ role: "assistant", content: text });
+  return text;
+}
+
+// ─────────────────────────────────────
+// HANDLE SEND
+// ─────────────────────────────────────
+async function handleSend() {
+  if (busy || finished) return;
+  const input = document.getElementById("userInput");
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = ""; input.style.height = "auto";
+  document.getElementById("sendBtn").disabled = true;
+  document.getElementById("chips").innerHTML = "";
+  addMsg("user", text);
+  showThinking(); busy = true;
+
+  try {
+    const reply = await callAI(text);
+    hideThinking();
+
+    // Track question progress
+    const qMatch = reply.match(/\[Q:(\d+)\]/);
+    if (qMatch) {
+      const nextQ = parseInt(qMatch[1]);
+      qDone = nextQ - 1;
+      setProgress(qDone);
+      setChips(nextQ);
+    }
+
+    if (reply.includes("[DONE]")) {
+      qDone = Q_TOTAL;
+      setProgress(Q_TOTAL);
+      finished = true;
+
+      // Store raw results for results page
+      rawResults = reply;
+
+      // Show closing message before email gate
+      const beforeProfile = reply.split("SPARK_PROFILE_START")[0]
+        .replace("[DONE]","").trim();
+      if (beforeProfile) addMsg("assistant", beforeProfile);
+
+      // Small delay then show email gate
+      setTimeout(showEmailGate, 600);
+    } else {
+      addMsg("assistant", reply);
+    }
+
+  } catch(e) {
+    hideThinking();
+    addMsg("assistant", "Something went sideways — give it another try in a moment.");
+    console.error(e);
+  }
+
+  busy = false;
+  if (!finished) document.getElementById("sendBtn").disabled = false;
+  document.getElementById("userInput").focus();
+}
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+async function init() {
+  showThinking();
+  const opening = `Start the Find Your Spark session. 
+Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that a lot of people arrive here feeling like they don't have anything valuable to offer, and tell them that's exactly why this exists. 
+Then ask question 1. Emit [Q:1] at the start.`;
+
+  try {
+    const reply = await callAI(opening);
+    hideThinking();
+    addMsg("assistant", reply);
+  } catch(e) {
+    hideThinking();
+    addMsg("assistant", `[Q:1] Welcome — and I'm really glad you're here. A lot of people show up to this feeling like they don't have anything valuable to offer. I know that feeling personally. But that's exactly why I built this.\n\nLet's start simple. <b>What's your first name?</b>`);
+  }
+  document.getElementById("sendBtn").disabled = false;
+}
+
+// auto-resize
+document.getElementById("userInput").addEventListener("input", function() {
+  this.style.height = "auto";
+  this.style.height = Math.min(this.scrollHeight, 130) + "px";
+});
+// enter to send
+document.getElementById("userInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+});
+
+function startSpark() {
+  const welcome = document.getElementById('sparkwelcome');
+  welcome.classList.add('hidden');
+  setTimeout(() => { welcome.style.display = 'none'; }, 460);
+  init();
+}
+</script>
+</body>
+</html>

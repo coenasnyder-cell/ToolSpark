@@ -434,6 +434,11 @@
             <div class="stat-card-label">Clarity Sessions</div>
             <div class="stat-card-sub">Completed sessions</div>
           </div>
+          <div class="stat-card">
+            <div class="stat-card-num" id="an-spark">—</div>
+            <div class="stat-card-label">Spark Sessions</div>
+            <div class="stat-card-sub">Saved Spark profiles</div>
+          </div>
         </div>
       </div>
     </div>
@@ -501,6 +506,17 @@
             <div class="admin-shortcut-label">Section Shortcut</div>
             <div class="admin-shortcut-title">Clarity</div>
             <div class="admin-shortcut-desc">Open the dedicated clarity sessions page and review summaries.</div>
+          </div>
+        </div>
+        <div class="admin-shortcut-arrow">&rarr;</div>
+      </a>
+      <a class="admin-shortcut-card" href="adminuserspark.html">
+        <div class="admin-shortcut-copy">
+          <div class="admin-shortcut-icon">&#10022;</div>
+          <div class="admin-shortcut-text">
+            <div class="admin-shortcut-label">Section Shortcut</div>
+            <div class="admin-shortcut-title">Spark Sessions</div>
+            <div class="admin-shortcut-desc">Open the Spark sessions page and review saved member profiles.</div>
           </div>
         </div>
         <div class="admin-shortcut-arrow">&rarr;</div>
@@ -664,15 +680,17 @@
     const weekTs = firebase.firestore.Timestamp.fromDate(oneWeekAgo);
 
     try {
-      const [usersSnap, threadsSnap, claritySnap, newSnap] = await Promise.all([
+      const [usersSnap, threadsSnap, claritySnap, sparkSnap, newSnap] = await Promise.all([
         db.collection('users').get(),
         db.collection('threads').get(),
         db.collection('clarity_sessions').get(),
+        db.collection('spark_profiles').get(),
         db.collection('users').where('createdAt', '>=', weekTs).get()
       ]);
       document.getElementById('an-members').textContent = usersSnap.size;
       document.getElementById('an-threads').textContent = threadsSnap.size;
       document.getElementById('an-clarity').textContent = claritySnap.size;
+      document.getElementById('an-spark').textContent = sparkSnap.size;
       document.getElementById('an-new').textContent = newSnap.size;
     } catch (e) {
       console.error('Analytics load failed', e);

@@ -300,6 +300,12 @@
 <script>
 let signingIn = false;
 
+function getRedirectTarget() {
+  const allowed = { userclaritytools: 'userclaritytools.html' };
+  const param = new URLSearchParams(window.location.search).get('redirect');
+  return (param && allowed[param]) || 'community.html';
+}
+
 function showMsg(text, type) {
   const el = document.getElementById('msg');
   el.textContent = text;
@@ -323,7 +329,7 @@ async function signIn() {
   try {
     await auth.signInWithEmailAndPassword(email, password);
     showMsg('Signed in! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
     setLoading(false);
@@ -338,7 +344,7 @@ async function signInWithGoogle() {
     const result = await auth.signInWithPopup(provider);
     await ensureUserDoc(result.user);
     showMsg('Signed in! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = 'community.html'; }, 800);
+    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
     if (err.code !== 'auth/popup-closed-by-user') {
@@ -388,7 +394,7 @@ function friendlyError(code) {
 
 // Redirect if already signed in (but not mid-sign-in flow)
 auth.onAuthStateChanged(user => {
-  if (user && !signingIn) window.location.href = 'community.html';
+  if (user && !signingIn) window.location.href = getRedirectTarget();
 });
 </script>
 </body>

@@ -74,3 +74,7 @@ skills-lock.json
 
 # Local only
 chat-prompts.txt
+
+# Service account keys — never commit these
+scripts/serviceAccount.json
+*serviceAccount*.json
