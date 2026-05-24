@@ -404,15 +404,11 @@
               <div class="card-label">Who You Help</div>
         <div class="card-text" id="whoText"></div>
       </div>
-      </div><!-- AI SYSTEMS SECTION -->
-<div class="ai-systems-section" id="aiSystemsSection">
-  <h2 class="section-title">How AI Delivers Your Spark</h2>
-  <p class="section-intro">Based on everything you shared, here are 3 AI systems built specifically for someone in your position. Inside ToolSpark, the Clarity Session will help you pick your #1 and give you a 30-day build plan.</p>
-  <div class="ai-tools-grid" id="aiToolsGrid"></div>
-</div>
-
-<div class="section-grid" style="margin-top:16px">
-    </div>
+      <div class="profile-card" id="edgeCard">
+        <div class="card-label">Your Edge</div>
+        <div class="card-text" id="edgeText"></div>
+      </div>
+      </div>
 
     <!-- CLOSING NOTE -->
     <div class="closing-card" id="closingCard">
@@ -464,23 +460,7 @@ function parseProfile(raw) {
   profile.statement  = extract("STATEMENT");
   profile.whatYouKnow = extract("WHAT_YOU_KNOW");
   profile.whoYouHelp = extract("WHO_YOU_HELP");
-  const aiSystemsRaw = extract("AI_SYSTEMS");
-  profile.aiSystems = [];
-  if (aiSystemsRaw) {
-    const toolBlocks = aiSystemsRaw.split(/\n\n+/);
-    toolBlocks.forEach(block => {
-      const nameMatch = block.match(/TOOL_NAME:\s*(.+?)(?=\s*\||$)/);
-      const doesMatch = block.match(/WHAT_IT_DOES:\s*(.+?)(?=\s*\||$)/);
-      const fitsMatch = block.match(/WHY_THIS_FITS:\s*(.+?)$/);
-      if (nameMatch && doesMatch && fitsMatch) {
-        profile.aiSystems.push({
-          name: nameMatch[1].trim(),
-          whatItDoes: doesMatch[1].trim(),
-          whyThisFits: fitsMatch[1].trim()
-        });
-      }
-    });
-  }
+  profile.yourEdge   = extract("YOUR_EDGE");
   profile.closing    = extract("CLOSING");
   return profile;
 }
@@ -497,9 +477,7 @@ function buildProfileFromDoc(data) {
     statement: data.statement || parsed.statement || DEMO_PROFILE.statement,
     whatYouKnow: data.whatYouKnow || parsed.whatYouKnow || DEMO_PROFILE.whatYouKnow,
     whoYouHelp: data.whoYouHelp || parsed.whoYouHelp || DEMO_PROFILE.whoYouHelp,
-    aiSystems: Array.isArray(data.aiSystems) && data.aiSystems.length
-      ? data.aiSystems
-      : (parsed.aiSystems && parsed.aiSystems.length ? parsed.aiSystems : DEMO_PROFILE.aiSystems),
+    yourEdge: data.yourEdge || parsed.yourEdge || DEMO_PROFILE.yourEdge,
     closing: data.closing || parsed.closing || DEMO_PROFILE.closing
   };
 }
@@ -524,28 +502,7 @@ function renderProfile(profile) {
  // Cards
 document.getElementById("knowText").innerHTML  = fmt(profile.whatYouKnow || "");
 document.getElementById("whoText").innerHTML   = fmt(profile.whoYouHelp || "");
-
-// Render AI Systems
-const toolsGrid = document.getElementById("aiToolsGrid");
-toolsGrid.innerHTML = ""; // Clear first
-if (profile.aiSystems && profile.aiSystems.length > 0) {
-  profile.aiSystems.forEach((tool, i) => {
-    const icons = ["✦", "⚡", "🎯"];
-    const card = document.createElement("div");
-    card.className = "ai-tool-card";
-    card.innerHTML = `
-      <div class="tool-header">
-        <span class="tool-icon">${icons[i] || "✦"}</span>
-        <div class="tool-name">${escHtml(tool.name)}</div>
-      </div>
-      <div class="tool-does">${escHtml(tool.whatItDoes)}</div>
-      <div class="tool-fits"><b>Why this fits you:</b> ${escHtml(tool.whyThisFits)}</div>
-    `;
-    toolsGrid.appendChild(card);
-  });
-} else {
-  document.getElementById("aiSystemsSection").style.display = "none";
-}
+document.getElementById("edgeText").innerHTML  = fmt(profile.yourEdge || "");
 
 document.getElementById("closingText").innerHTML = fmt(profile.closing || "");
 
@@ -606,23 +563,7 @@ const DEMO_PROFILE = {
   statement: "I help people who are sitting on years of hard-earned experience — but have no idea how to turn it into income — finally find their path and build something real, using everything they've already lived through.",
   whatYouKnow: "You know what it feels like to be capable but stuck. You've figured out things the hard way that most people are still struggling with. That knowledge — the kind that comes from lived experience, not a textbook — is exactly what someone out there is desperate to find.",
   whoYouHelp: "You help the person who's tried a dozen things and keeps hitting the same wall. They have skills. They have desire. They just can't see their own value clearly enough to build something with it. They need someone who has been exactly where they are.",
-  aiSystems: [
-  {
-    name: "The Clarity Compass",
-    whatItDoes: "A guided discovery tool that helps people identify what they already know and who needs it — positioning you as the expert who helps them see their own value",
-    whyThisFits: "You said people come to you when they can't see their own value — this tool does that first filter, then leads them to you"
-  },
-  {
-    name: "The Path Finder",
-    whatItDoes: "Helps people who've tried everything figure out why they keep hitting walls and what their actual next move should be",
-    whyThisFits: "You've learned that hitting a wall means stop and understand why — this teaches that exact mindset to your audience"
-  },
-  {
-    name: "The Experience Translator",
-    whatItDoes: "Takes messy life experience and shows people exactly how to package it into something they could get paid for this week",
-    whyThisFits: "You've figured out how to turn lived experience into value — this does the first pass, then leads them to you for deeper help"
-  }
-  ],
+  yourEdge: "What sets you apart is that you've actually lived it — you're not teaching theory, you're sharing the map you drew while lost in the dark. Most people in this space are still guessing at shortcuts. You've already found them.",
   closing: "I see something in you that you probably can't see yet — a depth of experience and a genuine desire to help that most people never have. You haven't failed. You've been preparing. This is where it starts."
 };
 

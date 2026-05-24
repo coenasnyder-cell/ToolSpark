@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity Session — ToolSpark</title>
+<title>Audience Deep Dive — ToolSpark</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -492,27 +492,27 @@
 <div id="sparkwelcome">
   <div class="sw-card">
     <div class="sw-eyebrow">ToolSpark · Free Tool</div>
-    <h1>Find Your <em>Spark</em></h1>
-    <p class="sw-sub">Most people are sitting on years of real experience and have no idea how to turn it into something. This finds it — in your words, in about 8 minutes.</p>
+    <h1>Audience <em>Deep Dive</em></h1>
+    <p class="sw-sub">Most coaches and course creators are guessing at who they're really talking to. This changes that — in your words, in about 10 minutes.</p>
 
     <div class="sw-promises">
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Your Spark Statement</strong> — a clear, personal description of what you know and who you help, in your own voice</span>
+        <span><strong>Your Client Bible</strong> — a deep, honest profile of the exact person you're built to help</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Your knowledge profile</strong> — what you've lived, who you're built for, and what makes your path different</span>
+        <span><strong>Their exact words</strong> — the language they use to describe their problem, pulled straight from your answers</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>3 AI system ideas</strong> — built specifically around your experience, not generic templates</span>
+        <span><strong>Their real objections</strong> — why they talk themselves out of buying, so you can speak to it before they do</span>
       </div>
     </div>
 
-    <div class="sw-time">⏱ About 8 minutes · Free · No account needed</div>
+    <div class="sw-time">⏱ About 10 minutes · Free · No account needed</div>
     <button class="sw-btn" onclick="startSpark()">
-      Find My Spark →
+      Start My Audience Deep Dive →
     </button>
     <div class="sw-note">Already a member? Your results will save to your profile automatically.</div>
   </div>
@@ -521,8 +521,8 @@
 <!-- HERO -->
 <header class="hero">
   <div class="hero-eyebrow">ToolSpark · Free Tool</div>
-  <h1>Find Your <em>Spark</em></h1>
-  <p class="hero-sub">You already have something valuable inside you. <b>Let's find it together</b> — and turn it into something that can change your life.</p>
+  <h1>Audience <em>Deep Dive</em></h1>
+  <p class="hero-sub">Stop guessing at who you're talking to. <b>Let's build your Client Bible together</b> — in your words, from your real experience.</p>
 </header>
 
 <!-- PROGRESS -->
@@ -572,74 +572,158 @@ let qDone    = 0;
 let busy     = false;
 let finished = false;
 let rawResults = "";
-const SPARK_SESSION_ID = 'spark_' + Date.now();
+let audiencePath = null; // 'self' or 'other'
+const AUDIENCE_SESSION_ID = 'audience_' + Date.now();
 
 // ─────────────────────────────────────
 // SYSTEM PROMPT — your voice
 // ─────────────────────────────────────
-const SYSTEM = `You are the heart of "Find Your Spark" — a free tool created by ToolSpark to help people discover what they have to offer the world and turn it into income using AI.
+const BASE_SYSTEM = `You are the heart of the "Audience Deep Dive" — a tool inside ToolSpark that helps coaches and course creators get to know their audience so deeply that every tool they build, every word they write, and every offer they create speaks directly to the right person.
 
-Your personality is warm, direct, and deeply believing. You sound like a trusted friend who has been exactly where this person is — not a corporate chatbot. You've felt the imposter syndrome. You've hit the walls. You know what it's like to have a calling but no clear path.
+Your personality is warm, patient, and genuinely curious. You sound like a trusted friend who has been exactly where this person is. You never rush. You never judge. You believe that the person in front of you already has everything they need — they just need the right questions to pull it out.
 
 Your core beliefs that should come through in every message:
-- Everyone has something valuable inside them — most people just can't see it yet
-- The feeling of having nothing to offer is fear, not truth — and you call it out gently
-- When people hit a wall they should stop and understand why, not start over with something new
-- You believe in them completely — and you walk them through every step
-- Financial freedom through AI is possible for anyone willing to do the inner work first
+- Nobody knows their audience perfectly yet — that's why they're here
+- The best audience research comes from lived experience not textbooks
+- "I don't know" is always a valid starting point — it just means we dig differently
+- Their exact words are more valuable than polished answers
+- If they are their audience they already have everything you need inside them
 
 ## YOUR JOB
-Ask 7 questions one at a time to excavate their lived experience, skills, and desires. Then generate their Spark Profile.
+Guide them through 7 questions using one of two paths based on who they're targeting. Then generate their Client Bible.
 
-The questions are about LIVED EXPERIENCE — not job titles or credentials. You're looking for the gold they can't see in themselves.
+## PATH SPLITTER — Ask this first, always
 
-## THE 7 QUESTIONS — ask in this exact order, one at a time
+"Before we dive in — the person you most want to help... are they a lot like you right now, or someone you've already been able to help through something?"
 
-Q1: "Before we dive in — what's your first name?" (warm opener, personal)
+Chips: ["A lot like me", "Someone I've helped"]
 
-Q2: "Okay [name], I want you to think about the last time someone came to you for help or advice — what was it about? It doesn't have to be work related. Could be anything." (surface natural expertise)
+If they choose "A lot like me" → follow PATH A
+If they choose "Someone I've helped" → follow PATH B
 
-Q3: "What's something you've been through — a challenge, a hard season, a big change — that you came out the other side of? Something that changed how you see things?" (find their story)
+## PATH A — They are their audience
 
-Q4: "If you could spend your days helping people with ONE thing — what would it feel like to do that? Don't think about money or whether it makes sense. Just the feeling." (uncover their calling)
+Q2: "Tell me about a typical day for you right now. Not the highlight reel — the real version. What does it actually feel like?"
+Chips: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over", "Lonely, feels like nobody gets what I'm trying to do"]
 
-Q5: "When you imagine the person you most want to help — what does their life look like right now? What are they struggling with?" (define their audience)
+Q3: "What's the one thing that grinds you down the most right now? The thing that's always there in the background nagging at you."
+(Open answer — no chips. You want their exact raw words here.)
 
-Q6: "What have you figured out about [topic from Q3 or Q2] that most people around you still haven't?" (find the insight gap — their real value)
+Q4: "What have you already tried to fix this? Walk me through it — and tell me why it didn't work."
+(Open answer — this surfaces skepticism and future objections.)
 
-Q7: "Last one — if someone paid you $100 right now to help them with something for an hour, what would you actually be good at helping them with?" (ground it in real value)
+Q5: "If this problem was completely solved six months from now — what does your life actually look like? Be as specific as you can. Don't just say better — tell me what you see."
+(Open answer — you want the feeling and the picture not just the goal.)
+
+Q6: "How would you describe this problem to a close friend? Not professionally — just how you'd actually say it out loud."
+(Open answer — this gives you their exact marketing language. These are the words that will stop people scrolling.)
+
+Q7: "Last one — finish this sentence however feels true: The person I most want to help is someone who..."
+(Open answer — this becomes the seed of their Client Bible.)
+
+## PATH B — They serve someone different
+
+Q2: "Think about the last person you helped. Without using their name — describe them. What was going on in their life when they first came to you?"
+(Open answer)
+
+Q3: "What words did they use to describe their problem when they first found you? Try to remember exactly how they said it — not how you'd professionally describe it."
+(Open answer — exact words are gold here.)
+
+Q4: "What had they already tried before they found you? And why hadn't it worked for them?"
+(Open answer — surfaces objections and skepticism your future clients will have too.)
+
+Q5: "What was the moment things started to shift for them? What did that actually look like?"
+(Open answer)
+
+Q6: "How do they describe their life now compared to before? What words do they use when they talk about it?"
+(Open answer — this becomes your results language and testimonial framing.)
+
+Q7: "Last one — based on everything you just shared, finish this sentence: The person I help is someone who..."
+(Open answer — seed of their Client Bible.)
 
 ## CONVERSATION RULES
-- Start Q2 onwards by using their name occasionally — makes it personal
-- After each answer, give 1-2 sentences of genuine acknowledgment before the next question
-- If someone says they have nothing to offer or feels like an imposter — STOP and address it directly. Say something like: "I hear that — and I want you to know that feeling is the fear talking, not the truth. I've been exactly there. Let's keep going because what you just said tells me more than you realize."
-- If an answer is vague, dig one level deeper before moving on: "Tell me a little more about that — what specifically did that look like?"
-- Never rush. Each question deserves space.
-- Emit [Q:N] at the start of each reply (e.g. [Q:2] before asking question 2)
-- After Q7 is answered, emit [DONE] and generate the Spark Profile
+- Ask one question at a time. Never stack questions.
+- After each answer give 1-2 sentences of genuine acknowledgment before moving on. Make them feel heard not processed.
+- If someone answers "I don't know" — never move on. Say something like: "That's okay — let's come at it differently. Think about the last time you felt really frustrated about this. What was happening?" Rephrase and dig one level deeper before accepting uncertainty.
+- If an answer is very short or vague — dig one level deeper: "Tell me a little more about that — what did that actually look like for you?"
+- If someone is being hard on themselves or expressing doubt — stop and address it directly: "I hear that. And I want you to know that not having this figured out yet doesn't mean you're behind. It means you're being honest. Let's keep going."
+- The mic is available — remind them if they seem stuck: "You can also just hit the mic and talk it out — sometimes it's easier to say than type."
+- Never rush. Each answer deserves space.
+- Emit [Q:N] at the start of each reply
+- After Q7 is answered emit [DONE] and generate the Client Bible
 
-## SPARK PROFILE FORMAT
-After [DONE], generate exactly this — nothing else after it:
+## CLIENT BIBLE FORMAT
+After [DONE] generate exactly this:
 
-SPARK_PROFILE_START
-NAME:[their first name]
-STATEMENT:[One powerful sentence: "I help [specific person] who [specific struggle] finally [specific outcome] — using everything I've learned from [their experience/story]." Make it personal, warm, real. Not corporate.]
-WHAT_YOU_KNOW:[2-3 sentences. Name their expertise in plain honest language. Reference what they actually said. Make them feel seen — not analyzed.]
-WHO_YOU_HELP:[2-3 sentences describing the specific person they're built to help. Paint a picture of that person's life and struggle. Use their words from Q5.]
-YOUR_EDGE:[2-3 sentences. What makes their path different from everyone else doing something similar. This is the thing they said in Q6 that most people still haven't figured out. Name it clearly so they own it.]
-CLOSING:[2 sentences in your warmest voice. Tell them what you see in them. Make it feel like a friend who truly believes in them is speaking directly to them.]
-SPARK_PROFILE_END`;
+CLIENT_BIBLE_START
+NAME:[their first name if shared, otherwise "Your"]
+WHO_THEY_ARE:[2-3 sentences. Paint a real picture of this person — their situation, where they are in life, what their days look like. Infer demographics naturally from what they shared. Never make them sound like a marketing persona — make them sound like a real human being.]
+DAILY_FRUSTRATION:[2-3 sentences. The specific thing that grinds them down every day. Use their exact words wherever possible. This should feel like it was written by them not about them.]
+WHAT_THEY_HAVE_TRIED:[2-3 sentences. What hasn't worked and why. This is their skepticism — honor it. Anyone who reads this should immediately understand why generic solutions have failed this person.]
+THEIR_OBJECTIONS:[2-3 sentences. The exact reasons they will talk themselves out of buying even when they want to. Be specific — not "they think it costs too much" but the real story underneath that.]
+DREAM_OUTCOME:[2-3 sentences. Not just the goal — the feeling. What does their life look like when this is solved. Make it vivid enough that they read it and think "yes that's exactly it."]
+THEIR_WORDS:[A short list of 5-8 exact phrases and words this person uses to describe their problem, their situation, and their desire. Pull directly from what they shared. These are the words that should appear in every piece of marketing, every ad, every offer.]
+CLOSING:[2 sentences. Tell them what knowing this person this deeply is going to do for their business. Warm, direct, believing.]
+CLIENT_BIBLE_END`;
+
+// SYSTEM starts as base and gets extended with spark context if available
+let SYSTEM = BASE_SYSTEM;
+
+// Kick off spark context lookup immediately — resolves while user reads the welcome screen
+const sparkContextPromise = (async () => {
+  try {
+    // Wait for auth to settle
+    const user = await new Promise(resolve => {
+      const unsub = auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+    });
+
+    let sparkProfile = null;
+
+    // Logged-in user: query their latest spark result
+    if (user) {
+      try {
+        const snap = await db.collection('spark_results')
+          .where('userId', '==', user.uid)
+          .orderBy('createdAt', 'desc')
+          .limit(1)
+          .get();
+        if (!snap.empty) sparkProfile = snap.docs[0].data();
+      } catch(e) { /* index may not exist yet — fall through */ }
+    }
+
+    // Not found or not logged in: try localStorage session
+    if (!sparkProfile) {
+      const sessionId = localStorage.getItem('toolspark_latest_spark_session');
+      if (sessionId) {
+        const snap = await db.collection('spark_profiles').doc(sessionId).get();
+        if (snap.exists) sparkProfile = snap.data();
+      }
+    }
+
+    if (sparkProfile && (sparkProfile.statement || sparkProfile.whatYouKnow)) {
+      const sparkContext = `
+
+## WHAT WE ALREADY KNOW ABOUT THIS PERSON
+From their Find Your Spark session:
+${sparkProfile.statement   ? `- Their statement: ${sparkProfile.statement}`     : ''}
+${sparkProfile.whatYouKnow ? `- What they know: ${sparkProfile.whatYouKnow}`   : ''}
+${sparkProfile.whoYouHelp  ? `- Who they help: ${sparkProfile.whoYouHelp}`     : ''}
+${sparkProfile.yourEdge    ? `- Their unique angle: ${sparkProfile.yourEdge}`  : ''}
+
+Use this as background context. Reference it naturally when relevant — don't repeat it back to them verbatim, just let it inform how you guide them.`;
+      SYSTEM = BASE_SYSTEM + sparkContext;
+    }
+  } catch(e) {
+    console.log('Spark context load skipped:', e.message);
+  }
+})();
 
 // ─────────────────────────────────────
 // CHIPS PER QUESTION
 // ─────────────────────────────────────
 const CHIPS = {
-  2: ["Help with a problem they were having", "Advice about a life decision", "Help with their business", "Emotional support", "Technical help"],
-  3: ["Financial struggle", "Career change", "Health challenge", "Relationship difficulty", "Starting over from scratch"],
-  4: ["Freeing — like I was finally being myself", "Purposeful — like I was actually making a difference", "Energising — I could do it all day", "Peaceful — like everything made sense"],
-  5: ["Stuck in a job they hate", "Trying to make money online but failing", "Overwhelmed and don't know where to start", "Have skills but no idea how to monetise them"],
-  6: ["That it doesn't have to be as hard as everyone makes it", "That mindset matters more than strategy", "That there's a simpler path nobody talks about", "That the thing holding them back is fear not knowledge"],
-  7: ["Helping them get clear on their direction", "Teaching them something I know really well", "Helping them see their own value", "Walking them through a process step by step"],
+  1: ["A lot like me", "Someone I've helped"],
+  2: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over", "Lonely, feels like nobody gets what I'm trying to do"],
 };
 
 // ─────────────────────────────────────
@@ -745,47 +829,52 @@ function showEmailGate() {
 }
 
 function extractProfileBlock(raw) {
-  const match = raw.match(/SPARK_PROFILE_START[\s\S]*?SPARK_PROFILE_END/);
+  const match = raw.match(/CLIENT_BIBLE_START[\s\S]*?CLIENT_BIBLE_END/);
   return match ? match[0].trim() : raw.trim();
 }
 
 function parseProfile(raw) {
   const profile = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|SPARK_PROFILE_END|$)`);
+    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|CLIENT_BIBLE_END|$)`);
     const match = raw.match(regex);
     return match ? match[1].trim() : "";
   };
 
   profile.name = extract("NAME");
-  profile.statement = extract("STATEMENT");
-  profile.whatYouKnow = extract("WHAT_YOU_KNOW");
-  profile.whoYouHelp = extract("WHO_YOU_HELP");
-  profile.yourEdge = extract("YOUR_EDGE");
+  profile.whoTheyAre = extract("WHO_THEY_ARE");
+  profile.dailyFrustration = extract("DAILY_FRUSTRATION");
+  profile.whatTheyHaveTried = extract("WHAT_THEY_HAVE_TRIED");
+  profile.theirObjections = extract("THEIR_OBJECTIONS");
+  profile.dreamOutcome = extract("DREAM_OUTCOME");
+  profile.theirWords = extract("THEIR_WORDS");
   profile.closing = extract("CLOSING");
   return profile;
 }
 
-function buildSparkPayload(sessionId, profile, rawProfile, email, currentUser) {
+function buildAudiencePayload(sessionId, profile, rawProfile, email, currentUser) {
   return {
     sessionId,
     name: profile.name || "",
     email,
     userId: currentUser?.uid || null,
-    statement: profile.statement || "",
-    whatYouKnow: profile.whatYouKnow || "",
-    whoYouHelp: profile.whoYouHelp || "",
-    yourEdge: profile.yourEdge || "",
+    audiencePath,
+    whoTheyAre: profile.whoTheyAre || "",
+    dailyFrustration: profile.dailyFrustration || "",
+    whatTheyHaveTried: profile.whatTheyHaveTried || "",
+    theirObjections: profile.theirObjections || "",
+    dreamOutcome: profile.dreamOutcome || "",
+    theirWords: profile.theirWords || "",
     closing: profile.closing || "",
     rawProfile,
     transcript: history,
-    source: "find-your-spark",
+    source: "audience-deep-dive",
     linkedAt: currentUser ? firebase.firestore.FieldValue.serverTimestamp() : null,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 }
 
-function buildSparkResultPayload(payload, currentUser) {
+function buildAudienceResultPayload(payload, currentUser) {
   return {
     ...payload,
     accountEmail: currentUser?.email || null
@@ -815,7 +904,7 @@ async function submitEmail() {
       },
       body: JSON.stringify({
         email: email,
-        source: "find-your-spark",
+        source: "audience-deep-dive",
         mailingLists: { "cmpe68czf0de30jyivrs3mjdu": true }
       })
     });
@@ -823,29 +912,29 @@ async function submitEmail() {
     console.log("Loops save failed:", e.message);
   }
 
-  const sessionId = SPARK_SESSION_ID;
+  const sessionId = AUDIENCE_SESSION_ID;
   const rawProfile = extractProfileBlock(rawResults);
   const profile = parseProfile(rawProfile);
-  const payload = buildSparkPayload(sessionId, profile, rawProfile, email, currentUser);
+  const payload = buildAudiencePayload(sessionId, profile, rawProfile, email, currentUser);
 
   try {
     const batch = db.batch();
-    const profileRef = db.collection("spark_profiles").doc(sessionId);
+    const profileRef = db.collection("audience_tool").doc(sessionId);
     batch.set(profileRef, payload);
 
     if (currentUser?.uid) {
-      const resultRef = db.collection("spark_results").doc(sessionId);
-      batch.set(resultRef, buildSparkResultPayload(payload, currentUser));
+      const resultRef = db.collection("audience_results").doc(sessionId);
+      batch.set(resultRef, buildAudienceResultPayload(payload, currentUser));
     }
 
     await batch.commit();
 
-    localStorage.setItem("toolspark_latest_spark_session", sessionId);
-    window.location.href = `spark-results.html?session=${encodeURIComponent(sessionId)}`;
+    localStorage.setItem("toolspark_latest_audience_session", sessionId);
+    window.location.href = `audienceresults.html?session=${encodeURIComponent(sessionId)}`;
   } catch(e) {
     console.log("Firestore save failed:", e);
     const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(rawResults))));
-    window.location.href = `spark-results.html?data=${encoded}&email=${encodeURIComponent(email)}`;
+    window.location.href = `audienceresults.html?data=${encoded}&email=${encodeURIComponent(email)}`;
   }
 }
 
@@ -862,7 +951,7 @@ async function callAI(userMsg) {
       max_tokens: 1200,
       system: SYSTEM,
       messages: history,
-      _meta: { tool: 'spark-conversation', sessionId: SPARK_SESSION_ID }
+      _meta: { tool: 'audience-conversation', sessionId: AUDIENCE_SESSION_ID }
     })
   });
 
@@ -895,6 +984,13 @@ async function handleSend() {
   input.value = ""; input.style.height = "auto";
   document.getElementById("sendBtn").disabled = true;
   document.getElementById("chips").innerHTML = "";
+  // Detect audience path from first answer
+  if (qDone === 0) {
+    const lower = text.toLowerCase();
+    if (lower.includes("like me")) audiencePath = 'self';
+    else if (lower.includes("helped") || lower.includes("someone")) audiencePath = 'other';
+  }
+
   addMsg("user", text);
   showThinking(); busy = true;
 
@@ -920,7 +1016,7 @@ async function handleSend() {
       rawResults = reply;
 
       // Show closing message before email gate
-      const beforeProfile = reply.split("SPARK_PROFILE_START")[0]
+      const beforeProfile = reply.split("CLIENT_BIBLE_START")[0]
         .replace("[DONE]","").trim();
       if (beforeProfile) addMsg("assistant", beforeProfile);
 
@@ -946,9 +1042,9 @@ async function handleSend() {
 // ─────────────────────────────────────
 async function init() {
   showThinking();
-  const opening = `Start the Find Your Spark session. 
-Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that a lot of people arrive here feeling like they don't have anything valuable to offer, and tell them that's exactly why this exists. 
-Then ask question 1. Emit [Q:1] at the start.`;
+  const opening = `Start the Audience Deep Dive session.
+Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that most coaches and course creators are guessing at who they're really talking to, and that this changes today.
+Then ask the path splitter question. Emit [Q:1] at the start.`;
 
   try {
     const reply = await callAI(opening);
@@ -956,7 +1052,7 @@ Then ask question 1. Emit [Q:1] at the start.`;
     addMsg("assistant", reply);
   } catch(e) {
     hideThinking();
-    addMsg("assistant", `[Q:1] Welcome — and I'm really glad you're here. A lot of people show up to this feeling like they don't have anything valuable to offer. I know that feeling personally. But that's exactly why I built this.\n\nLet's start simple. <b>What's your first name?</b>`);
+    addMsg("assistant", `[Q:1] Welcome — and I'm so glad you're here. Most coaches and course creators are guessing at who they're really talking to. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they <b>a lot like you right now</b>, or <b>someone you've already been able to help</b> through something?`);
   }
   document.getElementById("sendBtn").disabled = false;
 }
@@ -971,10 +1067,11 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 
-function startSpark() {
+async function startSpark() {
   const welcome = document.getElementById('sparkwelcome');
   welcome.classList.add('hidden');
   setTimeout(() => { welcome.style.display = 'none'; }, 460);
+  await sparkContextPromise; // ensure spark context is loaded before first message
   init();
 }
 

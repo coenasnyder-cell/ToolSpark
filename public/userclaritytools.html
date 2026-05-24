@@ -308,6 +308,28 @@
     color: #09110d;
   }
   .btn-primary.spark:hover { background: #4aa978; }
+  .btn-primary.audience {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+  .btn-primary.audience:hover { background: #5e50b0; }
+
+  .admin-card-icon.audience {
+    background: rgba(75,63,138,0.1);
+    border-color: rgba(75,63,138,0.18);
+    color: var(--purple);
+  }
+  .tools-count-badge.audience {
+    background: rgba(75,63,138,0.1);
+    border-color: rgba(75,63,138,0.18);
+    color: var(--purple);
+  }
+  .result-type.audience {
+    background: rgba(75,63,138,0.1);
+    color: var(--purple);
+    border-color: rgba(75,63,138,0.18);
+  }
 
   .empty-state {
     display: none;
@@ -486,6 +508,28 @@
           <div class="empty-state" id="spark-empty">No Spark sessions yet.</div>
         </div>
       </section>
+
+      <section class="admin-card" style="grid-column: 1 / -1;">
+        <div class="admin-card-header">
+          <div class="admin-card-icon audience">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+          </div>
+          <div>
+            <div class="admin-card-title">Audience Deep Dive</div>
+            <div class="admin-card-desc">Saved audience profiles and client research sessions.</div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div class="tools-toolbar">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span class="tools-count-badge audience" id="audience-count-badge">Loading...</span>
+              <span class="showing-text" id="audience-showing"></span>
+            </div>
+          </div>
+          <div class="result-grid" id="audience-grid"></div>
+          <div class="empty-state" id="audience-empty">No Audience Deep Dive sessions yet.</div>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -507,6 +551,7 @@
 
 <script>
   let currentUser = null;
+  let resultsLoaded = false;
 
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -553,6 +598,9 @@
       console.error(e);
     }
 
+    if (resultsLoaded) return;
+    resultsLoaded = true;
+
     try {
       await loadToolResults(user);
     } catch (e) {
@@ -563,13 +611,20 @@
 
   async function claimUnlinkedSparkSessions(user) {
     try {
-      const [profilesSnap, resultsByUid, resultsByEmail] = await Promise.all([
+      const userEmail = (user.email || '').toLowerCase();
+      const [profilesSnap, profilesSnapLower, resultsByUid, resultsByEmail] = await Promise.all([
         db.collection('spark_profiles').where('email', '==', user.email).get(),
+        db.collection('spark_profiles').where('email', '==', userEmail).get(),
         db.collection('spark_results').where('userId', '==', user.uid).get(),
         db.collection('spark_results').where('accountEmail', '==', user.email).get()
       ]);
 
-      if (profilesSnap.empty) return;
+      // Merge both case variants into one deduplicated map
+      const profilesMap = new Map();
+      profilesSnap.forEach(d => profilesMap.set(d.id, d));
+      profilesSnapLower.forEach(d => { if (!profilesMap.has(d.id)) profilesMap.set(d.id, d); });
+
+      if (!profilesMap.size) return;
 
       const existingResultIds = new Set();
       resultsByUid.forEach(d => existingResultIds.add(d.id));
@@ -578,7 +633,7 @@
       const batch = db.batch();
       let hasWrites = false;
 
-      profilesSnap.forEach(doc => {
+      profilesMap.forEach(doc => {
         if (existingResultIds.has(doc.id)) return;
         const data = doc.data() || {};
         const resultRef = db.collection('spark_results').doc(doc.id);
@@ -612,26 +667,45 @@
   async function loadToolResults(user) {
     await claimUnlinkedSparkSessions(user);
 
-    const [claritySnap, sparkByUserSnap, sparkByEmailSnap] = await Promise.all([
+    const userEmailLower = (user.email || '').toLowerCase();
+
+    const [
+      claritySnap, claritySnapLower,
+      sparkByUserSnap, sparkByEmailSnap, sparkByEmailLower,
+      audienceByUserSnap, audienceByEmailSnap
+    ] = await Promise.all([
       db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
+      db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
       db.collection('spark_results').where('userId', '==', user.uid).get(),
-      db.collection('spark_results').where('accountEmail', '==', user.email).get()
+      db.collection('spark_results').where('accountEmail', '==', user.email).get(),
+      db.collection('spark_results').where('accountEmail', '==', userEmailLower).get(),
+      db.collection('audience_results').where('userId', '==', user.uid).get(),
+      db.collection('audience_results').where('accountEmail', '==', user.email).get()
     ]);
 
-    const claritySessions = claritySnap.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
+    // Deduplicate clarity sessions by id across both email variants
+    const clarityMap = new Map();
+    claritySnap.forEach(doc => clarityMap.set(doc.id, { id: doc.id, ...doc.data() }));
+    claritySnapLower.forEach(doc => { if (!clarityMap.has(doc.id)) clarityMap.set(doc.id, { id: doc.id, ...doc.data() }); });
+
+    const claritySessions = Array.from(clarityMap.values())
       .filter(session => session.status === 'completed')
       .sort(sortByCreatedDesc);
 
     const sparkMap = new Map();
     sparkByUserSnap.forEach(doc => sparkMap.set(doc.id, { id: doc.id, ...doc.data() }));
-    sparkByEmailSnap.forEach(doc => {
-      if (!sparkMap.has(doc.id)) sparkMap.set(doc.id, { id: doc.id, ...doc.data() });
-    });
+    sparkByEmailSnap.forEach(doc => { if (!sparkMap.has(doc.id)) sparkMap.set(doc.id, { id: doc.id, ...doc.data() }); });
+    sparkByEmailLower.forEach(doc => { if (!sparkMap.has(doc.id)) sparkMap.set(doc.id, { id: doc.id, ...doc.data() }); });
     const sparkSessions = Array.from(sparkMap.values()).sort(sortByCreatedDesc);
+
+    const audienceMap = new Map();
+    audienceByUserSnap.forEach(doc => audienceMap.set(doc.id, { id: doc.id, ...doc.data() }));
+    audienceByEmailSnap.forEach(doc => { if (!audienceMap.has(doc.id)) audienceMap.set(doc.id, { id: doc.id, ...doc.data() }); });
+    const audienceSessions = Array.from(audienceMap.values()).sort(sortByCreatedDesc);
 
     renderClaritySessions(claritySessions);
     renderSparkSessions(sparkSessions);
+    renderAudienceSessions(audienceSessions);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'grid';
@@ -713,6 +787,50 @@
         </div>
         <div class="result-actions">
           <a class="btn-primary spark" href="spark-results.html?session=${encodeURIComponent(session.sessionId || session.id)}">
+            View Results
+          </a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderAudienceSessions(sessions) {
+    document.getElementById('audience-count-badge').textContent =
+      sessions.length + ' session' + (sessions.length === 1 ? '' : 's');
+    document.getElementById('audience-showing').textContent =
+      sessions.length ? 'Showing all your saved Audience Deep Dive sessions' : 'No sessions yet';
+
+    const grid = document.getElementById('audience-grid');
+    const empty = document.getElementById('audience-empty');
+    grid.innerHTML = '';
+
+    if (!sessions.length) {
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    sessions.forEach(session => {
+      const pathLabel = session.audiencePath === 'self' ? 'A Lot Like Me' :
+                        session.audiencePath === 'other' ? 'Someone I\'ve Helped' : '';
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="result-card-head">
+          <div>
+            <div class="result-name">${escapeHtml(session.name || 'Audience Profile')}</div>
+            <div class="result-email">${escapeHtml(session.accountEmail || session.email || currentUser.email || '')}</div>
+          </div>
+          <div class="result-date">${formatDate(session.createdAt)}</div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-summary-wrap">
+          <div class="result-type audience">Audience Deep Dive${pathLabel ? ' · ' + pathLabel : ''}</div>
+          <div class="result-preview">${escapeHtml(session.whoTheyAre || 'Your audience profile is saved and ready to revisit.')}</div>
+        </div>
+        <div class="result-actions">
+          <a class="btn-primary audience" href="audienceresults.html?session=${encodeURIComponent(session.sessionId || session.id)}">
             View Results
           </a>
         </div>

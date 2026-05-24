@@ -106,6 +106,12 @@ body{font-family:'Lato',sans-serif;background:var(--sidebar-bg);-webkit-font-smo
 .editor-toggle-btn{flex:1;border:none;background:transparent;color:var(--content-muted);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;padding:11px 14px;cursor:pointer;transition:all 0.15s}
 .editor-toggle-btn.active{background:var(--gold);color:#0C0B09}
 .editor-video-preview{margin-top:0.875rem}
+.editor-image-upload-area{border:2px dashed var(--content-border);border-radius:12px;padding:1.5rem 1rem;cursor:pointer;text-align:center;transition:border-color 0.2s,background 0.2s;background:#fff}
+.editor-image-upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,0.04)}
+.editor-image-placeholder{color:var(--content-muted);font-size:13px;line-height:1.5;user-select:none}
+.editor-image-thumb{display:block;max-width:100%;max-height:260px;border-radius:10px;margin:0 auto;border:1px solid var(--content-border)}
+.editor-image-remove-btn{display:block;margin:10px auto 0;border:1px solid var(--content-border);border-radius:8px;background:#fff;color:var(--content-muted);font-family:'Lato',sans-serif;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;transition:all 0.15s}
+.editor-image-remove-btn:hover{border-color:#C4622D;color:#C4622D}
 .editor-video-thumb{display:block;width:100%;max-width:420px;border-radius:12px;border:1px solid var(--content-border);box-shadow:0 10px 30px rgba(12,11,9,0.08)}
 .editor-video-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:rgba(201,168,76,0.14);color:#5B4B1F;font-size:13px;font-weight:700}
 .editor-toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;padding:12px;border:1px solid var(--content-border);border-radius:14px;background:#F7F4EF}

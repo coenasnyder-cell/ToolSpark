@@ -142,6 +142,35 @@ match /spark_results/{resultId} {
   );
   allow delete: if isAdmin();
 }
+
+    // AUDIENCE TOOL
+    match /audience_tool/{sessionId} {
+      allow get: if true;
+      allow list: if isAdmin() || (
+        isActive() &&
+        resource.data.email == request.auth.token.email
+      );
+      allow create: if true;
+      allow update: if isAdmin() || (
+        isActive() &&
+        request.resource.data.userId == request.auth.uid
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /audience_results/{resultId} {
+      allow read: if isActive() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.accountEmail == request.auth.token.email ||
+        isAdmin()
+      );
+      allow create: if isActive();
+      allow update: if isActive() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
     // EVENTS
     match /Events/{eventId} {
       allow read: if isActive();

@@ -9,6 +9,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var auth = firebase.auth();
+var storage = firebase.storage();
 
 // ── STATE ──
 let currentUser = null;
@@ -23,6 +24,8 @@ let progressData = null;
 let isAdmin = false;
 let editMode = false;
 let lessonEditorSelection = null;
+let selectedLessonImageFile = null;
+let currentLessonImageUrl = '';
 
 // ── BOOT ──
 const params = new URLSearchParams(window.location.search);
@@ -55,10 +58,12 @@ auth.onAuthStateChanged(async user => {
 
 function syncLessonVideoSection() {
   var typeInput = document.getElementById('edit-lesson-type');
-  var section = document.getElementById('editor-video-section');
-  if (!typeInput || !section) return;
-  var show = typeInput.value === 'video' || typeInput.value === 'mixed';
-  section.style.display = show ? '' : 'none';
+  var videoSection = document.getElementById('editor-video-section');
+  var imageSection = document.getElementById('editor-image-section');
+  if (!typeInput) return;
+  var t = typeInput.value;
+  if (videoSection) videoSection.style.display = (t === 'video' || t === 'mixed') ? '' : 'none';
+  if (imageSection) imageSection.style.display = t === 'image' ? '' : 'none';
 }
 
 function updateLessonVideoPreview() {
@@ -84,6 +89,7 @@ function updateLessonVideoPreview() {
 
   preview.innerHTML = '';
 }
+
 
 
 function renderLessonResourceLinks(resourceLinks) {
@@ -172,6 +178,8 @@ function loadLesson(index) {
   if (index < 0 || index >= lessons.length) return;
   currentIndex = index;
   currentLesson = lessons[index];
+  selectedLessonImageFile = null;
+  currentLessonImageUrl = '';
 
   const u = new URL(window.location.href);
   u.searchParams.set('lessonId', currentLesson.id);
@@ -182,7 +190,7 @@ function loadLesson(index) {
     currentLesson.lessonDuration ? currentLesson.lessonDuration + ' min' : '';
   refreshMarkBtn();
   document.getElementById('topbar-type').textContent =
-    ({ video: 'Video', written: 'Written', mixed: 'Mixed', section: 'Section' })[currentLesson.lessonType] || '';
+    ({ video: 'Video', written: 'Written', mixed: 'Mixed', section: 'Section', image: 'Image' })[currentLesson.lessonType] || '';
 
   const videoMeta = parseVideoUrl(currentLesson.videoUrl);
   const embed = videoMeta ? videoMeta.embedUrl : null;
@@ -193,6 +201,18 @@ function loadLesson(index) {
   } else {
     document.getElementById('video-iframe').src = '';
     vSec.style.display = 'none';
+  }
+
+  const iSec = document.getElementById('image-section');
+  const imgEl = document.getElementById('lesson-image');
+  const imageUrl = currentLesson.imageUrl ? currentLesson.imageUrl.trim() : '';
+  if (imageUrl && iSec && imgEl) {
+    imgEl.src = imageUrl;
+    imgEl.alt = currentLesson.lessonTitle || '';
+    iSec.style.display = 'block';
+  } else if (iSec) {
+    if (imgEl) imgEl.src = '';
+    iSec.style.display = 'none';
   }
 
   document.getElementById('lesson-desc').textContent = currentLesson.lessonDescription || '';
@@ -371,7 +391,7 @@ function renderSidebar() {
   var normalHeader = document.getElementById('sidebar-header');
   var addSectionBar = document.getElementById('sidebar-add-section-bar');
   var footer = document.querySelector('.sidebar-footer');
-  var typeIcon = { video: '🎬', written: '📝', mixed: '🎯' };
+  var typeIcon = { video: '🎬', written: '📝', mixed: '🎯', image: '🖼️' };
 
   typeIcon.section = 'S';
   var showEditorControls = isAdmin && editMode;
@@ -477,6 +497,12 @@ function setLessonSaveButtonState(state) {
 
   saveBtn.classList.remove('is-saving', 'is-saved');
 
+  if (state === 'uploading') {
+    saveBtn.classList.add('is-saving');
+    saveBtn.innerHTML = '<span class="editor-spinner"></span><span>Uploading...</span>';
+    return;
+  }
+
   if (state === 'saving') {
     saveBtn.classList.add('is-saving');
     saveBtn.innerHTML = '<span class="editor-spinner"></span><span>Saving...</span>';
@@ -489,6 +515,13 @@ function setLessonSaveButtonState(state) {
     return;
   }
 
+  if (state === 'error') {
+    saveBtn.style.background = '#C4622D';
+    saveBtn.textContent = 'Save failed — check console';
+    return;
+  }
+
+  saveBtn.style.background = '';
   saveBtn.textContent = 'Save Lesson';
 }
 

@@ -46,6 +46,14 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // LESSON IMAGES
+    match /lesson-images/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // COURSE CONTENT
     match /course-content/{fileName} {
       allow read: if isSignedIn();

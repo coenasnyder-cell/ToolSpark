@@ -543,6 +543,7 @@ let sessionComplete = false;
 let displayName = 'there';
 let businessName = '';
 let clientEmail = '';
+const CLARITY_SESSION_ID = 'session_' + Date.now();
 
 const PHASES = {
   1: { name: "You & Your Business",   questions: 3 },
@@ -784,7 +785,8 @@ async function callClaude(userMessage) {
       model: MODEL,
       max_tokens: 1500,
       system: SYSTEM_PROMPT,
-      messages: conversationHistory
+      messages: conversationHistory,
+      _meta: { tool: 'clarity-conversation', sessionId: CLARITY_SESSION_ID }
     })
   });
 
@@ -829,7 +831,8 @@ async function finishSession(actionPlanText) {
         messages: [{
           role: 'user',
           content: `Based on this business clarity interview, write a 2-3 sentence plain English summary of what this business does, who it serves, and where the biggest opportunity for an AI tool is. Be specific and warm. No bullet points.\n\nINTERVIEW:\n${conversation}`
-        }]
+        }],
+        _meta: { tool: 'clarity-summary', sessionId: CLARITY_SESSION_ID }
       })
     });
     const summaryData = await summaryResponse.json();
@@ -848,7 +851,8 @@ async function finishSession(actionPlanText) {
         messages: [{
           role: 'user',
           content: `Based on this business clarity interview extract the following information. Respond ONLY with valid JSON, no markdown:\n{"coreMethod":"what they teach or help people do","delivery":"how they currently deliver it","clientProfile":"who their ideal client is and starting point","success":"what success looks like for clients","friction":"where clients get stuck or give up","repetition":"what the creator repeats or explains most often","extra":"any other useful context"}\n\nINTERVIEW:\n${conversation}`
-        }]
+        }],
+        _meta: { tool: 'clarity-extract', sessionId: CLARITY_SESSION_ID }
       })
     });
     const extractData = await extractResponse.json();
@@ -857,7 +861,7 @@ async function finishSession(actionPlanText) {
     console.log('Data extraction failed:', e);
   }
 
-  const sessionId = 'session_' + Date.now();
+  const sessionId = CLARITY_SESSION_ID;
 
   try {
     await db.collection('clarity_sessions').doc(sessionId).set({

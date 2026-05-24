@@ -67,6 +67,7 @@ function buildLessonEditMarkup(lesson) {
               '<option value="video"' + getSelectedAttr(lessonType, 'video') + '>Video</option>' +
               '<option value="written"' + getSelectedAttr(lessonType, 'written') + '>Written</option>' +
               '<option value="mixed"' + getSelectedAttr(lessonType, 'mixed') + '>Mixed</option>' +
+              '<option value="image"' + getSelectedAttr(lessonType, 'image') + '>Image</option>' +
               '<option value="section"' + getSelectedAttr(lessonType, 'section') + '>Section</option>' +
             '</select>' +
           '</div>' +
@@ -98,6 +99,24 @@ function buildLessonEditMarkup(lesson) {
           '<input type="url" id="edit-lesson-video-url" class="editor-input" placeholder="Paste YouTube or Loom URL here" value="' + escHtml(lesson.videoUrl || '') + '">' +
           '<div class="editor-help-text">Supports YouTube and Loom links</div>' +
           '<div class="editor-video-preview" id="editor-video-preview"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="editor-section" id="editor-image-section">' +
+        '<div class="editor-section-title">Section 2 - Image</div>' +
+        '<div class="editor-field">' +
+          '<label class="editor-field-label">Lesson Image</label>' +
+          '<input type="file" id="lesson-image-file-input" accept="image/*" style="display:none;" onchange="handleLessonImageSelect(event)">' +
+          '<div class="editor-image-upload-area" id="lesson-image-upload-area" onclick="document.getElementById(\'lesson-image-file-input\').click()">' +
+            '<div id="lesson-image-placeholder" class="editor-image-placeholder">' +
+              '<div style="font-size:26px;margin-bottom:6px;">🖼️</div>' +
+              '<div style="font-weight:600;font-size:13px;">Click to upload an image</div>' +
+              '<div style="font-size:11px;margin-top:4px;opacity:0.7;">JPG, PNG, WebP — max 5 MB</div>' +
+            '</div>' +
+            '<div id="lesson-image-preview-wrap" style="display:none;position:relative;">' +
+              '<img id="lesson-image-preview-thumb" src="" alt="" class="editor-image-thumb">' +
+              '<button type="button" class="editor-image-remove-btn" onclick="event.stopPropagation(); removeLessonImage()">&#215; Remove</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       '<div class="editor-section">' +
@@ -185,6 +204,7 @@ function initializeLessonEditorUI() {
   renderLessonResourceRows(Array.isArray(currentLesson.resourceLinks) ? currentLesson.resourceLinks : []);
   syncLessonVideoSection();
   updateLessonVideoPreview();
+  initLessonImageEditor(currentLesson ? currentLesson.imageUrl : '');
 
   if (typeInput) typeInput.addEventListener('change', syncLessonVideoSection);
   if (videoInput) videoInput.addEventListener('input', updateLessonVideoPreview);
@@ -416,7 +436,7 @@ async function saveLessonEdits() {
 
   saveBtn.disabled = true;
   cancelBtn.disabled = true;
-  setLessonSaveButtonState('saving');
+  setLessonSaveButtonState(selectedLessonImageFile ? 'uploading' : 'saving');
 
   try {
     var durationValue = String(durationInput && durationInput.value ? durationInput.value : '').trim();
@@ -427,6 +447,7 @@ async function saveLessonEdits() {
       lessonType: typeInput.value,
       lessonDuration: Number.isFinite(parsedDuration) ? parsedDuration : '',
       videoUrl: videoUrlInput ? videoUrlInput.value.trim() : '',
+      imageUrl: await uploadLessonImageFile(),
       lessonContent: getLessonEditorHtml(contentInput),
       linkedThreadId: linkedThreadInput.value.trim(),
       isFree: accessInput.value !== 'false',
@@ -446,11 +467,12 @@ async function saveLessonEdits() {
     await loadCourse();
     loadLesson(currentIndex);
   } catch (e) {
-    setLessonSaveButtonState('default');
+    console.error('Save lesson error:', e);
+    setLessonSaveButtonState('error');
+    setTimeout(function() { setLessonSaveButtonState('default'); }, 3000);
   } finally {
     saveBtn.disabled = false;
     cancelBtn.disabled = false;
-    setLessonSaveButtonState('default');
   }
 }
 
@@ -479,6 +501,7 @@ async function addLesson() {
         lessonDuration: "",
         lessonType: "written",
         videoUrl: "",
+        imageUrl: "",
         linkedThreadId: "",
         isFree: true,
         resourceLinks: [],
@@ -527,6 +550,67 @@ async function deleteLesson(event, lessonId) {
     var nextIndex = Math.min(deleteIndex, lessons.length - 1);
     loadLesson(nextIndex);
   } catch (e) {}
+}
+
+function initLessonImageEditor(existingUrl) {
+  currentLessonImageUrl = existingUrl || '';
+  selectedLessonImageFile = null;
+  var placeholder = document.getElementById('lesson-image-placeholder');
+  var previewWrap = document.getElementById('lesson-image-preview-wrap');
+  var thumb = document.getElementById('lesson-image-preview-thumb');
+  if (!placeholder || !previewWrap || !thumb) return;
+  if (currentLessonImageUrl) {
+    thumb.src = currentLessonImageUrl;
+    placeholder.style.display = 'none';
+    previewWrap.style.display = 'block';
+  } else {
+    thumb.src = '';
+    placeholder.style.display = 'block';
+    previewWrap.style.display = 'none';
+  }
+}
+
+function handleLessonImageSelect(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image must be under 5 MB.');
+    return;
+  }
+  selectedLessonImageFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var placeholder = document.getElementById('lesson-image-placeholder');
+    var previewWrap = document.getElementById('lesson-image-preview-wrap');
+    var thumb = document.getElementById('lesson-image-preview-thumb');
+    if (!placeholder || !previewWrap || !thumb) return;
+    placeholder.style.display = 'none';
+    thumb.src = ev.target.result;
+    previewWrap.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLessonImage() {
+  selectedLessonImageFile = null;
+  currentLessonImageUrl = '';
+  var fileInput = document.getElementById('lesson-image-file-input');
+  if (fileInput) fileInput.value = '';
+  var placeholder = document.getElementById('lesson-image-placeholder');
+  var previewWrap = document.getElementById('lesson-image-preview-wrap');
+  var thumb = document.getElementById('lesson-image-preview-thumb');
+  if (placeholder) placeholder.style.display = 'block';
+  if (previewWrap) previewWrap.style.display = 'none';
+  if (thumb) thumb.src = '';
+}
+
+async function uploadLessonImageFile() {
+  if (!selectedLessonImageFile) return currentLessonImageUrl;
+  var ext = selectedLessonImageFile.name.split('.').pop().toLowerCase();
+  var path = 'lesson-images/' + courseId + '/' + currentLesson.id + '_' + Date.now() + '.' + ext;
+  var ref = storage.ref(path);
+  await ref.put(selectedLessonImageFile);
+  return await ref.getDownloadURL();
 }
 
 function toggleLessonColorMenu(event) {

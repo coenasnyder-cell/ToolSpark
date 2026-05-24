@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 <div id="loading-screen">
@@ -55,6 +56,7 @@
     <div class="content-scroll">
       <div class="content-inner">
         <div id="video-section" style="display:none;"><div class="video-wrap"><iframe id="video-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div></div>
+        <div id="image-section" style="display:none;"><div class="image-wrap" style="text-align:center;"><img id="lesson-image" alt="" style="max-width:340px;width:100%;border-radius:8px;display:inline-block;"></div></div>
         <p class="lesson-desc" id="lesson-desc"></p>
         <div class="lesson-html" id="lesson-html"></div>
         <div class="resource-links-section" id="resource-links-section">

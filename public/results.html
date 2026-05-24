@@ -573,7 +573,8 @@ Respond ONLY with valid JSON, no markdown:
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
+        messages: [{ role: 'user', content: prompt }],
+        _meta: { tool: 'clarity-analysis', sessionId }
       })
     });
 
