@@ -1010,12 +1010,15 @@ if (_params.get('email')) document.getElementById('s_email').value = _params.get
 const DEFAULT_LIMIT = 2;
 auth.onAuthStateChanged(async function(user) {
   if (!user) {
-    document.getElementById('start-screen').style.display = 'flex';
+    window.location.href = 'signon.html?redirect=clarity';
     return;
   }
-  // Pre-fill email if signed in
+  // Pre-fill name and email from auth account
   if (!document.getElementById('s_email').value) {
     document.getElementById('s_email').value = user.email || '';
+  }
+  if (!document.getElementById('s_displayName').value && user.displayName) {
+    document.getElementById('s_displayName').value = user.displayName.split(' ')[0];
   }
 
   try {
