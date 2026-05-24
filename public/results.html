@@ -379,6 +379,141 @@
     font-weight: 300;
   }
 
+  /* TOOL SELECTION & BUILD PROMPT */
+  .tool-footer {
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .tool-footer-hint {
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 300;
+  }
+  .build-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: 'Lato', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .build-btn.pb1 { background: var(--green); color: #fff; }
+  .build-btn.pb1:hover { background: var(--green-light); }
+  .build-btn.pb2 { background: var(--purple); color: #fff; }
+  .build-btn.pb2:hover { background: #5e50b0; }
+  .build-btn.pb3 { background: var(--coral); color: #fff; }
+  .build-btn.pb3:hover { background: #d97548; }
+  .build-btn:disabled { background: var(--border); color: var(--text3); cursor: default; }
+
+  .tool-card.chosen { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .roadmap-choose-row { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .roadmap-choose-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    font-family: 'Lato', sans-serif;
+    transition: all 0.2s;
+  }
+  .roadmap-choose-btn:hover { background: var(--gold); color: var(--bg); }
+  .roadmap-choose-btn.chosen { background: var(--gold); color: var(--bg); cursor: default; }
+  .chosen-indicator { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: 0.05em; }
+
+  .prompt-panel {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid rgba(201,168,76,0.28);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: -1rem;
+  }
+  .prompt-panel.open { display: block; animation: fadeUp 0.25s ease; }
+  .prompt-panel-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .prompt-panel-sub {
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 300;
+    margin-bottom: 14px;
+  }
+  .prompt-text-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.125rem;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.75;
+    font-family: 'Lato', sans-serif;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+  }
+  .prompt-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .builder-links {
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .builder-links a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .builder-links a:hover { text-decoration: underline; }
+
   /* ERROR */
   .error-screen {
     display: none;
@@ -416,12 +551,12 @@
 <!-- LOADING -->
 <div class="loading-screen" id="loading-screen">
   <div class="loading-ring"></div>
-  <h2>Analyzing your business...</h2>
+  <h2>Building your tool report...</h2>
   <p>This takes about 15 seconds</p>
   <div class="loading-steps">
     <div class="loading-step active" id="step-1">
       <div class="step-dot"></div>
-      Loading your clarity session
+      Loading your Breakthrough session
     </div>
     <div class="loading-step" id="step-2">
       <div class="step-dot"></div>
@@ -442,12 +577,12 @@
 <div class="results-page" id="results-page">
   <div class="results-hero">
     <div class="results-badge">✦ Your Tool Report</div>
-    <h1>Here's what your business <em>needs</em></h1>
-    <p id="hero-name">Based on your clarity session, here are the AI tools that would have the biggest impact on your clients' results.</p>
+    <h1>Your Recommendations Tailored Just For You</em> Session</h1>
+    <p id="hero-name">Based on your Discover Your Breakthrough session, here are the AI tools matched to your business right now.</p>
   </div>
 
   <div class="summary-card">
-    <div class="summary-label">Business summary</div>
+    <div class="summary-label">Session summary</div>
     <p id="summary-text"></p>
   </div>
 
@@ -455,10 +590,10 @@
   <div id="tools-container"></div>
 
   <div class="cta-card" style="background:var(--surface);border-color:var(--border);margin-bottom:1rem;">
-    <h2>Ready to Build?</h2>
-    <p>Join the ToolSpark community and get the resources, guidance, and accountability to build your first AI tool — surrounded by people doing the same thing.</p>
-    <a href="signup.html?redirect=userclaritytools" class="book-btn">Join the community free →</a>
-    <div class="cta-note">Free to join · No credit card required · <a href="signon.html?redirect=userclaritytools" style="color:inherit;">Already a member? Sign in</a></div>
+    <h2>Ready to <em>build it?</em></h2>
+    <p>Pick the tool above, copy your build prompt, and paste it into Lovable or Base44 to get started — or head to your Roadmap to see all three tools in order.</p>
+    <a href="roadmap.html" class="book-btn">View My Roadmap →</a>
+    <div class="cta-note">Or go back to <a href="dashboard.html" style="color:inherit;font-weight:700;">Dashboard</a></div>
   </div>
 
 </div>
@@ -466,13 +601,93 @@
 <!-- ERROR -->
 <div class="error-screen" id="error-screen">
   <h2>Something went wrong</h2>
-  <p>We couldn't load your results. Please <a href="clarity.html">start a new clarity session</a> or contact us for help.</p>
+  <p>We couldn't load your results. Please <a href="clarity.html">start a new Breakthrough session</a> or contact us for help.</p>
 </div>
 
 <footer>Powered by <span>ToolSpark</span> · Clarity. Build. Launch.</footer>
 
 <script>
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+
+// ── Lovable prompt helpers ──
+let lovablePrompts = [];
+let currentSessionId = null;
+let currentChosenTool = null;
+
+function parseLovablePrompts(actionPlan) {
+  if (!actionPlan) return [null, null, null];
+  const prompts = [];
+  for (let i = 1; i <= 3; i++) {
+    const nextBoundary = i < 3 ? `TOOL_${i + 1}_NAME:` : String.raw`\*\*ACTION_PLAN_END`;
+    const regex = new RegExp(`TOOL_${i}_LOVABLE_PROMPT:([\\s\\S]+?)(?=${nextBoundary}|$)`);
+    const match = actionPlan.match(regex);
+    prompts.push(match ? match[1].trim() : null);
+  }
+  return prompts;
+}
+
+function selectTool(index) {
+  for (let i = 0; i < 3; i++) {
+    const panel = document.getElementById('prompt-' + i);
+    if (panel) panel.classList.remove('open');
+  }
+  const panel = document.getElementById('prompt-' + index);
+  if (panel) {
+    panel.classList.add('open');
+    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+function copyPrompt(index) {
+  const text = lovablePrompts[index];
+  if (!text) return;
+  const btn = document.querySelector('#prompt-' + index + ' .copy-btn');
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2200); }
+  }).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2200); }
+  });
+}
+
+async function chooseForRoadmap(index) {
+  if (!currentSessionId) return;
+  const toolNum = index + 1;
+  try {
+    await db.collection('clarity_sessions').doc(currentSessionId).update({ chosenTool: toolNum });
+    currentChosenTool = toolNum;
+    markChosenTool(index);
+  } catch(e) {
+    console.log('Could not save roadmap choice:', e);
+  }
+}
+
+function markChosenTool(index) {
+  for (let i = 0; i < 3; i++) {
+    const card = document.getElementById('card-' + i);
+    const btn = document.getElementById('roadmap-btn-' + i);
+    const ind = document.getElementById('chosen-ind-' + i);
+    if (card) card.classList.remove('chosen');
+    if (btn) btn.style.display = 'inline-flex';
+    if (ind) ind.style.display = 'none';
+  }
+  const card = document.getElementById('card-' + index);
+  const btn = document.getElementById('roadmap-btn-' + index);
+  const ind = document.getElementById('chosen-ind-' + index);
+  if (card) card.classList.add('chosen');
+  if (btn) btn.style.display = 'none';
+  if (ind) ind.style.display = 'inline';
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 function setStep(num) {
   for (let i = 1; i <= 4; i++) {
@@ -530,6 +745,7 @@ async function loadAndAnalyze() {
   const sessionId = params.get('session');
 
   if (!sessionId) { showError(); return; }
+  currentSessionId = sessionId;
 
   try {
     // Step 1 — Load session from Firestore (retries up to 6x with 1.5s delay)
@@ -539,11 +755,13 @@ async function loadAndAnalyze() {
 
     const session = doc.data();
     const extracted = session.extracted;
+    currentChosenTool = session.chosenTool || null;
 
     // If results already exist don't re-analyze
     if (session.toolResults) {
       await ensureClientResult(sessionId, session, session.toolResults);
-      renderResults(session.displayName, session.summary, session.toolResults);
+      renderResults(session.displayName, session.summary, session.toolResults, session.actionPlan);
+      if (currentChosenTool) markChosenTool(currentChosenTool - 1);
       await markClarityComplete(session);
       return;
     }
@@ -590,7 +808,8 @@ Respond ONLY with valid JSON, no markdown:
     });
 
     await ensureClientResult(sessionId, session, parsed);
-    renderResults(session.displayName, session.summary, parsed);
+    renderResults(session.displayName, session.summary, parsed, session.actionPlan);
+    if (currentChosenTool) markChosenTool(currentChosenTool - 1);
     await markClarityComplete(session);
 
   } catch(err) {
@@ -599,19 +818,21 @@ Respond ONLY with valid JSON, no markdown:
   }
 }
 
-function renderResults(displayName, summary, parsed) {
+function renderResults(displayName, summary, parsed, actionPlan) {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('results-page').classList.add('active');
 
   if (displayName) {
-    document.getElementById('hero-name').textContent = `Hi ${displayName} — based on your clarity session, here are the AI tools that would have the biggest impact on your clients' results.`;
+    document.getElementById('hero-name').textContent = `Hi ${displayName} — here are the three tools recommended in your Breakthrough session, matched to where you are right now.`;
   }
 
   document.getElementById('summary-text').textContent = parsed.summary || summary;
 
   const priorityClass = ['p1', 'p2', 'p3'];
-  const toolsHTML = parsed.tools.map((t, i) => `
-    <div class="tool-card">
+  const btnClass = ['pb1', 'pb2', 'pb3'];
+  const toolsHTML = parsed.tools.map((t, i) => {
+    return `
+    <div class="tool-card" id="card-${i}">
       <div class="tool-header ${priorityClass[i]}">
         <div>
           <div style="margin-bottom:6px;"><span class="tool-priority">${t.priority}</span></div>
@@ -627,8 +848,12 @@ function renderResults(displayName, summary, parsed) {
           "${t.example_prompt}"
         </div>
       </div>
-    </div>
-  `).join('');
+      <div class="tool-footer">
+        <span class="chosen-indicator" id="chosen-ind-${i}" style="display:none;">✓ Your roadmap tool &nbsp;·&nbsp; <a href="roadmap.html" style="color:var(--gold);font-weight:700;text-decoration:none;">View Roadmap →</a></span>
+        <button class="build-btn ${btnClass[i]}" id="roadmap-btn-${i}" onclick="chooseForRoadmap(${i})">Add to My Roadmap</button>
+      </div>
+    </div>`;
+  }).join('');
 
   document.getElementById('tools-container').innerHTML = toolsHTML;
 }

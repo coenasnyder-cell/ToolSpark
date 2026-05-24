@@ -197,7 +197,7 @@
 
   .section-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
@@ -331,6 +331,75 @@
     border-color: rgba(75,63,138,0.18);
   }
 
+  /* ── BREAKTHROUGH INLINE DETAIL ── */
+  .breakthrough-detail {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    padding: 1rem;
+    margin-top: -2px;
+    margin-bottom: 0.875rem;
+  }
+  .bt-tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 0.625rem;
+    transition: border-color 0.15s;
+  }
+  .bt-tool-card:last-child { margin-bottom: 0; }
+  .bt-tool-card.chosen { border-color: var(--gold); }
+  .bt-tool-head {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .bt-tool-head.c1 { background: rgba(42,92,69,0.05); }
+  .bt-tool-head.c2 { background: rgba(75,63,138,0.05); }
+  .bt-tool-head.c3 { background: rgba(196,98,45,0.05); }
+  .bt-tool-name { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+  .bt-priority { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 100px; }
+  .bt-priority.b1 { background: var(--green); color: #fff; }
+  .bt-priority.b2 { background: var(--purple); color: #fff; }
+  .bt-priority.b3 { background: var(--coral); color: #fff; }
+  .bt-complexity { font-size: 11px; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0; }
+  .bt-tool-body { padding: 0.625rem 1rem 0.75rem; }
+  .bt-tool-what { font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 3px; line-height: 1.5; }
+  .bt-tool-why { font-size: 12px; color: var(--text2); line-height: 1.65; }
+  .bt-tool-footer {
+    padding: 0.625rem 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .bt-chosen-text { font-size: 11px; color: var(--gold); font-weight: 700; }
+  .bt-roadmap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: #b8902e;
+    font-family: 'Lato', sans-serif;
+    transition: all 0.15s;
+  }
+  .bt-roadmap-btn:hover { background: var(--gold); color: var(--dark); }
+  .bt-detail-footer { text-align: right; margin-top: 0.75rem; }
+  .bt-detail-footer a { font-size: 12px; color: var(--gold); font-weight: 700; text-decoration: none; }
+  .bt-detail-footer a:hover { color: #b8902e; }
+
   .empty-state {
     display: none;
     text-align: center;
@@ -416,6 +485,10 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       <span>Dashboard</span>
     </a>
+    <a href="roadmap.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
+      <span>My Roadmap</span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-user">
@@ -467,28 +540,6 @@
     <div id="content" class="section-grid" style="display:none;">
       <section class="admin-card">
         <div class="admin-card-header">
-          <div class="admin-card-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
-          </div>
-          <div>
-            <div class="admin-card-title">Clarity Sessions</div>
-            <div class="admin-card-desc">Completed recommendation sessions, newest first.</div>
-          </div>
-        </div>
-        <div class="admin-card-body">
-          <div class="tools-toolbar">
-            <div style="display:flex;flex-direction:column;gap:3px;">
-              <span class="tools-count-badge" id="clarity-count-badge">Loading...</span>
-              <span class="showing-text" id="clarity-showing"></span>
-            </div>
-          </div>
-          <div class="result-grid" id="clarity-grid"></div>
-          <div class="empty-state" id="clarity-empty">No Clarity Sessions yet.</div>
-        </div>
-      </section>
-
-      <section class="admin-card">
-        <div class="admin-card-header">
           <div class="admin-card-icon spark">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.8 6.8 19l.99-5.78-4.21-4.1 5.82-.85L12 3z"/></svg>
           </div>
@@ -509,7 +560,7 @@
         </div>
       </section>
 
-      <section class="admin-card" style="grid-column: 1 / -1;">
+      <section class="admin-card">
         <div class="admin-card-header">
           <div class="admin-card-icon audience">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
@@ -528,6 +579,28 @@
           </div>
           <div class="result-grid" id="audience-grid"></div>
           <div class="empty-state" id="audience-empty">No Audience Deep Dive sessions yet.</div>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
+          </div>
+          <div>
+            <div class="admin-card-title">Discover Your Breakthrough</div>
+            <div class="admin-card-desc">Completed recommendation sessions, newest first.</div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div class="tools-toolbar">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span class="tools-count-badge" id="clarity-count-badge">Loading...</span>
+              <span class="showing-text" id="clarity-showing"></span>
+            </div>
+          </div>
+          <div class="result-grid" id="clarity-grid"></div>
+          <div class="empty-state" id="clarity-empty">No Breakthrough sessions yet.</div>
         </div>
       </section>
     </div>
@@ -552,6 +625,7 @@
 <script>
   let currentUser = null;
   let resultsLoaded = false;
+  const claritySessionCache = {};
 
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -664,18 +738,56 @@
     }
   }
 
+  async function claimUnlinkedClaritySessions(user) {
+    try {
+      const userEmailLower = (user.email || '').toLowerCase();
+      const [byEmail, byEmailLower, byEmailNorm] = await Promise.all([
+        db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
+        db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get()
+      ]);
+
+      const sessionsMap = new Map();
+      byEmail.forEach(d => sessionsMap.set(d.id, d));
+      byEmailLower.forEach(d => { if (!sessionsMap.has(d.id)) sessionsMap.set(d.id, d); });
+      byEmailNorm.forEach(d => { if (!sessionsMap.has(d.id)) sessionsMap.set(d.id, d); });
+
+      if (!sessionsMap.size) return;
+
+      const batch = db.batch();
+      let hasWrites = false;
+      sessionsMap.forEach(doc => {
+        const data = doc.data() || {};
+        if (!data.userId) {
+          batch.update(doc.ref, {
+            userId: user.uid,
+            accountEmail: user.email,
+            clientEmailLower: (data.clientEmail || '').toLowerCase()
+          });
+          hasWrites = true;
+        }
+      });
+      if (hasWrites) await batch.commit();
+    } catch(e) {
+      console.log('Clarity session claiming failed:', e);
+    }
+  }
+
   async function loadToolResults(user) {
     await claimUnlinkedSparkSessions(user);
+    await claimUnlinkedClaritySessions(user);
 
     const userEmailLower = (user.email || '').toLowerCase();
 
     const [
-      claritySnap, claritySnapLower,
+      claritySnap, claritySnapLower, clarityByUserId, clarityByEmailNorm,
       sparkByUserSnap, sparkByEmailSnap, sparkByEmailLower,
       audienceByUserSnap, audienceByEmailSnap
     ] = await Promise.all([
       db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
       db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
+      db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
+      db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get(),
       db.collection('spark_results').where('userId', '==', user.uid).get(),
       db.collection('spark_results').where('accountEmail', '==', user.email).get(),
       db.collection('spark_results').where('accountEmail', '==', userEmailLower).get(),
@@ -683,10 +795,12 @@
       db.collection('audience_results').where('accountEmail', '==', user.email).get()
     ]);
 
-    // Deduplicate clarity sessions by id across both email variants
+    // Deduplicate clarity sessions by id across all query variants
     const clarityMap = new Map();
     claritySnap.forEach(doc => clarityMap.set(doc.id, { id: doc.id, ...doc.data() }));
     claritySnapLower.forEach(doc => { if (!clarityMap.has(doc.id)) clarityMap.set(doc.id, { id: doc.id, ...doc.data() }); });
+    clarityByUserId.forEach(doc => { if (!clarityMap.has(doc.id)) clarityMap.set(doc.id, { id: doc.id, ...doc.data() }); });
+    clarityByEmailNorm.forEach(doc => { if (!clarityMap.has(doc.id)) clarityMap.set(doc.id, { id: doc.id, ...doc.data() }); });
 
     const claritySessions = Array.from(clarityMap.values())
       .filter(session => session.status === 'completed')
@@ -711,6 +825,106 @@
     document.getElementById('content').style.display = 'grid';
   }
 
+  function parseToolsFromActionPlan(actionPlan) {
+    const tools = [];
+    for (let i = 1; i <= 3; i++) {
+      const get = (field) => {
+        const rx = new RegExp(`TOOL_${i}_${field}:\\s*([\\s\\S]*?)(?=TOOL_${i}_|TOOL_${i+1}_|$)`, 'i');
+        const m = (actionPlan || '').match(rx);
+        return m ? m[1].trim() : '';
+      };
+      const name = get('NAME');
+      if (!name) continue;
+      tools.push({
+        name,
+        summary: get('SUMMARY'),
+        complexity: get('COMPLEXITY'),
+        priority: get('PRIORITY'),
+        why: get('WHY'),
+        prompt: get('LOVABLE_PROMPT')
+      });
+    }
+    return tools;
+  }
+
+  function toggleBreakthroughDetail(sessionId, btn) {
+    const panel = document.getElementById('detail-' + sessionId);
+    if (!panel) return;
+    const isOpen = panel.style.display === 'block';
+    if (isOpen) {
+      panel.style.display = 'none';
+      btn.textContent = 'View Results ▼';
+      return;
+    }
+    panel.style.display = 'block';
+    btn.textContent = 'Hide Results ▲';
+    if (!panel.dataset.rendered) {
+      const session = claritySessionCache[sessionId];
+      if (session) renderBreakthroughTools(sessionId, session, panel);
+      panel.dataset.rendered = '1';
+    }
+  }
+
+  function renderBreakthroughTools(sessionId, session, panel) {
+    const tools = parseToolsFromActionPlan(session.actionPlan);
+    const chosen = session.chosenTool ? Number(session.chosenTool) : 0;
+
+    if (!tools.length) {
+      panel.innerHTML = '<p style="color:#888;padding:1rem;">No tool recommendations found for this session.</p>';
+      return;
+    }
+
+    const colorClasses = ['c1', 'c2', 'c3'];
+    const priorityClasses = ['b1', 'b2', 'b3'];
+    const labels = ['First', 'Second', 'Third'];
+
+    let html = '';
+    tools.forEach((tool, i) => {
+      const idx = i + 1;
+      const isChosen = chosen === idx;
+      html += `
+        <div class="bt-tool-card${isChosen ? ' chosen' : ''}" id="bt-card-${sessionId}-${idx}">
+          <div class="bt-tool-head ${colorClasses[i]}">
+            <span>${escapeHtml(tool.name)}</span>
+            <span class="bt-priority ${priorityClasses[i]}">${escapeHtml(tool.priority || labels[i])}</span>
+          </div>
+          <div class="bt-tool-body">
+            <div class="bt-tool-what">${escapeHtml(tool.summary)}</div>
+            ${tool.why ? `<div class="bt-tool-why"><strong>Why this tool:</strong> ${escapeHtml(tool.why)}</div>` : ''}
+            ${tool.complexity ? `<div class="bt-complexity">Complexity: ${escapeHtml(tool.complexity)}</div>` : ''}
+          </div>
+          <div class="bt-tool-footer">
+            ${isChosen
+              ? `<span class="bt-chosen-text">✓ Your roadmap tool</span>
+                 <a href="roadmap.html" class="bt-roadmap-btn">View Roadmap →</a>`
+              : `<button class="bt-roadmap-btn" onclick="chooseBreakthroughTool('${sessionId}', ${idx})">Add to My Roadmap</button>`
+            }
+          </div>
+        </div>`;
+    });
+
+    if (!chosen) {
+      html += `<p style="font-size:12px;color:var(--text3);text-align:right;margin-top:0.5rem;">Pick one tool above to feature on your roadmap.</p>`;
+    }
+
+    panel.innerHTML = html;
+  }
+
+  async function chooseBreakthroughTool(sessionId, toolIndex) {
+    try {
+      await db.collection('clarity_sessions').doc(sessionId).update({ chosenTool: toolIndex });
+      if (claritySessionCache[sessionId]) claritySessionCache[sessionId].chosenTool = toolIndex;
+
+      const panel = document.getElementById('detail-' + sessionId);
+      if (panel && claritySessionCache[sessionId]) {
+        panel.dataset.rendered = '';
+        renderBreakthroughTools(sessionId, claritySessionCache[sessionId], panel);
+      }
+    } catch(e) {
+      console.error('Failed to save chosen tool:', e);
+    }
+  }
+
   function renderClaritySessions(sessions) {
     document.getElementById('clarity-count-badge').textContent =
       sessions.length + ' session' + (sessions.length === 1 ? '' : 's');
@@ -728,6 +942,11 @@
 
     empty.style.display = 'none';
     sessions.forEach(session => {
+      const sid = session.sessionId || session.id;
+      claritySessionCache[sid] = session;
+
+      const wrapper = document.createElement('div');
+
       const card = document.createElement('div');
       card.className = 'result-card';
       card.innerHTML = `
@@ -744,12 +963,20 @@
           <div class="result-preview">${escapeHtml(session.summary || 'Your saved Clarity recommendations are ready to open again.')}</div>
         </div>
         <div class="result-actions">
-          <a class="btn-primary" href="results.html?session=${encodeURIComponent(session.sessionId || session.id)}">
-            View Results
-          </a>
+          <button class="btn-primary" onclick="toggleBreakthroughDetail('${sid}', this)">
+            View Results ▼
+          </button>
         </div>
       `;
-      grid.appendChild(card);
+      wrapper.appendChild(card);
+
+      const panel = document.createElement('div');
+      panel.className = 'breakthrough-detail';
+      panel.id = 'detail-' + sid;
+      panel.style.display = 'none';
+      wrapper.appendChild(panel);
+
+      grid.appendChild(wrapper);
     });
   }
 

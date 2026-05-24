@@ -301,7 +301,7 @@
 let signingIn = false;
 
 function getRedirectTarget() {
-  const allowed = { userclaritytools: 'userclaritytools.html' };
+  const allowed = { userclaritytools: 'userclaritytools.html', roadmap: 'roadmap.html', dashboard: 'dashboard.html' };
   const param = new URLSearchParams(window.location.search).get('redirect');
   return (param && allowed[param]) || 'community.html';
 }

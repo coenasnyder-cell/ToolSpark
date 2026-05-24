@@ -291,21 +291,10 @@ async function loadThread(threadId) {
     if (!tSnap.exists) return;
     var thread = tSnap.data();
 
-    var cSnap = await db.collection('threads').doc(threadId)
-      .collection('comments').orderBy('createdAt').limit(2).get();
-
-    var commentsHTML = cSnap.docs.map(function(c) {
-      var d = c.data();
-      return '<div class="comment-row"><div class="comment-author">' +
-        escHtml(d.displayName || 'Member') + '</div>' +
-        escHtml(d.content || '') + '</div>';
-    }).join('');
-
     document.getElementById('thread-content').innerHTML =
       '<div class="thread-card"><div class="thread-card-title">' +
-      escHtml(thread.title || 'Discussion') + '</div>' +
-      (commentsHTML || '<div class="comment-row" style="color:#9A9488;">No comments yet — be the first!</div>') +
-      '</div><a href="community.html?thread=' + threadId + '" class="view-thread-link">View full discussion →</a>';
+      escHtml(thread.title || 'Discussion') + '</div></div>' +
+      '<a href="community.html?thread=' + threadId + '" class="view-thread-link">View full discussion →</a>';
 
     section.style.display = 'block';
   } catch(e) {}

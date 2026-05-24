@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity Session — ToolSpark</title>
+<title>Discover Your Breakthrough</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
@@ -21,6 +22,7 @@
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
+  const auth = firebase.auth();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
@@ -449,7 +451,7 @@
 <!-- NAV -->
 <nav class="nav">
   <a href="dashboard.html" class="nav-logo">ToolSpark</a>
-  <span class="nav-title">Clarity Session</span>
+  <span class="nav-title">Discover Your Breakthrough</span>
   <div style="width:100px"></div>
 </nav>
 
@@ -457,9 +459,8 @@
 <div class="start-screen" id="start-screen">
   <div class="start-card">
     <div class="start-logo-mark">ToolSpark</div>
-    <h1>Let's get <em>clarity</em><br>on your business</h1>
-    <p class="start-sub">A focused 10–15 minute conversation to figure out the perfect AI tool for your business. Answer honestly — the more specific you are, the better your results.</p>
-
+    <h1>Discover Your <em>Breakthrough</em></h1>
+<p class="start-sub">Answer 5 questions and walk away knowing exactly what AI tool to build first — matched to your business, your audience, and where you are right now.</p>
     <div class="start-field">
       <label>Your first name</label>
       <input type="text" id="s_displayName" placeholder="e.g. Sarah" autocomplete="given-name" />
@@ -474,10 +475,10 @@
     </div>
 
     <div class="start-expect">
-      <strong>What to expect:</strong> About 8 questions across 4 phases — your business, your audience, the core problem, and your tool concept. No right or wrong answers. Just share freely.
+      <strong>What to expect:</strong> 5 focused questions about your business, your clients, and where you're stuck. No right or wrong answers — the more honest you are, the better your tool recommendations.
     </div>
 
-    <button class="start-btn" onclick="startSession()">Start My Clarity Session →</button>
+    <button class="start-btn" onclick="startSession()">Start My Breakthrough Session →</button>
   </div>
 </div>
 
@@ -485,23 +486,23 @@
 <div class="phase-bar" id="phaseBar">
   <div class="phase-step active" id="phase1">
     <div class="phase-dot">1</div>
-    <span class="phase-label">You & Your Business</span>
+    <span class="phase-label">The Frustration</span>
   </div>
   <div class="phase-step" id="phase2">
     <div class="phase-dot">2</div>
-    <span class="phase-label">Your Audience</span>
+    <span class="phase-label">The Magic Wand</span>
   </div>
   <div class="phase-step" id="phase3">
     <div class="phase-dot">3</div>
-    <span class="phase-label">The Problem</span>
+    <span class="phase-label">The Outcome</span>
   </div>
   <div class="phase-step" id="phase4">
     <div class="phase-dot">4</div>
-    <span class="phase-label">Your Tool</span>
+    <span class="phase-label">Your Experience</span>
   </div>
   <div class="phase-step" id="phase5">
     <div class="phase-dot">✓</div>
-    <span class="phase-label">Action Plan</span>
+    <span class="phase-label">Your Tool Report</span>
   </div>
 </div>
 
@@ -546,41 +547,37 @@ let clientEmail = '';
 const CLARITY_SESSION_ID = 'session_' + Date.now();
 
 const PHASES = {
-  1: { name: "You & Your Business",   questions: 3 },
-  2: { name: "Your Audience",         questions: 2 },
-  3: { name: "The Problem",           questions: 2 },
-  4: { name: "Your Tool Concept",     questions: 2 },
-  5: { name: "Action Plan",           questions: 0 }
+  1: { name: "The Frustration",    questions: 1 },
+  2: { name: "The Magic Wand",     questions: 1 },
+  3: { name: "The Outcome",        questions: 1 },
+  4: { name: "Your Experience",    questions: 1 },
+  5: { name: "Your Tool Report",   questions: 0 }
 };
 
 // ══════════════════════════════════════════
 // SYSTEM PROMPT
 // ══════════════════════════════════════════
-const SYSTEM_PROMPT = `You are the ToolSpark Clarity Session AI — a warm, sharp business strategist and AI tool consultant who helps entrepreneurs figure out exactly what AI tool to build for their business.
+const SYSTEM_PROMPT = `You are the Discover Your Breakthrough AI — a warm, sharp business strategist and AI tool consultant who helps entrepreneurs figure out exactly what AI tool to build for their business.
 
-Your job is to guide the member through 4 phases of discovery, then generate a rich action plan.
+Your job is to guide the member through 5 focused questions, then generate a rich tool recommendation report.
 
 ## THE 4 PHASES
 
-### PHASE 1 — You & Your Business (ask 3 questions total, one at a time)
-1. Start with: "What does your business do, and who do you serve?" (name + business type)
-2. "What are you best known for / what's your signature offer?"
-3. "What's your current biggest business challenge right now?"
+### PHASE 1 — The Frustration
+Ask: "Think about the day to day tasks it takes to run your business. What is the one thing you hate doing the most — the task that drains you every single time?"
 
-### PHASE 2 — Your Audience (2 questions)
-1. "Describe your ideal client in detail — who are they, what do they struggle with?"
-2. "Where do your best clients usually come from right now?"
+### PHASE 2 — The Magic Wand
+Ask: "If you could snap your fingers and have an AI tool that handled something automatically for you or your clients — what would it do?"
 
-### PHASE 3 — The Problem (2 questions)
-1. "What's a question, request, or task your clients ask you repeatedly — something you answer over and over?"
-2. "If you could snap your fingers and remove ONE friction point from your client journey, what would it be?"
+### PHASE 3 — The Outcome
+Ask: "What would make your clients stop and say — this is the most useful thing I have ever used?"
 
-### PHASE 4 — Your Tool Concept (2 questions)
-1. "If you had a magic AI assistant for your clients, what's one thing it would do for them automatically?"
-2. "What outcome would make your clients say 'this is the most useful thing I've ever used'?"
+### PHASE 4 — Tech Experience
+Ask: "How would you describe your current experience with AI tools?"
 
-### PHASE 5 — ACTION PLAN
-After all 8 questions are answered, generate the full action plan (see format below).
+### PHASE 5 — DIY or DFY → Tool Report
+Emit [PHASE:5] and ask: "When it comes to actually building this tool — which feels most like you right now?"
+After they answer, emit [PHASE:5] again and immediately generate the Tool Report (ACTION_PLAN_START block). Do not ask any more questions.
 
 ## CONVERSATION RULES
 - Ask ONE question at a time — never bundle questions
@@ -593,49 +590,59 @@ After all 8 questions are answered, generate the full action plan (see format be
 - When transitioning phases, say something like "Great — I've got a clear picture of [X]. Now let's talk about [next phase topic]."
 
 ## PHASE TRACKING
-You must emit a special tag at the start of your reply to track phases (hidden from user rendering):
-- [PHASE:1] when in phase 1
-- [PHASE:2] when starting phase 2
-- [PHASE:3] when starting phase 3
-- [PHASE:4] when starting phase 4
-- [PHASE:5] when generating the action plan
+Emit exactly one tag at the very start of every reply (it is stripped from display):
+- [PHASE:1] — while in The Frustration
+- [PHASE:2] — while in The Magic Wand
+- [PHASE:3] — while in The Outcome
+- [PHASE:4] — while in Tech Experience
+- [PHASE:5] — when asking the DIY or DFY question AND when generating the Tool Report
+
+IMPORTANT: You must emit [PHASE:5] the moment you transition to the DIY/DFY question. Do not stay on [PHASE:4] for that message.
 
 ## ACTION PLAN FORMAT (Phase 5)
 When all questions are answered, respond with [PHASE:5] then generate this exact structure using markdown:
 
 **ACTION_PLAN_START**
 
-## Your Clarity Report
+### Business Summary
+[2-3 sentences summarizing what they do, who they serve, and their biggest frustration. Be specific and warm. Reference exactly what they said.]
 
-### Your Business Snapshot
-[2-3 sentence summary of who they are and what they do]
+### The Core Opportunity
+[1-2 sentences naming the specific problem an AI tool would solve for them right now based on their answers.]
+### Your 3 Recommended Tools
 
-### Your Ideal Client Profile
-[Bullet points describing their ideal client based on what they shared]
+**Tool 1 — Start Here**
+The tool that fits their current skill level and solves their biggest frustration fastest.
 
-### The Core Problem You Solve
-[Name the specific repeatable problem/friction you identified — make it sharp and clear]
+**Tool 2 — Build Next**
+The tool that builds on tool 1 and goes deeper into their business opportunity.
 
-### Your Recommended AI Tool
-**Tool Name:** [Creative, memorable name for their tool]
-**Tool Type:** [e.g. Quiz + Report Generator / Lead Qualifier / Content Creator / Calculator / Coach Bot]
-**What it does:** [2-3 sentences describing the tool experience for their client]
-**Why this works for you:** [2 sentences connecting it to their specific business and audience]
-
-### Key Features to Build
-[5-6 bullet points of specific features]
-
-### How This Tool Grows Your Business
-[3 bullets: lead gen angle, trust-building angle, revenue angle]
-
-### Your 30-Day Launch Plan
-**Week 1:** [Specific action]
-**Week 2:** [Specific action]
-**Week 3:** [Specific action]
-**Week 4:** [Specific action]
+**Tool 3 — Long Term**
+The most ambitious tool — the one that becomes their signature asset.
 
 ### Your Next Step in ToolSpark
-[1 sentence directing them to choose their path — DIY Shell or DFY Build]
+[1 sentence telling them to choose their tool below and get their Lovable prompt — either build it yourself with the prompt or let us build it for you.]
+
+TOOL_1_NAME:[Creative memorable name]
+TOOL_1_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_1_COMPLEXITY:[Low/Medium/High]
+TOOL_1_PRIORITY:[START HERE]
+TOOL_1_WHY:[One sentence connecting to something specific they said]
+TOOL_1_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
+
+TOOL_2_NAME:[Creative memorable name]
+TOOL_2_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_2_COMPLEXITY:[Low/Medium/High]
+TOOL_2_PRIORITY:[BUILD NEXT]
+TOOL_2_WHY:[One sentence connecting to something specific they said]
+TOOL_2_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
+
+TOOL_3_NAME:[Creative memorable name]
+TOOL_3_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_3_COMPLEXITY:[Low/Medium/High]
+TOOL_3_PRIORITY:[LONG TERM]
+TOOL_3_WHY:[One sentence connecting to something specific they said]
+TOOL_3_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
 
 **ACTION_PLAN_END**
 
@@ -645,11 +652,17 @@ Keep the action plan specific to THEIR answers — not generic. Name their niche
 // QUICK CHIPS
 // ══════════════════════════════════════════
 const CHIPS_BY_PHASE = {
-  1: ["I'm a coach", "I run an agency", "I'm a consultant", "I sell digital products"],
-  2: ["Small business owners", "Entrepreneurs", "Women in business", "Service-based businesses"],
-  3: ["Getting more leads", "Saving time on admin", "Qualifying clients", "Creating content"],
-  4: ["A quiz that recommends solutions", "An AI chatbot for FAQs", "A tool that creates custom plans", "A lead scoring tool"],
-  5: []
+  1: ["Writing content and social media", "Onboarding and repeating myself", "Finding and qualifying leads", "Packaging and pricing my offer", "Admin, scheduling, follow ups"],
+  2: ["Answer my clients questions automatically", "Help clients get clarity before they talk to me", "Create something personalised for each person", "Qualify people before they book a call", "Walk someone through a process without me"],
+  3: ["They finally have clarity on what to do next",
+  "It saved them hours they were wasting every week",
+  "It felt like it was built just for them",
+  "It gave them something they could actually take action on",
+  "It made them look more professional to their own clients"
+],
+  4: ["Complete beginner — haven't really used AI", "I've used ChatGPT or Claude but haven't built anything", "I use AI regularly but haven't built a custom tool", "I've built something before and ready to go deeper"],
+  5: ["Build it for me — I'll focus on my business", "I want to build it myself with the right guidance", "I want to learn so I can do it again and again", "Not sure yet — show me what's involved first"],
+  6: []
 };
 
 // ══════════════════════════════════════════
@@ -863,16 +876,27 @@ async function finishSession(actionPlanText) {
 
   const sessionId = CLARITY_SESSION_ID;
 
+  // Attach userId if the user is already signed in
+  const currentUser = auth.currentUser;
+  const userId = currentUser ? currentUser.uid : null;
+  const accountEmail = currentUser ? currentUser.email : null;
+
   try {
     await db.collection('clarity_sessions').doc(sessionId).set({
       sessionId,
       displayName,
       businessName,
       clientEmail,
+      clientEmailLower: (clientEmail || '').toLowerCase(),
+      ...(userId && { userId, accountEmail }),
       summary: summaryText,
       extracted,
       transcript: conversationHistory,
       actionPlan: actionPlanText,
+      tool1: { name: '', summary: '', complexity: '', lovablePrompt: '' },
+      tool2: { name: '', summary: '', complexity: '', lovablePrompt: '' },
+      tool3: { name: '', summary: '', complexity: '', lovablePrompt: '' },
+      chosenTool: null,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: 'completed'
     });
@@ -884,17 +908,21 @@ async function finishSession(actionPlanText) {
     console.log('Firestore save failed:', e);
   }
 
-  if (clientEmail && typeof emailjs !== 'undefined') {
+  if (clientEmail) {
     try {
-      emailjs.send('service_c6gz0qv', 'template_866vz7q', {
-        client_name: displayName,
-        business_name: businessName,
-        client_email: clientEmail,
-        summary: summaryText,
-        results_url: 'https://toolspark.co/results.html?session=' + sessionId,
-        date: new Date().toLocaleDateString('en-US', {
-          weekday: 'long', year: 'numeric', month: 'long',
-          day: 'numeric', hour: '2-digit', minute: '2-digit'
+      await fetch('https://app.loops.so/api/v1/transactional', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 0098c07ddc65e9c00b244a849cca93d6'
+        },
+        body: JSON.stringify({
+          transactionalId: 'cmpjeq7cf06ev0jzwwd3rizi9',
+          email: clientEmail,
+          dataVariables: {
+            first_name: displayName || 'there',
+            results_url: 'https://toolspark.co/results.html?session=' + sessionId
+          }
         })
       });
     } catch(e) {
@@ -955,9 +983,9 @@ async function initSession() {
   document.getElementById("sendBtn").disabled = true;
   showThinking();
 
-  const openingPrompt = `Start the clarity session. The user's name is ${displayName}${businessName ? ` and their business is called "${businessName}"` : ''}.
-Begin with a warm, confident 2-3 sentence welcome that sets the tone — tell them this is a focused discovery conversation to figure out the perfect AI tool for their business, and it'll take about 10-15 minutes.
-Then immediately ask the first question. Emit [PHASE:1] at the start of your reply.`;
+const openingPrompt = `Start the Discover Your Breakthrough session. The user's name is ${displayName}${businessName ? ` and their business is called "${businessName}"` : ''}.
+Begin with a warm 2-3 sentence welcome — tell them this is a quick focused session to figure out exactly what AI tool would make the biggest impact on their business right now.
+Then immediately ask the frustration question — what is the one thing they hate doing most in their business. Emit [PHASE:1] at the start of your reply.`;
 
   try {
     const reply = await callClaude(openingPrompt);
@@ -967,7 +995,7 @@ Then immediately ask the first question. Emit [PHASE:1] at the start of your rep
     setChips(1);
   } catch(e) {
     hideThinking();
-    addMessage("assistant", `[PHASE:1] Welcome! I'm your ToolSpark Clarity AI. Let's figure out the perfect AI tool for your business in the next 10-15 minutes.\n\n**What does your business do, and who do you serve?**`);
+    addMessage("assistant", `[PHASE:1] Welcome! I'm your Discover Your Breakthrough AI. Let's figure out the perfect AI tool for your business in the next 10 minutes.\n\n**What is the one thing you hate doing most in your business right now?**`);
     setChips(1);
   }
 
