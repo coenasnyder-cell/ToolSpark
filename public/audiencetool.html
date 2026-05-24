@@ -493,12 +493,12 @@
   <div class="sw-card">
     <div class="sw-eyebrow">ToolSpark · Free Tool</div>
     <h1>Audience <em>Deep Dive</em></h1>
-    <p class="sw-sub">Most coaches and course creators are guessing at who they're really talking to. This changes that — in your words, in about 10 minutes.</p>
+    <p class="sw-sub">Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. This finds them — in your words, in about 10 minutes.</p>
 
     <div class="sw-promises">
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Your Client Bible</strong> — a deep, honest profile of the exact person you're built to help</span>
+        <span><strong>Your Client Provile</strong> — a deep, honest profile of the exact person you're built to help</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
@@ -522,7 +522,7 @@
 <header class="hero">
   <div class="hero-eyebrow">ToolSpark · Free Tool</div>
   <h1>Audience <em>Deep Dive</em></h1>
-  <p class="hero-sub">Stop guessing at who you're talking to. <b>Let's build your Client Bible together</b> — in your words, from your real experience.</p>
+  <p class="hero-sub">Stop guessing at who you're talking to. <b>Let's build your Client Profile together</b> — in your words, from your real experience.</p>
 </header>
 
 <!-- PROGRESS -->
@@ -580,7 +580,7 @@ const AUDIENCE_SESSION_ID = 'audience_' + Date.now();
 // ─────────────────────────────────────
 // SYSTEM PROMPT — your voice
 // ─────────────────────────────────────
-const BASE_SYSTEM = `You are the heart of the "Audience Deep Dive" — a tool inside ToolSpark that helps coaches and course creators get to know their audience so deeply that every tool they build, every word they write, and every offer they create speaks directly to the right person.
+const BASE_SYSTEM = `You are the heart of the "Audience Deep Dive" — a tool inside ToolSpark that helps entrepreneurs of any kind get to know their audience so deeply that every tool they build, every word they write, and every offer they create speaks directly to the right person.
 
 Your personality is warm, patient, and genuinely curious. You sound like a trusted friend who has been exactly where this person is. You never rush. You never judge. You believe that the person in front of you already has everything they need — they just need the right questions to pull it out.
 
@@ -592,7 +592,7 @@ Your core beliefs that should come through in every message:
 - If they are their audience they already have everything you need inside them
 
 ## YOUR JOB
-Guide them through 7 questions using one of two paths based on who they're targeting. Then generate their Client Bible.
+Guide them through 7 questions using one of two paths based on who they're targeting. Then generate their Client Profile.
 
 ## PATH SPLITTER — Ask this first, always
 
@@ -621,7 +621,7 @@ Q6: "How would you describe this problem to a close friend? Not professionally �
 (Open answer — this gives you their exact marketing language. These are the words that will stop people scrolling.)
 
 Q7: "Last one — finish this sentence however feels true: The person I most want to help is someone who..."
-(Open answer — this becomes the seed of their Client Bible.)
+(Open answer — this becomes the seed of their Client Profile.)
 
 ## PATH B — They serve someone different
 
@@ -641,7 +641,7 @@ Q6: "How do they describe their life now compared to before? What words do they 
 (Open answer — this becomes your results language and testimonial framing.)
 
 Q7: "Last one — based on everything you just shared, finish this sentence: The person I help is someone who..."
-(Open answer — seed of their Client Bible.)
+(Open answer — seed of their Client Profile.)
 
 ## CONVERSATION RULES
 - Ask one question at a time. Never stack questions.
@@ -652,9 +652,9 @@ Q7: "Last one — based on everything you just shared, finish this sentence: The
 - The mic is available — remind them if they seem stuck: "You can also just hit the mic and talk it out — sometimes it's easier to say than type."
 - Never rush. Each answer deserves space.
 - Emit [Q:N] at the start of each reply
-- After Q7 is answered emit [DONE] and generate the Client Bible
+- After Q7 is answered emit [DONE] and generate the Client PROFILE
 
-## CLIENT BIBLE FORMAT
+## CLIENT PROFILE FORMAT
 After [DONE] generate exactly this:
 
 CLIENT_BIBLE_START
@@ -1067,7 +1067,7 @@ async function handleSend() {
 async function init() {
   showThinking();
   const opening = `Start the Audience Deep Dive session.
-Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that most coaches and course creators are guessing at who they're really talking to, and that this changes today.
+Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that most people building an online business are sitting on years of experience and still guessing who they're actually building it for, and that this changes today.
 Then ask the path splitter question. Emit [Q:1] at the start.`;
 
   try {
@@ -1076,7 +1076,7 @@ Then ask the path splitter question. Emit [Q:1] at the start.`;
     addMsg("assistant", reply);
   } catch(e) {
     hideThinking();
-    addMsg("assistant", `[Q:1] Welcome — and I'm so glad you're here. Most coaches and course creators are guessing at who they're really talking to. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they <b>a lot like you right now</b>, or <b>someone you've already been able to help</b> through something?`);
+    addMsg("assistant", `[Q:1] Welcome — and I'm so glad you're here. Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they <b>a lot like you right now</b>, or <b>someone you've already been able to help</b> through something?`);
   }
   document.getElementById("sendBtn").disabled = false;
 }

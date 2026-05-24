@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Client Bible — ToolSpark</title>
+<title>Audience Depp Dive Results — ToolSpark</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -294,14 +294,13 @@
 
 <div id="loadingState">
   <div class="loading-ring"></div>
-  <div class="loading-text">Building your Client Bible...</div>
+  <div class="loading-text">Building your results...</div>
 </div>
 
 <div id="content">
   <header class="hero">
-    <div class="hero-eyebrow">ToolSpark · Audience Deep Dive</div>
-    <div class="hero-name" id="heroName">Your <span>Client Bible</span></div>
-    <p class="hero-sub">Everything you now know about the exact person you're built to help — in their words, from your lived experience.</p>
+    <div class="hero-eyebrow">ToolSpark · Audience Deep Dive Results</div>
+       <p class="hero-sub">Everything you now know about the exact person you're built to help — in their words, from your lived experience.</p>
   </header>
 
   <div class="page-wrap">
@@ -401,7 +400,7 @@ function escHtml(s) {
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ── PARSE RAW CLIENT BIBLE ──
+// ── PARSE RAW CLIENT PROFILE ──
 function extractBlock(raw) {
   const match = raw.match(/CLIENT_BIBLE_START[\s\S]*?CLIENT_BIBLE_END/);
   return match ? match[0].trim() : raw.trim();
@@ -471,8 +470,8 @@ function renderProfile(profile) {
   // Hero
   if (profile.name && profile.name !== "Your") {
     document.getElementById("heroName").innerHTML =
-      `${escHtml(profile.name)}'s <span>Client Bible</span>`;
-    document.title = `${profile.name}'s Client Bible — ToolSpark`;
+      `${escHtml(profile.name)}'s <span></span>`;
+    document.title = `${profile.name}'s Client Profile — ToolSpark`;
   }
 
   // Path badge

@@ -456,7 +456,18 @@
 </nav>
 
 <!-- START SCREEN -->
-<div class="start-screen" id="start-screen">
+<div class="start-screen" id="locked-screen" style="display:none;">
+  <div class="start-card" style="text-align:center;">
+    <div class="start-logo-mark">ToolSpark</div>
+    <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
+    <h1 style="margin-bottom:0.5rem;">You've completed your<br><em>2 Breakthrough sessions</em></h1>
+    <p class="start-sub" style="margin-bottom:1.5rem;">You've already uncovered your best tool opportunities. Head to your dashboard to pick one and start building — or reach out if you'd like to run another session.</p>
+    <a href="userclaritytools.html" class="start-btn" style="display:inline-block;text-decoration:none;margin-bottom:0.75rem;">View My Results →</a>
+    <div style="font-size:13px;color:var(--text3);">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold);font-weight:700;">Contact us</a></div>
+  </div>
+</div>
+
+<div class="start-screen" id="start-screen" style="display:none;">
   <div class="start-card">
     <div class="start-logo-mark">ToolSpark</div>
     <h1>Discover Your <em>Breakthrough</em></h1>
@@ -547,11 +558,13 @@ let clientEmail = '';
 const CLARITY_SESSION_ID = 'session_' + Date.now();
 
 const PHASES = {
-  1: { name: "The Frustration",    questions: 1 },
-  2: { name: "The Magic Wand",     questions: 1 },
-  3: { name: "The Outcome",        questions: 1 },
-  4: { name: "Your Experience",    questions: 1 },
-  5: { name: "Your Tool Report",   questions: 0 }
+  1: { name: "The Frustration",   questions: 1 },
+  2: { name: "The Magic Wand",    questions: 1 },
+  3: { name: "The Outcome",       questions: 1 },
+  4: { name: "Your Experience",   questions: 1 },
+  5: { name: "How You'll Build",  questions: 1 },
+  6: { name: "How You'll Build",  questions: 1 },
+  7: { name: "Your Tool Report",  questions: 0 }
 };
 
 // ══════════════════════════════════════════
@@ -559,9 +572,9 @@ const PHASES = {
 // ══════════════════════════════════════════
 const SYSTEM_PROMPT = `You are the Discover Your Breakthrough AI — a warm, sharp business strategist and AI tool consultant who helps entrepreneurs figure out exactly what AI tool to build for their business.
 
-Your job is to guide the member through 5 focused questions, then generate a rich tool recommendation report.
+Your job is to guide the member through 6 focused questions, then generate a rich tool recommendation report.
 
-## THE 4 PHASES
+## THE 6 PHASES
 
 ### PHASE 1 — The Frustration
 Ask: "Think about the day to day tasks it takes to run your business. What is the one thing you hate doing the most — the task that drains you every single time?"
@@ -575,9 +588,18 @@ Ask: "What would make your clients stop and say — this is the most useful thin
 ### PHASE 4 — Tech Experience
 Ask: "How would you describe your current experience with AI tools?"
 
-### PHASE 5 — DIY or DFY → Tool Report
+### PHASE 5 — DIY or DFY
 Emit [PHASE:5] and ask: "When it comes to actually building this tool — which feels most like you right now?"
-After they answer, emit [PHASE:5] again and immediately generate the Tool Report (ACTION_PLAN_START block). Do not ask any more questions.
+After they answer, proceed immediately to Phase 6.
+
+### PHASE 6 — How They'll Build
+Emit [PHASE:6] and ask: "One last thing — do you have an existing platform you want to add this tool to, or are you starting fresh?"
+After they answer, emit [PHASE:7] and immediately generate the Tool Report (ACTION_PLAN_START block). Do not ask any more questions.
+
+If they have existing platform → generate a VS Code/Cursor/Claude Code compatible prompt
+If starting from scratch → generate a Lovable compatible prompt
+If no-code → generate a Lovable compatible prompt
+If developer helping → generate a full spec prompt
 
 ## CONVERSATION RULES
 - Ask ONE question at a time — never bundle questions
@@ -588,6 +610,15 @@ After they answer, emit [PHASE:5] again and immediately generate the Tool Report
 - After each answer, briefly acknowledge it (1-2 sentences) then move to the next question
 - Track phase progression: after every 2-3 questions, you'll transition to the next phase
 - When transitioning phases, say something like "Great — I've got a clear picture of [X]. Now let's talk about [next phase topic]."
+## BUILD METHOD RULES
+Based on their Phase 6 answer generate the correct prompt type:
+- "Starting from scratch" or "no-code tool" → generate Lovable prompt format
+- "Existing platform" → generate VS Code + Claude Code prompt format
+- "Developer helping me" → generate full technical spec format
+
+Always include the honest cost note in the Tool Report:
+- Lovable/Base44 path → note monthly credit costs and expiry
+- VS Code + Claude Code path → note this lives in their existing platform with no ongoing platform fee
 
 ## PHASE TRACKING
 Emit exactly one tag at the very start of every reply (it is stripped from display):
@@ -595,12 +626,20 @@ Emit exactly one tag at the very start of every reply (it is stripped from displ
 - [PHASE:2] — while in The Magic Wand
 - [PHASE:3] — while in The Outcome
 - [PHASE:4] — while in Tech Experience
-- [PHASE:5] — when asking the DIY or DFY question AND when generating the Tool Report
+- [PHASE:5] — when asking the DIY or DFY question
+- [PHASE:6] — when asking the Build Method question (existing platform vs starting fresh)
+- [PHASE:7] — when generating the Tool Report
 
-IMPORTANT: You must emit [PHASE:5] the moment you transition to the DIY/DFY question. Do not stay on [PHASE:4] for that message.
+IMPORTANT: You must emit the correct phase tag the moment you transition to each new question. Do not stay on the previous phase tag for that message.
 
-## ACTION PLAN FORMAT (Phase 5)
-When all questions are answered, respond with [PHASE:5] then generate this exact structure using markdown:
+- The moment you ask the DIY/DFY question → emit [PHASE:5]
+- The moment you ask the Build Method question → emit [PHASE:6]
+- The moment you generate the Tool Report → emit [PHASE:7]
+
+Never emit the same phase tag twice in a row for different questions.
+
+## ACTION PLAN FORMAT (Phase 7)
+When all 6 questions are answered, respond with [PHASE:7] then generate this exact structure:
 
 **ACTION_PLAN_START**
 
@@ -609,6 +648,7 @@ When all questions are answered, respond with [PHASE:5] then generate this exact
 
 ### The Core Opportunity
 [1-2 sentences naming the specific problem an AI tool would solve for them right now based on their answers.]
+
 ### Your 3 Recommended Tools
 
 **Tool 1 — Start Here**
@@ -620,29 +660,26 @@ The tool that builds on tool 1 and goes deeper into their business opportunity.
 **Tool 3 — Long Term**
 The most ambitious tool — the one that becomes their signature asset.
 
-### Your Next Step in ToolSpark
-[1 sentence telling them to choose their tool below and get their Lovable prompt — either build it yourself with the prompt or let us build it for you.]
-
 TOOL_1_NAME:[Creative memorable name]
-TOOL_1_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_1_SUMMARY:[2-3 sentences: what the tool does, who uses it, and what they walk away with. Be specific to their niche.]
 TOOL_1_COMPLEXITY:[Low/Medium/High]
 TOOL_1_PRIORITY:[START HERE]
-TOOL_1_WHY:[One sentence connecting to something specific they said]
-TOOL_1_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
+TOOL_1_WHY:[2 sentences connecting this tool directly to something specific they said. Name the pain point and explain why this tool solves it.]
+TOOL_1_HOW:[2-3 sentences describing the core flow: what the user inputs, what the tool does with it, and what it outputs. Specific enough that someone could describe this to a no-code builder.]
 
 TOOL_2_NAME:[Creative memorable name]
-TOOL_2_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_2_SUMMARY:[2-3 sentences: what the tool does, who uses it, and what they walk away with. Be specific to their niche.]
 TOOL_2_COMPLEXITY:[Low/Medium/High]
 TOOL_2_PRIORITY:[BUILD NEXT]
-TOOL_2_WHY:[One sentence connecting to something specific they said]
-TOOL_2_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
+TOOL_2_WHY:[2 sentences connecting this tool directly to something specific they said. Name the pain point and explain why this tool solves it.]
+TOOL_2_HOW:[2-3 sentences describing the core flow: what the user inputs, what the tool does with it, and what it outputs. Specific enough that someone could describe this to a no-code builder.]
 
 TOOL_3_NAME:[Creative memorable name]
-TOOL_3_SUMMARY:[One sentence describing what it does for their specific client]
+TOOL_3_SUMMARY:[2-3 sentences: what the tool does, who uses it, and what they walk away with. Be specific to their niche.]
 TOOL_3_COMPLEXITY:[Low/Medium/High]
 TOOL_3_PRIORITY:[LONG TERM]
-TOOL_3_WHY:[One sentence connecting to something specific they said]
-TOOL_3_LOVABLE_PROMPT:[Full detailed ready to paste Lovable prompt customized to their niche, audience, and tech level]
+TOOL_3_WHY:[2 sentences connecting this tool directly to something specific they said. Name the pain point and explain why this tool solves it.]
+TOOL_3_HOW:[2-3 sentences describing the core flow: what the user inputs, what the tool does with it, and what it outputs. Specific enough that someone could describe this to a no-code builder.]
 
 **ACTION_PLAN_END**
 
@@ -652,19 +689,14 @@ Keep the action plan specific to THEIR answers — not generic. Name their niche
 // QUICK CHIPS
 // ══════════════════════════════════════════
 const CHIPS_BY_PHASE = {
-  1: ["Writing content and social media", "Onboarding and repeating myself", "Finding and qualifying leads", "Packaging and pricing my offer", "Admin, scheduling, follow ups"],
-  2: ["Answer my clients questions automatically", "Help clients get clarity before they talk to me", "Create something personalised for each person", "Qualify people before they book a call", "Walk someone through a process without me"],
-  3: ["They finally have clarity on what to do next",
-  "It saved them hours they were wasting every week",
-  "It felt like it was built just for them",
-  "It gave them something they could actually take action on",
-  "It made them look more professional to their own clients"
-],
-  4: ["Complete beginner — haven't really used AI", "I've used ChatGPT or Claude but haven't built anything", "I use AI regularly but haven't built a custom tool", "I've built something before and ready to go deeper"],
-  5: ["Build it for me — I'll focus on my business", "I want to build it myself with the right guidance", "I want to learn so I can do it again and again", "Not sure yet — show me what's involved first"],
-  6: []
+  1: ["Writing content and social media", "Finding and qualifying leads", "Admin, scheduling, follow ups"],
+  2: ["Help clients get clarity before they talk to me", "Create something personalised for each person", "Walk someone through a process without me"],
+  3: ["They finally have clarity on what to do next", "It saved them hours they were wasting every week", "It felt like it was built just for them"],
+  4: ["Complete beginner — haven't really used AI", "I've used ChatGPT or Claude but haven't built anything", "I use AI regularly but haven't built a custom tool"],
+  5: ["Build it for me — I'll focus on my business", "I want to build it myself with the right guidance", "Not sure yet — show me what's involved first"],
+  6: ["I'm starting from scratch — no platform yet", "I have an existing platform I want to add it to", "I have a developer helping me"],
+  7: []
 };
-
 // ══════════════════════════════════════════
 // START SESSION
 // ══════════════════════════════════════════
@@ -827,52 +859,9 @@ async function finishSession(actionPlanText) {
 
   showThinking();
 
-  const conversation = conversationHistory.map(m =>
-    (m.role === 'user' ? displayName : 'ToolSpark') + ': ' + m.content
-  ).join('\n\n');
-
-  let summaryText = 'Summary unavailable';
-  let extracted = {};
-
-  try {
-    const summaryResponse = await fetch(FUNCTION_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 200,
-        messages: [{
-          role: 'user',
-          content: `Based on this business clarity interview, write a 2-3 sentence plain English summary of what this business does, who it serves, and where the biggest opportunity for an AI tool is. Be specific and warm. No bullet points.\n\nINTERVIEW:\n${conversation}`
-        }],
-        _meta: { tool: 'clarity-summary', sessionId: CLARITY_SESSION_ID }
-      })
-    });
-    const summaryData = await summaryResponse.json();
-    summaryText = summaryData.content[0].text;
-  } catch(e) {
-    console.log('Summary generation failed:', e);
-  }
-
-  try {
-    const extractResponse = await fetch(FUNCTION_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 500,
-        messages: [{
-          role: 'user',
-          content: `Based on this business clarity interview extract the following information. Respond ONLY with valid JSON, no markdown:\n{"coreMethod":"what they teach or help people do","delivery":"how they currently deliver it","clientProfile":"who their ideal client is and starting point","success":"what success looks like for clients","friction":"where clients get stuck or give up","repetition":"what the creator repeats or explains most often","extra":"any other useful context"}\n\nINTERVIEW:\n${conversation}`
-        }],
-        _meta: { tool: 'clarity-extract', sessionId: CLARITY_SESSION_ID }
-      })
-    });
-    const extractData = await extractResponse.json();
-    extracted = JSON.parse(extractData.content[0].text.replace(/```json|```/g, '').trim());
-  } catch(e) {
-    console.log('Data extraction failed:', e);
-  }
+  // Parse summary directly from the actionPlan — no extra API call needed
+  const summaryMatch = actionPlanText.match(/###\s*Business Summary\s*\n([\s\S]*?)(?=###|TOOL_1_NAME|ACTION_PLAN_END|$)/);
+  const summaryText = summaryMatch ? summaryMatch[1].trim() : 'Your Breakthrough session results are ready.';
 
   const sessionId = CLARITY_SESSION_ID;
 
@@ -890,19 +879,15 @@ async function finishSession(actionPlanText) {
       clientEmailLower: (clientEmail || '').toLowerCase(),
       ...(userId && { userId, accountEmail }),
       summary: summaryText,
-      extracted,
       transcript: conversationHistory,
       actionPlan: actionPlanText,
-      tool1: { name: '', summary: '', complexity: '', lovablePrompt: '' },
-      tool2: { name: '', summary: '', complexity: '', lovablePrompt: '' },
-      tool3: { name: '', summary: '', complexity: '', lovablePrompt: '' },
       chosenTool: null,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: 'completed'
     });
 
     const sessions = JSON.parse(localStorage.getItem('toolspark_clarity_sessions') || '[]');
-    sessions.push({ sessionId, displayName, clientEmail, summary: summaryText, extracted });
+    sessions.push({ sessionId, displayName, clientEmail, summary: summaryText });
     localStorage.setItem('toolspark_clarity_sessions', JSON.stringify(sessions));
   } catch(e) {
     console.log('Firestore save failed:', e);
@@ -921,7 +906,7 @@ async function finishSession(actionPlanText) {
           email: clientEmail,
           dataVariables: {
             first_name: displayName || 'there',
-            results_url: 'https://toolspark.co/results.html?session=' + sessionId
+            results_url: 'https://toolspark.co/userclaritytools.html'
           }
         })
       });
@@ -930,7 +915,7 @@ async function finishSession(actionPlanText) {
     }
   }
 
-  window.location.href = 'results.html?session=' + sessionId;
+  window.location.href = 'userclaritytools.html';
 }
 
 // ══════════════════════════════════════════
@@ -1020,6 +1005,42 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
 const _params = new URLSearchParams(window.location.search);
 if (_params.get('name')) document.getElementById('s_displayName').value = _params.get('name');
 if (_params.get('email')) document.getElementById('s_email').value = _params.get('email');
+
+// ── Session limit check ──
+const DEFAULT_LIMIT = 2;
+auth.onAuthStateChanged(async function(user) {
+  if (!user) {
+    document.getElementById('start-screen').style.display = 'flex';
+    return;
+  }
+  // Pre-fill email if signed in
+  if (!document.getElementById('s_email').value) {
+    document.getElementById('s_email').value = user.email || '';
+  }
+
+  try {
+    // Check admin override limit on user profile
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    const limit = (userDoc.exists && userDoc.data().breakthroughLimit != null)
+      ? userDoc.data().breakthroughLimit
+      : DEFAULT_LIMIT;
+
+    // Count completed sessions for this user
+    const snap = await db.collection('clarity_sessions')
+      .where('userId', '==', user.uid)
+      .get();
+    const completed = snap.docs.filter(d => d.data().status === 'completed').length;
+
+    if (completed >= limit) {
+      document.getElementById('locked-screen').style.display = 'flex';
+    } else {
+      document.getElementById('start-screen').style.display = 'flex';
+    }
+  } catch(e) {
+    // On error just show the start screen
+    document.getElementById('start-screen').style.display = 'flex';
+  }
+});
 </script>
 </body>
 </html>

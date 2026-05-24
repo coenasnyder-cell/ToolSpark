@@ -519,7 +519,7 @@
       { key: 'complexity', tag: 'COMPLEXITY' },
       { key: 'priority',   tag: 'PRIORITY' },
       { key: 'why',        tag: 'WHY' },
-      { key: 'prompt',     tag: 'LOVABLE_PROMPT' },
+      { key: 'how',        tag: 'HOW' },
     ];
     const tools = [];
     for (let i = 1; i <= 3; i++) {
@@ -580,14 +580,10 @@
     const wrap = document.getElementById('roadmap-wrap');
     wrap.innerHTML = (chosenIndex !== null ? changeLink : '') + noPick + tools.map((t, i) => {
       const oi = t._origIndex;
-      const promptSection = t.prompt
-        ? `<div class="prompt-section-label">Build prompt</div>
-           <div class="prompt-box">${escapeHtml(t.prompt)}</div>
-           <div class="copy-row">
-             <button class="copy-btn" id="copy-btn-${i}" onclick="copyPrompt(${i}, ${JSON.stringify(t.prompt)})">Copy prompt</button>
-             <span class="builder-note">Paste into <a href="https://lovable.dev" target="_blank" rel="noopener">Lovable</a> or <a href="https://base44.com" target="_blank" rel="noopener">Base44</a></span>
-           </div>`
-        : `<p class="no-prompt">Complete a Breakthrough session to get your build prompt.</p>`;
+      const promptSection = t.how
+        ? `<div class="prompt-section-label">How it works</div>
+           <div class="step-why">${escapeHtml(t.how)}</div>`
+        : '';
 
       return `
       <div class="roadmap-step">

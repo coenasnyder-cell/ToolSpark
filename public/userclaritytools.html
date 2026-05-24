@@ -841,7 +841,7 @@
         complexity: get('COMPLEXITY'),
         priority: get('PRIORITY'),
         why: get('WHY'),
-        prompt: get('LOVABLE_PROMPT')
+        how: get('HOW')
       });
     }
     return tools;
@@ -891,6 +891,7 @@
           <div class="bt-tool-body">
             <div class="bt-tool-what">${escapeHtml(tool.summary)}</div>
             ${tool.why ? `<div class="bt-tool-why"><strong>Why this tool:</strong> ${escapeHtml(tool.why)}</div>` : ''}
+            ${tool.how ? `<div class="bt-tool-why" style="margin-top:6px;"><strong>How it works:</strong> ${escapeHtml(tool.how)}</div>` : ''}
             ${tool.complexity ? `<div class="bt-complexity">Complexity: ${escapeHtml(tool.complexity)}</div>` : ''}
           </div>
           <div class="bt-tool-footer">
