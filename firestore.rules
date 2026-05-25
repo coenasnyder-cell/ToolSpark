@@ -204,6 +204,18 @@ match /spark_results/{resultId} {
       allow write: if isAdmin();
     }
 
+    // AGENT SESSIONS
+    match /agent_sessions/{sessionId} {
+      allow read: if isActive() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isActive() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isActive() &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
    // CONVERSATIONS (direct messages)
 match /conversations/{conversationId} {
   allow read: if isActive() &&
