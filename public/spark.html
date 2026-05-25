@@ -537,7 +537,7 @@
 
 <!-- INPUT -->
 <div class="input-area" id="inputArea">
-  <div class="voice-bar">
+  <div class="voice-bar" style="display:none;">
     <button class="voice-toggle-btn" id="voiceToggleBtn" onclick="toggleVoice()">🔊 Voice on</button>
   </div>
   <div class="chips-row" id="chips"></div>
@@ -906,6 +906,7 @@ async function callAI(userMsg) {
 // ─────────────────────────────────────
 async function handleSend() {
   if (busy || finished) return;
+  unlockAudio();
   stopMic();
   if (currentAudio) { currentAudio.pause(); currentAudio = null; clearSpeakingAvatar(); }
   const input = document.getElementById("userInput");
@@ -991,7 +992,19 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 
+// ── Auth gate ──
+const sparkWelcomeEl = document.getElementById('sparkwelcome');
+sparkWelcomeEl.style.display = 'none';
+auth.onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.href = 'signon.html?redirect=spark';
+  } else {
+    sparkWelcomeEl.style.display = 'flex';
+  }
+});
+
 function startSpark() {
+  unlockAudio();
   const welcome = document.getElementById('sparkwelcome');
   welcome.classList.add('hidden');
   setTimeout(() => { welcome.style.display = 'none'; }, 460);
@@ -1001,16 +1014,26 @@ function startSpark() {
 // ─────────────────────────────────────
 // VOICE / TEXT-TO-SPEECH
 // ─────────────────────────────────────
-let voiceOn = true;
+let voiceOn = false;
 let currentAudio = null;
 let speakingAvatar = null;
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  // Play a silent audio on a direct user gesture to satisfy browser autoplay policy
+  const silence = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
+  silence.play().then(() => { audioUnlocked = true; }).catch(() => {});
+}
 
 function toggleVoice() {
   voiceOn = !voiceOn;
   const btn = document.getElementById("voiceToggleBtn");
   btn.textContent = voiceOn ? "🔊 Voice on" : "🔇 Voice off";
   btn.classList.toggle("muted", !voiceOn);
-  if (!voiceOn) {
+  if (voiceOn) {
+    unlockAudio();
+  } else {
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     clearSpeakingAvatar();
     stopMic();

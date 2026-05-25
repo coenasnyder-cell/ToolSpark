@@ -537,7 +537,7 @@
 
 <!-- INPUT -->
 <div class="input-area" id="inputArea">
-  <div class="voice-bar">
+  <div class="voice-bar" style="display:none;">
     <button class="voice-toggle-btn" id="voiceToggleBtn" onclick="toggleVoice()">🔊 Voice on</button>
   </div>
   <div class="chips-row" id="chips"></div>
@@ -1091,18 +1091,29 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 
+// ── Auth gate ──
+const audienceWelcomeEl = document.getElementById('sparkwelcome');
+audienceWelcomeEl.style.display = 'none';
+auth.onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.href = 'signon.html?redirect=audiencetool';
+  } else {
+    audienceWelcomeEl.style.display = 'flex';
+  }
+});
+
 async function startSpark() {
   const welcome = document.getElementById('sparkwelcome');
   welcome.classList.add('hidden');
   setTimeout(() => { welcome.style.display = 'none'; }, 460);
-  await sparkContextPromise; // ensure spark context is loaded before first message
+  await sparkContextPromise;
   init();
 }
 
 // ─────────────────────────────────────
 // VOICE / TEXT-TO-SPEECH
 // ─────────────────────────────────────
-let voiceOn = true;
+let voiceOn = false;
 let currentAudio = null;
 let speakingAvatar = null;
 
