@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Agent — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:       #141210;
+    --dark2:      #1C1A17;
+    --dark3:      #1C1A17;
+    --gold:       #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim:   rgba(201,168,76,0.10);
+    --gold-mid:   rgba(201,168,76,0.20);
+    --border:     rgba(201,168,76,0.15);
+    --border-mid: rgba(201,168,76,0.25);
+    --cream:      #F0EDE6;
+    --text3:      #9E9891;
+    --green-dim:  rgba(42,92,69,0.25);
+    --green-mid:  #3D8A65;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark);
+    color: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── PLATFORM HEADER ── */
+  .platform-header {
+    height: 56px;
+    background: #0C0B09;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .ph-back {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    color: var(--text3);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    transition: color 0.18s;
+  }
+  .ph-back:hover { color: var(--gold-light); }
+  .ph-back svg { opacity: 0.6; }
+  .ph-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .ph-user {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    text-align: center;
+    padding: 36px 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark2);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); opacity: 0.7;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text3);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── CHAT ── */
+  .chat-wrap {
+    flex: 1;
+    max-width: 700px; width: 100%;
+    margin: 0 auto;
+    padding: 32px 20px 170px;
+  }
+
+  .msg {
+    display: flex; gap: 12px;
+    margin-bottom: 22px;
+    animation: rise 0.38s ease both;
+  }
+  .msg.user { flex-direction: row-reverse; }
+  @keyframes rise {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .av {
+    width: 36px; height: 36px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .av.ai {
+    background: var(--gold-dim);
+    border: 1px solid var(--border-mid);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+  }
+  .av.you {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,138,101,0.3);
+    color: var(--green-mid);
+  }
+
+  .bubble {
+    max-width: 86%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .bubble.ai {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.you {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,138,101,0.22);
+    color: #c6e4d4;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.ai b  { color: var(--gold); }
+  .bubble.ai em { color: var(--gold-light); opacity: 0.8; font-style: normal; }
+
+  /* ── SAVE NOTE ── */
+  .save-note {
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--green-mid);
+    opacity: 0.85;
+    margin-bottom: 12px;
+    animation: rise 0.3s ease both;
+  }
+  .close-session-wrap {
+    text-align: center;
+    padding: 8px 16px 24px;
+    animation: rise 0.4s ease both;
+  }
+  .close-session-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-dim);
+    border: 1px solid var(--border-mid);
+    color: var(--gold-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 11px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .close-session-btn:hover {
+    background: var(--gold-mid);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-1px);
+  }
+  .session-community-note {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+  .session-community-link {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 700;
+    transition: opacity 0.18s;
+  }
+  .session-community-link:hover { opacity: 0.75; }
+
+  /* ── THINKING ── */
+  .thinking {
+    display: flex; gap: 12px; align-items: flex-end;
+    margin-bottom: 22px;
+    animation: rise 0.25s ease both;
+  }
+  .t-dots {
+    padding: 14px 18px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 18px 18px 18px 4px;
+    display: flex; gap: 5px; align-items: center;
+  }
+  .dot { width:6px; height:6px; border-radius:50%; background: var(--gold); }
+  .dot:nth-child(1){animation:blink 1.1s 0s    infinite;}
+  .dot:nth-child(2){animation:blink 1.1s 0.18s infinite;}
+  .dot:nth-child(3){animation:blink 1.1s 0.36s infinite;}
+  @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+
+  /* ── INPUT ── */
+  .input-area {
+    position: fixed; bottom:0; left:0; right:0;
+    padding: 14px 20px 22px;
+    background: linear-gradient(transparent, var(--dark) 30%);
+    z-index: 40;
+  }
+  .input-row {
+    max-width: 700px; margin: 0 auto;
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  .input-box {
+    flex: 1;
+    background: var(--dark3);
+    border: 1px solid var(--border-mid);
+    border-radius: 13px;
+    padding: 13px 17px;
+    color: var(--gold-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px; outline: none;
+    resize: none;
+    min-height: 50px; max-height: 130px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .input-box::placeholder { color: var(--text3); }
+  .input-box:focus { border-color: rgba(201,168,76,0.45); }
+  .send-btn {
+    width: 46px; height: 46px;
+    background: var(--gold); border: none;
+    border-radius: 11px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s; flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--gold-light); transform: scale(1.05); }
+  .send-btn:disabled { background: rgba(201,168,76,0.25); cursor: not-allowed; }
+  .send-btn svg { fill: var(--dark); }
+  .mic-btn {
+    width: 46px; height: 46px;
+    background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 11px; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    transition: all 0.18s; flex-shrink: 0; font-size: 18px;
+  }
+  .mic-btn:hover { background: rgba(201,168,76,0.22); }
+  .mic-btn.active {
+    background: rgba(196,98,45,0.15); border-color: rgba(196,98,45,0.5);
+    animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(196,98,45,0.35); }
+    50% { box-shadow: 0 0 0 7px rgba(196,98,45,0); }
+  }
+
+  /* ── FOOTER BRAND ── */
+  .brand-foot {
+    text-align: center;
+    padding: 12px;
+    font-size: 12px; color: var(--text3);
+    letter-spacing: 1px;
+  }
+  .brand-foot a { color: var(--gold); text-decoration: none; opacity: 0.7; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius:10px; }
+
+  @media(max-width:580px){
+    .hero { padding: 24px 16px 20px; }
+    .chat-wrap { padding: 20px 12px 160px; }
+  }
+
+  /* ── WELCOME OVERLAY ── */
+  #agentwelcome {
+    position: fixed;
+    inset: 56px 0 0 0;
+    background: var(--dark);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    transition: opacity 0.45s ease;
+    overflow-y: auto;
+  }
+  #agentwelcome.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sw-card {
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+  }
+  .sw-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .sw-eyebrow::before, .sw-eyebrow::after {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+  .sw-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: 400;
+    color: var(--gold-light);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .sw-card h1 em { font-style: italic; color: var(--gold); }
+  .sw-sub {
+    font-size: 15px;
+    color: var(--text3);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sw-promises {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .sw-promise {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--gold-light);
+    line-height: 1.5;
+  }
+  .sw-promise-icon { color: var(--gold); font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+  .sw-promise strong { color: var(--gold); }
+  .sw-time {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .sw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    padding: 16px 40px;
+    border-radius: 13px;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    width: 100%;
+    justify-content: center;
+  }
+  .sw-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .sw-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+</style>
+</head>
+<body>
+
+<!-- PLATFORM HEADER -->
+<header class="platform-header">
+  <a href="dashboard.html" class="ph-back">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Dashboard
+  </a>
+  <span class="ph-logo">ToolSpark</span>
+  <span class="ph-user" id="phUserName"></span>
+</header>
+
+<!-- WELCOME OVERLAY -->
+<div id="agentwelcome">
+  <div class="sw-card">
+    <div class="sw-eyebrow">ToolSpark · Tools</div>
+    <h1>Build <em>Agent</em></h1>
+    <p class="sw-sub">Your accountability partner for the build. Check in, stay focused on the one thing that matters, and make real progress — session by session.</p>
+
+    <div class="sw-promises">
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Remembers where you left off</strong> — picks up from your last session so you never start from scratch</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Keeps you on one thing</strong> — parks the new ideas and redirects you to what you said you would build</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Honest and direct</strong> — celebrates every win, calls out every stall, asks the one sharp question that moves you forward</span>
+      </div>
+    </div>
+
+    <div class="sw-time">5-10 minutes · Saves your progress automatically</div>
+    <button class="sw-btn" onclick="startAgent()">
+      Start Check-In →
+    </button>
+    <div class="sw-note">Your sessions are saved privately to your account.</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow">ToolSpark · Tools</div>
+  <h1>Build <em>Agent</em></h1>
+  <p class="hero-sub">Your accountability partner for the build — sharp, warm, and always on your side.</p>
+</header>
+
+<!-- CHAT -->
+<div class="chat-wrap" id="chatWrap"></div>
+
+<!-- INPUT -->
+<div class="input-area" id="inputArea">
+  <div class="input-row">
+    <textarea id="userInput" class="input-box" placeholder="Share what's on your mind…" rows="1"></textarea>
+    <button class="mic-btn" id="micBtn" title="Speak your answer" onclick="toggleMic()">🎤</button>
+    <button class="send-btn" id="sendBtn" onclick="handleSend()" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
+
+<script>
+// ─────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+const MODEL        = "claude-sonnet-4-6";
+const AGENT_SESSION_ID = 'agent_' + Date.now();
+
+// ─────────────────────────────────────
+// STATE
+// ─────────────────────────────────────
+let history    = [];
+let busy       = false;
+let lastSession = null;
+
+// ─────────────────────────────────────
+// SYSTEM PROMPT
+// ─────────────────────────────────────
+const SYSTEM = `You are the ToolSpark Build Agent — a sharp, warm, deeply informed accountability partner for Coena, the founder of ToolSpark.
+
+You are not a generic AI assistant. You know exactly what Coena is building, why she is building it, and what she is working through right now. You show up like a trusted advisor who has been in every conversation, read every plan, and understands the vision completely.
+
+Your personality:
+- Direct but warm — you tell the truth without being harsh
+- You celebrate progress even when it feels small
+- You notice when she is spinning and redirect her to one thing
+- You never let her talk herself out of something that is working
+- You ask one sharp question at a time — never a list of questions
+- You remember she is an introvert who moves fast on ideas and needs help finishing things
+
+---
+
+## WHAT TOOLSPARK IS
+
+ToolSpark is a platform that helps people who are building an online business stop drowning in AI tools and start building one that actually works for their business — without needing to know how to code.
+
+It is not just a course. It is not just a community. It is a build engine.
+
+The core belief: most people do not have an information problem. They have a clarity and implementation problem. ToolSpark solves both.
+
+The tagline: Built for people who have everything it takes except the confidence to show it.
+
+---
+
+## THE TOOLSPARK ECOSYSTEM
+
+**The Free Tool — Find Your Spark**
+A free 8 minute conversational tool that generates a Spark Profile — a clear picture of what someone knows, who they are built to help, and their unique angle. No account needed. This is the public lead magnet.
+
+**The Community**
+Where members live after joining. Paid entry. All tools and courses live here.
+
+**The Tools (The 8 Roadblock Tools)**
+Each tool solves one specific roadblock in the member's journey:
+1. Find Your Spark — defining who they help (updated — removes AI tool ideas, adds YOUR_EDGE section)
+2. Audience Deep Dive — knowing their audience deeply, outputs a Client Profile
+3. Discover Your Breakthrough — deciding what to build first, outputs a Tool Report with 3 ranked tools and a build prompt
+4. Focus & Build Tracker — following through on one thing (in development — currently building the agent version)
+5. Tech Stack Recommender — setting up their platform, community, and landing page
+6. Offer Builder — packaging their offer with name, inclusions, and pricing
+7. Paid Ads Clarity Tool — platform choice, targeting, creative direction, budget
+8. Confidence & Proof Builder — believing what they built is worth paying for
+
+**The Welcome Course (Course 1) — 4 Videos**
+- Video 1: Coena's story, the problem, why ToolSpark exists
+- Video 2: Find Your Spark walkthrough — who they are and who they help
+- Video 3: Discover Your Breakthrough walkthrough — what to build first
+- Video 4: What's next — two paths, DIY or DFY (script not yet written)
+
+**Course 2 — Your First Build (5 Modules)**
+Each module covers one roadblock (Roadblocks 4 through 8) with a short video, the roadblock tool, supporting resources, and a community thread prompt. Not yet built.
+
+---
+
+## THE CLIENT JOURNEY
+
+Cold traffic → Find Your Spark (free, no account) → emotional Spark Profile result → join community ($47-97 one time) → welcome course 4 videos → 3 tools (Audience Deep Dive, Discover Your Breakthrough) → Tool Report with chosen tool and build prompt → Course 2 Your First Build → DIY with community support OR DFY OR Mastermind
+
+---
+
+## THE OFFERS
+
+**Community Entry** — one time payment, access to Course 1, the tools, and the community. Pricing still being finalized.
+
+**Pro Subscription** — monthly access to advanced tools including the Lovable prompt generator, prompt library, unlimited tool runs. Pricing still being finalized.
+
+**Done With You** — Coena guides them through building their tool together.
+
+**Done For You** — Coena builds the tool, brands it, and deploys it for them.
+
+**White Label / Mastermind** — 10 people max. Coena deploys her shell code on their brand, their domain, their community. Quarterly group intensive days. This is the premium tier. Pricing still being finalized.
+
+---
+
+## THE TECHNICAL STACK
+
+- Custom coded platform built in VS Code with Claude
+- Claude API (claude-sonnet-4-6) powering all tools
+- Firebase / Firestore for user data and session storage
+- Loops for email (sending domain: mail.toolspark.co, reply-to: support@toolspark.co)
+- MJML email templates built for all three tool confirmations
+- Usage gate implemented — 3 runs per tool per month
+- Discover Your Breakthrough: 6 phase flow, generates 3 ranked tools with build prompts in Lovable, VS Code, or Technical Spec format based on member's platform situation
+
+---
+
+## COENA'S PERSONAL CONTEXT
+
+- Introvert — hates being on camera, done with social media for now
+- Tech person — loves finding tools, building things, seeing what is possible
+- Idea machine — brain never stops, biggest risk is starting new things before finishing current ones
+- Marketing gap — not confident in paid ads yet, planning $20/week testing budget on Facebook
+- No social media strategy — going straight to paid ads and VSL
+- Two beta contacts — podcast guests who have not gone through the tools yet, need follow up
+- Building in public — documenting the journey so the struggle becomes the course content
+- The build in public angle: every roadblock she solves for herself becomes a tool for her members
+
+---
+
+## CURRENT BUILD STATUS
+
+**Completed:**
+- Roadblocks 1, 2, 3 — all three tools built and working
+- Discover Your Breakthrough — fully redesigned with 6 phase flow
+- Breakthrough results page — rebuilt
+- Dashboard wiring — results pages for all three tools
+- Token optimization on Discover Your Breakthrough
+- Usage gate — 3 runs per tool per month
+- Viewing results no longer triggers API calls
+- Confirmation emails — 3 MJML templates in Loops
+- Tools linked inside welcome course lessons
+- Loops sending domain and reply-to configured
+- Phase tracking, chips, build method question all updated
+
+**In Progress:**
+- Roadblock 4 — Focus & Build Tracker / Build Agent (this tool)
+- Video 4 script for Course 1
+
+**Still To Build:**
+- Roadblocks 5 through 8 and their course modules
+- Course 2 — Your First Build (5 modules)
+- Discover Your Breakthrough standalone landing page
+- Community sales page
+- Loops email sequence after Find Your Spark
+- VSL script and recording
+- First $20 week of Facebook ads
+- Beta test with 2 contacts
+
+**The milestone:** Both courses done and beta tested → ready to run ads
+
+---
+
+## YOUR JOB IN EVERY SESSION
+
+When Coena starts a session:
+1. Check in warmly — ask what she worked on since last time or what is on her mind today
+2. Listen to where she is and reflect back what you hear
+3. Identify if she is making progress, spinning on ideas, or stuck on something specific
+4. Help her identify the ONE thing that will move the needle today
+5. If she brings a new idea — acknowledge it, park it, redirect her back to the current priority
+6. End every session by confirming what she is working on next and when
+
+## MEMORY RULES
+At the end of every session emit exactly this so the app can save it to Firestore:
+
+SESSION_SUMMARY_START
+DATE:[today's date]
+WORKED_ON:[what she said she worked on]
+WINS:[any progress or completions mentioned]
+STUCK_ON:[any blockers or struggles mentioned]
+NEW_IDEAS:[any new ideas that came up — parked for later]
+NEXT_ACTION:[the one thing she committed to working on next]
+ENERGY:[high/medium/low — your read on how she is feeling]
+SESSION_SUMMARY_END
+
+## CONVERSATION RULES
+- Ask ONE question at a time
+- Never give a list of options unless she specifically asks
+- If she is spinning on a new idea — say: "I am going to park that because it is a good one. Right now you are building X. Let's stay there."
+- If she has not followed through on something she committed to — be direct but kind: "Last time you said you were going to do X. What happened?"
+- Celebrate every completion no matter how small
+- Never ask about pricing — it is still being figured out
+- Keep responses conversational and short — this is a check-in not a lecture
+- You are her biggest believer AND her most honest mirror`;
+
+// ─────────────────────────────────────
+// FIRESTORE — load / save sessions
+// ─────────────────────────────────────
+async function loadLastSession(userId) {
+  try {
+    const snap = await db.collection("agent_sessions")
+      .where("userId", "==", userId)
+      .get();
+    if (snap.empty) return null;
+    const docs = snap.docs.map(d => d.data()).sort((a, b) => {
+      const at = a.createdAt?.toMillis?.() || 0;
+      const bt = b.createdAt?.toMillis?.() || 0;
+      return bt - at;
+    });
+    return docs[0] || null;
+  } catch(e) {
+    console.log("loadLastSession failed:", e.message);
+    return null;
+  }
+}
+
+async function saveSession(summaryRaw) {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    await db.collection("agent_sessions").doc(AGENT_SESSION_ID).set({
+      sessionId: AGENT_SESSION_ID,
+      userId: user.uid,
+      accountEmail: user.email,
+      summary: summaryRaw,
+      transcript: history,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    lastSession = { summary: summaryRaw };
+  } catch(e) {
+    console.error("saveSession failed:", e);
+  }
+}
+
+function parseSummary(raw) {
+  const result = {};
+  const fields = ['DATE', 'WORKED_ON', 'WINS', 'STUCK_ON', 'NEW_IDEAS', 'NEXT_ACTION', 'ENERGY'];
+  fields.forEach(field => {
+    const regex = new RegExp(`${field}:([\\s\\S]*?)(?=\\n[A-Z_]+:|SESSION_SUMMARY_END|$)`);
+    const m = raw.match(regex);
+    result[field] = m ? m[1].trim() : '';
+  });
+  return result;
+}
+
+// ─────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────
+function addMsg(role, content) {
+  const wrap = document.getElementById("chatWrap");
+  const div  = document.createElement("div");
+  div.className = `msg ${role === "user" ? "user" : "ai"}`;
+  const av  = document.createElement("div");
+  av.className  = `av ${role === "user" ? "you" : "ai"}`;
+  av.textContent = role === "user" ? "You" : "TS";
+  const bub = document.createElement("div");
+  bub.className  = `bubble ${role === "user" ? "you" : "ai"}`;
+  if (role === "user") {
+    bub.textContent = content;
+  } else {
+    bub.innerHTML = fmt(content);
+  }
+  div.appendChild(av);
+  div.appendChild(bub);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function fmt(t) {
+  return t
+    .replace(/SESSION_SUMMARY_START[\s\S]*?SESSION_SUMMARY_END/g, "")
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/\n/g, "<br>")
+    .trim();
+}
+
+function showThinking() {
+  const wrap = document.getElementById("chatWrap");
+  const t = document.createElement("div");
+  t.className = "thinking"; t.id = "thinking";
+  t.innerHTML = `<div class="av ai">TS</div>
+    <div class="t-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>`;
+  wrap.appendChild(t);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function hideThinking() {
+  const el = document.getElementById("thinking");
+  if (el) el.remove();
+}
+
+function addSavedNote() {
+  const wrap = document.getElementById("chatWrap");
+  const note = document.createElement("div");
+  note.className = "save-note";
+  note.textContent = "✓ Session saved";
+  wrap.appendChild(note);
+
+  const closeWrap = document.createElement("div");
+  closeWrap.className = "close-session-wrap";
+  closeWrap.innerHTML = `<a href="dashboard.html" class="close-session-btn">
+    Close Session &nbsp;→
+  </a>
+  <p class="session-community-note">If you get stuck before your next check-in, the community is always there —<br><a href="community.html" class="session-community-link">post your question and someone will jump in →</a></p>`;
+  wrap.appendChild(closeWrap);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+// ─────────────────────────────────────
+// API
+// ─────────────────────────────────────
+async function callAI(userMsg) {
+  history.push({ role: "user", content: userMsg });
+  const resp = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 600,
+      system: SYSTEM,
+      messages: history,
+      _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID }
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  if (!Array.isArray(data.content)) {
+    throw new Error(data.error?.message || data.message || "Unexpected API response shape");
+  }
+
+  const text = data.content.map(b => b.type === "text" ? b.text : "").join("");
+  history.push({ role: "assistant", content: text });
+  return text;
+}
+
+// ─────────────────────────────────────
+// HANDLE SEND
+// ─────────────────────────────────────
+async function handleSend() {
+  if (busy) return;
+  stopMic();
+  const input = document.getElementById("userInput");
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = ""; input.style.height = "auto";
+  document.getElementById("sendBtn").disabled = true;
+
+  addMsg("user", text);
+  showThinking(); busy = true;
+
+  try {
+    const reply = await callAI(text);
+    hideThinking();
+
+    if (reply.includes("SESSION_SUMMARY_START")) {
+      const beforeSummary = reply.split("SESSION_SUMMARY_START")[0].trim();
+      if (beforeSummary) addMsg("assistant", beforeSummary);
+      const summaryBlock = reply.match(/SESSION_SUMMARY_START[\s\S]*?SESSION_SUMMARY_END/)?.[0] || '';
+      if (summaryBlock) {
+        await saveSession(summaryBlock);
+        addSavedNote();
+      }
+    } else {
+      addMsg("assistant", reply);
+    }
+
+  } catch(e) {
+    hideThinking();
+    addMsg("assistant", "Something went sideways — give it another try in a moment.");
+    console.error(e);
+  }
+
+  busy = false;
+  document.getElementById("sendBtn").disabled = false;
+  document.getElementById("userInput").focus();
+}
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+async function init() {
+  showThinking();
+  let opening;
+
+  if (lastSession && lastSession.summary) {
+    const s = parseSummary(lastSession.summary);
+    opening = `You are checking in with the user. Their last session summary:
+DATE: ${s.DATE || 'unknown'}
+WORKED_ON: ${s.WORKED_ON || 'not recorded'}
+WINS: ${s.WINS || 'none mentioned'}
+STUCK_ON: ${s.STUCK_ON || 'none mentioned'}
+NEW_IDEAS: ${s.NEW_IDEAS || 'none'}
+NEXT_ACTION: ${s.NEXT_ACTION || 'not recorded'}
+ENERGY: ${s.ENERGY || 'unknown'}
+
+Start the check-in warmly. Reference what they said they would work on next. Ask what actually happened since then. One question only — make it specific and direct.`;
+  } else {
+    opening = `This is the user's first session with the Build Agent. Welcome them warmly in 2-3 sentences. Acknowledge that they are building something real and that you are here to help them stay focused and make real progress. Then ask your first question: what are they working on right now? One question only.`;
+  }
+
+  try {
+    const reply = await callAI(opening);
+    hideThinking();
+    addMsg("assistant", reply);
+  } catch(e) {
+    hideThinking();
+    addMsg("assistant", "Hey — glad you're here. What are you working on today?");
+  }
+  document.getElementById("sendBtn").disabled = false;
+}
+
+// auto-resize textarea
+document.getElementById("userInput").addEventListener("input", function() {
+  this.style.height = "auto";
+  this.style.height = Math.min(this.scrollHeight, 130) + "px";
+  document.getElementById("sendBtn").disabled = !this.value.trim();
+});
+// enter to send
+document.getElementById("userInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+});
+
+// ─────────────────────────────────────
+// AUTH GATE
+// ─────────────────────────────────────
+const agentWelcomeEl = document.getElementById('agentwelcome');
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) {
+    window.location.href = 'signon.html?redirect=build-agent';
+    return;
+  }
+  const firstName = (user.displayName || user.email || '').split(/[\s@]/)[0];
+  const nameEl = document.getElementById('phUserName');
+  if (nameEl && firstName) nameEl.textContent = firstName;
+  lastSession = await loadLastSession(user.uid);
+  agentWelcomeEl.style.display = 'flex';
+});
+
+async function startAgent() {
+  agentWelcomeEl.classList.add('hidden');
+  setTimeout(() => { agentWelcomeEl.style.display = 'none'; }, 460);
+  init();
+}
+
+// ─────────────────────────────────────
+// MIC / SPEECH-TO-TEXT
+// ─────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let micActive   = false;
+let micBaseText = "";
+
+if (SpeechRecognition) {
+  document.getElementById("micBtn").style.display = "flex";
+
+  recognition = new SpeechRecognition();
+  recognition.continuous    = true;
+  recognition.interimResults = true;
+  recognition.lang          = "en-US";
+
+  recognition.onresult = function(e) {
+    let interim = "";
+    let final   = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (final) micBaseText += final;
+    const input = document.getElementById("userInput");
+    input.value = micBaseText + interim;
+    input.dispatchEvent(new Event("input"));
+  };
+
+  recognition.onend = function() {
+    if (micActive) recognition.start();
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== "no-speech") stopMic();
+  };
+}
+
+function toggleMic() { micActive ? stopMic() : startMic(); }
+
+function startMic() {
+  if (!recognition) return;
+  micBaseText = document.getElementById("userInput").value;
+  micActive   = true;
+  recognition.start();
+  document.getElementById("micBtn").classList.add("active");
+}
+
+function stopMic() {
+  if (!recognition) return;
+  micActive = false;
+  recognition.stop();
+  document.getElementById("micBtn").classList.remove("active");
+}
+</script>
+</body>
+</html>
