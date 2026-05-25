@@ -801,10 +801,9 @@
         const ts = techstackSessions[0].data();
         const body = document.getElementById('techstack-body');
         body.innerHTML = [
-          ts.platform   ? `<div><div class="spark-field-label" style="color:var(--coral);">Platform</div><div class="spark-field-value">${escapeHtml(ts.platform)}</div></div>` : '',
-          ts.buildTool  ? `<div><div class="spark-field-label" style="color:var(--coral);">Build Tool</div><div class="spark-field-value">${escapeHtml(ts.buildTool)}</div></div>` : '',
-          ts.firstStep  ? `<div><div class="spark-field-label" style="color:var(--coral);">First Step</div><div class="spark-field-value">${escapeHtml(ts.firstStep)}</div></div>` : '',
-          ts.summary    ? `<div><div class="spark-field-label" style="color:var(--coral);">Summary</div><div class="spark-field-value">${escapeHtml(ts.summary)}</div></div>` : ''
+          ts.buildTool   ? `<div><div class="spark-field-label" style="color:var(--coral);">Where You're Building</div><div class="spark-field-value">${escapeHtml(ts.buildTool)}</div></div>` : '',
+          ts.creditNote  ? `<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(196,98,45,0.07);border:1px solid rgba(196,98,45,0.18);border-radius:8px;padding:10px 14px;"><svg width="13" height="13" style="flex-shrink:0;margin-top:2px;color:var(--coral);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div style="font-size:12px;color:var(--coral);line-height:1.6;">${escapeHtml(ts.creditNote)}</div></div>` : '',
+          ts.platform    ? `<div><div class="spark-field-label" style="color:var(--coral);">Your Platform</div><div class="spark-field-value">${escapeHtml(ts.platform)}</div></div>` : ''
         ].filter(Boolean).join('');
         document.getElementById('techstack-section').style.display = 'block';
       } else {

@@ -401,7 +401,7 @@ async function signUp() {
       isEarlyMember: isEarlyMember,
     });
     showMsg('Account created! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
+    setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
   } catch(err) {
     signingIn = false;
     setLoading(false);
@@ -416,8 +416,8 @@ async function signUpWithGoogle() {
     const result = await auth.signInWithPopup(provider);
     await createUserDoc(result.user, result.user.displayName || '');
     await claimSparkSessionsForUser(result.user);
-    const nameParts = (result.user.displayName || '').split(' ');
-    const emailOptIn = true; // Google signup assumes opt-in
+    const nameParts = (result.user.displayName || '').split(' ') || '';
+    const emailOptIn = true;
     const launchDate = new Date('2026-05-01');
     const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
@@ -431,7 +431,7 @@ async function signUpWithGoogle() {
       isEarlyMember: isEarlyMember,
     });
     showMsg('Account created! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
+    setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
   } catch(err) {
     signingIn = false;
     if (err.code !== 'auth/popup-closed-by-user') {

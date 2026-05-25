@@ -246,7 +246,7 @@
       </button>
       <div>
         <div class="header-title">Build Prompt Generator</div>
-        <div class="header-subtitle">Generate your ready-to-paste Base44 app prompt</div>
+        <div class="header-subtitle">Generate your ready-to-paste build prompt</div>
       </div>
     </div>
   </header>
@@ -265,7 +265,7 @@
       <!-- Step 1: Your Data -->
       <div class="card" id="data-card">
         <div class="card-title">Your Profile Data</div>
-        <div class="card-sub">We pulled this from your ToolSpark tools. It feeds directly into your prompt so Base44 knows exactly what to build.</div>
+        <div class="card-sub">We pulled this from your ToolSpark tools. It feeds directly into your prompt so your builder knows exactly what to build.</div>
         <div class="data-status" id="data-status"></div>
         <div id="data-details"></div>
       </div>
@@ -273,7 +273,7 @@
       <!-- Step 2: App Name -->
       <div class="card">
         <div class="card-title">What will you call your app?</div>
-        <div class="card-sub">This is what clients will see when they sign in. You can always rename it in Base44 later.</div>
+        <div class="card-sub">This is what clients will see when they sign in. You can always rename it later.</div>
         <div class="input-group">
           <label class="input-label" for="app-name">App Name</label>
           <span class="input-hint">Keep it short — 2 to 4 words</span>
@@ -445,11 +445,11 @@
           <div class="card-title" style="margin-bottom:0;">Your Build Prompt</div>
           <span id="save-status" style="font-size:12px;color:var(--green);font-weight:700;display:none;">✓ Saved to your profile</span>
         </div>
-        <div class="card-sub" style="margin-bottom:1rem;">Copy this and paste it directly into Base44 (or your chosen builder) to start your build.</div>
+        <div class="card-sub" style="margin-bottom:1rem;">Copy this and paste it into your builder to start your build.</div>
         <div class="prompt-output" id="prompt-output"></div>
         <div style="margin-top:1rem;" class="copy-row">
           <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
-          <span class="prompt-note"><strong>Tip:</strong> Open Base44, start a new project, and paste this as your first message.</span>
+          <span class="prompt-note"><strong>Tip:</strong> Open your builder, start a new project, and paste this as your first message.</span>
         </div>
       </div>
 
@@ -484,11 +484,15 @@
 </nav>
 
 <script>
+  const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  const MODEL = "claude-sonnet-4-6";
+
   // ── MEMBER DATA ──
   let memberData = {
     spark: null,
     audience: null,
-    breakthrough: null
+    breakthrough: null,
+    techstack: null
   };
   let currentUser = null;
 
@@ -558,12 +562,18 @@
     if (memberData.breakthrough) {
       statusEl.innerHTML += `<span class="data-pill found">Breakthrough Tool</span>`;
       detailsEl.innerHTML += `<div class="data-detail"><strong>Your AI Tool</strong>${escHtml(memberData.breakthrough.name)}</div>`;
-      if (memberData.breakthrough.how) {
-        detailsEl.innerHTML += `<div class="data-detail"><strong>How It Works</strong>${escHtml(memberData.breakthrough.how)}</div>`;
-      }
     } else {
       statusEl.innerHTML += `<span class="data-pill missing">Breakthrough Tool</span>`;
-      detailsEl.innerHTML += `<div class="data-missing-note">No Breakthrough results found. <a href="userclaritytools.html">Complete the Breakthrough session →</a></div>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Breakthrough results found. <a href="clarity.html">Complete the Breakthrough session →</a></div>`;
+    }
+
+    // Tech Stack
+    if (memberData.techstack) {
+      statusEl.innerHTML += `<span class="data-pill found">Tech Stack</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Building In</strong>${escHtml(memberData.techstack.buildTool)}</div>`;
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Tech Stack</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Tech Stack results found. <a href="techstack.html">Run the Tech Stack tool →</a></div>`;
     }
   }
 
@@ -584,80 +594,117 @@
   }
 
   // ── PROMPT GENERATION ──
-  function generatePrompt() {
+  async function generatePrompt() {
     const appName = document.getElementById('app-name').value.trim() || 'My App';
     const features = getCheckedFeatures();
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = 'Writing your prompt...';
 
     const spark = memberData.spark;
     const audience = memberData.audience;
     const breakthrough = memberData.breakthrough;
+    const techstack = memberData.techstack;
 
-    let lines = [];
+    // Build context block for Claude
+    const contextLines = [];
 
-    lines.push(`Build a web app called "${appName}".`);
-    lines.push('');
+    contextLines.push(`APP NAME: ${appName}`);
 
-    // Who built this
     if (spark) {
-      lines.push('WHAT THIS APP IS FOR:');
-      lines.push(spark.statement || `${spark.whatYouKnow || ''} helping ${spark.whoYouHelp || 'clients'}`);
-      lines.push('');
+      contextLines.push(`\nCREATOR SPARK STATEMENT: ${spark.statement || ''}`);
+      if (spark.whatYouKnow) contextLines.push(`WHAT THEY KNOW: ${spark.whatYouKnow}`);
+      if (spark.whoYouHelp) contextLines.push(`WHO THEY HELP: ${spark.whoYouHelp}`);
     }
 
-    // Target user
     if (audience) {
-      let audLine = audience.whoTheyAre || '';
-      if (audience.dailyFrustration) audLine += ` who struggle with: ${audience.dailyFrustration}`;
-      if (audience.dreamOutcome) audLine += `. Their goal: ${audience.dreamOutcome}`;
-      lines.push('WHO THIS IS FOR:');
-      lines.push(audLine);
-      lines.push('');
+      contextLines.push(`\nTARGET CLIENT: ${audience.whoTheyAre || ''}`);
+      if (audience.dailyFrustration) contextLines.push(`THEIR DAILY FRUSTRATION: ${audience.dailyFrustration}`);
+      if (audience.dreamOutcome) contextLines.push(`THEIR DREAM OUTCOME: ${audience.dreamOutcome}`);
+      if (audience.theirWords) contextLines.push(`IN THEIR OWN WORDS: "${audience.theirWords}"`);
     }
 
-    // Core AI tool
     if (breakthrough) {
-      lines.push(`CORE AI TOOL — ${breakthrough.name || 'AI Tool'}:`);
-      if (breakthrough.how) {
-        lines.push(breakthrough.how);
-      } else if (breakthrough.summary) {
-        lines.push(breakthrough.summary);
-      }
-      lines.push('');
+      contextLines.push(`\nCORE AI TOOL NAME: ${breakthrough.name || ''}`);
+      if (breakthrough.summary) contextLines.push(`TOOL SUMMARY: ${breakthrough.summary}`);
+      if (breakthrough.why) contextLines.push(`WHY THIS TOOL: ${breakthrough.why}`);
+      if (breakthrough.how) contextLines.push(`HOW IT WORKS: ${breakthrough.how}`);
     }
 
-    // Sections
-    lines.push('SECTIONS TO BUILD:');
-    lines.push('• AI Tool: This is the centerpiece. ' + (breakthrough ? breakthrough.name : 'the AI tool') + ' is what clients come for — make it prominent and easy to use.');
-    lines.push('• User Authentication: Full login, signup, password reset, and email verification.');
-    lines.push('• User Profiles: Each client has an account, can update their profile, and sees their own data only.');
-    lines.push('• Admin Dashboard: Manage all users, view who has signed up, see usage stats and activity.');
+    if (techstack) {
+      if (techstack.buildTool) contextLines.push(`\nBUILD TOOL: ${techstack.buildTool}`);
+      if (techstack.platform) contextLines.push(`PLATFORM: ${techstack.platform}`);
+    }
 
-    if (features.has('history')) lines.push('• Results History: Every time a client uses the AI tool, save the output to their account so they can review past results.');
-    if (features.has('roles')) lines.push('• User Roles: At minimum client vs. admin. Structure so free vs. paid tiers can be added later without rebuilding.');
-    if (features.has('analytics')) lines.push('• Usage Analytics: Track how often the AI tool is used — per user and overall. Show this in the admin dashboard.');
-    if (features.has('resources')) lines.push('• Tools & Resources: A dedicated tab with links, PDFs, videos, and resources the admin can manage.');
-    if (features.has('landing')) lines.push('• Landing Page: A public-facing page (no login required) that explains what the app is and lets new clients sign up.');
-    if (features.has('courses')) lines.push('• Course / Lesson Area: Modules with individual lessons, video or text content, and progress tracking per user.');
-    if (features.has('community')) lines.push('• Community: A discussion feed or forum where clients can post, reply, and connect with each other.');
-    if (features.has('payments')) lines.push('• Payments: Stripe integration for subscriptions or one-time purchases. Tie payment status to user role/access.');
-    if (features.has('onboarding')) lines.push('• Client Onboarding: On first login, walk new clients through a short guided tour of the app and AI tool.');
-    if (features.has('email')) lines.push('• Email Notifications: Send a welcome email on signup. Email clients their AI tool results after each session.');
+    const featureList = [
+      'Login & Signup, User Profiles, Admin Dashboard, Mobile-First PWA (always included)',
+      features.has('history') && 'Results History — clients can view all past AI tool outputs',
+      features.has('roles') && 'User Roles — client vs. admin, expandable to free vs. paid tiers later',
+      features.has('analytics') && 'Usage Analytics — track how often the AI tool is used per user and overall',
+      features.has('resources') && 'Tools & Resources — a tab with links, PDFs, and resources the admin manages',
+      features.has('landing') && 'Landing Page — public-facing page so new clients can sign up',
+      features.has('courses') && 'Course / Lesson Area — modules with lessons and progress tracking',
+      features.has('community') && 'Community / Discussion — a feed or forum where clients connect',
+      features.has('payments') && 'Payments (Stripe) — subscriptions or one-time purchases tied to user access',
+      features.has('onboarding') && 'Client Onboarding — guided walkthrough on a client\'s first login',
+      features.has('email') && 'Email Notifications — welcome email on signup, results emailed after sessions',
+    ].filter(Boolean).join('\n• ');
 
-    lines.push('');
-    lines.push('DESIGN:');
-    lines.push('Mobile-first with bottom tab navigation — not a sidebar. Clean, professional, and fast. Build as a PWA so clients can install it from their phone browser. Designed for easy App Store publishing later using Capacitor. No heavy frameworks or complicated setups.');
-    lines.push('');
-    lines.push('TECH:');
-    lines.push('React. Mobile-responsive. PWA manifest and service worker included. Keep the architecture simple and easy to extend.');
+    contextLines.push(`\nFEATURES TO INCLUDE:\n• ${featureList}`);
 
-    const promptText = lines.join('\n');
-    document.getElementById('prompt-output').textContent = promptText;
-    const saveStatus = document.getElementById('save-status');
-    if (saveStatus) saveStatus.style.display = 'none';
-    const card = document.getElementById('prompt-card');
-    card.classList.add('visible');
-    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    savePrompt(promptText, appName, features);
+    const systemPrompt = `You are a product brief writer for AI-powered web apps. Your job is to take information about a coach or expert and write a complete, specific, ready-to-paste build brief for an AI builder tool.
+
+The brief should read like it was written by someone who deeply understands their product — not a form filled out by a stranger. Write in plain English, be specific, and make it easy for an AI builder to understand exactly what to build and why.
+
+Your output is ONLY the build brief itself — no preamble, no explanation, no "here is your prompt". Just the brief, ready to paste.
+
+Structure it clearly with sections but write each section with real specificity based on the context provided. The AI tool (the centerpiece) should have the most detail — explain exactly how it should work, what questions it asks or what inputs it takes, what it outputs, and how results are saved. This is what makes the app valuable.
+
+Always end with a DESIGN section: mobile-first, bottom tab navigation (not sidebar), clean and professional, PWA so clients can install from their phone browser, designed for easy App Store publishing later.`;
+
+    const userMessage = `Write a complete build brief for this app using the context below. Make it specific to this exact business and tool — not generic.
+
+${contextLines.join('\n')}
+
+Write the brief now.`;
+
+    try {
+      const resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1200,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userMessage }],
+          _meta: { tool: 'prompt-generator' }
+        })
+      });
+
+      if (!resp.ok) throw new Error(`API error ${resp.status}`);
+      const data = await resp.json();
+      const promptText = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || '';
+
+      if (!promptText) throw new Error('Empty response');
+
+      document.getElementById('prompt-output').textContent = promptText;
+      const saveStatus = document.getElementById('save-status');
+      if (saveStatus) saveStatus.style.display = 'none';
+      const card = document.getElementById('prompt-card');
+      card.classList.add('visible');
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      savePrompt(promptText, appName, features);
+
+    } catch(e) {
+      console.error('Prompt generation error:', e);
+      btn.textContent = 'Something went wrong — try again';
+      btn.disabled = false;
+      return;
+    }
+
+    btn.textContent = 'Regenerate Prompt →';
+    btn.disabled = false;
   }
 
   // ── SAVE / LOAD ──
@@ -766,7 +813,8 @@
       const [
         sparkByUser, sparkByEmail, sparkByEmailLower,
         audByUser, audByEmail, audByEmailLower,
-        clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm
+        clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm,
+        techstackByUser, techstackByEmail
       ] = await Promise.all([
         db.collection('spark_results').where('userId', '==', user.uid).get(),
         db.collection('spark_results').where('accountEmail', '==', user.email).get(),
@@ -777,7 +825,9 @@
         db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', emailLower).get(),
-        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get()
+        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get(),
+        db.collection('techstack_results').where('userId', '==', user.uid).get(),
+        db.collection('techstack_results').where('accountEmail', '==', emailLower).get()
       ]);
 
       // Most recent spark
@@ -798,6 +848,10 @@
         const tool = tools[chosenIdx] || tools[0];
         if (tool && tool.name) memberData.breakthrough = tool;
       }
+
+      // Most recent tech stack result
+      const techstackDocs = mostRecent([techstackByUser, techstackByEmail]);
+      if (techstackDocs.length) memberData.techstack = techstackDocs[0].data();
 
     } catch(e) {
       console.error('Data load error:', e);

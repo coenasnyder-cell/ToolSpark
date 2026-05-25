@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100%; }
+
+  :root {
+    --bg: #0C0B09;
+    --surface: #141210;
+    --surface2: #1C1A17;
+    --border: #2A2720;
+    --text: #F0EDE6;
+    --text2: #9A9488;
+    --text3: #4A4840;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 3rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse at top, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wrap { width: 100%; max-width: 480px; animation: fadeUp 0.5s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .logo { text-align: center; margin-bottom: 2rem; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--text); }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-top: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+
+  .step-dots { display: flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all 0.2s; flex-shrink: 0; }
+  .dot.active { background: var(--gold); width: 18px; border-radius: 3px; }
+  .dot.done { background: rgba(201,168,76,0.4); }
+
+  .step { display: none; }
+  .step.visible { display: block; animation: fadeUp 0.3s ease; }
+
+  .step-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 10px; }
+  .step-question { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
+  .step-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 1.5rem; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem; }
+  .chip {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+  .chip:hover { border-color: rgba(201,168,76,0.4); color: var(--text); }
+  .chip.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+  /* ── CHECKBOX LIST ── */
+  .check-group { margin-bottom: 1.25rem; }
+  .check-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .check-items { display: flex; flex-direction: column; gap: 4px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .check-item:hover { border-color: rgba(201,168,76,0.3); }
+  .check-item.checked { background: var(--gold-dim); border-color: var(--gold); }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .check-item.checked .check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .check-box svg { display: none; }
+  .check-item.checked .check-box svg { display: block; }
+  .check-label { font-size: 14px; font-weight: 700; color: var(--text2); transition: color 0.15s; }
+  .check-item.checked .check-label { color: var(--text); }
+
+  .other-input {
+    display: none;
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-top: 6px;
+    margin-bottom: 0.25rem;
+  }
+  .other-input::placeholder { color: var(--text3); }
+  .other-input:focus { border-color: var(--gold); }
+  .other-input.visible { display: block; }
+
+  .next-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--gold);
+    color: #0C0B09;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    margin-top: 0.5rem;
+  }
+  .next-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
+  .next-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .skip-link { display: block; text-align: center; margin-top: 1rem; font-size: 12px; color: var(--text3); cursor: pointer; transition: color 0.15s; text-decoration: none; }
+  .skip-link:hover { color: var(--text2); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+
+  <div class="card">
+    <div class="step-dots" id="dots"></div>
+
+    <!-- Step A: Where are you starting from? -->
+    <div class="step visible" id="step-A">
+      <div class="step-eyebrow">One quick step before you dive in</div>
+      <div class="step-question">Where are you starting from?</div>
+      <div class="step-sub">This helps us point you to the right tools and skip the ones you don't need yet.</div>
+      <div class="chips">
+        <div class="chip" onclick="selectSetup(this, 'scratch')">Starting from scratch — nothing set up yet</div>
+        <div class="chip" onclick="selectSetup(this, 'existing')">I have a website but no community or course</div>
+        <div class="chip" onclick="selectSetup(this, 'existing')">I have a community but no AI tools</div>
+        <div class="chip" onclick="selectSetup(this, 'existing')">I already have courses or products running</div>
+      </div>
+      <button class="next-btn" id="next-A" disabled onclick="goFromA()">Next →</button>
+      <a class="skip-link" onclick="skipAll()">Skip for now</a>
+    </div>
+
+    <!-- Step B: What tools? (conditional — only shown if not scratch) -->
+    <div class="step" id="step-B">
+      <div class="step-eyebrow">Good to know</div>
+      <div class="step-question">What tools are you currently using?</div>
+      <div class="step-sub">Check everything that applies. This helps us build around what you already have instead of starting over.</div>
+
+      <div class="check-group">
+        <span class="check-group-label">Platform</span>
+        <div class="check-items">
+          <div class="check-item" onclick="toggleTool(this, 'Skool')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Skool</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'GoHighLevel (GHL)')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">GoHighLevel (GHL)</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'ClickFunnels')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">ClickFunnels</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'Mighty Networks')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Mighty Networks</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'Kajabi')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Kajabi</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="check-group">
+        <span class="check-group-label">Email</span>
+        <div class="check-items">
+          <div class="check-item" onclick="toggleTool(this, 'Mailchimp')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Mailchimp</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'ActiveCampaign')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">ActiveCampaign</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'ConvertKit (Kit)')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">ConvertKit (Kit)</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'Loops')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Loops</span>
+          </div>
+          <div class="check-item" onclick="toggleTool(this, 'AWeber')">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">AWeber</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="check-group">
+        <span class="check-group-label">Other</span>
+        <div class="check-items">
+          <div class="check-item" id="other-check-item" onclick="toggleOther(this)">
+            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="check-label">Something else</span>
+          </div>
+        </div>
+        <input
+          class="other-input"
+          id="tools-other-input"
+          type="text"
+          placeholder="e.g. Kajabi, Systeme.io, Teachable..."
+          oninput="onOtherToolInput()"
+        />
+      </div>
+
+      <button class="next-btn" id="next-B" onclick="goToStep('C')" style="margin-top:1rem;">Next →</button>
+      <a class="skip-link" onclick="skipPlatform()">Nothing set up yet / skip this one</a>
+    </div>
+
+    <!-- Step C: What do you want to build? -->
+    <div class="step" id="step-C">
+      <div class="step-eyebrow">Almost there</div>
+      <div class="step-question">What do you want to build first?</div>
+      <div class="step-sub">Pick the one thing you want to have working when you finish ToolSpark.</div>
+      <div class="chips">
+        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">An AI tool my clients can use</div>
+        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">A course with lessons and content</div>
+        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">A community space for my audience</div>
+        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">All three together</div>
+      </div>
+      <button class="next-btn" id="next-C" disabled onclick="goToStep('D')">Next →</button>
+      <a class="skip-link" onclick="skipAll()">Skip for now</a>
+    </div>
+
+    <!-- Step D: Tech comfort -->
+    <div class="step" id="step-D">
+      <div class="step-eyebrow">Last one</div>
+      <div class="step-question">How do you feel about tech?</div>
+      <div class="step-sub">Be honest — this shapes which tools we recommend so you don't end up with something that slows you down.</div>
+      <div class="chips">
+        <div class="chip" onclick="selectSimple(this, 'techComfort')">I avoid it as much as possible</div>
+        <div class="chip" onclick="selectSimple(this, 'techComfort')">I can follow instructions but I don't code</div>
+        <div class="chip" onclick="selectSimple(this, 'techComfort')">I'm comfortable figuring things out</div>
+      </div>
+      <button class="next-btn" id="next-D" disabled onclick="finish()">Let's go →</button>
+      <a class="skip-link" onclick="skipAll()">Skip for now</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let hasPlatformStep = false;
+
+const answers = {
+  currentSetup: null,
+  currentTools: [],   // array of selected tool names
+  wantToBuild: null,
+  techComfort: null
+};
+
+// Steps in order — platform step inserted conditionally after A
+const allSteps = ['A', 'B', 'C', 'D'];
+
+function buildDots() {
+  const steps = hasPlatformStep ? allSteps : ['A', 'C', 'D'];
+  const container = document.getElementById('dots');
+  container.innerHTML = '';
+  steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.id = 'dot-' + s;
+    container.appendChild(d);
+  });
+}
+
+function updateDots(currentStep) {
+  const steps = hasPlatformStep ? allSteps : ['A', 'C', 'D'];
+  steps.forEach(s => {
+    const d = document.getElementById('dot-' + s);
+    if (!d) return;
+    d.className = 'dot';
+    const idx = steps.indexOf(s);
+    const curIdx = steps.indexOf(currentStep);
+    if (idx < curIdx) d.classList.add('done');
+    else if (idx === curIdx) d.classList.add('active');
+  });
+}
+
+function showStep(stepId) {
+  ['A', 'B', 'C', 'D'].forEach(s => {
+    document.getElementById('step-' + s).classList.remove('visible');
+  });
+  document.getElementById('step-' + stepId).classList.add('visible');
+  updateDots(stepId);
+}
+
+// Step A chip selection
+function selectSetup(el, type) {
+  document.querySelectorAll('#step-A .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  answers.currentSetup = el.textContent.trim();
+  hasPlatformStep = (type === 'existing');
+  document.getElementById('next-A').disabled = false;
+}
+
+function goFromA() {
+  buildDots();
+  if (hasPlatformStep) {
+    showStep('B');
+  } else {
+    answers.currentPlatform = null;
+    showStep('C');
+  }
+}
+
+// Step B: checkbox tools
+function toggleTool(el, name) {
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) {
+    if (!answers.currentTools.includes(name)) answers.currentTools.push(name);
+  } else {
+    answers.currentTools = answers.currentTools.filter(t => t !== name);
+  }
+}
+
+function toggleOther(el) {
+  el.classList.toggle('checked');
+  const input = document.getElementById('tools-other-input');
+  if (el.classList.contains('checked')) {
+    input.classList.add('visible');
+    input.focus();
+  } else {
+    input.classList.remove('visible');
+    input.value = '';
+    answers.currentTools = answers.currentTools.filter(t => !t.startsWith('__other:'));
+  }
+}
+
+function onOtherToolInput() {
+  const val = document.getElementById('tools-other-input').value.trim();
+  answers.currentTools = answers.currentTools.filter(t => !t.startsWith('__other:'));
+  if (val) answers.currentTools.push('__other:' + val);
+}
+
+function skipPlatform() {
+  answers.currentTools = [];
+  goToStep('C');
+}
+
+// Generic chip selection for C and D
+function selectSimple(el, key) {
+  const stepMap = { wantToBuild: 'C', techComfort: 'D' };
+  const stepId = stepMap[key];
+  document.querySelectorAll(`#step-${stepId} .chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[key] = el.textContent.trim();
+  document.getElementById('next-' + stepId).disabled = false;
+}
+
+function goToStep(stepId) {
+  showStep(stepId);
+}
+
+async function finish() {
+  const btn = document.getElementById('next-D');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    if (currentUser) {
+      const cleanTools = answers.currentTools.map(t =>
+        t.startsWith('__other:') ? t.replace('__other:', '').trim() : t
+      ).filter(Boolean);
+
+      const intake = {
+        currentSetup:  answers.currentSetup,
+        currentTools:  cleanTools,
+        wantToBuild:   answers.wantToBuild,
+        techComfort:   answers.techComfort,
+        completedAt:   firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await db.collection('users').doc(currentUser.uid).update({ intake });
+    }
+  } catch(e) {
+    console.error('Intake save error:', e);
+  }
+
+  window.location.href = 'community.html';
+}
+
+async function skipAll() {
+  try {
+    if (currentUser) {
+      await db.collection('users').doc(currentUser.uid).update({
+        'intake.skipped': true,
+        'intake.skippedAt': firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  } catch(e) {}
+  window.location.href = 'community.html';
+}
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) { window.location.href = 'signon.html'; return; }
+  currentUser = user;
+
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    if (snap.exists) {
+      const intake = snap.data().intake;
+      if (intake && (intake.completedAt || intake.skipped)) {
+        window.location.href = 'community.html';
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Build initial dots (no platform step yet, determined after step A)
+  buildDots();
+});
+</script>
+</body>
+</html>

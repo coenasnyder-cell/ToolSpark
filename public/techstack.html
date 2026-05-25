@@ -209,32 +209,69 @@
     margin-bottom: 24px;
     animation: rise 0.5s ease both;
   }
-  .sr-header {
-    text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sr-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px; color: var(--gold); margin-bottom: 8px;
-  }
-  .sr-summary {
+  .sr-summary-text {
     font-size: 14px; color: var(--text3); line-height: 1.7;
+    margin-bottom: 22px; text-align: center;
   }
-  .sr-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
+
+  /* Hero build tool block */
+  .sr-hero {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.04));
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
   }
-  .sr-item {
-    background: rgba(201,168,76,0.05);
+  .sr-hero-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    margin: 0 auto 14px;
+  }
+  .sr-hero-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--gold); opacity: 0.7;
+    margin-bottom: 6px;
+  }
+  .sr-hero-tool {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .sr-hero-why {
+    font-size: 14px; color: var(--text3); line-height: 1.65;
+  }
+
+  /* Credit note */
+  .sr-credit-note {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(196,98,45,0.08);
+    border: 1px solid rgba(196,98,45,0.22);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px; color: #D97548; line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .sr-credit-note svg { flex-shrink: 0; margin-top: 2px; }
+
+  /* Platform card */
+  .sr-platform {
+    background: rgba(255,255,255,0.03);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
   }
-  .sr-item.full { grid-column: 1 / -1; }
+  .sr-platform-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--text3); margin-bottom: 5px;
+  }
+  .sr-platform-value { font-size: 14px; color: var(--gold-light); line-height: 1.6; }
+
   .sr-label {
     font-size: 10px; font-weight: 700;
     letter-spacing: 2px; text-transform: uppercase;
@@ -243,14 +280,6 @@
   .sr-value {
     font-size: 14px; color: var(--gold-light); line-height: 1.55;
   }
-  .sr-first-step {
-    background: rgba(61,138,101,0.12);
-    border: 1px solid rgba(61,138,101,0.3);
-    border-radius: 12px; padding: 16px 18px;
-    margin-bottom: 12px;
-  }
-  .sr-first-step .sr-label { color: var(--green-mid); }
-  .sr-first-step .sr-value { color: #c6e4d4; font-size: 15px; }
   .sr-permission {
     background: var(--gold-dim);
     border: 1px solid var(--border-mid);
@@ -258,14 +287,6 @@
     font-size: 14px; color: var(--gold-light);
     line-height: 1.65; font-style: italic;
     text-align: center; margin-bottom: 20px;
-  }
-  .sr-next-note {
-    font-size: 13px;
-    color: var(--text3);
-    line-height: 1.6;
-    text-align: center;
-    margin-bottom: 14px;
-    padding: 0 8px;
   }
   .sr-actions {
     display: flex; gap: 10px; flex-wrap: wrap;
@@ -559,97 +580,65 @@ Your personality:
 ---
 
 ## YOUR JOB
-Ask 5 questions one at a time to understand their situation, budget, tech comfort, and priorities. Then generate their Stack Report.
+The member's intake profile will be provided at the start. Use what you already know to skip questions you have answers for. Your focus is one recommendation: what they should build in — Base44 or VS Code + Claude Code. Ask only what you need to fill gaps, then generate the report.
 
 ---
 
-## THE 5 QUESTIONS — ask in this exact order, one at a time
+## DECISION LOGIC — BUILD TOOL (this is the only output that matters)
 
-Q1: "Let's start with where you are right now — which of these best describes your situation?"
-Chips: ["I have nothing set up yet — completely fresh", "I have a website but no community or course", "I have a community but no AI tools", "I already have some tools set up"]
+Use the following to determine the build tool. This takes priority over everything else:
 
-Q2: "Got it. And what are you focused on building first?"
-Chips: ["An AI tool my clients use", "A course with lessons and videos", "A community where people connect", "All three together"]
+- No platform set up + avoids tech → Base44
+- No platform set up + can follow instructions → Base44
+- No platform set up + comfortable with tech → VS Code + Claude Code with ToolSpark shell
+- Has existing platform (Skool, GHL, Kajabi, etc.) + avoids tech → Base44 (build the AI tool there, keep the platform)
+- Has existing platform + comfortable with tech → VS Code + Claude Code with ToolSpark shell (integrates with their existing platform)
+- Wants everything under one roof + comfortable with tech → VS Code + Claude Code with ToolSpark shell
+- Wants the simplest possible path regardless → Base44
 
-Q3: "How would you describe your comfort level with tech?"
-Chips: ["I avoid tech as much as possible", "I can follow instructions but don't code", "I'm comfortable figuring things out", "I code or have built things before"]
+**CREDIT WALL RULE:** If recommending Base44, always note in CREDIT_NOTE that Base44 runs on monthly credits. When they hit that ceiling VS Code + Claude Code is the natural next step — but Base44 is the right place to start.
 
-Q4: "What's your monthly budget for tools right now?"
-Chips: ["As close to free as possible", "Under $50 a month", "Under $100 a month", "Whatever it takes to do it right"]
+---
 
-Q5: "Last one — what matters most to you right now?"
-Chips: ["Speed — I want something working today", "Simplicity — I don't want to manage ten tools", "Quality — I want it to look professional", "Price — I want the lowest possible monthly cost"]
+## PLATFORM (secondary — where their community and course lives)
+- No platform at all → Skool (simple, one price, community and course built in)
+- Has existing platform (Skool, GHL, Kajabi, etc.) → keep what they have, no change needed
+- Comfortable with tech + wants everything custom → ToolSpark custom platform with shell
 
 ---
 
 ## CONVERSATION RULES
-- Ask ONE question at a time — never bundle questions
-- After each answer give 1 sentence of warm acknowledgment before the next question
-- Never mention specific prices — keep recommendations platform focused not cost focused
-- If someone seems overwhelmed in their answers — acknowledge it directly: "That is completely normal at this stage. Let's make this simple."
-- If someone says they have tried everything or nothing works — say: "Let's ignore everything you have tried before. We are starting fresh with just what you need right now."
-- Never recommend more than one option for each stack component — one platform, one build tool, one email tool, one payment tool
-- Emit [Q:N] at the start of each reply — every single reply, no exceptions
-- Never list the answer options as text in your message — the app displays them as buttons automatically
-- After Q5 is answered emit [DONE] and generate the Stack Report
-
----
-
-## STACK DECISION LOGIC
-
-Use their answers to determine the right recommendation for each component:
-
-### BUILD TOOL
-- Avoids tech + speed or price priority → Base44
-- Can follow instructions + speed priority → Base44
-- Can follow instructions + quality priority → Lovable
-- Comfortable with tech + quality or ownership → VS Code + Claude Code with ToolSpark shell
-- Has coded before → VS Code + Claude Code with ToolSpark shell
-- Wants it done → DFY
-
-### PLATFORM (community + course)
-- Fresh start + avoids tech + low budget → Skool (simple, one price, community and course in one)
-- Fresh start + wants quality → ToolSpark custom platform with shell
-- Has existing website → add tools to existing site with VS Code + Claude Code
-- Wants all three together + comfortable with tech → ToolSpark custom platform with shell
-- Wants simplicity → Skool
-
-### EMAIL
-- Always recommend Loops regardless of path
-- One sentence: "Loops handles all your automated emails and sequences — it connects directly to your tools and keeps everything in one place."
-
-### PAYMENTS
-- Low budget → Stripe direct (lowest fees, free to set up)
-- Wants simplicity → Gumroad (simple, built in audience, higher fees)
-- Wants full control → Stripe with a simple checkout page
-- Has existing platform → use platform's built in payments if available
+- Use intake data to skip questions already answered — do not re-ask what you know
+- If you have enough context to make the recommendation from intake alone, go straight to [DONE]
+- If you need one clarifying question, ask it with [Q:1] — never more than one
+- Emit [DONE] when you have enough — do not delay
+- Never list options in your message text — chips display them automatically
+- Never recommend more than one option for any component
 
 ---
 
 ## STACK REPORT FORMAT
-After [DONE] generate exactly this:
+After [DONE] generate exactly this — nothing else:
 
 STACK_REPORT_START
-NAME:[their first name if shared]
-SUMMARY:[2 sentences. Reflect back their situation warmly and specifically. Make them feel understood not analyzed.]
-PLATFORM:[One sentence. Their recommended community and course platform. Why it fits their specific situation.]
-BUILD_TOOL:[One sentence. Lovable / Base44 / VS Code + Claude Code with ToolSpark shell / DFY. Why this fits their tech level and priority.]
-EMAIL:[One sentence. Always Loops. Connect it to their specific situation.]
-PAYMENTS:[One sentence. One payment tool. Why this fits their budget and situation.]
-FIRST_STEP:[One sentence. What they will do the moment they open their build tool, once they have their build prompt in hand. Frame it as "Once you have your build prompt, open [tool] and..." — specific to their tool and situation.]
-SETUP_DOC:[Which document to send them — Base44 Setup Guide / Lovable Setup Guide / VS Code + Claude Code Setup Guide / Skool Setup Guide / DFY Handoff Doc]
-PERMISSION:[One warm direct sentence giving them permission to stop researching and just follow the steps.]
+NAME:[their first name if known]
+SUMMARY:[2 sentences. Warm and specific. Make them feel understood, not analysed.]
+BUILD_TOOL:[One sentence. Base44 or VS Code + Claude Code with ToolSpark shell. Why this fits their exact situation.]
+CREDIT_NOTE:[Only if recommending Base44: one honest sentence about monthly credits and that VS Code is the natural next step when they're ready to build more. Leave blank if recommending VS Code.]
+PLATFORM:[One sentence. Skool / keep what you have / ToolSpark shell. Keep it simple — just confirm where their community and course will live.]
+SETUP_DOC:[Base44 Setup Guide / VS Code + Claude Code Setup Guide / Skool Setup Guide]
+PERMISSION:[One warm direct sentence — trusted friend, hand on shoulder, stop researching and start building.]
 STACK_REPORT_END
 
 ---
 
-## CRITICAL RULES FOR THE STACK REPORT
-- Never recommend more than one option per component
-- Never use the word "overwhelm" in the report — show the solution not the problem
-- The PERMISSION line must feel like a trusted friend putting their hand on their shoulder and saying stop looking and start doing
-- Reference something specific they said — not a generic output
-- FIRST_STEP must reference getting their build prompt first, then opening their tool — never tell them to open the build tool before the build prompt step
-- Never mention pricing in the report`;
+## CRITICAL RULES
+- Two outputs only: where they build the tool and where their community lives — nothing else
+- No email recommendations. No payment recommendations. Those come later.
+- Never mention pricing amounts
+- PERMISSION must feel personal — reference something specific from their situation
+- Never use the word "overwhelm"
+- The member is about to generate their build prompt — this report closes that loop`;
 
 // ─────────────────────────────────────
 // CHIPS
@@ -743,11 +732,9 @@ function parseStackReport(raw) {
   return {
     name:       extract("NAME"),
     summary:    extract("SUMMARY"),
-    platform:   extract("PLATFORM"),
     buildTool:  extract("BUILD_TOOL"),
-    email:      extract("EMAIL"),
-    payments:   extract("PAYMENTS"),
-    firstStep:  extract("FIRST_STEP"),
+    creditNote: extract("CREDIT_NOTE"),
+    platform:   extract("PLATFORM"),
     setupDoc:   extract("SETUP_DOC"),
     permission: extract("PERMISSION")
   };
@@ -763,11 +750,9 @@ async function saveResults(report, rawReport) {
       accountEmail: user.email,
       name:        report.name,
       summary:     report.summary,
-      platform:    report.platform,
       buildTool:   report.buildTool,
-      email:       report.email,
-      payments:    report.payments,
-      firstStep:   report.firstStep,
+      creditNote:  report.creditNote,
+      platform:    report.platform,
       setupDoc:    report.setupDoc,
       permission:  report.permission,
       rawReport,
@@ -784,47 +769,37 @@ function showStackReport(report) {
   document.getElementById("inputArea").style.display = "none";
   setProgress(Q_TOTAL);
 
+  const toolName = getBuildToolName(report.buildTool);
+  const isBase44 = toolName === 'Base44';
+  const isVSCode = toolName === 'VS Code + Claude Code';
+
+  const toolIcon = isVSCode
+    ? `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`
+    : `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+
   const card = document.createElement("div");
   card.className = "stack-report";
   card.innerHTML = `
-    <div class="sr-header">
-      <div class="sr-title">Your Stack Report${report.name ? `, ${report.name}` : ''}</div>
-      <div class="sr-summary">${escHtml(report.summary)}</div>
+    <div class="sr-summary-text">${escHtml(report.summary)}</div>
+
+    <div class="sr-hero">
+      <div class="sr-hero-icon">${toolIcon}</div>
+      <div class="sr-hero-label">You're building in</div>
+      <div class="sr-hero-tool">${escHtml(toolName)}</div>
+      <div class="sr-hero-why">${escHtml(report.buildTool)}</div>
     </div>
 
-    <div class="sr-grid">
-      <div class="sr-item">
-        <div class="sr-label">Platform</div>
-        <div class="sr-value">${escHtml(report.platform)}</div>
-      </div>
-      <div class="sr-item">
-        <div class="sr-label">Build Tool</div>
-        <div class="sr-value">${escHtml(report.buildTool)}</div>
-      </div>
-      <div class="sr-item">
-        <div class="sr-label">Email</div>
-        <div class="sr-value">${escHtml(report.email)}</div>
-      </div>
-      <div class="sr-item">
-        <div class="sr-label">Payments</div>
-        <div class="sr-value">${escHtml(report.payments)}</div>
-      </div>
-      ${report.setupDoc ? `<div class="sr-item full">
-        <div class="sr-label">Your Setup Guide</div>
-        <div class="sr-value">${escHtml(report.setupDoc)}</div>
-      </div>` : ''}
-    </div>
+    ${report.creditNote ? `<div class="sr-credit-note">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ${escHtml(report.creditNote)}
+    </div>` : ''}
+
+    ${report.platform ? `<div class="sr-platform">
+      <div class="sr-platform-label">Your platform</div>
+      <div class="sr-platform-value">${escHtml(report.platform)}</div>
+    </div>` : ''}
 
     <div class="sr-permission">${escHtml(report.permission)}</div>
-
-    <div class="sr-next-note">
-      Your stack is decided. Next step: generate your build prompt — that's what you paste into ${escHtml(getBuildToolName(report.buildTool))} to get started building.
-    </div>
-
-    ${report.firstStep ? `<div class="sr-first-step">
-      <div class="sr-label">When you open ${escHtml(getBuildToolName(report.buildTool))}</div>
-      <div class="sr-value">${escHtml(report.firstStep)}</div>
-    </div>` : ''}
 
     <div class="sr-actions">
       <a href="prompt-generator.html" class="sr-btn">Generate My Build Prompt →</a>
@@ -941,18 +916,46 @@ async function handleSend() {
 // ─────────────────────────────────────
 async function init() {
   showThinking();
-  const opening = `Start the Tech Stack Recommender session. Write a warm 1-2 sentence welcome acknowledging that figuring out the right tools is one of the most confusing parts of getting started — and that today they are going to leave with a clear answer. Then ask Q1. Emit [Q:1] at the start.`;
+
+  let opening;
+  if (userIntake && (userIntake.currentSetup || userIntake.techComfort)) {
+    const tools = (userIntake.currentTools || []).join(', ') || 'none listed';
+    opening = `Start the Tech Stack session. The member has already completed their intake profile — use this to skip any questions you already have answers for:
+
+- Current setup: ${userIntake.currentSetup || 'not specified'}
+- Tools they currently use: ${tools}
+- What they want to build: ${userIntake.wantToBuild || 'not specified'}
+- Tech comfort: ${userIntake.techComfort || 'not specified'}
+
+If you have enough context to make the build tool recommendation right now, go straight to [DONE] and generate the Stack Report. If you need one clarifying question first, ask it with [Q:1]. Either way, open with a warm 1 sentence acknowledgement that you can see where they are.`;
+  } else {
+    opening = `Start the Tech Stack Recommender session. Write a warm 1-2 sentence welcome acknowledging that figuring out the right tools is one of the most confusing parts of getting started — and that today they are going to leave with one clear answer. Then ask Q1. Emit [Q:1] at the start.`;
+  }
+
   try {
     const reply = await callAI(opening);
     hideThinking();
-    addMsg("assistant", reply);
-    setChips(1);
+
+    if (reply.includes("[DONE]")) {
+      finished = true;
+      setProgress(Q_TOTAL);
+      const beforeReport = reply.split("STACK_REPORT_START")[0].replace("[DONE]", "").trim();
+      if (beforeReport) addMsg("assistant", beforeReport);
+      rawReport = reply.match(/STACK_REPORT_START[\s\S]*?STACK_REPORT_END/)?.[0] || "";
+      const report = parseStackReport(rawReport);
+      await saveResults(report, rawReport);
+      setTimeout(() => showStackReport(report), 400);
+    } else {
+      addMsg("assistant", reply);
+      setChips(1);
+      document.getElementById("sendBtn").disabled = false;
+    }
   } catch(e) {
     hideThinking();
     addMsg("assistant", "[Q:1] Let's figure out exactly what you need. First — which of these best describes where you are right now?");
     setChips(1);
+    document.getElementById("sendBtn").disabled = false;
   }
-  document.getElementById("sendBtn").disabled = false;
 }
 
 // auto-resize
@@ -970,11 +973,19 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
 // ─────────────────────────────────────
 const welcomeEl = document.getElementById('toolwelcome');
 
-auth.onAuthStateChanged(function(user) {
+let userIntake = null;
+
+auth.onAuthStateChanged(async function(user) {
   if (!user) {
     window.location.href = 'signon.html?redirect=techstack';
     return;
   }
+
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    if (snap.exists) userIntake = snap.data().intake || null;
+  } catch(e) {}
+
   const firstName = (user.displayName || user.email || '').split(/[\s@]/)[0];
   const nameEl = document.getElementById('phUserName');
   if (nameEl && firstName) nameEl.textContent = firstName;
