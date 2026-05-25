@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Prompt Generator — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* LAYOUT */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem 5rem; max-width: 860px; width: 100%; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--text); margin-bottom: 0.4rem; }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.5; }
+
+  /* DATA STATUS PILLS */
+  .data-status { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .data-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .data-pill.found { background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.2); }
+  .data-pill.missing { background: rgba(158,152,145,0.1); color: var(--text3); border: 1px solid var(--border); }
+  .data-pill.found::before { content: '✓'; }
+  .data-pill.missing::before { content: '○'; }
+  .data-detail { font-size: 13px; color: var(--text2); line-height: 1.55; padding: 10px 14px; background: rgba(42,92,69,0.04); border-radius: var(--radius-sm); border-left: 3px solid rgba(42,92,69,0.25); margin-bottom: 8px; }
+  .data-detail strong { color: var(--text); font-weight: 700; display: block; margin-bottom: 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .data-missing-note { font-size: 13px; color: var(--text3); padding: 10px 14px; background: var(--bg); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+  .data-missing-note a { color: var(--gold); text-decoration: none; font-weight: 700; }
+
+  /* APP NAME INPUT */
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-label { font-size: 13px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.06em; }
+  .input-hint { font-size: 12px; color: var(--text3); }
+  .text-input { width: 100%; padding: 11px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; font-family: 'Lato', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .text-input:focus { border-color: var(--gold); background: #fff; }
+  .text-input::placeholder { color: var(--text3); }
+
+  /* FEATURE CHECKLIST */
+  .feature-group { margin-bottom: 1.25rem; }
+  .feature-group:last-child { margin-bottom: 0; }
+  .feature-group-label { font-size: 11px; font-weight: 900; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .feature-group-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .feature-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .feature-item:hover:not(.locked) { border-color: var(--gold); background: rgba(201,168,76,0.04); }
+  .feature-item.checked { border-color: rgba(42,92,69,0.35); background: rgba(42,92,69,0.06); }
+  .feature-item.locked { cursor: default; opacity: 0.7; background: rgba(0,0,0,0.02); }
+  .feature-check { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border); background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+  .feature-item.checked .feature-check { background: var(--green); border-color: var(--green); }
+  .feature-item.locked .feature-check { background: var(--dark); border-color: var(--dark); }
+  .feature-check svg { display: none; }
+  .feature-item.checked .feature-check svg,
+  .feature-item.locked .feature-check svg { display: block; }
+  .feature-info { flex: 1; min-width: 0; }
+  .feature-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .feature-desc { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+  .lock-badge { font-size: 10px; font-weight: 900; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; display: inline-block; }
+
+  /* GENERATE BUTTON */
+  .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: var(--dark); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
+  .generate-btn:hover { background: #d4b35a; }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* GENERATED PROMPT */
+  .prompt-card { display: none; }
+  .prompt-card.visible { display: block; }
+  .prompt-output { background: var(--dark); color: #E8E4DC; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7; padding: 1.25rem; border-radius: var(--radius-sm); white-space: pre-wrap; word-break: break-word; border: 1px solid var(--border-dark); max-height: 500px; overflow-y: auto; }
+  .copy-btn { margin-top: 1rem; padding: 10px 20px; background: var(--dark); color: var(--gold); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 900; border: 1px solid rgba(201,168,76,0.3); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
+  .copy-btn:hover { background: var(--gold); color: var(--dark); }
+  .copy-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .prompt-note { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .prompt-note strong { color: var(--gold); }
+
+  /* LOADING */
+  #loading-state { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: 14px; padding: 2rem; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #main-content { display: none; }
+
+  /* MOBILE NAV */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; height: 58px; }
+  .mobile-nav-inner { display: flex; height: 100%; }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: none; }
+    .logout-btn span { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main-wrap { margin-left: 60px; }
+  }
+  @media (max-width: 640px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1.25rem 1rem 5rem; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .mobile-bottom-nav { display: block; }
+    .top-header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="roadmap.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
+      <span>My Roadmap</span>
+    </a>
+    <a href="build-agent.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>Build Agent</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="header-title">Build Prompt Generator</div>
+        <div class="header-subtitle">Generate your ready-to-paste Base44 app prompt</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- Loading -->
+    <div id="loading-state">
+      <div class="spinner"></div>
+      Loading your profile data...
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+
+      <!-- Step 1: Your Data -->
+      <div class="card" id="data-card">
+        <div class="card-title">Your Profile Data</div>
+        <div class="card-sub">We pulled this from your ToolSpark tools. It feeds directly into your prompt so Base44 knows exactly what to build.</div>
+        <div class="data-status" id="data-status"></div>
+        <div id="data-details"></div>
+      </div>
+
+      <!-- Step 2: App Name -->
+      <div class="card">
+        <div class="card-title">What will you call your app?</div>
+        <div class="card-sub">This is what clients will see when they sign in. You can always rename it in Base44 later.</div>
+        <div class="input-group">
+          <label class="input-label" for="app-name">App Name</label>
+          <span class="input-hint">Keep it short — 2 to 4 words</span>
+          <input type="text" id="app-name" class="text-input" placeholder="e.g. Client Clarity Hub, Lead Flow AI, The Growth Suite">
+        </div>
+      </div>
+
+      <!-- Step 3: Features -->
+      <div class="card">
+        <div class="card-title">What do you want in your app?</div>
+        <div class="card-sub">Check everything you want included in your first build. Adding things later costs more credits — it's cheaper to include them now even if you're not ready to use them yet.</div>
+
+        <div class="feature-group">
+          <div class="feature-group-label">Always Included — Foundation</div>
+          <div class="feature-grid">
+            <div class="feature-item locked" data-key="auth">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Login &amp; Signup</div>
+                <div class="feature-desc">Full auth — sign up, sign in, password reset</div>
+                <span class="lock-badge">Always included</span>
+              </div>
+            </div>
+            <div class="feature-item locked" data-key="profiles">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">User Profiles</div>
+                <div class="feature-desc">Each client has an account and can save their data</div>
+                <span class="lock-badge">Always included</span>
+              </div>
+            </div>
+            <div class="feature-item locked" data-key="admin">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Admin Dashboard</div>
+                <div class="feature-desc">Manage users, view who's active, track usage</div>
+                <span class="lock-badge">Always included</span>
+              </div>
+            </div>
+            <div class="feature-item locked" data-key="mobile">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Mobile-First PWA</div>
+                <div class="feature-desc">Bottom tab nav, installs on phone like an app</div>
+                <span class="lock-badge">Always included</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-group">
+          <div class="feature-group-label">Recommended — Cheap to add now, expensive later</div>
+          <div class="feature-grid">
+            <div class="feature-item checked" data-key="history" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Results History</div>
+                <div class="feature-desc">Clients can view all their past AI tool outputs</div>
+              </div>
+            </div>
+            <div class="feature-item checked" data-key="roles" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">User Roles</div>
+                <div class="feature-desc">Client vs. admin — expandable to free vs. paid later</div>
+              </div>
+            </div>
+            <div class="feature-item checked" data-key="analytics" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Basic Analytics</div>
+                <div class="feature-desc">See how often clients use your tool</div>
+              </div>
+            </div>
+            <div class="feature-item checked" data-key="resources" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Tools &amp; Resources</div>
+                <div class="feature-desc">A tab with links, PDFs, and resources for clients</div>
+              </div>
+            </div>
+            <div class="feature-item checked" data-key="landing" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Landing Page</div>
+                <div class="feature-desc">Public-facing page so new clients can sign up</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-group">
+          <div class="feature-group-label">Optional — Add what fits your vision</div>
+          <div class="feature-grid">
+            <div class="feature-item" data-key="courses" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Course / Lesson Area</div>
+                <div class="feature-desc">Modules with lessons and progress tracking</div>
+              </div>
+            </div>
+            <div class="feature-item" data-key="community" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Community / Discussion</div>
+                <div class="feature-desc">A feed or forum where clients connect</div>
+              </div>
+            </div>
+            <div class="feature-item" data-key="payments" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Payments (Stripe)</div>
+                <div class="feature-desc">Charge for access — subscriptions or one-time</div>
+              </div>
+            </div>
+            <div class="feature-item" data-key="onboarding" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Client Onboarding</div>
+                <div class="feature-desc">Guided walkthrough on a client's first login</div>
+              </div>
+            </div>
+            <div class="feature-item" data-key="email" onclick="toggleFeature(this)">
+              <div class="feature-check">
+                <svg width="11" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg>
+              </div>
+              <div class="feature-info">
+                <div class="feature-name">Email Notifications</div>
+                <div class="feature-desc">Welcome email, results sent to client inbox</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="generate-btn" id="generate-btn" onclick="generatePrompt()">
+          Generate My Build Prompt →
+        </button>
+      </div>
+
+      <!-- Step 4: Generated Prompt -->
+      <div class="card prompt-card" id="prompt-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0.3rem;">
+          <div class="card-title" style="margin-bottom:0;">Your Build Prompt</div>
+          <span id="save-status" style="font-size:12px;color:var(--green);font-weight:700;display:none;">✓ Saved to your profile</span>
+        </div>
+        <div class="card-sub" style="margin-bottom:1rem;">Copy this and paste it directly into Base44 (or your chosen builder) to start your build.</div>
+        <div class="prompt-output" id="prompt-output"></div>
+        <div style="margin-top:1rem;" class="copy-row">
+          <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
+          <span class="prompt-note"><strong>Tip:</strong> Open Base44, start a new project, and paste this as your first message.</span>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /page-content -->
+</div><!-- /main-wrap -->
+
+<!-- Mobile bottom nav -->
+<nav class="mobile-bottom-nav">
+  <div class="mobile-nav-inner">
+    <a href="community.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      Community
+    </a>
+    <a href="courses.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      Courses
+    </a>
+    <a href="dashboard.html" class="mobile-nav-item active">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="roadmap.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
+      Roadmap
+    </a>
+    <a href="tools.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Tools
+    </a>
+  </div>
+</nav>
+
+<script>
+  // ── MEMBER DATA ──
+  let memberData = {
+    spark: null,
+    audience: null,
+    breakthrough: null
+  };
+  let currentUser = null;
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function parseToolsFromActionPlan(actionPlan) {
+    if (!actionPlan) return [];
+    const fieldDefs = [
+      { key: 'name', tag: 'NAME' },
+      { key: 'summary', tag: 'SUMMARY' },
+      { key: 'complexity', tag: 'COMPLEXITY' },
+      { key: 'priority', tag: 'PRIORITY' },
+      { key: 'why', tag: 'WHY' },
+      { key: 'how', tag: 'HOW' }
+    ];
+    const tools = [];
+    for (let i = 1; i <= 3; i++) {
+      const tool = {};
+      fieldDefs.forEach(({ key, tag }, fi) => {
+        const nextBoundary = fi < fieldDefs.length - 1
+          ? `TOOL_${i}_${fieldDefs[fi + 1].tag}:`
+          : (i < 3 ? `TOOL_${i + 1}_NAME:` : String.raw`\*\*ACTION_PLAN_END`);
+        const regex = new RegExp(`TOOL_${i}_${tag}:([\\s\\S]+?)(?=${nextBoundary}|$)`);
+        const match = actionPlan.match(regex);
+        tool[key] = match ? match[1].trim() : '';
+      });
+      tools.push(tool);
+    }
+    return tools;
+  }
+
+  function mostRecent(snaps) {
+    const map = new Map();
+    snaps.forEach(snap => snap.forEach(d => { if (!map.has(d.id)) map.set(d.id, d); }));
+    return Array.from(map.values()).sort((a, b) => {
+      return (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0);
+    });
+  }
+
+  function renderDataCard() {
+    const statusEl = document.getElementById('data-status');
+    const detailsEl = document.getElementById('data-details');
+    statusEl.innerHTML = '';
+    detailsEl.innerHTML = '';
+
+    // Spark
+    if (memberData.spark) {
+      statusEl.innerHTML += `<span class="data-pill found">Spark Statement</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Spark Statement</strong>${escHtml(memberData.spark.statement)}</div>`;
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Spark Statement</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Spark results found. <a href="spark.html">Run the Spark tool →</a></div>`;
+    }
+
+    // Audience
+    if (memberData.audience) {
+      statusEl.innerHTML += `<span class="data-pill found">Audience Profile</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Target Client</strong>${escHtml(memberData.audience.whoTheyAre)}</div>`;
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Audience Profile</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Audience results found. <a href="audiencetool.html">Run the Audience tool →</a></div>`;
+    }
+
+    // Breakthrough
+    if (memberData.breakthrough) {
+      statusEl.innerHTML += `<span class="data-pill found">Breakthrough Tool</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Your AI Tool</strong>${escHtml(memberData.breakthrough.name)}</div>`;
+      if (memberData.breakthrough.how) {
+        detailsEl.innerHTML += `<div class="data-detail"><strong>How It Works</strong>${escHtml(memberData.breakthrough.how)}</div>`;
+      }
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Breakthrough Tool</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Breakthrough results found. <a href="userclaritytools.html">Complete the Breakthrough session →</a></div>`;
+    }
+  }
+
+  // ── FEATURE TOGGLE ──
+  function toggleFeature(el) {
+    if (el.classList.contains('locked')) return;
+    el.classList.toggle('checked');
+  }
+
+  function getCheckedFeatures() {
+    const checked = new Set();
+    // Locked always-on
+    ['auth','profiles','admin','mobile'].forEach(k => checked.add(k));
+    document.querySelectorAll('.feature-item:not(.locked)').forEach(el => {
+      if (el.classList.contains('checked')) checked.add(el.dataset.key);
+    });
+    return checked;
+  }
+
+  // ── PROMPT GENERATION ──
+  function generatePrompt() {
+    const appName = document.getElementById('app-name').value.trim() || 'My App';
+    const features = getCheckedFeatures();
+
+    const spark = memberData.spark;
+    const audience = memberData.audience;
+    const breakthrough = memberData.breakthrough;
+
+    let lines = [];
+
+    lines.push(`Build a web app called "${appName}".`);
+    lines.push('');
+
+    // Who built this
+    if (spark) {
+      lines.push('WHAT THIS APP IS FOR:');
+      lines.push(spark.statement || `${spark.whatYouKnow || ''} helping ${spark.whoYouHelp || 'clients'}`);
+      lines.push('');
+    }
+
+    // Target user
+    if (audience) {
+      let audLine = audience.whoTheyAre || '';
+      if (audience.dailyFrustration) audLine += ` who struggle with: ${audience.dailyFrustration}`;
+      if (audience.dreamOutcome) audLine += `. Their goal: ${audience.dreamOutcome}`;
+      lines.push('WHO THIS IS FOR:');
+      lines.push(audLine);
+      lines.push('');
+    }
+
+    // Core AI tool
+    if (breakthrough) {
+      lines.push(`CORE AI TOOL — ${breakthrough.name || 'AI Tool'}:`);
+      if (breakthrough.how) {
+        lines.push(breakthrough.how);
+      } else if (breakthrough.summary) {
+        lines.push(breakthrough.summary);
+      }
+      lines.push('');
+    }
+
+    // Sections
+    lines.push('SECTIONS TO BUILD:');
+    lines.push('• AI Tool: This is the centerpiece. ' + (breakthrough ? breakthrough.name : 'the AI tool') + ' is what clients come for — make it prominent and easy to use.');
+    lines.push('• User Authentication: Full login, signup, password reset, and email verification.');
+    lines.push('• User Profiles: Each client has an account, can update their profile, and sees their own data only.');
+    lines.push('• Admin Dashboard: Manage all users, view who has signed up, see usage stats and activity.');
+
+    if (features.has('history')) lines.push('• Results History: Every time a client uses the AI tool, save the output to their account so they can review past results.');
+    if (features.has('roles')) lines.push('• User Roles: At minimum client vs. admin. Structure so free vs. paid tiers can be added later without rebuilding.');
+    if (features.has('analytics')) lines.push('• Usage Analytics: Track how often the AI tool is used — per user and overall. Show this in the admin dashboard.');
+    if (features.has('resources')) lines.push('• Tools & Resources: A dedicated tab with links, PDFs, videos, and resources the admin can manage.');
+    if (features.has('landing')) lines.push('• Landing Page: A public-facing page (no login required) that explains what the app is and lets new clients sign up.');
+    if (features.has('courses')) lines.push('• Course / Lesson Area: Modules with individual lessons, video or text content, and progress tracking per user.');
+    if (features.has('community')) lines.push('• Community: A discussion feed or forum where clients can post, reply, and connect with each other.');
+    if (features.has('payments')) lines.push('• Payments: Stripe integration for subscriptions or one-time purchases. Tie payment status to user role/access.');
+    if (features.has('onboarding')) lines.push('• Client Onboarding: On first login, walk new clients through a short guided tour of the app and AI tool.');
+    if (features.has('email')) lines.push('• Email Notifications: Send a welcome email on signup. Email clients their AI tool results after each session.');
+
+    lines.push('');
+    lines.push('DESIGN:');
+    lines.push('Mobile-first with bottom tab navigation — not a sidebar. Clean, professional, and fast. Build as a PWA so clients can install it from their phone browser. Designed for easy App Store publishing later using Capacitor. No heavy frameworks or complicated setups.');
+    lines.push('');
+    lines.push('TECH:');
+    lines.push('React. Mobile-responsive. PWA manifest and service worker included. Keep the architecture simple and easy to extend.');
+
+    const promptText = lines.join('\n');
+    document.getElementById('prompt-output').textContent = promptText;
+    const saveStatus = document.getElementById('save-status');
+    if (saveStatus) saveStatus.style.display = 'none';
+    const card = document.getElementById('prompt-card');
+    card.classList.add('visible');
+    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    savePrompt(promptText, appName, features);
+  }
+
+  // ── SAVE / LOAD ──
+  async function savePrompt(promptText, appName, features) {
+    if (!currentUser) return;
+    try {
+      await db.collection('prompt_results').doc(currentUser.uid).set({
+        userId: currentUser.uid,
+        accountEmail: currentUser.email || '',
+        appName: appName,
+        features: Array.from(features),
+        promptText: promptText,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const el = document.getElementById('save-status');
+      if (el) { el.style.display = 'inline'; }
+    } catch(e) {
+      console.error('Save error:', e);
+    }
+  }
+
+  async function loadSavedPrompt() {
+    if (!currentUser) return;
+    try {
+      const doc = await db.collection('prompt_results').doc(currentUser.uid).get();
+      if (!doc.exists) return;
+      const data = doc.data();
+      if (data.appName) {
+        document.getElementById('app-name').value = data.appName;
+      }
+      if (data.features && Array.isArray(data.features)) {
+        const saved = new Set(data.features);
+        document.querySelectorAll('.feature-item:not(.locked)').forEach(el => {
+          if (saved.has(el.dataset.key)) {
+            el.classList.add('checked');
+          } else {
+            el.classList.remove('checked');
+          }
+        });
+      }
+      if (data.promptText) {
+        document.getElementById('prompt-output').textContent = data.promptText;
+        const card = document.getElementById('prompt-card');
+        card.classList.add('visible');
+        const saveStatus = document.getElementById('save-status');
+        if (saveStatus) saveStatus.style.display = 'inline';
+      }
+    } catch(e) {
+      console.error('Load error:', e);
+    }
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById('prompt-output').textContent;
+    const btn = document.getElementById('copy-btn');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2500);
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2500);
+    });
+  }
+
+  // ── SIDEBAR ──
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+  function openSidebar() { sidebar.classList.add('open'); sidebarOverlay.classList.add('open'); }
+  function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); }
+  if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
+  if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+  // ── AUTH + DATA LOAD ──
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html?redirect=prompt-generator'; return; }
+    currentUser = user;
+
+    const name = user.displayName || user.email || 'Builder';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists && snap.data().userRole === 'admin') {
+        document.getElementById('sidebar-role').textContent = 'Admin';
+      }
+    } catch(e) {}
+
+    try {
+      const emailLower = (user.email || '').toLowerCase();
+
+      const [
+        sparkByUser, sparkByEmail, sparkByEmailLower,
+        audByUser, audByEmail, audByEmailLower,
+        clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm
+      ] = await Promise.all([
+        db.collection('spark_results').where('userId', '==', user.uid).get(),
+        db.collection('spark_results').where('accountEmail', '==', user.email).get(),
+        db.collection('spark_results').where('accountEmail', '==', emailLower).get(),
+        db.collection('audience_results').where('userId', '==', user.uid).get(),
+        db.collection('audience_results').where('accountEmail', '==', user.email).get(),
+        db.collection('audience_results').where('accountEmail', '==', emailLower).get(),
+        db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', emailLower).get(),
+        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get()
+      ]);
+
+      // Most recent spark
+      const sparkDocs = mostRecent([sparkByUser, sparkByEmail, sparkByEmailLower]);
+      if (sparkDocs.length) memberData.spark = sparkDocs[0].data();
+
+      // Most recent audience
+      const audDocs = mostRecent([audByUser, audByEmail, audByEmailLower]);
+      if (audDocs.length) memberData.audience = audDocs[0].data();
+
+      // Most recent clarity session with an actionPlan
+      const clarityDocs = mostRecent([clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm])
+        .filter(d => d.data().actionPlan);
+      if (clarityDocs.length) {
+        const session = clarityDocs[0].data();
+        const tools = parseToolsFromActionPlan(session.actionPlan);
+        const chosenIdx = session.chosenTool ? session.chosenTool - 1 : 0;
+        const tool = tools[chosenIdx] || tools[0];
+        if (tool && tool.name) memberData.breakthrough = tool;
+      }
+
+    } catch(e) {
+      console.error('Data load error:', e);
+    }
+
+    renderDataCard();
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    loadSavedPrompt();
+  });
+</script>
+</body>
+</html>

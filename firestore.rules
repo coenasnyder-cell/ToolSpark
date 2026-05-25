@@ -216,6 +216,15 @@ match /spark_results/{resultId} {
       allow delete: if isAdmin();
     }
 
+    // PROMPT RESULTS
+    match /prompt_results/{userId} {
+      allow read: if isActive() && (isOwner(userId) || isAdmin());
+      allow create: if isActive() && isOwner(userId) &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isActive() && isOwner(userId);
+      allow delete: if isAdmin();
+    }
+
     // AGENT SESSIONS
     match /agent_sessions/{sessionId} {
       allow read: if isActive() && (

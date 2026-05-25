@@ -42,6 +42,7 @@
     --green-mid:  #3D8A65;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { overflow-x: hidden; max-width: 100%; }
 
   body {
     font-family: 'Lato', sans-serif;
@@ -280,6 +281,7 @@
     border: 1px solid var(--border-mid);
     border-radius: 100px;
     color: var(--gold-light);
+    white-space: normal; word-break: break-word;
     font-size: 13px; cursor: pointer;
     transition: all 0.18s;
     font-family: 'Lato', sans-serif;
@@ -634,12 +636,12 @@ SPARK_PROFILE_END`;
 // CHIPS PER QUESTION
 // ─────────────────────────────────────
 const CHIPS = {
-  2: ["Help with a problem they were having", "Advice about a life decision", "Help with their business", "Emotional support", "Technical help"],
-  3: ["Financial struggle", "Career change", "Health challenge", "Relationship difficulty", "Starting over from scratch"],
-  4: ["Freeing — like I was finally being myself", "Purposeful — like I was actually making a difference", "Energising — I could do it all day", "Peaceful — like everything made sense"],
-  5: ["Stuck in a job they hate", "Trying to make money online but failing", "Overwhelmed and don't know where to start", "Have skills but no idea how to monetise them"],
-  6: ["That it doesn't have to be as hard as everyone makes it", "That mindset matters more than strategy", "That there's a simpler path nobody talks about", "That the thing holding them back is fear not knowledge"],
-  7: ["Helping them get clear on their direction", "Teaching them something I know really well", "Helping them see their own value", "Walking them through a process step by step"],
+  2: ["Help with a problem they were having", "Help with their business", "Emotional support"],
+  3: ["Financial struggle", "Career change", "Starting over from scratch"],
+  4: ["Freeing — like I was finally being myself", "Purposeful — like I was actually making a difference", "Energising — I could do it all day"],
+  5: ["Stuck in a job they hate", "Overwhelmed and don't know where to start", "Have skills but no idea how to monetise them"],
+  6: ["That it doesn't have to be as hard as everyone makes it", "That mindset matters more than strategy", "That the thing holding them back is fear not knowledge"],
+  7: ["Helping them get clear on their direction", "Teaching them something I know really well", "Walking them through a process step by step"],
 };
 
 // ─────────────────────────────────────

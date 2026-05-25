@@ -461,8 +461,8 @@
     <div class="start-logo-mark">ToolSpark</div>
     <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
     <h1 style="margin-bottom:0.5rem;">You've completed your<br><em>2 Breakthrough sessions</em></h1>
-    <p class="start-sub" style="margin-bottom:1.5rem;">You've already uncovered your best tool opportunities. Head to your dashboard to pick one and start building — or reach out if you'd like to run another session.</p>
-    <a href="userclaritytools.html" class="start-btn" style="display:inline-block;text-decoration:none;margin-bottom:0.75rem;">View My Results →</a>
+    <p class="start-sub" style="margin-bottom:1.5rem;">You've already uncovered your best tool opportunities. Head to your roadmap to pick one and start building — or reach out if you'd like to run another session.</p>
+    <a href="roadmap.html" class="start-btn" style="display:inline-block;text-decoration:none;margin-bottom:0.75rem;">View My Roadmap →</a>
     <div style="font-size:13px;color:var(--text3);">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold);font-weight:700;">Contact us</a></div>
   </div>
 </div>
@@ -906,7 +906,7 @@ async function finishSession(actionPlanText) {
           email: clientEmail,
           dataVariables: {
             first_name: displayName || 'there',
-            results_url: 'https://toolspark.co/userclaritytools.html'
+            results_url: 'https://toolspark.co/roadmap.html'
           }
         })
       });
@@ -915,7 +915,7 @@ async function finishSession(actionPlanText) {
     }
   }
 
-  window.location.href = 'userclaritytools.html';
+  window.location.href = 'results.html';
 }
 
 // ══════════════════════════════════════════

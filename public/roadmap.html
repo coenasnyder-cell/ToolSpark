@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -165,6 +165,9 @@
   .step-card-head.c1 { background: rgba(42,92,69,0.06); }
   .step-card-head.c2 { background: rgba(75,63,138,0.06); }
   .step-card-head.c3 { background: rgba(196,98,45,0.06); }
+  .choose-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.15s; border: 1px solid var(--border); background: none; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
+  .choose-btn:hover { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .choose-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .step-tool-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
   .step-badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
@@ -255,6 +258,8 @@
   }
   .spark-section-title { font-weight: 700; font-size: 15px; color: var(--text); }
   .spark-section-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .section-tool-btn { margin-left: auto; padding: 5px 13px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text2); text-decoration: none; transition: all 0.15s; flex-shrink: 0; white-space: nowrap; }
+  .section-tool-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
   .spark-section-body {
     padding: 1.25rem 1.375rem;
     display: flex;
@@ -357,10 +362,6 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       <span>Build Agent</span>
     </a>
-    <a href="techstack.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      <span>Tech Stack</span>
-    </a>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-user">
@@ -419,6 +420,7 @@
             <div class="spark-section-title">Find Your Spark</div>
             <div class="spark-section-desc">Your core business identity from your Spark session</div>
           </div>
+          <a href="spark.html" class="section-tool-btn">Open tool →</a>
         </div>
         <div class="spark-section-body">
           <div>
@@ -447,6 +449,7 @@
             <div class="spark-section-title">Audience Deep Dive</div>
             <div class="spark-section-desc">Your client profile from your most recent session</div>
           </div>
+          <a href="audiencetool.html" class="section-tool-btn">Open tool →</a>
         </div>
         <div class="spark-section-body">
           <div id="aud-who-wrap">
@@ -479,10 +482,43 @@
             <div class="spark-section-title">Discover Your Breakthrough</div>
             <div class="spark-section-desc">Your three recommended tools and build prompts, newest session</div>
           </div>
+          <a href="clarity.html" class="section-tool-btn">Open tool →</a>
         </div>
       </div>
       <div class="roadmap-wrap" id="roadmap-wrap"></div>
     </div>
+
+    <div id="techstack-section" style="display:none;">
+      <div class="spark-section-card">
+        <div class="spark-section-header" style="background:rgba(196,98,45,0.06);">
+          <div class="spark-section-icon" style="background:rgba(196,98,45,0.1);border-color:rgba(196,98,45,0.18);color:var(--coral);">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div>
+            <div class="spark-section-title">Tech Stack</div>
+            <div class="spark-section-desc">Your recommended platform and build tool</div>
+          </div>
+          <a href="techstack.html" class="section-tool-btn">Open tool →</a>
+        </div>
+        <div class="spark-section-body" id="techstack-body"></div>
+      </div>
+    </div>
+
+    <div id="techstack-empty" style="display:none;">
+      <div class="spark-section-card">
+        <div class="spark-section-header" style="background:rgba(196,98,45,0.04);">
+          <div class="spark-section-icon" style="background:rgba(196,98,45,0.08);border-color:rgba(196,98,45,0.15);color:var(--coral);opacity:0.6;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div>
+            <div class="spark-section-title" style="color:var(--text2);">Tech Stack</div>
+            <div class="spark-section-desc">Find your recommended platform and build tool</div>
+          </div>
+          <a href="techstack.html" class="section-tool-btn" style="border-color:var(--coral);color:var(--coral);">Start →</a>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -532,17 +568,44 @@
     const tools = [];
     for (let i = 1; i <= 3; i++) {
       const tool = {};
-      fieldDefs.forEach(({ key, tag }, fi) => {
-        const nextBoundary = fi < fieldDefs.length - 1
-          ? `TOOL_${i}_${fieldDefs[fi + 1].tag}:`
-          : (i < 3 ? `TOOL_${i + 1}_NAME:` : String.raw`\*\*ACTION_PLAN_END`);
-        const regex = new RegExp(`TOOL_${i}_${tag}:([\\s\\S]+?)(?=${nextBoundary}|$)`);
+      fieldDefs.forEach(({ key, tag }) => {
+        const regex = new RegExp(`TOOL_${i}_${tag}:([\\s\\S]+?)(?=TOOL_\\d+_[A-Z_]+:|\\*\\*ACTION_PLAN_END|$)`);
         const match = actionPlan.match(regex);
         tool[key] = match ? match[1].trim() : '';
       });
       tools.push(tool);
     }
     return tools;
+  }
+
+  let currentSessionData = null;
+  let currentSessionId = null;
+
+  async function chooseTool(index) {
+    if (!currentSessionId) return;
+    const btn = document.querySelector(`[data-choose="${index}"]`);
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      await db.collection('clarity_sessions').doc(currentSessionId).update({ chosenTool: index });
+      currentSessionData = { ...currentSessionData, chosenTool: index };
+      renderRoadmap(currentSessionData, currentSessionId);
+    } catch(e) {
+      console.error('Choose tool error:', e);
+      if (btn) { btn.textContent = 'Choose this tool'; btn.disabled = false; }
+    }
+  }
+
+  async function clearTool() {
+    if (!currentSessionId) return;
+    try {
+      await db.collection('clarity_sessions').doc(currentSessionId).update({ chosenTool: firebase.firestore.FieldValue.delete() });
+      const updated = { ...currentSessionData };
+      delete updated.chosenTool;
+      currentSessionData = updated;
+      renderRoadmap(currentSessionData, currentSessionId);
+    } catch(e) {
+      console.error('Clear tool error:', e);
+    }
   }
 
   function copyPrompt(index, text) {
@@ -562,6 +625,8 @@
   }
 
   function renderRoadmap(session, sessionId) {
+    currentSessionData = session;
+    currentSessionId = sessionId;
     const allTools = parseToolsFromActionPlan(session.actionPlan);
 
     if (!allTools.length || !allTools[0].name) {
@@ -577,22 +642,17 @@
     const chosenIndex = session.chosenTool ? session.chosenTool - 1 : null;
     const tools = chosenIndex !== null ? [{ ...allTools[chosenIndex], _origIndex: chosenIndex }] : allTools.map((t, i) => ({ ...t, _origIndex: i }));
 
-    const changeLink = sessionId
-      ? `<div style="margin-bottom:1rem;"><a href="results.html?session=${encodeURIComponent(sessionId)}" style="font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:5px;">← Change your tool selection</a></div>`
+    const changeLink = chosenIndex !== null
+      ? `<div style="margin-bottom:1rem;"><button onclick="clearTool()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'Lato',sans-serif;padding:0;">← Change tool selection</button></div>`
       : '';
 
     const noPick = chosenIndex === null
-      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:8px;font-size:12px;color:var(--gold);">Pick one tool from your results page to focus your roadmap. All three are shown below until you choose.</div>`
+      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:8px;font-size:12px;color:var(--gold);">Choose one of the three tools below to focus your roadmap.</div>`
       : '';
 
     const wrap = document.getElementById('roadmap-wrap');
     wrap.innerHTML = (chosenIndex !== null ? changeLink : '') + noPick + tools.map((t, i) => {
       const oi = t._origIndex;
-      const promptSection = t.how
-        ? `<div class="prompt-section-label">How it works</div>
-           <div class="step-why">${escapeHtml(t.how)}</div>`
-        : '';
-
       return `
       <div class="roadmap-step">
         <div class="step-left">
@@ -608,11 +668,11 @@
                 ${t.complexity ? `<span class="complexity-badge">Complexity: ${escapeHtml(t.complexity)}</span>` : ''}
               </div>
             </div>
+            ${chosenIndex === null ? `<button class="choose-btn" data-choose="${oi + 1}" onclick="chooseTool(${oi + 1})">Choose this tool</button>` : ''}
           </div>
           <div class="step-card-body">
             ${t.summary ? `<div class="step-what">${escapeHtml(t.summary)}</div>` : ''}
             ${t.why ? `<div class="step-why">${escapeHtml(t.why)}</div>` : ''}
-            ${promptSection}
           </div>
         </div>
       </div>`;
@@ -644,11 +704,12 @@
     try {
       const userEmailLower = (user.email || '').toLowerCase();
 
-      // Run all three tool queries in parallel
+      // Run all tool queries in parallel
       const [
         sparkByUser, sparkByEmail, sparkByEmailLower,
         audienceByUser, audienceByEmail, audienceByEmailLower,
-        clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm
+        clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm,
+        techstackByUser, techstackByEmail
       ] = await Promise.all([
         db.collection('spark_results').where('userId', '==', user.uid).get(),
         db.collection('spark_results').where('accountEmail', '==', user.email).get(),
@@ -659,7 +720,9 @@
         db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
-        db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get()
+        db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get(),
+        db.collection('techstack_results').where('userId', '==', user.uid).get(),
+        db.collection('techstack_results').where('accountEmail', '==', userEmailLower).get()
       ]);
 
       // Render Spark section from most recent spark_results doc
@@ -720,10 +783,33 @@
 
       if (!completed.length) {
         document.getElementById('empty').style.display = 'block';
-        return;
+      } else {
+        renderRoadmap(completed[0].data(), completed[0].id);
       }
 
-      renderRoadmap(completed[0].data(), completed[0].id);
+      // Render Tech Stack section from most recent techstack_results doc
+      const techstackMap = new Map();
+      [techstackByUser, techstackByEmail].forEach(snap => {
+        snap.forEach(d => { if (!techstackMap.has(d.id)) techstackMap.set(d.id, d); });
+      });
+      const techstackSessions = Array.from(techstackMap.values()).sort((a, b) => {
+        const aT = a.data().createdAt?.toMillis?.() || 0;
+        const bT = b.data().createdAt?.toMillis?.() || 0;
+        return bT - aT;
+      });
+      if (techstackSessions.length) {
+        const ts = techstackSessions[0].data();
+        const body = document.getElementById('techstack-body');
+        body.innerHTML = [
+          ts.platform   ? `<div><div class="spark-field-label" style="color:var(--coral);">Platform</div><div class="spark-field-value">${escapeHtml(ts.platform)}</div></div>` : '',
+          ts.buildTool  ? `<div><div class="spark-field-label" style="color:var(--coral);">Build Tool</div><div class="spark-field-value">${escapeHtml(ts.buildTool)}</div></div>` : '',
+          ts.firstStep  ? `<div><div class="spark-field-label" style="color:var(--coral);">First Step</div><div class="spark-field-value">${escapeHtml(ts.firstStep)}</div></div>` : '',
+          ts.summary    ? `<div><div class="spark-field-label" style="color:var(--coral);">Summary</div><div class="spark-field-value">${escapeHtml(ts.summary)}</div></div>` : ''
+        ].filter(Boolean).join('');
+        document.getElementById('techstack-section').style.display = 'block';
+      } else {
+        document.getElementById('techstack-empty').style.display = 'block';
+      }
     } catch(e) {
       console.error('Roadmap load error:', e);
       document.getElementById('loading').textContent = 'Could not load your roadmap right now.';

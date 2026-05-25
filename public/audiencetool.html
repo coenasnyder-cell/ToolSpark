@@ -42,6 +42,7 @@
     --green-mid:  #3D8A65;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { overflow-x: hidden; max-width: 100%; }
 
   body {
     font-family: 'Lato', sans-serif;
@@ -280,6 +281,7 @@
     border: 1px solid var(--border-mid);
     border-radius: 100px;
     color: var(--gold-light);
+    white-space: normal; word-break: break-word;
     font-size: 13px; cursor: pointer;
     transition: all 0.18s;
     font-family: 'Lato', sans-serif;
@@ -725,7 +727,7 @@ Use this as background context. Reference it naturally when relevant — don't r
 // ─────────────────────────────────────
 const CHIPS = {
   1: ["A lot like me", "Someone I've helped"],
-  2: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over", "Lonely, feels like nobody gets what I'm trying to do"],
+  2: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over"],
 };
 
 // ─────────────────────────────────────
