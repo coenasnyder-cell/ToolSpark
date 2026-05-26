@@ -374,7 +374,7 @@
     body += '\n\nGo check it out and drop your feedback in the comments. What works? What could be better?';
 
     try {
-      await db.collection('threads').add({
+      const threadRef = await db.collection('threads').add({
         authorId:      currentUser.uid,
         authorPhotoURL: currentUser.photoURL || '',
         displayName:   userName,
@@ -388,6 +388,29 @@
         reactionCount: 0,
         createdAt:     firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Auto-pin feedback prompt comment — posted as admin account
+      let adminId = 'toolspark-system', adminName = 'ToolSpark', adminPhoto = '';
+      try {
+        const adminSnap = await db.collection('users').where('userEmail', '==', 'coenasnyder@gmail.com').limit(1).get();
+        if (!adminSnap.empty) {
+          const a = adminSnap.docs[0].data();
+          adminId    = adminSnap.docs[0].id;
+          adminName  = a.displayName || 'ToolSpark';
+          adminPhoto = a.photoURL || '';
+        }
+      } catch(e) {}
+
+      await db.collection('threads').doc(threadRef.id).collection('comments').add({
+        authorId:      adminId,
+        authorPhotoURL: adminPhoto,
+        displayName:   adminName,
+        content:       'Help your fellow builder by leaving feedback below:\n\n✦ What worked really well?\n✦ What was confusing or didn\'t work?\n✦ Would you share this with someone? Why or why not?\n\nYour feedback helps them get to certification. 🙌',
+        isPinned:      true,
+        gifUrl:        '',
+        reactionCount: 0,
+        createdAt:     firebase.firestore.FieldValue.serverTimestamp()
       });
 
       window.location.href = 'community.html';
