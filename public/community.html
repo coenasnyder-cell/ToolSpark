@@ -2013,11 +2013,25 @@ async function toggleLike(threadId) {
                 ${gifHtml}
                 <div class="comment-footer">
                   <div class="comment-time">${timeAgo(c.createdAt)}</div>
+                  ${(currentUser && (c.authorId === currentUser.uid || currentUserRole === 'admin')) && !isPinned ? `<button onclick="deleteComment('${threadId}','${commentId}')" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-left:8px;font-family:'Lato',sans-serif;transition:color 0.15s;" onmouseover="this.style.color='#E05555'" onmouseout="this.style.color='var(--text3)'">Delete</button>` : ''}
                 </div>
               </div>
             </div>`;
         }).join('');
       });
+  }
+
+  async function deleteComment(threadId, commentId) {
+    if (!confirm('Delete this comment?')) return;
+    try {
+      await db.collection('threads').doc(threadId).collection('comments').doc(commentId).delete();
+      await db.collection('threads').doc(threadId).update({
+        commentCount: firebase.firestore.FieldValue.increment(-1)
+      });
+    } catch(e) {
+      console.error('Delete comment error:', e);
+      alert('Could not delete comment. Try again.');
+    }
   }
 
   async function onCommentPosted(uid) {
