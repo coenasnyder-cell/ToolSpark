@@ -541,6 +541,19 @@
   </div>
 </div>
 
+<!-- CHECK-IN INPUT -->
+<div id="checkin-overlay" style="display:none;">
+  <div class="sw-card">
+    <div class="sw-eyebrow">Before We Start</div>
+    <h1 style="font-size:26px;margin-bottom:0.5rem;">How are you feeling right now?</h1>
+    <p class="sw-sub" style="margin-bottom:1.5rem;">Be honest — good, behind, scattered, fired up. Whatever it is, say it. That's what we're starting from.</p>
+    <textarea id="checkin-input" placeholder="I've been avoiding it all week and I don't know why..." style="width:100%;min-height:100px;padding:12px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border-dark);border-radius:10px;color:#F0EDE6;font-family:'Lato',sans-serif;font-size:15px;line-height:1.65;resize:none;outline:none;transition:border-color 0.15s;" oninput="document.getElementById('checkin-btn').disabled=!this.value.trim();"></textarea>
+    <button id="checkin-btn" class="sw-btn" style="margin-top:1rem;" onclick="submitCheckin()" disabled>
+      Let's Go →
+    </button>
+  </div>
+</div>
+
 <!-- HERO -->
 <header class="hero">
   <div class="hero-eyebrow">ToolSpark · Tools</div>
@@ -863,9 +876,10 @@ SESSION_SUMMARY_END`;
 // ─────────────────────────────────────
 // INIT
 // ─────────────────────────────────────
-async function init() {
+async function init(feeling) {
   showThinking();
   let opening;
+  const feelingContext = feeling ? `\nHow they're feeling right now (their words): "${feeling}"` : '';
 
   if (lastSession && lastSession.summary) {
     const s = parseSummary(lastSession.summary);
@@ -876,11 +890,13 @@ WINS: ${s.WINS || 'none mentioned'}
 STUCK_ON: ${s.STUCK_ON || 'none mentioned'}
 NEW_IDEAS: ${s.NEW_IDEAS || 'none'}
 NEXT_ACTION: ${s.NEXT_ACTION || 'not recorded'}
-ENERGY: ${s.ENERGY || 'unknown'}
+ENERGY: ${s.ENERGY || 'unknown'}${feelingContext}
 
-Start the check-in warmly. Reference what they said they would work on next. Ask what actually happened since then. One question only — make it specific and direct.`;
+Start the check-in warmly. Acknowledge how they're feeling if they shared it. Reference what they said they would work on next. Ask what actually happened since then. One question only — make it specific and direct.`;
   } else {
-    opening = `This is the user's first session with the Build Agent. Welcome them warmly in 2-3 sentences. Acknowledge that they are building something real and that you are here to help them stay focused and make real progress. Then ask your first question: what are they working on right now? One question only.`;
+    opening = `This is the user's first session with the Build Agent.${feelingContext}
+
+Welcome them warmly in 2-3 sentences. Acknowledge how they're feeling if they shared it. Tell them you're here to help them stay focused and make real progress. Then ask your first question: what are they working on right now? One question only.`;
   }
 
   try {
@@ -924,8 +940,18 @@ auth.onAuthStateChanged(async function(user) {
 
 async function startAgent() {
   agentWelcomeEl.classList.add('hidden');
-  setTimeout(() => { agentWelcomeEl.style.display = 'none'; }, 460);
-  init();
+  setTimeout(() => {
+    agentWelcomeEl.style.display = 'none';
+    document.getElementById('checkin-overlay').style.display = 'flex';
+  }, 460);
+}
+
+function submitCheckin() {
+  const feeling = document.getElementById('checkin-input').value.trim();
+  const overlay = document.getElementById('checkin-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(() => { overlay.style.display = 'none'; }, 460);
+  init(feeling);
 }
 
 // ─────────────────────────────────────
