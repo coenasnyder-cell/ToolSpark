@@ -750,6 +750,15 @@ function hideThinking() {
   if (el) el.remove();
 }
 
+function addEmergencyKitLink() {
+  const wrap = document.getElementById("chatWrap");
+  const div = document.createElement("div");
+  div.style.cssText = "display:flex;justify-content:center;padding:1rem 0;";
+  div.innerHTML = `<a href="emergency-kit.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#C9A84C;color:#0C0B09;border-radius:8px;font-family:'Lato',sans-serif;font-size:14px;font-weight:900;text-decoration:none;letter-spacing:0.02em;">Open Mid-Build Emergency Kit →</a>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
 function addSavedNote() {
   // Fade the chat and hide the input
   document.getElementById("chatWrap").classList.add("faded");
@@ -821,6 +830,21 @@ async function handleSend() {
         await saveSession(summaryBlock);
         addSavedNote();
       }
+    } else if (reply.includes("Mid-Build Emergency Kit")) {
+      addMsg("assistant", reply);
+      // Inject clickable link button
+      addEmergencyKitLink();
+      // Auto-save a session note so the agent remembers the spiral when they return
+      const spiralSummary = `SESSION_SUMMARY_START
+DATE:${new Date().toLocaleDateString()}
+WORKED_ON:session in progress
+WINS:none recorded — session paused
+STUCK_ON:spiral detected — member sent to Mid-Build Emergency Kit
+NEW_IDEAS:none
+NEXT_ACTION:return to Build Agent after reading the Emergency Kit
+ENERGY:low
+SESSION_SUMMARY_END`;
+      await saveSession(spiralSummary);
     } else {
       addMsg("assistant", reply);
     }
