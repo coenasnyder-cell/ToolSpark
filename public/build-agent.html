@@ -403,6 +403,23 @@
     opacity: 0;
     pointer-events: none;
   }
+
+  #checkin-overlay {
+    position: fixed;
+    inset: 56px 0 0 0;
+    background: var(--dark);
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    transition: opacity 0.45s ease;
+  }
+  #checkin-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
   .sw-card {
     max-width: 520px;
     width: 100%;
@@ -542,7 +559,7 @@
 </div>
 
 <!-- CHECK-IN INPUT -->
-<div id="checkin-overlay" style="display:none;">
+<div id="checkin-overlay" class="hidden" style="display:none;">
   <div class="sw-card">
     <div class="sw-eyebrow">Before We Start</div>
     <h1 style="font-size:26px;margin-bottom:0.5rem;">How are you feeling right now?</h1>
@@ -942,7 +959,9 @@ async function startAgent() {
   agentWelcomeEl.classList.add('hidden');
   setTimeout(() => {
     agentWelcomeEl.style.display = 'none';
-    document.getElementById('checkin-overlay').style.display = 'flex';
+    const co = document.getElementById('checkin-overlay');
+    co.style.display = 'flex';
+    setTimeout(() => co.classList.remove('hidden'), 10);
   }, 460);
 }
 
