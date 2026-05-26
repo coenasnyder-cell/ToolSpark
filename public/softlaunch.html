@@ -390,22 +390,11 @@
         updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Auto-pin feedback prompt comment — posted as admin account
-      let adminId = 'toolspark-system', adminName = 'ToolSpark', adminPhoto = '';
-      try {
-        const adminSnap = await db.collection('users').where('userEmail', '==', 'coenasnyder@gmail.com').limit(1).get();
-        if (!adminSnap.empty) {
-          const a = adminSnap.docs[0].data();
-          adminId    = adminSnap.docs[0].id;
-          adminName  = a.displayName || 'ToolSpark';
-          adminPhoto = a.photoURL || '';
-        }
-      } catch(e) {}
-
+      // Auto-pin feedback prompt comment — posted as ToolSpark system
       await db.collection('threads').doc(threadRef.id).collection('comments').add({
-        authorId:      adminId,
-        authorPhotoURL: adminPhoto,
-        displayName:   adminName,
+        authorId:      currentUser.uid,
+        authorPhotoURL: '',
+        displayName:   'ToolSpark',
         content:       'Help your fellow builder by leaving feedback below:\n\n✦ What worked really well?\n✦ What was confusing or didn\'t work?\n✦ Would you share this with someone? Why or why not?\n\nYour feedback helps them get to certification. 🙌',
         isPinned:      true,
         gifUrl:        '',
