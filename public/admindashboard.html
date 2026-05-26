@@ -724,20 +724,22 @@
     try {
       const snap = await db.collection('admin_alerts')
         .where('type', '==', 'just_sparked')
-        .where('read', '==', false)
-        .orderBy('createdAt', 'desc')
         .get();
 
-      if (snap.empty) return;
+      const unreadDocs = snap.docs
+        .filter(d => d.data().read === false)
+        .sort((a, b) => (b.data().createdAt?.toMillis() || 0) - (a.data().createdAt?.toMillis() || 0));
+
+      if (unreadDocs.length === 0) return;
 
       const card = document.getElementById('just-sparked-card');
       const list = document.getElementById('just-sparked-list');
       const badge = document.getElementById('just-sparked-badge');
 
       card.style.display = 'block';
-      badge.textContent = snap.size + ' unread';
+      badge.textContent = unreadDocs.length + ' unread';
 
-      list.innerHTML = snap.docs.map(doc => {
+      list.innerHTML = unreadDocs.map(doc => {
         const d = doc.data();
         const time = d.createdAt ? timeAgoAdmin(d.createdAt) : '';
         return `
