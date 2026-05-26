@@ -487,6 +487,9 @@
   const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
   const MODEL = "claude-sonnet-4-6";
 
+  const MAX_GENERATIONS = 3; // 1 original + 2 regenerations
+  let generateCount = 0;
+
   // ── MEMBER DATA ──
   let memberData = {
     spark: null,
@@ -653,15 +656,43 @@
 
     contextLines.push(`\nFEATURES TO INCLUDE:\n• ${featureList}`);
 
-    const systemPrompt = `You are a product brief writer for AI-powered web apps. Your job is to take information about a coach or expert and write a complete, specific, ready-to-paste build brief for an AI builder tool.
+    const isBase44 = (techstack?.buildTool || '').toLowerCase().includes('base44');
 
-The brief should read like it was written by someone who deeply understands their product — not a form filled out by a stranger. Write in plain English, be specific, and make it easy for an AI builder to understand exactly what to build and why.
+    const systemPrompt = `You are a product brief writer for AI-powered web apps. Write a complete, specific, ready-to-paste build brief based on the context provided.
 
-Your output is ONLY the build brief itself — no preamble, no explanation, no "here is your prompt". Just the brief, ready to paste.
+${isBase44
+  ? `This brief is for Base44, an AI no-code web builder. Base44 works best with clear, plain-English instructions it can act on immediately. Keep each section focused and direct — avoid long prose. The builder reads this top to bottom and builds what you describe, so be specific but don't over-explain.`
+  : `This brief is for VS Code + Claude Code. Be specific about data structure, component behavior, and technical requirements where relevant.`}
 
-Structure it clearly with sections but write each section with real specificity based on the context provided. The AI tool (the centerpiece) should have the most detail — explain exactly how it should work, what questions it asks or what inputs it takes, what it outputs, and how results are saved. This is what makes the app valuable.
+FORMAT RULES — follow exactly:
+- Use ## headers for each section
+- Use bullet points for lists, features, and specs — not paragraphs
+- Keep prose to 1–2 sentences max per section intro
+- Total output: 400–600 words. No longer.
 
-Always end with a DESIGN section: mobile-first, bottom tab navigation (not sidebar), clean and professional, PWA so clients can install from their phone browser, designed for easy App Store publishing later.`;
+SECTIONS TO INCLUDE:
+
+## What This Is
+One sentence: app name + what it does + who it's for.
+
+## Who It's For
+3–4 bullets. Describe the client's situation, pain, and what they need — use the language they actually use.
+
+## The Core AI Tool
+Name it, then three bullets:
+- Input: what the user types or selects
+- Output: exactly what gets generated (be specific — formats, length, how many pieces)
+- Saves: whether results are stored and how they're accessed again
+
+## Features
+Bullet list only. One line per feature. No elaboration needed — the list speaks for itself.
+
+## Design
+Mobile-first PWA, bottom tab navigation (not sidebar). One or two bullets on tone, color palette, or feel based on the context.
+
+IMPORTANT: Write every section in bullets — not paragraphs. Keep each bullet to one line. If a section starts getting long, trim it. Always finish the Design section completely before stopping. Never end mid-sentence — if you are running long, wrap up the current section in one bullet and move straight to Design.
+
+Your output is ONLY the brief — no preamble, no explanation. Start directly with ## What This Is.`;
 
     const userMessage = `Write a complete build brief for this app using the context below. Make it specific to this exact business and tool — not generic.
 
@@ -675,7 +706,7 @@ Write the brief now.`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: MODEL,
-          max_tokens: 1200,
+          max_tokens: 2500,
           system: systemPrompt,
           messages: [{ role: 'user', content: userMessage }],
           _meta: { tool: 'prompt-generator' }
@@ -703,8 +734,15 @@ Write the brief now.`;
       return;
     }
 
-    btn.textContent = 'Regenerate Prompt →';
-    btn.disabled = false;
+    generateCount++;
+    const regsLeft = MAX_GENERATIONS - generateCount;
+    if (regsLeft <= 0) {
+      btn.textContent = 'Regeneration limit reached';
+      btn.disabled = true;
+    } else {
+      btn.textContent = `Regenerate Prompt → (${regsLeft} left)`;
+      btn.disabled = false;
+    }
   }
 
   // ── SAVE / LOAD ──
