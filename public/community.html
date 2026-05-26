@@ -1472,6 +1472,12 @@ img, video, iframe {
         <div class="filter-chip">Just Sparked</div>
       </div>
 
+      <!-- ADMIN TOOLS (hidden unless admin) -->
+      <div id="admin-tools-bar" style="display:none;align-items:center;gap:8px;padding:4px 0;">
+        <span style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Admin</span>
+        <button id="recalc-btn" onclick="recalculateCommentCounts()" style="background:none;border:1px solid var(--border);border-radius:100px;padding:4px 12px;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.05em;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">Recalculate Comment Counts</button>
+      </div>
+
       <!-- PINNED THREADS -->
       <div id="pinned-section">
         <div class="pinned-section-label">📌 Pinned</div>
@@ -2013,7 +2019,7 @@ async function toggleLike(threadId) {
                 ${gifHtml}
                 <div class="comment-footer">
                   <div class="comment-time">${timeAgo(c.createdAt)}</div>
-                  ${(currentUser && (c.authorId === currentUser.uid || currentUserRole === 'admin')) && !isPinned ? `<button onclick="deleteComment('${threadId}','${commentId}')" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-left:8px;font-family:'Lato',sans-serif;transition:color 0.15s;" onmouseover="this.style.color='#E05555'" onmouseout="this.style.color='var(--text3)'">Delete</button>` : ''}
+                  ${(currentUser && (c.authorId === currentUser.uid || currentUserRole === 'admin')) && !isPinned ? `<button onclick="deleteComment('${threadId}','${doc.id}')" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-left:8px;font-family:'Lato',sans-serif;transition:color 0.15s;" onmouseover="this.style.color='#E05555'" onmouseout="this.style.color='var(--text3)'">Delete</button>` : ''}
                 </div>
               </div>
             </div>`;
@@ -2191,7 +2197,10 @@ async function toggleLike(threadId) {
     // Sidebar
     document.getElementById('sidebar-name').textContent = name;
     document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Builder';
-    if (currentUserRole === 'admin') document.getElementById('admin-nav-link').style.display = 'flex';
+    if (currentUserRole === 'admin') {
+      document.getElementById('admin-nav-link').style.display = 'flex';
+      document.getElementById('admin-tools-bar').style.display = 'flex';
+    }
     const sidebarAv = document.getElementById('sidebar-avatar');
     if (user.photoURL) {
       sidebarAv.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">';
@@ -2419,6 +2428,32 @@ await onThreadPosted(currentUser.uid);
     } finally {
       btn.disabled = false;
       btn.textContent = 'Post Thread →';
+    }
+  }
+
+  async function recalculateCommentCounts() {
+    if (currentUserRole !== 'admin') return;
+    if (!confirm('Recalculate comment counts for all threads? This may take a moment.')) return;
+    const btn = document.getElementById('recalc-btn');
+    btn.disabled = true;
+    btn.textContent = 'Working...';
+    try {
+      const threadsSnap = await db.collection('threads').get();
+      let fixed = 0;
+      for (const threadDoc of threadsSnap.docs) {
+        const commentsSnap = await db.collection('threads').doc(threadDoc.id).collection('comments').get();
+        const actual = commentsSnap.size;
+        if (actual !== (threadDoc.data().commentCount || 0)) {
+          await db.collection('threads').doc(threadDoc.id).update({ commentCount: actual });
+          fixed++;
+        }
+      }
+      btn.textContent = `Done — ${fixed} thread${fixed !== 1 ? 's' : ''} fixed`;
+      setTimeout(() => { btn.textContent = 'Recalculate Comment Counts'; btn.disabled = false; }, 4000);
+    } catch(e) {
+      console.error(e);
+      btn.textContent = 'Error — try again';
+      btn.disabled = false;
     }
   }
 
