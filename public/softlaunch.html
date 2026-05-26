@@ -390,21 +390,18 @@
         updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Auto-pin feedback prompt comment — posted as ToolSpark system
-      await db.collection('threads').doc(threadRef.id).collection('comments').add({
-        authorId:      currentUser.uid,
-        authorPhotoURL: '',
-        displayName:   'ToolSpark',
-        content:       'Help your fellow builder by leaving feedback below:\n\n✦ What worked really well?\n✦ What was confusing or didn\'t work?\n✦ Would you share this with someone? Why or why not?\n\nYour feedback helps them get to certification. 🙌',
-        isPinned:      true,
-        gifUrl:        '',
-        reactionCount: 0,
-        createdAt:     firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      await db.collection('threads').doc(threadRef.id).update({
-        commentCount: firebase.firestore.FieldValue.increment(1)
-      });
+      // Notify admin of new Just Sparked post
+      try {
+        await db.collection('admin_alerts').add({
+          type:        'just_sparked',
+          threadId:    threadRef.id,
+          threadTitle: `⚡ ${userName} just sparked ${toolName}`,
+          authorId:    currentUser.uid,
+          authorName:  userName,
+          read:        false,
+          createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e) {}
 
       window.location.href = 'community.html';
     } catch(e) {

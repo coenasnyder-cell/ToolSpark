@@ -259,6 +259,14 @@ match /conversations/{conversationId} {
   }
 }
 
+    // ADMIN ALERTS (Just Sparked etc.)
+    match /admin_alerts/{alertId} {
+      allow create: if isActive();
+      allow read: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // NOTIFICATIONS
     match /notifications/{notificationId} {
       allow read: if isActive() && (
