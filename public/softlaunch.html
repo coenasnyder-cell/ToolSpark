@@ -413,6 +413,10 @@
         createdAt:     firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      await db.collection('threads').doc(threadRef.id).update({
+        commentCount: firebase.firestore.FieldValue.increment(1)
+      });
+
       window.location.href = 'community.html';
     } catch(e) {
       console.error('Post error:', e);
