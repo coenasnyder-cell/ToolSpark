@@ -133,6 +133,12 @@
   .feature-desc { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
   .lock-badge { font-size: 10px; font-weight: 900; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; display: inline-block; }
 
+  /* MODE TOGGLE */
+  .mode-toggle { display: flex; gap: 8px; margin-top: 0.75rem; }
+  .mode-btn { flex: 1; padding: 11px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text2); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .mode-btn.active { background: var(--dark); color: var(--gold); border-color: rgba(201,168,76,0.3); }
+  .mode-btn:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
   /* GENERATE BUTTON */
   .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: var(--dark); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
   .generate-btn:hover { background: #d4b35a; }
@@ -261,6 +267,32 @@
 
     <!-- Main Content -->
     <div id="main-content">
+
+      <!-- Mode Toggle -->
+      <div class="card" id="mode-card">
+        <div class="card-title">What are you here to do?</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-new" onclick="setMode('new')">Starting fresh</button>
+          <button class="mode-btn" id="mode-refine" onclick="setMode('refine')">Refining my existing prompt</button>
+        </div>
+      </div>
+
+      <!-- Refine Form -->
+      <div class="card" id="refine-card" style="display:none;">
+        <div class="card-title">What needs to change?</div>
+        <div class="card-sub">Be as specific as you can — the more detail you give, the better the revision.</div>
+        <div class="input-group" style="margin-bottom:1.25rem;">
+          <label class="input-label" for="refine-missing">What's missing or not working?</label>
+          <textarea id="refine-missing" class="text-input" rows="3" placeholder="e.g. It doesn't sound like me — too formal. The AI tool section is vague. It doesn't mention my audience at all."></textarea>
+        </div>
+        <div class="input-group" style="margin-bottom:1.5rem;">
+          <label class="input-label" for="refine-different">What do you want it to do differently?</label>
+          <textarea id="refine-different" class="text-input" rows="3" placeholder="e.g. Make it warmer and more conversational. Be more specific about how the AI tool works. Add more detail about who this is for."></textarea>
+        </div>
+        <button class="generate-btn" id="refine-btn" onclick="generatePrompt()">
+          Refine My Prompt →
+        </button>
+      </div>
 
       <!-- Step 1: Your Data -->
       <div class="card" id="data-card">
@@ -489,6 +521,22 @@
 
   const MAX_GENERATIONS = 3; // 1 original + 2 regenerations
   let generateCount = 0;
+  let currentMode = 'new'; // 'new' or 'refine'
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('mode-new').classList.toggle('active', mode === 'new');
+    document.getElementById('mode-refine').classList.toggle('active', mode === 'refine');
+    document.getElementById('refine-card').style.display = mode === 'refine' ? 'block' : 'none';
+    document.getElementById('data-card').style.display = mode === 'refine' ? 'none' : 'block';
+    document.querySelectorAll('.card:not(#mode-card):not(#refine-card):not(#data-card):not(#prompt-card)').forEach(c => {
+      c.style.display = mode === 'refine' ? 'none' : 'block';
+    });
+    // Reset generate count when switching modes
+    generateCount = 0;
+    const btn = document.getElementById('generate-btn');
+    if (btn) { btn.textContent = 'Generate My Build Prompt →'; btn.disabled = false; }
+  }
 
   // ── MEMBER DATA ──
   let memberData = {
@@ -598,12 +646,83 @@
 
   // ── PROMPT GENERATION ──
   async function generatePrompt() {
+    const btn = currentMode === 'refine'
+      ? document.getElementById('refine-btn')
+      : document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = currentMode === 'refine' ? 'Refining your prompt...' : 'Writing your prompt...';
+
+    // ── REFINE MODE ──
+    if (currentMode === 'refine') {
+      const missing   = document.getElementById('refine-missing').value.trim();
+      const different = document.getElementById('refine-different').value.trim();
+      const existingPrompt = document.getElementById('prompt-output').textContent.trim();
+
+      if (!existingPrompt) {
+        btn.textContent = 'No existing prompt found — generate one first';
+        btn.disabled = false;
+        return;
+      }
+
+      const refineSystem = `You are revising an existing build brief based on specific feedback. Your job is to address what isn't working while keeping everything that is. Maintain the same ## section structure and bullet-point format. Output ONLY the revised brief — no preamble, no explanation.`;
+
+      const refineMessage = `Here is the existing build brief:
+
+${existingPrompt}
+
+---
+
+Feedback:
+${missing ? `WHAT'S MISSING OR NOT WORKING:\n${missing}\n` : ''}${different ? `WHAT TO DO DIFFERENTLY:\n${different}` : ''}
+
+Revise the brief now. Keep the same structure. Fix what the feedback asks for. Leave everything else alone.`;
+
+      try {
+        const resp = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: MODEL,
+            max_tokens: 2500,
+            system: refineSystem,
+            messages: [{ role: 'user', content: refineMessage }],
+            _meta: { tool: 'prompt-generator-refine' }
+          })
+        });
+        if (!resp.ok) throw new Error(`API error ${resp.status}`);
+        const data = await resp.json();
+        const promptText = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || '';
+        if (!promptText) throw new Error('Empty response');
+
+        document.getElementById('prompt-output').textContent = promptText;
+        const card = document.getElementById('prompt-card');
+        card.classList.add('visible');
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        savePrompt(promptText, document.getElementById('app-name').value.trim() || 'My App', getCheckedFeatures());
+        const saveStatus = document.getElementById('save-status');
+        if (saveStatus) saveStatus.style.display = 'inline';
+      } catch(e) {
+        console.error('Refine error:', e);
+        btn.textContent = 'Something went wrong — try again';
+        btn.disabled = false;
+        return;
+      }
+
+      generateCount++;
+      const regsLeft = MAX_GENERATIONS - generateCount;
+      if (regsLeft <= 0) {
+        btn.textContent = 'Refinement limit reached';
+        btn.disabled = true;
+      } else {
+        btn.textContent = `Refine Again → (${regsLeft} left)`;
+        btn.disabled = false;
+      }
+      return;
+    }
+
+    // ── NEW PROMPT MODE ──
     const appName = document.getElementById('app-name').value.trim() || 'My App';
     const features = getCheckedFeatures();
-
-    const btn = document.getElementById('generate-btn');
-    btn.disabled = true;
-    btn.textContent = 'Writing your prompt...';
 
     const spark = memberData.spark;
     const audience = memberData.audience;
@@ -899,6 +1018,11 @@ Write the brief now.`;
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('main-content').style.display = 'block';
     loadSavedPrompt();
+
+    // Auto-select refine mode if coming from Emergency Kit
+    if (new URLSearchParams(window.location.search).get('mode') === 'refine') {
+      setMode('refine');
+    }
   });
 </script>
 </body>
