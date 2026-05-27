@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Sparked — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; font-weight: 400; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(42,92,69,0.15); border: 1px solid rgba(42,92,69,0.3); color: #3D8A65; border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 900px; width: 100%; }
+
+  .template-card {
+    background: var(--dark);
+    border: 1px solid var(--border-dark);
+    border-left: 3px solid var(--green-light);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+  .template-label { font-size: 10px; font-weight: 700; color: var(--green-light); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; }
+  .template-text { font-size: 13px; color: #C4BDB3; line-height: 1.85; white-space: pre-wrap; }
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 7px 16px; font-family: 'Lato', sans-serif;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: background 0.15s; letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: var(--green-light); }
+  .copy-btn.copied { background: #1a4a32; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); }
+  .filter-row { display: flex; gap: 6px; }
+  .filter-chip { padding: 4px 12px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-chip:hover { border-color: var(--green-light); color: var(--green-light); }
+  .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
+
+  .alert-list { display: flex; flex-direction: column; gap: 0.875rem; }
+  .alert-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.125rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s;
+  }
+  .alert-row:hover { box-shadow: var(--shadow-md); }
+  .alert-row.done { opacity: 0.5; }
+  .alert-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; }
+  .alert-row.done .alert-dot { background: var(--border); }
+  .alert-info { flex: 1; min-width: 0; }
+  .alert-title { font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .alert-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .alert-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .btn-view { display: inline-flex; align-items: center; gap: 5px; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 7px 14px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: background 0.15s; white-space: nowrap; }
+  .btn-view:hover { background: var(--green-light); }
+  .btn-done { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 12px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text3); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-done:hover { border-color: var(--green-light); color: var(--green-light); }
+  .btn-done.is-done { border-color: var(--border); color: var(--text3); cursor: default; }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+  .loading-state { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      Courses
+    </a>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="adminjustsparked.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Just Sparked
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Just Sparked</div>
+      <div class="header-subtitle">Members who have soft launched their tool</div>
+    </div>
+    <div class="admin-badge">⚡ Soft Launches</div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">You need admin privileges to view this page.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <!-- COMMENT TEMPLATE -->
+    <div class="template-card">
+      <div class="template-label">
+        <span>📋 Feedback Comment Template</span>
+        <button class="copy-btn" id="copy-btn" onclick="copyTemplate()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Template
+        </button>
+      </div>
+      <div class="template-text" id="template-text">Help your fellow builder by leaving feedback below:
+
+✦ What worked really well?
+✦ What was confusing or didn't work?
+✦ Would you share this with someone? Why or why not?
+
+Your feedback helps them get to certification. 🙌</div>
+    </div>
+
+    <!-- FILTER + LIST -->
+    <div>
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div class="section-title">All Launches</div>
+        <div class="filter-row">
+          <div class="filter-chip active" onclick="setFilter('all', this)">All</div>
+          <div class="filter-chip" onclick="setFilter('pending', this)">Needs Comment</div>
+          <div class="filter-chip" onclick="setFilter('done', this)">Done</div>
+        </div>
+      </div>
+      <div class="loading-state" id="list-loading">Loading...</div>
+      <div class="alert-list" id="alert-list" style="display:none;"></div>
+      <div class="empty-state" id="empty-state" style="display:none;">No Just Sparked posts yet.</div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const TEMPLATE = `Help your fellow builder by leaving feedback below:
+
+✦ What worked really well?
+✦ What was confusing or didn't work?
+✦ Would you share this with someone? Why or why not?
+
+Your feedback helps them get to certification. 🙌`;
+
+  let allAlerts = [];
+  let currentFilter = 'all';
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      const role = snap.exists ? snap.data().userRole : 'member';
+      if (role !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
+
+    document.getElementById('admin-content').style.display = 'flex';
+
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = `<img src="${user.photoURL}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    loadAlerts();
+  });
+
+  async function loadAlerts() {
+    try {
+      const snap = await db.collection('admin_alerts')
+        .where('type', '==', 'just_sparked')
+        .get();
+
+      allAlerts = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+
+      document.getElementById('list-loading').style.display = 'none';
+      renderList();
+    } catch(e) {
+      document.getElementById('list-loading').textContent = 'Could not load. Try refreshing.';
+      console.error(e);
+    }
+  }
+
+  function renderList() {
+    const list = document.getElementById('alert-list');
+    const empty = document.getElementById('empty-state');
+
+    let filtered = allAlerts;
+    if (currentFilter === 'pending') filtered = allAlerts.filter(a => !a.read);
+    if (currentFilter === 'done')    filtered = allAlerts.filter(a => a.read);
+
+    if (filtered.length === 0) {
+      list.style.display = 'none';
+      empty.style.display = 'block';
+      empty.textContent = currentFilter === 'pending' ? 'All caught up — no pending launches.' :
+                          currentFilter === 'done'    ? 'No completed launches yet.' :
+                          'No Just Sparked posts yet.';
+      return;
+    }
+
+    empty.style.display = 'none';
+    list.style.display = 'flex';
+    list.innerHTML = filtered.map(a => {
+      const isDone = !!a.read;
+      const time = timeAgo(a.createdAt);
+      return `
+        <div class="alert-row ${isDone ? 'done' : ''}" id="row-${a.id}">
+          <div class="alert-dot"></div>
+          <div class="alert-info">
+            <div class="alert-title">${escHtml(a.threadTitle || '')}</div>
+            <div class="alert-meta">${escHtml(a.authorName || '')} · ${time}</div>
+          </div>
+          <div class="alert-actions">
+            <a class="btn-view" href="community.html#thread-${escHtml(a.threadId || '')}" target="_blank">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Thread
+            </a>
+            ${isDone
+              ? `<button class="btn-done is-done" disabled>✓ Done</button>`
+              : `<button class="btn-done" onclick="markDone('${a.id}')">Mark Done</button>`
+            }
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function markDone(alertId) {
+    try {
+      await db.collection('admin_alerts').doc(alertId).update({ read: true });
+      const alert = allAlerts.find(a => a.id === alertId);
+      if (alert) alert.read = true;
+      renderList();
+    } catch(e) {
+      alert('Could not update. Try again.');
+    }
+  }
+
+  function setFilter(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderList();
+  }
+
+  function copyTemplate() {
+    navigator.clipboard.writeText(TEMPLATE).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Template`;
+      }, 2500);
+    });
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - ts.toMillis();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return days + 'd ago';
+    return ts.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
