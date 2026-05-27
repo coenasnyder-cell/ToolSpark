@@ -21,6 +21,7 @@ const LOOPS_TAGS = {
   INACTIVE: 'inactive',
   EARLY_MEMBER: 'earlyMember',
   OPT_IN: 'emailOptIn',
+  WAITLIST: 'waitlistSignup',
 };
 
 async function upsertContact({ email, firstName, lastName, userId, tags = {} }) {
@@ -111,4 +112,24 @@ async function onUserCourseComplete(email) {
   await updateContactTag(email, {
     [LOOPS_TAGS.COURSE_COMPLETE]: true,
   });
+}
+
+async function onWaitlistSignup(email, firstName) {
+  try {
+    const response = await fetch(`${LOOPS_API_URL}/contacts/update`, {
+      method: 'PUT',
+      headers: loopsHeaders,
+      body: JSON.stringify({
+        email,
+        firstName,
+        [LOOPS_TAGS.WAITLIST]: true,
+        [LOOPS_TAGS.NOT_ON_APP]: true,
+      }),
+    });
+    const result = await response.json();
+    if (!result.success) console.warn('Loops waitlist upsert failed:', result);
+    return result;
+  } catch (err) {
+    console.warn('Loops onWaitlistSignup error:', err);
+  }
 }

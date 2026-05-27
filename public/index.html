@@ -321,6 +321,7 @@
     </div>
 
     <button class="submit-btn" id="submit-btn" onclick="joinWaitlist()">Join the Waitlist →</button>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px;">By joining, you agree to receive updates from ToolSpark. Unsubscribe anytime.</p>
     <div class="form-msg" id="form-msg"></div>
 
     <div class="success-state" id="success-state">
@@ -330,33 +331,6 @@
     </div>
   </div>
 
-  <!-- WHAT TO EXPECT -->
-  <div class="expect-section">
-    <div class="expect-title">What's inside</div>
-    <div class="expect-items">
-      <div class="expect-item">
-        <div class="expect-icon">🤖</div>
-        <div class="expect-text">
-          <div class="expect-label">Build Agent</div>
-          <div class="expect-desc">Your AI accountability coach that keeps you moving and unstuck.</div>
-        </div>
-      </div>
-      <div class="expect-item">
-        <div class="expect-icon">⚡</div>
-        <div class="expect-text">
-          <div class="expect-label">Guided Roadmap</div>
-          <div class="expect-desc">A step-by-step path from idea to live tool — no tech background required.</div>
-        </div>
-      </div>
-      <div class="expect-item">
-        <div class="expect-icon">👥</div>
-        <div class="expect-text">
-          <div class="expect-label">Builder Community</div>
-          <div class="expect-desc">A private community of coaches and creators building alongside you.</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="footer">
     Already have an account? <a href="signon.html">Sign in →</a><br>
@@ -385,6 +359,14 @@
         email: email.toLowerCase(),
         joinedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // Add to Loops via newsletter form endpoint
+      const loopsBody = `userGroup=waitlist&email=${encodeURIComponent(email.toLowerCase())}&firstName=${encodeURIComponent(name)}&mailingLists=cmpnw65ae1ki40juh0m9g95yy`;
+      fetch('https://app.loops.so/api/newsletter-form/cmpe58l4x08bo0jxhmxewxk11', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: loopsBody,
+      }).catch(() => {});
 
       // Show success
       document.getElementById('form-card').querySelector('.form-card-title').style.display = 'none';
