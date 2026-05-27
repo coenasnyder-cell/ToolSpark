@@ -259,6 +259,12 @@ match /conversations/{conversationId} {
   }
 }
 
+    // WAITLIST (public signups — no auth required)
+    match /waitlist/{email} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
     // ADMIN ALERTS (Just Sparked etc.)
     match /admin_alerts/{alertId} {
       allow create: if isActive();
