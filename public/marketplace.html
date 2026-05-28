@@ -612,6 +612,9 @@
       const tags  = (t.tags || []).slice(0, 3).map(tag => `<span class="card-tag">${esc(tag)}</span>`).join('');
       const certBadge = t.certified ? `<span class="cert-badge-small"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Certified</span>` : '';
       const initials = esc(t.builderInitials || (t.builderName || '?').charAt(0).toUpperCase());
+      const avatarHTML = t.builderPhotoUrl
+        ? `<img src="${esc(t.builderPhotoUrl)}" alt="${initials}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : initials;
 
       return `<div class="tool-card">
         <div class="card-body">
@@ -629,7 +632,7 @@
           ${tags ? `<div class="card-tags">${tags}</div>` : ''}
 
           <div class="card-builder">
-            <div class="builder-avatar">${initials}</div>
+            <div class="builder-avatar">${avatarHTML}</div>
             <div class="builder-info">
               <div class="builder-name">${esc(t.builderName || '')}</div>
               ${certBadge}
@@ -712,6 +715,7 @@
         toolUrl: url,
         builderName: userData.displayName || currentUser.displayName || 'Builder',
         builderInitials: initials,
+        builderPhotoUrl: currentUser.photoURL || userData.photoURL || null,
         builderUserId: currentUser.uid,
         certified: true,
         useCount: 0,
