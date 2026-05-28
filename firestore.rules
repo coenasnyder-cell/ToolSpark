@@ -287,6 +287,14 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // VALUE TOOL (Roadblock 8 — Value Mirror)
+    match /value_tool/{docId} {
+      allow read: if isActive() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // WAITLIST (public signups — no auth required)
     match /waitlist/{email} {
       allow create, update: if true;
