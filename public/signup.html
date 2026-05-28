@@ -25,7 +25,6 @@
     firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
   });
 </script>
-<script src="/js/loops.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -451,7 +450,7 @@ async function createUserDoc(user, displayName) {
   photoURL: user.photoURL || '',
   userRole: 'member',
   createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-emailOptIn: false, // set properly in signUp() and signUpWithGoogle() via Loops
+  emailOptIn: false,
   points: 0,
   badges: [],
   streak: 0,

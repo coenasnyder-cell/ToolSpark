@@ -563,8 +563,6 @@ if (typeof emailjs !== 'undefined') emailjs.init('i9Oz0ibL_775xDsSb');
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
 const TTS_URL    = "https://us-central1-toolspark-2d62d.cloudfunctions.net/tts";
 const MODEL      = "claude-sonnet-4-6";
-const LOOPS_KEY  = "0098c07ddc65e9c00b244a849cca93d6";
-const LOOPS_URL  = "https://app.loops.so/api/v1/contacts/upsert";
 const JOIN_URL   = "https://toolspark.co/community-landing";
 const Q_TOTAL    = 7;
 
@@ -898,23 +896,6 @@ async function submitEmail() {
   btnEl.disabled = true;
   btnEl.textContent = "Sending…";
 
-  // Save to Loops
-  try {
-    await fetch(LOOPS_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${LOOPS_KEY}`
-      },
-      body: JSON.stringify({
-        email: email,
-        source: "audience-deep-dive",
-        mailingLists: { "cmpe68czf0de30jyivrs3mjdu": true }
-      })
-    });
-  } catch(e) {
-    console.log("Loops save failed:", e.message);
-  }
 
   const sessionId = AUDIENCE_SESSION_ID;
   const rawProfile = extractProfileBlock(rawResults);
@@ -933,27 +914,6 @@ async function submitEmail() {
 
     await batch.commit();
 
-    if (email) {
-      try {
-        await fetch('https://app.loops.so/api/v1/transactional', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer 0098c07ddc65e9c00b244a849cca93d6'
-          },
-          body: JSON.stringify({
-            transactionalId: 'cmpjen5fj05lh0j19rpcpe22y',
-            email: email,
-            dataVariables: {
-              first_name: profile.name || 'there',
-              results_url: 'https://toolspark.co/audienceresults.html?session=' + sessionId
-            }
-          })
-        });
-      } catch(e) {
-        console.log('Email send failed:', e);
-      }
-    }
 
     localStorage.setItem("toolspark_latest_audience_session", sessionId);
     window.location.href = `audienceresults.html?session=${encodeURIComponent(sessionId)}`;

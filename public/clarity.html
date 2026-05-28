@@ -893,27 +893,6 @@ async function finishSession(actionPlanText) {
     console.log('Firestore save failed:', e);
   }
 
-  if (clientEmail) {
-    try {
-      await fetch('https://app.loops.so/api/v1/transactional', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer 0098c07ddc65e9c00b244a849cca93d6'
-        },
-        body: JSON.stringify({
-          transactionalId: 'cmpjeq7cf06ev0jzwwd3rizi9',
-          email: clientEmail,
-          dataVariables: {
-            first_name: displayName || 'there',
-            results_url: 'https://toolspark.co/roadmap.html'
-          }
-        })
-      });
-    } catch(e) {
-      console.log('Email send failed:', e);
-    }
-  }
 
   window.location.href = 'results.html';
 }

@@ -340,8 +340,14 @@
 </div>
 
 <script>
+  const formatName = (name) => {
+    if (!name) return '';
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
   async function joinWaitlist() {
-    const name  = document.getElementById('name-input').value.trim();
+    const rawName = document.getElementById('name-input').value.trim();
+    const name  = formatName(rawName);
     const email = document.getElementById('email-input').value.trim();
     const msg   = document.getElementById('form-msg');
     const btn   = document.getElementById('submit-btn');
@@ -360,13 +366,6 @@
         joinedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Add to Loops via newsletter form endpoint
-      const loopsBody = `userGroup=waitlist&email=${encodeURIComponent(email.toLowerCase())}&firstName=${encodeURIComponent(name)}&mailingLists=cmpnw65ae1ki40juh0m9g95yy`;
-      fetch('https://app.loops.so/api/newsletter-form/cmpe58l4x08bo0jxhmxewxk11', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: loopsBody,
-      }).catch(() => {});
 
       // Show success
       document.getElementById('form-card').querySelector('.form-card-title').style.display = 'none';
