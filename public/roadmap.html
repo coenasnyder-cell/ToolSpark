@@ -897,14 +897,15 @@
         const sparkSnap = await db.collection('threads')
           .where('authorId', '==', user.uid)
           .where('category', '==', 'Just Sparked')
-          .orderBy('createdAt', 'desc')
-          .limit(1)
           .get();
 
         const sparkBody = document.getElementById('just-sparked-body');
-        if (!sparkSnap.empty) {
-          const post = sparkSnap.docs[0].data();
-          const threadId = sparkSnap.docs[0].id;
+        const sparkDocs = sparkSnap.docs.sort((a, b) =>
+          (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0)
+        );
+        if (sparkDocs.length) {
+          const post = sparkDocs[0].data();
+          const threadId = sparkDocs[0].id;
           const preview = (post.content || '').split('\n')[0].substring(0, 200);
           const postedDate = post.createdAt
             ? post.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -920,6 +921,7 @@
             </div>`;
         } else {
           sparkBody.innerHTML = `
+
             <div style="display:flex;gap:14px;align-items:flex-start;">
               <div style="font-size:22px;flex-shrink:0;">🚀</div>
               <div>
