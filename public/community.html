@@ -270,6 +270,36 @@
     align-items: start;
   }
 
+  /* ── FIRST VISIT BANNER ── */
+  .first-visit-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(201,168,76,0.12) 0%, rgba(201,168,76,0.06) 100%);
+    border: 1px solid rgba(201,168,76,0.35);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 1.125rem 1.375rem;
+    margin-bottom: 0.25rem;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .first-visit-banner.visible { display: flex; }
+  .banner-text { flex: 1; min-width: 200px; }
+  .banner-label { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+  .banner-msg { font-size: 14px; color: var(--text); line-height: 1.55; font-weight: 400; }
+  .banner-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--gold); color: var(--dark);
+    border: none; border-radius: var(--radius-sm);
+    padding: 10px 20px; font-family: 'Lato', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    text-decoration: none; transition: background 0.15s; white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .banner-btn:hover { background: var(--gold-light); }
+
   /* ── FEED COLUMN ── */
   .feed-col { display: flex; flex-direction: column; gap: 1.25rem; }
   #threads-feed { display: flex; flex-direction: column; gap: 1rem; }
@@ -1361,6 +1391,17 @@ img, video, iframe {
     <!-- FEED COLUMN -->
     <div class="feed-col">
 
+      <!-- FIRST VISIT BANNER -->
+      <div class="first-visit-banner" id="first-visit-banner">
+        <div class="banner-text">
+          <div class="banner-label">Welcome to ToolSpark</div>
+          <div class="banner-msg">Before you dive in — your Build Roadmap is waiting. That's where everything starts.</div>
+        </div>
+        <a href="roadmap.html" class="banner-btn" onclick="dismissBanner()">
+          Start My Roadmap →
+        </a>
+      </div>
+
       <!-- WELCOME CARD -->
       <div class="welcome-card">
         <div>
@@ -2179,10 +2220,16 @@ async function toggleLike(threadId) {
     }
     currentUser = user;
 
-    // Fetch role and update lastSeen
+    // Fetch role, check firstVisit, and update lastSeen
     try {
       const userSnap = await db.collection('users').doc(user.uid).get();
-      if (userSnap.exists) currentUserRole = userSnap.data().userRole || 'member';
+      if (userSnap.exists) {
+        const userData = userSnap.data();
+        currentUserRole = userData.userRole || 'member';
+        if (userData.firstVisit === true) {
+          document.getElementById('first-visit-banner').classList.add('visible');
+        }
+      }
       await db.collection('users').doc(user.uid).update({
         lastSeen: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -2458,6 +2505,15 @@ await onThreadPosted(currentUser.uid);
   }
 
   // ── MOBILE SIDEBAR DRAWER ──
+  async function dismissBanner() {
+    document.getElementById('first-visit-banner').classList.remove('visible');
+    if (currentUser) {
+      try {
+        await db.collection('users').doc(currentUser.uid).update({ firstVisit: false });
+      } catch(e) {}
+    }
+  }
+
   function openSidebar() {
     document.querySelector('.sidebar').classList.add('open');
     document.getElementById('sidebar-overlay').classList.add('open');
