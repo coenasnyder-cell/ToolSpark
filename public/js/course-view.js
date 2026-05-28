@@ -327,8 +327,8 @@ async function toggleComplete() {
     await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
     onLessonComplete(currentUser.uid);
     if (completedLessons.size === lessons.length) {
-      onCourseComplete(currentUser.uid);
-      showCompletion();
+      await onCourseComplete(currentUser.uid, courseData && courseData.courseNumber);
+      await maybeRedirectToGraduation() || showCompletion();
     }
   }
 
@@ -367,7 +367,11 @@ async function nextLesson() {
     }
     await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
     onLessonComplete(currentUser.uid);
-    if (completedLessons.size === lessons.length) { onCourseComplete(currentUser.uid); showCompletion(); return; }
+    if (completedLessons.size === lessons.length) {
+      await onCourseComplete(currentUser.uid, courseData && courseData.courseNumber);
+      if (await maybeRedirectToGraduation()) return;
+      showCompletion(); return;
+    }
   }
   if (currentIndex < lessons.length - 1) loadLesson(currentIndex + 1);
 }
@@ -449,6 +453,29 @@ function showCompletion() {
   document.getElementById('completion-msg').textContent =
     "You've completed " + (courseData && courseData.title ? courseData.title : 'this course') + '. Amazing work!';
   document.getElementById('completion-overlay').style.display = 'flex';
+}
+
+async function maybeRedirectToGraduation() {
+  if (!courseData || courseData.courseNumber !== 2) return false;
+  try {
+    const snap = await db.collection('users').doc(currentUser.uid).get();
+    if (!snap.exists) return false;
+    const u = snap.data();
+    const allMet =
+      u.course1Complete === true &&
+      u.course2Complete === true &&
+      u.toolBuilt       === true &&
+      u.toolSubmitted   === true &&
+      (u.feedbackCount  || 0) >= 3 &&
+      u.profileComplete === true;
+    if (allMet) {
+      window.location.href = 'graduation.html';
+      return true;
+    }
+  } catch(e) {
+    console.error('maybeRedirectToGraduation error:', e);
+  }
+  return false;
 }
 
 // ── MOBILE ──

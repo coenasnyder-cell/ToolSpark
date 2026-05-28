@@ -127,11 +127,18 @@ async function onLessonComplete(uid) {
   }
 }
 
-async function onCourseComplete(uid) {
+async function onCourseComplete(uid, courseNum) {
   if (!uid) return;
   try {
     await awardPoints(uid, POINTS.COMPLETE_COURSE, 'COMPLETE_COURSE');
     await awardBadge(uid, 'course_complete');
+
+    // Mark course1Complete / course2Complete on user profile
+    if (courseNum === 1) {
+      await db.collection('users').doc(uid).update({ course1Complete: true }).catch(() => {});
+    } else if (courseNum === 2) {
+      await db.collection('users').doc(uid).update({ course2Complete: true }).catch(() => {});
+    }
 
     // Scholar — 3 courses complete
     const progressSnap = await db.collection('userProgress')

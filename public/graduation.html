@@ -481,7 +481,18 @@
 
       userProfile = snap.data();
 
-      if (!userProfile.certified) { showNotCertified(); return; }
+      if (!userProfile.certified) {
+        // Cloud Function may not have fired yet — check conditions directly
+        const u = userProfile;
+        const conditionsMet =
+          u.course1Complete === true &&
+          u.course2Complete === true &&
+          u.toolBuilt       === true &&
+          u.toolSubmitted   === true &&
+          (u.feedbackCount  || 0) >= 3 &&
+          u.profileComplete === true;
+        if (!conditionsMet) { showNotCertified(); return; }
+      }
 
       showCelebration(userProfile);
     } catch (e) {
