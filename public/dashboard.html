@@ -167,6 +167,28 @@
   .mp-badge-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; }
   .mp-badge-name { font-size: 10px; font-weight: 700; color: var(--text2); line-height: 1.3; }
 
+  /* -- ONBOARDING CHECKLIST -- */
+  .oc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-top: 1rem; }
+  .oc-header { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .oc-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .oc-count { font-size: 11px; color: var(--text3); }
+  .oc-bar { height: 3px; background: var(--border); }
+  .oc-fill { height: 100%; background: var(--gold); transition: width 0.4s ease; }
+  .oc-step { display: flex; align-items: center; gap: 10px; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: background 0.12s; cursor: pointer; }
+  .oc-step:last-child { border-bottom: none; }
+  .oc-step:not(.oc-done):hover { background: #FAFAF8; }
+  .oc-step.oc-done { cursor: default; }
+  .oc-step.oc-featured { background: rgba(201,168,76,0.04); }
+  .oc-step.oc-featured:not(.oc-done):hover { background: rgba(201,168,76,0.08); }
+  .oc-check { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text3); }
+  .oc-check.done { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .oc-check.featured { border-color: var(--gold); color: var(--gold); }
+  .oc-body { flex: 1; }
+  .oc-label { font-size: 13px; font-weight: 700; color: var(--text); }
+  .oc-label.done { color: var(--text3); text-decoration: line-through; }
+  .oc-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .oc-arrow { color: var(--text3); }
+
   /* -- SECTION HEADERS -- */
   .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); }
@@ -431,6 +453,14 @@
           <div class="mp-badges-row" id="mp-earned"></div>
         </div>
       </div>
+      <div class="oc-card" id="oc-card" style="display:none;">
+        <div class="oc-header">
+          <div class="oc-title">Getting Started</div>
+          <div class="oc-count" id="oc-count"></div>
+        </div>
+        <div class="oc-bar"><div class="oc-fill" id="oc-fill"></div></div>
+        <div id="oc-steps"></div>
+      </div>
     </div>
 
     <!-- hidden stat targets kept for JS compatibility -->
@@ -641,6 +671,7 @@
 
         // My Profile section
         renderMyProfile(user, data);
+        renderChecklist(user.uid, data);
 
         // Onboarding
         const onboarding = data.onboarding;
@@ -719,6 +750,53 @@
           '</div>';
       }).join('');
     }
+  }
+
+  function renderChecklist(uid, data) {
+    const steps = data.onboarding?.steps || {};
+    const profileDone = steps.profileComplete || data.profileComplete ||
+      !!(data.bio && (data.photoURL || (data.displayName && data.displayName !== data.email)));
+
+    const allSteps = [
+      { key: 'profileComplete', label: 'Update your profile',           desc: 'Add your photo, bio, and what you build', href: 'profile.html', featured: true, done: profileDone },
+      { key: 'welcomePost',     label: 'Introduce yourself',            desc: 'Post in the welcome thread',              href: 'community.html',                           done: !!steps.welcomePost },
+      { key: 'welcomeCourse',   label: 'Welcome to ToolSpark! Lesson',  desc: 'Start here before anything else',         href: 'courses.html',                             done: !!steps.welcomeCourse },
+      { key: 'visitRoadmap',    label: 'Visit your Build Roadmap',      desc: 'See your full build path',                href: 'roadmap.html',                             done: !!steps.visitRoadmap },
+    ];
+
+    const completed = allSteps.filter(function(s) { return s.done; }).length;
+    if (completed === allSteps.length) return;
+
+    document.getElementById('oc-card').style.display = 'block';
+    document.getElementById('oc-count').textContent = completed + ' of ' + allSteps.length + ' complete';
+    document.getElementById('oc-fill').style.width = Math.round((completed / allSteps.length) * 100) + '%';
+
+    document.getElementById('oc-steps').innerHTML = allSteps.map(function(s, i) {
+      const checkClass = s.done ? 'done' : s.featured ? 'featured' : '';
+      const checkInner = s.done
+        ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+        : (i + 1);
+      return '<a class="oc-step' + (s.done ? ' oc-done' : '') + (s.featured ? ' oc-featured' : '') + '"' +
+        ' href="' + (s.done ? '#' : s.href) + '"' +
+        (!s.done ? ' onclick="ocMarkStep(event,\'' + uid + '\',\'' + s.key + '\',\'' + s.href + '\')"' : '') + '>' +
+        '<div class="oc-check ' + checkClass + '">' + checkInner + '</div>' +
+        '<div class="oc-body">' +
+        '<div class="oc-label' + (s.done ? ' done' : '') + '">' + s.label + '</div>' +
+        '<div class="oc-desc">' + s.desc + '</div>' +
+        '</div>' +
+        (s.done ? '' : '<svg class="oc-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>') +
+        '</a>';
+    }).join('');
+  }
+
+  async function ocMarkStep(e, uid, key, href) {
+    e.preventDefault();
+    try {
+      const update = {};
+      update['onboarding.steps.' + key] = true;
+      await db.collection('users').doc(uid).update(update);
+    } catch(err) {}
+    window.location.href = href;
   }
 
   async function loadStats(uid) {
