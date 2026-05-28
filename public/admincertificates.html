@@ -355,12 +355,12 @@
     try {
       const snap = await db.collection('marketplace_listings')
         .where('status', '==', 'pending')
-        .orderBy('listedAt', 'desc')
         .get();
 
       document.getElementById('tools-loading').style.display = 'none';
 
-      const tools = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const tools = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.listedAt?.seconds || 0) - (a.listedAt?.seconds || 0));
       document.getElementById('tools-count-badge').textContent = tools.length + ' pending';
 
       if (!tools.length) {
