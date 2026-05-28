@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tools Marketplace — ToolSpark</title>
+<meta name="description" content="Browse AI tools built by certified creators, coaches, and consultants. Every tool tested and certified by ToolSpark.">
+<meta property="og:title" content="AI Tools Marketplace — ToolSpark">
+<meta property="og:description" content="Browse AI tools built by certified creators, coaches, and consultants. Every tool tested and certified by ToolSpark.">
+<meta property="og:url" content="https://toolspark.co/marketplace.html">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-dim: rgba(42,92,69,0.1);
+    --green-border: rgba(42,92,69,0.25);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+  /* ── NAV ── */
+  .site-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--dark);
+    border-bottom: 1px solid var(--border-dark);
+    height: 60px;
+    display: flex; align-items: center;
+    padding: 0 1.5rem;
+  }
+  .nav-inner {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .nav-logo span { color: var(--gold); }
+  .nav-label {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    background: var(--dark3); border: 1px solid var(--border-dark);
+    border-radius: 100px; padding: 2px 9px;
+  }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-link { color: #9A9488; text-decoration: none; font-size: 14px; font-weight: 400; padding: 8px 12px; border-radius: var(--radius-sm); transition: color 0.15s; }
+  .nav-link:hover { color: #F0EDE6; }
+  .nav-btn {
+    background: var(--gold); color: var(--dark);
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm);
+    padding: 8px 18px; cursor: pointer; text-decoration: none;
+    transition: background 0.15s;
+  }
+  .nav-btn:hover { background: var(--gold-light); }
+  #nav-user-wrap { display: flex; align-items: center; gap: 8px; }
+  #nav-user-name { font-size: 13px; color: #9A9488; }
+
+  /* ── PAGE WRAP ── */
+  .page { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 3.5rem 1rem 2.5rem;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px; font-weight: 400; line-height: 1.2;
+    color: var(--text); margin-bottom: 1rem;
+  }
+  .hero-sub {
+    font-size: 15px; color: var(--text2); line-height: 1.75;
+    max-width: 480px; margin: 0 auto 1.75rem;
+  }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--dark); color: #F0EDE6;
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    border: 1px solid var(--border-dark); border-radius: var(--radius-sm);
+    padding: 11px 24px; text-decoration: none; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .hero-cta:hover { background: #1C1A17; border-color: rgba(201,168,76,0.3); }
+  .hero-cta.gold { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .hero-cta.gold:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+  /* ── SEARCH ── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); pointer-events: none;
+  }
+  #search-input {
+    width: 100%; padding: 12px 14px 12px 42px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Lato', sans-serif;
+    font-size: 15px; color: var(--text); outline: none;
+    transition: border-color 0.15s; box-shadow: var(--shadow);
+  }
+  #search-input::placeholder { color: var(--text3); }
+  #search-input:focus { border-color: var(--gold); }
+
+  /* ── FILTERS ── */
+  .filter-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+  .filter-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    padding: 6px 16px; border-radius: 100px;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .pill:hover { border-color: var(--gold); color: var(--gold); }
+  .pill.active { background: var(--dark); border-color: var(--dark); color: #F0EDE6; }
+
+  /* ── RESULTS BAR ── */
+  .results-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  #results-count { font-size: 13px; color: var(--text2); font-weight: 700; }
+  #sort-select {
+    padding: 8px 32px 8px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--surface);
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text);
+    cursor: pointer; outline: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9891' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    transition: border-color 0.15s;
+  }
+  #sort-select:focus { border-color: var(--gold); }
+
+  /* ── TOOL GRID ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  /* ── TOOL CARD ── */
+  .tool-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .tool-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+  .card-body { padding: 1.25rem 1.25rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .tool-icon {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-title-block { flex: 1; min-width: 0; }
+  .card-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-type { font-size: 11px; color: var(--text3); font-weight: 400; }
+  .free-badge {
+    flex-shrink: 0; font-size: 11px; font-weight: 700;
+    background: var(--green-dim); color: #3D8A65; border: 1px solid var(--green-border);
+    border-radius: 100px; padding: 2px 9px; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .card-desc { font-size: 13px; color: var(--text2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .card-tag {
+    font-size: 11px; color: var(--text2); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 100px; padding: 2px 9px;
+  }
+
+  .card-builder {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 0.75rem; border-top: 1px solid var(--border);
+  }
+  .builder-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 900; color: var(--gold);
+  }
+  .builder-info { flex: 1; min-width: 0; }
+  .builder-name { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cert-badge-small {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 700; color: #3D8A65;
+  }
+  .cert-check { color: #3D8A65; }
+  .use-count { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text3); flex-shrink: 0; }
+
+  .card-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .built-label { font-size: 11px; color: var(--text3); }
+  .built-label strong { color: var(--text2); font-weight: 700; }
+  .try-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 14px;
+    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--text2); cursor: pointer; text-decoration: none;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .try-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* ── EMPTY / LOADING ── */
+  .grid-state { grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text3); }
+  .grid-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .grid-state-text { font-size: 14px; }
+
+  /* ── BOTTOM CTA ── */
+  .bottom-cta {
+    background: var(--dark); border-radius: var(--radius);
+    padding: 3rem 2rem; text-align: center;
+    margin-bottom: 4rem;
+  }
+  .bottom-cta-text { font-size: 14px; color: #9A9488; margin-bottom: 1rem; }
+  .bottom-cta h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: #F0EDE6; margin-bottom: 1.5rem; }
+  .bottom-cta-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold); color: var(--dark);
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm);
+    padding: 12px 28px; text-decoration: none; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .bottom-cta-btn:hover { background: var(--gold-light); }
+
+  /* ── SUBMIT MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(12,11,9,0.8); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius);
+    width: 100%; max-width: 520px; max-height: 90vh;
+    overflow-y: auto; box-shadow: var(--shadow-md);
+  }
+  .modal-header {
+    padding: 1.5rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .modal-close { background: none; border: none; font-size: 20px; color: var(--text3); cursor: pointer; line-height: 1; padding: 4px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .modal-field { display: flex; flex-direction: column; gap: 5px; }
+  .modal-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+  .modal-input, .modal-select, .modal-textarea {
+    width: 100%; padding: 10px 13px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Lato', sans-serif;
+    font-size: 14px; color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  .modal-input:focus, .modal-select:focus, .modal-textarea:focus { border-color: var(--gold); }
+  .modal-input::placeholder, .modal-textarea::placeholder { color: var(--text3); }
+  .modal-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .modal-hint { font-size: 11px; color: var(--text3); }
+  .modal-footer {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .modal-submit {
+    flex: 1; padding: 12px; background: var(--gold); color: var(--dark);
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    transition: background 0.15s;
+  }
+  .modal-submit:hover { background: var(--gold-light); }
+  .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .modal-cancel { padding: 12px 20px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .modal-cancel:hover { border-color: var(--text2); }
+  .modal-msg { font-size: 12px; text-align: center; padding: 8px 12px; border-radius: 6px; display: none; }
+  .modal-msg.error { background: rgba(196,98,45,0.1); color: #E0875A; border: 1px solid rgba(196,98,45,0.2); }
+  .modal-msg.success { background: var(--green-dim); color: #3D8A65; border: 1px solid var(--green-border); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 32px; }
+  }
+  @media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+    .hero { padding: 2.5rem 0 2rem; }
+    .hero h1 { font-size: 26px; }
+    .filter-pills { gap: 4px; }
+    .pill { font-size: 12px; padding: 5px 12px; }
+    .filter-row { flex-direction: column; align-items: flex-start; }
+    .bottom-cta { padding: 2rem 1.25rem; }
+    .bottom-cta h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <div class="nav-logo">Tool<span>Spark</span></div>
+      <span class="nav-label">Marketplace</span>
+    </a>
+    <div class="nav-right">
+      <div id="nav-guest" style="display:none;">
+        <a href="signon.html" class="nav-link">Sign in</a>
+        <a href="signup.html" class="nav-btn">Join free</a>
+      </div>
+      <div id="nav-user-wrap" style="display:none;">
+        <span id="nav-user-name"></span>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">ToolSpark · Marketplace</div>
+    <h1>AI tools built by real people</h1>
+    <p class="hero-sub">Every tool here was built, tested, and certified by a ToolSpark member. Browse, try, or build your own.</p>
+    <div id="hero-cta-wrap">
+      <a href="dashboard.html" class="hero-cta" id="hero-cta">Become a certified builder →</a>
+    </div>
+  </section>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" placeholder="Search tools, niches, or builders…" oninput="applyFilters()" />
+  </div>
+
+  <!-- FILTERS + RESULTS BAR -->
+  <div class="filter-row">
+    <div class="filter-pills" id="filter-pills">
+      <button class="pill active" data-niche="all" onclick="setNiche('all')">All tools</button>
+      <button class="pill" data-niche="coaches" onclick="setNiche('coaches')">Coaches</button>
+      <button class="pill" data-niche="creators" onclick="setNiche('creators')">Course creators</button>
+      <button class="pill" data-niche="consultants" onclick="setNiche('consultants')">Consultants</button>
+      <button class="pill" data-niche="realestate" onclick="setNiche('realestate')">Real estate</button>
+      <button class="pill" data-niche="health" onclick="setNiche('health')">Health &amp; wellness</button>
+      <button class="pill" data-niche="finance" onclick="setNiche('finance')">Finance</button>
+    </div>
+  </div>
+
+  <div class="results-bar">
+    <div id="results-count">Loading…</div>
+    <select id="sort-select" onchange="applyFilters()">
+      <option value="popular">Most used</option>
+      <option value="newest">Newest first</option>
+      <option value="az">A–Z</option>
+    </select>
+  </div>
+
+  <!-- TOOL GRID -->
+  <div class="tools-grid" id="tools-grid">
+    <div class="grid-state">
+      <div class="grid-state-icon">⚡</div>
+      <div class="grid-state-text">Loading tools…</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM CTA -->
+  <div class="bottom-cta">
+    <p class="bottom-cta-text">Want to add your tool to the marketplace?</p>
+    <h2>Build something people actually use.</h2>
+    <a href="dashboard.html" class="bottom-cta-btn">Become a certified builder →</a>
+  </div>
+
+</div><!-- /page -->
+
+<!-- SUBMIT MODAL -->
+<div class="modal-overlay" id="submit-modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Submit Your Tool</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);line-height:1.65;">Your tool will be reviewed and approved before it appears publicly. You'll be notified when it goes live.</p>
+
+      <div class="modal-field">
+        <label class="modal-label">Tool Name</label>
+        <input class="modal-input" id="sub-name" placeholder="e.g. The Clarity Compass" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Tool Type</label>
+        <select class="modal-select" id="sub-type">
+          <option value="">Select a type…</option>
+          <option>Quiz + Report</option>
+          <option>Assessment</option>
+          <option>Assessment + Plan</option>
+          <option>Content Generator</option>
+          <option>Document Generator</option>
+          <option>Lead Qualifier</option>
+          <option>Strategy Guide</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Description</label>
+        <textarea class="modal-textarea" id="sub-desc" placeholder="What does your tool do? Who is it for?" maxlength="200"></textarea>
+        <span class="modal-hint">Max 200 characters</span>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Niche</label>
+        <select class="modal-select" id="sub-niche">
+          <option value="">Select a niche…</option>
+          <option value="coaches">Coaches</option>
+          <option value="creators">Course creators</option>
+          <option value="consultants">Consultants</option>
+          <option value="realestate">Real estate</option>
+          <option value="health">Health &amp; wellness</option>
+          <option value="finance">Finance</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Tags</label>
+        <input class="modal-input" id="sub-tags" placeholder="e.g. coaching, clarity, AI quiz" />
+        <span class="modal-hint">Comma-separated</span>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Live Tool URL</label>
+        <input class="modal-input" id="sub-url" placeholder="https://…" type="url" />
+      </div>
+      <div class="modal-msg" id="submit-msg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-submit" id="submit-btn" onclick="submitTool()">Submit for Review →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── DATA ──
+  let allTools = [];
+  let currentNiche = 'all';
+  let currentUser = null;
+  let userIsCertified = false;
+
+  // ── ICON MAP ──
+  const ICON_COLORS = [
+    { bg: 'rgba(201,168,76,0.15)', fill: '#C9A84C' },
+    { bg: 'rgba(42,92,69,0.15)',   fill: '#3D8A65' },
+    { bg: 'rgba(75,63,138,0.15)',  fill: '#7B6FCA' },
+    { bg: 'rgba(196,98,45,0.15)',  fill: '#C4622D' },
+    { bg: 'rgba(59,130,246,0.15)', fill: '#3B82F6' },
+  ];
+
+  function iconForType(type) {
+    const t = (type || '').toLowerCase();
+    if (t.includes('quiz') || t.includes('report'))
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>';
+    if (t.includes('document') || t.includes('generator'))
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+    if (t.includes('assessment') || t.includes('plan'))
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>';
+    if (t.includes('lead') || t.includes('qualifier'))
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>';
+    if (t.includes('content'))
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+    // default lightbulb
+    return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>';
+  }
+
+  function colorForIndex(i) {
+    return ICON_COLORS[i % ICON_COLORS.length];
+  }
+
+  // ── AUTH (optional) ──
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+      document.getElementById('nav-guest').style.display = 'none';
+      const wrap = document.getElementById('nav-user-wrap');
+      wrap.style.display = 'flex';
+      const name = user.displayName || user.email || '';
+      document.getElementById('nav-user-name').textContent = name.split(' ')[0] || '';
+
+      try {
+        const snap = await db.collection('users').doc(user.uid).get();
+        if (snap.exists && snap.data().certified) {
+          userIsCertified = true;
+          const cta = document.getElementById('hero-cta');
+          cta.textContent = 'Submit your tool ↗';
+          cta.classList.add('gold');
+          cta.href = '#';
+          cta.onclick = (e) => { e.preventDefault(); openModal(); };
+        }
+      } catch(e) {}
+    } else {
+      document.getElementById('nav-guest').style.display = 'flex';
+      document.getElementById('nav-user-wrap').style.display = 'none';
+    }
+  });
+
+  // ── LOAD TOOLS ──
+  async function loadTools() {
+    try {
+      const snap = await db.collection('marketplace_listings')
+        .where('status', '==', 'active')
+        .get();
+      allTools = snap.docs.map((d, i) => ({ id: d.id, _idx: i, ...d.data() }));
+      applyFilters();
+    } catch (e) {
+      document.getElementById('tools-grid').innerHTML =
+        '<div class="grid-state"><div class="grid-state-text">Could not load tools. Please refresh.</div></div>';
+      console.error(e);
+    }
+  }
+
+  // ── FILTER + SORT ──
+  function setNiche(niche) {
+    currentNiche = niche;
+    document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.niche === niche));
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q    = document.getElementById('search-input').value.toLowerCase().trim();
+    const sort = document.getElementById('sort-select').value;
+
+    let filtered = allTools.filter(t => {
+      if (currentNiche !== 'all' && t.niche !== currentNiche) return false;
+      if (!q) return true;
+      const hay = [t.toolName, t.description, t.builderName, ...(t.tags || [])].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (sort === 'popular') filtered.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
+    else if (sort === 'newest') filtered.sort((a, b) => (b.listedAt?.seconds || 0) - (a.listedAt?.seconds || 0));
+    else if (sort === 'az') filtered.sort((a, b) => (a.toolName || '').localeCompare(b.toolName || ''));
+
+    renderGrid(filtered);
+  }
+
+  // ── RENDER ──
+  function renderGrid(tools) {
+    const grid = document.getElementById('tools-grid');
+    const count = document.getElementById('results-count');
+    count.textContent = 'Showing ' + tools.length + ' tool' + (tools.length !== 1 ? 's' : '');
+
+    if (!tools.length) {
+      grid.innerHTML = '<div class="grid-state"><div class="grid-state-icon">🔍</div><div class="grid-state-text">No tools match your search.</div></div>';
+      return;
+    }
+
+    grid.innerHTML = tools.map((t, i) => {
+      const color = colorForIndex(t._idx ?? i);
+      const icon  = iconForType(t.toolType);
+      const tags  = (t.tags || []).slice(0, 3).map(tag => `<span class="card-tag">${esc(tag)}</span>`).join('');
+      const certBadge = t.certified ? `<span class="cert-badge-small"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Certified</span>` : '';
+      const initials = esc(t.builderInitials || (t.builderName || '?').charAt(0).toUpperCase());
+
+      return `<div class="tool-card">
+        <div class="card-body">
+          <div class="card-top">
+            <div class="tool-icon" style="background:${color.bg};color:${color.fill};">${icon}</div>
+            <div class="card-title-block">
+              <div class="card-name" title="${esc(t.toolName)}">${esc(t.toolName)}</div>
+              <div class="card-type">${esc(t.toolType || '')}</div>
+            </div>
+            <span class="free-badge">Free</span>
+          </div>
+
+          <div class="card-desc">${esc(t.description || '')}</div>
+
+          ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+
+          <div class="card-builder">
+            <div class="builder-avatar">${initials}</div>
+            <div class="builder-info">
+              <div class="builder-name">${esc(t.builderName || '')}</div>
+              ${certBadge}
+            </div>
+            <div class="use-count">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              ${t.useCount || 0}
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="built-label">Built inside <strong>ToolSpark</strong></span>
+          <a class="try-btn" href="${esc(t.toolUrl || '#')}" target="_blank" rel="noopener" onclick="incrementUse('${t.id}', this)">
+            Try it
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── INCREMENT USE COUNT ──
+  async function incrementUse(docId, btn) {
+    try {
+      await db.collection('marketplace_listings').doc(docId).update({
+        useCount: firebase.firestore.FieldValue.increment(1)
+      });
+      const tool = allTools.find(t => t.id === docId);
+      if (tool) tool.useCount = (tool.useCount || 0) + 1;
+    } catch(e) { /* fail silently — Firestore rules may require auth */ }
+  }
+
+  // ── SUBMIT MODAL ──
+  function openModal() {
+    document.getElementById('submit-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('submit-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('submit-msg').style.display = 'none';
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('submit-modal')) closeModal();
+  }
+
+  async function submitTool() {
+    const btn  = document.getElementById('submit-btn');
+    const msg  = document.getElementById('submit-msg');
+    const name = document.getElementById('sub-name').value.trim();
+    const type = document.getElementById('sub-type').value;
+    const desc = document.getElementById('sub-desc').value.trim();
+    const niche = document.getElementById('sub-niche').value;
+    const tags = document.getElementById('sub-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    const url  = document.getElementById('sub-url').value.trim();
+
+    if (!name || !type || !desc || !niche || !url) {
+      msg.textContent = 'Please fill in all fields.';
+      msg.className = 'modal-msg error'; msg.style.display = 'block'; return;
+    }
+    if (!url.startsWith('http')) {
+      msg.textContent = 'Please enter a valid URL starting with https://';
+      msg.className = 'modal-msg error'; msg.style.display = 'block'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Submitting…'; msg.style.display = 'none';
+
+    try {
+      const userSnap = await db.collection('users').doc(currentUser.uid).get();
+      const userData = userSnap.data() || {};
+      const initials = (userData.displayName || currentUser.displayName || '?')
+        .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+      await db.collection('marketplace_listings').add({
+        toolName: name,
+        toolType: type,
+        description: desc,
+        niche,
+        tags,
+        toolUrl: url,
+        builderName: userData.displayName || currentUser.displayName || 'Builder',
+        builderInitials: initials,
+        builderUserId: currentUser.uid,
+        certified: true,
+        useCount: 0,
+        status: 'pending',
+        listedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      msg.textContent = '✓ Submitted! We\'ll review your tool and notify you when it\'s live.';
+      msg.className = 'modal-msg success'; msg.style.display = 'block';
+      btn.textContent = 'Submitted!';
+      ['sub-name','sub-type','sub-desc','sub-niche','sub-tags','sub-url'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      setTimeout(closeModal, 2500);
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.className = 'modal-msg error'; msg.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Submit for Review →';
+    }
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  loadTools();
+</script>
+</body>
+</html>

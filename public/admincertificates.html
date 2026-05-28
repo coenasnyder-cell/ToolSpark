@@ -174,6 +174,39 @@
       </table>
     </div>
 
+    <!-- PENDING MARKETPLACE SUBMISSIONS -->
+    <div style="margin-top:0.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">Pending Marketplace Submissions</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;">Tools submitted by certified builders awaiting approval</div>
+        </div>
+        <span class="count-badge" id="tools-count-badge">—</span>
+      </div>
+
+      <div class="admin-card">
+        <div class="loading-state" id="tools-loading">Loading…</div>
+        <div class="empty-state" id="tools-empty" style="display:none;">
+          <div class="empty-state-icon">🛠️</div>
+          <div class="empty-state-text">No pending tool submissions.</div>
+        </div>
+        <table id="tools-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Type</th>
+              <th>Builder</th>
+              <th>Niche</th>
+              <th>Submitted</th>
+              <th>URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tools-body"></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -217,6 +250,7 @@
     else av.textContent = name.charAt(0).toUpperCase();
 
     loadCertificates();
+    loadPendingTools();
   });
 
   async function loadCertificates() {
@@ -314,6 +348,71 @@
 
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── PENDING MARKETPLACE TOOLS ──
+  async function loadPendingTools() {
+    try {
+      const snap = await db.collection('marketplace_listings')
+        .where('status', '==', 'pending')
+        .orderBy('listedAt', 'desc')
+        .get();
+
+      document.getElementById('tools-loading').style.display = 'none';
+
+      const tools = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('tools-count-badge').textContent = tools.length + ' pending';
+
+      if (!tools.length) {
+        document.getElementById('tools-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('tools-table').style.display = 'table';
+      document.getElementById('tools-body').innerHTML = tools.map(t => {
+        const submitted = t.listedAt
+          ? t.listedAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '—';
+        const urlShort = (t.toolUrl || '').replace(/^https?:\/\//, '').substring(0, 30);
+        return `<tr id="tool-row-${t.id}">
+          <td class="td-name">${esc(t.toolName || '—')}</td>
+          <td class="td-tool">${esc(t.toolType || '—')}</td>
+          <td>${esc(t.builderName || '—')}</td>
+          <td>${esc(t.niche || '—')}</td>
+          <td class="td-date">${submitted}</td>
+          <td><a href="${esc(t.toolUrl || '#')}" target="_blank" style="color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;">${esc(urlShort)}…</a></td>
+          <td>
+            <button class="mark-btn" style="color:var(--green-light);border-color:rgba(42,92,69,0.3);" onclick="approveTool('${t.id}', this)">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Approve
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (e) {
+      console.error(e);
+      document.getElementById('tools-loading').textContent = 'Could not load. Try refreshing.';
+    }
+  }
+
+  async function approveTool(docId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Approving…';
+    try {
+      await db.collection('marketplace_listings').doc(docId).update({ status: 'active' });
+      const row = document.getElementById('tool-row-' + docId);
+      if (row) row.style.opacity = '0.4';
+      btn.textContent = '✓ Approved';
+      // refresh count
+      const badge = document.getElementById('tools-count-badge');
+      const current = parseInt(badge.textContent) || 0;
+      badge.textContent = Math.max(0, current - 1) + ' pending';
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Approve';
+      alert('Could not approve. Please try again.');
+    }
   }
 </script>
 </body>
