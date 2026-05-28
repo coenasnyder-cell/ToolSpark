@@ -584,7 +584,7 @@
 
     const name = user.displayName || user.email || 'Builder';
     const first = name.split(' ')[0];
-    document.getElementById('welcome-heading').textContent = 'Welcome back, ' + first + ' ??';
+    document.getElementById('welcome-heading').textContent = 'Welcome back, ' + first + ' 👋';
     document.getElementById('sidebar-name').textContent = name;
 
     // Avatar
@@ -742,7 +742,7 @@
           '<div class="course-footer">' +
           '<span class="course-meta">' + total + ' lessons</span>' +
           (locked
-            ? '<span class="locked-badge">?? Locked</span>'
+            ? '<span class="locked-badge">🔒 Locked</span>'
             : '<button class="course-btn" onclick="event.stopPropagation();window.location.href=\'' + url + '\'">' + btnLabel + '</button>') +
           '</div>' +
           progressHtml +
