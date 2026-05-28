@@ -260,6 +260,40 @@
   .quick-link svg { opacity: 0.5; flex-shrink: 0; }
   .quick-link:hover svg { opacity: 1; }
 
+  /* ── GETTING STARTED CHECKLIST ── */
+  .checklist-card { overflow: hidden; }
+  .checklist-header { padding: 1rem 1.25rem 0.875rem; border-bottom: 1px solid var(--border); }
+  .checklist-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .checklist-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .checklist-count { font-size: 11px; color: var(--text3); }
+  .checklist-bar { height: 3px; background: var(--border); border-radius: 10px; overflow: hidden; }
+  .checklist-fill { height: 100%; background: var(--gold); border-radius: 10px; transition: width 0.4s ease; }
+  .checklist-steps { display: flex; flex-direction: column; }
+  .cl-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.8rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none; color: inherit;
+    transition: background 0.12s; cursor: pointer;
+  }
+  .cl-step:last-child { border-bottom: none; }
+  .cl-step:not(.cl-done):hover { background: #FAFAF8; }
+  .cl-step.cl-done { cursor: default; }
+  .cl-step.cl-featured { background: rgba(201,168,76,0.05); }
+  .cl-step.cl-featured:not(.cl-done):hover { background: rgba(201,168,76,0.09); }
+  .cl-check {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text3);
+  }
+  .cl-check.cl-check-done { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .cl-check.cl-check-featured { border-color: var(--gold); color: var(--gold); }
+  .cl-body { flex: 1; }
+  .cl-label { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .cl-label.cl-done-text { color: var(--text3); text-decoration: line-through; }
+  .cl-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .cl-arrow { color: var(--text3); font-size: 14px; }
+
   /* ── MOBILE BOTTOM NAV ── */
   .mobile-bottom-nav { display: none; }
 
@@ -551,6 +585,17 @@
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           Dashboard
         </a>
+      </div>
+
+      <div class="card checklist-card" id="getting-started-card" style="display:none;">
+        <div class="checklist-header">
+          <div class="checklist-title-row">
+            <div class="checklist-title">Getting Started</div>
+            <div class="checklist-count" id="cl-count"></div>
+          </div>
+          <div class="checklist-bar"><div class="checklist-fill" id="cl-fill"></div></div>
+        </div>
+        <div class="checklist-steps" id="cl-steps"></div>
       </div>
 
     </div><!-- /right-col -->
@@ -871,7 +916,95 @@ function renderBadges(badges) {
       console.error('Clarity session query error', err);
       document.getElementById('clarity-empty').style.display = 'flex';
     }
+
+    // Getting Started checklist — own profile only
+    if (isOwnProfile) {
+      renderChecklist(user.uid, data);
+    }
   });
+
+  async function markStep(uid, key, href) {
+    try {
+      const update = {};
+      update['onboarding.steps.' + key] = true;
+      await db.collection('users').doc(uid).update(update);
+    } catch(e) {}
+    if (href && href !== '#') window.location.href = href;
+  }
+
+  function renderChecklist(uid, data) {
+    const steps = data.onboarding?.steps || {};
+
+    // Auto-detect profile completion
+    const profileDone = steps.profileComplete ||
+      data.profileComplete ||
+      !!(data.bio && (data.photoURL || (data.displayName && data.displayName !== data.email)));
+
+    const allSteps = [
+      {
+        key:      'profileComplete',
+        label:    'Update your profile',
+        desc:     'Add your photo, bio, and what you build',
+        href:     '#profile-edit',
+        featured: true,
+        done:     profileDone,
+      },
+      {
+        key:   'welcomePost',
+        label: 'Introduce yourself',
+        desc:  'Post in the welcome thread',
+        href:  'community.html',
+        done:  !!steps.welcomePost,
+      },
+      {
+        key:   'welcomeCourse',
+        label: 'Complete the welcome course',
+        desc:  'Watch all lessons',
+        href:  'courses.html',
+        done:  !!steps.welcomeCourse,
+      },
+      {
+        key:   'visitRoadmap',
+        label: 'Visit your Build Roadmap',
+        desc:  'See your full build path — that\'s where everything starts',
+        href:  'roadmap.html',
+        done:  !!steps.visitRoadmap,
+      },
+      {
+        key:   'clarityTool',
+        label: 'Complete your Clarity Session',
+        desc:  'Discover your first tool idea',
+        href:  'clarity.html',
+        done:  !!steps.clarityTool,
+      },
+    ];
+
+    const completed = allSteps.filter(s => s.done).length;
+    if (completed === allSteps.length) return; // all done — hide
+
+    document.getElementById('getting-started-card').style.display = 'block';
+    document.getElementById('cl-count').textContent = completed + ' of ' + allSteps.length + ' complete';
+    const pct = Math.round((completed / allSteps.length) * 100);
+    document.getElementById('cl-fill').style.width = pct + '%';
+
+    document.getElementById('cl-steps').innerHTML = allSteps.map((s, i) => {
+      const checkClass = s.done ? 'cl-check-done' : s.featured ? 'cl-check-featured' : '';
+      const checkInner = s.done
+        ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+        : (i + 1);
+      return `<a class="cl-step${s.done ? ' cl-done' : ''}${s.featured ? ' cl-featured' : ''}"
+          href="${s.done ? '#' : s.href}"
+          ${!s.done && s.key !== 'profileComplete' ? `onclick="event.preventDefault();markStep('${uid}','${s.key}','${s.href}')"` : ''}
+        >
+        <div class="cl-check ${checkClass}">${checkInner}</div>
+        <div class="cl-body">
+          <div class="cl-label${s.done ? ' cl-done-text' : ''}">${s.label}</div>
+          <div class="cl-desc">${s.desc}</div>
+        </div>
+        ${s.done ? '' : '<span class="cl-arrow">›</span>'}
+      </a>`;
+    }).join('');
+  }
 
 </script>
 </body>
