@@ -115,18 +115,34 @@ exports.onWaitlistSignup = onDocumentCreated({
 }, async (event) => {
   const data = event.data.data();
   const { name, email } = data;
-  if (!email) return;
+
+  console.log(JSON.stringify({ event: "waitlist_signup_triggered", email, name }));
+
+  if (!email) {
+    console.error("onWaitlistSignup: no email in document data");
+    return;
+  }
 
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
   const firstName = name || "there";
 
-  await sgMail.send({
-    to: email,
-    from: { name: "Coena @ ToolSpark", email: "hello@toolspark.com" },
-    templateId: "d-0bdf7ef6978d498385eb8c0ac3745c5c",
-    dynamicTemplateData: {
-      firstName,
-    },
-  });
+  try {
+    await sgMail.send({
+      to: email,
+      from: { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
+      templateId: "d-0bdf7ef6978d498385eb8c0ac3745c5c",
+      dynamicTemplateData: { firstName },
+    });
+    console.log(JSON.stringify({ event: "waitlist_email_sent", email }));
+  } catch (err) {
+    console.error(JSON.stringify({
+      event: "waitlist_email_failed",
+      email,
+      status: err.code,
+      message: err.message,
+      response: err.response?.body,
+    }));
+    throw err;
+  }
 });

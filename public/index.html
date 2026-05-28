@@ -180,6 +180,13 @@
   }
   .field input::placeholder { color: var(--text3); }
   .field input:focus { border-color: rgba(201,168,76,0.5); }
+  .field input:-webkit-autofill,
+  .field input:-webkit-autofill:hover,
+  .field input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--dark3) inset;
+    -webkit-text-fill-color: var(--text);
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
   .submit-btn {
     width: 100%;
@@ -303,7 +310,6 @@
 
   <div class="hero">
     <h1>Build the AI tool your<br>business <em>actually</em> needs.</h1>
-    <p>ToolSpark is where coaches, creators, and consultants go from idea to live AI tool — with a community, guided roadmap, and support every step of the way.</p>
   </div>
 
   <!-- FORM CARD -->
@@ -319,10 +325,7 @@
       <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email"
         onkeydown="if(event.key==='Enter') joinWaitlist()" />
     </div>
-
-    <button class="submit-btn" id="submit-btn" onclick="joinWaitlist()">Join the Waitlist →</button>
-
-    <div id="optin-wrap" style="display:flex;gap:10px;align-items:flex-start;margin-top:0.75rem;">
+    <div id="optin-wrap" style="display:flex;gap:10px;align-items:flex-start;margin-top:0.75rem;margin-bottom:1rem;">
       <input type="checkbox" id="optin-check" style="margin-top:3px;accent-color:#C9A84C;width:16px;height:16px;flex-shrink:0;cursor:pointer;" />
       <label for="optin-check" style="font-size:12px;color:var(--text2);line-height:1.6;cursor:pointer;">
         I agree to receive updates from ToolSpark and accept the
@@ -330,23 +333,19 @@
         <a href="terms.html" style="color:#C9A84C;">Terms of Service</a>.
       </label>
     </div>
+    <button class="submit-btn" id="submit-btn" onclick="joinWaitlist()">Join the Waitlist →</button>
+    <div id="signin-link" style="text-align:center;margin-top:0.75rem;font-size:12px;color:var(--text2);">
+      Already have an account? <a href="signon.html" style="color:var(--gold);">Sign in →</a>
+    </div>
     <div class="form-msg" id="form-msg"></div>
-
     <div class="success-state" id="success-state">
       <div class="success-title">You're on the list!</div>
       <div class="success-sub">We'll reach out as soon as doors open.<br>Keep building — your idea is worth it.</div>
     </div>
   </div>
-
-
   <div class="footer">
-    Already have an account? <a href="signon.html">Sign in →</a><br>
-    <span style="margin-top:4px;display:block;">© 2025 ToolSpark. All rights reserved.</span>
-    <span style="margin-top:6px;display:block;">
-      <a href="privacy-policy.html">Privacy Policy</a>
-      <span style="margin:0 8px;color:var(--text3);">·</span>
-      <a href="terms.html">Terms of Service</a>
-    </span>
+    <div style="margin-bottom:4px;">© 2025 ToolSpark</div>
+    <div><a href="privacy-policy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></div>
   </div>
 
 </div>
@@ -384,6 +383,7 @@
       document.getElementById('form-card').querySelector('.form-card-title').style.display = 'none';
       document.querySelector('.field').closest('.form-card').querySelectorAll('.field, #submit-btn').forEach(el => el.style.display = 'none');
       document.getElementById('optin-wrap').style.display = 'none';
+      document.getElementById('signin-link').style.display = 'none';
       document.getElementById('form-msg').style.display = 'none';
       document.getElementById('success-state').style.display = 'block';
 
