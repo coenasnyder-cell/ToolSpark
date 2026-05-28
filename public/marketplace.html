@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Tools Marketplace — ToolSpark</title>
-<meta name="description" content="Browse AI tools built by certified creators, coaches, and consultants. Every tool tested and certified by ToolSpark.">
+<meta name="description" content="Browse AI tools built by certified builders across business, health, finance, real estate, and more. Every tool tested and certified by ToolSpark.">
 <meta property="og:title" content="AI Tools Marketplace — ToolSpark">
-<meta property="og:description" content="Browse AI tools built by certified creators, coaches, and consultants. Every tool tested and certified by ToolSpark.">
+<meta property="og:description" content="Browse AI tools built by certified builders across business, health, finance, real estate, and more. Every tool tested and certified by ToolSpark.">
 <meta property="og:url" content="https://toolspark.co/marketplace.html">
 <meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -383,19 +383,21 @@
   <!-- SEARCH -->
   <div class="search-wrap">
     <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="search-input" placeholder="Search tools, niches, or builders…" oninput="applyFilters()" />
+    <input type="text" id="search-input" placeholder="Search tools, categories, or builders…" oninput="applyFilters()" />
   </div>
 
   <!-- FILTERS + RESULTS BAR -->
   <div class="filter-row">
     <div class="filter-pills" id="filter-pills">
       <button class="pill active" data-niche="all" onclick="setNiche('all')">All tools</button>
-      <button class="pill" data-niche="coaches" onclick="setNiche('coaches')">Coaches</button>
-      <button class="pill" data-niche="creators" onclick="setNiche('creators')">Course creators</button>
-      <button class="pill" data-niche="consultants" onclick="setNiche('consultants')">Consultants</button>
-      <button class="pill" data-niche="realestate" onclick="setNiche('realestate')">Real estate</button>
-      <button class="pill" data-niche="health" onclick="setNiche('health')">Health &amp; wellness</button>
-      <button class="pill" data-niche="finance" onclick="setNiche('finance')">Finance</button>
+      <button class="pill" data-niche="business" onclick="setNiche('business')">Business &amp; Entrepreneurship</button>
+      <button class="pill" data-niche="finance" onclick="setNiche('finance')">Finance &amp; Credit</button>
+      <button class="pill" data-niche="health" onclick="setNiche('health')">Health &amp; Wellness</button>
+      <button class="pill" data-niche="realestate" onclick="setNiche('realestate')">Real Estate</button>
+      <button class="pill" data-niche="education" onclick="setNiche('education')">Education &amp; Learning</button>
+      <button class="pill" data-niche="marketing" onclick="setNiche('marketing')">Marketing &amp; Content</button>
+      <button class="pill" data-niche="faith" onclick="setNiche('faith')">Faith &amp; Community</button>
+      <button class="pill" data-niche="career" onclick="setNiche('career')">Career &amp; Leadership</button>
     </div>
   </div>
 
@@ -459,15 +461,17 @@
         <span class="modal-hint">Max 200 characters</span>
       </div>
       <div class="modal-field">
-        <label class="modal-label">Niche</label>
+        <label class="modal-label">Category</label>
         <select class="modal-select" id="sub-niche">
-          <option value="">Select a niche…</option>
-          <option value="coaches">Coaches</option>
-          <option value="creators">Course creators</option>
-          <option value="consultants">Consultants</option>
-          <option value="realestate">Real estate</option>
-          <option value="health">Health &amp; wellness</option>
-          <option value="finance">Finance</option>
+          <option value="">Select a category…</option>
+          <option value="business">Business &amp; Entrepreneurship</option>
+          <option value="finance">Finance &amp; Credit</option>
+          <option value="health">Health &amp; Wellness</option>
+          <option value="realestate">Real Estate</option>
+          <option value="education">Education &amp; Learning</option>
+          <option value="marketing">Marketing &amp; Content</option>
+          <option value="faith">Faith &amp; Community</option>
+          <option value="career">Career &amp; Leadership</option>
         </select>
       </div>
       <div class="modal-field">
@@ -491,7 +495,7 @@
 <script>
   // ── DATA ──
   let allTools = [];
-  let currentNiche = 'all';
+  let currentCategory = 'all';
   let currentUser = null;
   let userIsCertified = false;
 
@@ -567,9 +571,9 @@
   }
 
   // ── FILTER + SORT ──
-  function setNiche(niche) {
-    currentNiche = niche;
-    document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.niche === niche));
+  function setNiche(category) {
+    currentCategory = category;
+    document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.niche === category));
     applyFilters();
   }
 
@@ -578,7 +582,7 @@
     const sort = document.getElementById('sort-select').value;
 
     let filtered = allTools.filter(t => {
-      if (currentNiche !== 'all' && t.niche !== currentNiche) return false;
+      if (currentCategory !== 'all' && t.category !== currentCategory) return false;
       if (!q) return true;
       const hay = [t.toolName, t.description, t.builderName, ...(t.tags || [])].join(' ').toLowerCase();
       return hay.includes(q);
@@ -678,11 +682,11 @@
     const name = document.getElementById('sub-name').value.trim();
     const type = document.getElementById('sub-type').value;
     const desc = document.getElementById('sub-desc').value.trim();
-    const niche = document.getElementById('sub-niche').value;
+    const category = document.getElementById('sub-niche').value;
     const tags = document.getElementById('sub-tags').value.split(',').map(t => t.trim()).filter(Boolean);
     const url  = document.getElementById('sub-url').value.trim();
 
-    if (!name || !type || !desc || !niche || !url) {
+    if (!name || !type || !desc || !category || !url) {
       msg.textContent = 'Please fill in all fields.';
       msg.className = 'modal-msg error'; msg.style.display = 'block'; return;
     }
@@ -703,7 +707,7 @@
         toolName: name,
         toolType: type,
         description: desc,
-        niche,
+        category,
         tags,
         toolUrl: url,
         builderName: userData.displayName || currentUser.displayName || 'Builder',
