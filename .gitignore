@@ -74,6 +74,11 @@ skills-lock.json
 
 # Local only
 chat-prompts.txt
+test-email.js
+
+# Root-level package files (accidental install — packages belong in /functions)
+package.json
+package-lock.json
 
 # Service account keys — never commit these
 scripts/serviceAccount.json
