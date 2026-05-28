@@ -259,6 +259,34 @@ match /conversations/{conversationId} {
   }
 }
 
+    // MARKETPLACE LISTINGS (public marketplace)
+    match /marketplace_listings/{listingId} {
+      // Anyone can browse — no login required
+      allow read: if true;
+
+      // Only certified members can submit (status must be 'pending')
+      allow create: if isSignedIn() &&
+        currentUserData().get('certified', false) == true &&
+        request.resource.data.builderUserId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+
+      // Anyone can increment useCount by exactly 1; admins can update anything
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['useCount']) &&
+        request.resource.data.useCount == resource.data.useCount + 1
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // COMMUNITY POSTS (graduation announcements etc.)
+    match /communityPosts/{postId} {
+      allow read: if isActive();
+      allow create: if isActive();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // WAITLIST (public signups — no auth required)
     match /waitlist/{email} {
       allow create, update: if true;
