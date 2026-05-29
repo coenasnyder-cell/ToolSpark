@@ -631,6 +631,7 @@ const AGENT_SESSION_ID = 'agent_' + Date.now();
 let history    = [];
 let busy       = false;
 let lastSession = null;
+let agentKnowledge = '';
 
 // ─────────────────────────────────────
 // SYSTEM PROMPT
@@ -692,7 +693,15 @@ Do not try to coach them through it in the chat. Do not ask follow-up questions.
 - If they have not followed through on something they committed to — be direct but kind: "Last time you said you were going to do X. What happened?"
 - Celebrate every completion no matter how small
 - Keep responses conversational and short — this is a check-in not a lecture
-- You are their biggest believer AND their most honest mirror`;
+- You are their biggest believer AND their most honest mirror
+
+## POST-CERTIFICATION CONTEXT
+Members who have earned their ToolSpark Certified Builder badge are in the monetization phase. The three main areas to focus on are:
+1. Building a paid offer around their tool — packaging it, pricing it, writing the sales copy
+2. Getting it listed and visible on the ToolSpark Marketplace and beyond
+3. Finding and closing their first paying clients
+
+When a certified member doesn't know what to work on, redirect to one of these three areas. Ask which one feels most stuck right now. Do not let them go back to building features or tweaking the tool — that is avoidance. The tool is done. The work now is selling it.`;
 
 // ─────────────────────────────────────
 // FIRESTORE — load / save sessions
@@ -712,6 +721,22 @@ async function loadLastSession(userId) {
   } catch(e) {
     console.log("loadLastSession failed:", e.message);
     return null;
+  }
+}
+
+async function loadKnowledge() {
+  try {
+    const snap = await db.collection('agent_knowledge')
+      .where('active', '==', true)
+      .get();
+    if (!snap.empty) {
+      const entries = snap.docs.map(d => d.data())
+        .sort((a, b) => (a.order || 99) - (b.order || 99));
+      agentKnowledge = '\n\n## KNOWN STRUGGLES & GUIDANCE\nWhen a member describes one of these situations, use the corresponding guidance:\n\n' +
+        entries.map(e => 'STRUGGLE: ' + e.problem + '\nGUIDANCE: ' + e.guidance).join('\n\n');
+    }
+  } catch(e) {
+    console.error('loadKnowledge error:', e);
   }
 }
 
@@ -823,7 +848,7 @@ async function callAI(userMsg) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 600,
-      system: SYSTEM,
+      system: SYSTEM + agentKnowledge,
       messages: history,
       _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID }
     })
@@ -978,6 +1003,7 @@ auth.onAuthStateChanged(async function(user) {
   }
 
   lastSession = await loadLastSession(user.uid);
+  await loadKnowledge();
   agentWelcomeEl.style.display = 'flex';
 });
 

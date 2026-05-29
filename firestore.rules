@@ -287,6 +287,12 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // AGENT KNOWLEDGE BASE (admin-managed, read by Build Agent)
+    match /agent_knowledge/{docId} {
+      allow read: if isActive();
+      allow write: if isAdmin();
+    }
+
     // VALUE TOOL (Roadblock 8 — Value Mirror)
     match /value_tool/{docId} {
       allow read: if isActive() && (resource.data.userId == request.auth.uid || isAdmin());

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Knowledge — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; font-weight: 400; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 860px; width: 100%; }
+
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .form-input, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); background: var(--surface); }
+  .form-textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+  .form-hint { font-size: 11px; color: var(--text3); }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .save-msg { font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); display: none; }
+  .save-msg.success { background: #EBF7F2; color: #2A7A55; border: 1px solid #A8D9C4; }
+  .save-msg.error { background: #FEF0ED; color: #C0392B; border: 1px solid #F5C6C0; }
+
+  /* Knowledge entries list */
+  .knowledge-list { display: flex; flex-direction: column; }
+  .knowledge-item { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; }
+  .knowledge-item:last-child { border-bottom: none; }
+  .knowledge-body { flex: 1; }
+  .knowledge-problem { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .knowledge-guidance { font-size: 13px; color: var(--text2); line-height: 1.65; }
+  .knowledge-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .knowledge-tag { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; }
+  .active-badge { background: rgba(42,92,69,0.1); color: var(--green-light); border-color: rgba(42,92,69,0.25); }
+  .inactive-badge { background: rgba(196,98,45,0.1); color: #C4622D; border-color: rgba(196,98,45,0.25); }
+  .knowledge-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn.danger:hover { border-color: #C0392B; color: #C0392B; background: rgba(192,57,43,0.05); }
+
+  .empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-size: 14px; }
+  .loading-state { text-align: center; padding: 2rem; color: var(--text3); font-size: 14px; }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="adminagentknowledge.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Agent Knowledge
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Agent Knowledge Base</div>
+      <div class="header-subtitle">Struggles and guidance injected into the Build Agent</div>
+    </div>
+    <div class="admin-badge">⚡ Build Agent</div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">Admin only.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <!-- ADD NEW ENTRY -->
+    <div class="admin-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Add New Entry</div>
+          <div class="card-desc">Describe a struggle members face and what the agent should do about it.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">The Struggle</label>
+          <input class="form-input" id="new-problem" placeholder="e.g. They don't know how to price their tool" />
+          <span class="form-hint">Describe the situation or feeling the member expresses</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Guidance for the Agent</label>
+          <textarea class="form-textarea" id="new-guidance" placeholder="e.g. Walk them through the value equation — what would it cost them to get this result another way? Anchor the price to that, not to the hours spent building..."></textarea>
+          <span class="form-hint">What should the agent say or do when it detects this struggle?</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <input class="form-input" id="new-category" placeholder="e.g. pricing, mindset, selling, offers" />
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn-primary" id="add-btn" onclick="addEntry()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add to Knowledge Base
+          </button>
+          <div class="save-msg" id="add-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXISTING ENTRIES -->
+    <div class="admin-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Current Entries</div>
+          <div class="card-desc" id="entries-count">Loading…</div>
+        </div>
+      </div>
+      <div id="knowledge-loading" class="loading-state">Loading entries…</div>
+      <div class="empty-state" id="knowledge-empty" style="display:none;">No entries yet. Add your first one above.</div>
+      <div class="knowledge-list" id="knowledge-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
+    document.getElementById('admin-content').style.display = 'flex';
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
+    loadEntries();
+  });
+
+  async function loadEntries() {
+    try {
+      const snap = await db.collection('agent_knowledge')
+        .orderBy('createdAt', 'desc')
+        .get();
+      document.getElementById('knowledge-loading').style.display = 'none';
+      const entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('entries-count').textContent =
+        entries.length + ' entr' + (entries.length === 1 ? 'y' : 'ies');
+
+      if (!entries.length) {
+        document.getElementById('knowledge-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('knowledge-list').innerHTML = entries.map(e => `
+        <div class="knowledge-item" id="entry-${e.id}">
+          <div class="knowledge-body">
+            <div class="knowledge-problem">${esc(e.problem)}</div>
+            <div class="knowledge-guidance">${esc(e.guidance)}</div>
+            <div class="knowledge-meta">
+              <span class="knowledge-tag ${e.active !== false ? 'active-badge' : 'inactive-badge'}">
+                ${e.active !== false ? 'Active' : 'Inactive'}
+              </span>
+              ${e.category ? `<span class="knowledge-tag">${esc(e.category)}</span>` : ''}
+            </div>
+          </div>
+          <div class="knowledge-actions">
+            <button class="icon-btn" onclick="toggleActive('${e.id}', ${e.active !== false})">
+              ${e.active !== false ? 'Deactivate' : 'Activate'}
+            </button>
+            <button class="icon-btn danger" onclick="deleteEntry('${e.id}')">Delete</button>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      console.error(e);
+      document.getElementById('knowledge-loading').textContent = 'Could not load. Try refreshing.';
+    }
+  }
+
+  async function addEntry() {
+    const problem  = document.getElementById('new-problem').value.trim();
+    const guidance = document.getElementById('new-guidance').value.trim();
+    const category = document.getElementById('new-category').value.trim();
+    const btn = document.getElementById('add-btn');
+    const msg = document.getElementById('add-msg');
+
+    if (!problem || !guidance) {
+      msg.textContent = 'Please fill in the struggle and guidance fields.';
+      msg.className = 'save-msg error'; msg.style.display = 'block'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Adding…'; msg.style.display = 'none';
+
+    try {
+      await db.collection('agent_knowledge').add({
+        problem, guidance,
+        category: category || null,
+        active: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      document.getElementById('new-problem').value = '';
+      document.getElementById('new-guidance').value = '';
+      document.getElementById('new-category').value = '';
+      msg.textContent = '✓ Added to knowledge base.';
+      msg.className = 'save-msg success'; msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+      loadEntries();
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Try again.';
+      msg.className = 'save-msg error'; msg.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Add to Knowledge Base';
+    }
+  }
+
+  async function toggleActive(id, currentlyActive) {
+    try {
+      await db.collection('agent_knowledge').doc(id).update({ active: !currentlyActive });
+      loadEntries();
+    } catch(e) { alert('Could not update. Try again.'); }
+  }
+
+  async function deleteEntry(id) {
+    if (!confirm('Delete this entry? The agent will no longer have this guidance.')) return;
+    try {
+      await db.collection('agent_knowledge').doc(id).delete();
+      loadEntries();
+    } catch(e) { alert('Could not delete. Try again.'); }
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>
