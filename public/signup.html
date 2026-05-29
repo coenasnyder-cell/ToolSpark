@@ -387,17 +387,19 @@ async function signUp() {
   if (!email) { showMsg('Please enter your email address.', 'error'); return; }
   if (!password || password.length < 8) { showMsg('Password must be at least 8 characters.', 'error'); return; }
   if (!document.getElementById('terms-check').checked) { showMsg('Please agree to the Terms of Service and Privacy Policy.', 'error'); return; }
+const emailOptIn = document.getElementById('emailOptIn').checked;
+const termsAccepted = true; // they passed the check above
 
   signingIn = true;
   setLoading(true);
   try {
     const displayName = firstName + (lastName ? ' ' + lastName : '');
     const cred = await auth.createUserWithEmailAndPassword(email, password);
-    await cred.user.updateProfile({ displayName });
-    await createUserDoc(cred.user, displayName);
+  await cred.user.updateProfile({ displayName });
+await cred.user.sendEmailVerification();
+await createUserDoc(cred.user, displayName, emailOptIn);
     await claimSparkSessionsForUser(cred.user);
 
-    const emailOptIn = document.getElementById('emailOptIn').checked;
     const launchDate = new Date('2026-05-01');
     const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
@@ -440,7 +442,7 @@ async function signUpWithGoogle() {
       optedIn: emailOptIn,
       isEarlyMember: isEarlyMember,
     });
-    showMsg('Account created! Redirecting...', 'success');
+    showMsg('Account created! Check your email to verify your account.', 'success');
     setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
   } catch(err) {
     signingIn = false;
@@ -450,34 +452,76 @@ async function signUpWithGoogle() {
   }
 }
 
-async function createUserDoc(user, displayName) {
+async function createUserDoc(user, displayName, emailOptIn = false) {
   const ref = db.collection('users').doc(user.uid);
   const snap = await ref.get();
   if (!snap.exists) {
-    await ref.set({
+ await ref.set({
   displayName: displayName || user.displayName || '',
   userEmail: user.email || '',
   clientEmail: user.email || '',
   photoURL: user.photoURL || '',
+  bio: '',
   userRole: 'member',
+  role: 'member',
+  status: 'active',
+  firstVisit: true,
+  completed: false,
   createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-  emailOptIn: false,
+  lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+  emailOptIn: emailOptIn,
+  termsAccepted: true,
+  termsAcceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  fcmToken: '',
+  instagram: '',
+  linkedin: '',
+  twitter: '',
+  youtube: '',
+  website: '',
   points: 0,
   badges: [],
   streak: 0,
+  polls: [],
+  totalLikesReceived: 0,
+  projectTitle: '',
+  projectDescription: '',
+  projectImageURL: '',
+  toolName: '',
+  valueReportComplete: false,
+  certified: false,
+  certifiedDate: null,
+  badgeUnlocked: false,
+  marketplaceUnlocked: false,
+  course1Complete: false,
+  course2Complete: false,
+  toolBuilt: false,
+  toolSubmitted: false,
+  feedbackCount: 0,
+  sparkComplete: false,
+  audienceComplete: false,
+  breakthroughComplete: false,
+  mailingAddress: {
+    city: '',
+    country: '',
+    name: '',
+    requestedAt: null,
+    state: '',
+    status: '',
+    street: '',
+    zip: ''
+  },
   onboarding: {
-    completed: false,
-    steps: {
-      welcomePost: false,
-      welcomeCourse: false,
-      clarityTool: false,
-      toolIdeaPost: false
+  completed: false,
+  steps: {
+    welcomePost: false,
+    welcomeCourse: false,
+    clarityTool: false,
+    toolIdeaPost: false
     }
   }
 });
+    }
   }
-}
-
 function buildSparkResultPayload(sessionId, data, user) {
   return {
     sessionId: data.sessionId || sessionId,
@@ -505,6 +549,7 @@ async function claimSparkSessionsForUser(user) {
   const batch = db.batch();
   const sessionsToClaim = [];
   const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
+  const userEmailLower = (user.email || '').toLowerCase();
 
   if (latestSparkSessionId) {
     try {
@@ -533,14 +578,25 @@ async function claimSparkSessionsForUser(user) {
     console.log('Spark session email lookup failed:', err);
   }
 
+  if (userEmailLower && userEmailLower !== user.email) {
+    try {
+      const emailLowerSnap = await db.collection('spark_profiles')
+        .where('email', '==', userEmailLower)
+        .get();
+
+      emailLowerSnap.forEach(doc => {
+        if (claimedIds.has(doc.id)) return;
+        sessionsToClaim.push({ id: doc.id, ref: doc.ref, data: doc.data() || {} });
+        claimedIds.add(doc.id);
+      });
+    } catch(err) {
+      console.log('Spark session lowercase email lookup failed:', err);
+    }
+  }
+
   if (!sessionsToClaim.length) return;
 
-  sessionsToClaim.forEach(({ id, ref, data }) => {
-    batch.update(ref, {
-      userId: user.uid,
-      linkedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
+  sessionsToClaim.forEach(({ id, data }) => {
     const resultRef = db.collection('spark_results').doc(id);
     batch.set(resultRef, buildSparkResultPayload(id, data || {}, user), { merge: true });
   });

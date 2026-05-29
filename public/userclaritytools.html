@@ -707,7 +707,6 @@
           createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
           linkedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        batch.update(doc.ref, { userId: user.uid, accountEmail: user.email });
         hasWrites = true;
       });
 

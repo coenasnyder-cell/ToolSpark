@@ -111,30 +111,64 @@ service cloud.firestore {
     }
 
     // CLARITY SESSIONS
-    match /clarity_sessions/{sessionId} {
-  allow read: if true;
-  allow create: if true;
-  allow update: if true;
+  match /clarity_sessions/{sessionId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
   allow delete: if isAdmin();
 }
 match /spark_profiles/{sessionId} {
-  allow get: if true;
-  allow list: if isAdmin() || (
-    isActive() &&
-    resource.data.email == request.auth.token.email
+  allow get: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow create: if true;
-  allow update: if isAdmin() || (
-    isActive() &&
-    request.resource.data.userId == request.auth.uid
+  allow list: if isActive();
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
   );
   allow delete: if isAdmin();
 }
 match /spark_results/{resultId} {
+  allow get: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow list: if isActive();
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
+    // AUDIENCE TOOL
+   match /audience_tool/{sessionId} {
+  allow get: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow list: if isActive();
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
+  match /audience_results/{resultId} {
+   allow get: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow list: if isActive();
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
+match /breakthrough_sessions/{sessionId} {
   allow read: if isActive() && (
-    resource.data.userId == request.auth.uid ||
-    resource.data.accountEmail == request.auth.token.email ||
-    isAdmin()
+    resource.data.userId == request.auth.uid || isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
@@ -143,34 +177,34 @@ match /spark_results/{resultId} {
   allow delete: if isAdmin();
 }
 
-    // AUDIENCE TOOL
-    match /audience_tool/{sessionId} {
-      allow get: if true;
-      allow list: if isAdmin() || (
-        isActive() &&
-        resource.data.email == request.auth.token.email
-      );
-      allow create: if true;
-      allow update: if isAdmin() || (
-        isActive() &&
-        request.resource.data.userId == request.auth.uid
-      );
-      allow delete: if isAdmin();
-    }
+match /value_reports/{reportId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive();
+  allow update: if isAdmin();
+  allow delete: if isAdmin();
+}
 
-    match /audience_results/{resultId} {
-      allow read: if isActive() && (
-        resource.data.userId == request.auth.uid ||
-        resource.data.accountEmail == request.auth.token.email ||
-        isAdmin()
-      );
-      allow create: if isActive();
-      allow update: if isActive() && (
-        resource.data.userId == request.auth.uid || isAdmin()
-      );
-      allow delete: if isAdmin();
-    }
+match /journey_sessions/{sessionId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive();
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
 
+match /graduation_requests/{requestId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive();
+  allow update: if isAdmin();
+  allow delete: if isAdmin();
+}
     // EVENTS
     match /Events/{eventId} {
       allow read: if isActive();

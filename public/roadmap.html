@@ -379,13 +379,7 @@
     </div>
 
     <div id="loading" class="loading-state">Loading your roadmap...</div>
-    <div id="empty" class="empty-card" style="display:none;">
-      <h3>No Breakthrough session yet</h3>
-      <p>Complete a Discover Your Breakthrough session and your personalised tool roadmap will appear here automatically.</p>
-      <a href="clarity.html" class="empty-btn">Start My Breakthrough Session →</a>
-    </div>
-
-    <div id="spark-section" style="display:none;">
+    <div id="spark-section">
       <div class="spark-section-card">
         <div class="spark-section-header">
           <div class="spark-section-icon">
@@ -400,21 +394,21 @@
         <div class="spark-section-body">
           <div>
             <div class="spark-field-label">Your Spark Statement</div>
-            <div class="spark-field-value" id="spark-statement"></div>
+            <div class="spark-field-value" id="spark-statement">No Spark statement yet. Run the tool to generate your business identity.</div>
           </div>
           <div>
             <div class="spark-field-label">What You Know</div>
-            <div class="spark-field-value" id="spark-what-you-know"></div>
+            <div class="spark-field-value" id="spark-what-you-know">Your experience, knowledge, and strengths will appear here after your Spark session.</div>
           </div>
           <div>
             <div class="spark-field-label">Who You Help</div>
-            <div class="spark-field-value" id="spark-who-you-help"></div>
+            <div class="spark-field-value" id="spark-who-you-help">Your ideal audience and who you serve will appear here after your Spark session.</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="audience-section" style="display:none;">
+    <div id="audience-section">
       <div class="spark-section-card">
         <div class="spark-section-header" style="background:rgba(75,63,138,0.06);">
           <div class="spark-section-icon" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.18);color:var(--purple);">
@@ -429,25 +423,25 @@
         <div class="spark-section-body">
           <div id="aud-who-wrap">
             <div class="spark-field-label" style="color:var(--purple);">Who They Are</div>
-            <div class="spark-field-value" id="aud-who-they-are"></div>
+            <div class="spark-field-value" id="aud-who-they-are">Run the Audience Deep Dive to define exactly who your best-fit customer is.</div>
           </div>
           <div id="aud-frustration-wrap">
             <div class="spark-field-label" style="color:var(--purple);">Daily Frustration</div>
-            <div class="spark-field-value" id="aud-daily-frustration"></div>
+            <div class="spark-field-value" id="aud-daily-frustration">Their biggest recurring frustration will appear here after you finish the tool.</div>
           </div>
           <div id="aud-outcome-wrap">
             <div class="spark-field-label" style="color:var(--purple);">Dream Outcome</div>
-            <div class="spark-field-value" id="aud-dream-outcome"></div>
+            <div class="spark-field-value" id="aud-dream-outcome">Their desired transformation and end result will appear here after the session.</div>
           </div>
           <div id="aud-words-wrap">
             <div class="spark-field-label" style="color:var(--purple);">Their Exact Words</div>
-            <div class="audience-words-box" id="aud-their-words"></div>
+            <div class="audience-words-box" id="aud-their-words">You’ll see the language your audience actually uses once you complete the Audience Deep Dive.</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="content" style="display:none;">
+    <div id="breakthrough-section">
       <div class="spark-section-card" style="margin-bottom:1.25rem;">
         <div class="spark-section-header" style="background:rgba(201,168,76,0.06);">
           <div class="spark-section-icon" style="background:var(--gold-dim);border-color:rgba(201,168,76,0.2);color:var(--gold);">
@@ -459,10 +453,31 @@
           </div>
           <a href="clarity.html" class="section-tool-btn">Open tool →</a>
         </div>
+        <div class="spark-section-body">
+          <div>
+            <div class="spark-field-label" style="color:var(--gold);">Business Summary</div>
+            <div class="spark-field-value" id="breakthrough-summary">Run Discover Your Breakthrough to generate your business summary and next best tool directions.</div>
+          </div>
+          <div>
+            <div class="spark-field-label" style="color:var(--gold);">Recommended Tools</div>
+            <div class="spark-field-value" id="breakthrough-tools">Your three recommended build directions will appear here after you finish the session.</div>
+          </div>
+          <div>
+            <div class="spark-field-label" style="color:var(--gold);">Selected Direction</div>
+            <div class="spark-field-value" id="breakthrough-chosen">Once you choose one of your recommended tools, it will show here.</div>
+          </div>
+        </div>
       </div>
-      <div class="roadmap-wrap" id="roadmap-wrap"></div>
     </div>
 
+    <div id="content" style="display:none;">
+      <div class="roadmap-wrap" id="roadmap-wrap"></div>
+    </div>
+<div id="empty" class="empty-card" style="display:none;">
+      <h3>No Breakthrough session yet</h3>
+      <p>Complete a Discover Your Breakthrough session and your personalised tool roadmap will appear here automatically.</p>
+      <a href="clarity.html" class="empty-btn">Start My Breakthrough Session →</a>
+    </div>
     <div id="techstack-section" style="display:none;">
       <div class="spark-section-card">
         <div class="spark-section-header" style="background:rgba(196,98,45,0.06);">
@@ -594,6 +609,151 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function buildSparkResultPayloadFromProfile(sessionId, data, user) {
+    return {
+      sessionId: data.sessionId || sessionId,
+      name: data.name || '',
+      email: data.email || user.email || '',
+      userId: user.uid,
+      accountEmail: user.email || data.accountEmail || '',
+      statement: data.statement || '',
+      whatYouKnow: data.whatYouKnow || '',
+      whoYouHelp: data.whoYouHelp || '',
+      aiSystems: Array.isArray(data.aiSystems) ? data.aiSystems : [],
+      closing: data.closing || '',
+      rawProfile: data.rawProfile || '',
+      transcript: Array.isArray(data.transcript) ? data.transcript : [],
+      source: data.source || 'find-your-spark',
+      linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+    };
+  }
+
+  async function ensureSparkResultsForUser(user) {
+    if (!user || !user.uid || !user.email) return;
+
+    const userEmailLower = (user.email || '').toLowerCase();
+    const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
+    const profileMap = new Map();
+    const existingResultIds = new Set();
+
+    const [
+      existingByUser,
+      existingByEmail,
+      existingByEmailLower,
+      profilesByEmail,
+      profilesByEmailLower
+    ] = await Promise.all([
+      db.collection('spark_results').where('userId', '==', user.uid).get(),
+      db.collection('spark_results').where('accountEmail', '==', user.email).get(),
+      db.collection('spark_results').where('accountEmail', '==', userEmailLower).get(),
+      db.collection('spark_profiles').where('email', '==', user.email).get(),
+      db.collection('spark_profiles').where('email', '==', userEmailLower).get()
+    ]);
+
+    [existingByUser, existingByEmail, existingByEmailLower].forEach(snap => {
+      snap.forEach(doc => existingResultIds.add(doc.id));
+    });
+    [profilesByEmail, profilesByEmailLower].forEach(snap => {
+      snap.forEach(doc => {
+        if (!profileMap.has(doc.id)) profileMap.set(doc.id, doc);
+      });
+    });
+
+    if (latestSparkSessionId && !profileMap.has(latestSparkSessionId)) {
+      try {
+        const latestSnap = await db.collection('spark_profiles').doc(latestSparkSessionId).get();
+        if (latestSnap.exists) profileMap.set(latestSnap.id, latestSnap);
+      } catch(e) {
+        console.log('Latest Spark session lookup failed:', e);
+      }
+    }
+
+    const missingProfiles = Array.from(profileMap.values()).filter(doc => !existingResultIds.has(doc.id));
+    if (!missingProfiles.length) return;
+
+    const batch = db.batch();
+    missingProfiles.forEach(doc => {
+      const resultRef = db.collection('spark_results').doc(doc.id);
+      batch.set(resultRef, buildSparkResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
+    });
+    await batch.commit();
+  }
+
+  function buildAudienceResultPayloadFromProfile(sessionId, data, user) {
+    return {
+      sessionId: data.sessionId || sessionId,
+      name: data.name || '',
+      email: data.email || user.email || '',
+      userId: user.uid,
+      accountEmail: user.email || data.accountEmail || '',
+      audiencePath: data.audiencePath || '',
+      whoTheyAre: data.whoTheyAre || '',
+      dailyFrustration: data.dailyFrustration || '',
+      whatTheyHaveTried: data.whatTheyHaveTried || '',
+      theirObjections: data.theirObjections || '',
+      dreamOutcome: data.dreamOutcome || '',
+      theirWords: data.theirWords || '',
+      closing: data.closing || '',
+      rawProfile: data.rawProfile || '',
+      transcript: Array.isArray(data.transcript) ? data.transcript : [],
+      source: data.source || 'audience-deep-dive',
+      linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+    };
+  }
+
+  async function ensureAudienceResultsForUser(user) {
+    if (!user || !user.uid || !user.email) return;
+
+    const userEmailLower = (user.email || '').toLowerCase();
+    const latestAudienceSessionId = localStorage.getItem('toolspark_latest_audience_session');
+    const profileMap = new Map();
+    const existingResultIds = new Set();
+
+    const [
+      existingByUser,
+      existingByEmail,
+      existingByEmailLower,
+      profilesByEmail,
+      profilesByEmailLower
+    ] = await Promise.all([
+      db.collection('audience_results').where('userId', '==', user.uid).get(),
+      db.collection('audience_results').where('accountEmail', '==', user.email).get(),
+      db.collection('audience_results').where('accountEmail', '==', userEmailLower).get(),
+      db.collection('audience_tool').where('email', '==', user.email).get(),
+      db.collection('audience_tool').where('email', '==', userEmailLower).get()
+    ]);
+
+    [existingByUser, existingByEmail, existingByEmailLower].forEach(snap => {
+      snap.forEach(doc => existingResultIds.add(doc.id));
+    });
+    [profilesByEmail, profilesByEmailLower].forEach(snap => {
+      snap.forEach(doc => {
+        if (!profileMap.has(doc.id)) profileMap.set(doc.id, doc);
+      });
+    });
+
+    if (latestAudienceSessionId && !profileMap.has(latestAudienceSessionId)) {
+      try {
+        const latestSnap = await db.collection('audience_tool').doc(latestAudienceSessionId).get();
+        if (latestSnap.exists) profileMap.set(latestSnap.id, latestSnap);
+      } catch(e) {
+        console.log('Latest Audience session lookup failed:', e);
+      }
+    }
+
+    const missingProfiles = Array.from(profileMap.values()).filter(doc => !existingResultIds.has(doc.id));
+    if (!missingProfiles.length) return;
+
+    const batch = db.batch();
+    missingProfiles.forEach(doc => {
+      const resultRef = db.collection('audience_results').doc(doc.id);
+      batch.set(resultRef, buildAudienceResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
+    });
+    await batch.commit();
+  }
+
   // Parse all tool fields directly from the raw actionPlan text saved by clarity.html
   function parseToolsFromActionPlan(actionPlan) {
     if (!actionPlan) return [];
@@ -664,14 +824,49 @@
     });
   }
 
+  function renderBreakthroughSection(session) {
+    if (!session) return;
+
+    const tools = parseToolsFromActionPlan(session.actionPlan)
+      .map(tool => tool.name)
+      .filter(Boolean);
+
+    const summaryEl = document.getElementById('breakthrough-summary');
+    const toolsEl = document.getElementById('breakthrough-tools');
+    const chosenEl = document.getElementById('breakthrough-chosen');
+
+    if (summaryEl) {
+      summaryEl.textContent = session.summary || 'Your Breakthrough session results are ready.';
+    }
+
+    if (toolsEl) {
+      if (tools.length) {
+        toolsEl.innerHTML = tools
+          .map((name, index) => `${index + 1}. ${escapeHtml(name)}`)
+          .join('<br>');
+      } else {
+        toolsEl.textContent = 'Your recommended tools will appear here after the session.';
+      }
+    }
+
+    if (chosenEl) {
+      if (session.chosenTool && tools[session.chosenTool - 1]) {
+        chosenEl.textContent = tools[session.chosenTool - 1];
+      } else {
+        chosenEl.textContent = 'No tool selected yet. Your chosen direction will appear here after you pick one.';
+      }
+    }
+  }
+
   function renderRoadmap(session, sessionId) {
     currentSessionData = session;
     currentSessionId = sessionId;
+    renderBreakthroughSection(session);
     const allTools = parseToolsFromActionPlan(session.actionPlan);
 
     if (!allTools.length || !allTools[0].name) {
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('empty').style.display = 'block';
+      document.getElementById('content').style.display = 'none';
       return;
     }
 
@@ -743,6 +938,8 @@
 
     try {
       const userEmailLower = (user.email || '').toLowerCase();
+      await ensureSparkResultsForUser(user);
+      await ensureAudienceResultsForUser(user);
 
       // Run all tool queries in parallel
       const [
@@ -824,7 +1021,7 @@
       document.getElementById('loading').style.display = 'none';
 
       if (!completed.length) {
-        document.getElementById('empty').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
       } else {
         renderRoadmap(completed[0].data(), completed[0].id);
       }

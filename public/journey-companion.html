@@ -380,7 +380,7 @@ Warm but firm. Like a coach who believes in them completely and has zero patienc
     // Check spark
     let sparkDone = false;
     try {
-      const sSnap = await db.collection('spark_profiles')
+      const sSnap = await db.collection('spark_results')
         .where('userId', '==', user.uid).limit(1).get();
       sparkDone = !sSnap.empty;
     } catch(e) {}
