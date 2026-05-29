@@ -393,7 +393,41 @@ Warm but firm. Like a coach who believes in them completely and has zero patienc
       toolSubmitted:    !!userProfile.toolSubmitted,
       feedbackCount:    userProfile.feedbackCount || 0,
       certified:        !!userProfile.certified,
+      currentLessonName: null,
+      currentCourseName: null,
+      currentCoursePercent: null,
     };
+
+    // Look up their current lesson name from userProgress
+    try {
+      const progressSnap = await db.collection('userProgress')
+        .where('userId', '==', user.uid)
+        .get();
+
+      // Find in-progress courses (started but not completed)
+      const inProgress = progressSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(p => p.lastLessonId && !p.completedAt)
+        .sort((a, b) => (b.percentComplete || 0) - (a.percentComplete || 0));
+
+      if (inProgress.length) {
+        const prog = inProgress[0];
+        milestoneData.currentCoursePercent = prog.percentComplete || 0;
+
+        // Look up course title and lesson title
+        if (prog.courseId && prog.lastLessonId) {
+          const [courseSnap, lessonSnap] = await Promise.all([
+            db.collection('courses').doc(prog.courseId).get(),
+            db.collection('courses').doc(prog.courseId)
+              .collection('lessons').doc(prog.lastLessonId).get(),
+          ]);
+          if (courseSnap.exists) milestoneData.currentCourseName = courseSnap.data().title || null;
+          if (lessonSnap.exists) milestoneData.currentLessonName = lessonSnap.data().lessonTitle || null;
+        }
+      }
+    } catch(e) {
+      console.error('Progress lookup error:', e);
+    }
 
     const step = getMilestoneStep(milestoneData);
     const pct  = Math.round((step / (MILESTONE_STEPS.length - 1)) * 100);
@@ -426,16 +460,22 @@ Warm but firm. Like a coach who believes in them completely and has zero patienc
 
   function buildContextBlock() {
     const d = milestoneData;
+    let courseDetail = '';
+    if (d.currentCourseName || d.currentLessonName) {
+      courseDetail = '\nCurrent Course: ' + (d.currentCourseName || 'unknown');
+      if (d.currentLessonName) courseDetail += '\nLast Lesson Opened: "' + d.currentLessonName + '"';
+      if (d.currentCoursePercent !== null) courseDetail += '\nCourse Progress: ' + d.currentCoursePercent + '% complete';
+    }
     return `\n\n## MEMBER PROGRESS DATA (already loaded from Firestore — do not ask them to recap)
 Find Your Spark: ${d.sparkComplete ? 'COMPLETE' : 'NOT STARTED'}
 Course 1: ${d.course1Complete ? 'COMPLETE' : 'NOT STARTED'}
-Course 2: ${d.course2Complete ? 'COMPLETE' : d.course1Complete ? 'IN PROGRESS' : 'NOT STARTED'}
+Course 2: ${d.course2Complete ? 'COMPLETE' : d.course1Complete ? 'IN PROGRESS' : 'NOT STARTED'}${courseDetail}
 Tool Built: ${d.toolBuilt ? 'YES' : 'NO'}
 Tool Submitted to Community: ${d.toolSubmitted ? 'YES' : 'NO'}
 Community Feedback Count: ${d.feedbackCount}
 Certified: ${d.certified ? 'YES' : 'NO'}
 
-Based on this data, open the session knowing exactly where they are.`;
+If a lesson name is provided above, reference it directly — e.g. "You were on the lesson '[lesson name]' — have you finished it?" Based on this data, open knowing exactly where they are.`;
   }
 
   async function openSession() {
