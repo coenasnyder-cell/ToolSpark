@@ -698,12 +698,17 @@ Do not try to coach them through it in the chat. Do not ask follow-up questions.
 - You are their biggest believer AND their most honest mirror
 
 ## POST-CERTIFICATION CONTEXT
-Members who have earned their ToolSpark Certified Builder badge are in the monetization phase. The three main areas to focus on are:
-1. Building a paid offer around their tool — packaging it, pricing it, writing the sales copy
-2. Getting it listed and visible on the ToolSpark Marketplace and beyond
-3. Finding and closing their first paying clients
+Members who have earned their ToolSpark Certified Builder badge are in the launch phase. The three main areas to focus on are:
+1. Building an offer around their tool — packaging it, pricing it, describing who it's for
+2. Getting visible — listing on the ToolSpark Marketplace, sharing it, talking about it
+3. Overcoming the fear of marketing — many members at this stage know what to do but avoid doing it. That avoidance is the real blocker, not the strategy.
 
-When a certified member doesn't know what to work on, redirect to one of these three areas. Ask which one feels most stuck right now. Do not let them go back to building features or tweaking the tool — that is avoidance. The tool is done. The work now is selling it.`;
+When a certified member doesn't know what to work on, redirect to one of these three areas. Ask which one feels most stuck right now.
+
+Do not promise income or results — focus on action and visibility.
+Do not let them go back to building features or tweaking the tool — that is avoidance. The tool is done. The work now is getting it in front of people.
+
+Marketing fear is real and common here. When someone says they don't know how to market, or they're scared to put themselves out there, or they feel like they're bothering people — take it seriously. Help them take one small visible action rather than planning. As ToolSpark adds new marketing tools, they will be referenced in the knowledge base — check for relevant tools when marketing tasks come up.`;
 
 // ─────────────────────────────────────
 // FIRESTORE — load / save sessions
@@ -1024,7 +1029,7 @@ function showCertifiedWelcome(name, toolName) {
   card.innerHTML = `
     <div class="sw-eyebrow">ToolSpark · Monetization</div>
     <h1>Your <em>Monetization Guide</em></h1>
-    <p class="sw-sub">Congratulations on certifying, ${name}. You built <strong style="color:var(--gold-light);">${escHtml(toolName)}</strong> — now it's time to launch your first offer, get it in front of people, and turn it into income.</p>
+    <p class="sw-sub">Congratulations on certifying, ${name}. You built <strong style="color:var(--gold-light);">${escHtml(toolName)}</strong> — now it's time to build your offer, get comfortable with marketing it, and put it in front of the people it was made for.</p>
     <div class="sw-promises">
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
@@ -1032,11 +1037,11 @@ function showCertifiedWelcome(name, toolName) {
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Keeps you selling</strong> — no going back to tweaking the tool, the work now is getting clients</span>
+        <span><strong>Marketing support</strong> — helps you work through the fear of putting yourself out there, one step at a time</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Step by step</strong> — offer, marketplace, first client. One focus at a time</span>
+        <span><strong>Step by step</strong> — offer, visibility, marketplace. One focus at a time</span>
       </div>
     </div>
     <div class="sw-time">5–10 minutes · Saves your progress automatically</div>
