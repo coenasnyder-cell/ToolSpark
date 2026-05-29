@@ -632,6 +632,8 @@ let history    = [];
 let busy       = false;
 let lastSession = null;
 let agentKnowledge = '';
+let memberToolName = '';
+let memberFirstName = '';
 
 // ─────────────────────────────────────
 // SYSTEM PROMPT
@@ -848,7 +850,7 @@ async function callAI(userMsg) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 600,
-      system: SYSTEM + agentKnowledge,
+      system: SYSTEM + agentKnowledge + (memberToolName ? '\n\nMEMBER CONTEXT: This member has built a certified tool called "' + memberToolName + '". Reference it by name. They are now in the monetization phase — help them sell it.' : ''),
       messages: history,
       _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID }
     })
@@ -989,23 +991,62 @@ auth.onAuthStateChanged(async function(user) {
   const nameEl = document.getElementById('phUserName');
   if (nameEl && firstName) nameEl.textContent = firstName;
 
-  // Check certified or admin
+  // Check certified or admin, load profile
   try {
     const snap = await db.collection('users').doc(user.uid).get();
     const data = snap.exists ? snap.data() : {};
-    const unlocked = data.certified === true || data.userRole === 'admin';
-    if (!unlocked) {
+    const isCertified = data.certified === true;
+    const isAdmin     = data.userRole === 'admin';
+
+    if (!isCertified && !isAdmin) {
       document.getElementById('agent-locked').style.display = 'flex';
       return;
     }
+
+    memberFirstName = data.firstName || data.displayName?.split(' ')[0] || firstName;
+    memberToolName  = data.toolName || '';
+
+    if (isCertified && memberToolName) {
+      showCertifiedWelcome(memberFirstName, memberToolName);
+    }
   } catch(e) {
-    // fail open — don't block on error
+    // fail open
   }
 
   lastSession = await loadLastSession(user.uid);
   await loadKnowledge();
   agentWelcomeEl.style.display = 'flex';
 });
+
+function showCertifiedWelcome(name, toolName) {
+  const card = document.querySelector('#agentwelcome .sw-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div class="sw-eyebrow">ToolSpark · Monetization</div>
+    <h1>Your <em>Monetization Guide</em></h1>
+    <p class="sw-sub">Congratulations on certifying, ${name}. You built <strong style="color:var(--gold-light);">${escHtml(toolName)}</strong> — now it's time to launch your first offer, get it in front of people, and turn it into income.</p>
+    <div class="sw-promises">
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Knows your tool</strong> — every session starts knowing what you built and where you are in the launch</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Keeps you selling</strong> — no going back to tweaking the tool, the work now is getting clients</span>
+      </div>
+      <div class="sw-promise">
+        <span class="sw-promise-icon">✦</span>
+        <span><strong>Step by step</strong> — offer, marketplace, first client. One focus at a time</span>
+      </div>
+    </div>
+    <div class="sw-time">5–10 minutes · Saves your progress automatically</div>
+    <button class="sw-btn" onclick="startAgent()">Let's Launch ${escHtml(toolName)} →</button>
+    <div class="sw-note">Your sessions are saved privately to your account.</div>`;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 async function startAgent() {
   agentWelcomeEl.classList.add('hidden');
