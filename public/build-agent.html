@@ -528,6 +528,18 @@
   <span class="ph-user" id="phUserName"></span>
 </header>
 
+<!-- LOCKED SCREEN -->
+<div id="agent-locked" style="display:none;flex:1;align-items:center;justify-content:center;padding:40px 20px;">
+  <div class="sw-card" style="text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">🔒</div>
+    <div class="sw-eyebrow">Locked</div>
+    <h1 style="font-size:28px;margin-bottom:14px;">Build Agent</h1>
+    <p class="sw-sub">The Build Agent unlocks when you earn your ToolSpark Certified Builder badge. Finish your journey first — then this is all yours.</p>
+    <a href="journey-companion.html" class="sw-btn" style="text-decoration:none;margin-top:8px;">Open Journey Companion →</a>
+    <div class="sw-note" style="margin-top:12px;">Already certified? Make sure your profile is up to date.</div>
+  </div>
+</div>
+
 <!-- WELCOME OVERLAY -->
 <div id="agentwelcome">
   <div class="sw-card">
@@ -951,6 +963,20 @@ auth.onAuthStateChanged(async function(user) {
   const firstName = (user.displayName || user.email || '').split(/[\s@]/)[0];
   const nameEl = document.getElementById('phUserName');
   if (nameEl && firstName) nameEl.textContent = firstName;
+
+  // Check certified or admin
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    const data = snap.exists ? snap.data() : {};
+    const unlocked = data.certified === true || data.userRole === 'admin';
+    if (!unlocked) {
+      document.getElementById('agent-locked').style.display = 'flex';
+      return;
+    }
+  } catch(e) {
+    // fail open — don't block on error
+  }
+
   lastSession = await loadLastSession(user.uid);
   agentWelcomeEl.style.display = 'flex';
 });
