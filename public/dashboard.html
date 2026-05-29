@@ -325,44 +325,7 @@
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <nav class="sidebar-nav">
-    <a href="community.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-      <span>Community</span>
-    </a>
-    <a href="courses.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-      <span>Courses</span>
-    </a>
-    <a href="tools.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-      <span>Tools</span>
-    </a>
-    <a href="inbox.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      <span>Inbox</span>
-    </a>
-    <a href="events.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      <span>Events</span>
-    </a>
-    <a href="dashboard.html" class="nav-item active">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Dashboard</span>
-    </a>
-    <a href="roadmap.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
-      <span>My Roadmap</span>
-    </a>
-    <a href="build-agent.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      <span>Build Agent</span>
-    </a>
-    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span>Admin</span>
-    </a>
-  </nav>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
   
   <div class="sidebar-footer">
     <div class="sidebar-user">
@@ -492,27 +455,6 @@
           <div class="hub-card-title">Build Roadmap</div>
           <div class="hub-card-sub">Your AI tool plan &amp; build prompts</div>
         </a>
-        <a href="courses.html" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(42,92,69,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#3D8A65" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-          </div>
-          <div class="hub-card-title">Courses</div>
-          <div class="hub-card-sub">Continue learning</div>
-        </a>
-        <a href="tools.html" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div class="hub-card-title">Tools &amp; Resources</div>
-          <div class="hub-card-sub">Browse the library</div>
-        </a>
-        <a href="events.html" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(196,98,45,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#E0875A" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          </div>
-          <div class="hub-card-title">Events</div>
-          <div class="hub-card-sub" id="events-sub">Upcoming sessions</div>
-        </a>
         <a href="userclaritytools.html" class="hub-card">
           <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);">
             <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
@@ -520,6 +462,19 @@
           <div class="hub-card-title">My Sessions</div>
           <div class="hub-card-sub">View all your past sessions</div>
         </a>
+      </div>
+    </div>
+<!-- COURSES PREVIEW -->
+    <div>
+      <div class="section-header">
+        <div>
+          <div class="section-title">Courses & Training</div>
+          <div class="section-sub">Step-by-step programs to help you build and sell AI tools.</div>
+        </div>
+        <a href="courses.html" class="section-link">View all →</a>
+      </div>
+      <div class="courses-grid" id="courses-grid">
+        <div style="color:var(--text3);font-size:13px;">Loading...</div>
       </div>
     </div>
 
@@ -550,6 +505,20 @@
           <div class="hub-card-title">Leaderboard</div>
           <div class="hub-card-sub">Top community members</div>
         </a>
+        <a href="events.html" class="hub-card">
+          <div class="hub-card-icon" style="background:rgba(196,98,45,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#E0875A" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="hub-card-title">Events</div>
+          <div class="hub-card-sub" id="events-sub">Upcoming sessions</div>
+        </a>
+        <a href="tools.html" class="hub-card">
+          <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div class="hub-card-title">Tools &amp; Resources</div>
+          <div class="hub-card-sub">Browse the library</div>
+        </a>
         <a href="marketplace.html" class="hub-card">
           <div class="hub-card-icon" style="background:rgba(42,92,69,0.12);">
             <svg width="20" height="20" fill="none" stroke="#3D8A65" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -572,20 +541,7 @@
       <div class="events-list" id="events-list"></div>
     </div>
 
-    <!-- COURSES PREVIEW -->
-    <div>
-      <div class="section-header">
-        <div>
-          <div class="section-title">Courses & Training</div>
-          <div class="section-sub">Step-by-step programs to help you build and sell AI tools.</div>
-        </div>
-        <a href="courses.html" class="section-link">View all →</a>
-      </div>
-      <div class="courses-grid" id="courses-grid">
-        <div style="color:var(--text3);font-size:13px;">Loading...</div>
-      </div>
-    </div>
-
+    
   </div>
 </div>
 
@@ -989,5 +945,7 @@
   document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
   window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
 </script>
+<script src="js/nav.js"></script>
+<script>initNav('dashboard');</script>
 </body>
 </html>
