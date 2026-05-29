@@ -26,6 +26,10 @@
       key: 'build-agent', href: 'build-agent.html', label: 'Build Agent',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
     },
+    {
+      key: 'journey-companion', href: 'journey-companion.html', label: 'Journey Companion',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+    },
   ];
 
   window.initNav = function(activeKey) {
