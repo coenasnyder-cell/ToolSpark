@@ -125,7 +125,9 @@ match /spark_profiles/{sessionId} {
   allow get: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow list: if isActive();
+  allow list: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
   allow create: if isActive();
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
@@ -136,7 +138,9 @@ match /spark_results/{resultId} {
   allow get: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow list: if isActive();
+  allow list: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
   allow create: if isActive();
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
@@ -148,7 +152,9 @@ match /spark_results/{resultId} {
   allow get: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow list: if isActive();
+  allow list: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
   allow create: if isActive();
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
@@ -159,7 +165,9 @@ match /spark_results/{resultId} {
    allow get: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow list: if isActive();
+  allow list: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
   allow create: if isActive();
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
