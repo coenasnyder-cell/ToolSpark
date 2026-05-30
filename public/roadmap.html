@@ -295,6 +295,120 @@
     word-break: break-word;
   }
 
+  /* ── CHOOSE YOUR PATH ── */
+  .path-section-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .path-option-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,242,238,0.96));
+    padding: 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-height: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  }
+  .path-option-card.selected {
+    border-color: rgba(201,168,76,0.45);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.14);
+    transform: translateY(-1px);
+  }
+  .path-option-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .path-option-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid;
+  }
+  .path-option-card.build .path-option-icon {
+    background: rgba(42,92,69,0.1);
+    border-color: rgba(42,92,69,0.2);
+    color: var(--green-light);
+  }
+  .path-option-card.dfy .path-option-icon {
+    background: var(--gold-dim);
+    border-color: rgba(201,168,76,0.2);
+    color: var(--gold);
+  }
+  .path-option-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .path-option-copy {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    flex: 1;
+  }
+  .path-choice-badge {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.24);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .path-option-card.selected .path-choice-badge {
+    display: inline-flex;
+  }
+  .path-option-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .path-option-card.build .path-option-action {
+    background: var(--green);
+    color: #fff;
+  }
+  .path-option-card.build .path-option-action:hover {
+    background: var(--green-light);
+  }
+  .path-option-card.dfy .path-option-action {
+    background: var(--gold-dim);
+    color: var(--text);
+    border-color: rgba(201,168,76,0.28);
+  }
+  .path-option-card.dfy .path-option-action:hover {
+    background: rgba(201,168,76,0.2);
+    border-color: rgba(201,168,76,0.4);
+  }
+  .path-status-note {
+    font-size: 12px;
+    color: var(--text3);
+    padding-top: 2px;
+  }
+
   /* ── MOBILE ── */
   .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
   .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; }
@@ -321,6 +435,7 @@
     .mobile-bottom-nav { display: flex; }
     .step-left { width: 32px; }
     .step-node { width: 32px; height: 32px; font-size: 14px; }
+    .path-section-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -472,6 +587,47 @@
 
     <div id="content" style="display:none;">
       <div class="roadmap-wrap" id="roadmap-wrap"></div>
+    </div>
+    <div id="choose-path-section">
+      <div class="spark-section-card">
+        <div class="spark-section-header" style="background:rgba(42,92,69,0.05);">
+          <div class="spark-section-icon" style="background:rgba(42,92,69,0.08);border-color:rgba(42,92,69,0.15);color:var(--green-light);">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 011.4 0l1.6 1.6a1 1 0 010 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/></svg>
+          </div>
+          <div>
+            <div class="spark-section-title">Choose Your Path</div>
+            <div class="spark-section-desc">Pick how you want to bring your tool to life. We'll use this choice to guide what comes next.</div>
+          </div>
+        </div>
+        <div class="spark-section-body">
+          <div class="path-section-grid">
+            <div class="path-option-card build" id="path-card-build">
+              <div class="path-option-head">
+                <div class="path-option-icon">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 011.4 0l1.6 1.6a1 1 0 010 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/><path d="M16 3l5 5"/></svg>
+                </div>
+                <div class="path-choice-badge" id="path-badge-build">Selected</div>
+              </div>
+              <div class="path-option-title">Build It Yourself</div>
+              <div class="path-option-copy">You have your prompt. You have your platform. The Build Agent and the community are beside you the whole way.</div>
+              <a href="courses.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'courses.html');">Start Course 2 →</a>
+            </div>
+
+            <div class="path-option-card dfy" id="path-card-dfy">
+              <div class="path-option-head">
+                <div class="path-option-icon">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14z"/><path d="M5 15l.7 1.6L7.3 17l-1.6.7L5 19.3l-.7-1.6L2.7 17l1.6-.7L5 15z"/></svg>
+                </div>
+                <div class="path-choice-badge" id="path-badge-dfy">Selected</div>
+              </div>
+              <div class="path-option-title">Done For You</div>
+              <div class="path-option-copy">Hand us your Tool Report and we'll build it for you. Branded, deployed, and ready to launch.</div>
+              <a href="#" class="path-option-action" onclick="return handlePathSelection(event, 'done_for_you', '#');">Book a Call →</a>
+            </div>
+          </div>
+          <div class="path-status-note" id="path-status-note">No path selected yet. Your choice will be saved to guide your next steps later.</div>
+        </div>
+      </div>
     </div>
 <div id="empty" class="empty-card" style="display:none;">
       <h3>No Breakthrough session yet</h3>
@@ -780,6 +936,8 @@
 
   let currentSessionData = null;
   let currentSessionId = null;
+  let currentBuildPathChoice = null;
+  const DONE_FOR_YOU_BOOKING_URL = '#';
 
   async function chooseTool(index) {
     if (!currentSessionId) return;
@@ -858,6 +1016,74 @@
     }
   }
 
+  function renderPathSelection() {
+    const buildCard = document.getElementById('path-card-build');
+    const dfyCard = document.getElementById('path-card-dfy');
+    const note = document.getElementById('path-status-note');
+
+    if (buildCard) buildCard.classList.toggle('selected', currentBuildPathChoice === 'build_it_yourself');
+    if (dfyCard) dfyCard.classList.toggle('selected', currentBuildPathChoice === 'done_for_you');
+
+    if (!note) return;
+
+    if (currentBuildPathChoice === 'build_it_yourself') {
+      note.textContent = 'Current choice: Build It Yourself. We can use this later to guide lessons, support, and build steps.';
+    } else if (currentBuildPathChoice === 'done_for_you') {
+      note.textContent = 'Current choice: Done For You. We can use this later to skip builder lessons and route you into the DFY flow.';
+    } else {
+      note.textContent = 'No path selected yet. Your choice will be saved to guide your next steps later.';
+    }
+  }
+
+  async function handlePathSelection(event, pathChoice, targetUrl) {
+    if (event) event.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return false;
+
+    const actionEl = event?.currentTarget || null;
+    const originalLabel = actionEl ? actionEl.textContent : '';
+    if (actionEl) actionEl.textContent = 'Saving...';
+
+    try {
+      await db.collection('users').doc(user.uid).set({
+        buildPathChoice: pathChoice,
+        buildPathChoiceSessionId: currentSessionId || null,
+        buildPathChoiceSource: 'roadmap',
+        buildPathChoiceUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      currentBuildPathChoice = pathChoice;
+      renderPathSelection();
+
+      if (pathChoice === 'done_for_you') {
+        const resolvedUrl = targetUrl && targetUrl !== '#' ? targetUrl : DONE_FOR_YOU_BOOKING_URL;
+        if (resolvedUrl && resolvedUrl !== '#') {
+          window.location.href = resolvedUrl;
+        } else {
+          const note = document.getElementById('path-status-note');
+          if (note) {
+            note.textContent = 'Done For You selected. Your choice is saved. Add your booking link here when that page is ready.';
+          }
+        }
+        return false;
+      }
+
+      if (targetUrl) {
+        window.location.href = targetUrl;
+      }
+    } catch(e) {
+      console.error('Build path save failed:', e);
+      const note = document.getElementById('path-status-note');
+      if (note) {
+        note.textContent = 'We could not save your path choice right now. Please try again.';
+      }
+    } finally {
+      if (actionEl) actionEl.textContent = originalLabel;
+    }
+
+    return false;
+  }
+
   function renderRoadmap(session, sessionId) {
     currentSessionData = session;
     currentSessionId = sessionId;
@@ -931,10 +1157,15 @@
 
     try {
       const snap = await db.collection('users').doc(user.uid).get();
-      if (snap.exists && snap.data().userRole === 'admin') {
-        document.getElementById('sidebar-role').textContent = 'Admin';
+      if (snap.exists) {
+        const userData = snap.data() || {};
+        currentBuildPathChoice = userData.buildPathChoice || null;
+        if (userData.userRole === 'admin') {
+          document.getElementById('sidebar-role').textContent = 'Admin';
+        }
       }
     } catch(e) {}
+    renderPathSelection();
 
     try {
       const userEmailLower = (user.email || '').toLowerCase();

@@ -197,6 +197,30 @@ match /journey_sessions/{sessionId} {
   allow delete: if isAdmin();
 }
 
+match /spark_council_sessions/{sessionId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive() &&
+    request.resource.data.userId == request.auth.uid;
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
+
+match /breakthrough_public_results/{sessionId} {
+  allow read: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow create: if isActive() &&
+    request.resource.data.userId == request.auth.uid;
+  allow update: if isActive() && (
+    resource.data.userId == request.auth.uid || isAdmin()
+  );
+  allow delete: if isAdmin();
+}
+
 match /graduation_requests/{requestId} {
   allow read: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
