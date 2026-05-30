@@ -100,18 +100,24 @@
   /* RESULTS */
   .results-section { display: none; }
   .results-section.visible { display: flex; flex-direction: column; gap: 1rem; }
-  .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   .results-header { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); margin-bottom: 0.25rem; }
   .results-sub { font-size: 13px; color: var(--text2); }
 
   /* RECORD BUTTON */
+  .record-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .record-buttons { display: flex; gap: 8px; align-items: center; }
   .record-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .record-btn:hover { border-color: var(--coral); color: var(--coral); background: rgba(196,98,45,0.05); }
   .record-btn.recording { border-color: rgba(196,98,45,0.5); color: var(--coral); background: rgba(196,98,45,0.07); }
   .record-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background 0.15s; }
   .record-btn.recording .record-dot { background: var(--coral); animation: pulse-dot 1.2s ease infinite; }
   @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .record-status { font-size: 11px; color: var(--text3); margin-top: 5px; text-align: right; }
+  .mark-step-btn { display: none; align-items: center; gap: 8px; padding: 10px 18px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.35); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .mark-step-btn:hover { background: rgba(201,168,76,0.2); }
+  .mark-step-btn.visible { display: inline-flex; }
+  .step-badge { background: var(--gold); color: var(--dark); border-radius: 100px; padding: 1px 7px; font-size: 11px; font-weight: 900; }
+  .record-status { font-size: 11px; color: var(--text3); text-align: right; }
+  .record-status.analyzing { color: var(--gold); font-weight: 700; }
 
   /* SECTION CARDS */
   .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
@@ -235,7 +241,30 @@
           <textarea class="form-textarea" id="resultsProduces" rows="3" placeholder="A Spark Statement, Client Bible snapshot, and clear sense of their edge"></textarea>
         </div>
 
+        <div class="form-group">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:6px;flex-wrap:wrap;">
+            <label class="form-label" style="margin-bottom:0;">Tool Steps / Flow</label>
+            <div class="record-controls">
+              <div class="record-buttons">
+                <button class="mark-step-btn" id="mark-step-btn" onclick="markStep()">
+                  ✦ Mark Step <span class="step-badge" id="step-count">0</span>
+                </button>
+                <button class="record-btn" id="record-btn" onclick="toggleRecording()">
+                  <span class="record-dot"></span>
+                  Record Walkthrough
+                </button>
+              </div>
+              <div class="record-status" id="record-status"></div>
+            </div>
+          </div>
+          <textarea class="form-textarea" id="toolSteps" rows="4" placeholder="1. Enter your first name&#10;2. Answer 7 questions about your lived experience&#10;3. Receive your Spark Profile with statement, edge, and audience snapshot"></textarea>
+        </div>
+
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Lesson Number</label>
+            <input class="form-input" id="lessonNumber" type="number" min="1" placeholder="1" />
+          </div>
           <div class="form-group">
             <label class="form-label">Estimated Completion Time</label>
             <div class="time-row">
@@ -243,9 +272,16 @@
               <span class="time-label">minutes</span>
             </div>
           </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Next Lesson Name</label>
             <input class="form-input" id="nextLesson" type="text" placeholder="Audience Deep Dive" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Lesson Number</label>
+            <input class="form-input" id="nextLessonNumber" type="number" min="1" placeholder="2" />
           </div>
         </div>
 
@@ -267,18 +303,9 @@
     </div>
 
     <div class="results-section" id="results-section">
-      <div class="results-top">
-        <div>
-          <div class="results-header">Lesson Package Ready</div>
-          <div class="results-sub" id="results-sub"></div>
-        </div>
-        <div>
-          <button class="record-btn" id="record-btn" onclick="toggleRecording()">
-            <span class="record-dot"></span>
-            Record Walkthrough
-          </button>
-          <div class="record-status" id="record-status"></div>
-        </div>
+      <div>
+        <div class="results-header">Lesson Package Ready</div>
+        <div class="results-sub" id="results-sub"></div>
       </div>
 
       <div class="section-card open" id="card-intro">
@@ -448,13 +475,15 @@
   }
 
   function buildUserMessage(fields) {
-    return `TOOL NAME: ${fields.toolName}
+    return `LESSON NUMBER: ${fields.lessonNumber}
+TOOL NAME: ${fields.toolName}
 TOOL PURPOSE: ${fields.toolPurpose}
 PROBLEM IT SOLVES: ${fields.problemSolves}
 RESULTS IT PRODUCES: ${fields.resultsProduces}
+TOOL STEPS / FLOW: ${fields.toolSteps}
 COMPLETION TIME: ${fields.completionTime} minutes
 COMMUNITY ACTION: ${fields.communityAction}
-NEXT LESSON: ${fields.nextLesson}
+NEXT LESSON: Lesson ${fields.nextLessonNumber} — ${fields.nextLesson}
 
 Generate a complete lesson package for this ToolSpark tool.`;
   }
@@ -509,19 +538,24 @@ Generate a complete lesson package for this ToolSpark tool.`;
   async function generatePackage() {
     clearError();
     const fields = {
-      toolName:       document.getElementById('toolName').value.trim(),
-      toolPurpose:    document.getElementById('toolPurpose').value.trim(),
-      problemSolves:  document.getElementById('problemSolves').value.trim(),
+      lessonNumber:    document.getElementById('lessonNumber').value.trim() || '1',
+      toolName:        document.getElementById('toolName').value.trim(),
+      toolPurpose:     document.getElementById('toolPurpose').value.trim(),
+      problemSolves:   document.getElementById('problemSolves').value.trim(),
       resultsProduces: document.getElementById('resultsProduces').value.trim(),
-      completionTime: document.getElementById('completionTime').value.trim() || '8',
+      toolSteps:       document.getElementById('toolSteps').value.trim(),
+      completionTime:  document.getElementById('completionTime').value.trim() || '8',
       communityAction: document.getElementById('communityAction').value.trim(),
-      nextLesson:     document.getElementById('nextLesson').value.trim(),
+      nextLesson:      document.getElementById('nextLesson').value.trim(),
+      nextLessonNumber: document.getElementById('nextLessonNumber').value.trim() || (parseInt(fields?.lessonNumber || 1) + 1),
     };
+    fields.nextLessonNumber = document.getElementById('nextLessonNumber').value.trim() || (parseInt(fields.lessonNumber) + 1);
 
     if (!fields.toolName)        { showError('Please enter the tool name.'); return; }
     if (!fields.toolPurpose)     { showError('Please describe the tool purpose.'); return; }
     if (!fields.problemSolves)   { showError('Please describe the problem it solves.'); return; }
     if (!fields.resultsProduces) { showError('Please describe the results it produces.'); return; }
+    if (!fields.toolSteps)       { showError('Please describe the tool steps and flow.'); return; }
 
     const btn = document.getElementById('generate-btn');
     btn.disabled = true;
@@ -567,9 +601,11 @@ Generate a complete lesson package for this ToolSpark tool.`;
   }
 
   // ── SCREEN RECORDING ──
-  let mediaRecorder = null;
-  let recordedChunks = [];
+  let mediaRecorder   = null;
+  let recordedChunks  = [];
   let recordingStream = null;
+  let previewVideo    = null;
+  let markedFrames    = [];
 
   async function toggleRecording() {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -586,10 +622,19 @@ Generate a complete lesson package for this ToolSpark tool.`;
         audio: false
       });
     } catch(e) {
-      return; // user cancelled picker or denied
+      return; // user cancelled or denied
     }
 
+    markedFrames   = [];
     recordedChunks = [];
+    document.getElementById('step-count').textContent = '0';
+
+    // Hidden video mirrors the stream so markStep() can snapshot it
+    previewVideo = document.createElement('video');
+    previewVideo.srcObject = recordingStream;
+    previewVideo.muted = true;
+    previewVideo.play();
+
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
       ? 'video/webm;codecs=vp9' : 'video/webm';
     mediaRecorder = new MediaRecorder(recordingStream, { mimeType });
@@ -598,7 +643,7 @@ Generate a complete lesson package for this ToolSpark tool.`;
       if (e.data.size > 0) recordedChunks.push(e.data);
     };
 
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
@@ -607,18 +652,23 @@ Generate a complete lesson package for this ToolSpark tool.`;
       a.download = toolName.toLowerCase().replace(/\s+/g, '-') + '-walkthrough.webm';
       a.click();
       URL.revokeObjectURL(url);
-      setRecordUI(false, 'Saved — check your downloads.');
       mediaRecorder = null;
+
+      if (markedFrames.length > 0) {
+        setRecordUI(false, null);
+        await analyzeSteps();
+      } else {
+        setRecordUI(false, 'Saved — check your downloads.');
+      }
     };
 
-    // Handle user stopping share from the browser's built-in stop button
     recordingStream.getVideoTracks()[0].onended = () => {
       if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
       if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
     };
 
     mediaRecorder.start(1000);
-    setRecordUI(true, 'Recording in progress...');
+    setRecordUI(true, 'Recording — click Mark Step at each new screen.');
   }
 
   function stopRecording() {
@@ -626,15 +676,86 @@ Generate a complete lesson package for this ToolSpark tool.`;
     if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
   }
 
-  function setRecordUI(isRecording, statusText) {
-    const btn    = document.getElementById('record-btn');
+  function markStep() {
+    if (!previewVideo || !recordingStream) return;
+    if (previewVideo.videoWidth === 0) return;
+
+    const canvas  = document.createElement('canvas');
+    const maxW    = 1024;
+    const scale   = Math.min(1, maxW / previewVideo.videoWidth);
+    canvas.width  = Math.round(previewVideo.videoWidth  * scale);
+    canvas.height = Math.round(previewVideo.videoHeight * scale);
+    canvas.getContext('2d').drawImage(previewVideo, 0, 0, canvas.width, canvas.height);
+    markedFrames.push(canvas.toDataURL('image/jpeg', 0.75).split(',')[1]);
+
+    const badge = document.getElementById('step-count');
+    badge.textContent = markedFrames.length;
+
+    const btn = document.getElementById('mark-step-btn');
+    btn.style.background = 'rgba(201,168,76,0.35)';
+    setTimeout(() => { btn.style.background = ''; }, 250);
+  }
+
+  async function analyzeSteps() {
     const status = document.getElementById('record-status');
+    status.textContent = 'Analysing ' + markedFrames.length + ' steps with Claude...';
+    status.classList.add('analyzing');
+
+    try {
+      const content = [
+        ...markedFrames.map(data => ({
+          type: 'image',
+          source: { type: 'base64', media_type: 'image/jpeg', data }
+        })),
+        {
+          type: 'text',
+          text: `These ${markedFrames.length} screenshots were captured in order during a tool walkthrough. Describe each one as a numbered step. One sentence per step — specific and action-oriented. Start with "1." and number each step sequentially.`
+        }
+      ];
+
+      const res  = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 600,
+          messages: [{ role: 'user', content }],
+          _meta: { tool: 'step-vision', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+
+      const data  = await res.json();
+      const steps = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+
+      if (steps) {
+        document.getElementById('toolSteps').value = steps;
+        document.getElementById('toolSteps').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        status.textContent = 'Steps filled in — review and edit before generating.';
+      } else {
+        status.textContent = 'Could not read steps — fill in manually.';
+      }
+    } catch(e) {
+      status.textContent = 'Step analysis failed — fill in manually.';
+    }
+
+    status.classList.remove('analyzing');
+    setTimeout(() => { status.textContent = ''; }, 6000);
+    markedFrames = [];
+  }
+
+  function setRecordUI(isRecording, statusText) {
+    const btn     = document.getElementById('record-btn');
+    const markBtn = document.getElementById('mark-step-btn');
+    const status  = document.getElementById('record-status');
     btn.classList.toggle('recording', isRecording);
     btn.innerHTML = isRecording
       ? '<span class="record-dot"></span> Stop Recording'
       : '<span class="record-dot"></span> Record Walkthrough';
-    status.textContent = statusText || '';
-    if (!isRecording && statusText) setTimeout(() => { status.textContent = ''; }, 4000);
+    markBtn.classList.toggle('visible', isRecording);
+    if (statusText !== null) {
+      status.textContent = statusText || '';
+      if (!isRecording && statusText) setTimeout(() => { status.textContent = ''; }, 5000);
+    }
   }
 
   function copySection(e, contentId) {
