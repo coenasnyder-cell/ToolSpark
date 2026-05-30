@@ -387,8 +387,7 @@ async function signUp() {
   if (!email) { showMsg('Please enter your email address.', 'error'); return; }
   if (!password || password.length < 8) { showMsg('Password must be at least 8 characters.', 'error'); return; }
   if (!document.getElementById('terms-check').checked) { showMsg('Please agree to the Terms of Service and Privacy Policy.', 'error'); return; }
-const emailOptIn = document.getElementById('emailOptIn').checked;
-const termsAccepted = true; // they passed the check above
+  const emailOptIn = document.getElementById('emailOptIn').checked;
 
   signingIn = true;
   setLoading(true);
@@ -413,7 +412,7 @@ async function signUpWithGoogle() {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-    await createUserDoc(result.user, result.user.displayName || '');
+    await createUserDoc(result.user, result.user.displayName || '', true);
     await claimSparkSessionsForUser(result.user);
     showMsg('Account created! Check your email to verify your account.', 'success');
     setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
