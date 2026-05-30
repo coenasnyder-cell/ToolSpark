@@ -1,5 +1,6 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const {onDocumentCreated, onDocumentUpdated} = require("firebase-functions/v2/firestore");
+const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
 const admin = require("firebase-admin");
 if (!admin.apps.length) admin.initializeApp();
@@ -7,6 +8,54 @@ if (!admin.apps.length) admin.initializeApp();
 // Sonnet 4.6 pricing per million tokens
 const PRICE_INPUT  = 3.00;
 const PRICE_OUTPUT = 15.00;
+
+const JOURNEY_COMPANION_VOICE_PROMPT = `You are the ToolSpark Journey Companion, now running as a live voice conversation.
+
+You are a warm, direct clarity coach and accountability partner who guides members through Course 1. Your job is to help them get crystal clear on who they help, who they serve, and what tool to build, then hand them off to the Build Agent ready to go.
+
+You are NOT a general chat assistant.
+You are NOT a therapist.
+You are NOT a coding helper.
+You are NOT the Build Agent.
+You have ONE job: guide them through the three clarity tools, process their results until they truly own them, and hand them off to the Build Agent with a committed tool choice.
+
+VOICE BEHAVIOR
+- Speak naturally, warmly, and briefly.
+- Ask one question at a time.
+- Do not give long speeches.
+- Keep each spoken response focused on a single next step.
+- If they drift, redirect them kindly but immediately.
+
+SESSION OPENING
+- Open first. Do not wait for the user to speak before greeting them.
+- Start by naming the mission of the conversation in one sentence.
+- Then acknowledge what you already know from their progress data.
+- Then ask one grounded first question.
+- Never ask them to recap information that is already in the provided context.
+
+COURSE 1 FLOW
+- If Find Your Spark is not complete, send them to spark.html.
+- If Spark is complete but Course 1 is not finished, keep them moving through clarity work one step at a time.
+- If Course 1 is complete, hand them off to build-agent.html.
+
+CONVERSATION RULES
+- One question at a time.
+- Every response ends with one specific action.
+- Never leave them with nowhere to go.
+- Never help with code or technical problems.
+- Never discuss pricing or business strategy.
+- Never let them stay stuck on one phase for more than three exchanges.
+- Celebrate progress genuinely, then move them forward.
+
+TONE
+Warm but firm. Like a trusted friend who believes in them completely and has zero patience for self-sabotage.`;
+
+function buildJourneyVoiceInstructions({firstName, contextBlock}) {
+  const intro = firstName ? `The member's first name is ${firstName}. Use it occasionally, not every turn.` : "";
+  return [JOURNEY_COMPANION_VOICE_PROMPT, intro, contextBlock || ""]
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 exports.tts = onRequest({
   cors: true,
@@ -112,6 +161,112 @@ exports.analyze = onRequest({
 });
 
 // ── GRADUATION TRIGGER ──────────────────────────────────────────────────────
+exports.journeyVoiceToken = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["OPENAI_KEY"]
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const contextBlock = typeof req.body?.contextBlock === "string" ?
+      req.body.contextBlock.slice(0, 6000) : "";
+    const firstName = typeof req.body?.firstName === "string" ?
+      req.body.firstName.slice(0, 80) : "";
+    const safetyId = crypto.createHash("sha256").update(decoded.uid).digest("hex");
+
+    const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_KEY}`,
+        "OpenAI-Safety-Identifier": safetyId,
+      },
+      body: JSON.stringify({
+        expires_after: {
+          anchor: "created_at",
+          seconds: 300,
+        },
+        session: {
+          type: "realtime",
+          model: "gpt-realtime",
+          instructions: buildJourneyVoiceInstructions({firstName, contextBlock}),
+          output_modalities: ["audio"],
+          tool_choice: "none",
+          max_output_tokens: 700,
+          audio: {
+            input: {
+              turn_detection: {
+                type: "server_vad",
+                create_response: true,
+                interrupt_response: true,
+              },
+              transcription: {
+                model: "gpt-4o-mini-transcribe",
+                language: "en",
+              },
+            },
+            output: {
+              voice: "marin",
+            },
+          },
+        },
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(JSON.stringify({
+        event: "journey_voice_token_failed",
+        uid: decoded.uid,
+        status: response.status,
+        error: data,
+      }));
+      res.status(response.status).json({
+        error: data.error?.message || "Failed to create voice session",
+      });
+      return;
+    }
+
+    const clientSecretValue = data.client_secret?.value || data.value || null;
+    const clientSecretExpiresAt = data.client_secret?.expires_at || data.expires_at || null;
+
+    console.log(JSON.stringify({
+      event: "journey_voice_token_created",
+      uid: decoded.uid,
+      expiresAt: clientSecretExpiresAt,
+    }));
+
+    res.status(200).json({
+      client_secret: clientSecretValue ? {
+        value: clientSecretValue,
+        expires_at: clientSecretExpiresAt,
+      } : null,
+      value: clientSecretValue,
+      expires_at: clientSecretExpiresAt,
+      session: data.session,
+    });
+  } catch (err) {
+    console.error(JSON.stringify({
+      event: "journey_voice_token_error",
+      message: err.message,
+    }));
+    res.status(500).json({ error: err.message });
+  }
+});
+
 exports.onGraduation = onDocumentUpdated({
   document: "users/{uid}",
   secrets: ["SENDGRID_API_KEY"],
@@ -261,6 +416,104 @@ exports.deliverCertificate = onRequest({
   } catch (err) {
     console.error(JSON.stringify({ event: "deliver_certificate_failed", message: err.message }));
     res.status(500).json({ error: err.message });
+  }
+});
+
+exports.deleteAccount = onRequest({
+  cors: true,
+  invoker: "public",
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
+  if (!token) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  let uid, email;
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    uid = decoded.uid;
+    email = decoded.email || "";
+  } catch {
+    res.status(401).json({ error: "Invalid token" }); return;
+  }
+
+  const db = admin.firestore();
+
+  async function deleteBatch(query) {
+    const snap = await query.get();
+    if (snap.empty) return;
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  }
+
+  try {
+    await db.collection("users").doc(uid).delete();
+    await deleteBatch(db.collection("spark_profiles").where("email", "==", email));
+    await deleteBatch(db.collection("spark_results").where("userId", "==", uid));
+    await deleteBatch(db.collection("clarity_sessions").where("userId", "==", uid));
+    await deleteBatch(db.collection("notifications").where("userId", "==", uid));
+    await deleteBatch(db.collection("threads").where("authorId", "==", uid));
+    await deleteBatch(db.collection("agent_sessions").where("userId", "==", uid));
+    await deleteBatch(db.collection("audience_tool").where("userId", "==", uid));
+    await deleteBatch(db.collection("audits").where("userId", "==", uid));
+
+    // userProgress docs are keyed uid_courseId — range query on doc ID
+    const progressSnap = await db.collection("userProgress")
+      .where(admin.firestore.FieldPath.documentId(), ">=", uid + "_")
+      .where(admin.firestore.FieldPath.documentId(), "<=", uid + "_")
+      .get();
+    if (!progressSnap.empty) {
+      const batch = db.batch();
+      progressSnap.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+    }
+
+    await admin.auth().deleteUser(uid);
+
+    console.log(JSON.stringify({ event: "account_deleted", uid }));
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "delete_account_failed", uid, message: err.message }));
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.onNewMemberSignup = onDocumentCreated({
+  document: "users/{uid}",
+  secrets: ["SENDGRID_API_KEY"],
+}, async (event) => {
+  const data = event.data.data();
+  const email = data.userEmail || data.clientEmail || '';
+  const displayName = data.displayName || '';
+  const firstName = displayName.split(' ')[0] || 'there';
+
+  console.log(JSON.stringify({ event: "new_member_signup_triggered", email }));
+
+  if (!email) {
+    console.error("onNewMemberSignup: no email in user document");
+    return;
+  }
+
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+  try {
+    await sgMail.send({
+      to: email,
+      from: { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
+      templateId: "d-7f60caa60ebc4bbbb04978be5d4960b0",
+      dynamicTemplateData: { firstName },
+    });
+    console.log(JSON.stringify({ event: "new_member_welcome_email_sent", email }));
+  } catch (err) {
+    console.error(JSON.stringify({
+      event: "new_member_welcome_email_failed",
+      email,
+      status: err.code,
+      message: err.message,
+      response: err.response?.body,
+    }));
+    throw err;
   }
 });
 

@@ -121,6 +121,83 @@
   }
   .sw-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
   .sw-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .interaction-picker {
+    margin-top: 10px;
+    background: rgba(201,168,76,0.05);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+    text-align: left;
+  }
+  .interaction-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .mode-option {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid var(--border-mid);
+    border-radius: 16px;
+    padding: 16px 16px 15px;
+    color: var(--cream);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .mode-option + .mode-option { margin-top: 12px; }
+  .mode-option:hover {
+    transform: translateY(-2px);
+    border-color: rgba(201,168,76,0.45);
+    background: rgba(201,168,76,0.08);
+  }
+  .mode-option:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .mode-option-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .mode-option-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  #text-choice-btn .mode-option-title,
+  #voice-choice-btn .mode-option-title { font-size: 0; }
+  #text-choice-btn .mode-option-title::before,
+  #voice-choice-btn .mode-option-title::before {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  #text-choice-btn .mode-option-title::before { content: "Text Check-Ins"; }
+  #voice-choice-btn .mode-option-title::before { content: "Voice Check-Ins"; }
+  .mode-option-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dark);
+    background: var(--gold);
+    border-radius: 999px;
+    padding: 5px 8px;
+    flex-shrink: 0;
+  }
+  .mode-option-copy {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text3);
+  }
+  .legacy-start-btn { display: none; }
 
   /* ── MILESTONE BADGE ── */
   .milestone-badge {
@@ -188,6 +265,19 @@
     position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--dark2); border-top: 1px solid var(--border); padding: 14px 20px;
   }
+  .voice-controls {
+    max-width: 680px; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .voice-btn {
+    background: transparent; color: var(--gold-light); border: 1px solid var(--border-mid);
+    border-radius: 999px; padding: 10px 14px; font: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .voice-btn:hover { background: rgba(201,168,76,0.08); }
+  .voice-btn.live { background: rgba(201,168,76,0.12); border-color: rgba(201,168,76,0.45); }
+  .voice-status { font-size: 12px; color: var(--text3); }
+  .voice-status.live { color: var(--gold-light); }
   .input-inner { max-width: 680px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
   .input-field {
     flex: 1; background: var(--dark3); border: 1px solid var(--border-mid);
@@ -247,8 +337,30 @@
     </div>
 
     <div class="sw-time" id="milestone-display">Loading your progress…</div>
-    <button class="sw-btn" id="start-btn" onclick="startCompanion()" disabled>
+    <div class="interaction-picker">
+      <div class="interaction-title">How would you like to interact?</div>
+
+      <button class="mode-option" id="text-choice-btn" onclick="startCompanion('text')" disabled>
+        <div class="mode-option-head">
+          <span class="mode-option-title">📝 Text Check-Ins</span>
+          <span class="mode-option-badge">Recommended</span>
+        </div>
+        <div class="mode-option-copy">Text is faster and works great for daily check-ins.</div>
+      </button>
+
+      <button class="mode-option" id="voice-choice-btn" onclick="startCompanion('voice')" disabled>
+        <div class="mode-option-head">
+          <span class="mode-option-title">🎤 Voice Check-Ins</span>
+        </div>
+        <div class="mode-option-copy">Voice feels more like talking to a coach.</div>
+      </button>
+    </div>
+
+    <button class="sw-btn legacy-start-btn" id="start-btn" onclick="startCompanion('text')" disabled>
       Check In →
+    </button>
+    <button class="sw-btn secondary legacy-start-btn" id="voice-start-btn" onclick="startCompanion('voice')" disabled>
+      Try Voice Beta
     </button>
   </div>
 </div>
@@ -265,6 +377,10 @@
 
 <!-- INPUT BAR -->
 <div class="input-bar" id="input-bar" style="display:none;">
+  <div class="voice-controls">
+    <button class="voice-btn" id="voice-connect-btn" onclick="toggleVoiceSession()">Start Voice Beta</button>
+    <span class="voice-status" id="voice-status">Voice off. You can still type below.</span>
+  </div>
   <div class="input-inner">
     <textarea class="input-field" id="user-input" placeholder="Reply…" rows="1"
       onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
@@ -278,12 +394,22 @@
 
 <script>
   const ANALYZE_URL = 'https://us-central1-toolspark-2d62d.cloudfunctions.net/analyze';
+  const VOICE_TOKEN_URL = 'https://us-central1-toolspark-2d62d.cloudfunctions.net/journeyVoiceToken';
 
   let currentUser  = null;
   let userProfile  = null;
   let messages     = [];
   let waitingForAI = false;
   let milestoneData = {};
+  let voiceMode = false;
+  let voiceConnected = false;
+  let voiceConnecting = false;
+  let voiceStartedWithGreeting = false;
+  let voicePc = null;
+  let voiceDc = null;
+  let voiceStream = null;
+  let voiceAudioEl = null;
+  const assistantTranscriptDrafts = new Map();
 
   // ── MILESTONE STEPS ──
   const MILESTONE_STEPS = [
@@ -526,6 +652,9 @@ Warm but firm. Like a trusted friend who has been exactly where they are — som
     document.getElementById('jp-step').textContent = MILESTONE_STEPS[step];
 
     document.getElementById('start-btn').disabled = false;
+    document.getElementById('voice-start-btn').disabled = false;
+    document.getElementById('text-choice-btn').disabled = false;
+    document.getElementById('voice-choice-btn').disabled = false;
   });
 
   function getMilestoneStep(d) {
@@ -539,10 +668,16 @@ Warm but firm. Like a trusted friend who has been exactly where they are — som
   }
 
   // ── START ──
-  function startCompanion() {
+  async function startCompanion(mode = 'text') {
+    voiceMode = mode === 'voice';
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('chat-ui').style.display = 'flex';
     document.getElementById('input-bar').style.display = 'block';
+    if (voiceMode) {
+      await connectVoiceSession(true);
+      if (!voiceConnected && messages.length === 0) await openSession();
+      return;
+    }
     openSession();
   }
 
@@ -604,6 +739,11 @@ If a lesson name is provided above, reference it directly — e.g. "You were on 
     input.style.height = 'auto';
     document.getElementById('send-btn').disabled = true;
 
+    if (voiceConnected) {
+      sendVoiceTextMessage(text);
+      return;
+    }
+
     addBubble('user', text);
     messages.push({ role: 'user', content: text });
     callAI();
@@ -639,6 +779,252 @@ If a lesson name is provided above, reference it directly — e.g. "You were on 
   }
 
   // ── UI HELPERS ──
+  async function toggleVoiceSession() {
+    if (voiceConnected || voiceConnecting) {
+      disconnectVoiceSession();
+      return;
+    }
+    voiceMode = true;
+    await connectVoiceSession(false);
+  }
+
+  async function connectVoiceSession(openWithGreeting) {
+    if (voiceConnected || voiceConnecting) return;
+    if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) {
+      setVoiceStatus("Voice beta needs a newer browser.", false);
+      addBubble('ai', "Voice beta needs a newer browser, but you can keep typing here.");
+      return;
+    }
+
+    voiceConnecting = true;
+    waitingForAI = true;
+    showThinking();
+    setVoiceStatus("Connecting voice...", false);
+    updateVoiceButton();
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const tokenResp = await fetch(VOICE_TOKEN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + idToken,
+        },
+        body: JSON.stringify({
+          firstName: currentUser?.displayName?.split(' ')[0] || '',
+          contextBlock: buildContextBlock(),
+        }),
+      });
+      const tokenData = await tokenResp.json();
+      if (!tokenResp.ok) throw new Error(tokenData.error || 'Could not start voice');
+
+      const ephemeralKey = tokenData.client_secret?.value || tokenData.value;
+      if (!ephemeralKey) throw new Error('Voice session key missing');
+
+      voicePc = new RTCPeerConnection();
+      voiceAudioEl = document.createElement('audio');
+      voiceAudioEl.autoplay = true;
+      voiceAudioEl.playsInline = true;
+      voicePc.ontrack = (event) => {
+        voiceAudioEl.srcObject = event.streams[0];
+      };
+
+      voiceDc = voicePc.createDataChannel('oai-events');
+      voiceDc.addEventListener('open', () => {
+        voiceConnected = true;
+        voiceConnecting = false;
+        waitingForAI = false;
+        hideThinking();
+        setVoiceStatus("Voice is live. Speak whenever you're ready.", true);
+        updateVoiceButton();
+        enableInput();
+        if (openWithGreeting && !voiceStartedWithGreeting && messages.length === 0) {
+          voiceStartedWithGreeting = true;
+          requestVoiceOpening();
+        }
+      });
+      voiceDc.addEventListener('message', handleVoiceServerEvent);
+      voiceDc.addEventListener('close', () => {
+        if (voiceConnected || voiceConnecting) disconnectVoiceSession(false);
+      });
+
+      voiceStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      voiceStream.getTracks().forEach((track) => voicePc.addTrack(track, voiceStream));
+
+      const offer = await voicePc.createOffer();
+      await voicePc.setLocalDescription(offer);
+
+      const sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + ephemeralKey,
+          'Content-Type': 'application/sdp',
+        },
+        body: offer.sdp,
+      });
+      if (!sdpResp.ok) {
+        const errorText = await sdpResp.text();
+        throw new Error(errorText || 'Realtime call failed');
+      }
+
+      const answer = {
+        type: 'answer',
+        sdp: await sdpResp.text(),
+      };
+      await voicePc.setRemoteDescription(answer);
+    } catch (err) {
+      console.error('Voice session error:', err);
+      disconnectVoiceSession(false);
+      waitingForAI = false;
+      hideThinking();
+      setVoiceStatus("Voice couldn't start. You can keep typing.", false);
+      updateVoiceButton();
+      enableInput();
+      if (messages.length === 0) {
+        addBubble('ai', "Voice beta couldn't start just yet, but I'm still here with the regular chat.");
+      }
+    }
+  }
+
+  function requestVoiceOpening() {
+    sendVoiceEvent({
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: 'START' }],
+      },
+    });
+    sendVoiceEvent({ type: 'response.create' });
+  }
+
+  function sendVoiceTextMessage(text) {
+    addBubble('user', text);
+    messages.push({ role: 'user', content: text });
+    waitingForAI = true;
+    setVoiceStatus("Journey Companion is responding...", true);
+    showThinking();
+    sendVoiceEvent({
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text }],
+      },
+    });
+    sendVoiceEvent({ type: 'response.create' });
+  }
+
+  function sendVoiceEvent(event) {
+    if (!voiceDc || voiceDc.readyState !== 'open') return;
+    voiceDc.send(JSON.stringify(event));
+  }
+
+  function handleVoiceServerEvent(evt) {
+    let payload;
+    try {
+      payload = JSON.parse(evt.data);
+    } catch (err) {
+      return;
+    }
+
+    switch (payload.type) {
+      case 'input_audio_buffer.speech_started':
+        setVoiceStatus("Listening...", true);
+        break;
+      case 'input_audio_buffer.speech_stopped':
+        setVoiceStatus("Thinking...", true);
+        break;
+      case 'conversation.item.input_audio_transcription.completed':
+        if (payload.transcript?.trim()) {
+          addBubble('user', payload.transcript.trim());
+          messages.push({ role: 'user', content: payload.transcript.trim() });
+        }
+        break;
+      case 'response.created':
+        waitingForAI = true;
+        hideThinking();
+        showThinking();
+        setVoiceStatus("Journey Companion is responding...", true);
+        break;
+      case 'response.output_audio_transcript.delta': {
+        const prior = assistantTranscriptDrafts.get(payload.item_id) || '';
+        assistantTranscriptDrafts.set(payload.item_id, prior + (payload.delta || ''));
+        break;
+      }
+      case 'response.output_audio_transcript.done': {
+        const text = (payload.transcript || assistantTranscriptDrafts.get(payload.item_id) || '').trim();
+        assistantTranscriptDrafts.delete(payload.item_id);
+        if (text) {
+          hideThinking();
+          addBubble('ai', text);
+          messages.push({ role: 'assistant', content: text });
+        }
+        break;
+      }
+      case 'response.done':
+        waitingForAI = false;
+        hideThinking();
+        setVoiceStatus("Voice is live. Speak whenever you're ready.", true);
+        enableInput();
+        break;
+      case 'error':
+        console.error('Realtime server event error:', payload);
+        waitingForAI = false;
+        hideThinking();
+        setVoiceStatus("Voice hit an error. You can keep typing.", false);
+        enableInput();
+        break;
+      default:
+        break;
+    }
+  }
+
+  function disconnectVoiceSession(manual = true) {
+    if (voiceStream) {
+      voiceStream.getTracks().forEach((track) => track.stop());
+      voiceStream = null;
+    }
+    if (voiceDc) {
+      try { voiceDc.close(); } catch (e) {}
+      voiceDc = null;
+    }
+    if (voicePc) {
+      try { voicePc.close(); } catch (e) {}
+      voicePc = null;
+    }
+    if (voiceAudioEl) {
+      voiceAudioEl.srcObject = null;
+      voiceAudioEl = null;
+    }
+    assistantTranscriptDrafts.clear();
+    voiceConnected = false;
+    voiceConnecting = false;
+    waitingForAI = false;
+    hideThinking();
+    setVoiceStatus(manual ? "Voice off. You can still type below." : "Voice disconnected. You can keep typing.", false);
+    updateVoiceButton();
+    enableInput();
+  }
+
+  function updateVoiceButton() {
+    const btn = document.getElementById('voice-connect-btn');
+    btn.textContent = (voiceConnected || voiceConnecting) ? 'End Voice Beta' : 'Start Voice Beta';
+    btn.classList.toggle('live', voiceConnected || voiceConnecting);
+  }
+
+  function setVoiceStatus(text, live) {
+    const status = document.getElementById('voice-status');
+    status.textContent = text;
+    status.classList.toggle('live', !!live);
+  }
+
   function addBubble(role, text) {
     const scroll = document.getElementById('chat-scroll');
     const div = document.createElement('div');
@@ -688,6 +1074,9 @@ If a lesson name is provided above, reference it directly — e.g. "You were on 
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
     document.getElementById('send-btn').disabled = !el.value.trim();
   }
+
+  updateVoiceButton();
+  window.addEventListener('beforeunload', () => disconnectVoiceSession(false));
 </script>
 </body>
 </html>

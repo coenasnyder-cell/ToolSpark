@@ -399,20 +399,7 @@ const termsAccepted = true; // they passed the check above
 await cred.user.sendEmailVerification();
 await createUserDoc(cred.user, displayName, emailOptIn);
     await claimSparkSessionsForUser(cred.user);
-
-    const launchDate = new Date('2026-05-01');
-    const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
-
-    await onUserSignup({
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      userId: cred.user.uid,
-      optedIn: emailOptIn,
-      isEarlyMember: isEarlyMember,
-    });
-    showMsg('Account created! Redirecting...', 'success');
+    showMsg('Account created! Check your email to verify your account.', 'success');
     setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
   } catch(err) {
     signingIn = false;
@@ -428,20 +415,6 @@ async function signUpWithGoogle() {
     const result = await auth.signInWithPopup(provider);
     await createUserDoc(result.user, result.user.displayName || '');
     await claimSparkSessionsForUser(result.user);
-    const nameParts = (result.user.displayName || '').split(' ') || '';
-    const emailOptIn = true;
-    const launchDate = new Date('2026-05-01');
-    const thirtyDaysAfterLaunch = new Date(launchDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const isEarlyMember = new Date() <= thirtyDaysAfterLaunch;
-
-    await onUserSignup({
-      email: result.user.email,
-      firstName: nameParts[0],
-      lastName: nameParts.slice(1).join(' ') || '',
-      userId: result.user.uid,
-      optedIn: emailOptIn,
-      isEarlyMember: isEarlyMember,
-    });
     showMsg('Account created! Check your email to verify your account.', 'success');
     setTimeout(() => { window.location.href = 'onboarding.html'; }, 800);
   } catch(err) {
