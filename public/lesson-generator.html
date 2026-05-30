@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson Generator — Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --coral: #C4622D;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; font-weight: 400; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .page-content { flex: 1; padding: 2rem; max-width: 760px; width: 100%; }
+
+  /* ACCESS DENIED */
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+
+  /* FORM CARD */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
+  .form-card-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
+  .form-card-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.75rem; line-height: 1.6; }
+  .form-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+  .form-input, .form-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; resize: vertical; }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); }
+  .time-row { display: flex; align-items: center; gap: 10px; }
+  .time-row .form-input { width: 100px; }
+  .time-label { font-size: 14px; color: var(--text2); }
+  .generate-btn { width: 100%; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); padding: 14px; font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; margin-top: 0.5rem; }
+  .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* PROGRESS */
+  .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem 2rem; text-align: center; margin-bottom: 1.5rem; display: none; }
+  .progress-card.visible { display: block; }
+  .progress-sparky { font-size: 2.5rem; margin-bottom: 0.75rem; animation: bounce 1s ease infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .progress-text { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
+  .progress-sub { font-size: 13px; color: var(--text2); }
+
+  /* ERROR */
+  .error-msg { background: rgba(196,98,45,0.08); border: 1px solid rgba(196,98,45,0.25); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--coral); margin-bottom: 1.25rem; display: none; }
+  .error-msg.visible { display: block; }
+
+  /* RESULTS */
+  .results-section { display: none; }
+  .results-section.visible { display: flex; flex-direction: column; gap: 1rem; }
+  .results-header { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); margin-bottom: 0.25rem; }
+  .results-sub { font-size: 13px; color: var(--text2); margin-bottom: 0.5rem; }
+
+  /* SECTION CARDS */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .section-card.voiceover { border-color: rgba(201,168,76,0.45); box-shadow: var(--shadow), 0 0 0 1px rgba(201,168,76,0.1) inset; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s; gap: 12px; }
+  .section-header:hover { background: #FAFAF8; }
+  .section-card.voiceover .section-header { background: rgba(201,168,76,0.04); }
+  .section-card.voiceover .section-header:hover { background: rgba(201,168,76,0.08); }
+  .section-header-left { display: flex; align-items: center; gap: 10px; }
+  .section-num { width: 24px; height: 24px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .section-card.voiceover .section-title { color: var(--gold); }
+  .section-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .copy-btn.copied { border-color: #3D8A65; color: #3D8A65; background: rgba(42,92,69,0.08); }
+  .copy-btn-elevenlabs { padding: 7px 16px; font-size: 12px; background: var(--gold-dim); border-color: rgba(201,168,76,0.4); color: var(--gold); }
+  .copy-btn-elevenlabs:hover { background: rgba(201,168,76,0.2); }
+  .chevron { width: 16px; height: 16px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+  .section-card.open .chevron { transform: rotate(180deg); }
+  .section-body { display: none; border-top: 1px solid var(--border); }
+  .section-card.open .section-body { display: block; }
+  .section-card.voiceover .section-body { border-top-color: rgba(201,168,76,0.25); }
+  .section-content { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.75; white-space: pre-wrap; font-family: 'Lato', sans-serif; }
+  .elevenlabs-note { padding: 0 1.25rem 1.25rem; font-size: 12px; color: var(--text3); font-style: italic; }
+
+  @media (max-width: 767px) {
+    .main-wrap { margin-left: 0; }
+    .sidebar { display: none; }
+    .page-content { padding: 1rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="adminwaitlist.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Waitlist
+    </a>
+    <a href="admincertificates.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+      Certificates
+    </a>
+    <a href="lesson-generator.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Lesson Generator
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Lesson Generator</div>
+      <div class="header-subtitle">Generate complete course lesson packages with Sparky</div>
+    </div>
+    <div class="admin-badge">✦ Sparky</div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">Admin only.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <div class="page-content" id="admin-content" style="display:none;">
+
+    <div class="form-card">
+      <div class="form-card-title">New Lesson Package</div>
+      <div class="form-card-sub">Fill in the details about the tool this lesson covers. Sparky will write the complete package.</div>
+
+      <div id="error-msg" class="error-msg"></div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Tool Name</label>
+          <input class="form-input" id="toolName" type="text" placeholder="Find Your Spark" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tool Purpose</label>
+          <textarea class="form-textarea" id="toolPurpose" rows="3" placeholder="Helps members identify their lived experience, skills, and unique edge"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Problem It Solves</label>
+          <textarea class="form-textarea" id="problemSolves" rows="3" placeholder="Most people don't know how to articulate what they know or who they help"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Results It Produces</label>
+          <textarea class="form-textarea" id="resultsProduces" rows="3" placeholder="A Spark Statement, Client Bible snapshot, and clear sense of their edge"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Estimated Completion Time</label>
+            <div class="time-row">
+              <input class="form-input" id="completionTime" type="number" min="1" max="120" placeholder="8" />
+              <span class="time-label">minutes</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Next Lesson Name</label>
+            <input class="form-input" id="nextLesson" type="text" placeholder="Audience Deep Dive" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Community Action</label>
+          <textarea class="form-textarea" id="communityAction" rows="2" placeholder="Post your Spark Statement in the community and ask for feedback"></textarea>
+        </div>
+
+        <button class="generate-btn" id="generate-btn" onclick="generatePackage()">
+          Generate My Lesson Package →
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-card" id="progress-card">
+      <div class="progress-sparky">✨</div>
+      <div class="progress-text">Sparky is writing your lesson package...</div>
+      <div class="progress-sub">This usually takes 20–30 seconds</div>
+    </div>
+
+    <div class="results-section" id="results-section">
+      <div>
+        <div class="results-header">Lesson Package Ready</div>
+        <div class="results-sub" id="results-sub"></div>
+      </div>
+
+      <div class="section-card open" id="card-intro">
+        <div class="section-header" onclick="toggleSection('card-intro')">
+          <div class="section-header-left">
+            <div class="section-num">1</div>
+            <div class="section-title">Introduction Script</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-intro')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-intro"></div>
+        </div>
+      </div>
+
+      <div class="section-card open" id="card-screen">
+        <div class="section-header" onclick="toggleSection('card-screen')">
+          <div class="section-header-left">
+            <div class="section-num">2</div>
+            <div class="section-title">Screen Display Suggestions</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-screen')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-screen"></div>
+        </div>
+      </div>
+
+      <div class="section-card open" id="card-walkthrough">
+        <div class="section-header" onclick="toggleSection('card-walkthrough')">
+          <div class="section-header-left">
+            <div class="section-num">3</div>
+            <div class="section-title">Walkthrough Script</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-walkthrough')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-walkthrough"></div>
+        </div>
+      </div>
+
+      <div class="section-card open" id="card-example">
+        <div class="section-header" onclick="toggleSection('card-example')">
+          <div class="section-header-left">
+            <div class="section-num">4</div>
+            <div class="section-title">Example Results Section</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-example')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-example"></div>
+        </div>
+      </div>
+
+      <div class="section-card open" id="card-community">
+        <div class="section-header" onclick="toggleSection('card-community')">
+          <div class="section-header-left">
+            <div class="section-num">5</div>
+            <div class="section-title">Community Action</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-community')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-community"></div>
+        </div>
+      </div>
+
+      <div class="section-card open" id="card-transition">
+        <div class="section-header" onclick="toggleSection('card-transition')">
+          <div class="section-header-left">
+            <div class="section-num">6</div>
+            <div class="section-title">Transition to Next Lesson</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn" onclick="copySection(event, 'content-transition')">Copy</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-transition"></div>
+        </div>
+      </div>
+
+      <div class="section-card voiceover open" id="card-voiceover">
+        <div class="section-header" onclick="toggleSection('card-voiceover')">
+          <div class="section-header-left">
+            <div class="section-num">7</div>
+            <div class="section-title">Voiceover Script</div>
+          </div>
+          <div class="section-header-right">
+            <button class="copy-btn copy-btn-elevenlabs" onclick="copySection(event, 'content-voiceover')">Copy for ElevenLabs →</button>
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="section-content" id="content-voiceover"></div>
+          <div class="elevenlabs-note">Paste this directly into ElevenLabs with the Sparky2 voice</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  const MODEL = 'claude-sonnet-4-6';
+  let currentUser = null;
+
+  const SECTIONS = [
+    { key: 'INTRODUCTION_SCRIPT',      contentId: 'content-intro' },
+    { key: 'SCREEN_DISPLAY_SUGGESTIONS', contentId: 'content-screen' },
+    { key: 'WALKTHROUGH_SCRIPT',       contentId: 'content-walkthrough' },
+    { key: 'EXAMPLE_RESULTS_SECTION',  contentId: 'content-example' },
+    { key: 'COMMUNITY_ACTION',         contentId: 'content-community' },
+    { key: 'TRANSITION_TO_NEXT_LESSON', contentId: 'content-transition' },
+    { key: 'VOICEOVER_SCRIPT',         contentId: 'content-voiceover' },
+  ];
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+      document.getElementById('admin-content').style.display = 'flex';
+      document.getElementById('admin-content').style.flexDirection = 'column';
+      const name = snap.data().displayName || user.displayName || 'Admin';
+      document.getElementById('sidebar-name').textContent = name;
+      const av = document.getElementById('sidebar-avatar');
+      if (user.photoURL) av.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      else av.textContent = name.charAt(0).toUpperCase();
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+    }
+  });
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.classList.add('visible');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearError() {
+    const el = document.getElementById('error-msg');
+    el.textContent = '';
+    el.classList.remove('visible');
+  }
+
+  function buildUserMessage(fields) {
+    return `TOOL NAME: ${fields.toolName}
+TOOL PURPOSE: ${fields.toolPurpose}
+PROBLEM IT SOLVES: ${fields.problemSolves}
+RESULTS IT PRODUCES: ${fields.resultsProduces}
+COMPLETION TIME: ${fields.completionTime} minutes
+COMMUNITY ACTION: ${fields.communityAction}
+NEXT LESSON: ${fields.nextLesson}
+
+Generate a complete lesson package for this ToolSpark tool.`;
+  }
+
+  function parseLessonPackage(raw) {
+    const pkgStart = raw.indexOf('LESSON_PACKAGE_START');
+    const pkgEnd   = raw.indexOf('LESSON_PACKAGE_END');
+    const content  = raw.slice(
+      pkgStart === -1 ? 0 : pkgStart + 'LESSON_PACKAGE_START'.length,
+      pkgEnd   === -1 ? raw.length : pkgEnd
+    );
+
+    const positions = SECTIONS.map(s => ({
+      key: s.key,
+      idx: content.indexOf(s.key + ':')
+    })).filter(p => p.idx !== -1).sort((a, b) => a.idx - b.idx);
+
+    const result = {};
+    positions.forEach((p, i) => {
+      const valueStart = p.idx + p.key.length + 1;
+      const valueEnd   = i + 1 < positions.length ? positions[i + 1].idx : content.length;
+      result[p.key] = content.slice(valueStart, valueEnd).trim();
+    });
+    return result;
+  }
+
+  function renderResults(parsed, toolName) {
+    SECTIONS.forEach(s => {
+      const el = document.getElementById(s.contentId);
+      if (el) el.textContent = parsed[s.key] || 'Not generated.';
+    });
+    document.getElementById('results-sub').textContent =
+      'Lesson package for "' + toolName + '" — all sections ready to use.';
+    document.getElementById('results-section').classList.add('visible');
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function saveToFirestore(toolName, rawResponse) {
+    if (!currentUser) return;
+    try {
+      await db.collection('lesson_packages').add({
+        userId: currentUser.uid,
+        toolName,
+        fullPackage: rawResponse,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e) {
+      console.log('Lesson package save failed:', e.message);
+    }
+  }
+
+  async function generatePackage() {
+    clearError();
+    const fields = {
+      toolName:       document.getElementById('toolName').value.trim(),
+      toolPurpose:    document.getElementById('toolPurpose').value.trim(),
+      problemSolves:  document.getElementById('problemSolves').value.trim(),
+      resultsProduces: document.getElementById('resultsProduces').value.trim(),
+      completionTime: document.getElementById('completionTime').value.trim() || '8',
+      communityAction: document.getElementById('communityAction').value.trim(),
+      nextLesson:     document.getElementById('nextLesson').value.trim(),
+    };
+
+    if (!fields.toolName)        { showError('Please enter the tool name.'); return; }
+    if (!fields.toolPurpose)     { showError('Please describe the tool purpose.'); return; }
+    if (!fields.problemSolves)   { showError('Please describe the problem it solves.'); return; }
+    if (!fields.resultsProduces) { showError('Please describe the results it produces.'); return; }
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    document.getElementById('progress-card').classList.add('visible');
+    document.getElementById('results-section').classList.remove('visible');
+
+    try {
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 4000,
+          messages: [{ role: 'user', content: buildUserMessage(fields) }],
+          _meta: { tool: 'lesson-generator', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'API error ' + res.status);
+      }
+
+      const data = await res.json();
+      const raw  = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+      const parsed = parseLessonPackage(raw);
+
+      renderResults(parsed, fields.toolName);
+      await saveToFirestore(fields.toolName, raw);
+
+    } catch(e) {
+      showError(e.message || 'Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate My Lesson Package →';
+      document.getElementById('progress-card').classList.remove('visible');
+    }
+  }
+
+  function toggleSection(cardId) {
+    document.getElementById(cardId).classList.toggle('open');
+  }
+
+  function copySection(e, contentId) {
+    e.stopPropagation();
+    const text = document.getElementById(contentId)?.textContent || '';
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = e.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
