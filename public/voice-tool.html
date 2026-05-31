@@ -182,34 +182,6 @@
   }
   .char-count.warn { color:var(--coral); }
 
-  /* ── PROVIDER TOGGLE ── */
-  .provider-toggle {
-    display:flex;
-    gap:6px;
-    margin-bottom:16px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:24px;
-    padding:4px;
-    width:fit-content;
-    box-shadow:var(--shadow);
-  }
-  .provider-btn {
-    padding:7px 18px;
-    border-radius:20px;
-    border:none;
-    background:transparent;
-    color:var(--text3);
-    font-family:'Lato',sans-serif;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    cursor:pointer;
-    transition:all 0.18s;
-  }
-  .provider-btn:hover { color:var(--text); }
-  .provider-btn.active { background:var(--gold); color:#fff; }
   .voices-loading {
     text-align:center;
     padding:32px;
@@ -774,31 +746,15 @@
 
     <!-- Voice Selection -->
     <section>
-      <div class="section-label">Select a Voice</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="provider-toggle">
-          <button class="provider-btn active" data-provider="openai">OpenAI</button>
-          <button class="provider-btn" data-provider="elevenlabs">ElevenLabs</button>
-        </div>
-        <button id="refresh-voices-btn" title="Refresh voice list" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--text3);transition:all 0.18s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">↻ Refresh</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="section-label" style="margin-bottom:0">Select a Voice</div>
+        <button id="refresh-voices-btn" title="Refresh voice list" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--text3);transition:all 0.18s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">↻ Refresh</button>
       </div>
       <div class="voice-grid" id="voice-grid"></div>
     </section>
 
-    <!-- Speed -->
-    <section id="speed-section">
-      <div class="section-label">Speed</div>
-      <div class="speed-wrap">
-        <div class="speed-row">
-          <input type="range" id="speed-slider" class="speed-slider" min="0" max="3" step="1" value="1">
-          <div class="speed-display" id="speed-display">1.0× — Normal</div>
-        </div>
-        <div class="speed-ticks" id="speed-ticks"></div>
-      </div>
-    </section>
-
-    <!-- Expressiveness (ElevenLabs only) -->
-    <section id="expressiveness-section" style="display:none">
+    <!-- Expressiveness -->
+    <section id="expressiveness-section">
       <div class="section-label">Expressiveness</div>
       <div class="speed-wrap">
         <div class="speed-row">
@@ -893,42 +849,20 @@
 <audio id="audio-el"></audio>
 
 <script>
-const TTS_URL           = "https://us-central1-toolspark-2d62d.cloudfunctions.net/tts";
-const GENERATE_URL      = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsGenerate";
-const EL_VOICES_URL     = "https://us-central1-toolspark-2d62d.cloudfunctions.net/getElevenLabsVoices";
-const EL_TTS_URL        = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsElevenLabs";
-const EL_CLONE_URL      = "https://us-central1-toolspark-2d62d.cloudfunctions.net/cloneVoice";
-const EL_DELETE_URL     = "https://us-central1-toolspark-2d62d.cloudfunctions.net/deleteClonedVoice";
-
-const OPENAI_VOICES = [
-  { id: "nova",    name: "Nova",    desc: "Warm & natural",        category: "premade" },
-  { id: "shimmer", name: "Shimmer", desc: "Clear & bright",        category: "premade" },
-  { id: "alloy",   name: "Alloy",   desc: "Neutral & balanced",    category: "premade" },
-  { id: "echo",    name: "Echo",    desc: "Warm & refined",        category: "premade" },
-  { id: "fable",   name: "Fable",   desc: "Expressive & animated", category: "premade" },
-  { id: "onyx",    name: "Onyx",    desc: "Deep & authoritative",  category: "premade" },
-  { id: "ash",     name: "Ash",     desc: "Direct & confident",    category: "premade" },
-  { id: "ballad",  name: "Ballad",  desc: "Smooth & storytelling", category: "premade" },
-  { id: "coral",   name: "Coral",   desc: "Friendly & engaging",   category: "premade" },
-  { id: "sage",    name: "Sage",    desc: "Calm & thoughtful",     category: "premade" },
-  { id: "verse",   name: "Verse",   desc: "Dynamic & versatile",   category: "premade" },
-];
-
-const SPEEDS       = [0.75, 1.0, 1.25, 1.5];
-const SPEED_LABELS = ["0.75×", "1.0×", "1.25×", "1.5×"];
-const SPEED_NAMES  = ["Slow", "Normal", "Fast", "Fastest"];
+const EL_VOICES_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/getElevenLabsVoices";
+const EL_TTS_URL    = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsElevenLabs";
+const EL_CLONE_URL  = "https://us-central1-toolspark-2d62d.cloudfunctions.net/cloneVoice";
+const EL_DELETE_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/deleteClonedVoice";
 
 const PREVIEW_TEXT = "Hello! This is a preview so you can hear how this voice sounds before generating your full audio.";
 
-let provider        = "openai";
-let selectedVoice   = "nova";
-let selectedVoiceId = "nova";
-let elVoicesCache   = null;
-let previewCache    = {};
-let currentUser     = null;
-let isAdmin         = false;
-let previewAudio    = null;
-let activePrevBtn   = null;
+let selectedVoice = "";
+let elVoicesCache = null;
+let previewCache  = {};
+let currentUser   = null;
+let isAdmin       = false;
+let previewAudio  = null;
+let activePrevBtn = null;
 
 // ── Auth Helpers ──────────────────────────────────────────
 async function getAuthHeaders() {
@@ -947,37 +881,15 @@ auth.onAuthStateChanged(async user => {
     document.getElementById("auth-gate").style.display = "none";
     document.getElementById("main").style.display = "block";
     document.getElementById("clone-section").style.display = isAdmin ? "block" : "none";
-    updateElCallout();
+    document.getElementById("el-member-callout").style.display = isAdmin ? "none" : "block";
+    buildVoiceGrid();
   } else {
     document.getElementById("auth-gate").style.display = "flex";
     document.getElementById("main").style.display = "none";
   }
 });
 
-function updateElCallout() {
-  const show = provider === "elevenlabs" && !isAdmin;
-  document.getElementById("el-member-callout").style.display = show ? "block" : "none";
-}
-
-// ── Provider Toggle ───────────────────────────────────────
-document.querySelectorAll(".provider-btn").forEach(btn => {
-  btn.addEventListener("click", () => switchProvider(btn.dataset.provider));
-});
-
-function switchProvider(p) {
-  provider = p;
-  document.querySelectorAll(".provider-btn").forEach(b => {
-    b.classList.toggle("active", b.dataset.provider === p);
-  });
-  document.getElementById("speed-section").style.display = p === "openai" ? "" : "none";
-  document.getElementById("expressiveness-section").style.display = p === "elevenlabs" ? "" : "none";
-  document.getElementById("refresh-voices-btn").style.display = p === "elevenlabs" ? "inline-block" : "none";
-  selectedVoice   = p === "openai" ? "nova" : "";
-  selectedVoiceId = p === "openai" ? "nova" : "";
-  updateElCallout();
-  buildVoiceGrid();
-}
-
+// ── Refresh Button ────────────────────────────────────────
 document.getElementById("refresh-voices-btn").addEventListener("click", () => {
   elVoicesCache = null;
   previewCache  = {};
@@ -987,18 +899,11 @@ document.getElementById("refresh-voices-btn").addEventListener("click", () => {
 // ── Voice Grid ───────────────────────────────────────────
 async function buildVoiceGrid() {
   const grid = document.getElementById("voice-grid");
-
-  if (provider === "openai") {
-    renderVoiceCards(OPENAI_VOICES);
-    return;
-  }
-
-  // ElevenLabs — fetch if not cached
   if (elVoicesCache) { renderVoiceCards(elVoicesCache); return; }
 
   grid.innerHTML = `<div class="voices-loading">
     <span class="preview-loading"><span></span><span></span><span></span></span>
-    Loading ElevenLabs voices…
+    Loading voices…
   </div>`;
 
   try {
@@ -1009,25 +914,22 @@ async function buildVoiceGrid() {
     renderVoiceCards(voices);
   } catch {
     grid.innerHTML = `<div class="voices-loading" style="color:var(--coral)">
-      Failed to load ElevenLabs voices. Check your API key and redeploy.
+      Failed to load voices. Try refreshing.
     </div>`;
   }
 }
 
 function renderVoiceCards(voices) {
-  const grid = document.getElementById("voice-grid");
-
+  const grid    = document.getElementById("voice-grid");
   const cloned  = voices.filter(v => v.category !== "premade");
   const premade = voices.filter(v => v.category === "premade");
 
   let html = "";
-
   if (cloned.length) {
     html += `<div class="voices-divider">Your Cloned Voices</div>`;
     html += cloned.map(v => voiceCardHTML(v, true)).join("");
     if (premade.length) html += `<div class="voices-divider" style="margin-top:4px">All Voices</div>`;
   }
-
   html += premade.map(v => voiceCardHTML(v, false)).join("");
   grid.innerHTML = html;
 
@@ -1037,19 +939,11 @@ function renderVoiceCards(voices) {
       selectVoice(card.dataset.voice);
     });
   });
-
   grid.querySelectorAll(".btn-preview").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      handlePreview(btn.dataset.voice, btn);
-    });
+    btn.addEventListener("click", e => { e.stopPropagation(); handlePreview(btn.dataset.voice, btn); });
   });
-
   grid.querySelectorAll(".btn-delete-voice").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      handleDeleteVoice(btn.dataset.voice, btn.dataset.name, btn);
-    });
+    btn.addEventListener("click", e => { e.stopPropagation(); handleDeleteVoice(btn.dataset.voice, btn.dataset.name, btn); });
   });
 }
 
@@ -1059,19 +953,17 @@ function voiceCardHTML(v, isCloned) {
   const delBtn   = isCloned && isAdmin
     ? `<button class="btn-delete-voice" data-voice="${v.id}" data-name="${v.name}" title="Delete voice">×</button>`
     : "";
-  return `
-    <div class="voice-card${selected}" data-voice="${v.id}">
-      <div class="voice-name">${v.name}</div>
-      <div class="voice-desc">${v.desc}</div>
-      ${badge}
-      <button class="btn-preview" data-voice="${v.id}"><span class="prev-label">▶ Preview</span></button>
-      ${delBtn}
-    </div>`;
+  return `<div class="voice-card${selected}" data-voice="${v.id}">
+    <div class="voice-name">${v.name}</div>
+    <div class="voice-desc">${v.desc}</div>
+    ${badge}
+    <button class="btn-preview" data-voice="${v.id}"><span class="prev-label">▶ Preview</span></button>
+    ${delBtn}
+  </div>`;
 }
 
 function selectVoice(voice) {
-  selectedVoice   = voice;
-  selectedVoiceId = voice;
+  selectedVoice = voice;
   document.querySelectorAll(".voice-card").forEach(c => {
     c.classList.toggle("selected", c.dataset.voice === voice);
   });
@@ -1081,7 +973,6 @@ async function handlePreview(voice, btn) {
   const script = document.getElementById("script-input").value.trim();
   if (!script) { showToast("Paste your script first to hear a preview."); return; }
 
-  // Stop previous preview
   if (previewAudio) {
     previewAudio.pause();
     previewAudio = null;
@@ -1099,28 +990,16 @@ async function handlePreview(voice, btn) {
 
   try {
     const exprIdx  = parseInt(document.getElementById("expr-slider").value, 10);
-    const cacheKey = provider === "elevenlabs"
-      ? `el-${voice}-${exprIdx}`
-      : `openai-${voice}`;
+    const cacheKey = `${voice}-${exprIdx}`;
     let url = previewCache[cacheKey];
 
     if (!url) {
-      const authHeaders = await getAuthHeaders();
-      let resp;
-      if (provider === "openai") {
-        resp = await fetch(TTS_URL, {
-          method: "POST",
-          headers: authHeaders,
-          body: JSON.stringify({ text: PREVIEW_TEXT, voice, speed: 1.0 })
-        });
-      } else {
-        resp = await fetch(EL_TTS_URL, {
-          method: "POST",
-          headers: authHeaders,
-          body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice, save: false,
-            style: getExpressiveness(), stability: getStability() })
-        });
-      }
+      const resp = await fetch(EL_TTS_URL, {
+        method: "POST",
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice, save: false,
+          style: getExpressiveness(), stability: getStability() })
+      });
       if (!resp.ok) throw new Error("Preview failed");
       const blob = await resp.blob();
       url = URL.createObjectURL(blob);
@@ -1132,7 +1011,6 @@ async function handlePreview(voice, btn) {
     btn.classList.add("playing");
     btn.querySelector(".prev-label").textContent = "■ Stop";
     btn.disabled = false;
-
     previewAudio.play();
     previewAudio.onended = () => {
       btn.classList.remove("playing");
@@ -1147,10 +1025,10 @@ async function handlePreview(voice, btn) {
   }
 }
 
-// ── Expressiveness Slider (ElevenLabs) ────────────────────
-const EXPR_VALUES = [0.0, 0.35, 0.65, 1.0];
-const EXPR_LABELS = ["Natural", "Warm", "Expressive", "Max Energy"];
-const EXPR_STABILITY = [0.6, 0.5, 0.4, 0.3]; // lower = more variable/dynamic
+// ── Expressiveness Slider ─────────────────────────────────
+const EXPR_VALUES    = [0.0, 0.35, 0.65, 1.0];
+const EXPR_LABELS    = ["Natural", "Warm", "Expressive", "Max Energy"];
+const EXPR_STABILITY = [0.6, 0.5, 0.4, 0.3];
 
 function getExpressiveness() {
   return EXPR_VALUES[parseInt(document.getElementById("expr-slider").value, 10)];
@@ -1183,32 +1061,6 @@ document.getElementById("expr-slider").addEventListener("input", e => {
   updateExprDisplay(parseInt(e.target.value, 10));
 });
 
-// ── Speed Slider ─────────────────────────────────────────
-function buildSpeedTicks() {
-  const ticks = document.getElementById("speed-ticks");
-  ticks.innerHTML = SPEED_LABELS.map((label, i) => `
-    <span class="speed-tick${i === 1 ? " active" : ""}" data-idx="${i}">${label}</span>
-  `).join("");
-  ticks.querySelectorAll(".speed-tick").forEach(tick => {
-    tick.addEventListener("click", () => {
-      document.getElementById("speed-slider").value = tick.dataset.idx;
-      updateSpeedDisplay(parseInt(tick.dataset.idx, 10));
-    });
-  });
-}
-
-function updateSpeedDisplay(idx) {
-  document.getElementById("speed-display").textContent =
-    `${SPEED_LABELS[idx]} — ${SPEED_NAMES[idx]}`;
-  document.querySelectorAll(".speed-tick").forEach((t, i) => {
-    t.classList.toggle("active", i === idx);
-  });
-}
-
-document.getElementById("speed-slider").addEventListener("input", e => {
-  updateSpeedDisplay(parseInt(e.target.value, 10));
-});
-
 // ── Char Count ───────────────────────────────────────────
 const scriptInput = document.getElementById("script-input");
 const charCount   = document.getElementById("char-count");
@@ -1221,7 +1073,7 @@ scriptInput.addEventListener("input", () => {
 // ── Generate ─────────────────────────────────────────────
 document.getElementById("generate-btn").addEventListener("click", async () => {
   const script = scriptInput.value.trim();
-  if (!script) { showToast("Paste your script before generating."); return; }
+  if (!script)        { showToast("Paste your script before generating."); return; }
   if (!selectedVoice) { showToast("Select a voice first."); return; }
 
   const btn = document.getElementById("generate-btn");
@@ -1229,35 +1081,18 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
   btn.classList.add("loading");
   btn.textContent = "Generating audio…";
 
-  const speedIdx = parseInt(document.getElementById("speed-slider").value, 10);
-
   try {
-    const authHeaders = await getAuthHeaders();
-    let resp;
-
-    if (provider === "openai") {
-      resp = await fetch(GENERATE_URL, {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({
-          text:  script,
-          voice: selectedVoice,
-          speed: SPEEDS[speedIdx]
-        })
-      });
-    } else {
-      resp = await fetch(EL_TTS_URL, {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({
-          text:      script,
-          voiceId:   selectedVoice,
-          save:      true,
-          style:     getExpressiveness(),
-          stability: getStability()
-        })
-      });
-    }
+    const resp = await fetch(EL_TTS_URL, {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({
+        text:      script,
+        voiceId:   selectedVoice,
+        save:      true,
+        style:     getExpressiveness(),
+        stability: getStability()
+      })
+    });
 
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
@@ -1265,7 +1100,7 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
     }
 
     const { url, filename } = await resp.json();
-    showResult(url, filename, speedIdx);
+    showResult(url, filename);
 
   } catch (err) {
     showToast(err.message || "Something went wrong. Try again.");
@@ -1277,17 +1112,13 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
 });
 
 // ── Result Player ─────────────────────────────────────────
-function showResult(url, filename, speedIdx) {
-  // Set up download link
+function showResult(url, filename) {
   const dlLink = document.getElementById("download-link");
   dlLink.href = url;
   dlLink.download = filename || `voice-${selectedVoice}.mp3`;
 
-  // Badge
-  const voiceLabel = provider === "openai"
-    ? `${selectedVoice.charAt(0).toUpperCase() + selectedVoice.slice(1)} · ${SPEED_LABELS[speedIdx]}`
-    : (elVoicesCache?.find(v => v.id === selectedVoice)?.name ?? selectedVoice);
-  document.getElementById("result-badge").textContent = voiceLabel;
+  const voiceName = elVoicesCache?.find(v => v.id === selectedVoice)?.name ?? selectedVoice;
+  document.getElementById("result-badge").textContent = voiceName;
   document.getElementById("result-filename").textContent = filename || "";
 
   // Audio player
@@ -1431,9 +1262,9 @@ document.getElementById("btn-clone").addEventListener("click", async () => {
     uploadFilename.style.display = "none";
     uploadFilename.textContent = "";
 
-    // Refresh EL voices so new clone appears
+    // Refresh voice list so new clone appears
     elVoicesCache = null;
-    if (provider === "elevenlabs") buildVoiceGrid();
+    buildVoiceGrid();
 
     showToast("Voice cloned! Find it at the top of your ElevenLabs list.");
   } catch (err) {
@@ -1484,8 +1315,6 @@ async function handleDeleteVoice(voiceId, voiceName, btn) {
 }
 
 // ── Init ──────────────────────────────────────────────────
-buildVoiceGrid();
-buildSpeedTicks();
 buildExprTicks();
 </script>
 </body>
