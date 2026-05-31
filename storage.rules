@@ -60,6 +60,12 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // VOICE TOOL AUDIO — written server-side only, readable by owner
+    match /voice-audio/{userId}/{fileName} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;

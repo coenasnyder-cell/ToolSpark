@@ -485,6 +485,11 @@
 
 <script>
   const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : "";
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
   const MODEL = "claude-sonnet-4-6";
 
   const MAX_GENERATIONS = 3; // 1 original + 2 regenerations
@@ -660,7 +665,7 @@ Revise the brief now. Keep the same structure. Fix what the feedback asks for. L
       try {
         const resp = await fetch(FUNCTION_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await authHeaders(),
           body: JSON.stringify({
             model: MODEL,
             max_tokens: 2500,
@@ -806,7 +811,7 @@ Write the brief now.`;
     try {
       const resp = await fetch(FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           model: MODEL,
           max_tokens: 2500,

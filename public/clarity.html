@@ -535,6 +535,11 @@ if (typeof emailjs !== 'undefined') emailjs.init('i9Oz0ibL_775xDsSb');
 // CONFIG
 // ══════════════════════════════════════════
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken() : "";
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+}
 const MODEL = "claude-sonnet-4-6";
 
 // ══════════════════════════════════════════
@@ -697,7 +702,7 @@ async function callClaude(userMessage) {
 
   const response = await fetch(FUNCTION_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: await authHeaders(),
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1500,

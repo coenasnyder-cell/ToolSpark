@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Tool — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #F4F2EE;
+    --surface:    #FFFFFF;
+    --dark:       #0C0B09;
+    --dark2:      #141210;
+    --dark3:      #1C1A17;
+    --gold:       #C9A84C;
+    --gold-light: #B8922E;
+    --gold-dim:   rgba(201,168,76,0.12);
+    --gold-mid:   rgba(201,168,76,0.20);
+    --gold-glow:  rgba(201,168,76,0.25);
+    --border:     #E4E0D8;
+    --border-mid: rgba(0,0,0,0.12);
+    --text:       #1A1714;
+    --text2:      #4A453F;
+    --text3:      #9E9891;
+    --coral:      #C4622D;
+    --coral-dim:  rgba(196,98,45,0.10);
+    --shadow:     0 1px 4px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Lato',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ── HEADER ── */
+  .hdr {
+    height:56px;
+    background:var(--dark);
+    border-bottom:1px solid rgba(201,168,76,0.15);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    flex-shrink:0;
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
+  .hdr-back {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    text-decoration:none;
+    color:#9E9891;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    transition:color 0.18s;
+  }
+  .hdr-back:hover { color:#E8D5A3; }
+  .hdr-title {
+    font-family:'Playfair Display',serif;
+    font-size:16px;
+    color:#E8D5A3;
+    letter-spacing:0.02em;
+  }
+  .hdr-right { width:80px; }
+
+  /* ── AUTH GATE ── */
+  .fullpage {
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 20px;
+  }
+  .gate-card {
+    max-width:420px;
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:36px 32px;
+    text-align:center;
+    box-shadow:var(--shadow);
+  }
+  .gate-title {
+    font-family:'Playfair Display',serif;
+    font-size:22px;
+    color:var(--text);
+    margin-bottom:10px;
+  }
+  .gate-sub {
+    font-size:14px;
+    color:var(--text3);
+    margin-bottom:24px;
+    line-height:1.5;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex:1;
+    padding:32px 20px 60px;
+  }
+  .container {
+    max-width:720px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:36px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .section-label::before {
+    content:'';
+    display:block;
+    width:20px;
+    height:1px;
+    background:var(--gold);
+    opacity:0.5;
+  }
+
+  /* ── SCRIPT TEXTAREA ── */
+  .script-wrap { position:relative; }
+  .script-textarea {
+    width:100%;
+    min-height:180px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px 18px;
+    font-family:'Lato',sans-serif;
+    font-size:15px;
+    color:var(--text);
+    line-height:1.6;
+    resize:vertical;
+    outline:none;
+    transition:border-color 0.2s;
+    box-shadow:var(--shadow);
+  }
+  .script-textarea::placeholder { color:var(--text3); }
+  .script-textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.1); }
+  .char-count {
+    text-align:right;
+    font-size:12px;
+    color:var(--text3);
+    margin-top:6px;
+  }
+  .char-count.warn { color:var(--coral); }
+
+  /* ── PROVIDER TOGGLE ── */
+  .provider-toggle {
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:4px;
+    width:fit-content;
+    box-shadow:var(--shadow);
+  }
+  .provider-btn {
+    padding:7px 18px;
+    border-radius:20px;
+    border:none;
+    background:transparent;
+    color:var(--text3);
+    font-family:'Lato',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all 0.18s;
+  }
+  .provider-btn:hover { color:var(--text); }
+  .provider-btn.active { background:var(--gold); color:#fff; }
+  .voices-loading {
+    text-align:center;
+    padding:32px;
+    color:var(--text3);
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+
+  /* ── VOICE LIST (rows) ── */
+  .voice-grid {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .voice-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:border-color 0.18s, background 0.18s, box-shadow 0.18s;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    user-select:none;
+    box-shadow:var(--shadow);
+  }
+  .voice-card:hover { border-color:rgba(201,168,76,0.4); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .voice-card.selected {
+    border-color:var(--gold);
+    background:rgba(201,168,76,0.06);
+    box-shadow:0 0 0 1px var(--gold);
+  }
+  .voice-card.selected .voice-name { color:var(--gold-light); }
+  .voice-name {
+    font-family:'Playfair Display',serif;
+    font-size:16px;
+    font-weight:600;
+    color:var(--text);
+    min-width:80px;
+    transition:color 0.18s;
+  }
+  .voice-desc {
+    font-size:13px;
+    color:var(--text3);
+    flex:1;
+  }
+  .btn-preview {
+    padding:7px 14px;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:8px;
+    color:var(--text3);
+    font-family:'Lato',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    transition:all 0.18s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    min-height:32px;
+    flex-shrink:0;
+  }
+  .btn-preview:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-preview:disabled { opacity:0.5; cursor:default; }
+  .btn-preview.playing { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+
+  /* spinner dots for preview loading */
+  .preview-loading { display:flex; gap:3px; align-items:center; }
+  .preview-loading span {
+    width:4px; height:4px; border-radius:50%;
+    background:var(--text3);
+    animation:dot-bounce 1s infinite ease-in-out;
+  }
+  .preview-loading span:nth-child(2) { animation-delay:0.16s; }
+  .preview-loading span:nth-child(3) { animation-delay:0.32s; }
+  @keyframes dot-bounce {
+    0%,80%,100% { transform:scale(0.7); opacity:0.4; }
+    40% { transform:scale(1); opacity:1; }
+  }
+
+  /* ── SPEED CONTROL ── */
+  .speed-wrap {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .speed-row {
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .speed-slider {
+    flex:1;
+    -webkit-appearance:none;
+    appearance:none;
+    height:4px;
+    background:var(--border);
+    border-radius:2px;
+    outline:none;
+    cursor:pointer;
+  }
+  .speed-slider::-webkit-slider-thumb {
+    -webkit-appearance:none;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:var(--gold);
+    cursor:pointer;
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px var(--gold);
+    transition:transform 0.12s;
+  }
+  .speed-slider::-webkit-slider-thumb:hover { transform:scale(1.15); }
+  .speed-slider::-moz-range-thumb {
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:var(--gold);
+    cursor:pointer;
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px var(--gold);
+  }
+  .speed-display {
+    font-size:13px;
+    font-weight:700;
+    color:var(--gold);
+    min-width:120px;
+    text-align:right;
+  }
+  .speed-ticks {
+    display:flex;
+    justify-content:space-between;
+    padding:0 1px;
+  }
+  .speed-tick {
+    font-size:11px;
+    color:var(--text3);
+    cursor:pointer;
+    transition:color 0.15s;
+  }
+  .speed-tick:hover { color:var(--text); }
+  .speed-tick.active { color:var(--gold); font-weight:700; }
+
+  /* ── MEMBER EL CALLOUT ── */
+  .el-callout {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:var(--shadow);
+    margin-top:8px;
+  }
+  .el-callout-icon { font-size:18px; flex-shrink:0; }
+  .el-callout-text { flex:1; font-size:13px; color:var(--text2); line-height:1.4; }
+  .el-callout-text strong { color:var(--text); }
+  .el-callout-link {
+    font-size:12px;
+    font-weight:700;
+    color:var(--gold);
+    text-decoration:none;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .el-callout-link:hover { text-decoration:underline; }
+
+  /* ── CLONED VOICE BADGE ── */
+  .voice-cloned-badge {
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:rgba(255,140,0,0.12);
+    color:#d97706;
+    border:1px solid rgba(255,140,0,0.25);
+    border-radius:8px;
+    padding:2px 7px;
+    flex-shrink:0;
+  }
+  .btn-delete-voice {
+    width:28px;
+    height:28px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text3);
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:all 0.15s;
+  }
+  .btn-delete-voice:hover { border-color:#f87171; color:#ef4444; background:rgba(239,68,68,0.06); }
+  .voices-divider {
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text3);
+    padding:4px 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .voices-divider::after {
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--border);
+  }
+
+  /* ── CLONE SECTION (admin only) ── */
+  .clone-section {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .clone-section-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .clone-section-title {
+    font-family:'Playfair Display',serif;
+    font-size:17px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .admin-badge {
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    background:var(--gold-dim);
+    color:var(--gold);
+    border:1px solid rgba(201,168,76,0.3);
+    border-radius:10px;
+    padding:3px 9px;
+  }
+  .clone-form {
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .clone-field label {
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text3);
+    margin-bottom:6px;
+  }
+  .clone-field input {
+    width:100%;
+    padding:10px 14px;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-family:'Lato',sans-serif;
+    font-size:14px;
+    color:var(--text);
+    outline:none;
+    transition:border-color 0.18s;
+  }
+  .clone-field input:focus { border-color:var(--gold); }
+  .upload-area {
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:28px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.2s;
+    background:var(--bg);
+    position:relative;
+  }
+  .upload-area:hover, .upload-area.drag-over {
+    border-color:var(--gold);
+    background:rgba(201,168,76,0.04);
+  }
+  .upload-area input[type="file"] {
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+    width:100%;
+    height:100%;
+  }
+  .upload-icon { font-size:28px; margin-bottom:8px; }
+  .upload-label { font-size:14px; font-weight:700; color:var(--text2); margin-bottom:4px; }
+  .upload-hint { font-size:12px; color:var(--text3); line-height:1.5; }
+  .upload-filename {
+    font-size:13px;
+    font-weight:700;
+    color:var(--gold);
+    margin-top:8px;
+    display:none;
+  }
+  .btn-clone {
+    padding:13px;
+    background:var(--gold);
+    border:none;
+    border-radius:12px;
+    color:#fff;
+    font-family:'Lato',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    transition:all 0.18s;
+  }
+  .btn-clone:hover { background:#b8922e; }
+  .btn-clone:disabled { opacity:0.6; cursor:default; }
+
+  /* ── GENERATE BUTTON ── */
+  .btn-generate {
+    width:100%;
+    padding:16px;
+    background:var(--gold);
+    border:none;
+    border-radius:14px;
+    color:#0C0B09;
+    font-family:'Lato',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .btn-generate:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .btn-generate:disabled {
+    opacity:0.6;
+    cursor:default;
+    transform:none;
+  }
+  .btn-generate.loading {
+    background:var(--dark3);
+    border:1px solid var(--border-mid);
+    color:var(--text3);
+  }
+
+  /* ── RESULT SECTION ── */
+  .result-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    animation:fadeUp 0.35s ease both;
+    box-shadow:var(--shadow);
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .result-meta {
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .result-badge {
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    background:var(--gold-dim);
+    border:1px solid var(--border-mid);
+    border-radius:20px;
+    padding:4px 10px;
+  }
+  .result-filename {
+    font-size:13px;
+    color:var(--text3);
+  }
+
+  /* Custom audio player */
+  .player-wrap {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .player-controls {
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .btn-play-pause {
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:var(--gold);
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:all 0.18s;
+  }
+  .btn-play-pause:hover { background:var(--gold-light); transform:scale(1.05); }
+  .btn-play-pause svg { fill:#0C0B09; width:14px; height:14px; }
+  .player-progress-wrap {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .progress-bar-track {
+    height:4px;
+    background:var(--border);
+    border-radius:2px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-bar-fill {
+    height:100%;
+    background:var(--gold);
+    border-radius:2px;
+    width:0%;
+    transition:width 0.1s linear;
+  }
+  .player-times {
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--text3);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .btn-download {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:12px 20px;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--gold);
+    font-family:'Lato',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-decoration:none;
+    transition:all 0.18s;
+    cursor:pointer;
+  }
+  .btn-download:hover { border-color:var(--gold); background:var(--gold-dim); }
+  .btn-download svg { fill:currentColor; width:14px; height:14px; }
+
+  /* ── SIGN IN BUTTON ── */
+  .btn-gold {
+    display:inline-block;
+    padding:12px 28px;
+    background:var(--gold);
+    border-radius:10px;
+    color:#0C0B09;
+    font-family:'Lato',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none;
+    letter-spacing:0.04em;
+    transition:all 0.18s;
+  }
+  .btn-gold:hover { background:var(--gold-light); transform:translateY(-1px); }
+
+  /* ── ERROR TOAST ── */
+  .toast {
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--text);
+    border-radius:10px;
+    padding:10px 18px;
+    font-size:13px;
+    color:#F4F2EE;
+    z-index:999;
+    opacity:0;
+    transition:all 0.3s ease;
+    max-width:360px;
+    text-align:center;
+    pointer-events:none;
+    box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:600px) {
+    .container { gap:24px; }
+    .main { padding:20px 16px 48px; }
+    .speed-display { min-width:80px; font-size:12px; }
+    .voice-name { min-width:64px; font-size:14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <a href="dashboard.html" class="hdr-back">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Dashboard
+  </a>
+  <span class="hdr-title">Voice Tool</span>
+  <div class="hdr-right"></div>
+</header>
+
+<!-- Auth Gate -->
+<div id="auth-gate" class="fullpage" style="display:none">
+  <div class="gate-card">
+    <div class="gate-title">Sign In to Continue</div>
+    <p class="gate-sub">The Voice Tool is available to ToolSpark members.</p>
+    <a href="signon.html" class="btn-gold">Sign In</a>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main id="main" class="main" style="display:none">
+  <div class="container">
+
+    <!-- Script Input -->
+    <section>
+      <div class="section-label">Your Script</div>
+      <div class="script-wrap">
+        <textarea
+          id="script-input"
+          class="script-textarea"
+          placeholder="Paste or type your script here…"
+          maxlength="4096"
+        ></textarea>
+      </div>
+      <div class="char-count"><span id="char-count">0</span> / 4096 characters</div>
+    </section>
+
+    <!-- Voice Selection -->
+    <section>
+      <div class="section-label">Select a Voice</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="provider-toggle">
+          <button class="provider-btn active" data-provider="openai">OpenAI</button>
+          <button class="provider-btn" data-provider="elevenlabs">ElevenLabs</button>
+        </div>
+        <button id="refresh-voices-btn" title="Refresh voice list" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--text3);transition:all 0.18s" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">↻ Refresh</button>
+      </div>
+      <div class="voice-grid" id="voice-grid"></div>
+    </section>
+
+    <!-- Speed -->
+    <section id="speed-section">
+      <div class="section-label">Speed</div>
+      <div class="speed-wrap">
+        <div class="speed-row">
+          <input type="range" id="speed-slider" class="speed-slider" min="0" max="3" step="1" value="1">
+          <div class="speed-display" id="speed-display">1.0× — Normal</div>
+        </div>
+        <div class="speed-ticks" id="speed-ticks"></div>
+      </div>
+    </section>
+
+    <!-- Expressiveness (ElevenLabs only) -->
+    <section id="expressiveness-section" style="display:none">
+      <div class="section-label">Expressiveness</div>
+      <div class="speed-wrap">
+        <div class="speed-row">
+          <input type="range" id="expr-slider" class="speed-slider" min="0" max="3" step="1" value="0">
+          <div class="speed-display" id="expr-display">Natural</div>
+        </div>
+        <div class="speed-ticks" id="expr-ticks"></div>
+      </div>
+    </section>
+
+    <!-- Generate -->
+    <section>
+      <button id="generate-btn" class="btn-generate">Generate + Download MP3</button>
+    </section>
+
+    <!-- Member ElevenLabs callout (non-admin, shown when EL tab active) -->
+    <div id="el-member-callout" style="display:none">
+      <div class="el-callout">
+        <div class="el-callout-icon">🎙️</div>
+        <div class="el-callout-text">
+          <strong>Want to use your own cloned voice?</strong> ElevenLabs lets you clone your voice in minutes with just a short recording.
+        </div>
+        <a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener" class="el-callout-link">$5/month →</a>
+      </div>
+    </div>
+
+    <!-- Admin clone section -->
+    <div id="clone-section" style="display:none">
+      <div class="clone-section">
+        <div class="clone-section-header">
+          <span class="clone-section-title">Clone a Voice</span>
+          <span class="admin-badge">Admin Only</span>
+        </div>
+        <div class="clone-form">
+          <div class="clone-field">
+            <label>Voice Name</label>
+            <input type="text" id="clone-name" placeholder="e.g. My Voice, Coena Studio…" maxlength="64">
+          </div>
+          <div class="clone-field">
+            <label>Audio Sample</label>
+            <div class="upload-area" id="upload-area">
+              <input type="file" id="clone-file" accept="audio/mp3,audio/mpeg,audio/wav,audio/m4a,audio/mp4,audio/*">
+              <div class="upload-icon">🎤</div>
+              <div class="upload-label">Click or drag an audio file here</div>
+              <div class="upload-hint">MP3 or WAV · 1–3 minutes of clear speech recommended<br>Max 20MB</div>
+              <div class="upload-filename" id="upload-filename"></div>
+            </div>
+          </div>
+          <button class="btn-clone" id="btn-clone">Clone Voice</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result-section" style="display:none">
+      <div class="result-card" id="result-card">
+        <div class="result-meta">
+          <span class="result-badge" id="result-badge">Nova · 1.0×</span>
+          <span class="result-filename" id="result-filename"></span>
+        </div>
+        <div class="player-wrap">
+          <div class="player-controls">
+            <button class="btn-play-pause" id="btn-play-pause" title="Play / Pause">
+              <svg id="play-icon" viewBox="0 0 16 16"><path d="M4 2.5L13 8L4 13.5V2.5Z"/></svg>
+              <svg id="pause-icon" viewBox="0 0 16 16" style="display:none"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
+            </button>
+            <div class="player-progress-wrap">
+              <div class="progress-bar-track" id="progress-track">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+              </div>
+              <div class="player-times">
+                <span id="time-current">0:00</span>
+                <span id="time-total">0:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a id="download-link" class="btn-download" download>
+          <svg viewBox="0 0 16 16"><path d="M8 1v9M4 7l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          Download MP3
+        </a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Error Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden audio element -->
+<audio id="audio-el"></audio>
+
+<script>
+const TTS_URL           = "https://us-central1-toolspark-2d62d.cloudfunctions.net/tts";
+const GENERATE_URL      = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsGenerate";
+const EL_VOICES_URL     = "https://us-central1-toolspark-2d62d.cloudfunctions.net/getElevenLabsVoices";
+const EL_TTS_URL        = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsElevenLabs";
+const EL_CLONE_URL      = "https://us-central1-toolspark-2d62d.cloudfunctions.net/cloneVoice";
+const EL_DELETE_URL     = "https://us-central1-toolspark-2d62d.cloudfunctions.net/deleteClonedVoice";
+
+const OPENAI_VOICES = [
+  { id: "nova",    name: "Nova",    desc: "Warm & natural",        category: "premade" },
+  { id: "shimmer", name: "Shimmer", desc: "Clear & bright",        category: "premade" },
+  { id: "alloy",   name: "Alloy",   desc: "Neutral & balanced",    category: "premade" },
+  { id: "echo",    name: "Echo",    desc: "Warm & refined",        category: "premade" },
+  { id: "fable",   name: "Fable",   desc: "Expressive & animated", category: "premade" },
+  { id: "onyx",    name: "Onyx",    desc: "Deep & authoritative",  category: "premade" },
+  { id: "ash",     name: "Ash",     desc: "Direct & confident",    category: "premade" },
+  { id: "ballad",  name: "Ballad",  desc: "Smooth & storytelling", category: "premade" },
+  { id: "coral",   name: "Coral",   desc: "Friendly & engaging",   category: "premade" },
+  { id: "sage",    name: "Sage",    desc: "Calm & thoughtful",     category: "premade" },
+  { id: "verse",   name: "Verse",   desc: "Dynamic & versatile",   category: "premade" },
+];
+
+const SPEEDS       = [0.75, 1.0, 1.25, 1.5];
+const SPEED_LABELS = ["0.75×", "1.0×", "1.25×", "1.5×"];
+const SPEED_NAMES  = ["Slow", "Normal", "Fast", "Fastest"];
+
+const PREVIEW_TEXT = "Hello! This is a preview so you can hear how this voice sounds before generating your full audio.";
+
+let provider        = "openai";
+let selectedVoice   = "nova";
+let selectedVoiceId = "nova";
+let elVoicesCache   = null;
+let previewCache    = {};
+let currentUser     = null;
+let isAdmin         = false;
+let previewAudio    = null;
+let activePrevBtn   = null;
+
+// ── Auth Helpers ──────────────────────────────────────────
+async function getAuthHeaders() {
+  const token = await currentUser.getIdToken();
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+}
+
+// ── Auth ──────────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    currentUser = user;
+    const doc = await db.collection("users").doc(user.uid).get();
+    isAdmin = doc.exists && doc.data().userRole === "admin";
+    document.getElementById("auth-gate").style.display = "none";
+    document.getElementById("main").style.display = "block";
+    document.getElementById("clone-section").style.display = isAdmin ? "block" : "none";
+    updateElCallout();
+  } else {
+    document.getElementById("auth-gate").style.display = "flex";
+    document.getElementById("main").style.display = "none";
+  }
+});
+
+function updateElCallout() {
+  const show = provider === "elevenlabs" && !isAdmin;
+  document.getElementById("el-member-callout").style.display = show ? "block" : "none";
+}
+
+// ── Provider Toggle ───────────────────────────────────────
+document.querySelectorAll(".provider-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchProvider(btn.dataset.provider));
+});
+
+function switchProvider(p) {
+  provider = p;
+  document.querySelectorAll(".provider-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.provider === p);
+  });
+  document.getElementById("speed-section").style.display = p === "openai" ? "" : "none";
+  document.getElementById("expressiveness-section").style.display = p === "elevenlabs" ? "" : "none";
+  document.getElementById("refresh-voices-btn").style.display = p === "elevenlabs" ? "inline-block" : "none";
+  selectedVoice   = p === "openai" ? "nova" : "";
+  selectedVoiceId = p === "openai" ? "nova" : "";
+  updateElCallout();
+  buildVoiceGrid();
+}
+
+document.getElementById("refresh-voices-btn").addEventListener("click", () => {
+  elVoicesCache = null;
+  previewCache  = {};
+  buildVoiceGrid();
+});
+
+// ── Voice Grid ───────────────────────────────────────────
+async function buildVoiceGrid() {
+  const grid = document.getElementById("voice-grid");
+
+  if (provider === "openai") {
+    renderVoiceCards(OPENAI_VOICES);
+    return;
+  }
+
+  // ElevenLabs — fetch if not cached
+  if (elVoicesCache) { renderVoiceCards(elVoicesCache); return; }
+
+  grid.innerHTML = `<div class="voices-loading">
+    <span class="preview-loading"><span></span><span></span><span></span></span>
+    Loading ElevenLabs voices…
+  </div>`;
+
+  try {
+    const resp = await fetch(EL_VOICES_URL, { headers: await getAuthHeaders() });
+    if (!resp.ok) throw new Error("Could not load voices");
+    const { voices } = await resp.json();
+    elVoicesCache = voices;
+    renderVoiceCards(voices);
+  } catch {
+    grid.innerHTML = `<div class="voices-loading" style="color:var(--coral)">
+      Failed to load ElevenLabs voices. Check your API key and redeploy.
+    </div>`;
+  }
+}
+
+function renderVoiceCards(voices) {
+  const grid = document.getElementById("voice-grid");
+
+  const cloned  = voices.filter(v => v.category !== "premade");
+  const premade = voices.filter(v => v.category === "premade");
+
+  let html = "";
+
+  if (cloned.length) {
+    html += `<div class="voices-divider">Your Cloned Voices</div>`;
+    html += cloned.map(v => voiceCardHTML(v, true)).join("");
+    if (premade.length) html += `<div class="voices-divider" style="margin-top:4px">All Voices</div>`;
+  }
+
+  html += premade.map(v => voiceCardHTML(v, false)).join("");
+  grid.innerHTML = html;
+
+  grid.querySelectorAll(".voice-card").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest(".btn-preview") || e.target.closest(".btn-delete-voice")) return;
+      selectVoice(card.dataset.voice);
+    });
+  });
+
+  grid.querySelectorAll(".btn-preview").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      handlePreview(btn.dataset.voice, btn);
+    });
+  });
+
+  grid.querySelectorAll(".btn-delete-voice").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      handleDeleteVoice(btn.dataset.voice, btn.dataset.name, btn);
+    });
+  });
+}
+
+function voiceCardHTML(v, isCloned) {
+  const selected = v.id === selectedVoice ? " selected" : "";
+  const badge    = isCloned ? `<span class="voice-cloned-badge">Cloned</span>` : "";
+  const delBtn   = isCloned && isAdmin
+    ? `<button class="btn-delete-voice" data-voice="${v.id}" data-name="${v.name}" title="Delete voice">×</button>`
+    : "";
+  return `
+    <div class="voice-card${selected}" data-voice="${v.id}">
+      <div class="voice-name">${v.name}</div>
+      <div class="voice-desc">${v.desc}</div>
+      ${badge}
+      <button class="btn-preview" data-voice="${v.id}"><span class="prev-label">▶ Preview</span></button>
+      ${delBtn}
+    </div>`;
+}
+
+function selectVoice(voice) {
+  selectedVoice   = voice;
+  selectedVoiceId = voice;
+  document.querySelectorAll(".voice-card").forEach(c => {
+    c.classList.toggle("selected", c.dataset.voice === voice);
+  });
+}
+
+async function handlePreview(voice, btn) {
+  const script = document.getElementById("script-input").value.trim();
+  if (!script) { showToast("Paste your script first to hear a preview."); return; }
+
+  // Stop previous preview
+  if (previewAudio) {
+    previewAudio.pause();
+    previewAudio = null;
+    if (activePrevBtn) {
+      activePrevBtn.classList.remove("playing");
+      activePrevBtn.querySelector(".prev-label").textContent = "▶ Preview";
+      activePrevBtn.disabled = false;
+    }
+    activePrevBtn = null;
+  }
+
+  btn.disabled = true;
+  btn.querySelector(".prev-label").innerHTML =
+    '<span class="preview-loading"><span></span><span></span><span></span></span>';
+
+  try {
+    const exprIdx  = parseInt(document.getElementById("expr-slider").value, 10);
+    const cacheKey = provider === "elevenlabs"
+      ? `el-${voice}-${exprIdx}`
+      : `openai-${voice}`;
+    let url = previewCache[cacheKey];
+
+    if (!url) {
+      const authHeaders = await getAuthHeaders();
+      let resp;
+      if (provider === "openai") {
+        resp = await fetch(TTS_URL, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({ text: PREVIEW_TEXT, voice, speed: 1.0 })
+        });
+      } else {
+        resp = await fetch(EL_TTS_URL, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice, save: false,
+            style: getExpressiveness(), stability: getStability() })
+        });
+      }
+      if (!resp.ok) throw new Error("Preview failed");
+      const blob = await resp.blob();
+      url = URL.createObjectURL(blob);
+      previewCache[cacheKey] = url;
+    }
+
+    previewAudio  = new Audio(url);
+    activePrevBtn = btn;
+    btn.classList.add("playing");
+    btn.querySelector(".prev-label").textContent = "■ Stop";
+    btn.disabled = false;
+
+    previewAudio.play();
+    previewAudio.onended = () => {
+      btn.classList.remove("playing");
+      btn.querySelector(".prev-label").textContent = "▶ Preview";
+      previewAudio = null;
+      activePrevBtn = null;
+    };
+  } catch {
+    btn.disabled = false;
+    btn.querySelector(".prev-label").textContent = "▶ Preview";
+    showToast("Preview failed — check your script and try again.");
+  }
+}
+
+// ── Expressiveness Slider (ElevenLabs) ────────────────────
+const EXPR_VALUES = [0.0, 0.35, 0.65, 1.0];
+const EXPR_LABELS = ["Natural", "Warm", "Expressive", "Max Energy"];
+const EXPR_STABILITY = [0.6, 0.5, 0.4, 0.3]; // lower = more variable/dynamic
+
+function getExpressiveness() {
+  return EXPR_VALUES[parseInt(document.getElementById("expr-slider").value, 10)];
+}
+function getStability() {
+  return EXPR_STABILITY[parseInt(document.getElementById("expr-slider").value, 10)];
+}
+
+function buildExprTicks() {
+  const ticks = document.getElementById("expr-ticks");
+  ticks.innerHTML = EXPR_LABELS.map((label, i) => `
+    <span class="speed-tick${i === 0 ? " active" : ""}" data-idx="${i}">${label}</span>
+  `).join("");
+  ticks.querySelectorAll(".speed-tick").forEach(tick => {
+    tick.addEventListener("click", () => {
+      document.getElementById("expr-slider").value = tick.dataset.idx;
+      updateExprDisplay(parseInt(tick.dataset.idx, 10));
+    });
+  });
+}
+
+function updateExprDisplay(idx) {
+  document.getElementById("expr-display").textContent = EXPR_LABELS[idx];
+  document.querySelectorAll("#expr-ticks .speed-tick").forEach((t, i) => {
+    t.classList.toggle("active", i === idx);
+  });
+}
+
+document.getElementById("expr-slider").addEventListener("input", e => {
+  updateExprDisplay(parseInt(e.target.value, 10));
+});
+
+// ── Speed Slider ─────────────────────────────────────────
+function buildSpeedTicks() {
+  const ticks = document.getElementById("speed-ticks");
+  ticks.innerHTML = SPEED_LABELS.map((label, i) => `
+    <span class="speed-tick${i === 1 ? " active" : ""}" data-idx="${i}">${label}</span>
+  `).join("");
+  ticks.querySelectorAll(".speed-tick").forEach(tick => {
+    tick.addEventListener("click", () => {
+      document.getElementById("speed-slider").value = tick.dataset.idx;
+      updateSpeedDisplay(parseInt(tick.dataset.idx, 10));
+    });
+  });
+}
+
+function updateSpeedDisplay(idx) {
+  document.getElementById("speed-display").textContent =
+    `${SPEED_LABELS[idx]} — ${SPEED_NAMES[idx]}`;
+  document.querySelectorAll(".speed-tick").forEach((t, i) => {
+    t.classList.toggle("active", i === idx);
+  });
+}
+
+document.getElementById("speed-slider").addEventListener("input", e => {
+  updateSpeedDisplay(parseInt(e.target.value, 10));
+});
+
+// ── Char Count ───────────────────────────────────────────
+const scriptInput = document.getElementById("script-input");
+const charCount   = document.getElementById("char-count");
+scriptInput.addEventListener("input", () => {
+  const len = scriptInput.value.length;
+  charCount.textContent = len;
+  charCount.parentElement.classList.toggle("warn", len > 3800);
+});
+
+// ── Generate ─────────────────────────────────────────────
+document.getElementById("generate-btn").addEventListener("click", async () => {
+  const script = scriptInput.value.trim();
+  if (!script) { showToast("Paste your script before generating."); return; }
+  if (!selectedVoice) { showToast("Select a voice first."); return; }
+
+  const btn = document.getElementById("generate-btn");
+  btn.disabled = true;
+  btn.classList.add("loading");
+  btn.textContent = "Generating audio…";
+
+  const speedIdx = parseInt(document.getElementById("speed-slider").value, 10);
+
+  try {
+    const authHeaders = await getAuthHeaders();
+    let resp;
+
+    if (provider === "openai") {
+      resp = await fetch(GENERATE_URL, {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          text:  script,
+          voice: selectedVoice,
+          speed: SPEEDS[speedIdx]
+        })
+      });
+    } else {
+      resp = await fetch(EL_TTS_URL, {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({
+          text:      script,
+          voiceId:   selectedVoice,
+          save:      true,
+          style:     getExpressiveness(),
+          stability: getStability()
+        })
+      });
+    }
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || "Generation failed");
+    }
+
+    const { url, filename } = await resp.json();
+    showResult(url, filename, speedIdx);
+
+  } catch (err) {
+    showToast(err.message || "Something went wrong. Try again.");
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    btn.textContent = "Generate + Download MP3";
+  }
+});
+
+// ── Result Player ─────────────────────────────────────────
+function showResult(url, filename, speedIdx) {
+  // Set up download link
+  const dlLink = document.getElementById("download-link");
+  dlLink.href = url;
+  dlLink.download = filename || `voice-${selectedVoice}.mp3`;
+
+  // Badge
+  const voiceLabel = provider === "openai"
+    ? `${selectedVoice.charAt(0).toUpperCase() + selectedVoice.slice(1)} · ${SPEED_LABELS[speedIdx]}`
+    : (elVoicesCache?.find(v => v.id === selectedVoice)?.name ?? selectedVoice);
+  document.getElementById("result-badge").textContent = voiceLabel;
+  document.getElementById("result-filename").textContent = filename || "";
+
+  // Audio player
+  const audioEl = document.getElementById("audio-el");
+  audioEl.src = url;
+  audioEl.load();
+
+  setupPlayer(audioEl);
+
+  document.getElementById("result-section").style.display = "block";
+  document.getElementById("result-section").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function setupPlayer(audioEl) {
+  const btnPP     = document.getElementById("btn-play-pause");
+  const playIcon  = document.getElementById("play-icon");
+  const pauseIcon = document.getElementById("pause-icon");
+  const fill      = document.getElementById("progress-fill");
+  const track     = document.getElementById("progress-track");
+  const timeCur   = document.getElementById("time-current");
+  const timeTotal = document.getElementById("time-total");
+
+  // Remove old listeners by cloning
+  const newBtn = btnPP.cloneNode(true);
+  btnPP.parentNode.replaceChild(newBtn, btnPP);
+
+  const newTrack = track.cloneNode(true);
+  track.parentNode.replaceChild(newTrack, track);
+
+  const freshBtn   = document.getElementById("btn-play-pause");
+  const freshTrack = document.getElementById("progress-track");
+  const freshFill  = document.getElementById("progress-fill");
+  const freshPlay  = document.getElementById("play-icon");
+  const freshPause = document.getElementById("pause-icon");
+
+  function fmt(s) {
+    s = Math.floor(s || 0);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  }
+
+  audioEl.addEventListener("loadedmetadata", () => {
+    timeTotal.textContent = fmt(audioEl.duration);
+  });
+  audioEl.addEventListener("timeupdate", () => {
+    const pct = audioEl.duration ? (audioEl.currentTime / audioEl.duration) * 100 : 0;
+    freshFill.style.width = pct + "%";
+    timeCur.textContent   = fmt(audioEl.currentTime);
+  });
+  audioEl.addEventListener("ended", () => {
+    freshPlay.style.display  = "";
+    freshPause.style.display = "none";
+    freshFill.style.width    = "0%";
+    timeCur.textContent      = fmt(0);
+  });
+
+  freshBtn.addEventListener("click", () => {
+    if (audioEl.paused) {
+      audioEl.play();
+      freshPlay.style.display  = "none";
+      freshPause.style.display = "";
+    } else {
+      audioEl.pause();
+      freshPlay.style.display  = "";
+      freshPause.style.display = "none";
+    }
+  });
+
+  freshTrack.addEventListener("click", e => {
+    if (!audioEl.duration) return;
+    const rect = freshTrack.getBoundingClientRect();
+    audioEl.currentTime = ((e.clientX - rect.left) / rect.width) * audioEl.duration;
+  });
+}
+
+// ── Toast ─────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+// ── Clone Form ────────────────────────────────────────────
+const cloneFileInput = document.getElementById("clone-file");
+const uploadArea     = document.getElementById("upload-area");
+const uploadFilename = document.getElementById("upload-filename");
+
+cloneFileInput.addEventListener("change", () => {
+  const file = cloneFileInput.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) {
+    showToast("File too large — please use an audio file under 20MB.");
+    cloneFileInput.value = "";
+    return;
+  }
+  uploadFilename.textContent = `✓ ${file.name}`;
+  uploadFilename.style.display = "block";
+});
+
+uploadArea.addEventListener("dragover", e => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
+uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
+uploadArea.addEventListener("drop", e => {
+  e.preventDefault();
+  uploadArea.classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    cloneFileInput.files = e.dataTransfer.files;
+    cloneFileInput.dispatchEvent(new Event("change"));
+  }
+});
+
+document.getElementById("btn-clone").addEventListener("click", async () => {
+  const name = document.getElementById("clone-name").value.trim();
+  const file = cloneFileInput.files[0];
+
+  if (!name) { showToast("Enter a name for this voice."); return; }
+  if (!file)  { showToast("Upload an audio sample first."); return; }
+
+  const btn = document.getElementById("btn-clone");
+  btn.disabled = true;
+  btn.textContent = "Cloning your voice…";
+
+  try {
+    const audioBase64 = await fileToBase64(file);
+    const resp = await fetch(EL_CLONE_URL, {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ name, audioBase64, mimeType: file.type || "audio/mpeg" })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || "Cloning failed");
+    }
+
+    // Reset form
+    document.getElementById("clone-name").value = "";
+    cloneFileInput.value = "";
+    uploadFilename.style.display = "none";
+    uploadFilename.textContent = "";
+
+    // Refresh EL voices so new clone appears
+    elVoicesCache = null;
+    if (provider === "elevenlabs") buildVoiceGrid();
+
+    showToast("Voice cloned! Find it at the top of your ElevenLabs list.");
+  } catch (err) {
+    showToast(err.message || "Cloning failed. Try again.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Clone Voice";
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleDeleteVoice(voiceId, voiceName, btn) {
+  if (!confirm(`Delete "${voiceName}"? This cannot be undone.`)) return;
+
+  btn.disabled = true;
+  btn.textContent = "…";
+
+  try {
+    const resp = await fetch(EL_DELETE_URL, {
+      method: "POST",
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ voiceId })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || "Delete failed");
+    }
+
+    // Remove from cache and re-render
+    if (elVoicesCache) elVoicesCache = elVoicesCache.filter(v => v.id !== voiceId);
+    if (selectedVoice === voiceId) { selectedVoice = ""; selectedVoiceId = ""; }
+    renderVoiceCards(elVoicesCache || []);
+    showToast(`"${voiceName}" deleted.`);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "×";
+    showToast(err.message || "Delete failed.");
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────
+buildVoiceGrid();
+buildSpeedTicks();
+buildExprTicks();
+</script>
+</body>
+</html>

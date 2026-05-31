@@ -447,6 +447,11 @@
 
 <script>
   const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : "";
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
   const MODEL = "claude-sonnet-4-6";
   const ADVISOR_SECTIONS = [
     { key: "contrarian", header: "THE CONTRARIAN", name: "The Contrarian" },
@@ -541,7 +546,7 @@
   async function callCouncil(question) {
     const response = await fetch(FUNCTION_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await authHeaders(),
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 3000,

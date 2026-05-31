@@ -576,6 +576,11 @@
 
 <script>
   const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : "";
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
   const MODEL = "claude-sonnet-4-6";
   const TOOLFINDER_COLLECTION = "breakthrough_public_results";
   const USE_MOCK_RESULTS = false;
@@ -1130,7 +1135,7 @@ TOOL_REPORT_END`;
 
     const response = await fetch(FUNCTION_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await authHeaders(),
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 1800,

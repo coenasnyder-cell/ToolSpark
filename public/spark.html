@@ -559,6 +559,11 @@
 // CONFIG
 // ─────────────────────────────────────
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken() : "";
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+}
 const TTS_URL    = "https://us-central1-toolspark-2d62d.cloudfunctions.net/tts";
 const MODEL      = "claude-sonnet-4-6";
 const JOIN_URL   = "https://toolspark.co/community-landing";
@@ -787,7 +792,7 @@ async function callAI(userMsg) {
   history.push({ role: "user", content: userMsg });
   const resp = await fetch(FUNCTION_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: await authHeaders(),
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1200,
@@ -977,7 +982,7 @@ async function speakMessage(text, avatarEl) {
   try {
     const resp = await fetch(TTS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await authHeaders(),
       body: JSON.stringify({ text: cleaned })
     });
     if (!resp.ok) return;

@@ -57,6 +57,31 @@ function buildJourneyVoiceInstructions({firstName, contextBlock}) {
     .join("\n\n");
 }
 
+const VALID_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse"];
+
+async function requireAuth(req, res) {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Authentication required" });
+    return null;
+  }
+  try {
+    return await admin.auth().verifyIdToken(header.split("Bearer ")[1]);
+  } catch {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return null;
+  }
+}
+
+async function requireAdmin(uid, res) {
+  const doc = await admin.firestore().collection("users").doc(uid).get();
+  if (!doc.exists || doc.data().userRole !== "admin") {
+    res.status(403).json({ error: "Admin access required" });
+    return false;
+  }
+  return true;
+}
+
 exports.tts = onRequest({
   cors: true,
   invoker: "public",
@@ -65,6 +90,9 @@ exports.tts = onRequest({
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
   const text = (req.body.text || "").trim();
+  const voice = VALID_VOICES.includes(req.body.voice) ? req.body.voice : "nova";
+  const speed = Math.min(4.0, Math.max(0.25, parseFloat(req.body.speed) || 1.0));
+
   if (!text) { res.status(400).json({ error: "No text provided" }); return; }
 
   try {
@@ -74,7 +102,7 @@ exports.tts = onRequest({
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_KEY}`
       },
-      body: JSON.stringify({ model: "tts-1-hd", voice: "nova", input: text })
+      body: JSON.stringify({ model: "tts-1-hd", voice, input: text, speed })
     });
 
     if (!response.ok) {
@@ -88,6 +116,269 @@ exports.tts = onRequest({
     res.set("Cache-Control", "private, max-age=86400");
     res.status(200).send(Buffer.from(audio));
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.ttsGenerate = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["OPENAI_KEY"],
+  timeoutSeconds: 120,
+  memory: "256MiB"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  const userId = decoded.uid.replace(/[^a-zA-Z0-9_-]/g, "_");
+
+  const text = (req.body.text || "").trim();
+  const voice = VALID_VOICES.includes(req.body.voice) ? req.body.voice : "nova";
+  const speed = Math.min(4.0, Math.max(0.25, parseFloat(req.body.speed) || 1.0));
+
+  if (!text) { res.status(400).json({ error: "No text provided" }); return; }
+  if (text.length > 4096) { res.status(400).json({ error: "Script too long (max 4096 characters)" }); return; }
+
+  try {
+    const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_KEY}`
+      },
+      body: JSON.stringify({ model: "tts-1-hd", voice, input: text, speed })
+    });
+
+    if (!ttsResponse.ok) {
+      const err = await ttsResponse.json().catch(() => ({}));
+      res.status(ttsResponse.status).json({ error: err.error?.message || "TTS generation failed" });
+      return;
+    }
+
+    const audio = await ttsResponse.arrayBuffer();
+    const buffer = Buffer.from(audio);
+
+    const timestamp = Date.now();
+    const filename = `${voice}-${timestamp}.mp3`;
+    const storagePath = `voice-audio/${userId}/${filename}`;
+
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(storagePath);
+    const token = crypto.randomUUID();
+
+    await file.save(buffer, {
+      metadata: {
+        contentType: "audio/mpeg",
+        metadata: { firebaseStorageDownloadTokens: token }
+      }
+    });
+
+    const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${token}`;
+    res.status(200).json({ url: downloadUrl, filename });
+  } catch (err) {
+    console.error("ttsGenerate error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.getElevenLabsVoices = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ELEVENLABS_KEY"]
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+
+  try {
+    const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+      headers: { "xi-api-key": process.env.ELEVENLABS_KEY }
+    });
+
+    if (!response.ok) {
+      res.status(response.status).json({ error: "Failed to fetch voices from ElevenLabs" });
+      return;
+    }
+
+    const data = await response.json();
+    const voices = (data.voices || [])
+      .map(v => ({
+        id:       v.voice_id,
+        name:     v.name,
+        desc:     [v.labels?.gender, v.labels?.accent, v.labels?.description].filter(Boolean).join(" · ") || "ElevenLabs voice",
+        category: v.category || "premade"
+      }))
+      .sort((a, b) => {
+        // Cloned voices first, then premade alphabetically
+        const aCloned = a.category !== "premade";
+        const bCloned = b.category !== "premade";
+        if (aCloned && !bCloned) return -1;
+        if (!aCloned && bCloned) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+    res.set("Cache-Control", "no-cache");
+    res.status(200).json({ voices });
+  } catch (err) {
+    console.error("getElevenLabsVoices error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.cloneVoice = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ELEVENLABS_KEY"],
+  timeoutSeconds: 120,
+  memory: "512MiB"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  const isAdmin = await requireAdmin(decoded.uid, res);
+  if (!isAdmin) return;
+
+  const { name, audioBase64, mimeType = "audio/mpeg" } = req.body;
+  if (!name)        { res.status(400).json({ error: "Voice name is required" }); return; }
+  if (!audioBase64) { res.status(400).json({ error: "Audio file is required" }); return; }
+
+  try {
+    const buffer = Buffer.from(audioBase64, "base64");
+    const blob   = new Blob([buffer], { type: mimeType });
+    const form   = new FormData();
+    form.append("name", name.trim());
+    form.append("description", `Cloned via ToolSpark Voice Tool`);
+    form.append("files", blob, "voice-sample.mp3");
+
+    const response = await fetch("https://api.elevenlabs.io/v1/voices/add", {
+      method: "POST",
+      headers: { "xi-api-key": process.env.ELEVENLABS_KEY },
+      body: form
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      res.status(response.status).json({ error: err.detail?.message || "Voice cloning failed" });
+      return;
+    }
+
+    const data = await response.json();
+    res.status(200).json({ voiceId: data.voice_id, name: name.trim() });
+  } catch (err) {
+    console.error("cloneVoice error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.deleteClonedVoice = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ELEVENLABS_KEY"]
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  const isAdmin = await requireAdmin(decoded.uid, res);
+  if (!isAdmin) return;
+
+  const { voiceId } = req.body;
+  if (!voiceId) { res.status(400).json({ error: "Voice ID required" }); return; }
+
+  try {
+    const response = await fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, {
+      method: "DELETE",
+      headers: { "xi-api-key": process.env.ELEVENLABS_KEY }
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      res.status(response.status).json({ error: err.detail?.message || "Delete failed" });
+      return;
+    }
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("deleteClonedVoice error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.ttsElevenLabs = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ELEVENLABS_KEY"],
+  timeoutSeconds: 120,
+  memory: "256MiB"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  const userId = decoded.uid.replace(/[^a-zA-Z0-9_-]/g, "_");
+
+  const text      = (req.body.text || "").trim();
+  const voiceId   = (req.body.voiceId || "").trim();
+  const save      = req.body.save === true;
+  const style     = Math.min(1.0, Math.max(0.0, parseFloat(req.body.style)     || 0.0));
+  const stability = Math.min(1.0, Math.max(0.0, parseFloat(req.body.stability) || 0.5));
+
+  if (!text)    { res.status(400).json({ error: "No text provided" }); return; }
+  if (!voiceId) { res.status(400).json({ error: "No voice ID provided" }); return; }
+  if (text.length > 5000) { res.status(400).json({ error: "Script too long (max 5000 characters)" }); return; }
+
+  try {
+    const elResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: "POST",
+      headers: {
+        "xi-api-key":   process.env.ELEVENLABS_KEY,
+        "Content-Type": "application/json",
+        "Accept":       "audio/mpeg"
+      },
+      body: JSON.stringify({
+        text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability, similarity_boost: 0.8, style, use_speaker_boost: true }
+      })
+    });
+
+    if (!elResponse.ok) {
+      const err = await elResponse.json().catch(() => ({}));
+      res.status(elResponse.status).json({ error: err.detail?.message || "ElevenLabs TTS failed" });
+      return;
+    }
+
+    const audio  = await elResponse.arrayBuffer();
+    const buffer = Buffer.from(audio);
+
+    if (save) {
+      const timestamp   = Date.now();
+      const filename    = `el-${voiceId.slice(0, 8)}-${timestamp}.mp3`;
+      const storagePath = `voice-audio/${userId}/${filename}`;
+
+      const bucket = admin.storage().bucket();
+      const file   = bucket.file(storagePath);
+      const token  = crypto.randomUUID();
+
+      await file.save(buffer, {
+        metadata: {
+          contentType: "audio/mpeg",
+          metadata: { firebaseStorageDownloadTokens: token }
+        }
+      });
+
+      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${token}`;
+      res.status(200).json({ url: downloadUrl, filename });
+    } else {
+      res.set("Content-Type", "audio/mpeg");
+      res.set("Cache-Control", "private, max-age=3600");
+      res.status(200).send(buffer);
+    }
+  } catch (err) {
+    console.error("ttsElevenLabs error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -1020,12 +1311,15 @@ exports.analyze = onRequest({
     return;
   }
 
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+
   try {
     // Extract tracking metadata — not forwarded to Anthropic
     const { _meta, ...anthropicBody } = req.body;
     const tool      = _meta?.tool      || "unknown";
     const sessionId = _meta?.sessionId || "unknown";
-    const userId    = _meta?.userId    || null;
+    const userId    = decoded.uid;
 
     // Override system prompt server-side for protected tools
     if (SERVER_SIDE_SYSTEMS[tool]) {

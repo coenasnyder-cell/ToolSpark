@@ -417,6 +417,11 @@
 
 <script>
   const ANALYZE_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/analyze";
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : "";
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
 
   let currentUser   = null;
   let userProfile   = null;
@@ -483,7 +488,7 @@
     try {
       const res = await fetch(ANALYZE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
           max_tokens: 1500,
@@ -511,7 +516,7 @@
     try {
       const res = await fetch(ANALYZE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
           max_tokens: 400,
