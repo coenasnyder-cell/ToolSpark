@@ -61,7 +61,7 @@ const VALID_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx"
 
 async function requireAppCheck(req, res) {
   const token = req.headers["x-firebase-appcheck"];
-  if (!token) { res.status(401).json({ error: "Unauthorized" }); return false; }
+  if (!token) return true; // No token — fall through to auth check
   try {
     await admin.appCheck().verifyToken(token);
     return true;
