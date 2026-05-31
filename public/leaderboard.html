@@ -62,15 +62,6 @@
 
   /* MAIN */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
-  .header-left { display: flex; align-items: center; gap: 12px; }
-  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; }
-  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
-  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
-  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
-  .notif-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; position: relative; text-decoration: none; }
-  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
-  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
 
   /* PAGE */
   .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
@@ -145,9 +136,7 @@
     .nav-item { justify-content: flex-start; padding: 9px 12px; }
     .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
     .sidebar-overlay { display: block; }
-    .hamburger-btn { display: flex; }
     .main-wrap { margin-left: 0; }
-    .top-header { padding: 0 1rem; height: 54px; }
     .page-content { padding: 1rem 1rem 80px; gap: 1rem; }
     .level-grid { grid-template-columns: 1fr; }
     .mobile-bottom-nav { display: flex; }
@@ -190,21 +179,7 @@
 
 <!-- MAIN -->
 <div class="main-wrap">
-  <header class="top-header">
-    <div class="header-left">
-      <button class="hamburger-btn" id="hamburger-btn">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div>
-        <div class="header-title">Leaderboard</div>
-        <div class="header-subtitle">Top community members by points</div>
-      </div>
-    </div>
-    <a href="notifications.html" class="notif-btn">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-      <div class="notif-dot" id="notif-dot"></div>
-    </a>
-  </header>
+  <header class="top-header"></header>
 
   <div class="page-content">
 
@@ -526,22 +501,8 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Mobile sidebar
-  document.getElementById('hamburger-btn').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  });
-  function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
-  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
-  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('');</script>
+<script>initNav('leaderboard', 'Leaderboard');</script>
 </body>
 </html>

@@ -81,14 +81,8 @@
 
   /* â”€â”€ TOP HEADER â”€â”€ */
   .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; z-index: 50; gap: 1.5rem; flex-shrink: 0; }
-  .header-title-block { flex-shrink: 0; }
-  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; line-height: 1.2; }
-  .header-subtitle { font-size: 12px; color: #9A9488; margin-top: 1px; }
-  .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .new-msg-btn { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; padding: 7px 16px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .new-msg-btn:hover { background: rgba(201,168,76,0.2); border-color: rgba(201,168,76,0.5); }
-  .hamburger-btn { display: none; align-items: center; justify-content: center; width: 44px; height: 44px; background: none; border: none; color: #F0EDE6; cursor: pointer; border-radius: var(--radius-sm); flex-shrink: 0; margin-left: -6px; transition: background 0.15s; -webkit-tap-highlight-color: transparent; }
-  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
   .sidebar-close-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; background: none; border: none; color: #9A9488; cursor: pointer; border-radius: 50%; flex-shrink: 0; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
   .sidebar-close-btn:hover { background: rgba(255,255,255,0.08); color: #F0EDE6; }
 
@@ -228,13 +222,8 @@
     .sidebar-user { justify-content: flex-start; padding: 8px 10px; }
     .sidebar-close-btn { display: flex; }
     .sidebar-overlay { display: block; }
-    .hamburger-btn { display: flex; }
-
     .main-wrap { margin-left: 0; height: calc(100vh - 60px); }
     .top-header { padding: 0 1rem; height: 54px; }
-    .header-title { font-size: 17px; }
-    .header-subtitle { display: none; }
-    .new-msg-btn { font-size: 12px; padding: 6px 12px; }
 
     /* Mobile panel switching */
     .inbox-wrap { position: relative; overflow: hidden; }
@@ -317,20 +306,7 @@
 <div class="main-wrap">
 
   <!-- TOP HEADER -->
-  <header class="top-header">
-    <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
-    <div class="header-title-block">
-      <div class="header-title">Inbox</div>
-      <div class="header-subtitle">Your direct messages</div>
-    </div>
-    <div class="header-actions">
-      <button class="new-msg-btn" onclick="openNewConvModal()">+ New Message</button>
-    </div>
-  </header>
+  <header class="top-header"></header>
 
   <!-- INBOX TWO-PANEL -->
   <div class="inbox-wrap" id="inbox-wrap">
@@ -486,7 +462,6 @@
     const name = user.displayName || user.email || 'Builder';
     document.getElementById('sidebar-name').textContent = name;
     document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Builder';
-    if (currentUserRole === 'admin') document.getElementById('admin-nav-link').style.display = 'flex';
 
     const sidebarAv = document.getElementById('sidebar-avatar');
     if (user.photoURL) {
@@ -827,21 +802,6 @@
     }
   }
 
-  // â”€â”€ SIDEBAR DRAWER â”€â”€
-  function openSidebar() {
-    document.querySelector('.sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeSidebar() {
-    document.querySelector('.sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
-  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
-  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
-  window.addEventListener('resize', () => { if (window.innerWidth > 767) closeSidebar(); });
 
   // â”€â”€ TEXTAREA: auto-resize + Enter to send â”€â”€
   const msgInputEl = document.getElementById('msg-input');
@@ -872,7 +832,7 @@
   }
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('inbox');</script>
+<script>initNav('inbox', 'Inbox');</script>
 </body>
 </html>
 

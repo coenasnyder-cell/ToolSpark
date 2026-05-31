@@ -101,24 +101,6 @@
   .sidebar-overlay.open { opacity: 1; pointer-events: all; }
 
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .top-header {
-    background: var(--dark2);
-    border-bottom: 1px solid var(--border-dark);
-    height: var(--header-height);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    gap: 1rem;
-  }
-  .header-left { display: flex; align-items: center; gap: 12px; }
-  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; }
-  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
-  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
-  .header-actions { display: flex; align-items: center; gap: 10px; }
 
   .page-content {
     flex: 1;
@@ -441,9 +423,7 @@
     .nav-item { justify-content: flex-start; padding: 9px 12px; }
     .sidebar-close-btn { display: flex; }
     .sidebar-overlay { display: block; }
-    .hamburger-btn { display: flex; }
     .main-wrap { margin-left: 0; }
-    .top-header { padding: 0 1rem; }
     .page-content { padding: 1rem 1rem 80px; }
     .welcome-card { padding: 1.25rem; flex-direction: column; align-items: flex-start; }
     .mobile-bottom-nav { display: flex; }
@@ -485,22 +465,7 @@
 </aside>
 
 <div class="main-wrap">
-  <header class="top-header">
-    <div class="header-left">
-      <button class="hamburger-btn" id="hamburger-btn">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div>
-        <div class="header-title">Clarity Tools</div>
-        <div class="header-subtitle">Your saved tool sessions and results</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <a href="dashboard.html" class="nav-item" style="padding:8px 12px;border:1px solid var(--border-dark);">
-        <span>Back to Dashboard</span>
-      </a>
-    </div>
-  </header>
+  <header class="top-header"></header>
 
   <main class="page-content">
     <div class="welcome-card">
@@ -606,24 +571,6 @@
   let resultsLoaded = false;
   const claritySessionCache = {};
 
-  const sidebar = document.getElementById('sidebar');
-  const sidebarOverlay = document.getElementById('sidebar-overlay');
-  const hamburgerBtn = document.getElementById('hamburger-btn');
-  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    sidebarOverlay.classList.add('open');
-  }
-
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('open');
-  }
-
-  if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
-  if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
-  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
   auth.onAuthStateChanged(async function(user) {
     if (!user) {
@@ -1077,6 +1024,6 @@
   }
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('');</script>
+<script>initNav('clarity-tools', 'Clarity Tools');</script>
 </body>
 </html>

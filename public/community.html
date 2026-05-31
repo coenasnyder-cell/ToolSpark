@@ -167,95 +167,6 @@
   }
 
   /* ── TOP HEADER ── */
-  .top-header {
-    background: var(--dark2);
-    border-bottom: 1px solid var(--border-dark);
-    height: var(--header-height);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    gap: 1.5rem;
-  }
-
-  .header-title-block { flex-shrink: 0; }
-  .header-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 400;
-    color: #F0EDE6;
-    line-height: 1.2;
-  }
-  .header-subtitle {
-    font-size: 12px;
-    color: #9A9488;
-    font-weight: 400;
-    margin-top: 1px;
-    display: none;
-  }
-
-  .header-search {
-    flex: 1;
-    max-width: 380px;
-    position: relative;
-  }
-  .header-search input {
-    width: 100%;
-    background: var(--dark3);
-    border: 1px solid var(--border-dark);
-    border-radius: 100px;
-    padding: 8px 16px 8px 38px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    color: #F0EDE6;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .header-search input::placeholder { color: #7A7670; }
-  .header-search input { color: #F0EDE6; }
-  .header-search input:focus { border-color: rgba(201,168,76,0.4); }
-  .search-icon {
-    position: absolute;
-    left: 12px; top: 50%; transform: translateY(-50%);
-    color: #4A4840;
-    pointer-events: none;
-  }
-
-  .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .header-btn {
-    background: none;
-    border: 1px solid var(--border-dark);
-    border-radius: 100px;
-    padding: 6px 14px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    color: #9A9488;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .header-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
-  .notif-btn {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    background: var(--dark3);
-    border: 1px solid var(--border-dark);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    color: #9A9488;
-    transition: all 0.15s;
-    position: relative;
-  }
-  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
-  .notif-dot {
-    position: absolute; top: 6px; right: 6px;
-    width: 7px; height: 7px;
-    background: var(--gold);
-    border-radius: 50%;
-    border: 1px solid var(--dark2);
-  }
 
   /* ── PAGE CONTENT ── */
   .page-content {
@@ -1117,18 +1028,8 @@ img, video, iframe {
     /* Show overlay layer */
     .sidebar-overlay { display: block; }
 
-    /* Hamburger button visible */
-    .hamburger-btn { display: flex; }
-
     /* Main wrap — full width, no left margin */
     .main-wrap { margin-left: 0; }
-
-    /* Compact top header */
-    .top-header { padding: 0 1rem; height: 54px; }
-    .header-search { display: none; }
-    .header-btn { display: none; }
-    .header-title { font-size: 17px; }
-    .notif-btn { width: 44px; height: 44px; }
 
     /* Single-column feed, 16px side padding */
     .page-content {
@@ -1319,33 +1220,7 @@ img, video, iframe {
 <div class="main-wrap">
 
   <!-- TOP HEADER -->
-  <header class="top-header">
-    <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
-    <div class="header-title-block">
-      <div class="header-title">Community</div>
-      <div class="header-subtitle">Builders creating smarter systems and experiences.</div>
-    </div>
-
-    <div class="header-search">
-      <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <label>
-        <input type="text" id="community-search" placeholder="Search threads, topics, members..." />
-      </label>
-    </div>
-
-    <div class="header-actions">
-      <a href="notifications.html" class="notif-btn">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <div class="notif-dot" id="notif-dot"></div>
-      </a>
-    </div>
-  </header>
+  <header class="top-header"></header>
 
   <!-- PAGE CONTENT -->
   <div class="page-content">
@@ -2207,7 +2082,6 @@ async function toggleLike(threadId) {
     document.getElementById('sidebar-name').textContent = name;
     document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Builder';
     if (currentUserRole === 'admin') {
-      document.getElementById('admin-nav-link').style.display = 'flex';
       document.getElementById('admin-tools-bar').style.display = 'flex';
     }
     const sidebarAv = document.getElementById('sidebar-avatar');
@@ -2476,23 +2350,6 @@ await onThreadPosted(currentUser.uid);
     }
   }
 
-  function openSidebar() {
-    document.querySelector('.sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeSidebar() {
-    document.querySelector('.sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
-  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
-  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
-  // Close drawer on resize to desktop
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 767) closeSidebar();
-  });
 </script>
 
 <!-- ── MOBILE BOTTOM NAV ── -->
@@ -2519,6 +2376,6 @@ await onThreadPosted(currentUser.uid);
   </a>
 </nav>
 <script src="js/nav.js"></script>
-<script>initNav('community');</script>
+<script>initNav('community', 'Community');</script>
 </body>
 </html>
