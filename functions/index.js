@@ -59,6 +59,17 @@ function buildJourneyVoiceInstructions({firstName, contextBlock}) {
 
 const VALID_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse"];
 
+async function requireAppCheck(req, res) {
+  const token = req.headers["x-firebase-appcheck"];
+  if (!token) { res.status(401).json({ error: "Unauthorized" }); return false; }
+  try {
+    await admin.appCheck().verifyToken(token);
+    return true;
+  } catch {
+    res.status(401).json({ error: "Unauthorized" }); return false;
+  }
+}
+
 async function requireAuth(req, res) {
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) {
@@ -88,6 +99,8 @@ exports.tts = onRequest({
   secrets: ["OPENAI_KEY"]
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  if (!await requireAppCheck(req, res)) return;
+  if (!await requireAuth(req, res)) return;
 
   const text = (req.body.text || "").trim();
   const voice = VALID_VOICES.includes(req.body.voice) ? req.body.voice : "nova";
@@ -129,6 +142,7 @@ exports.ttsGenerate = onRequest({
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
   const userId = decoded.uid.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -188,7 +202,7 @@ exports.getElevenLabsVoices = onRequest({
   secrets: ["ELEVENLABS_KEY"]
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
-
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
 
@@ -235,7 +249,7 @@ exports.cloneVoice = onRequest({
   memory: "512MiB"
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
-
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
   const isAdmin = await requireAdmin(decoded.uid, res);
@@ -279,7 +293,7 @@ exports.deleteClonedVoice = onRequest({
   secrets: ["ELEVENLABS_KEY"]
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
-
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
   const isAdmin = await requireAdmin(decoded.uid, res);
@@ -316,6 +330,7 @@ exports.ttsElevenLabs = onRequest({
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
   const userId = decoded.uid.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -1311,6 +1326,7 @@ exports.analyze = onRequest({
     return;
   }
 
+  if (!await requireAppCheck(req, res)) return;
   const decoded = await requireAuth(req, res);
   if (!decoded) return;
 

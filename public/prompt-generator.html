@@ -488,7 +488,9 @@
   async function authHeaders() {
     const user = firebase.auth().currentUser;
     const token = user ? await user.getIdToken() : "";
-    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+    let acToken = "";
+    try { acToken = (await firebase.appCheck().getToken(false)).token; } catch(e) {}
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, "X-Firebase-AppCheck": acToken };
   }
   const MODEL = "claude-sonnet-4-6";
 
