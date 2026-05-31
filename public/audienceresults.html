@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audience Depp Dive Results — ToolSpark</title>
+<title>Audience Blueprint — ToolSpark</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -334,26 +334,49 @@
       </div>
     </div>
 
-    <!-- ROW 2: What They've Tried + Their Objections -->
+    <!-- ROW 2: What Triggered Them — full width -->
+    <div class="section-grid">
+      <div class="profile-card full">
+        <div class="card-icon">⚡</div>
+        <div class="card-label">What Triggered Them</div>
+        <div class="card-text" id="whatTriggeredThemText"></div>
+      </div>
+    </div>
+
+    <!-- ROW 3: What They've Tried + Their Objections -->
     <div class="section-grid">
       <div class="profile-card">
-        <div class="card-icon">⚡</div>
+        <div class="card-icon">🚧</div>
         <div class="card-label">What They've Tried</div>
         <div class="card-text" id="whatTheyHaveTriedText"></div>
       </div>
       <div class="profile-card">
-        <div class="card-icon">🚧</div>
+        <div class="card-icon">🛑</div>
         <div class="card-label">Their Objections</div>
         <div class="card-text" id="theirObjectionsText"></div>
       </div>
     </div>
 
-    <!-- ROW 3: Dream Outcome — full width -->
+    <!-- ROW 4: Dream Outcome + How They Want to Be Seen -->
     <div class="section-grid">
-      <div class="profile-card full">
+      <div class="profile-card">
         <div class="card-icon">✨</div>
         <div class="card-label">Dream Outcome</div>
         <div class="card-text" id="dreamOutcomeText"></div>
+      </div>
+      <div class="profile-card">
+        <div class="card-icon">🪞</div>
+        <div class="card-label">How They Want to Be Seen</div>
+        <div class="card-text" id="howTheyWantToBeSeenText"></div>
+      </div>
+    </div>
+
+    <!-- ROW 5: Where to Find Them — full width -->
+    <div class="section-grid">
+      <div class="profile-card full">
+        <div class="card-icon">📍</div>
+        <div class="card-label">Where to Find Them</div>
+        <div class="card-text" id="whereToFindThemText"></div>
       </div>
     </div>
 
@@ -400,9 +423,9 @@ function escHtml(s) {
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ── PARSE RAW CLIENT PROFILE ──
+// ── PARSE AUDIENCE BLUEPRINT ──
 function extractBlock(raw) {
-  const match = raw.match(/CLIENT_BIBLE_START[\s\S]*?CLIENT_BIBLE_END/);
+  const match = raw.match(/AUDIENCE_BLUEPRINT_START[\s\S]*?AUDIENCE_BLUEPRINT_END/);
   return match ? match[0].trim() : raw.trim();
 }
 
@@ -413,14 +436,17 @@ function parseClientBible(raw) {
     const m = raw.match(regex);
     return m ? m[1].trim() : "";
   };
-  p.name              = extract("NAME");
-  p.whoTheyAre        = extract("WHO_THEY_ARE");
-  p.dailyFrustration  = extract("DAILY_FRUSTRATION");
-  p.whatTheyHaveTried = extract("WHAT_THEY_HAVE_TRIED");
-  p.theirObjections   = extract("THEIR_OBJECTIONS");
-  p.dreamOutcome      = extract("DREAM_OUTCOME");
-  p.theirWords        = extract("THEIR_WORDS");
-  p.closing           = extract("CLOSING");
+  p.name                = extract("NAME");
+  p.whoTheyAre          = extract("WHO_THEY_ARE");
+  p.dailyFrustration    = extract("DAILY_FRUSTRATION");
+  p.whatTriggeredThem   = extract("WHAT_TRIGGERED_THEM");
+  p.whatTheyHaveTried   = extract("WHAT_THEY_HAVE_TRIED");
+  p.theirObjections     = extract("THEIR_OBJECTIONS");
+  p.dreamOutcome        = extract("DREAM_OUTCOME");
+  p.howTheyWantToBeeSeen = extract("HOW_THEY_WANT_TO_BE_SEEN");
+  p.whereToFindThem     = extract("WHERE_TO_FIND_THEM");
+  p.theirWords          = extract("THEIR_WORDS");
+  p.closing             = extract("CLOSING");
   return p;
 }
 
@@ -484,12 +510,15 @@ function renderProfile(profile) {
   }
 
   // Cards
-  document.getElementById("whoTheyAreText").innerHTML        = fmt(profile.whoTheyAre);
-  document.getElementById("dailyFrustrationText").innerHTML  = fmt(profile.dailyFrustration);
-  document.getElementById("whatTheyHaveTriedText").innerHTML = fmt(profile.whatTheyHaveTried);
-  document.getElementById("theirObjectionsText").innerHTML   = fmt(profile.theirObjections);
-  document.getElementById("dreamOutcomeText").innerHTML      = fmt(profile.dreamOutcome);
-  document.getElementById("closingText").innerHTML           = fmt(profile.closing);
+  document.getElementById("whoTheyAreText").innerHTML           = fmt(profile.whoTheyAre);
+  document.getElementById("dailyFrustrationText").innerHTML     = fmt(profile.dailyFrustration);
+  document.getElementById("whatTriggeredThemText").innerHTML    = fmt(profile.whatTriggeredThem);
+  document.getElementById("whatTheyHaveTriedText").innerHTML    = fmt(profile.whatTheyHaveTried);
+  document.getElementById("theirObjectionsText").innerHTML      = fmt(profile.theirObjections);
+  document.getElementById("dreamOutcomeText").innerHTML         = fmt(profile.dreamOutcome);
+  document.getElementById("howTheyWantToBeSeenText").innerHTML  = fmt(profile.howTheyWantToBeeSeen);
+  document.getElementById("whereToFindThemText").innerHTML      = fmt(profile.whereToFindThem);
+  document.getElementById("closingText").innerHTML              = fmt(profile.closing);
   renderWords(profile.theirWords || "");
 
   document.getElementById("loadingState").style.display = "none";
