@@ -136,6 +136,18 @@
   .search-input:focus { border-color: var(--gold); }
   .search-input::placeholder { color: var(--text3); }
 
+  .credits-cell { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .credits-count { font-size:13px; font-weight:700; color:var(--gold); min-width:20px; }
+  .credits-add-wrap { display:flex; gap:4px; }
+  .credits-input { width:52px; padding:4px 7px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-size:12px; color:var(--text); font-family:'Lato',sans-serif; outline:none; }
+  .credits-input:focus { border-color:var(--gold); }
+  .credits-add-btn { padding:4px 10px; background:var(--gold-dim,rgba(201,168,76,0.12)); border:1px solid rgba(201,168,76,0.3); border-radius:6px; color:var(--gold,#C9A84C); font-size:12px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; transition:all 0.15s; white-space:nowrap; }
+  .credits-add-btn:hover { background:var(--gold,#C9A84C); color:#0C0B09; }
+  .c2-grant-btn { padding:4px 10px; background:rgba(42,92,69,0.1); border:1px solid rgba(42,92,69,0.3); border-radius:6px; color:#3D8A65; font-size:12px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; transition:all 0.15s; white-space:nowrap; }
+  .c2-grant-btn:hover { background:rgba(42,92,69,0.2); }
+  .c2-grant-btn:disabled { opacity:0.6; cursor:not-allowed; }
+  .c2-badge { font-size:11px; font-weight:700; color:#3D8A65; background:rgba(42,92,69,0.1); border:1px solid rgba(42,92,69,0.25); border-radius:20px; padding:3px 8px; white-space:nowrap; }
+
   .member-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .member-table th {
     text-align: left; padding: 9px 12px;
@@ -342,6 +354,7 @@
                 <th>Member</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>BA Credits</th>
                 <th>Member Since</th>
                 <th>Actions</th>
               </tr>
@@ -583,6 +596,21 @@
             <span class="saved-badge" id="saved-${m.uid}">Saved</span>
           </div>
         </td>
+        <td>
+          <div class="credits-cell">
+            <span class="credits-count" id="credits-count-${m.uid}">${typeof m.buildAgentCredits === 'number' ? m.buildAgentCredits : 0}</span>
+            <div class="credits-add-wrap">
+              <input class="credits-input" type="number" min="1" max="999" placeholder="+" id="credits-input-${m.uid}" />
+              <button class="credits-add-btn" onclick="addCredits('${m.uid}')">Add</button>
+            </div>
+            <div id="c2-cell-${m.uid}">
+              ${m.course2Access
+                ? `<span class="c2-badge">C2 Active ✓</span>`
+                : `<button class="c2-grant-btn" onclick="grantCourse2('${m.uid}')">Grant Course 2</button>`
+              }
+            </div>
+          </div>
+        </td>
         <td style="color:var(--text3);font-size:12px;">${since}</td>
         <td>
           <div class="member-actions">
@@ -598,6 +626,70 @@
         </td>
       </tr>`;
     }).join('');
+  }
+
+  const COURSE2_CREDITS = 30;
+
+  async function grantCourse2(uid) {
+    const btn = document.querySelector(`#c2-cell-${uid} button`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Granting…'; }
+    try {
+      const userRef = db.collection('users').doc(uid);
+      const snap    = await userRef.get();
+      const current = snap.exists ? (snap.data().buildAgentCredits || 0) : 0;
+
+      await userRef.update({
+        course2Access:     true,
+        buildAgentCredits: current + COURSE2_CREDITS
+      });
+
+      // Update credit count display
+      const countEl = document.getElementById('credits-count-' + uid);
+      if (countEl) countEl.textContent = current + COURSE2_CREDITS;
+
+      // Swap button → badge
+      const cell = document.getElementById('c2-cell-' + uid);
+      if (cell) cell.innerHTML = `<span class="c2-badge">C2 Active ✓</span>`;
+
+      // Update in-memory data
+      for (const arr of [allMembers, allMembersAll]) {
+        if (!arr) continue;
+        const m = arr.find(x => x.uid === uid);
+        if (m) { m.course2Access = true; m.buildAgentCredits = current + COURSE2_CREDITS; }
+      }
+    } catch(e) {
+      alert('Failed to grant Course 2 access. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Grant Course 2'; }
+    }
+  }
+
+  async function addCredits(uid) {
+    const input  = document.getElementById('credits-input-' + uid);
+    const amount = parseInt(input?.value, 10);
+    if (!amount || amount < 1) return;
+    input.disabled = true;
+    try {
+      await db.collection('users').doc(uid).update({
+        buildAgentCredits: firebase.firestore.FieldValue.increment(amount)
+      });
+      // Update the displayed count
+      const countEl = document.getElementById('credits-count-' + uid);
+      if (countEl) {
+        const current = parseInt(countEl.textContent, 10) || 0;
+        countEl.textContent = current + amount;
+      }
+      input.value = '';
+      // Update in-memory member data
+      for (const arr of [allMembers, allMembersAll]) {
+        if (!arr) continue;
+        const m = arr.find(x => x.uid === uid);
+        if (m) m.buildAgentCredits = (m.buildAgentCredits || 0) + amount;
+      }
+    } catch(e) {
+      alert('Failed to add credits. Please try again.');
+    } finally {
+      input.disabled = false;
+    }
   }
 
   async function changeRole(selectEl) {

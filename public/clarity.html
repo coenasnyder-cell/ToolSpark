@@ -460,7 +460,7 @@
   <div class="start-card" style="text-align:center;">
     <div class="start-logo-mark">ToolSpark</div>
     <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
-    <h1 style="margin-bottom:0.5rem;">You've completed your<br><em>2 Breakthrough sessions</em></h1>
+    <h1 style="margin-bottom:0.5rem;">You've completed your<br><em>5 Breakthrough sessions</em></h1>
     <p class="start-sub" style="margin-bottom:1.5rem;">You've already uncovered your best tool opportunities. Head to your roadmap to pick one and start building — or reach out if you'd like to run another session.</p>
     <a href="roadmap.html" class="start-btn" style="display:inline-block;text-decoration:none;margin-bottom:0.75rem;">View My Roadmap →</a>
     <div style="font-size:13px;color:var(--text3);">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold);font-weight:700;">Contact us</a></div>
@@ -471,22 +471,14 @@
   <div class="start-card">
     <div class="start-logo-mark">ToolSpark</div>
     <h1>Discover Your <em>Breakthrough</em></h1>
-<p class="start-sub">Answer 5 questions and walk away knowing exactly what AI tool to build first — matched to your business, your audience, and where you are right now.</p>
+    <p class="start-sub">4 focused questions built around your Spark Profile and Audience Blueprint — walk away knowing exactly what AI tool to build first.</p>
     <div class="start-field">
       <label>Your first name</label>
       <input type="text" id="s_displayName" placeholder="e.g. Sarah" autocomplete="given-name" />
     </div>
-    <div class="start-field">
-      <label>Your business or program name</label>
-      <input type="text" id="s_businessName" placeholder="e.g. Sarah's Storytelling Method" />
-    </div>
-    <div class="start-field">
-      <label>Email <span class="opt">— we'll send you your results</span></label>
-      <input type="email" id="s_email" placeholder="you@example.com" autocomplete="email" />
-    </div>
 
-    <div class="start-expect">
-      <strong>What to expect:</strong> 5 focused questions about your business, your clients, and where you're stuck. No right or wrong answers — the more honest you are, the better your tool recommendations.
+    <div class="start-expect" id="context-status">
+      <strong>What to expect:</strong> 4 focused questions built around your existing Spark and Audience work. The more specific you are in your answers, the stronger your recommendation.
     </div>
 
     <button class="start-btn" onclick="startSession()">Start My Breakthrough Session →</button>
@@ -497,19 +489,19 @@
 <div class="phase-bar" id="phaseBar">
   <div class="phase-step active" id="phase1">
     <div class="phase-dot">1</div>
-    <span class="phase-label">The Frustration</span>
+    <span class="phase-label">Context</span>
   </div>
   <div class="phase-step" id="phase2">
     <div class="phase-dot">2</div>
-    <span class="phase-label">The Magic Wand</span>
+    <span class="phase-label">Who It's For</span>
   </div>
   <div class="phase-step" id="phase3">
     <div class="phase-dot">3</div>
-    <span class="phase-label">The Outcome</span>
+    <span class="phase-label">The Bottleneck</span>
   </div>
   <div class="phase-step" id="phase4">
     <div class="phase-dot">4</div>
-    <span class="phase-label">Your Experience</span>
+    <span class="phase-label">The Output</span>
   </div>
   <div class="phase-step" id="phase5">
     <div class="phase-dot">✓</div>
@@ -555,16 +547,16 @@ let sessionComplete = false;
 let displayName = 'there';
 let businessName = '';
 let clientEmail = '';
+let sparkContextData = null;
+let audienceContextData = null;
 const CLARITY_SESSION_ID = 'session_' + Date.now();
 
 const PHASES = {
-  1: { name: "The Frustration",   questions: 1 },
-  2: { name: "The Magic Wand",    questions: 1 },
-  3: { name: "The Outcome",       questions: 1 },
-  4: { name: "Your Experience",   questions: 1 },
-  5: { name: "How You'll Build",  questions: 1 },
-  6: { name: "How You'll Build",  questions: 1 },
-  7: { name: "Your Tool Report",  questions: 0 }
+  1: { name: "Context",          questions: 1 },
+  2: { name: "Who It's For",     questions: 1 },
+  3: { name: "The Bottleneck",   questions: 1 },
+  4: { name: "The Output",       questions: 1 },
+  5: { name: "Your Tool Report", questions: 0 }
 };
 
 // ══════════════════════════════════════════
@@ -573,21 +565,17 @@ const PHASES = {
 // QUICK CHIPS
 // ══════════════════════════════════════════
 const CHIPS_BY_PHASE = {
-  1: ["Writing content and social media", "Finding and qualifying leads", "Admin, scheduling, follow ups"],
-  2: ["Help clients get clarity before they talk to me", "Create something personalised for each person", "Walk someone through a process without me"],
-  3: ["They finally have clarity on what to do next", "It saved them hours they were wasting every week", "It felt like it was built just for them"],
-  4: ["Complete beginner — haven't really used AI", "I've used ChatGPT or Claude but haven't built anything", "I use AI regularly but haven't built a custom tool"],
-  5: ["Build it for me — I'll focus on my business", "I want to build it myself with the right guidance", "Not sure yet — show me what's involved first"],
-  6: ["I'm starting from scratch — no platform yet", "I have an existing platform I want to add it to", "I have a developer helping me"],
-  7: []
+  1: ["Yes, that feels accurate", "A few things have shifted"],
+  2: ["For my clients", "For my own business", "Both"],
+  3: [],
+  4: ["A document or report", "A checklist or action plan", "A conversation starter", "A video script"],
+  5: []
 };
 // ══════════════════════════════════════════
 // START SESSION
 // ══════════════════════════════════════════
 function startSession() {
   displayName = document.getElementById('s_displayName').value.trim() || 'there';
-  businessName = document.getElementById('s_businessName').value.trim();
-  clientEmail = document.getElementById('s_email').value.trim();
 
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('phaseBar').classList.add('active');
@@ -830,9 +818,36 @@ async function initSession() {
   document.getElementById("sendBtn").disabled = true;
   showThinking();
 
-const openingPrompt = `Start the Discover Your Breakthrough session. The user's name is ${displayName}${businessName ? ` and their business is called "${businessName}"` : ''}.
-Begin with a warm 2-3 sentence welcome — tell them this is a quick focused session to figure out exactly what AI tool would make the biggest impact on their business right now.
-Then immediately ask the frustration question — what is the one thing they hate doing most in their business. Emit [PHASE:1] at the start of your reply.`;
+  let contextBlock = '';
+
+  if (sparkContextData && (sparkContextData.statement || sparkContextData.whoYouHelp)) {
+    contextBlock += `\n\nSPARK PROFILE:
+- I help statement: "${sparkContextData.statement || '(not set)'}"
+- What they know: ${sparkContextData.whatYouKnow || '(not set)'}
+- Who they help: ${sparkContextData.whoYouHelp || '(not set)'}
+- Result they create: ${sparkContextData.resultYouCreate || '(not set)'}
+- Their edge: ${sparkContextData.yourEdge || '(not set)'}`;
+  }
+
+  if (audienceContextData && (audienceContextData.whoTheyAre || audienceContextData.dailyFrustration)) {
+    contextBlock += `\n\nAUDIENCE BLUEPRINT:
+- Who they are: ${audienceContextData.whoTheyAre || '(not set)'}
+- Daily frustration: ${audienceContextData.dailyFrustration || '(not set)'}
+- What they've tried: ${audienceContextData.whatTheyHaveTried || '(not set)'}
+- Their objections: ${audienceContextData.theirObjections || '(not set)'}
+- Dream outcome: ${audienceContextData.dreamOutcome || '(not set)'}
+- Their words: ${audienceContextData.theirWords || '(not set)'}
+- How they want to be seen: ${audienceContextData.closing || '(not set)'}
+- Where to find them: ${audienceContextData.audiencePath || '(not set)'}`;
+  }
+
+  if (!contextBlock) {
+    contextBlock = '\n\nNote: No Spark Profile or Audience Blueprint data was found for this user. Ask them to briefly describe their business and who they help before confirming context.';
+  }
+
+  const openingPrompt = `Start the Discover Your Breakthrough session. The user's name is ${displayName}.${contextBlock}
+
+Emit [PHASE:1] at the start of your reply. Give a warm 1-2 sentence welcome by name, then summarise what you know about them from the above data in 2-3 sentences, then ask if it feels accurate.`;
 
   try {
     const reply = await callClaude(openingPrompt);
@@ -842,7 +857,7 @@ Then immediately ask the frustration question — what is the one thing they hat
     setChips(1);
   } catch(e) {
     hideThinking();
-    addMessage("assistant", `[PHASE:1] Welcome! I'm your Discover Your Breakthrough AI. Let's figure out the perfect AI tool for your business in the next 10 minutes.\n\n**What is the one thing you hate doing most in your business right now?**`);
+    addMessage("assistant", `[PHASE:1] Welcome, ${displayName}! I've pulled in your Spark and Audience work so we can make this session as focused as possible.\n\nDoes what you've built so far still feel like an accurate picture of your business?`);
     setChips(1);
   }
 
@@ -863,25 +878,25 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   }
 });
 
-// ── Pre-fill URL params (name/email) ──
+// ── Pre-fill URL params ──
 const _params = new URLSearchParams(window.location.search);
 if (_params.get('name')) document.getElementById('s_displayName').value = _params.get('name');
-if (_params.get('email')) document.getElementById('s_email').value = _params.get('email');
 
-// ── Session limit check ──
-const DEFAULT_LIMIT = 2;
+// ── Session limit check + context fetch ──
+const DEFAULT_LIMIT = 5;
 auth.onAuthStateChanged(async function(user) {
   if (!user) {
     window.location.href = 'signon.html?redirect=clarity';
     return;
   }
-  // Pre-fill name and email from auth account
-  if (!document.getElementById('s_email').value) {
-    document.getElementById('s_email').value = user.email || '';
-  }
+
+  // Pre-fill name from auth
   if (!document.getElementById('s_displayName').value && user.displayName) {
     document.getElementById('s_displayName').value = user.displayName.split(' ')[0];
   }
+
+  // Store email from auth for session save
+  clientEmail = user.email || '';
 
   try {
     // Check admin override limit on user profile
@@ -898,11 +913,64 @@ auth.onAuthStateChanged(async function(user) {
 
     if (completed >= limit) {
       document.getElementById('locked-screen').style.display = 'flex';
-    } else {
-      document.getElementById('start-screen').style.display = 'flex';
+      return;
     }
+
+    // Fetch Spark Profile (latest)
+    try {
+      const sparkSnap = await db.collection('spark_results')
+        .where('userId', '==', user.uid)
+        .orderBy('createdAt', 'desc')
+        .limit(1)
+        .get();
+      if (!sparkSnap.empty) {
+        const d = sparkSnap.docs[0].data();
+        sparkContextData = {
+          statement:       d.statement       || '',
+          whatYouKnow:     d.whatYouKnow     || '',
+          whoYouHelp:      d.whoYouHelp      || '',
+          yourEdge:        d.yourEdge        || '',
+          resultYouCreate: d.resultYouCreate || '',
+        };
+        if (!businessName && d.statement) businessName = d.statement;
+      }
+    } catch(e) {}
+
+    // Fetch Audience Blueprint (latest)
+    try {
+      const audSnap = await db.collection('audience_results')
+        .where('userId', '==', user.uid)
+        .orderBy('createdAt', 'desc')
+        .limit(1)
+        .get();
+      if (!audSnap.empty) {
+        const d = audSnap.docs[0].data();
+        audienceContextData = {
+          whoTheyAre:        d.whoTheyAre        || '',
+          dailyFrustration:  d.dailyFrustration  || '',
+          whatTheyHaveTried: d.whatTheyHaveTried || '',
+          theirObjections:   d.theirObjections   || '',
+          dreamOutcome:      d.dreamOutcome      || '',
+          theirWords:        d.theirWords        || '',
+          closing:           d.closing           || '',
+          audiencePath:      d.audiencePath      || '',
+        };
+      }
+    } catch(e) {}
+
+    // Update context indicator on start screen
+    const contextEl = document.getElementById('context-status');
+    if (sparkContextData || audienceContextData) {
+      const parts = [];
+      if (sparkContextData) parts.push('Spark Profile');
+      if (audienceContextData) parts.push('Audience Blueprint');
+      contextEl.innerHTML = '<strong>Profile loaded:</strong> Your ' + parts.join(' and ') +
+        (parts.length > 1 ? ' are' : ' is') +
+        ' ready. This session will be personalized to your business.';
+    }
+
+    document.getElementById('start-screen').style.display = 'flex';
   } catch(e) {
-    // On error just show the start screen
     document.getElementById('start-screen').style.display = 'flex';
   }
 });

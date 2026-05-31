@@ -389,10 +389,7 @@
             <div class="mp-stat-label">Days Active</div>
           </div>
         </div>
-        <div id="mp-earned-wrap" style="display:none;">
-          <div class="mp-badges-label">Badges Earned</div>
-          <div class="mp-badges-row" id="mp-earned"></div>
-        </div>
+
     </div>
     <div class="oc-card" id="oc-card" style="display:none;">
         <div class="oc-header">
@@ -677,19 +674,7 @@
       bioEl.classList.add('empty');
     }
 
-    // Earned badges
-    if (badges.length) {
-      const wrap = document.getElementById('mp-earned-wrap');
-      wrap.style.display = 'block';
-      document.getElementById('mp-earned').innerHTML = badges.map(function(key) {
-        const def = BADGE_DEFS[key];
-        if (!def) return '';
-        return '<div class="mp-badge-icon">' +
-          '<div class="mp-badge-circle">' + def.icon + '</div>' +
-          '<div class="mp-badge-name">' + def.name + '</div>' +
-          '</div>';
-      }).join('');
-    }
+
   }
 
   function renderChecklist(uid, data) {

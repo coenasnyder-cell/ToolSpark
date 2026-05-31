@@ -260,6 +260,16 @@
         <div id="data-details"></div>
       </div>
 
+      <!-- Platform selector (shown only if no tech stack data) -->
+      <div class="card" id="platform-card" style="display:none;">
+        <div class="card-title">What are you building in?</div>
+        <div class="card-sub">This changes the format of your prompt — Lovable needs plain English, VS Code needs more technical detail.</div>
+        <div class="mode-toggle">
+          <button class="mode-btn platform-btn active" data-platform="lovable" onclick="setPlatform('lovable')">Lovable</button>
+          <button class="mode-btn platform-btn" data-platform="vscode" onclick="setPlatform('vscode')">VS Code + Claude Code</button>
+        </div>
+      </div>
+
       <!-- Step 2: App Name -->
       <div class="card">
         <div class="card-title">What will you call your app?</div>
@@ -480,6 +490,7 @@
   const MAX_GENERATIONS = 3; // 1 original + 2 regenerations
   let generateCount = 0;
   let currentMode = 'new'; // 'new' or 'refine'
+  let selectedPlatform = 'lovable'; // fallback when no tech stack data
 
   function setMode(mode) {
     currentMode = mode;
@@ -517,7 +528,8 @@
       { key: 'complexity', tag: 'COMPLEXITY' },
       { key: 'priority', tag: 'PRIORITY' },
       { key: 'why', tag: 'WHY' },
-      { key: 'how', tag: 'HOW' }
+      { key: 'how', tag: 'HOW' },
+      { key: 'audienceConnection', tag: 'AUDIENCE_CONNECTION' }
     ];
     const tools = [];
     for (let i = 1; i <= 3; i++) {
@@ -580,10 +592,20 @@
     if (memberData.techstack) {
       statusEl.innerHTML += `<span class="data-pill found">Tech Stack</span>`;
       detailsEl.innerHTML += `<div class="data-detail"><strong>Building In</strong>${escHtml(memberData.techstack.buildTool)}</div>`;
+      document.getElementById('platform-card').style.display = 'none';
     } else {
       statusEl.innerHTML += `<span class="data-pill missing">Tech Stack</span>`;
-      detailsEl.innerHTML += `<div class="data-missing-note">No Tech Stack results found. <a href="techstack.html">Run the Tech Stack tool →</a></div>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Tech Stack results found. Choose your platform below, or <a href="techstack.html">run the full Tech Stack assessment →</a></div>`;
+      document.getElementById('platform-card').style.display = 'block';
     }
+  }
+
+  // ── PLATFORM SELECTOR (fallback when no tech stack data) ──
+  function setPlatform(p) {
+    selectedPlatform = p;
+    document.querySelectorAll('.platform-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.platform === p);
+    });
   }
 
   // ── FEATURE TOGGLE ──
@@ -715,6 +737,8 @@ Revise the brief now. Keep the same structure. Fix what the feedback asks for. L
     if (techstack) {
       if (techstack.buildTool) contextLines.push(`\nBUILD TOOL: ${techstack.buildTool}`);
       if (techstack.platform) contextLines.push(`PLATFORM: ${techstack.platform}`);
+    } else {
+      contextLines.push(`\nBUILD TOOL: ${selectedPlatform === 'lovable' ? 'Lovable' : 'VS Code + Claude Code'}`);
     }
 
     const featureList = [
@@ -733,12 +757,14 @@ Revise the brief now. Keep the same structure. Fix what the feedback asks for. L
 
     contextLines.push(`\nFEATURES TO INCLUDE:\n• ${featureList}`);
 
-    const isBase44 = (techstack?.buildTool || '').toLowerCase().includes('base44');
+    const buildToolStr = (techstack?.buildTool || '').toLowerCase();
+    const isNoCode = buildToolStr.includes('base44') || buildToolStr.includes('lovable')
+      || (!techstack && selectedPlatform === 'lovable');
 
     const systemPrompt = `You are a product brief writer for AI-powered web apps. Write a complete, specific, ready-to-paste build brief based on the context provided.
 
-${isBase44
-  ? `This brief is for Base44, an AI no-code web builder. Base44 works best with clear, plain-English instructions it can act on immediately. Keep each section focused and direct — avoid long prose. The builder reads this top to bottom and builds what you describe, so be specific but don't over-explain.`
+${isNoCode
+  ? `This brief is for a no-code AI builder (Lovable or Base44). It works best with clear, plain-English instructions it can act on immediately. Keep each section focused and direct — avoid long prose. The builder reads this top to bottom and builds what you describe, so be specific but don't over-explain.`
   : `This brief is for VS Code + Claude Code. Be specific about data structure, component behavior, and technical requirements where relevant.`}
 
 FORMAT RULES — follow exactly:
