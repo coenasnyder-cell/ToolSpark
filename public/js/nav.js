@@ -2,9 +2,9 @@
 (function() {
   var HAMBURGER_SVG = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
   var BELL_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>';
-  var SIGNOUT_SVG = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
-  var SIGNIN_SVG = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
-  var ADMIN_SVG = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+  var SIGNOUT_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  var SIGNIN_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+  var ADMIN_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 
   var ITEMS = [
     {
@@ -50,16 +50,16 @@
       '.notif-btn{width:36px;height:36px;border-radius:50%;background:var(--dark3);border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9A9488;transition:all 0.15s;position:relative;text-decoration:none;}' +
       '.notif-btn:hover{border-color:rgba(201,168,76,0.3);color:var(--gold);}' +
       '.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--gold);border-radius:50%;border:2px solid var(--dark2);}' +
-      '.header-admin-btn{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:999px;border:1px solid rgba(201,168,76,0.35);background:rgba(201,168,76,0.1);color:var(--gold);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:0.04em;font-family:inherit;transition:all 0.15s;}' +
-      '.header-admin-btn:hover{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.5);}' +
-      '.header-auth-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(201,168,76,0.35);background:rgba(201,168,76,0.12);color:#E8D5A3;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;}' +
-      '.header-auth-btn:hover{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.5);color:#F6E8BD;}' +
+      '.header-admin-btn{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);transition:all 0.15s;text-decoration:none;}' +
+      '.header-admin-btn:hover{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.55);}' +
+      '.header-auth-btn{width:36px;height:36px;border-radius:50%;background:var(--dark3);border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9A9488;transition:all 0.15s;font-family:inherit;}' +
+      '.header-auth-btn:hover{border-color:rgba(201,168,76,0.3);color:var(--gold);}' +
+      '.mobile-bottom-nav{-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;}' +
       '@media(max-width:767px){' +
       '.top-header{padding:0 1rem;height:54px;}' +
       '.hamburger-btn{display:flex;}' +
       '.header-title{font-size:17px;}' +
-      '.header-auth-btn span{display:none;}' +
-      '.header-admin-btn span{display:none;}' +
+      '.sidebar-footer{display:none;}' +
       '}';
     document.head.appendChild(s);
   }
@@ -72,9 +72,9 @@
       '<button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation">' + HAMBURGER_SVG + '</button>' +
       '<div class="header-title">' + (pageTitle || '') + '</div>' +
       '<div class="header-actions">' +
-        '<a href="admindashboard.html" class="header-admin-btn" id="header-admin-btn" style="display:none">' + ADMIN_SVG + '<span>Admin</span></a>' +
+        '<a href="admindashboard.html" class="header-admin-btn" id="header-admin-btn" style="display:none" title="Admin dashboard">' + ADMIN_SVG + '</a>' +
         '<a href="notifications.html" class="notif-btn" id="header-notif-btn">' + BELL_SVG + '<div class="notif-dot" id="notif-dot" style="display:none"></div></a>' +
-        '<button class="header-auth-btn" id="header-auth-btn">' + SIGNIN_SVG + '<span>Sign In</span></button>' +
+        '<button class="header-auth-btn" id="header-auth-btn" title="Sign in">' + SIGNIN_SVG + '</button>' +
       '</div>';
 
     // Sidebar wiring
@@ -107,7 +107,8 @@
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        authBtn.innerHTML = SIGNOUT_SVG + '<span>Sign Out</span>';
+        authBtn.innerHTML = SIGNOUT_SVG;
+        authBtn.title = 'Sign out';
         authBtn.onclick = function() {
           firebase.auth().signOut().then(function() { window.location.href = 'signon.html'; });
         };
@@ -125,7 +126,8 @@
             if (notifDot && !snap.empty) notifDot.style.display = 'block';
           }).catch(function() {});
       } else {
-        authBtn.innerHTML = SIGNIN_SVG + '<span>Sign In</span>';
+        authBtn.innerHTML = SIGNIN_SVG;
+        authBtn.title = 'Sign in';
         authBtn.onclick = function() { window.location.href = 'signon.html'; };
       }
     });

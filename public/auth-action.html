@@ -135,17 +135,33 @@
       }
 
       if (mode === 'verifyEmail') {
-        try {
-          await applyActionCode(auth, oobCode);
-          icon.textContent = '✅';
-          title.textContent = 'Email Verified!';
-          message.textContent = 'Your email has been verified. You can now sign in to ToolSpark.';
-          primaryBtn.textContent = 'Open ToolSpark';
-          primaryBtn.href = '/signon.html';
-          actions.style.display = 'block';
-        } catch (err) {
-          showError('This verification link has expired or already been used. Please request a new one from the app.');
-        }
+        // Show a button first — don't auto-apply the code on page load.
+        // Google's security scanner fetches the URL which would consume the
+        // one-time code before the user gets a chance to use it.
+        icon.textContent = '✉️';
+        title.textContent = 'Confirm Your Email';
+        message.textContent = 'Click the button below to verify your email address and activate your account.';
+        primaryBtn.textContent = 'Verify My Email';
+        primaryBtn.href = '#';
+        actions.style.display = 'block';
+
+        primaryBtn.addEventListener('click', async function(e) {
+          e.preventDefault();
+          primaryBtn.textContent = 'Verifying...';
+          primaryBtn.style.opacity = '0.7';
+          try {
+            await applyActionCode(auth, oobCode);
+            icon.textContent = '✅';
+            title.textContent = 'Email Verified!';
+            message.textContent = 'Your email has been verified. You can now sign in to ToolSpark.';
+            primaryBtn.textContent = 'Open ToolSpark';
+            primaryBtn.href = '/signon.html';
+            primaryBtn.style.opacity = '1';
+            primaryBtn.removeEventListener('click', arguments.callee);
+          } catch (err) {
+            showError('This verification link has expired or already been used. Please request a new one from the app.');
+          }
+        });
 
       } else if (mode === 'resetPassword') {
         try {

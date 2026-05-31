@@ -110,12 +110,11 @@
 
   /* ── PAGE GRID ── */
   .page-content {
-    flex: 1; display: grid; grid-template-columns: 1fr 288px;
-    gap: 1.5rem; padding: 1.75rem 2rem;
-    max-width: 1100px; width: 100%; margin: 0 auto; align-items: start;
+    flex: 1; display: flex; flex-direction: column; gap: 1.5rem;
+    padding: 1.75rem 2rem 3rem; max-width: 860px; width: 100%;
   }
   .main-col { display: flex; flex-direction: column; gap: 1.25rem; }
-  .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  .member-since-row { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text3); margin-top:10px; }
 
   /* ── CARD BASE ── */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -154,6 +153,11 @@
     font-size: 30px; font-weight: 900; color: var(--gold);
     box-shadow: 0 2px 12px rgba(0,0,0,0.2); letter-spacing: -1px;
   }
+  .photo-upload-btn { display:none; position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,0.45); border:none; cursor:pointer; align-items:center; justify-content:center; color:#fff; transition:background 0.15s; }
+  .photo-upload-btn:hover { background:rgba(0,0,0,0.6); }
+  .photo-upload-btn svg { pointer-events:none; }
+  .edit-open .photo-upload-btn { display:flex; }
+  .profile-photo-wrap { position:relative; display:inline-block; }
   .profile-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
   .profile-name-block { flex: 1; min-width: 0; }
   .profile-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.2; margin-bottom: 5px; }
@@ -232,6 +236,28 @@
   /* ── RIGHT COLUMN CARDS ── */
   .since-card { padding: 1.25rem 1.5rem; }
   .since-date { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 3px; }
+
+  /* ── MARKETPLACE SECTION ── */
+  .marketplace-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .marketplace-section-header { padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .marketplace-section-title { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; }
+  .marketplace-section-link { font-size: 12px; color: var(--gold); font-weight: 700; text-decoration: none; }
+  .marketplace-section-link:hover { color: var(--gold-light); }
+  .tool-list { display: flex; flex-direction: column; }
+  .tool-row { display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--border); text-decoration: none; transition: background 0.15s; }
+  .tool-row:last-child { border-bottom: none; }
+  .tool-row:hover { background: var(--bg); }
+  .tool-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
+  .tool-info { flex: 1; min-width: 0; }
+  .tool-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .tool-desc { font-size: 13px; color: var(--text3); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+  .tool-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .tool-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; }
+  .tool-uses { font-size: 12px; color: var(--text3); }
+  .marketplace-empty { padding: 2.5rem 1.75rem; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.7; }
+  .marketplace-empty-icon { font-size: 32px; margin-bottom: 10px; }
+  .marketplace-empty-link { color: var(--gold); font-weight: 700; text-decoration: none; }
+  .marketplace-empty-link:hover { color: var(--gold-light); }
   .since-sub { font-size: 12px; color: var(--text3); }
   .links-card { padding: 1.25rem 1.5rem; }
   .quick-link {
@@ -289,8 +315,6 @@
     .nav-item { justify-content: center; padding: 10px; }
     .nav-icon { opacity: 0.7; }
     .nav-item.active .nav-icon { opacity: 1; }
-    .page-content { grid-template-columns: 1fr; }
-    .right-col { display: none; }
     .sidebar-user { justify-content: center; padding: 8px; }
     .user-avatar { margin: 0; }
   }
@@ -298,8 +322,7 @@
   @media (max-width: 600px) {
     .sidebar { display: none; }
     .main-wrap { margin-left: 0; }
-    .page-content { grid-template-columns: 1fr; gap: 0.875rem; padding: 0.875rem 0.875rem 80px; }
-    .right-col { display: none; }
+    .page-content { padding: 0.875rem 0.875rem 80px; gap: 0.875rem; }
     .profile-body { padding: 0 1.25rem 1.25rem; }
     .profile-name { font-size: 19px; }
     .stats-card, .clarity-card { padding: 1.25rem; }
@@ -399,9 +422,13 @@
         <div class="profile-banner"></div>
         <div class="profile-body">
 
-          <div class="profile-photo-wrap">
+          <div class="profile-photo-wrap" id="profile-photo-wrap">
             <!-- Replaced by JS with <img> or initials div -->
             <div class="profile-photo-initials" id="profile-photo-el">?</div>
+            <button class="photo-upload-btn" type="button" title="Change photo" onclick="document.getElementById('photo-file-input').click()">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+            <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
           </div>
 
           <div class="profile-top-row">
@@ -409,6 +436,10 @@
               <div class="profile-name" id="profile-name">Loading…</div>
               <div class="profile-email" id="profile-email"></div>
               <div class="badge-row" id="badge-row"></div>
+              <div class="member-since-row" id="member-since-row" style="display:none">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Member since <span id="since-date">—</span>
+              </div>
             </div>
             <button class="edit-profile-btn" id="edit-toggle-btn" onclick="toggleEdit()">Edit Profile</button>
           </div>
@@ -455,83 +486,21 @@
   </div>
         </div><!-- /stats-grid -->
       </div><!-- /profile-body -->
-    </div><!-- /profile-hero -->
+    </div><!-- /profile-hero -->    
 
-      <!-- BADGES CARD -->
-      <div class="card stats-card" id="badges-card" style="display:none;">
-        <div class="card-title">Badges Earned</div>
-        <div id="badges-grid" style="display:flex;flex-wrap:wrap;gap:0.75rem;"></div>
+    <!-- MARKETPLACE TOOLS -->
+    <div class="marketplace-section" id="marketplace-section">
+      <div class="marketplace-section-header">
+        <div class="marketplace-section-title">Tools on the Marketplace</div>
+        <a href="marketplace.html" class="marketplace-section-link">View marketplace →</a>
       </div>
-
-      <!-- CLARITY SESSION CARD -->
-      <div class="card clarity-card">
-        <div class="card-title">Clarity Session</div>
-
-        <!-- Session found -->
-        <div class="clarity-found" id="clarity-found">
-          <div class="clarity-section-label">Business</div>
-          <div class="clarity-business" id="clarity-business"></div>
-          <div class="clarity-section-label">Your Summary</div>
-          <div class="clarity-summary" id="clarity-summary"></div>
-          <div class="clarity-meta" id="clarity-meta"></div>
-        </div>
-
-        <!-- No session yet -->
-        <div class="clarity-empty" id="clarity-empty">
-          <div class="clarity-cta-text">
-            <strong>You haven't completed a Clarity Session yet.</strong><br>
-            A Clarity Session helps you define your business, niche, and the AI tools that will make the biggest impact for your clients.
-          </div>
-          <a href="clarity.html" class="cta-link">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            Start Clarity Session
-          </a>
+      <div id="marketplace-list">
+        <div class="marketplace-empty">
+          <div class="marketplace-empty-icon">🛠️</div>
+          Loading tools…
         </div>
       </div>
-
-    </div><!-- /main-col -->
-
-    <!-- RIGHT COLUMN -->
-    <div class="right-col">
-
-      <div class="card since-card">
-        <div class="card-title">Member Since</div>
-        <div class="since-date" id="since-date">—</div>
-        <div class="since-sub" id="since-sub"></div>
-      </div>
-
-      <div class="card links-card">
-        <div class="card-title">Quick Links</div>
-        <a href="community.html" class="quick-link">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-          Community
-        </a>
-        <a href="clarity.html" class="quick-link">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Clarity Session
-        </a>
-        <a href="results.html" class="quick-link">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          My Results
-        </a>
-        <a href="dashboard.html" class="quick-link">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Dashboard
-        </a>
-      </div>
-
-      <div class="card checklist-card" id="getting-started-card" style="display:none;">
-        <div class="checklist-header">
-          <div class="checklist-title-row">
-            <div class="checklist-title">Getting Started</div>
-            <div class="checklist-count" id="cl-count"></div>
-          </div>
-          <div class="checklist-bar"><div class="checklist-fill" id="cl-fill"></div></div>
-        </div>
-        <div class="checklist-steps" id="cl-steps"></div>
-      </div>
-
-    </div><!-- /right-col -->
+    </div>
 
   </div><!-- /page-content -->
 </div><!-- /main-wrap -->
@@ -563,6 +532,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
@@ -577,6 +547,7 @@
 try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}  
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
   let currentUser = null;
   let editOpen = false;
@@ -613,17 +584,54 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     const form = document.getElementById('edit-form');
     const btn = document.getElementById('edit-toggle-btn');
     const bioView = document.getElementById('profile-bio-view');
+    const photoWrap = document.getElementById('profile-photo-wrap');
     if (editOpen) {
       form.classList.add('open');
       btn.textContent = 'Cancel';
       btn.classList.add('cancel');
       bioView.style.display = 'none';
+      if (photoWrap) photoWrap.classList.add('edit-open');
       document.getElementById('success-msg').classList.remove('show');
     } else {
       form.classList.remove('open');
       btn.textContent = 'Edit Profile';
       btn.classList.remove('cancel');
       bioView.style.display = '';
+      if (photoWrap) photoWrap.classList.remove('edit-open');
+    }
+  }
+
+  let pendingPhotoURL = null;
+
+  async function handlePhotoSelect(input) {
+    const file = input.files[0];
+    if (!file || !currentUser) return;
+    const MAX_MB = 5;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      alert('Image must be under 5 MB.');
+      input.value = '';
+      return;
+    }
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading…';
+    try {
+      const ref = storage.ref('profile-images/' + currentUser.uid + '/photo');
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      pendingPhotoURL = url;
+      // Preview immediately
+      const photoEl = document.getElementById('profile-photo-el');
+      photoEl.outerHTML = '<img id="profile-photo-el" class="profile-photo" src="' + url + '" alt="avatar">';
+      const sidebarAv = document.getElementById('sidebar-avatar');
+      if (sidebarAv) sidebarAv.innerHTML = '<img src="' + url + '" alt="avatar">';
+    } catch(err) {
+      console.error('Photo upload failed', err);
+      alert('Could not upload photo. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+      input.value = '';
     }
   }
 
@@ -640,10 +648,11 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
-      await db.collection('users').doc(currentUser.uid).update({
-        displayName: nameVal,
-        bio: bioVal
-      });
+      const update = { displayName: nameVal, bio: bioVal };
+      if (pendingPhotoURL) update.photoURL = pendingPhotoURL;
+      await currentUser.updateProfile({ displayName: nameVal, ...(pendingPhotoURL && { photoURL: pendingPhotoURL }) });
+      await db.collection('users').doc(currentUser.uid).update(update);
+      pendingPhotoURL = null;
       document.getElementById('profile-name').textContent = nameVal;
       document.getElementById('sidebar-name').textContent = nameVal;
       const bioView = document.getElementById('profile-bio-view');
@@ -753,7 +762,8 @@ function renderBadges(badges) {
 
     // Admin nav
     if (role === 'admin') {
-      document.getElementById('sidebar-role').textContent = 'Admin';
+      const sidebarRole = document.getElementById('sidebar-role');
+      if (sidebarRole) sidebarRole.textContent = 'Admin';
     }
 
     // Profile photo
@@ -798,10 +808,8 @@ function renderBadges(badges) {
     // Stats
     document.getElementById('stat-days').textContent = daysActive(createdAt);
     document.getElementById('since-date').textContent = formatDate(createdAt);
-    if (createdAt) {
-      const days = daysActive(createdAt);
-      document.getElementById('since-sub').textContent = days + ' days as a member';
-    }
+    const sinceRow = document.getElementById('member-since-row');
+    if (sinceRow) sinceRow.style.display = 'flex';
   // Points, streak and badges
     document.getElementById('stat-points').textContent = data.points || 0;
     document.getElementById('stat-streak').textContent = (data.streak || 0) + ((data.streak || 0) >= 3 ? ' 🔥' : '');
@@ -847,7 +855,46 @@ function renderBadges(badges) {
     if (isOwnProfile) {
       renderChecklist(user.uid, data);
     }
+
+    // Marketplace tools
+    loadMarketplaceTools(targetUid, isOwnProfile);
   });
+
+  async function loadMarketplaceTools(uid, isOwn) {
+    const list = document.getElementById('marketplace-list');
+    try {
+      const snap = await db.collection('marketplace_listings')
+        .where('builderUserId', '==', uid)
+        .where('status', '==', 'active')
+        .get();
+
+      if (snap.empty) {
+        list.innerHTML = '<div class="marketplace-empty">' +
+          '<div class="marketplace-empty-icon">🛠️</div>' +
+          (isOwn
+            ? 'You haven\'t listed any tools yet. <br><a href="marketplace.html" class="marketplace-empty-link">Submit your first tool →</a>'
+            : 'No tools listed on the marketplace yet.') +
+          '</div>';
+        return;
+      }
+
+      list.innerHTML = snap.docs.map(function(doc) {
+        const d = doc.data();
+        const uses = d.useCount > 0 ? '<span class="tool-uses">' + d.useCount + ' uses</span>' : '';
+        const tag = d.category ? '<span class="tool-tag">' + d.category + '</span>' : '';
+        return '<a href="marketplace.html" class="tool-row">' +
+          '<div class="tool-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>' +
+          '<div class="tool-info">' +
+            '<div class="tool-name">' + (d.toolName || 'Untitled Tool') + '</div>' +
+            '<div class="tool-desc">' + (d.description || '') + '</div>' +
+            '<div class="tool-meta">' + tag + uses + '</div>' +
+          '</div>' +
+          '</a>';
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div class="marketplace-empty">Could not load tools.</div>';
+    }
+  }
 
   async function markStep(uid, key, href) {
     try {

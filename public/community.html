@@ -1986,7 +1986,8 @@ async function toggleLike(threadId) {
     });
   });
 
-  document.getElementById('community-search').addEventListener('input', function() {
+  const communitySearchEl = document.getElementById('community-search');
+  if (communitySearchEl) communitySearchEl.addEventListener('input', function() {
     searchQuery = this.value.toLowerCase().trim();
     if (lastSnapshot) renderFeed(lastSnapshot);
   });

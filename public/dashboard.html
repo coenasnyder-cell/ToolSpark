@@ -351,19 +351,17 @@
         <h1 id="welcome-heading">Welcome back</h1>
         <p>You're building something real. Everything you need to create, launch, and grow your AI-powered tools is right here.</p>
       </div>
-      <div id="welcome-avatar-wrap"></div>
     </div>
 
     <!-- MY PROFILE -->
-    <div>
-      <div class="section-header">
+    <div class="my-profile-card">
+      <div class="section-header" style="padding-bottom:1rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;">
         <div class="section-title">My Profile</div>
         <div style="display:flex;gap:12px;align-items:center;">
           <a href="profile.html" class="section-link">View public profile →</a>
           <a href="profile.html" class="section-link" style="background:var(--gold);color:var(--dark);padding:6px 14px;border-radius:20px;font-size:12px;">Edit Profile</a>
         </div>
       </div>
-      <div class="my-profile-card">
         <div class="mp-top">
           <div class="mp-avatar" id="mp-avatar"></div>
           <div class="mp-name-block">
@@ -395,22 +393,20 @@
           <div class="mp-badges-label">Badges Earned</div>
           <div class="mp-badges-row" id="mp-earned"></div>
         </div>
-      </div>
-      <div class="oc-card" id="oc-card" style="display:none;">
+    </div>
+    <div class="oc-card" id="oc-card" style="display:none;">
         <div class="oc-header">
           <div class="oc-title">Getting Started</div>
           <div class="oc-count" id="oc-count"></div>
         </div>
         <div class="oc-bar"><div class="oc-fill" id="oc-fill"></div></div>
         <div id="oc-steps"></div>
-      </div>
     </div>
 
     <!-- hidden stat targets kept for JS compatibility -->
     <span id="stat-sessions" style="display:none;"></span>
 
     <!-- ONBOARDING -->
-    <div id="onboarding-section" style="display:none;"></div>
    <!-- UPCOMING EVENTS -->
     <div id="events-section" style="display:none;">
       <div class="section-header">
@@ -585,10 +581,10 @@
     const welcomeAvatarWrap = document.getElementById('welcome-avatar-wrap');
     if (user.photoURL) {
       av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
-      welcomeAvatarWrap.innerHTML = '<img class="welcome-avatar" src="' + user.photoURL + '" alt="avatar">';
+      if (welcomeAvatarWrap) welcomeAvatarWrap.innerHTML = '<img class="welcome-avatar" src="' + user.photoURL + '" alt="avatar">';
     } else {
       av.textContent = first.charAt(0).toUpperCase();
-      welcomeAvatarWrap.innerHTML = '<div class="welcome-avatar-fallback">' + first.charAt(0).toUpperCase() + '</div>';
+      if (welcomeAvatarWrap) welcomeAvatarWrap.innerHTML = '<div class="welcome-avatar-fallback">' + first.charAt(0).toUpperCase() + '</div>';
     }
 
     try {
@@ -620,7 +616,7 @@
         // Onboarding
         const onboarding = data.onboarding;
         if (onboarding && !onboarding.completed) {
-          renderOnboarding(onboarding.steps || {});
+          renderChecklist(user.uid, data);
         }
 
         // Notifications
@@ -767,37 +763,6 @@
     } catch(e) {}
   }
 
-  function renderOnboarding(steps) {
-    document.getElementById('onboarding-section').style.display = 'block';
-
-    const stepDefs = [
-      { key: 'welcomePost', label: 'Introduce yourself', desc: 'Post in the welcome thread', href: 'community.html' },
-      { key: 'welcomeCourse', label: 'Complete the welcome course', desc: 'Watch all 4 lessons', href: 'course.html?courseId=' + WELCOME_COURSE_ID },
-      { key: 'clarityTool', label: 'Complete your Clarity Session', desc: 'Discover your first tool idea', href: 'clarity.html' },
-      { key: 'toolIdeaPost', label: 'Share your Tool Idea', desc: 'Comment in the Tool Ideas thread', href: 'community.html' },
-    ];
-
-    const completed = stepDefs.filter(s => steps[s.key]).length;
-    const pct = Math.round((completed / stepDefs.length) * 100);
-
-    document.getElementById('onboarding-count').textContent = completed + ' of ' + stepDefs.length + ' complete';
-    document.getElementById('onboarding-progress').style.width = pct + '%';
-
-    document.getElementById('onboarding-steps').innerHTML = stepDefs.map(function(step, i) {
-      const done = !!steps[step.key];
-      return '<a class="onboarding-step' + (done ? ' done' : '') + '" href="' + (done ? '#' : step.href) + '">' +
-        '<div class="step-check' + (done ? ' completed' : '') + '">' +
-        (done ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>' : (i + 1)) +
-        '</div>' +
-        '<div class="step-body">' +
-        '<div class="step-title' + (done ? ' done-text' : '') + '">' + step.label + '</div>' +
-        '<div class="step-desc-text">' + step.desc + '</div>' +
-        '</div>' +
-        (done ? '' : '<span class="step-arrow">?</span>') +
-        '</a>';
-    }).join('');
-  }
-
   async function loadCourses(uid) {
     const grid = document.getElementById('courses-grid');
     try {
@@ -918,8 +883,11 @@
   function closeDeleteModal() {
     document.getElementById('da-overlay').classList.remove('open');
   }
-  document.getElementById('da-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
+  document.addEventListener('DOMContentLoaded', function() {
+    const daOverlay = document.getElementById('da-overlay');
+    if (daOverlay) daOverlay.addEventListener('click', function(e) {
+      if (e.target === this) closeDeleteModal();
+    });
   });
 
   async function confirmDeleteAccount() {
