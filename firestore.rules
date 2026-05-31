@@ -61,20 +61,33 @@ service cloud.firestore {
 
     // THREADS collection
     match /threads/{threadId} {
-     allow read: if isActive();
-  allow create: if isActive();
-  allow update: if isActive() && (
-    resource.data.authorId == request.auth.uid ||
-    isAdmin()
-  );
-  allow delete: if (isOwner(resource.data.authorId) || isAdmin()) && !isBanned();
+      allow read: if isActive();
+      allow create: if isActive();
+      allow update: if isActive() && (
+        isAdmin() ||
+        // Owner can edit content fields only — not pinned, likeCount, etc.
+        (resource.data.authorId == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['title', 'content', 'editedAt'])) ||
+        // Any member can react (reactions map field)
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['reactions']) ||
+        // Any member can update commentCount (on add/delete comment)
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['commentCount'])
+      );
+      allow delete: if (isOwner(resource.data.authorId) || isAdmin()) && !isBanned();
 
       // COMMENTS subcollection
       match /comments/{commentId} {
         allow read: if isActive();
         allow create: if isActive();
         allow update: if isActive() && (
-          resource.data.authorId == request.auth.uid || isAdmin()
+          isAdmin() ||
+          // Owner can only edit content, not authorId or createdAt
+          (resource.data.authorId == request.auth.uid &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['content', 'editedAt']))
         );
         allow delete: if (isOwner(resource.data.authorId) || isAdmin()) && !isBanned();
       }
@@ -336,11 +349,16 @@ match /conversations/{conversationId} {
         request.resource.data.builderUserId == request.auth.uid &&
         request.resource.data.status == 'pending';
 
-      // Anyone can increment useCount by exactly 1; admins can update anything
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['useCount']) &&
-        request.resource.data.useCount == resource.data.useCount + 1
-      );
+      allow update: if isAdmin() ||
+        // Signed-in users can increment useCount by exactly 1
+        (isSignedIn() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['useCount']) &&
+          request.resource.data.useCount == resource.data.useCount + 1) ||
+        // Listing owner can edit content fields (not status, builderUserId, useCount)
+        (isActive() &&
+          resource.data.builderUserId == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['name', 'description', 'link', 'category', 'tags', 'updatedAt']));
 
       allow delete: if isAdmin();
     }
@@ -386,7 +404,10 @@ match /conversations/{conversationId} {
       allow read: if isActive() && (
         resource.data.userId == request.auth.uid || isAdmin()
       );
-      allow create: if isActive();
+      // Users can only create notifications targeted at themselves; admins can create for anyone
+      allow create: if isActive() && (
+        request.resource.data.userId == request.auth.uid || isAdmin()
+      );
       allow update: if isActive() && (
         resource.data.userId == request.auth.uid || isAdmin()
       );
