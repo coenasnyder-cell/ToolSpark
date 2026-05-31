@@ -86,6 +86,14 @@
   .step-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 1.5rem; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem; }
+
+  /* Stacked full-width option cards for longer answers */
+  .option-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+  .option-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); cursor: pointer; transition: all 0.15s; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; color: var(--text2); line-height: 1.4; }
+  .option-card:hover { border-color: rgba(201,168,76,0.4); color: var(--text); }
+  .option-card.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+  .option-card-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .option-card.selected .option-card-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: block; }
   .chip {
     padding: 10px 16px;
     border: 1px solid var(--border);
@@ -299,13 +307,25 @@
     <!-- Step C: What do you want to build? -->
     <div class="step" id="step-C">
       <div class="step-eyebrow">Almost there</div>
-      <div class="step-question">What do you want to build first?</div>
-      <div class="step-sub">Pick the one thing you want to have working when you finish ToolSpark.</div>
-      <div class="chips">
-        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">An AI tool my clients can use</div>
-        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">A course with lessons and content</div>
-        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">A community space for my audience</div>
-        <div class="chip" onclick="selectSimple(this, 'wantToBuild')">All three together</div>
+      <div class="step-question">How clear are you on what you want to build?</div>
+      <div class="step-sub">Be honest — this shapes where we start you so you're not sitting through steps you don't need.</div>
+      <div class="option-cards">
+        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
+          <div class="option-card-dot"></div>
+          I know my skills and exactly what I want to build
+        </div>
+        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
+          <div class="option-card-dot"></div>
+          I know what I'm good at but not sure what to build with it
+        </div>
+        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
+          <div class="option-card-dot"></div>
+          I have some ideas but need help figuring out if they're right
+        </div>
+        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
+          <div class="option-card-dot"></div>
+          I'm not sure yet — I need to find out what I have to offer first
+        </div>
       </div>
       <button class="next-btn" id="next-C" disabled onclick="goToStep('D')">Next →</button>
       <a class="skip-link" onclick="skipAll()">Skip for now</a>
@@ -334,8 +354,8 @@ let hasPlatformStep = false;
 
 const answers = {
   currentSetup: null,
-  currentTools: [],   // array of selected tool names
-  wantToBuild: null,
+  currentTools: [],
+  clarityLevel: null,
   techComfort: null
 };
 
@@ -428,9 +448,17 @@ function skipPlatform() {
   goToStep('C');
 }
 
-// Generic chip selection for C and D
+// Option card selection (Step C)
+function selectOption(el, key) {
+  document.querySelectorAll('#step-C .option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[key] = el.textContent.trim();
+  document.getElementById('next-C').disabled = false;
+}
+
+// Generic chip selection (Step D)
 function selectSimple(el, key) {
-  const stepMap = { wantToBuild: 'C', techComfort: 'D' };
+  const stepMap = { techComfort: 'D' };
   const stepId = stepMap[key];
   document.querySelectorAll(`#step-${stepId} .chip`).forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -456,7 +484,7 @@ async function finish() {
       const intake = {
         currentSetup:  answers.currentSetup,
         currentTools:  cleanTools,
-        wantToBuild:   answers.wantToBuild,
+        clarityLevel:  answers.clarityLevel,
         techComfort:   answers.techComfort,
         completedAt:   firebase.firestore.FieldValue.serverTimestamp()
       };

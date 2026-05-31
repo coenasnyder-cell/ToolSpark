@@ -85,6 +85,21 @@
   .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
   .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
+  /* FLOATING RECORD BAR */
+  .record-bar { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: var(--dark2); border-bottom: 1px solid rgba(196,98,45,0.4); padding: 10px 24px; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .record-bar.visible { display: flex; }
+  .record-bar-left { display: flex; align-items: center; gap: 10px; }
+  .record-bar-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); animation: pulse-dot 1.2s ease infinite; flex-shrink: 0; }
+  .record-bar-text { font-size: 13px; font-weight: 700; color: #F0EDE6; }
+  .record-bar-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .record-bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .bar-mark-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.4); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--gold); cursor: pointer; transition: all 0.15s; }
+  .bar-mark-btn:hover { background: rgba(201,168,76,0.25); }
+  .bar-mark-btn.flash { background: rgba(201,168,76,0.35); }
+  .bar-stop-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.4); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--coral); cursor: pointer; transition: all 0.15s; }
+  .bar-stop-btn:hover { background: rgba(196,98,45,0.25); }
+  .record-hint { font-size: 11px; color: var(--text3); margin-top: 5px; font-style: italic; }
+
   /* PROGRESS */
   .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem 2rem; text-align: center; margin-bottom: 1.5rem; display: none; }
   .progress-card.visible { display: block; }
@@ -153,6 +168,23 @@
 </style>
 </head>
 <body>
+
+<!-- FLOATING RECORDING BAR -->
+<div class="record-bar" id="record-bar">
+  <div class="record-bar-left">
+    <div class="record-bar-dot"></div>
+    <div>
+      <div class="record-bar-text">Recording in progress</div>
+      <div class="record-bar-sub">Switch to the tool tab — click Mark Step each time a new screen appears</div>
+    </div>
+  </div>
+  <div class="record-bar-right">
+    <button class="bar-mark-btn" id="bar-mark-btn" onclick="markStep()">
+      ✦ Mark Step <span class="step-badge" id="step-count">0</span>
+    </button>
+    <button class="bar-stop-btn" onclick="stopRecording()">◼ Stop</button>
+  </div>
+</div>
 
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -257,6 +289,7 @@
               <div class="record-status" id="record-status"></div>
             </div>
           </div>
+          <div class="record-hint">Tip: open the tool in a separate tab, then click Record Walkthrough and select that tab — not this one.</div>
           <textarea class="form-textarea" id="toolSteps" rows="4" placeholder="1. Enter your first name&#10;2. Answer 7 questions about your lived experience&#10;3. Receive your Spark Profile with statement, edge, and audience snapshot"></textarea>
         </div>
 
@@ -688,12 +721,13 @@ Generate a complete lesson package for this ToolSpark tool.`;
     canvas.getContext('2d').drawImage(previewVideo, 0, 0, canvas.width, canvas.height);
     markedFrames.push(canvas.toDataURL('image/jpeg', 0.75).split(',')[1]);
 
-    const badge = document.getElementById('step-count');
-    badge.textContent = markedFrames.length;
+    // Update both the form badge and the floating bar badge
+    document.querySelectorAll('#step-count').forEach(el => el.textContent = markedFrames.length);
 
-    const btn = document.getElementById('mark-step-btn');
-    btn.style.background = 'rgba(201,168,76,0.35)';
-    setTimeout(() => { btn.style.background = ''; }, 250);
+    // Flash the bar button as feedback
+    const barBtn = document.getElementById('bar-mark-btn');
+    barBtn.classList.add('flash');
+    setTimeout(() => { barBtn.classList.remove('flash'); }, 250);
   }
 
   async function analyzeSteps() {
@@ -744,14 +778,18 @@ Generate a complete lesson package for this ToolSpark tool.`;
   }
 
   function setRecordUI(isRecording, statusText) {
-    const btn     = document.getElementById('record-btn');
-    const markBtn = document.getElementById('mark-step-btn');
-    const status  = document.getElementById('record-status');
+    const btn      = document.getElementById('record-btn');
+    const markBtn  = document.getElementById('mark-step-btn');
+    const floatBar = document.getElementById('record-bar');
+    const status   = document.getElementById('record-status');
+
     btn.classList.toggle('recording', isRecording);
     btn.innerHTML = isRecording
       ? '<span class="record-dot"></span> Stop Recording'
       : '<span class="record-dot"></span> Record Walkthrough';
     markBtn.classList.toggle('visible', isRecording);
+    floatBar.classList.toggle('visible', isRecording);
+
     if (statusText !== null) {
       status.textContent = statusText || '';
       if (!isRecording && statusText) setTimeout(() => { status.textContent = ''; }, 5000);

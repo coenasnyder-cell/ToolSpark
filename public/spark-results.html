@@ -400,6 +400,10 @@
               <div class="card-label">Who You Help</div>
         <div class="card-text" id="whoText"></div>
       </div>
+      <div class="profile-card" id="resultCard">
+        <div class="card-label">The Result You Create</div>
+        <div class="card-text" id="resultText"></div>
+      </div>
       <div class="profile-card" id="edgeCard">
         <div class="card-label">Your Edge</div>
         <div class="card-text" id="edgeText"></div>
@@ -449,10 +453,11 @@ function parseProfile(raw) {
   };
   profile.name       = extract("NAME");
   profile.statement  = extract("STATEMENT");
-  profile.whatYouKnow = extract("WHAT_YOU_KNOW");
-  profile.whoYouHelp = extract("WHO_YOU_HELP");
-  profile.yourEdge   = extract("YOUR_EDGE");
-  profile.closing    = extract("CLOSING");
+  profile.whatYouKnow      = extract("WHAT_YOU_KNOW");
+  profile.whoYouHelp       = extract("WHO_YOU_HELP");
+  profile.resultYouCreate  = extract("THE_RESULT_YOU_CREATE");
+  profile.yourEdge         = extract("YOUR_EDGE");
+  profile.closing          = extract("CLOSING");
   return profile;
 }
 
@@ -491,9 +496,10 @@ function renderProfile(profile) {
   document.getElementById("statementText").textContent = profile.statement || "";
 
  // Cards
-document.getElementById("knowText").innerHTML  = fmt(profile.whatYouKnow || "");
-document.getElementById("whoText").innerHTML   = fmt(profile.whoYouHelp || "");
-document.getElementById("edgeText").innerHTML  = fmt(profile.yourEdge || "");
+document.getElementById("knowText").innerHTML   = fmt(profile.whatYouKnow     || "");
+document.getElementById("whoText").innerHTML    = fmt(profile.whoYouHelp      || "");
+document.getElementById("resultText").innerHTML = fmt(profile.resultYouCreate || "");
+document.getElementById("edgeText").innerHTML   = fmt(profile.yourEdge        || "");
 
 document.getElementById("closingText").innerHTML = fmt(profile.closing || "");
 
