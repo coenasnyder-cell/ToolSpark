@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Screen Recorder — Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --coral: #C4622D;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 220px; background: var(--dark); flex-shrink: 0; display: flex; flex-direction: column; padding: 24px 16px; gap: 6px; }
+  .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-dark); }
+  .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 13px; text-decoration: none; transition: all 0.15s; }
+  .sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.06); color: var(--gold-light); }
+  .sidebar-back { margin-top: auto; }
+
+  /* MAIN */
+  .main { flex: 1; padding: 40px 32px; max-width: 680px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); margin-bottom: 36px; }
+
+  /* CARD */
+  .recorder-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 36px 32px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+  /* FILE NAME INPUT */
+  .name-row { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+  .name-label { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .name-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+  .name-input:focus { border-color: var(--gold); }
+
+  /* TIMER */
+  .timer { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: var(--text); letter-spacing: 2px; line-height: 1; }
+  .timer.recording { color: var(--coral); }
+
+  /* STATUS */
+  .status-row { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .status-dot.recording { background: var(--coral); animation: pulse 1.2s ease infinite; }
+  .status-dot.done { background: #3D8A65; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .status-text { font-size: 13px; color: var(--text2); }
+
+  /* BUTTONS */
+  .btn-row { display: flex; gap: 12px; }
+  .btn-record { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; background: var(--coral); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-record:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-record:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-stop { display: none; align-items: center; gap: 10px; padding: 14px 32px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-stop:hover { opacity: 0.85; }
+  .btn-stop.visible { display: inline-flex; }
+
+  /* DOWNLOAD AREA */
+  .download-area { display: none; width: 100%; background: rgba(61,138,101,0.07); border: 1px solid rgba(61,138,101,0.25); border-radius: var(--radius-sm); padding: 20px 24px; text-align: center; flex-direction: column; align-items: center; gap: 12px; }
+  .download-area.visible { display: flex; }
+  .download-icon { font-size: 28px; }
+  .download-label { font-size: 14px; font-weight: 700; color: #2A5C45; }
+  .download-sub { font-size: 12px; color: var(--text3); }
+  .btn-download { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: #2A5C45; color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .btn-download:hover { background: #3D8A65; }
+
+  /* TIPS */
+  .tips { width: 100%; border-top: 1px solid var(--border); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .tip { font-size: 13px; color: var(--text3); display: flex; gap: 8px; }
+  .tip span:first-child { color: var(--gold); flex-shrink: 0; }
+
+  /* ACCESS DENIED */
+  #access-denied { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; text-align: center; padding: 40px; }
+</style>
+</head>
+<body>
+
+<div id="access-denied">
+  <div style="font-size:2.5rem;">🔒</div>
+  <div style="font-family:'Playfair Display',serif;font-size:22px;">Admin Only</div>
+  <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
+</div>
+
+<div class="layout" id="main-layout" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-logo">✦ ToolSpark</div>
+    <a href="lesson-generator.html" class="sidebar-link">📋 Lesson Generator</a>
+    <a href="screen-recorder.html" class="sidebar-link active">⏺ Screen Recorder</a>
+    <a href="dashboard.html" class="sidebar-link sidebar-back">← Dashboard</a>
+  </aside>
+
+  <div class="main">
+    <div class="page-title">Screen Recorder</div>
+    <p class="page-sub">Record your screen and download the file when done. No steps, no analysis — just the recording.</p>
+
+    <div class="recorder-card">
+
+      <div class="name-row">
+        <div class="name-label">File Name</div>
+        <input class="name-input" id="fileName" type="text" placeholder="lesson-2-walkthrough" />
+      </div>
+
+      <div class="timer" id="timer">0:00</div>
+
+      <div class="status-row">
+        <div class="status-dot" id="statusDot"></div>
+        <div class="status-text" id="statusText">Ready to record</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-record" id="btnRecord" onclick="startRecording()">⏺ Start Recording</button>
+        <button class="btn-stop" id="btnStop" onclick="stopRecording()">◼ Stop</button>
+      </div>
+
+      <div class="download-area" id="downloadArea">
+        <div class="download-icon">✅</div>
+        <div class="download-label">Recording complete</div>
+        <div class="download-sub" id="downloadSub"></div>
+        <a class="btn-download" id="downloadBtn">⬇ Download</a>
+        <button onclick="resetRecorder()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;margin-top:4px;">Record another</button>
+      </div>
+
+      <div class="tips">
+        <div class="tip"><span>✦</span><span>Open your tool in a separate tab before starting — then select that tab when the screen picker appears.</span></div>
+        <div class="tip"><span>✦</span><span>Chrome saves as MP4 if supported, otherwise WebM. Both work in CapCut and video editors.</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let mediaRecorder   = null;
+  let recordedChunks  = [];
+  let recordingStream = null;
+  let timerInterval   = null;
+  let secondsElapsed  = 0;
+  let downloadUrl     = null;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+      document.getElementById('main-layout').style.display = 'flex';
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+    }
+  });
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = String(s % 60).padStart(2, '0');
+    return m + ':' + sec;
+  }
+
+  function setStatus(dot, text) {
+    const d = document.getElementById('statusDot');
+    d.className = 'status-dot' + (dot ? ' ' + dot : '');
+    document.getElementById('statusText').textContent = text;
+  }
+
+  async function startRecording() {
+    try {
+      recordingStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: 'always' },
+        audio: true
+      });
+    } catch(e) {
+      return;
+    }
+
+    recordedChunks  = [];
+    secondsElapsed  = 0;
+    if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
+
+    const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+      ? 'video/mp4;codecs=avc1'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+    const fileExt = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+    mediaRecorder = new MediaRecorder(recordingStream, { mimeType });
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      clearInterval(timerInterval);
+      const blob = new Blob(recordedChunks, { type: mimeType });
+      downloadUrl  = URL.createObjectURL(blob);
+      const name   = (document.getElementById('fileName').value.trim() || 'recording')
+                       .toLowerCase().replace(/\s+/g, '-');
+      const fullName = name + '.' + fileExt;
+      const btn    = document.getElementById('downloadBtn');
+      btn.href     = downloadUrl;
+      btn.download = fullName;
+
+      document.getElementById('downloadSub').textContent = fullName + ' · ' + formatTime(secondsElapsed);
+      document.getElementById('downloadArea').classList.add('visible');
+      document.getElementById('btnStop').classList.remove('visible');
+      document.getElementById('timer').classList.remove('recording');
+      setStatus('done', 'Done — download your recording below.');
+      mediaRecorder = null;
+    };
+
+    recordingStream.getVideoTracks()[0].onended = () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      recordingStream = null;
+      clearInterval(timerInterval);
+    };
+
+    mediaRecorder.start(1000);
+
+    document.getElementById('btnRecord').style.display = 'none';
+    document.getElementById('btnStop').classList.add('visible');
+    document.getElementById('downloadArea').classList.remove('visible');
+    document.getElementById('timer').classList.add('recording');
+    setStatus('recording', 'Recording in progress…');
+
+    timerInterval = setInterval(() => {
+      secondsElapsed++;
+      document.getElementById('timer').textContent = formatTime(secondsElapsed);
+    }, 1000);
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+    if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
+  }
+
+  function resetRecorder() {
+    if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
+    secondsElapsed = 0;
+    document.getElementById('timer').textContent = '0:00';
+    document.getElementById('timer').classList.remove('recording');
+    document.getElementById('downloadArea').classList.remove('visible');
+    document.getElementById('btnRecord').style.display = 'inline-flex';
+    document.getElementById('btnStop').classList.remove('visible');
+    setStatus('', 'Ready to record');
+  }
+</script>
+</body>
+</html>

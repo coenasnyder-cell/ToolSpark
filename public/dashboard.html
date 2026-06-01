@@ -268,6 +268,20 @@
   .event-join-btn { display: inline-flex; align-items: center; gap: 5px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 6px 14px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: background 0.15s; margin-top: 8px; }
   .event-join-btn:hover { background: var(--gold-light); }
 
+  /* -- ADMIN TOOLS CARD -- */
+  .admin-tools-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-tools-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; }
+  .admin-tools-header:hover { background: rgba(201,168,76,0.04); }
+  .admin-tools-title { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .admin-tools-body { display: none; border-top: 1px solid var(--border); padding: 8px 0; }
+  .admin-tools-card.open .admin-tools-body { display: block; }
+  .admin-tools-card.open .admin-tools-chevron { transform: rotate(180deg); }
+  .admin-tools-chevron { width: 16px; height: 16px; color: var(--text3); transition: transform 0.2s; }
+  .admin-tool-link { display: flex; align-items: center; gap: 12px; padding: 10px 1.25rem; text-decoration: none; color: var(--text); font-size: 13px; font-weight: 600; transition: background 0.12s; }
+  .admin-tool-link:hover { background: rgba(0,0,0,0.03); }
+  .admin-tool-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .admin-tool-desc { font-size: 11px; color: var(--text3); font-weight: 400; margin-top: 1px; }
+
   /* -- ADMIN LESSON CARD -- */
   .admin-lesson-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
   .admin-lesson-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; }
@@ -524,6 +538,34 @@
       </div>
     </div>
 
+    <!-- ADMIN: TOOLS -->
+    <div id="admin-tools-section" style="display:none;">
+      <div class="admin-tools-card" id="admin-tools-card">
+        <div class="admin-tools-header" onclick="this.closest('.admin-tools-card').classList.toggle('open')">
+          <div class="admin-tools-title">
+            ⚙ Admin Tools
+          </div>
+          <svg class="admin-tools-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+        <div class="admin-tools-body">
+          <a href="lesson-generator.html" class="admin-tool-link">
+            <div class="admin-tool-icon" style="background:rgba(201,168,76,0.12);">📋</div>
+            <div>
+              <div>Lesson Generator</div>
+              <div class="admin-tool-desc">Generate complete lesson packages with Sparky</div>
+            </div>
+          </a>
+          <a href="screen-recorder.html" class="admin-tool-link">
+            <div class="admin-tool-icon" style="background:rgba(196,98,45,0.12);">⏺</div>
+            <div>
+              <div>Screen Recorder</div>
+              <div class="admin-tool-desc">Record your screen and download as MP4</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- ADMIN: LESSON PACKAGES -->
     <div id="admin-lesson-section" style="display:none;">
       <div class="admin-lesson-card" id="admin-lesson-card">
@@ -638,6 +680,7 @@
         if (data.userRole === 'admin') {
           isAdmin = true;
           document.getElementById('sidebar-role').textContent = 'Admin';
+          document.getElementById('admin-tools-section').style.display = 'block';
           document.getElementById('admin-lesson-section').style.display = 'block';
         }
 
