@@ -211,6 +211,9 @@
         <div class="page-title">Tool Library</div>
         <div class="page-sub">Discover AI tools and resources to build smarter client experiences</div>
       </div>
+      <a href="admintools.html" id="manage-tools-link" style="display:none;align-items:center;gap:6px;padding:8px 16px;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:0.04em;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.background='rgba(201,168,76,0.2)'" onmouseout="this.style.background='var(--gold-dim)'">
+        + Manage Tools
+      </a>
     </div>
 
     <!-- Filter bar -->
@@ -335,6 +338,7 @@
         if (data.userRole === 'admin') {
           document.getElementById('admin-nav-link').style.display = 'flex';
           document.getElementById('sidebar-role').textContent = 'Admin';
+          document.getElementById('manage-tools-link').style.display = 'inline-flex';
         }
       }
     } catch(e) {}
