@@ -159,6 +159,23 @@
   .section-content { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.75; white-space: pre-wrap; font-family: 'Lato', sans-serif; }
   .elevenlabs-note { padding: 0 1.25rem 1.25rem; font-size: 12px; color: var(--text3); font-style: italic; }
 
+  /* HISTORY */
+  .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
+  .history-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s; }
+  .history-header:hover { background: #FAFAF8; }
+  .history-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .history-count { font-size: 12px; color: var(--text3); }
+  .history-body { border-top: 1px solid var(--border); display: none; }
+  .history-card.open .history-body { display: block; }
+  .history-card.open .chevron { transform: rotate(180deg); }
+  .history-empty { padding: 1.25rem; font-size: 13px; color: var(--text3); text-align: center; }
+  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; gap: 12px; }
+  .history-item:last-child { border-bottom: none; }
+  .history-item:hover { background: #FAFAF8; }
+  .history-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .history-item-date { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .history-load-btn { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; flex-shrink: 0; }
+
   @media (max-width: 767px) {
     .main-wrap { margin-left: 0; }
     .sidebar { display: none; }
@@ -329,6 +346,20 @@
       </div>
     </div>
 
+    <!-- Previous Lessons -->
+    <div class="history-card" id="history-card">
+      <div class="history-header" onclick="document.getElementById('history-card').classList.toggle('open')">
+        <span class="history-title">Previous Packages</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="history-count" id="history-count"></span>
+          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+      <div class="history-body">
+        <div id="history-list"><div class="history-empty">Loading...</div></div>
+      </div>
+    </div>
+
     <div class="progress-card" id="progress-card">
       <div class="progress-sparky">✨</div>
       <div class="progress-text">Sparky is writing your lesson package...</div>
@@ -491,6 +522,7 @@
       }
       document.getElementById('admin-content').style.display = 'flex';
       document.getElementById('admin-content').style.flexDirection = 'column';
+      loadHistory();
       const name = snap.data().displayName || user.displayName || 'Admin';
       document.getElementById('sidebar-name').textContent = name;
       const av = document.getElementById('sidebar-avatar');
@@ -626,6 +658,7 @@ Generate a complete lesson package for this ToolSpark tool.`;
 
       renderResults(parsed, fields.toolName);
       await saveToFirestore(fields.toolName, raw);
+      loadHistory();
 
     } catch(e) {
       showError(e.message || 'Something went wrong. Please try again.');
@@ -800,6 +833,59 @@ Generate a complete lesson package for this ToolSpark tool.`;
     if (statusText !== null) {
       status.textContent = statusText || '';
       if (!isRecording && statusText) setTimeout(() => { status.textContent = ''; }, 5000);
+    }
+  }
+
+  // ── HISTORY ──────────────────────────────────────────────
+  async function loadHistory() {
+    if (!currentUser) return;
+    try {
+      const snap = await db.collection('lesson_packages')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
+        .limit(30)
+        .get();
+
+      const list = document.getElementById('history-list');
+      const countEl = document.getElementById('history-count');
+
+      if (snap.empty) {
+        list.innerHTML = '<div class="history-empty">No previous packages yet.</div>';
+        countEl.textContent = '';
+        return;
+      }
+
+      countEl.textContent = snap.size + ' saved';
+      list.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        const date = d.createdAt?.toDate
+          ? d.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '';
+        return `<div class="history-item" onclick="loadPackage('${doc.id}')">
+          <div>
+            <div class="history-item-name">${d.toolName || 'Untitled'}</div>
+            <div class="history-item-date">${date}</div>
+          </div>
+          <span class="history-load-btn">Load →</span>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      document.getElementById('history-list').innerHTML =
+        '<div class="history-empty">Could not load history.</div>';
+    }
+  }
+
+  async function loadPackage(docId) {
+    try {
+      const doc = await db.collection('lesson_packages').doc(docId).get();
+      if (!doc.exists) return;
+      const data = doc.data();
+      const parsed = parseLessonPackage(data.fullPackage || '');
+      renderResults(parsed, data.toolName || 'Lesson');
+      // Scroll to results
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch(e) {
+      alert('Could not load that package.');
     }
   }
 
