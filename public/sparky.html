@@ -792,7 +792,7 @@ async function callAI(userMsg) {
       model: MODEL,
       max_tokens: 600,
       messages: history,
-      _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID, context: { memberToolName: memberToolName || '' } }
+      _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID, context: { memberToolName: memberToolName || '', currentDate: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), currentTime: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) } }
     })
   });
 

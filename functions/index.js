@@ -1449,6 +1449,9 @@ exports.analyze = onRequest({
         if (context.memberToolName) {
           system += `\n\nMEMBER CONTEXT: This member has built a certified tool called "${context.memberToolName}". Reference it by name. They are now in the monetization phase — help them sell it.`;
         }
+        if (context.currentDate || context.currentTime) {
+          system += `\n\nCURRENT DATE & TIME: ${context.currentDate || ''}${context.currentTime ? ' at ' + context.currentTime : ''}. Use this when confirming commitments, noting when they said they'd sit down to work, or referencing how long until end of day.`;
+        }
       }
 
       anthropicBody.system = system;
