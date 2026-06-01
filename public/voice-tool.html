@@ -732,16 +732,31 @@
 
     <!-- Script Input -->
     <section>
-      <div class="section-label">Your Script</div>
-      <div class="script-wrap">
-        <textarea
-          id="script-input"
-          class="script-textarea"
-          placeholder="Paste or type your script here…"
-          maxlength="4096"
-        ></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="section-label" style="margin-bottom:0;">Script 1 — Intro &amp; Outro</div>
+        <button onclick="copyScript(1)" style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.15s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">Copy</button>
       </div>
-      <div class="char-count"><span id="char-count">0</span> / 4096 characters</div>
+      <div class="script-wrap">
+        <textarea id="script-input" class="script-textarea" placeholder="Paste your intro and outro voiceover script here…" maxlength="4096"></textarea>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="char-count" id="char-wrap-1"><span id="char-count">0</span> / 4096 characters</div>
+        <button onclick="generateFrom(1)" style="background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Generate Script 1 →</button>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="section-label" style="margin-bottom:0;">Script 2 — Walkthrough</div>
+        <button onclick="copyScript(2)" style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.15s;" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">Copy</button>
+      </div>
+      <div class="script-wrap">
+        <textarea id="script-input-2" class="script-textarea" placeholder="Paste your walkthrough script here (from the recorder page)…" maxlength="4096"></textarea>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="char-count" id="char-wrap-2"><span id="char-count-2">0</span> / 4096 characters</div>
+        <button onclick="generateFrom(2)" style="background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Generate Script 2 →</button>
+      </div>
     </section>
 
     <!-- Voice Selection -->
@@ -767,7 +782,7 @@
 
     <!-- Generate -->
     <section>
-      <button id="generate-btn" class="btn-generate">Generate + Download MP3</button>
+      <button id="generate-btn" class="btn-generate" style="display:none;">Generate + Download MP3</button>
     </section>
 
     <!-- Member ElevenLabs callout (non-admin, shown when EL tab active) -->
@@ -1062,17 +1077,41 @@ document.getElementById("expr-slider").addEventListener("input", e => {
 });
 
 // ── Char Count ───────────────────────────────────────────
-const scriptInput = document.getElementById("script-input");
-const charCount   = document.getElementById("char-count");
+const scriptInput  = document.getElementById("script-input");
+const scriptInput2 = document.getElementById("script-input-2");
+const charCount    = document.getElementById("char-count");
+const charCount2   = document.getElementById("char-count-2");
+
 scriptInput.addEventListener("input", () => {
   const len = scriptInput.value.length;
   charCount.textContent = len;
-  charCount.parentElement.classList.toggle("warn", len > 3800);
+  document.getElementById("char-wrap-1").classList.toggle("warn", len > 3800);
 });
+scriptInput2.addEventListener("input", () => {
+  const len = scriptInput2.value.length;
+  charCount2.textContent = len;
+  document.getElementById("char-wrap-2").classList.toggle("warn", len > 3800);
+});
+
+function copyScript(n) {
+  const el = n === 1 ? scriptInput : scriptInput2;
+  if (!el.value.trim()) { showToast("Nothing to copy — paste your script first."); return; }
+  navigator.clipboard.writeText(el.value.trim()).then(() => showToast("Copied!"));
+}
+
+let activeScriptNum = 1;
+function generateFrom(n) {
+  activeScriptNum = n;
+  const el = n === 1 ? scriptInput : scriptInput2;
+  if (!el.value.trim()) { showToast(`Paste Script ${n} before generating.`); return; }
+  if (!selectedVoice)   { showToast("Select a voice first."); return; }
+  document.getElementById("generate-btn").click();
+}
 
 // ── Generate ─────────────────────────────────────────────
 document.getElementById("generate-btn").addEventListener("click", async () => {
-  const script = scriptInput.value.trim();
+  const activeInput = activeScriptNum === 2 ? scriptInput2 : scriptInput;
+  const script = activeInput.value.trim();
   if (!script)        { showToast("Paste your script before generating."); return; }
   if (!selectedVoice) { showToast("Select a voice first."); return; }
 

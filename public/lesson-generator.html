@@ -476,6 +476,7 @@
           </div>
           <div class="section-header-right">
             <button class="copy-btn copy-btn-elevenlabs" onclick="copySection(event, 'content-voiceover')">Copy for ElevenLabs →</button>
+            <button class="copy-btn" onclick="downloadVoiceoverScript()">⬇ Download Script</button>
             <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
           </div>
         </div>
@@ -891,6 +892,18 @@ Generate a complete lesson package for this ToolSpark tool.`;
     } catch(e) {
       alert('Could not load that package.');
     }
+  }
+
+  function downloadVoiceoverScript() {
+    const text = document.getElementById('content-voiceover')?.textContent?.trim() || '';
+    if (!text) return;
+    const name = (document.getElementById('toolName')?.value?.trim() || 'lesson')
+      .toLowerCase().replace(/\s+/g, '-');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = name + '-voiceover-script.txt';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
 
   function copySection(e, contentId) {

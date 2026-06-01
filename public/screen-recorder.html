@@ -92,6 +92,21 @@
   .tip { font-size: 13px; color: var(--text3); display: flex; gap: 8px; }
   .tip span:first-child { color: var(--gold); flex-shrink: 0; }
 
+  /* MARK STEP */
+  .btn-mark { display: none; align-items: center; gap: 8px; padding: 14px 22px; background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.35); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-mark.visible { display: inline-flex; }
+  .btn-mark:hover { background: rgba(201,168,76,0.22); }
+  .btn-mark.flash { background: rgba(201,168,76,0.4); }
+  .step-badge { background: var(--gold); color: var(--dark); border-radius: 20px; padding: 1px 8px; font-size: 11px; min-width: 20px; text-align: center; }
+
+  /* SCRIPT AREA */
+  .script-area { display: none; width: 100%; background: rgba(42,92,69,0.07); border: 1px solid rgba(42,92,69,0.25); border-radius: var(--radius-sm); padding: 20px 24px; flex-direction: column; gap: 12px; }
+  .script-area.visible { display: flex; }
+  .script-label { font-size: 12px; font-weight: 700; color: #2A5C45; text-transform: uppercase; letter-spacing: 0.08em; }
+  .script-text { font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+  .btn-dl-script { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; background: #2A5C45; color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; align-self: flex-start; }
+  .btn-dl-script:hover { background: #3D8A65; }
+
   /* ACCESS DENIED */
   #access-denied { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; text-align: center; padding: 40px; }
 </style>
@@ -113,8 +128,8 @@
   </aside>
 
   <div class="main">
-    <div class="page-title">Screen Recorder</div>
-    <p class="page-sub">Record your screen and download the file when done. No steps, no analysis — just the recording.</p>
+    <div class="page-title">Walkthrough Recorder</div>
+    <p class="page-sub">Record your tool walkthrough. Click <strong>Mark Step</strong> each time the screen changes — Claude will turn those screenshots into your walkthrough script.</p>
 
     <div class="recorder-card">
 
@@ -132,6 +147,7 @@
 
       <div class="btn-row">
         <button class="btn-record" id="btnRecord" onclick="startRecording()">⏺ Start Recording</button>
+        <button class="btn-mark" id="btnMark" onclick="markStep()">✦ Mark Step <span class="step-badge" id="stepCount">0</span></button>
         <button class="btn-stop" id="btnStop" onclick="stopRecording()">◼ Stop</button>
       </div>
 
@@ -139,13 +155,22 @@
         <div class="download-icon">✅</div>
         <div class="download-label">Recording complete</div>
         <div class="download-sub" id="downloadSub"></div>
-        <a class="btn-download" id="downloadBtn">⬇ Download</a>
-        <button onclick="resetRecorder()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;margin-top:4px;">Record another</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+          <a class="btn-download" id="downloadBtn">⬇ Download Video</a>
+          <button class="btn-download" id="downloadScriptBtn" onclick="downloadScript()" style="display:none;background:#2A5C45;">⬇ Download Script</button>
+        </div>
+        <button onclick="resetRecorder()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;margin-top:8px;">Record another</button>
+      </div>
+
+      <div class="script-area" id="scriptArea">
+        <div class="script-label">Walkthrough Script — <span id="scriptStepCount"></span></div>
+        <div class="script-text" id="scriptText"></div>
       </div>
 
       <div class="tips">
-        <div class="tip"><span>✦</span><span>Open your tool in a separate tab before starting — then select that tab when the screen picker appears.</span></div>
-        <div class="tip"><span>✦</span><span>Chrome saves as MP4 if supported, otherwise WebM. Both work in CapCut and video editors.</span></div>
+        <div class="tip"><span>✦</span><span>Open your tool in a separate tab first — select that tab when the screen picker appears.</span></div>
+        <div class="tip"><span>✦</span><span>Click Mark Step each time a new screen or action appears.</span></div>
+        <div class="tip"><span>✦</span><span>Chrome saves as MP4 if supported, otherwise WebM. Both work in CapCut.</span></div>
       </div>
 
     </div>
@@ -153,9 +178,22 @@
 </div>
 
 <script>
+  const FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  const MODEL = 'claude-sonnet-4-6';
+  let currentUser = null;
+
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : '';
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  }
+
   let mediaRecorder   = null;
   let recordedChunks  = [];
   let recordingStream = null;
+  let previewVideo    = null;
+  let markedFrames    = [];
+  let walkthroughScript = '';
   let timerInterval   = null;
   let secondsElapsed  = 0;
   let downloadUrl     = null;
@@ -168,6 +206,7 @@
         document.getElementById('access-denied').style.display = 'flex';
         return;
       }
+      currentUser = user;
       document.getElementById('main-layout').style.display = 'flex';
     } catch(e) {
       document.getElementById('access-denied').style.display = 'flex';
@@ -197,8 +236,19 @@
     }
 
     recordedChunks  = [];
+    markedFrames    = [];
+    walkthroughScript = '';
     secondsElapsed  = 0;
     if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
+    document.getElementById('stepCount').textContent = '0';
+    document.getElementById('scriptArea').classList.remove('visible');
+    document.getElementById('downloadScriptBtn').style.display = 'none';
+
+    // Hidden video for snapshots
+    previewVideo = document.createElement('video');
+    previewVideo.srcObject = recordingStream;
+    previewVideo.muted = true;
+    await previewVideo.play();
 
     const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
       ? 'video/mp4;codecs=avc1'
@@ -213,7 +263,7 @@
       if (e.data.size > 0) recordedChunks.push(e.data);
     };
 
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       clearInterval(timerInterval);
       const blob = new Blob(recordedChunks, { type: mimeType });
       downloadUrl  = URL.createObjectURL(blob);
@@ -227,9 +277,17 @@
       document.getElementById('downloadSub').textContent = fullName + ' · ' + formatTime(secondsElapsed);
       document.getElementById('downloadArea').classList.add('visible');
       document.getElementById('btnStop').classList.remove('visible');
+      document.getElementById('btnMark').classList.remove('visible');
       document.getElementById('timer').classList.remove('recording');
-      setStatus('done', 'Done — download your recording below.');
       mediaRecorder = null;
+
+      if (markedFrames.length > 0) {
+        setStatus('recording', `Analysing ${markedFrames.length} steps with Claude…`);
+        await analyzeSteps(name);
+        setStatus('done', 'Done — download your video and script below.');
+      } else {
+        setStatus('done', 'Done — download your recording below.');
+      }
     };
 
     recordingStream.getVideoTracks()[0].onended = () => {
@@ -242,14 +300,78 @@
 
     document.getElementById('btnRecord').style.display = 'none';
     document.getElementById('btnStop').classList.add('visible');
+    document.getElementById('btnMark').classList.add('visible');
     document.getElementById('downloadArea').classList.remove('visible');
     document.getElementById('timer').classList.add('recording');
-    setStatus('recording', 'Recording in progress…');
+    setStatus('recording', 'Recording — click Mark Step at each new screen.');
 
     timerInterval = setInterval(() => {
       secondsElapsed++;
       document.getElementById('timer').textContent = formatTime(secondsElapsed);
     }, 1000);
+  }
+
+  function markStep() {
+    if (!previewVideo || !recordingStream) return;
+    if (previewVideo.videoWidth === 0) return;
+    const canvas = document.createElement('canvas');
+    const maxW = 1024;
+    const scale = Math.min(1, maxW / previewVideo.videoWidth);
+    canvas.width  = Math.round(previewVideo.videoWidth * scale);
+    canvas.height = Math.round(previewVideo.videoHeight * scale);
+    canvas.getContext('2d').drawImage(previewVideo, 0, 0, canvas.width, canvas.height);
+    markedFrames.push(canvas.toDataURL('image/jpeg', 0.75).split(',')[1]);
+    document.getElementById('stepCount').textContent = markedFrames.length;
+    const btn = document.getElementById('btnMark');
+    btn.classList.add('flash');
+    setTimeout(() => btn.classList.remove('flash'), 250);
+  }
+
+  async function analyzeSteps(baseName) {
+    try {
+      const content = [
+        ...markedFrames.map(data => ({
+          type: 'image',
+          source: { type: 'base64', media_type: 'image/jpeg', data }
+        })),
+        {
+          type: 'text',
+          text: `These ${markedFrames.length} screenshots were captured in order during a tool walkthrough. Write a voiceover walkthrough script that guides the viewer through each step naturally. Use conversational language. Number each step. Be specific about what's on screen.`
+        }
+      ];
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1500,
+          messages: [{ role: 'user', content }],
+          _meta: { tool: 'walkthrough-recorder', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+      const data = await res.json();
+      walkthroughScript = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+      if (walkthroughScript) {
+        document.getElementById('scriptText').textContent = walkthroughScript;
+        document.getElementById('scriptStepCount').textContent = markedFrames.length + ' steps';
+        document.getElementById('scriptArea').classList.add('visible');
+        document.getElementById('downloadScriptBtn').style.display = 'inline-flex';
+        document.getElementById('downloadScriptBtn').dataset.name = baseName;
+      }
+    } catch(e) {
+      console.error('Step analysis failed:', e);
+    }
+    markedFrames = [];
+  }
+
+  function downloadScript() {
+    if (!walkthroughScript) return;
+    const name = document.getElementById('downloadScriptBtn').dataset.name || 'walkthrough';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([walkthroughScript], { type: 'text/plain' }));
+    a.download = name + '-walkthrough-script.txt';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
 
   function stopRecording() {
@@ -259,12 +381,18 @@
 
   function resetRecorder() {
     if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
+    walkthroughScript = '';
+    markedFrames = [];
     secondsElapsed = 0;
     document.getElementById('timer').textContent = '0:00';
     document.getElementById('timer').classList.remove('recording');
     document.getElementById('downloadArea').classList.remove('visible');
+    document.getElementById('scriptArea').classList.remove('visible');
+    document.getElementById('downloadScriptBtn').style.display = 'none';
     document.getElementById('btnRecord').style.display = 'inline-flex';
     document.getElementById('btnStop').classList.remove('visible');
+    document.getElementById('btnMark').classList.remove('visible');
+    document.getElementById('stepCount').textContent = '0';
     setStatus('', 'Ready to record');
   }
 </script>
