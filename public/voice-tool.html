@@ -868,7 +868,7 @@ let activePrevBtn = null;
 async function getAuthHeaders() {
   const token = await currentUser.getIdToken();
   let acToken = "";
-  try { acToken = (await firebase.appCheck().getToken(false)).token; } catch(e) {}
+  try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r)=>setTimeout(()=>r(),3000))]); acToken = t?.token||""; } catch(e) {}
   return { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, "X-Firebase-AppCheck": acToken };
 }
 
