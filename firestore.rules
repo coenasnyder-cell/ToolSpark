@@ -371,6 +371,11 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // LESSON PACKAGES (admin-only — lesson generator output)
+    match /lesson_packages/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // AGENT KNOWLEDGE BASE (admin-managed, read by Build Agent)
     match /agent_knowledge/{docId} {
       allow read: if isActive();
