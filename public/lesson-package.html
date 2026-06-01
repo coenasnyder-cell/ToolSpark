@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson Package — Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-mid: #3D8A65; --green-dim: rgba(42,92,69,0.08);
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; background: var(--dark); flex-shrink: 0; display: flex; flex-direction: column; padding: 24px 16px; gap: 6px; }
+  .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-dark); }
+  .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 13px; text-decoration: none; transition: all 0.15s; }
+  .sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.06); color: var(--gold-light); }
+  .sidebar-back { margin-top: auto; }
+
+  /* MAIN */
+  .main { flex: 1; padding: 40px 32px 40px; max-width: 760px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
+
+  /* LESSON SELECTOR */
+  .selector-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 24px; margin-bottom: 24px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .selector-label { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .selector-select { flex: 1; min-width: 200px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; cursor: pointer; }
+  .selector-select:focus { border-color: var(--gold); }
+
+  /* ASSET CARDS */
+  .assets { display: flex; flex-direction: column; gap: 14px; }
+  .asset-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: border-color 0.2s; }
+  .asset-card.ready { border-color: rgba(42,92,69,0.4); }
+  .asset-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+  .asset-icon { font-size: 22px; flex-shrink: 0; }
+  .asset-info { flex: 1; }
+  .asset-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .asset-source { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .asset-status { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .asset-status.missing { background: rgba(0,0,0,0.05); color: var(--text3); }
+  .asset-status.ready { background: var(--green-dim); color: var(--green); border: 1px solid rgba(42,92,69,0.2); }
+  .asset-body { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* UPLOAD ZONE */
+  .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.15s; position: relative; background: var(--bg); }
+  .upload-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-zone-icon { font-size: 20px; flex-shrink: 0; }
+  .upload-zone-text { font-size: 13px; color: var(--text2); }
+  .upload-zone-text b { color: var(--text); }
+
+  /* PREVIEW */
+  .preview-area { display: none; flex-direction: column; gap: 8px; }
+  .preview-area.visible { display: flex; }
+  .preview-filename { font-size: 12px; font-weight: 700; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+  .preview-filename span { color: var(--green); }
+  video.preview-video { width: 100%; max-height: 180px; border-radius: var(--radius-sm); background: #000; object-fit: contain; }
+  audio.preview-audio { width: 100%; }
+  .preview-img-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .preview-img-thumb { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+
+  /* SCRIPT BOX */
+  .script-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--text2); line-height: 1.7; max-height: 120px; overflow-y: auto; white-space: pre-wrap; }
+  .script-empty { font-size: 13px; color: var(--text3); font-style: italic; }
+
+  /* ACTION ROW */
+  .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-dl { background: var(--green); color: #fff; }
+  .btn-dl:hover { background: var(--green-mid); }
+  .btn-dl:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-copy { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .btn-copy:hover { background: rgba(201,168,76,0.22); }
+  .btn-copy.copied { background: var(--green-dim); color: var(--green); border-color: rgba(42,92,69,0.3); }
+  .btn-clear { background: none; color: var(--text3); border: 1px solid var(--border); }
+  .btn-clear:hover { color: #c0392b; border-color: rgba(192,57,43,0.3); }
+
+  /* SUMMARY BAR */
+  .summary-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-top: 20px; box-shadow: var(--shadow); }
+  .summary-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 12px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .summary-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+  .summary-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .summary-dot.ready { background: var(--green); }
+  .summary-dot.missing { background: var(--border); }
+  .summary-complete { background: linear-gradient(135deg, rgba(42,92,69,0.08), rgba(42,92,69,0.04)); border: 1px solid rgba(42,92,69,0.25); border-radius: var(--radius-sm); padding: 14px 18px; text-align: center; font-size: 14px; font-weight: 700; color: var(--green); display: none; }
+  .summary-complete.visible { display: block; }
+
+  /* ACCESS DENIED */
+  #access-denied { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 100vh; text-align: center; padding: 40px; }
+
+  /* WORKFLOW NAV */
+  .workflow-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid rgba(255,255,255,0.07); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .workflow-steps { display: flex; align-items: center; gap: 6px; }
+  .wf-step { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #6B6560; padding: 4px 10px; border-radius: 20px; }
+  .wf-step.active { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .wf-step.done { color: #3D8A65; }
+  .wf-divider { font-size: 11px; color: #2A2720; }
+  .wf-label { font-size: 12px; color: #6B6560; }
+  .btn-done { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.15s; }
+  .btn-done:hover { opacity: 0.88; }
+</style>
+</head>
+<body>
+
+<div id="access-denied">
+  <div style="font-size:2.5rem;">🔒</div>
+  <div style="font-family:'Playfair Display',serif;font-size:22px;">Admin Only</div>
+  <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
+</div>
+
+<div class="layout" id="main-layout" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-logo">✦ ToolSpark</div>
+    <a href="lesson-generator.html" class="sidebar-link">📋 Lesson Generator</a>
+    <a href="screen-recorder.html" class="sidebar-link">⏺ Walkthrough Recorder</a>
+    <a href="voice-tool.html" class="sidebar-link">🎙 Voice Tool</a>
+    <a href="lesson-slides.html" class="sidebar-link">🖼 Slide Builder</a>
+    <a href="lesson-package.html" class="sidebar-link active">📦 Package</a>
+    <a href="dashboard.html" class="sidebar-link sidebar-back">← Dashboard</a>
+  </aside>
+
+  <div class="main">
+    <div class="page-title">Your Lesson Package</div>
+    <p class="page-sub">Upload everything you generated across the workflow. When it's all here, you're ready to drop it into CapCut and build your video.</p>
+
+    <!-- LESSON SELECTOR -->
+    <div class="selector-card">
+      <div class="selector-label">Lesson</div>
+      <select class="selector-select" id="packageSelect" onchange="loadScript()">
+        <option value="">— Select lesson to load script —</option>
+      </select>
+    </div>
+
+    <div class="assets">
+
+      <!-- 1. WALKTHROUGH VIDEO -->
+      <div class="asset-card" id="card-video">
+        <div class="asset-header">
+          <div class="asset-icon">📹</div>
+          <div class="asset-info">
+            <div class="asset-name">Walkthrough Video</div>
+            <div class="asset-source">From Step 2 — Walkthrough Recorder</div>
+          </div>
+          <div class="asset-status missing" id="status-video">Missing</div>
+        </div>
+        <div class="asset-body">
+          <div class="upload-zone" id="zone-video">
+            <input type="file" accept="video/*" onchange="handleVideo(this)" />
+            <div class="upload-zone-icon">⬆</div>
+            <div class="upload-zone-text"><b>Click to upload</b> your walkthrough MP4 or WebM</div>
+          </div>
+          <div class="preview-area" id="preview-video">
+            <div class="preview-filename">✅ <span id="name-video"></span></div>
+            <video class="preview-video" id="video-player" controls></video>
+            <div class="action-row">
+              <button class="btn-action btn-dl" onclick="downloadAsset('video')">⬇ Download</button>
+              <button class="btn-action btn-clear" onclick="clearAsset('video')">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. VOICEOVER — SCRIPT 1 -->
+      <div class="asset-card" id="card-audio1">
+        <div class="asset-header">
+          <div class="asset-icon">🎙</div>
+          <div class="asset-info">
+            <div class="asset-name">Voiceover — Intro &amp; Outro</div>
+            <div class="asset-source">From Step 3 — Voice Tool (Script 1)</div>
+          </div>
+          <div class="asset-status missing" id="status-audio1">Missing</div>
+        </div>
+        <div class="asset-body">
+          <div class="upload-zone" id="zone-audio1">
+            <input type="file" accept="audio/*" onchange="handleAudio(this, 1)" />
+            <div class="upload-zone-icon">⬆</div>
+            <div class="upload-zone-text"><b>Click to upload</b> your intro/outro voiceover MP3</div>
+          </div>
+          <div class="preview-area" id="preview-audio1">
+            <div class="preview-filename">✅ <span id="name-audio1"></span></div>
+            <audio class="preview-audio" id="audio1-player" controls></audio>
+            <div class="action-row">
+              <button class="btn-action btn-dl" onclick="downloadAsset('audio1')">⬇ Download</button>
+              <button class="btn-action btn-clear" onclick="clearAsset('audio1')">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. VOICEOVER — SCRIPT 2 -->
+      <div class="asset-card" id="card-audio2">
+        <div class="asset-header">
+          <div class="asset-icon">🎙</div>
+          <div class="asset-info">
+            <div class="asset-name">Voiceover — Walkthrough</div>
+            <div class="asset-source">From Step 3 — Voice Tool (Script 2)</div>
+          </div>
+          <div class="asset-status missing" id="status-audio2">Missing</div>
+        </div>
+        <div class="asset-body">
+          <div class="upload-zone" id="zone-audio2">
+            <input type="file" accept="audio/*" onchange="handleAudio(this, 2)" />
+            <div class="upload-zone-icon">⬆</div>
+            <div class="upload-zone-text"><b>Click to upload</b> your walkthrough voiceover MP3</div>
+          </div>
+          <div class="preview-area" id="preview-audio2">
+            <div class="preview-filename">✅ <span id="name-audio2"></span></div>
+            <audio class="preview-audio" id="audio2-player" controls></audio>
+            <div class="action-row">
+              <button class="btn-action btn-dl" onclick="downloadAsset('audio2')">⬇ Download</button>
+              <button class="btn-action btn-clear" onclick="clearAsset('audio2')">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. SCRIPT -->
+      <div class="asset-card" id="card-script">
+        <div class="asset-header">
+          <div class="asset-icon">📄</div>
+          <div class="asset-info">
+            <div class="asset-name">Script</div>
+            <div class="asset-source">From Step 1 — Lesson Generator (loads from selected lesson above)</div>
+          </div>
+          <div class="asset-status missing" id="status-script">Missing</div>
+        </div>
+        <div class="asset-body">
+          <div class="script-empty" id="script-empty">Select a lesson above to load the script.</div>
+          <div class="preview-area" id="preview-script">
+            <div class="script-box" id="script-content"></div>
+            <div class="action-row">
+              <button class="btn-action btn-dl" onclick="downloadScript()">⬇ Download .txt</button>
+              <button class="btn-action btn-copy" id="btn-copy-script" onclick="copyScript()">Copy Script</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. SLIDES -->
+      <div class="asset-card" id="card-slides">
+        <div class="asset-header">
+          <div class="asset-icon">🖼</div>
+          <div class="asset-info">
+            <div class="asset-name">Slide Images</div>
+            <div class="asset-source">From Step 4 — Slide Builder</div>
+          </div>
+          <div class="asset-status missing" id="status-slides">Missing</div>
+        </div>
+        <div class="asset-body">
+          <div class="upload-zone" id="zone-slides">
+            <input type="file" accept="image/*" multiple onchange="handleSlides(this)" />
+            <div class="upload-zone-icon">⬆</div>
+            <div class="upload-zone-text"><b>Click to upload</b> your slide images (select multiple)</div>
+          </div>
+          <div class="preview-area" id="preview-slides">
+            <div class="preview-filename">✅ <span id="name-slides"></span></div>
+            <div class="preview-img-grid" id="slides-grid"></div>
+            <div class="action-row">
+              <button class="btn-action btn-dl" onclick="downloadSlides()">⬇ Download All Slides</button>
+              <button class="btn-action btn-clear" onclick="clearAsset('slides')">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-bar">
+      <div class="summary-title">Package Summary</div>
+      <div class="summary-grid">
+        <div class="summary-item"><div class="summary-dot missing" id="dot-video"></div>Walkthrough Video</div>
+        <div class="summary-item"><div class="summary-dot missing" id="dot-audio1"></div>Voiceover — Intro/Outro</div>
+        <div class="summary-item"><div class="summary-dot missing" id="dot-audio2"></div>Voiceover — Walkthrough</div>
+        <div class="summary-item"><div class="summary-dot missing" id="dot-script"></div>Script</div>
+        <div class="summary-item"><div class="summary-dot missing" id="dot-slides"></div>Slides</div>
+      </div>
+      <div class="summary-complete" id="summary-complete">🎉 Package complete — you're ready for video editing!</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="workflow-nav">
+  <div>
+    <div class="wf-label" style="margin-bottom:6px;">Lesson Video Workflow</div>
+    <div class="workflow-steps">
+      <span class="wf-step done">1 · Script ✓</span>
+      <span class="wf-divider">›</span>
+      <span class="wf-step done">2 · Record ✓</span>
+      <span class="wf-divider">›</span>
+      <span class="wf-step done">3 · Voiceover ✓</span>
+      <span class="wf-divider">›</span>
+      <span class="wf-step done">4 · Slides ✓</span>
+      <span class="wf-divider">›</span>
+      <span class="wf-step active">5 · Package</span>
+    </div>
+  </div>
+  <a href="dashboard.html" class="btn-done">✓ Done — Back to Dashboard</a>
+</div>
+
+<script>
+  let assets = { video: null, audio1: null, audio2: null, slides: [] };
+  let scriptText = '';
+  let scriptToolName = '';
+  let packages = [];
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+      document.getElementById('main-layout').style.display = 'flex';
+      loadPackageList();
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+    }
+  });
+
+  async function loadPackageList() {
+    const select = document.getElementById('packageSelect');
+    try {
+      const snap = await db.collection('lesson_packages').orderBy('createdAt', 'desc').limit(30).get();
+      packages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      packages.forEach((p, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        const num  = p.lessonNumber ? `Lesson ${p.lessonNumber} — ` : '';
+        const date = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+        opt.textContent = `${num}${p.toolName || 'Untitled'} (${date})`;
+        select.appendChild(opt);
+      });
+    } catch(e) { console.error(e); }
+  }
+
+  function loadScript() {
+    const idx = document.getElementById('packageSelect').value;
+    if (idx === '') return;
+    const pkg = packages[parseInt(idx)];
+    scriptToolName = pkg.toolName || 'lesson';
+    const raw = pkg.fullPackage || '';
+    // Pull intro + voiceover sections as the reference script
+    scriptText = extractSection(raw, 'VOICEOVER_SCRIPT') || extractSection(raw, 'INTRODUCTION_SCRIPT') || raw.slice(0, 2000);
+    document.getElementById('script-empty').style.display = 'none';
+    document.getElementById('script-content').textContent = scriptText;
+    document.getElementById('preview-script').classList.add('visible');
+    document.getElementById('card-script').classList.add('ready');
+    document.getElementById('status-script').textContent = 'Ready';
+    document.getElementById('status-script').className = 'asset-status ready';
+    document.getElementById('dot-script').className = 'summary-dot ready';
+    checkComplete();
+  }
+
+  function extractSection(raw, key) {
+    const allKeys = ['INTRODUCTION_SCRIPT','SCREEN_DISPLAY_SUGGESTIONS','WALKTHROUGH_SCRIPT',
+      'EXAMPLE_RESULTS_SECTION','COMMUNITY_ACTION','TRANSITION_TO_NEXT_LESSON','VOICEOVER_SCRIPT','LESSON_PACKAGE_END'];
+    const startIdx = raw.indexOf(key + ':');
+    if (startIdx === -1) return '';
+    let endIdx = raw.length;
+    for (const k of allKeys) {
+      if (k === key) continue;
+      const idx = raw.indexOf(k + ':', startIdx + key.length + 1);
+      if (idx !== -1 && idx < endIdx) endIdx = idx;
+    }
+    return raw.slice(startIdx + key.length + 1, endIdx).trim();
+  }
+
+  // VIDEO
+  function handleVideo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    assets.video = file;
+    const url = URL.createObjectURL(file);
+    document.getElementById('video-player').src = url;
+    document.getElementById('name-video').textContent = file.name;
+    setReady('video');
+  }
+
+  // AUDIO
+  function handleAudio(input, num) {
+    const file = input.files[0];
+    if (!file) return;
+    const key = 'audio' + num;
+    assets[key] = file;
+    const url = URL.createObjectURL(file);
+    document.getElementById('audio' + num + '-player').src = url;
+    document.getElementById('name-audio' + num).textContent = file.name;
+    setReady(key);
+  }
+
+  // SLIDES
+  function handleSlides(input) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    assets.slides = files;
+    const grid = document.getElementById('slides-grid');
+    grid.innerHTML = '';
+    files.forEach(f => {
+      const img = document.createElement('img');
+      img.className = 'preview-img-thumb';
+      img.src = URL.createObjectURL(f);
+      grid.appendChild(img);
+    });
+    document.getElementById('name-slides').textContent = files.length + ' image' + (files.length > 1 ? 's' : '') + ' uploaded';
+    setReady('slides');
+  }
+
+  function setReady(key) {
+    document.getElementById('zone-' + key).style.display = 'none';
+    document.getElementById('preview-' + key).classList.add('visible');
+    document.getElementById('card-' + key).classList.add('ready');
+    document.getElementById('status-' + key).textContent = 'Ready';
+    document.getElementById('status-' + key).className = 'asset-status ready';
+    document.getElementById('dot-' + key).className = 'summary-dot ready';
+    checkComplete();
+  }
+
+  function clearAsset(key) {
+    if (key === 'slides') assets.slides = [];
+    else assets[key] = null;
+    document.getElementById('zone-' + key).style.display = 'flex';
+    document.getElementById('preview-' + key).classList.remove('visible');
+    document.getElementById('card-' + key).classList.remove('ready');
+    document.getElementById('status-' + key).textContent = 'Missing';
+    document.getElementById('status-' + key).className = 'asset-status missing';
+    document.getElementById('dot-' + key).className = 'summary-dot missing';
+    document.getElementById('summary-complete').classList.remove('visible');
+  }
+
+  function downloadAsset(key) {
+    const file = assets[key];
+    if (!file) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
+  function downloadScript() {
+    if (!scriptText) return;
+    const name = scriptToolName.toLowerCase().replace(/\s+/g, '-') + '-voiceover-script.txt';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([scriptText], { type: 'text/plain' }));
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
+  function copyScript() {
+    if (!scriptText) return;
+    navigator.clipboard.writeText(scriptText).then(() => {
+      const btn = document.getElementById('btn-copy-script');
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy Script'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function downloadSlides() {
+    assets.slides.forEach((f, i) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(f);
+        a.download = f.name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      }, i * 300);
+    });
+  }
+
+  function checkComplete() {
+    const allReady = assets.video && assets.audio1 && assets.audio2 && scriptText && assets.slides.length > 0;
+    document.getElementById('summary-complete').classList.toggle('visible', !!allReady);
+  }
+</script>
+</body>
+</html>
