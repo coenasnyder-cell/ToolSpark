@@ -593,12 +593,13 @@ Generate a complete lesson package for this ToolSpark tool.`;
     document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function saveToFirestore(toolName, rawResponse) {
+  async function saveToFirestore(toolName, lessonNumber, rawResponse) {
     if (!currentUser) return;
     try {
       await db.collection('lesson_packages').add({
         userId: currentUser.uid,
         toolName,
+        lessonNumber: parseInt(lessonNumber) || null,
         fullPackage: rawResponse,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -619,9 +620,9 @@ Generate a complete lesson package for this ToolSpark tool.`;
       completionTime:  document.getElementById('completionTime').value.trim() || '8',
       communityAction: document.getElementById('communityAction').value.trim(),
       nextLesson:      document.getElementById('nextLesson').value.trim(),
-      nextLessonNumber: document.getElementById('nextLessonNumber').value.trim() || (parseInt(fields?.lessonNumber || 1) + 1),
+      nextLessonNumber: document.getElementById('nextLessonNumber').value.trim(),
     };
-    fields.nextLessonNumber = document.getElementById('nextLessonNumber').value.trim() || (parseInt(fields.lessonNumber) + 1);
+    if (!fields.nextLessonNumber) fields.nextLessonNumber = String(parseInt(fields.lessonNumber) + 1);
 
     if (!fields.toolName)        { showError('Please enter the tool name.'); return; }
     if (!fields.toolPurpose)     { showError('Please describe the tool purpose.'); return; }
@@ -657,7 +658,7 @@ Generate a complete lesson package for this ToolSpark tool.`;
       const parsed = parseLessonPackage(raw);
 
       renderResults(parsed, fields.toolName);
-      await saveToFirestore(fields.toolName, raw);
+      await saveToFirestore(fields.toolName, fields.lessonNumber, raw);
       loadHistory();
 
     } catch(e) {
@@ -706,10 +707,14 @@ Generate a complete lesson package for this ToolSpark tool.`;
     previewVideo = document.createElement('video');
     previewVideo.srcObject = recordingStream;
     previewVideo.muted = true;
-    previewVideo.play();
+    await previewVideo.play();
 
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9' : 'video/webm';
+    const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+      ? 'video/mp4;codecs=avc1'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+        ? 'video/webm;codecs=vp9'
+        : 'video/webm';
+    const fileExt = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
     mediaRecorder = new MediaRecorder(recordingStream, { mimeType });
 
     mediaRecorder.ondataavailable = (e) => {
@@ -717,14 +722,14 @@ Generate a complete lesson package for this ToolSpark tool.`;
     };
 
     mediaRecorder.onstop = async () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const blob = new Blob(recordedChunks, { type: mimeType });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       const toolName = document.getElementById('toolName').value.trim() || 'walkthrough';
       a.href     = url;
-      a.download = toolName.toLowerCase().replace(/\s+/g, '-') + '-walkthrough.webm';
+      a.download = toolName.toLowerCase().replace(/\s+/g, '-') + '-walkthrough.' + fileExt;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
       mediaRecorder = null;
 
       if (markedFrames.length > 0) {
