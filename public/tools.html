@@ -336,7 +336,6 @@
       if (snap.exists) {
         const data = snap.data();
         if (data.userRole === 'admin') {
-          document.getElementById('admin-nav-link').style.display = 'flex';
           document.getElementById('sidebar-role').textContent = 'Admin';
           document.getElementById('manage-tools-link').style.display = 'inline-flex';
         }
