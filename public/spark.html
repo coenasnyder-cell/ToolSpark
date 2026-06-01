@@ -725,6 +725,7 @@ function parseProfile(raw) {
   profile.statement = extract("STATEMENT");
   profile.whatYouKnow = extract("WHAT_YOU_KNOW");
   profile.whoYouHelp = extract("WHO_YOU_HELP");
+  profile.resultYouCreate = extract("THE_RESULT_YOU_CREATE");
   profile.yourEdge = extract("YOUR_EDGE");
   profile.closing = extract("CLOSING");
   return profile;
@@ -739,6 +740,7 @@ function buildSparkPayload(sessionId, profile, rawProfile, email, currentUser) {
     statement: profile.statement || "",
     whatYouKnow: profile.whatYouKnow || "",
     whoYouHelp: profile.whoYouHelp || "",
+    resultYouCreate: profile.resultYouCreate || "",
     yourEdge: profile.yourEdge || "",
     closing: profile.closing || "",
     rawProfile,
