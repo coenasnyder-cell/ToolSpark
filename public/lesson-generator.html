@@ -846,7 +846,6 @@ Generate a complete lesson package for this ToolSpark tool.`;
     if (!currentUser) return;
     try {
       const snap = await db.collection('lesson_packages')
-        .where('userId', '==', currentUser.uid)
         .orderBy('createdAt', 'desc')
         .limit(30)
         .get();
