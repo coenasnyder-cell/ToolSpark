@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Usage — ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17;
+    --border-dark: #2A2720; --gold: #C9A84C; --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12); --bg: #F4F2EE; --surface: #FFFFFF;
+    --border: #E4E0D8; --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; font-weight: 400; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.3); color: #E0875A; border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1200px; width: 100%; }
+
+  /* CARDS */
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .admin-card-header-left { display: flex; align-items: center; gap: 12px; }
+  .admin-card-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-card-body { padding: 1.5rem; }
+
+  /* STAT GRID */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.125rem 1.25rem; display: flex; flex-direction: column; gap: 4px; }
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -0.02em; font-family: 'Playfair Display', serif; }
+  .stat-label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-sub { font-size: 11px; color: var(--text3); }
+  .stat-card.highlight { border-color: rgba(201,168,76,0.3); background: var(--gold-dim); }
+  .stat-card.highlight .stat-num { color: var(--gold); }
+
+  /* FILTER TABS */
+  .filter-tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; width: fit-content; }
+  .filter-tab { padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; color: var(--text2); cursor: pointer; border: none; background: none; font-family: 'Lato', sans-serif; transition: all 0.15s; }
+  .filter-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .filter-tab:hover:not(.active) { color: var(--text); }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .data-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .data-table th.right, .data-table td.right { text-align: right; }
+  .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--bg); }
+  .tool-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; }
+  .tool-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .cost-val { font-weight: 700; font-family: 'Lato', monospace; }
+  .token-val { color: var(--text2); font-size: 13px; }
+  .cache-hit { color: #2A7A55; font-weight: 700; font-size: 12px; }
+  .no-data { text-align: center; padding: 3rem; color: var(--text3); font-size: 14px; }
+
+  /* LOADING */
+  .loading-state { display: flex; align-items: center; justify-content: center; padding: 3rem; gap: 10px; color: var(--text3); font-size: 14px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      Courses
+    </a>
+    <a href="tools.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Tools
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin
+    </a>
+    <a href="adminapiusage.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      API Usage
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">API Usage</div>
+      <div class="header-subtitle">Token consumption and cost breakdown by tool</div>
+    </div>
+    <div class="admin-badge">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin
+    </div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">You need admin privileges to view this page.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <!-- FILTER + SUMMARY -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-header-left">
+          <div class="admin-card-icon">💰</div>
+          <div>
+            <div class="admin-card-title">Cost Summary</div>
+            <div class="admin-card-desc" id="period-desc">Loading...</div>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setWindow(1)">Today</button>
+          <button class="filter-tab" onclick="setWindow(7)">7 Days</button>
+          <button class="filter-tab" onclick="setWindow(30)">30 Days</button>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div class="stat-grid" id="stat-grid">
+          <div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div> Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PER-TOOL TABLE -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-header-left">
+          <div class="admin-card-icon">🔧</div>
+          <div>
+            <div class="admin-card-title">By Tool</div>
+            <div class="admin-card-desc">Sorted by total cost, highest first</div>
+          </div>
+        </div>
+      </div>
+      <div id="tool-table-wrap">
+        <div class="loading-state"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+    <!-- RECENT CALLS -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-header-left">
+          <div class="admin-card-icon">🕐</div>
+          <div>
+            <div class="admin-card-title">Recent Calls</div>
+            <div class="admin-card-desc">Last 100 API calls in the selected period</div>
+          </div>
+        </div>
+      </div>
+      <div id="recent-table-wrap">
+        <div class="loading-state"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const TOOL_NAMES = {
+    'spark-conversation':       'Find Your Spark',
+    'audience-conversation':    'Audience Deep Dive',
+    'clarity-conversation':     'Discover Your Breakthrough',
+    'spark-council':            'Spark Council',
+    'toolfinder-public':        'Tool Finder',
+    'agent-conversation':       'Build Agent (Sparky)',
+    'value_tool':               'Value Mirror',
+    'journey-companion':        'Journey Companion',
+    'lesson-generator':         'Lesson Generator',
+    'build-agent-conversation': 'Build Agent Prompts',
+    'techstack':                'Tech Stack Advisor',
+  };
+
+  const TOOL_COLORS = [
+    '#C9A84C','#2A7A55','#4A7FC1','#A0522D','#7B5EA7',
+    '#C0392B','#1A8A8A','#D4693E','#5C8A3C','#8A5C8A','#3C7A8A'
+  ];
+
+  let allDocs = [];
+  let windowDays = 1;
+
+  function toolLabel(key) {
+    return TOOL_NAMES[key] || key;
+  }
+
+  function fmtCost(v) {
+    if (v >= 1) return '$' + v.toFixed(2);
+    if (v >= 0.01) return '$' + v.toFixed(3);
+    return '$' + v.toFixed(4);
+  }
+
+  function fmtTokens(n) {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + 'k';
+    return n.toString();
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+           ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  }
+
+  function setWindow(days) {
+    windowDays = days;
+    document.querySelectorAll('.filter-tab').forEach((t, i) => {
+      t.classList.toggle('active', [1, 7, 30][i] === days);
+    });
+    renderAll();
+  }
+
+  function getWindowedDocs() {
+    const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
+    return allDocs.filter(d => {
+      const ts = d.timestamp?.toDate ? d.timestamp.toDate().getTime() : 0;
+      return ts >= cutoff;
+    });
+  }
+
+  function renderAll() {
+    const docs = getWindowedDocs();
+    const label = windowDays === 1 ? 'today' : `last ${windowDays} days`;
+    document.getElementById('period-desc').textContent = `${docs.length} API call${docs.length !== 1 ? 's' : ''} ${label}`;
+    renderStats(docs);
+    renderToolTable(docs);
+    renderRecentTable(docs);
+  }
+
+  function renderStats(docs) {
+    const totalCost   = docs.reduce((s, d) => s + (d.costUsd || 0), 0);
+    const totalCalls  = docs.length;
+    const totalInput  = docs.reduce((s, d) => s + (d.inputTokens || 0), 0);
+    const totalOutput = docs.reduce((s, d) => s + (d.outputTokens || 0), 0);
+    const totalCacheRead  = docs.reduce((s, d) => s + (d.cacheReadTokens || 0), 0);
+    const totalCacheWrite = docs.reduce((s, d) => s + (d.cacheWriteTokens || 0), 0);
+    const totalPossibleInput = totalInput + totalCacheRead + totalCacheWrite;
+    const cacheHitRate = totalPossibleInput > 0
+      ? Math.round((totalCacheRead / totalPossibleInput) * 100)
+      : 0;
+    const avgCost = totalCalls > 0 ? totalCost / totalCalls : 0;
+
+    document.getElementById('stat-grid').innerHTML = `
+      <div class="stat-card highlight">
+        <div class="stat-num">${fmtCost(totalCost)}</div>
+        <div class="stat-label">Total Cost</div>
+        <div class="stat-sub">${fmtTokens(totalInput + totalCacheRead)} tokens in</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${totalCalls.toLocaleString()}</div>
+        <div class="stat-label">API Calls</div>
+        <div class="stat-sub">${fmtCost(avgCost)} avg per call</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${cacheHitRate}%</div>
+        <div class="stat-label">Cache Hit Rate</div>
+        <div class="stat-sub">${fmtTokens(totalCacheRead)} tokens from cache</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${fmtTokens(totalOutput)}</div>
+        <div class="stat-label">Output Tokens</div>
+        <div class="stat-sub">${fmtTokens(totalCacheWrite)} cache writes</div>
+      </div>
+    `;
+  }
+
+  function renderToolTable(docs) {
+    if (docs.length === 0) {
+      document.getElementById('tool-table-wrap').innerHTML = '<div class="no-data">No API calls in this period.</div>';
+      return;
+    }
+
+    const byTool = {};
+    docs.forEach(d => {
+      const key = d.tool || 'unknown';
+      if (!byTool[key]) byTool[key] = { calls: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, costUsd: 0 };
+      const t = byTool[key];
+      t.calls++;
+      t.inputTokens      += d.inputTokens      || 0;
+      t.outputTokens     += d.outputTokens     || 0;
+      t.cacheReadTokens  += d.cacheReadTokens  || 0;
+      t.cacheWriteTokens += d.cacheWriteTokens || 0;
+      t.costUsd          += d.costUsd          || 0;
+    });
+
+    const rows = Object.entries(byTool)
+      .sort((a, b) => b[1].costUsd - a[1].costUsd);
+
+    const toolKeys = Object.keys(byTool);
+
+    const tbody = rows.map(([key, t], i) => {
+      const color = TOOL_COLORS[toolKeys.indexOf(key) % TOOL_COLORS.length];
+      const totalIn = t.inputTokens + t.cacheReadTokens;
+      const cacheRate = totalIn > 0 ? Math.round((t.cacheReadTokens / totalIn) * 100) : 0;
+      return `<tr>
+        <td><div class="tool-badge"><div class="tool-dot" style="background:${color}"></div>${toolLabel(key)}</div></td>
+        <td class="right token-val">${t.calls.toLocaleString()}</td>
+        <td class="right token-val">${fmtTokens(t.inputTokens)}</td>
+        <td class="right token-val">${fmtTokens(t.outputTokens)}</td>
+        <td class="right">${cacheRate > 0 ? `<span class="cache-hit">${cacheRate}% cached</span>` : '<span style="color:var(--text3);font-size:12px;">—</span>'}</td>
+        <td class="right cost-val">${fmtCost(t.costUsd)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('tool-table-wrap').innerHTML = `
+      <table class="data-table">
+        <thead><tr>
+          <th>Tool</th>
+          <th class="right">Calls</th>
+          <th class="right">Input Tokens</th>
+          <th class="right">Output Tokens</th>
+          <th class="right">Cache</th>
+          <th class="right">Cost</th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>`;
+  }
+
+  function renderRecentTable(docs) {
+    if (docs.length === 0) {
+      document.getElementById('recent-table-wrap').innerHTML = '<div class="no-data">No API calls in this period.</div>';
+      return;
+    }
+
+    const sorted = [...docs].sort((a, b) => {
+      const at = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+      const bt = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+      return bt - at;
+    }).slice(0, 100);
+
+    const tbody = sorted.map(d => {
+      const cacheRead = d.cacheReadTokens || 0;
+      const totalIn   = (d.inputTokens || 0) + cacheRead;
+      return `<tr>
+        <td style="color:var(--text3);font-size:12px;white-space:nowrap;">${fmtDate(d.timestamp)}</td>
+        <td><span style="font-size:13px;font-weight:700;">${toolLabel(d.tool || 'unknown')}</span></td>
+        <td class="right token-val">${fmtTokens(totalIn)}</td>
+        <td class="right token-val">${fmtTokens(d.outputTokens || 0)}</td>
+        <td class="right">${cacheRead > 0 ? `<span class="cache-hit">✓ cached</span>` : '<span style="color:var(--text3);font-size:12px;">—</span>'}</td>
+        <td class="right cost-val">${fmtCost(d.costUsd || 0)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('recent-table-wrap').innerHTML = `
+      <table class="data-table">
+        <thead><tr>
+          <th>Time</th>
+          <th>Tool</th>
+          <th class="right">Input</th>
+          <th class="right">Output</th>
+          <th class="right">Cache</th>
+          <th class="right">Cost</th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>`;
+  }
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      const role = snap.exists ? snap.data().userRole : 'member';
+      if (role !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+    } catch (e) {
+      document.getElementById('access-denied').style.display = 'flex';
+      return;
+    }
+
+    document.getElementById('admin-content').style.display = 'flex';
+
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    } else {
+      av.textContent = name.charAt(0).toUpperCase();
+    }
+
+    // Load last 30 days of data once; filter client-side by window
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    try {
+      const snap = await db.collection('api_usage')
+        .where('timestamp', '>=', cutoff)
+        .orderBy('timestamp', 'desc')
+        .limit(2000)
+        .get();
+      allDocs = snap.docs.map(d => d.data());
+      renderAll();
+    } catch (e) {
+      document.getElementById('stat-grid').innerHTML = `<div class="no-data" style="grid-column:1/-1">Failed to load data: ${e.message}</div>`;
+      document.getElementById('tool-table-wrap').innerHTML = '';
+      document.getElementById('recent-table-wrap').innerHTML = '';
+    }
+  });
+</script>
+</body>
+</html>

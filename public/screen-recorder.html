@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Screen Recorder — Admin</title>
+<title>New Lesson Package — Admin</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -17,6 +18,7 @@
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
@@ -107,6 +109,59 @@
   .btn-dl-script { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; background: #2A5C45; color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; align-self: flex-start; }
   .btn-dl-script:hover { background: #3D8A65; }
 
+  /* LESSON PLAN CARD */
+  .lesson-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 32px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .lesson-card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .field-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+  .field-input:focus { border-color: var(--gold); background: var(--surface); }
+  .field-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; resize: vertical; min-height: 72px; line-height: 1.6; }
+  .field-textarea:focus { border-color: var(--gold); background: var(--surface); }
+  .save-row { display: flex; align-items: center; gap: 12px; }
+  .btn-save-lesson { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-save-lesson:hover { background: var(--gold-light); }
+  .btn-save-lesson:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-status { font-size: 12px; color: var(--text3); }
+  .save-status.ok { color: #2A7A55; }
+  .save-status.err { color: #C0392B; }
+
+  /* GENERATE SCRIPT */
+  .btn-generate { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: var(--coral); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-generate:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .script-output-area { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; resize: vertical; min-height: 320px; line-height: 1.8; transition: border-color 0.15s; }
+  .script-output-area:focus { border-color: var(--gold); background: var(--surface); }
+  .char-count { font-size: 12px; font-weight: 700; }
+  .char-count.ok  { color: #2A7A55; }
+  .char-count.warn { color: #C9A84C; }
+  .char-count.over { color: #C0392B; }
+  .script-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-action:hover { background: var(--surface); border-color: var(--gold); color: var(--gold); }
+  .btn-action.primary { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .btn-action.primary:hover { background: var(--gold-light); }
+
+  /* VOICEOVER SECTION */
+  .voice-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+  .voice-btn { flex: 1; min-width: 120px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-family: 'Lato', sans-serif; text-align: left; transition: all 0.15s; }
+  .voice-btn:hover { border-color: var(--gold); }
+  .voice-btn.selected { background: var(--gold-dim); border-color: var(--gold); }
+  .voice-btn-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .voice-btn-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .voice-btn.selected .voice-btn-name { color: var(--gold); }
+  .expr-tabs { display: flex; gap: 4px; }
+  .expr-tab { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; color: var(--text2); cursor: pointer; border: 1px solid var(--border); background: var(--bg); font-family: 'Lato', sans-serif; transition: all 0.15s; }
+  .expr-tab.selected { background: var(--surface); border-color: var(--gold); color: var(--gold); }
+  .audio-result { background: rgba(42,92,69,0.07); border: 1px solid rgba(42,92,69,0.25); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .audio-player-row { display: flex; align-items: center; gap: 12px; }
+  .btn-play { width: 36px; height: 36px; border-radius: 50%; background: #2A5C45; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .btn-play:hover { background: #3D8A65; }
+  .btn-play svg { fill: #fff; width: 12px; height: 12px; }
+  .audio-progress-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; cursor: pointer; position: relative; overflow: hidden; }
+  .audio-progress-fill { height: 100%; background: #2A5C45; border-radius: 2px; width: 0%; transition: width 0.1s linear; }
+  .audio-times { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
   /* ACCESS DENIED */
   #access-denied { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; text-align: center; padding: 40px; }
 </style>
@@ -128,8 +183,43 @@
   </aside>
 
   <div class="main">
-    <div class="page-title">Walkthrough Recorder</div>
-    <p class="page-sub">Record your tool walkthrough. Click <strong>Mark Step</strong> each time the screen changes — Claude will turn those screenshots into your walkthrough script.</p>
+    <div class="page-title">New Lesson Package</div>
+    <p class="page-sub">Fill in the lesson details, then record your walkthrough below.</p>
+
+    <!-- LESSON PLAN -->
+    <div class="lesson-card">
+      <div class="lesson-card-title">Lesson Plan</div>
+
+      <div class="field-group">
+        <div class="field-label">Tool Name</div>
+        <input class="field-input" id="lp-tool-name" type="text" placeholder="e.g. Audience Deep Dive" />
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Lesson Title</div>
+        <input class="field-input" id="lp-lesson-title" type="text" placeholder="Defaults to Tool Name" />
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Tool Purpose</div>
+        <input class="field-input" id="lp-tool-purpose" type="text" placeholder="What this tool does in one line" />
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Problem It Solves</div>
+        <textarea class="field-textarea" id="lp-problem" placeholder="What problem does this tool solve for the user?"></textarea>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Results It Produces</div>
+        <textarea class="field-textarea" id="lp-results" placeholder="What does the audience walk away with?"></textarea>
+      </div>
+
+      <div class="save-row">
+        <button class="btn-save-lesson" id="btn-save-lesson" onclick="saveLesson()">Save Lesson</button>
+        <span class="save-status" id="save-status"></span>
+      </div>
+    </div>
 
     <div class="recorder-card">
 
@@ -173,24 +263,611 @@
         <div class="tip"><span>✦</span><span>Chrome saves as MP4 if supported, otherwise WebM. Both work in CapCut.</span></div>
       </div>
 
-      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:20px;text-align:center;">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Recording done? Head to the next step.</div>
-        <a href="voice-tool.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-family:'Lato',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Step 3 — Generate Voiceover →</a>
+    </div>
+
+    <!-- GENERATE WALKTHROUGH STEPS -->
+    <div class="lesson-card" style="margin-top:24px;">
+      <div class="lesson-card-title">Generate Walkthrough Steps</div>
+
+      <div class="field-group">
+        <div class="field-label">Tool Name</div>
+        <input class="field-input" id="wt-tool-name" type="text" placeholder="Auto-filled from Lesson Plan" />
       </div>
 
+      <div class="field-group">
+        <div class="field-label">Steps You Take</div>
+        <textarea class="field-textarea" id="wt-steps-input" style="min-height:90px;" placeholder="Describe what you do in the tool — rough notes are fine. e.g. enter name, answer questions, see results..."></textarea>
+      </div>
+
+      <div class="save-row">
+        <button class="btn-save-lesson" id="btn-gen-steps" onclick="generateSteps()">Generate Steps</button>
+        <span class="save-status" id="steps-status"></span>
+      </div>
+
+      <div class="field-group" id="wt-output-group" style="display:none;">
+        <div class="field-label">Walkthrough Steps — edit as needed</div>
+        <textarea class="field-textarea" id="wt-steps-output" style="min-height:200px;font-size:13px;line-height:1.8;"></textarea>
+      </div>
     </div>
+
+    <!-- USER TRANSFORMATION -->
+    <div class="lesson-card" style="margin-top:24px;">
+      <div class="lesson-card-title">User Transformation / Result</div>
+
+      <div class="field-group">
+        <div class="field-label">Name</div>
+        <input class="field-input" id="tr-name" type="text" placeholder="e.g. Ashley" />
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Before</div>
+        <textarea class="field-textarea" id="tr-before" placeholder="What they said before going through the tool. e.g. "I sell print on demand products.""></textarea>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">After</div>
+        <textarea class="field-textarea" id="tr-after" placeholder="What they said after going through the tool. e.g. "I help overwhelmed print on demand sellers...""></textarea>
+      </div>
+    </div>
+
+    <!-- OUTRO -->
+    <div class="lesson-card" style="margin-top:24px;">
+      <div class="lesson-card-title">Outro</div>
+
+      <div class="field-group">
+        <div class="field-label">Community Action</div>
+        <textarea class="field-textarea" id="ou-community" placeholder="e.g. Post your Spark Statement in the community."></textarea>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">What's Next</div>
+        <textarea class="field-textarea" id="ou-next" placeholder="e.g. Audience Deep Dive"></textarea>
+      </div>
+    </div>
+
+    <!-- GENERATE SCRIPT -->
+    <div class="lesson-card" style="margin-top:24px;">
+      <div class="lesson-card-title">Generate Script</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Generates a complete Sparky voiceover script under 4000 characters — ready to paste into ElevenLabs.</p>
+
+      <div class="save-row">
+        <button class="btn-generate" id="btn-gen-script" onclick="generateScript()">✦ Generate Script</button>
+        <span class="save-status" id="script-status"></span>
+      </div>
+
+      <div id="script-output-group" style="display:none;flex-direction:column;gap:14px;">
+        <div class="field-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div class="field-label">Script — edit as needed</div>
+            <span class="char-count ok" id="char-count">0 / 4000 chars</span>
+          </div>
+          <textarea class="script-output-area" id="script-output" oninput="updateCharCount()"></textarea>
+        </div>
+
+        <div class="script-actions">
+          <button class="btn-action primary" onclick="copyScriptText()">Copy to Clipboard</button>
+          <button class="btn-action" onclick="downloadScriptFile()">Download .txt</button>
+          <button class="btn-action" id="btn-save-pkg" onclick="saveLessonPackage()">Save to Firestore</button>
+          <span class="save-status" id="package-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERATE VOICEOVER -->
+    <div class="lesson-card" style="margin-top:24px;">
+      <div class="lesson-card-title">Generate Voiceover</div>
+
+      <div class="field-group">
+        <div class="field-label">Voice</div>
+        <div class="voice-picker" id="voice-picker"></div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Expressiveness</div>
+        <div class="expr-tabs" id="expr-tabs"></div>
+      </div>
+
+      <div class="save-row">
+        <button class="btn-generate" id="btn-gen-audio" onclick="generateAudio()">Generate Audio</button>
+        <span class="save-status" id="audio-status"></span>
+      </div>
+
+      <div id="audio-result" style="display:none;" class="audio-result">
+        <div class="audio-player-row">
+          <button class="btn-play" id="btn-play-vo" onclick="togglePlay()">
+            <svg id="vo-play-icon" viewBox="0 0 16 16"><path d="M4 2.5L13 8L4 13.5V2.5Z"/></svg>
+            <svg id="vo-pause-icon" viewBox="0 0 16 16" style="display:none"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
+          </button>
+          <div class="audio-progress-track" id="vo-track" onclick="seekAudio(event)">
+            <div class="audio-progress-fill" id="vo-fill"></div>
+          </div>
+          <span class="audio-times" id="vo-times">0:00 / 0:00</span>
+        </div>
+        <a class="btn-download" id="vo-download">⬇ Download MP3</a>
+      </div>
+    </div>
+
+    <!-- STEP 3 NAV -->
+    <div style="margin-top:32px;margin-bottom:40px;text-align:center;">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Recording done? Head to the next step.</div>
+      <a href="voice-tool.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Step 3 — Generate Voiceover →</a>
+    </div>
+
   </div>
 </div>
 
 <script>
   const FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  const EL_TTS_URL   = 'https://us-central1-toolspark-2d62d.cloudfunctions.net/ttsElevenLabs';
   const MODEL = 'claude-sonnet-4-6';
+
+  const VOICES = [
+    { id: 'g14YnDYCsy3k7XLlcKlO', name: 'Todd',  desc: 'Clear, Engaging & Educational' },
+    { id: 'zHVe0gnIazURAaIwDWOn', name: 'Coena', desc: 'Your cloned voice' },
+    { id: 'wSqOdjeNqDrHcoK0zorF', name: 'Lukas', desc: 'Excited, Youthful' },
+  ];
+
+  const EXPR = [
+    { label: 'Natural',    style: 0.0,  stability: 0.6 },
+    { label: 'Warm',       style: 0.35, stability: 0.5 },
+    { label: 'Expressive', style: 0.65, stability: 0.4 },
+  ];
   let currentUser = null;
+  let lessonTitleManuallyEdited = false;
+
+  // ── LESSON PLAN ──────────────────────────────────────────────────────────────
+
+  const LP_FIELDS = ['lp-tool-name','lp-lesson-title','lp-tool-purpose','lp-problem','lp-results'];
+  const TR_FIELDS = ['tr-name','tr-before','tr-after'];
+  const OU_FIELDS = ['ou-community','ou-next'];
+
+  function lpValues() {
+    const toolName = document.getElementById('lp-tool-name').value.trim();
+    const title    = document.getElementById('lp-lesson-title').value.trim() || toolName;
+    return {
+      toolName,
+      lessonTitle:    title,
+      toolPurpose:    document.getElementById('lp-tool-purpose').value.trim(),
+      problemSolves:  document.getElementById('lp-problem').value.trim(),
+      resultsProduces: document.getElementById('lp-results').value.trim(),
+    };
+  }
+
+  function saveLPToLocal() {
+    localStorage.setItem('lesson_plan_draft', JSON.stringify(lpValues()));
+  }
+
+  function loadLPFromLocal() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('lesson_plan_draft') || 'null');
+      if (!saved) return;
+      document.getElementById('lp-tool-name').value    = saved.toolName        || '';
+      document.getElementById('lp-lesson-title').value = saved.lessonTitle     || '';
+      document.getElementById('lp-tool-purpose').value = saved.toolPurpose     || '';
+      document.getElementById('lp-problem').value      = saved.problemSolves   || '';
+      document.getElementById('lp-results').value      = saved.resultsProduces || '';
+      if (saved.lessonTitle && saved.lessonTitle !== saved.toolName) {
+        lessonTitleManuallyEdited = true;
+      }
+    } catch(e) {}
+  }
+
+  function saveOUToLocal() {
+    localStorage.setItem('outro_draft', JSON.stringify({
+      communityAction: document.getElementById('ou-community').value.trim(),
+      whatsNext:       document.getElementById('ou-next').value.trim(),
+    }));
+  }
+
+  function loadOUFromLocal() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('outro_draft') || 'null');
+      if (!saved) return;
+      document.getElementById('ou-community').value = saved.communityAction || '';
+      document.getElementById('ou-next').value      = saved.whatsNext       || '';
+    } catch(e) {}
+  }
+
+  function saveTRToLocal() {
+    localStorage.setItem('transformation_draft', JSON.stringify({
+      name:   document.getElementById('tr-name').value.trim(),
+      before: document.getElementById('tr-before').value.trim(),
+      after:  document.getElementById('tr-after').value.trim(),
+    }));
+  }
+
+  function loadTRFromLocal() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('transformation_draft') || 'null');
+      if (!saved) return;
+      document.getElementById('tr-name').value   = saved.name   || '';
+      document.getElementById('tr-before').value = saved.before || '';
+      document.getElementById('tr-after').value  = saved.after  || '';
+    } catch(e) {}
+  }
+
+  function initLPListeners() {
+    LP_FIELDS.forEach(id => {
+      document.getElementById(id).addEventListener('input', saveLPToLocal);
+    });
+
+    TR_FIELDS.forEach(id => {
+      document.getElementById(id).addEventListener('input', saveTRToLocal);
+    });
+
+    OU_FIELDS.forEach(id => {
+      document.getElementById(id).addEventListener('input', saveOUToLocal);
+    });
+
+    // Auto-fill Lesson Title from Tool Name unless manually edited
+    document.getElementById('lp-tool-name').addEventListener('input', function() {
+      if (!lessonTitleManuallyEdited) {
+        document.getElementById('lp-lesson-title').value = this.value;
+      }
+      // Also sync to walkthrough tool name field
+      document.getElementById('wt-tool-name').value = this.value;
+    });
+
+    document.getElementById('lp-lesson-title').addEventListener('input', function() {
+      const toolName = document.getElementById('lp-tool-name').value.trim();
+      lessonTitleManuallyEdited = this.value.trim() !== '' && this.value.trim() !== toolName;
+    });
+  }
+
+  // ── VOICEOVER ──────────────────────────────────────────────────────────────
+
+  let selectedVoiceId = VOICES[0].id;
+  let selectedExprIdx = 0;
+  let voiceAudio = null;
+
+  function buildVoicePicker() {
+    document.getElementById('voice-picker').innerHTML = VOICES.map(v => `
+      <button class="voice-btn${v.id === selectedVoiceId ? ' selected' : ''}"
+              onclick="selectVoice('${v.id}')" data-id="${v.id}">
+        <div class="voice-btn-name">${v.name}</div>
+        <div class="voice-btn-desc">${v.desc}</div>
+      </button>`).join('');
+
+    document.getElementById('expr-tabs').innerHTML = EXPR.map((e, i) => `
+      <button class="expr-tab${i === selectedExprIdx ? ' selected' : ''}"
+              onclick="selectExpr(${i})">${e.label}</button>`).join('');
+  }
+
+  function selectVoice(id) {
+    selectedVoiceId = id;
+    document.querySelectorAll('.voice-btn').forEach(b => b.classList.toggle('selected', b.dataset.id === id));
+  }
+
+  function selectExpr(idx) {
+    selectedExprIdx = idx;
+    document.querySelectorAll('.expr-tab').forEach((t, i) => t.classList.toggle('selected', i === idx));
+  }
+
+  function togglePlay() {
+    if (!voiceAudio) return;
+    if (voiceAudio.paused) {
+      voiceAudio.play();
+      document.getElementById('vo-play-icon').style.display  = 'none';
+      document.getElementById('vo-pause-icon').style.display = '';
+    } else {
+      voiceAudio.pause();
+      document.getElementById('vo-play-icon').style.display  = '';
+      document.getElementById('vo-pause-icon').style.display = 'none';
+    }
+  }
+
+  function seekAudio(e) {
+    if (!voiceAudio || !voiceAudio.duration) return;
+    const rect = document.getElementById('vo-track').getBoundingClientRect();
+    voiceAudio.currentTime = ((e.clientX - rect.left) / rect.width) * voiceAudio.duration;
+  }
+
+  function fmtTime(s) {
+    s = Math.floor(s || 0);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  async function generateAudio() {
+    const script = document.getElementById('script-output').value.trim();
+    const btn    = document.getElementById('btn-gen-audio');
+    const status = document.getElementById('audio-status');
+
+    if (!script) { status.className = 'save-status err'; status.textContent = 'Generate a script first.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    status.className = 'save-status';
+    status.textContent = '';
+    document.getElementById('audio-result').style.display = 'none';
+
+    try {
+      const expr = EXPR[selectedExprIdx];
+      const resp = await fetch(EL_TTS_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          text:      script,
+          voiceId:   selectedVoiceId,
+          save:      true,
+          style:     expr.style,
+          stability: expr.stability
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Generation failed');
+      }
+
+      const { url, filename } = await resp.json();
+
+      if (voiceAudio) { voiceAudio.pause(); voiceAudio = null; }
+      voiceAudio = new Audio(url);
+
+      voiceAudio.addEventListener('loadedmetadata', () => {
+        document.getElementById('vo-times').textContent = '0:00 / ' + fmtTime(voiceAudio.duration);
+      });
+      voiceAudio.addEventListener('timeupdate', () => {
+        const pct = voiceAudio.duration ? (voiceAudio.currentTime / voiceAudio.duration) * 100 : 0;
+        document.getElementById('vo-fill').style.width = pct + '%';
+        document.getElementById('vo-times').textContent = fmtTime(voiceAudio.currentTime) + ' / ' + fmtTime(voiceAudio.duration);
+      });
+      voiceAudio.addEventListener('ended', () => {
+        document.getElementById('vo-play-icon').style.display  = '';
+        document.getElementById('vo-pause-icon').style.display = 'none';
+        document.getElementById('vo-fill').style.width = '0%';
+      });
+
+      const dlBtn = document.getElementById('vo-download');
+      dlBtn.href     = url;
+      dlBtn.download = (filename || 'lesson-voiceover.mp3');
+
+      document.getElementById('vo-play-icon').style.display  = '';
+      document.getElementById('vo-pause-icon').style.display = 'none';
+      document.getElementById('vo-fill').style.width = '0%';
+      document.getElementById('audio-result').style.display = 'flex';
+      status.className = 'save-status ok';
+      status.textContent = 'Ready — play or download below.';
+
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = e.message || 'Generation failed — try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate Audio';
+    }
+  }
+
+  async function generateSteps() {
+    const toolName   = document.getElementById('wt-tool-name').value.trim()
+                    || document.getElementById('lp-tool-name').value.trim();
+    const stepsInput = document.getElementById('wt-steps-input').value.trim();
+    const btn        = document.getElementById('btn-gen-steps');
+    const status     = document.getElementById('steps-status');
+
+    if (!toolName) { status.className = 'save-status err'; status.textContent = 'Enter a tool name first.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    status.className = 'save-status';
+    status.textContent = '';
+
+    try {
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 400,
+          messages: [{
+            role: 'user',
+            content: `Tool: ${toolName}${stepsInput ? '\n\nNotes on steps: ' + stepsInput : ''}\n\nWrite a clean walkthrough step list for this tool. Each step on its own line. Short action phrases only — no numbering, no bullets, no extra explanation. Example format:\nShow Tool Homepage\nClick Start\nEnter Name\nComplete Question 1\nReveal Results`
+          }],
+          _meta: { tool: 'walkthrough-steps', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+
+      const data = await res.json();
+      const output = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+
+      if (output) {
+        document.getElementById('wt-steps-output').value = output;
+        document.getElementById('wt-output-group').style.display = 'flex';
+        localStorage.setItem('walkthrough_steps_draft', output);
+        status.className = 'save-status ok';
+        status.textContent = 'Done — edit as needed.';
+      }
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = 'Generation failed — try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate Steps';
+    }
+  }
+
+  function collectLessonData() {
+    return {
+      toolName:        document.getElementById('lp-tool-name').value.trim(),
+      lessonTitle:     document.getElementById('lp-lesson-title').value.trim() || document.getElementById('lp-tool-name').value.trim(),
+      toolPurpose:     document.getElementById('lp-tool-purpose').value.trim(),
+      problemSolves:   document.getElementById('lp-problem').value.trim(),
+      resultsProduces: document.getElementById('lp-results').value.trim(),
+      walkthroughSteps: document.getElementById('wt-steps-output').value.trim(),
+      transformation: {
+        name:   document.getElementById('tr-name').value.trim(),
+        before: document.getElementById('tr-before').value.trim(),
+        after:  document.getElementById('tr-after').value.trim(),
+      },
+      communityAction: document.getElementById('ou-community').value.trim(),
+      whatsNext:       document.getElementById('ou-next').value.trim(),
+    };
+  }
+
+  function buildScriptPrompt(d) {
+    return `TOOL: ${d.toolName}
+LESSON TITLE: ${d.lessonTitle}
+TOOL PURPOSE: ${d.toolPurpose}
+PROBLEM IT SOLVES: ${d.problemSolves}
+RESULTS IT PRODUCES: ${d.resultsProduces}
+
+WALKTHROUGH STEPS:
+${d.walkthroughSteps || '(not provided)'}
+
+TRANSFORMATION:
+Name: ${d.transformation.name || 'the user'}
+Before: ${d.transformation.before || '(not provided)'}
+After: ${d.transformation.after || '(not provided)'}
+
+COMMUNITY ACTION: ${d.communityAction || '(not provided)'}
+WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
+  }
+
+  function updateCharCount() {
+    const len = document.getElementById('script-output').value.length;
+    const el  = document.getElementById('char-count');
+    el.textContent = len.toLocaleString() + ' / 4000 chars';
+    el.className = 'char-count ' + (len > 4000 ? 'over' : len > 3500 ? 'warn' : 'ok');
+    localStorage.setItem('lesson_script_draft', document.getElementById('script-output').value);
+  }
+
+  async function generateScript() {
+    const d      = collectLessonData();
+    const btn    = document.getElementById('btn-gen-script');
+    const status = document.getElementById('script-status');
+
+    if (!d.toolName) { status.className = 'save-status err'; status.textContent = 'Fill in Tool Name first.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    status.className = 'save-status';
+    status.textContent = '';
+
+    try {
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: buildScriptPrompt(d) }],
+          _meta: { tool: 'lesson-script', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+
+      if (!res.ok) throw new Error('API error ' + res.status);
+
+      const data   = await res.json();
+      const script = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+
+      if (!script) throw new Error('No script returned — try again.');
+
+      document.getElementById('script-output').value = script;
+      document.getElementById('script-output-group').style.display = 'flex';
+      updateCharCount();
+      status.className = 'save-status ok';
+      status.textContent = 'Script ready.';
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = e.message || 'Generation failed — try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✦ Generate Script';
+    }
+  }
+
+  function copyScriptText() {
+    const text = document.getElementById('script-output').value;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy to Clipboard', 2000);
+    });
+  }
+
+  function downloadScriptFile() {
+    const text = document.getElementById('script-output').value;
+    if (!text) return;
+    const name = (document.getElementById('lp-lesson-title').value.trim()
+               || document.getElementById('lp-tool-name').value.trim()
+               || 'lesson')
+               .toLowerCase().replace(/\s+/g, '-');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = name + '-script.txt';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
+  async function saveLessonPackage() {
+    const btn    = document.getElementById('btn-save-pkg');
+    const status = document.getElementById('package-status');
+    const script = document.getElementById('script-output').value.trim();
+    const d      = collectLessonData();
+
+    if (!script) { status.className = 'save-status err'; status.textContent = 'Generate a script first.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    status.className = 'save-status';
+    status.textContent = '';
+
+    try {
+      await db.collection('lesson_packages').add({
+        ...d,
+        script,
+        userId:    currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      status.className = 'save-status ok';
+      status.textContent = 'Lesson package saved.';
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = 'Firestore save failed — script is in localStorage.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save to Firestore';
+    }
+  }
+
+  async function saveLesson() {
+    const btn = document.getElementById('btn-save-lesson');
+    const status = document.getElementById('save-status');
+    const vals = lpValues();
+
+    if (!vals.toolName) { status.className = 'save-status err'; status.textContent = 'Tool Name is required.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    status.className = 'save-status';
+    status.textContent = '';
+
+    saveLPToLocal();
+
+    try {
+      await db.collection('lesson_plans').add({
+        ...vals,
+        userId: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      status.className = 'save-status ok';
+      status.textContent = 'Saved.';
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = 'Firestore save failed — data kept locally.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Lesson';
+    }
+  }
 
   async function authHeaders() {
     const user = firebase.auth().currentUser;
     const token = user ? await user.getIdToken() : '';
-    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    let acToken = '';
+    try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r) => setTimeout(() => r(), 3000))]); acToken = t?.token || ''; } catch(e) {}
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-Firebase-AppCheck': acToken };
   }
 
   let mediaRecorder   = null;
@@ -213,6 +890,27 @@
       }
       currentUser = user;
       document.getElementById('main-layout').style.display = 'flex';
+      loadLPFromLocal();
+      loadTRFromLocal();
+      loadOUFromLocal();
+      initLPListeners();
+      buildVoicePicker();
+      // Sync tool name to walkthrough section on load
+      const savedToolName = document.getElementById('lp-tool-name').value;
+      if (savedToolName) document.getElementById('wt-tool-name').value = savedToolName;
+      // Restore walkthrough steps if previously generated
+      const savedSteps = localStorage.getItem('walkthrough_steps_draft');
+      if (savedSteps) {
+        document.getElementById('wt-steps-output').value = savedSteps;
+        document.getElementById('wt-output-group').style.display = 'flex';
+      }
+      // Restore script if previously generated
+      const savedScript = localStorage.getItem('lesson_script_draft');
+      if (savedScript) {
+        document.getElementById('script-output').value = savedScript;
+        document.getElementById('script-output-group').style.display = 'flex';
+        updateCharCount();
+      }
     } catch(e) {
       document.getElementById('access-denied').style.display = 'flex';
     }

@@ -3,6 +3,7 @@ const {onDocumentCreated, onDocumentUpdated} = require("firebase-functions/v2/fi
 const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
 const admin = require("firebase-admin");
+const Anthropic = require("@anthropic-ai/sdk");
 if (!admin.apps.length) admin.initializeApp();
 
 // Sonnet 4.6 pricing per million tokens
@@ -1369,6 +1370,25 @@ If you are not sure which platform they are on, check the context you were given
 If they seem done: "What else do you want to change?"
 If they are clearly finished for now: "Good session. What are you tackling next time?"`;
 
+const LESSON_SCRIPT_SYSTEM = `You are Sparky — ToolSpark's AI guide. Write a single flowing voiceover script for a course lesson.
+
+The script must:
+- Be under 4000 characters total
+- Sound like Sparky: warm, funny, direct — like a brilliant friend who knows their stuff
+- Flow as one continuous voiceover from start to finish
+- Use no headers, no section labels, no stage directions — only the spoken words
+- Never say utilize, leverage, or synergy
+- Never push video or camera — text-based marketing is the strategy, not a workaround
+
+Structure to follow:
+1. Open with the problem this tool solves and why this lesson matters (30-40 seconds of speaking)
+2. Brief walkthrough narration — reference the steps naturally, as if talking the viewer through what they are seeing on screen
+3. Reveal the transformation — contrast the before and after for the example user by name, make the result feel real and achievable
+4. Community action — tell the viewer exactly what to post, be specific
+5. Close with what is coming next — create momentum and anticipation
+
+Output only the script text. Nothing else. No intro like "Here is your script". Just start speaking.`;
+
 const SERVER_SIDE_SYSTEMS = {
   "spark-council": SPARK_COUNCIL_SYSTEM,
   "spark-conversation": FIND_YOUR_SPARK_SYSTEM,
@@ -1380,6 +1400,7 @@ const SERVER_SIDE_SYSTEMS = {
   "build-agent-conversation": BUILD_PROMPT_AGENT_SYSTEM,
   "journey-companion": JOURNEY_COMPANION_TEXT_SYSTEM,
   "lesson-generator": LESSON_GENERATOR_SYSTEM,
+  "lesson-script": LESSON_SCRIPT_SYSTEM,
   "audience-conversation": AUDIENCE_SYSTEM,
 };
 
@@ -1449,12 +1470,11 @@ exports.analyze = onRequest({
         if (context.memberToolName) {
           system += `\n\nMEMBER CONTEXT: This member has built a certified tool called "${context.memberToolName}". Reference it by name. They are now in the monetization phase — help them sell it.`;
         }
-        if (context.currentDate || context.currentTime) {
-          system += `\n\nCURRENT DATE & TIME: ${context.currentDate || ''}${context.currentTime ? ' at ' + context.currentTime : ''}. Use this when confirming commitments, noting when they said they'd sit down to work, or referencing how long until end of day.`;
-        }
       }
 
-      anthropicBody.system = system;
+      anthropicBody.system = [
+        { type: "text", text: system, cache_control: { type: "ephemeral" } }
+      ];
     }
 
     // Attach Anthropic's official user tracking field
@@ -1471,35 +1491,37 @@ exports.analyze = onRequest({
       timestamp: new Date().toISOString()
     }));
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(anthropicBody),
-    });
-
-    const data = await response.json();
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_KEY });
+    const data = await anthropic.messages.create(anthropicBody);
 
     // Log token usage and estimated cost
     if (data.usage) {
-      const inputTokens  = data.usage.input_tokens  || 0;
-      const outputTokens = data.usage.output_tokens || 0;
-      const costUsd = (inputTokens / 1_000_000 * PRICE_INPUT) +
-                      (outputTokens / 1_000_000 * PRICE_OUTPUT);
+      const inputTokens      = data.usage.input_tokens                  || 0;
+      const outputTokens     = data.usage.output_tokens                 || 0;
+      const cacheWriteTokens = data.usage.cache_creation_input_tokens   || 0;
+      const cacheReadTokens  = data.usage.cache_read_input_tokens       || 0;
+      const costUsd = (inputTokens      / 1_000_000 * 3.00)  +
+                      (outputTokens     / 1_000_000 * 15.00) +
+                      (cacheWriteTokens / 1_000_000 * 3.75)  +
+                      (cacheReadTokens  / 1_000_000 * 0.30);
 
-      console.log(JSON.stringify({
-        event: "api_usage",
+      const usageRecord = {
         tool,
         sessionId,
         userId,
         inputTokens,
         outputTokens,
+        cacheWriteTokens,
+        cacheReadTokens,
         costUsd: parseFloat(costUsd.toFixed(6)),
-        timestamp: new Date().toISOString()
-      }));
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
+      };
+
+      console.log(JSON.stringify({ event: "api_usage", ...usageRecord, timestamp: new Date().toISOString() }));
+
+      admin.firestore().collection("api_usage").add(usageRecord).catch(e =>
+        console.error("Failed to write api_usage record:", e.message)
+      );
     }
 
     res.status(200).json(data);

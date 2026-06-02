@@ -792,7 +792,7 @@ async function callAI(userMsg) {
       model: MODEL,
       max_tokens: 600,
       messages: history,
-      _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID, context: { memberToolName: memberToolName || '', currentDate: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), currentTime: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) } }
+      _meta: { tool: 'agent-conversation', sessionId: AGENT_SESSION_ID, context: { memberToolName: memberToolName || '' } }
     })
   });
 
@@ -874,12 +874,13 @@ SESSION_SUMMARY_END`;
 // ─────────────────────────────────────
 async function init(feeling) {
   showThinking();
-  let opening;
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  let opening = `[Today is ${todayStr}]\n`;
   const feelingContext = feeling ? `\nHow they're feeling right now (their words): "${feeling}"` : '';
 
   if (lastSession && lastSession.summary) {
     const s = parseSummary(lastSession.summary);
-    opening = `You are checking in with the user. Their last session summary:
+    opening += `You are checking in with the user. Their last session summary:
 DATE: ${s.DATE || 'unknown'}
 WORKED_ON: ${s.WORKED_ON || 'not recorded'}
 WINS: ${s.WINS || 'none mentioned'}
@@ -890,7 +891,7 @@ ENERGY: ${s.ENERGY || 'unknown'}${feelingContext}
 
 Start the check-in warmly. Acknowledge how they're feeling if they shared it. Reference what they said they would work on next. Ask what actually happened since then. One question only — make it specific and direct.`;
   } else {
-    opening = `This is the user's first session with Sparky.${feelingContext}
+    opening += `This is the user's first session with Sparky.${feelingContext}
 
 Welcome them warmly in 2-3 sentences. Acknowledge how they're feeling if they shared it. Tell them you're here to help them stay focused and make real progress. Then ask your first question: what are they working on right now? One question only.`;
   }
