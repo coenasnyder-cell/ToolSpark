@@ -381,6 +381,14 @@ match /conversations/{conversationId} {
       allow read, write: if isAdmin();
     }
 
+    // MEMBER LESSON PACKAGES (member course creation tool)
+    match /member_lesson_packages/{docId} {
+      allow read: if isActive() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+      allow update: if isActive() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
     // AGENT KNOWLEDGE BASE (admin-managed, read by Build Agent)
     match /agent_knowledge/{docId} {
       allow read: if isActive();
