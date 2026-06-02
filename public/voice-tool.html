@@ -1154,7 +1154,8 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
 function showResult(url, filename) {
   const dlLink = document.getElementById("download-link");
   dlLink.href = url;
-  dlLink.download = filename || `voice-${selectedVoice}.mp3`;
+  const base = (filename || `voice-${selectedVoice}.mp3`).replace(/\.mp3$/i, '');
+  dlLink.download = `${base}-script-${activeScriptNum}.mp3`;
 
   const voiceName = elVoicesCache?.find(v => v.id === selectedVoice)?.name ?? selectedVoice;
   document.getElementById("result-badge").textContent = voiceName;
@@ -1357,32 +1358,8 @@ async function handleDeleteVoice(voiceId, voiceName, btn) {
 buildExprTicks();
 </script>
 
-<style>
-  .workflow-nav { background: var(--dark); border-top: 1px solid rgba(255,255,255,0.07); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 40px; }
-  .workflow-steps { display: flex; align-items: center; gap: 6px; }
-  .wf-step { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #6B6560; padding: 4px 10px; border-radius: 20px; }
-  .wf-step.active { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
-  .wf-step.done { color: #3D8A65; }
-  .wf-divider { font-size: 11px; color: #2A2720; }
-  .wf-next-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: var(--gold); color: var(--dark); border: none; border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .wf-next-btn:hover { opacity: 0.88; }
-  .wf-label { font-size: 12px; color: #6B6560; }
-</style>
-
-<div class="workflow-nav">
-  <div>
-    <div class="wf-label" style="margin-bottom:6px;">Lesson Video Workflow</div>
-    <div class="workflow-steps">
-      <span class="wf-step done">1 · Script ✓</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step done">2 · Record ✓</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step active">3 · Voiceover</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step">4 · Slides</span>
-    </div>
-  </div>
-  <a href="lesson-slides.html" class="wf-next-btn">Step 4 — Build Slides →</a>
+<div style="padding: 32px 24px 60px; text-align: right;">
+  <a href="lesson-slides.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:var(--gold);color:var(--dark);border-radius:8px;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Step 4 — Build Slides →</a>
 </div>
 </body>
 </html>
