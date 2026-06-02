@@ -183,36 +183,19 @@
       <button class="btn-dl-all" id="btnDlAll" onclick="downloadAll()" disabled>⬇ Download All Slides</button>
     </div>
 
-  </div>
-</div>
-
-<!-- WORKFLOW NAV -->
-<style>
-  .workflow-nav { position: fixed; bottom: 0; left: 0; right: 0; }
-</style>
-<div class="workflow-nav">
-  <div>
-    <div class="wf-label" style="margin-bottom:6px;">Lesson Video Workflow</div>
-    <div class="workflow-steps">
-      <span class="wf-step done">1 · Script ✓</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step done">2 · Record ✓</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step done">3 · Voiceover ✓</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step active">4 · Slides</span>
+    <div style="border-top:1px solid var(--border);margin-top:24px;padding-top:24px;text-align:center;padding-bottom:40px;">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Slides done? Head to the final step.</div>
+      <a href="lesson-package.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-family:'Lato',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Step 5 — Build Your Package →</a>
     </div>
+
   </div>
-  <a href="lesson-package.html" class="wf-next-btn">Step 5 — Build Your Package →</a>
 </div>
 
 <script>
-  const SECTIONS = [
-    { key: 'INTRODUCTION_SCRIPT',       label: 'Introduction',          num: 1 },
-    { key: 'SCREEN_DISPLAY_SUGGESTIONS',label: 'Screen Display',         num: 2 },
-    { key: 'EXAMPLE_RESULTS_SECTION',   label: 'Example Results',        num: 3 },
-    { key: 'COMMUNITY_ACTION',          label: 'Community Action',       num: 4 },
-    { key: 'TRANSITION_TO_NEXT_LESSON', label: 'Transition / Outro',     num: 5 },
+  const ALL_KEYS = [
+    'INTRODUCTION_SCRIPT','SCREEN_DISPLAY_SUGGESTIONS','WALKTHROUGH_SCRIPT',
+    'EXAMPLE_RESULTS_SECTION','COMMUNITY_ACTION','TRANSITION_TO_NEXT_LESSON',
+    'VOICEOVER_SCRIPT','LESSON_PACKAGE_END'
   ];
 
   let packages = [];
@@ -256,23 +239,44 @@
     }
   }
 
-  function parseSection(raw, key) {
-    const sectionKeys = SECTIONS.map(s => s.key);
-    const allKeys = [
-      'INTRODUCTION_SCRIPT', 'SCREEN_DISPLAY_SUGGESTIONS', 'WALKTHROUGH_SCRIPT',
-      'EXAMPLE_RESULTS_SECTION', 'COMMUNITY_ACTION', 'TRANSITION_TO_NEXT_LESSON', 'VOICEOVER_SCRIPT',
-      'LESSON_PACKAGE_END'
-    ];
+  function extractSection(raw, key) {
     const startTag = key + ':';
     const startIdx = raw.indexOf(startTag);
     if (startIdx === -1) return '';
     let endIdx = raw.length;
-    for (const k of allKeys) {
+    for (const k of ALL_KEYS) {
       if (k === key) continue;
       const idx = raw.indexOf(k + ':', startIdx + startTag.length);
       if (idx !== -1 && idx < endIdx) endIdx = idx;
     }
     return raw.slice(startIdx + startTag.length, endIdx).trim();
+  }
+
+  function splitIntoSlides(raw) {
+    const sources = [
+      { key: 'INTRODUCTION_SCRIPT',       label: 'Intro' },
+      { key: 'EXAMPLE_RESULTS_SECTION',   label: 'Example Results' },
+      { key: 'COMMUNITY_ACTION',          label: 'Community' },
+      { key: 'TRANSITION_TO_NEXT_LESSON', label: 'Outro' },
+    ];
+
+    // Check if any section markers exist
+    const hasMarkers = sources.some(src => raw.includes(src.key + ':'));
+
+    if (hasMarkers) {
+      const chunks = [];
+      sources.forEach(src => {
+        const text = extractSection(raw, src.key);
+        if (!text) return;
+        const paras = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 20);
+        paras.forEach(p => chunks.push({ text: p, source: src.label }));
+      });
+      return chunks;
+    }
+
+    // No markers — split the whole text by paragraph breaks
+    const paras = raw.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 20);
+    return paras.map((p, i) => ({ text: p, source: `Part ${i + 1}` }));
   }
 
   function loadPackage() {
@@ -292,50 +296,58 @@
     const list = document.getElementById('slidesList');
     list.innerHTML = '';
 
-    SECTIONS.forEach((sec, i) => {
-      const text = parseSection(raw, sec.key);
-      if (!text) return;
+    const chunks = splitIntoSlides(raw);
 
+    if (!chunks.length) {
+      list.innerHTML = '<div class="empty-state">No slide content found in this package. Make sure the package was generated with all sections.</div>';
+      return;
+    }
+
+    chunks.forEach((chunk, i) => {
+      const label = `Slide ${i + 1}`;
       const card = document.createElement('div');
       card.className = 'slide-card';
       card.id = 'slide-' + i;
       card.innerHTML = `
         <div class="slide-header">
-          <div class="slide-num">${sec.num}</div>
-          <div class="slide-name">${sec.label}</div>
+          <div class="slide-num">${i + 1}</div>
+          <div class="slide-name">${label} <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:6px;">${chunk.source}</span></div>
           <div class="slide-actions">
-            <button class="btn-copy" id="copy-${i}" onclick="copySection(${i}, \`${escJs(text)}\`)">Copy for ChatGPT</button>
+            <button class="btn-copy" id="copy-${i}" onclick="copyChunk(${i})">Copy for ChatGPT</button>
           </div>
         </div>
         <div class="slide-body">
           <div class="slide-script">
-            <div class="script-preview" id="preview-${i}">${escHtml(text)}</div>
-            <button class="expand-btn" id="expand-${i}" onclick="toggleExpand(${i})">Show more ↓</button>
+            <div class="script-preview expanded" id="preview-${i}">${escHtml(chunk.text)}</div>
           </div>
           <div class="slide-image-col">
             <div class="upload-zone" id="zone-${i}">
-              <input type="file" accept="image/*" onchange="handleUpload(${i}, this, '${escJs(toolName)}', '${escJs(sec.label)}')" />
+              <input type="file" accept="image/*" onchange="handleUpload(${i}, this, '${escJs(toolName)}', '${escJs(label)}')" />
               <div class="upload-placeholder">
                 <div class="upload-icon">🖼</div>
-                <div class="upload-label">Upload slide image</div>
+                <div class="upload-label">Upload image</div>
               </div>
               <img class="upload-preview" id="img-${i}" />
             </div>
-            <button class="btn-dl-img" id="dl-${i}" onclick="downloadImage(${i}, '${escJs(toolName)}', '${escJs(sec.label)}')">⬇ Download</button>
+            <button class="btn-dl-img" id="dl-${i}" onclick="downloadImage(${i}, '${escJs(toolName)}', '${escJs(label)}')">⬇ Download</button>
           </div>
         </div>
       `;
       list.appendChild(card);
     });
 
+    // Store chunks for copy function
+    window._slideChunks = chunks;
     document.getElementById('downloadAllBar').style.display = 'flex';
-    document.getElementById('totalCount').textContent = SECTIONS.length;
+    document.getElementById('totalCount').textContent = chunks.length;
     updateDownloadAll();
   }
 
-  function copySection(idx, text) {
+  function copyChunk(idx) {
+    const chunk = (window._slideChunks || [])[idx];
+    if (!chunk) return;
     const brand = document.getElementById('brandPrompt').value.trim();
-    const full  = brand ? brand + '\n\n' + text : text;
+    const full  = brand ? brand + '\n\n' + chunk.text : chunk.text;
     navigator.clipboard.writeText(full).then(() => {
       const btn = document.getElementById('copy-' + idx);
       const orig = btn.textContent;
@@ -343,13 +355,6 @@
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
     });
-  }
-
-  function toggleExpand(idx) {
-    const el  = document.getElementById('preview-' + idx);
-    const btn = document.getElementById('expand-' + idx);
-    el.classList.toggle('expanded');
-    btn.textContent = el.classList.contains('expanded') ? 'Show less ↑' : 'Show more ↓';
   }
 
   function handleUpload(idx, input, toolName, sectionLabel) {
