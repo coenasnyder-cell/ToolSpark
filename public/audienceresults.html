@@ -432,7 +432,7 @@ function extractBlock(raw) {
 function parseClientBible(raw) {
   const p = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|CLIENT_BIBLE_END|$)`);
+    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|AUDIENCE_BLUEPRINT_END|$)`);
     const m = raw.match(regex);
     return m ? m[1].trim() : "";
   };
@@ -470,13 +470,16 @@ function buildProfile(data, parsed) {
   return {
     name:              data.name              || parsed.name              || DEMO.name,
     audiencePath:      data.audiencePath      || null,
-    whoTheyAre:        data.whoTheyAre        || parsed.whoTheyAre        || DEMO.whoTheyAre,
-    dailyFrustration:  data.dailyFrustration  || parsed.dailyFrustration  || DEMO.dailyFrustration,
-    whatTheyHaveTried: data.whatTheyHaveTried || parsed.whatTheyHaveTried || DEMO.whatTheyHaveTried,
-    theirObjections:   data.theirObjections   || parsed.theirObjections   || DEMO.theirObjections,
-    dreamOutcome:      data.dreamOutcome      || parsed.dreamOutcome      || DEMO.dreamOutcome,
-    theirWords:        data.theirWords        || parsed.theirWords        || DEMO.theirWords,
-    closing:           data.closing           || parsed.closing           || DEMO.closing
+    whoTheyAre:          data.whoTheyAre          || parsed.whoTheyAre          || DEMO.whoTheyAre,
+    dailyFrustration:    data.dailyFrustration    || parsed.dailyFrustration    || DEMO.dailyFrustration,
+    whatTriggeredThem:   data.whatTriggeredThem   || parsed.whatTriggeredThem   || "",
+    whatTheyHaveTried:   data.whatTheyHaveTried   || parsed.whatTheyHaveTried   || DEMO.whatTheyHaveTried,
+    theirObjections:     data.theirObjections     || parsed.theirObjections     || DEMO.theirObjections,
+    dreamOutcome:        data.dreamOutcome        || parsed.dreamOutcome        || DEMO.dreamOutcome,
+    howTheyWantToBeeSeen: data.howTheyWantToBeeSeen || parsed.howTheyWantToBeeSeen || "",
+    whereToFindThem:     data.whereToFindThem     || parsed.whereToFindThem     || "",
+    theirWords:          data.theirWords          || parsed.theirWords          || DEMO.theirWords,
+    closing:             data.closing             || parsed.closing             || DEMO.closing
   };
 }
 

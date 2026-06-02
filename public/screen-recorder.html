@@ -931,7 +931,12 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
   async function startRecording() {
     try {
       recordingStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { cursor: 'always' },
+        video: {
+          cursor: 'always',
+          width:     { ideal: 1920 },
+          height:    { ideal: 1080 },
+          frameRate: { ideal: 30 }
+        },
         audio: true
       });
     } catch(e) {
@@ -953,14 +958,18 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
     previewVideo.muted = true;
     await previewVideo.play();
 
-    const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
-      ? 'video/mp4;codecs=avc1'
-      : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
+    // Prefer webm/vp9 — more stable for long recordings than mp4/avc1 in Chrome
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+        ? 'video/webm;codecs=vp8'
         : 'video/webm';
-    const fileExt = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+    const fileExt = 'webm';
 
-    mediaRecorder = new MediaRecorder(recordingStream, { mimeType });
+    mediaRecorder = new MediaRecorder(recordingStream, {
+      mimeType,
+      videoBitsPerSecond: 5_000_000  // 5 Mbps — clear at 1080p
+    });
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) recordedChunks.push(e.data);
@@ -999,7 +1008,7 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
       clearInterval(timerInterval);
     };
 
-    mediaRecorder.start(1000);
+    mediaRecorder.start(10000); // 10-second chunks — reduces memory pressure for long recordings
 
     document.getElementById('btnRecord').style.display = 'none';
     document.getElementById('btnStop').classList.add('visible');

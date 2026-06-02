@@ -376,6 +376,11 @@ match /conversations/{conversationId} {
       allow read, write: if isAdmin();
     }
 
+    // LESSON PLANS (admin-only — lesson package page form data)
+    match /lesson_plans/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // AGENT KNOWLEDGE BASE (admin-managed, read by Build Agent)
     match /agent_knowledge/{docId} {
       allow read: if isActive();
