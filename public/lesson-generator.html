@@ -102,6 +102,19 @@
   .results-section.visible { display: flex; flex-direction: column; gap: 1rem; }
   .results-header { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); margin-bottom: 0.25rem; }
   .results-sub { font-size: 13px; color: var(--text2); }
+  .save-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.3); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: #2A5C45; cursor: pointer; transition: all 0.15s; }
+  .save-btn:hover { background: rgba(42,92,69,0.18); }
+  .save-btn.saved { background: rgba(42,92,69,0.15); border-color: rgba(42,92,69,0.5); }
+  .import-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 24px; margin-bottom: 1.5rem; }
+  .import-card-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 4px; }
+  .import-card-sub { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+  .import-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; resize: vertical; min-height: 80px; line-height: 1.6; transition: border-color 0.15s; }
+  .import-textarea:focus { border-color: var(--gold); }
+  .import-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .import-name { flex: 1; min-width: 160px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; }
+  .import-name:focus { border-color: var(--gold); }
+  .btn-import-save { padding: 9px 20px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-import-save:hover { background: var(--gold-light); }
 
   /* SECTION CARDS */
   .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
@@ -284,6 +297,19 @@
       </div>
     </div>
 
+    <!-- IMPORT PREVIOUSLY GENERATED SCRIPT -->
+    <div class="import-card">
+      <div class="import-card-title">📂 Import a Previously Generated Script</div>
+      <div class="import-card-sub">Paste the contents of a downloaded script .txt file to save it to your library without regenerating.</div>
+      <textarea class="import-textarea" id="importText" placeholder="Paste your saved script here…"></textarea>
+      <div class="import-row">
+        <input class="import-name" id="importName" type="text" placeholder="Tool name (e.g. Find Your Spark)" />
+        <input class="import-name" id="importLesson" type="number" min="1" placeholder="Lesson #" style="max-width:100px;" />
+        <button class="btn-import-save" onclick="importScript()">Save to Library →</button>
+      </div>
+      <div id="importStatus" style="font-size:12px;margin-top:8px;color:var(--text3);"></div>
+    </div>
+
     <!-- Previous Lessons -->
     <div class="history-card" id="history-card">
       <div class="history-header" onclick="document.getElementById('history-card').classList.toggle('open')">
@@ -305,9 +331,12 @@
     </div>
 
     <div class="results-section" id="results-section">
-      <div>
-        <div class="results-header">Lesson Package Ready</div>
-        <div class="results-sub" id="results-sub"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="results-header">Lesson Package Ready</div>
+          <div class="results-sub" id="results-sub"></div>
+        </div>
+        <button class="save-btn" id="saveBtn" onclick="manualSave()">⬇ Save to Library</button>
       </div>
 
       <div class="section-card open" id="card-intro">
@@ -597,6 +626,8 @@ Generate a complete lesson package for this ToolSpark tool.`;
       const parsed = parseLessonPackage(raw);
 
       renderResults(parsed, fields.toolName);
+      lastGeneratedRaw  = { _raw: raw, lessonNumber: fields.lessonNumber };
+      lastGeneratedName = fields.toolName;
       await saveToFirestore(fields.toolName, fields.lessonNumber, raw);
       loadHistory();
 
@@ -663,6 +694,43 @@ Generate a complete lesson package for this ToolSpark tool.`;
       document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch(e) {
       alert('Could not load that package.');
+    }
+  }
+
+  let lastGeneratedRaw  = '';
+  let lastGeneratedName = '';
+
+  async function manualSave() {
+    if (!lastGeneratedRaw) { alert('Nothing generated yet — generate a package first.'); return; }
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+    await saveToFirestore(lastGeneratedName, lastGeneratedRaw.lessonNumber || null, lastGeneratedRaw._raw || '');
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    await loadHistory();
+    setTimeout(() => { btn.textContent = '⬇ Save to Library'; btn.classList.remove('saved'); btn.disabled = false; }, 3000);
+  }
+
+  async function importScript() {
+    const text   = document.getElementById('importText').value.trim();
+    const name   = document.getElementById('importName').value.trim();
+    const lesson = document.getElementById('importLesson').value.trim();
+    const status = document.getElementById('importStatus');
+    if (!text) { status.textContent = 'Paste your script first.'; return; }
+    if (!name) { status.textContent = 'Enter the tool name.'; return; }
+    status.textContent = 'Saving…';
+    try {
+      await saveToFirestore(name, lesson ? parseInt(lesson) : null, text);
+      status.style.color = '#2A5C45';
+      status.textContent = '✓ Saved to library — it will now appear in the Slide Builder and Package pages.';
+      document.getElementById('importText').value = '';
+      document.getElementById('importName').value = '';
+      document.getElementById('importLesson').value = '';
+      await loadHistory();
+    } catch(e) {
+      status.style.color = '#C4622D';
+      status.textContent = 'Save failed — make sure Firestore rules are deployed.';
     }
   }
 
