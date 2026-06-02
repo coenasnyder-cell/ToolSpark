@@ -126,11 +126,16 @@ service cloud.firestore {
     // CLARITY SESSIONS
   match /clarity_sessions/{sessionId} {
   allow read: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.clientEmail == request.auth.token.email ||
+    resource.data.clientEmailLower == request.auth.token.email ||
+    isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.clientEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow delete: if isAdmin();
 }
@@ -149,14 +154,20 @@ match /spark_profiles/{sessionId} {
 }
 match /spark_results/{resultId} {
   allow get: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow list: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow delete: if isAdmin();
 }
@@ -175,15 +186,21 @@ match /spark_results/{resultId} {
   allow delete: if isAdmin();
 }
   match /audience_results/{resultId} {
-   allow get: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+  allow get: if isActive() && (
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow list: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.accountEmail == request.auth.token.email ||
+    isAdmin()
   );
   allow delete: if isAdmin();
 }
@@ -286,7 +303,9 @@ match /graduation_requests/{requestId} {
     // TECHSTACK RESULTS
     match /techstack_results/{resultId} {
       allow read: if isActive() && (
-        resource.data.userId == request.auth.uid || isAdmin()
+        resource.data.userId == request.auth.uid ||
+        resource.data.accountEmail == request.auth.token.email ||
+        isAdmin()
       );
       allow create: if isActive() &&
         request.resource.data.userId == request.auth.uid;
