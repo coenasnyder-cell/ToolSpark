@@ -694,32 +694,8 @@ Generate a complete lesson package for this ToolSpark tool.`;
   }
 </script>
 
-<style>
-  .workflow-nav { background: var(--dark2); border-top: 1px solid var(--border-dark); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 48px; }
-  .workflow-steps { display: flex; align-items: center; gap: 6px; }
-  .wf-step { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text3); padding: 4px 10px; border-radius: 20px; }
-  .wf-step.active { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
-  .wf-step.done { color: #3D8A65; }
-  .wf-divider { font-size: 11px; color: var(--border-dark); }
-  .wf-next-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .wf-next-btn:hover { background: var(--gold-light); }
-  .wf-label { font-size: 12px; color: var(--text3); }
-</style>
-
-<div class="workflow-nav">
-  <div>
-    <div class="wf-label" style="margin-bottom:6px;">Lesson Video Workflow</div>
-    <div class="workflow-steps">
-      <span class="wf-step active">1 · Script</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step">2 · Record</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step">3 · Voiceover</span>
-      <span class="wf-divider">›</span>
-      <span class="wf-step">4 · Slides</span>
-    </div>
-  </div>
-  <a href="screen-recorder.html" class="wf-next-btn">Step 2 — Record Walkthrough →</a>
+<div style="padding: 32px 24px 60px; text-align: right;">
+  <a href="screen-recorder.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:var(--gold);color:var(--dark);border-radius:var(--radius-sm);font-family:'Lato',sans-serif;font-size:14px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">Step 2 — Record Walkthrough →</a>
 </div>
 </body>
 </html>
