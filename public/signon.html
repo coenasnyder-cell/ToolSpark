@@ -333,13 +333,18 @@ async function signIn() {
   setLoading(true);
   try {
     const cred = await auth.signInWithEmailAndPassword(email, password);
-    await ensureUserDoc(cred.user);
-    await claimSparkSessionsForUser(cred.user);
+    try { await ensureUserDoc(cred.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
+    try { await claimSparkSessionsForUser(cred.user); } catch(e) { console.warn('claimSparkSessions failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
     setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
     setLoading(false);
+    // If auth succeeded but something else failed, still redirect
+    if (auth.currentUser) {
+      setTimeout(() => { window.location.href = getRedirectTarget(); }, 400);
+      return;
+    }
     showMsg(friendlyError(err.code), 'error');
   }
 }
@@ -349,12 +354,16 @@ async function signInWithGoogle() {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-    await ensureUserDoc(result.user);
-    await claimSparkSessionsForUser(result.user);
+    try { await ensureUserDoc(result.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
+    try { await claimSparkSessionsForUser(result.user); } catch(e) { console.warn('claimSparkSessions failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
     setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
     signingIn = false;
+    if (auth.currentUser) {
+      setTimeout(() => { window.location.href = getRedirectTarget(); }, 400);
+      return;
+    }
     if (err.code !== 'auth/popup-closed-by-user') {
       showMsg(friendlyError(err.code), 'error');
     }
