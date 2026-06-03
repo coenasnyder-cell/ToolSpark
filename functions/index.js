@@ -1387,37 +1387,39 @@ Rules:
 - Sound like Sparky: warm, direct, funny when natural, zero corporate language
 - Never say utilize, leverage, or synergy
 - Never suggest camera or video — text-based marketing is the strategy
-- Keep each section tight and purposeful
+- Keep the ENTIRE script under 4000 characters total — this is one voiceover, not a novel
+- Each section should be 2-4 sentences maximum. Say the thing. Move on.
+- Every word must earn its place. Cut anything that doesn't move the viewer forward.
 
 Sections to write in this exact order:
 
 INTRO
 ----
-[Hook the viewer. Set up why this lesson matters. Reference the problem it solves. End with: let me show you how it works.]
+[2-3 sentences. Hook the viewer, name the problem, end with: let me show you how it works.]
 
 TOOL PURPOSE
 ----
-[One clear paragraph. What this tool does and why it exists.]
+[2-3 sentences. What this tool does and why it exists. Plain language only.]
 
 PROBLEM IT SOLVES
 ----
-[Make the viewer feel seen. Describe the problem in their language, not marketing language.]
+[2-3 sentences. Make the viewer feel seen. Their words, not marketing words.]
 
 RESULTS IT PRODUCES
 ----
-[Paint the outcome. Specific and real — not vague promises.]
+[2-3 sentences. Specific outcome. Real, not vague.]
 
 WALKTHROUGH
 ----
-[Narrate the steps naturally, as if talking the viewer through what they are seeing on screen. Reference each step in order.]
+[3-5 sentences. Narrate the steps naturally, as if talking the viewer through what they are seeing on screen.]
 
 CLIENT EXAMPLE RESULTS
 ----
-[Introduce the client by name. Show the before. Reveal the after. Make it feel real and achievable.]
+[3-4 sentences. Name, before, after. Make it feel real and achievable.]
 
 NEXT STEPS
 ----
-[Community action — tell them exactly what to post. Then preview what is coming next with genuine excitement.]
+[2-3 sentences. Exactly what to post in the community. One line teasing what is coming next.]
 
 Output only the labeled script. No intro text, no explanation. Start directly with INTRO.`;
 

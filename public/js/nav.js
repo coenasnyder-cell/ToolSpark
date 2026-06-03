@@ -35,6 +35,10 @@
       key: 'journey-companion', href: 'journey-companion.html', label: 'Journey Companion',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
     },
+    {
+      key: 'lesson-projects', href: 'lesson-projects.html', label: 'Lesson Generator',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
+    },
   ];
 
   function injectHeaderStyles() {

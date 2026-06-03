@@ -459,6 +459,14 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // LESSON PROJECTS
+    match /lesson_projects/{projectId} {
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow create: if isActive() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
     // NOTIFICATIONS
     match /notifications/{notificationId} {
       allow read: if isActive() && (
