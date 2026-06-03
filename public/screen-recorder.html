@@ -814,7 +814,7 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
     status.textContent = '';
 
     try {
-      await db.collection('lesson_packages').add({
+      await db.collection('admin_lesson_scripts').add({
         ...d,
         script,
         userId:    currentUser.uid,

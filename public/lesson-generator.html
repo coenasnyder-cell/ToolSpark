@@ -692,9 +692,18 @@ Generate a complete lesson package for this ToolSpark tool.`;
       const doc = await db.collection('lesson_packages').doc(docId).get();
       if (!doc.exists) return;
       const data = doc.data();
+
+      // New format (screen-recorder workflow): has a single `script` field
+      if (!data.fullPackage && data.script) {
+        const parsed = { VOICEOVER_SCRIPT: data.script };
+        renderResults(parsed, data.toolName || data.lessonTitle || 'Lesson');
+        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      // Old format: full 7-section package
       const parsed = parseLessonPackage(data.fullPackage || '');
       renderResults(parsed, data.toolName || 'Lesson');
-      // Scroll to results
       document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch(e) {
       alert('Could not load that package.');
