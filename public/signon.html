@@ -405,6 +405,8 @@ async function ensureUserDoc(user) {
       clientEmail: user.email || '',
       photoURL: user.photoURL || '',
       userRole: 'member',
+      isBanned: false,
+      isVerified: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }

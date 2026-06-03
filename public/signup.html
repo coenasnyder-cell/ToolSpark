@@ -436,6 +436,8 @@ async function createUserDoc(user, displayName, emailOptIn = false) {
   userRole: 'member',
   role: 'member',
   status: 'active',
+  isBanned: false,
+  isVerified: false,
   firstVisit: true,
   completed: false,
   createdAt: firebase.firestore.FieldValue.serverTimestamp(),
