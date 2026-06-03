@@ -558,7 +558,7 @@
 
       <!-- Save Draft -->
       <div class="save-row" id="slides-save-row" style="display:none;">
-        <button class="btn-primary" onclick="saveSlidesDraft()">Save Draft</button>
+        <button class="btn-primary" id="btn-save-slides" onclick="saveSlidesDraft()">Save Draft</button>
         <span class="save-msg" id="save-msg-slides"></span>
       </div>
 
@@ -1174,6 +1174,22 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     const toolName = projectData.toolName || projectData.title || 'lesson';
     list.innerHTML = '';
 
+    // Script reference card — full script text, no image uploader
+    const rawScript = document.getElementById('script-raw').value.trim() || projectData.script?.raw || '';
+    if (rawScript) {
+      const scriptCard = document.createElement('div');
+      scriptCard.className = 'slide-card';
+      scriptCard.innerHTML = `
+        <div class="slide-header">
+          <div class="slide-name" style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;">Script</div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <div class="script-preview expanded" style="max-height:160px;overflow-y:auto;">${escHtml(rawScript)}</div>
+        </div>
+      `;
+      list.appendChild(scriptCard);
+    }
+
     slideChunks.forEach((chunk, i) => {
       const slideNum  = i + 1;
       const hasImg    = !!slideImages[chunk.id];
@@ -1184,11 +1200,6 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
       const deleteBtn = chunk.custom
         ? `<button class="btn-delete-slide" onclick="deleteSlide('${chunk.id}')">✕ Remove</button>`
         : '';
-
-      const scriptContent = chunk.custom
-        ? `<textarea class="slide-custom-input" placeholder="Add your slide content here..." onchange="updateCustomSlideText('${chunk.id}', this.value)">${escHtml(chunk.text)}</textarea>`
-        : `<div class="script-preview" id="preview-${chunk.id}">${escHtml(chunk.text)}</div>
-           <button class="expand-btn" onclick="toggleExpand('${chunk.id}')">Show more</button>`;
 
       const uploadedImg = slideImages[chunk.id];
       const imgVisible  = uploadedImg ? ' visible' : '';
@@ -1205,7 +1216,9 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
           </div>
         </div>
         <div class="slide-body">
-          <div class="slide-script">${scriptContent}</div>
+          <div class="slide-script">
+            <textarea class="slide-custom-input" placeholder="${chunk.custom ? 'Add your slide content here...' : 'Edit slide content...'}" onchange="updateCustomSlideText('${chunk.id}', this.value)">${escHtml(chunk.text)}</textarea>
+          </div>
           <div class="slide-image-col">
             <div class="upload-zone${hasImg ? ' has-image' : ''}" id="zone-${chunk.id}">
               <input type="file" accept="image/*" onchange="handleSlideUpload('${chunk.id}', this, '${escJs(toolName)}', 'Slide ${slideNum}')">
@@ -1241,9 +1254,8 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     const chunk = slideChunks.find(c => c.id === id || String(c.id) === String(id));
     if (!chunk) return;
     const brand = document.getElementById('brand-prompt').value.trim();
-    const text  = chunk.custom
-      ? (document.querySelector(`.slide-card[data-id="${id}"] .slide-custom-input`)?.value || chunk.text)
-      : chunk.text;
+    const ta    = document.querySelector(`.slide-card[data-id="${id}"] .slide-custom-input`);
+    const text  = ta ? ta.value : chunk.text;
     const full  = brand ? brand + '\n\n' + text : text;
     navigator.clipboard.writeText(full).then(() => {
       const btn = document.querySelector(`[data-id="${id}"].btn-copy-slide`);
@@ -1320,8 +1332,9 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
   }
 
   async function saveSlidesDraft() {
-    const btn = document.querySelector('#slides-save-row .btn-primary');
+    const btn = document.getElementById('btn-save-slides');
     const msg = document.getElementById('save-msg-slides');
+    if (!btn) return;
     btn.disabled = true; btn.textContent = 'Saving...';
     msg.className = 'save-msg'; msg.textContent = '';
 
