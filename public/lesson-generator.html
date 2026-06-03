@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -17,8 +18,9 @@
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const auth = firebase.auth();
-  const db = firebase.firestore();
+  const db   = firebase.firestore();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -28,7 +30,7 @@
     --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
     --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
     --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
-    --coral: #C4622D;
+    --coral: #C4622D; --green: #2A5C45; --green-light: #3D8A65;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --sidebar-width: 220px; --header-height: 64px;
@@ -62,112 +64,77 @@
   .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
   .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
   .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-  .page-content { flex: 1; padding: 2rem; max-width: 760px; width: 100%; }
+  .page-content { flex: 1; padding: 2rem; max-width: 760px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
 
   /* ACCESS DENIED */
   #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
 
-  /* FORM CARD */
-  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; margin-bottom: 1.5rem; }
-  .form-card-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
-  .form-card-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.75rem; line-height: 1.6; }
-  .form-grid { display: flex; flex-direction: column; gap: 1.25rem; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-  .form-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
-  .form-input, .form-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; resize: vertical; }
-  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
-  .form-input:focus, .form-textarea:focus { border-color: var(--gold); }
-  .time-row { display: flex; align-items: center; gap: 10px; }
-  .time-row .form-input { width: 100px; }
-  .time-label { font-size: 14px; color: var(--text2); }
-  .generate-btn { width: 100%; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); padding: 14px; font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; margin-top: 0.5rem; }
-  .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
-  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.6; }
+
+  /* FIELDS */
+  .field-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .field-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+  .field-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .field-input:focus { border-color: var(--gold); background: var(--surface); }
+  .field-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; resize: vertical; min-height: 80px; line-height: 1.6; }
+  .field-textarea:focus { border-color: var(--gold); background: var(--surface); }
+  .field-hint { font-size: 12px; color: var(--text3); }
+  .section-divider { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.5rem 0; border-bottom: 1px solid var(--border); margin-top: 0.25rem; }
+
+  /* ERROR */
+  .error-msg { background: rgba(196,98,45,0.08); border: 1px solid rgba(196,98,45,0.25); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--coral); display: none; }
+  .error-msg.visible { display: block; }
+
+  /* GENERATE BTN */
+  .btn-generate { width: 100%; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); padding: 14px; font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; margin-top: 0.5rem; }
+  .btn-generate:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
   /* PROGRESS */
-  .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem 2rem; text-align: center; margin-bottom: 1.5rem; display: none; }
+  .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem 2rem; text-align: center; display: none; }
   .progress-card.visible { display: block; }
   .progress-sparky { font-size: 2.5rem; margin-bottom: 0.75rem; animation: bounce 1s ease infinite; }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
   .progress-text { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
   .progress-sub { font-size: 13px; color: var(--text2); }
 
-  /* ERROR */
-  .error-msg { background: rgba(196,98,45,0.08); border: 1px solid rgba(196,98,45,0.25); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--coral); margin-bottom: 1.25rem; display: none; }
-  .error-msg.visible { display: block; }
+  /* OUTPUT */
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; gap: 12px; }
+  .output-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); }
+  .char-count { font-size: 12px; font-weight: 700; color: var(--text3); }
+  .output-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-family: 'Lato', monospace; font-size: 13px; color: var(--text); outline: none; resize: vertical; min-height: 400px; line-height: 1.8; transition: border-color 0.15s; }
+  .output-textarea:focus { border-color: var(--gold); background: var(--surface); }
+  .output-actions { display: flex; align-items: center; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .btn-download { display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: var(--dark); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-download:hover { opacity: 0.85; }
+  .btn-save-dash { display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.3); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-save-dash:hover { background: rgba(42,92,69,0.18); }
+  .btn-save-dash:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-status { font-size: 12px; }
+  .save-status.ok  { color: var(--green-light); }
+  .save-status.err { color: var(--coral); }
 
-  /* RESULTS */
-  .results-section { display: none; }
-  .results-section.visible { display: flex; flex-direction: column; gap: 1rem; }
-  .results-header { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); margin-bottom: 0.25rem; }
-  .results-sub { font-size: 13px; color: var(--text2); }
-  .save-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.3); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: #2A5C45; cursor: pointer; transition: all 0.15s; }
-  .save-btn:hover { background: rgba(42,92,69,0.18); }
-  .save-btn.saved { background: rgba(42,92,69,0.15); border-color: rgba(42,92,69,0.5); }
-  .import-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 24px; margin-bottom: 1.5rem; }
-  .import-card-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 4px; }
-  .import-card-sub { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
-  .import-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; resize: vertical; min-height: 80px; line-height: 1.6; transition: border-color 0.15s; }
-  .import-textarea:focus { border-color: var(--gold); }
-  .import-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
-  .import-name { flex: 1; min-width: 160px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; font-family: 'Lato', sans-serif; color: var(--text); background: var(--bg); outline: none; }
-  .import-name:focus { border-color: var(--gold); }
-  .btn-import-save { padding: 9px 20px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .btn-import-save:hover { background: var(--gold-light); }
-
-  /* SECTION CARDS */
-  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  .section-card.voiceover { border-color: rgba(201,168,76,0.45); box-shadow: var(--shadow), 0 0 0 1px rgba(201,168,76,0.1) inset; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s; gap: 12px; }
-  .section-header:hover { background: #FAFAF8; }
-  .section-card.voiceover .section-header { background: rgba(201,168,76,0.04); }
-  .section-card.voiceover .section-header:hover { background: rgba(201,168,76,0.08); }
-  .section-header-left { display: flex; align-items: center; gap: 10px; }
-  .section-num { width: 24px; height: 24px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
-  .section-title { font-size: 14px; font-weight: 700; color: var(--text); }
-  .section-card.voiceover .section-title { color: var(--gold); }
-  .section-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 100px; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .copy-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-  .copy-btn.copied { border-color: #3D8A65; color: #3D8A65; background: rgba(42,92,69,0.08); }
-  .copy-btn-elevenlabs { padding: 7px 16px; font-size: 12px; background: var(--gold-dim); border-color: rgba(201,168,76,0.4); color: var(--gold); }
-  .copy-btn-elevenlabs:hover { background: rgba(201,168,76,0.2); }
-  .chevron { width: 16px; height: 16px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
-  .section-card.open .chevron { transform: rotate(180deg); }
-  .section-body { display: none; border-top: 1px solid var(--border); }
-  .section-card.open .section-body { display: block; }
-  .section-card.voiceover .section-body { border-top-color: rgba(201,168,76,0.25); }
-  .section-content { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.75; white-space: pre-wrap; font-family: 'Lato', sans-serif; }
-  .elevenlabs-note { padding: 0 1.25rem 1.25rem; font-size: 12px; color: var(--text3); font-style: italic; }
-
-  /* HISTORY */
-  .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
-  .history-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s; }
-  .history-header:hover { background: #FAFAF8; }
-  .history-title { font-size: 14px; font-weight: 700; color: var(--text); }
-  .history-count { font-size: 12px; color: var(--text3); }
-  .history-body { border-top: 1px solid var(--border); display: none; }
-  .history-card.open .history-body { display: block; }
-  .history-card.open .chevron { transform: rotate(180deg); }
-  .history-empty { padding: 1.25rem; font-size: 13px; color: var(--text3); text-align: center; }
-  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; gap: 12px; }
-  .history-item:last-child { border-bottom: none; }
-  .history-item:hover { background: #FAFAF8; }
-  .history-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
-  .history-item-date { font-size: 12px; color: var(--text3); white-space: nowrap; }
-  .history-load-btn { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; flex-shrink: 0; }
+  /* STEP NAV */
+  .step-nav { background: var(--dark); border-radius: var(--radius); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .step-nav-copy { color: #9E9891; font-size: 13px; line-height: 1.5; }
+  .step-nav-copy strong { color: var(--gold-light); display: block; font-size: 14px; margin-bottom: 2px; }
+  .btn-step2 { display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; background: var(--gold); color: var(--dark); border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-step2:hover { background: var(--gold-light); }
 
   @media (max-width: 767px) {
     .main-wrap { margin-left: 0; }
     .sidebar { display: none; }
     .page-content { padding: 1rem; }
-    .form-row { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-
 
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -183,13 +150,9 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Admin Dashboard
     </a>
-    <a href="adminwaitlist.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-      Waitlist
-    </a>
-    <a href="admincertificates.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
-      Certificates
+    <a href="screen-recorder.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      Lesson Package
     </a>
     <a href="lesson-generator.html" class="nav-item active">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -215,9 +178,9 @@
   <header class="top-header">
     <div>
       <div class="header-title">Lesson Generator</div>
-      <div class="header-subtitle">Generate complete course lesson packages with Sparky</div>
+      <div class="header-subtitle">Fill in the details — Sparky writes the full lesson script</div>
     </div>
-    <div class="admin-badge">✦ Sparky</div>
+    <div class="admin-badge">✦ Admin</div>
   </header>
 
   <div id="access-denied">
@@ -229,384 +192,216 @@
 
   <div class="page-content" id="admin-content" style="display:none;">
 
-    <div class="form-card">
-      <div class="form-card-title">New Lesson Package</div>
-      <div class="form-card-sub">Fill in the details about the tool this lesson covers. Sparky will write the complete package.</div>
+    <!-- FORM -->
+    <div class="card">
+      <div class="card-title">New Lesson</div>
+      <div class="card-sub">All fields save automatically. Fill in what you have and generate when ready.</div>
 
       <div id="error-msg" class="error-msg"></div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Tool Name</label>
-          <input class="form-input" id="toolName" type="text" placeholder="Find Your Spark" />
-        </div>
+      <div class="field-grid">
 
-        <div class="form-group">
-          <label class="form-label">Tool Purpose</label>
-          <textarea class="form-textarea" id="toolPurpose" rows="3" placeholder="Helps members identify their lived experience, skills, and unique edge"></textarea>
-        </div>
+        <div class="section-divider">Lesson Info</div>
 
-        <div class="form-group">
-          <label class="form-label">Problem It Solves</label>
-          <textarea class="form-textarea" id="problemSolves" rows="3" placeholder="Most people don't know how to articulate what they know or who they help"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Results It Produces</label>
-          <textarea class="form-textarea" id="resultsProduces" rows="3" placeholder="A Spark Statement, Client Bible snapshot, and clear sense of their edge"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Tool Steps / Flow</label>
-          <textarea class="form-textarea" id="toolSteps" rows="4" placeholder="1. Enter your first name&#10;2. Answer 7 questions about your lived experience&#10;3. Receive your Spark Profile with statement, edge, and audience snapshot"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Lesson Number</label>
-            <input class="form-input" id="lessonNumber" type="number" min="1" placeholder="1" />
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Tool Name</div>
+            <input class="field-input" id="f-tool-name" type="text" placeholder="Find Your Spark" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Estimated Completion Time</label>
-            <div class="time-row">
-              <input class="form-input" id="completionTime" type="number" min="1" max="120" placeholder="8" />
-              <span class="time-label">minutes</span>
-            </div>
+          <div class="field">
+            <div class="field-label">Lesson Title</div>
+            <input class="field-input" id="f-lesson-title" type="text" placeholder="Defaults to Tool Name" />
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Next Lesson Name</label>
-            <input class="form-input" id="nextLesson" type="text" placeholder="Audience Deep Dive" />
+        <div class="field">
+          <div class="field-label">Tool Purpose</div>
+          <textarea class="field-textarea" id="f-purpose" placeholder="What this tool does in one sentence"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Problem It Solves</div>
+          <textarea class="field-textarea" id="f-problem" placeholder="What problem does this tool solve?"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Results It Produces</div>
+          <textarea class="field-textarea" id="f-results" placeholder="What does the user walk away with?"></textarea>
+        </div>
+
+        <div class="section-divider">Walkthrough</div>
+
+        <div class="field">
+          <div class="field-label">Steps</div>
+          <textarea class="field-textarea" id="f-steps" style="min-height:120px;" placeholder="Enter each step on its own line:&#10;Show homepage&#10;Click Start&#10;Enter name&#10;Answer questions&#10;Reveal results"></textarea>
+          <div class="field-hint">Each step will be narrated in the walkthrough section of the script.</div>
+        </div>
+
+        <div class="section-divider">Client Example</div>
+
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Client Name</div>
+            <input class="field-input" id="f-client-name" type="text" placeholder="e.g. Ashley" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Next Lesson Number</label>
-            <input class="form-input" id="nextLessonNumber" type="number" min="1" placeholder="2" />
-          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Community Action</label>
-          <textarea class="form-textarea" id="communityAction" rows="2" placeholder="Post your Spark Statement in the community and ask for feedback"></textarea>
+        <div class="field">
+          <div class="field-label">Before</div>
+          <textarea class="field-textarea" id="f-before" placeholder="What they said or felt before using the tool"></textarea>
         </div>
 
-        <button class="generate-btn" id="generate-btn" onclick="generatePackage()">
-          Generate My Lesson Package →
-        </button>
-
-        <div style="text-align:center;margin-top:12px;">
-          <a href="screen-recorder.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:transparent;color:var(--gold);border:1px solid rgba(201,168,76,0.35);border-radius:var(--radius-sm);font-family:'Lato',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.background='rgba(201,168,76,0.08)'" onmouseout="this.style.background='transparent'">Step 2 — Record Walkthrough →</a>
+        <div class="field">
+          <div class="field-label">After</div>
+          <textarea class="field-textarea" id="f-after" placeholder="What changed after going through the tool"></textarea>
         </div>
+
+        <div class="section-divider">Outro</div>
+
+        <div class="field">
+          <div class="field-label">Community Action</div>
+          <textarea class="field-textarea" id="f-community" placeholder="What should viewers post after this lesson?"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">What's Next</div>
+          <input class="field-input" id="f-next" type="text" placeholder="e.g. Audience Deep Dive" />
+        </div>
+
+        <button class="btn-generate" id="btn-generate" onclick="generateScript()">Generate Lesson Script →</button>
+
       </div>
     </div>
 
-    <!-- IMPORT PREVIOUSLY GENERATED SCRIPT -->
-    <div class="import-card">
-      <div class="import-card-title">📂 Import a Previously Generated Script</div>
-      <div class="import-card-sub">Paste the contents of a downloaded script .txt file to save it to your library without regenerating.</div>
-      <textarea class="import-textarea" id="importText" placeholder="Paste your saved script here…"></textarea>
-      <div class="import-row">
-        <input class="import-name" id="importName" type="text" placeholder="Tool name (e.g. Find Your Spark)" />
-        <input class="import-name" id="importLesson" type="number" min="1" placeholder="Lesson #" style="max-width:100px;" />
-        <button class="btn-import-save" onclick="importScript()">Save to Library →</button>
-      </div>
-      <div id="importStatus" style="font-size:12px;margin-top:8px;color:var(--text3);"></div>
-    </div>
-
-    <!-- Previous Lessons -->
-    <div class="history-card" id="history-card">
-      <div class="history-header" onclick="document.getElementById('history-card').classList.toggle('open')">
-        <span class="history-title">Previous Packages</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="history-count" id="history-count"></span>
-          <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-        </div>
-      </div>
-      <div class="history-body">
-        <div id="history-list"><div class="history-empty">Loading...</div></div>
-      </div>
-    </div>
-
+    <!-- PROGRESS -->
     <div class="progress-card" id="progress-card">
-      <div class="progress-sparky">✨</div>
-      <div class="progress-text">Sparky is writing your lesson package...</div>
-      <div class="progress-sub">This usually takes 20–30 seconds</div>
+      <div class="progress-sparky">✦</div>
+      <div class="progress-text">Sparky is writing your lesson…</div>
+      <div class="progress-sub">This takes about 15–20 seconds.</div>
     </div>
 
-    <div class="results-section" id="results-section">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div>
-          <div class="results-header">Lesson Package Ready</div>
-          <div class="results-sub" id="results-sub"></div>
-        </div>
-        <button class="save-btn" id="saveBtn" onclick="manualSave()">⬇ Save to Library</button>
+    <!-- OUTPUT -->
+    <div class="card" id="output-card" style="display:none;">
+      <div class="output-header">
+        <div class="output-title" id="output-title">Lesson Script</div>
+        <span class="char-count" id="char-count"></span>
       </div>
-
-      <div class="section-card open" id="card-intro">
-        <div class="section-header" onclick="toggleSection('card-intro')">
-          <div class="section-header-left">
-            <div class="section-num">1</div>
-            <div class="section-title">Introduction Script</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-intro')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-intro"></div>
-        </div>
+      <textarea class="output-textarea" id="output-script" oninput="onScriptEdit()"></textarea>
+      <div class="output-actions">
+        <button class="btn-download" onclick="downloadScript()">⬇ Download .txt</button>
+        <button class="btn-save-dash" id="btn-save" onclick="saveToDashboard()">Save to Dashboard</button>
+        <span class="save-status" id="save-status"></span>
       </div>
-
-      <div class="section-card open" id="card-screen">
-        <div class="section-header" onclick="toggleSection('card-screen')">
-          <div class="section-header-left">
-            <div class="section-num">2</div>
-            <div class="section-title">Screen Display Suggestions</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-screen')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-screen"></div>
-        </div>
-      </div>
-
-      <div class="section-card open" id="card-walkthrough">
-        <div class="section-header" onclick="toggleSection('card-walkthrough')">
-          <div class="section-header-left">
-            <div class="section-num">3</div>
-            <div class="section-title">Walkthrough Script</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-walkthrough')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-walkthrough"></div>
-        </div>
-      </div>
-
-      <div class="section-card open" id="card-example">
-        <div class="section-header" onclick="toggleSection('card-example')">
-          <div class="section-header-left">
-            <div class="section-num">4</div>
-            <div class="section-title">Example Results Section</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-example')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-example"></div>
-        </div>
-      </div>
-
-      <div class="section-card open" id="card-community">
-        <div class="section-header" onclick="toggleSection('card-community')">
-          <div class="section-header-left">
-            <div class="section-num">5</div>
-            <div class="section-title">Community Action</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-community')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-community"></div>
-        </div>
-      </div>
-
-      <div class="section-card open" id="card-transition">
-        <div class="section-header" onclick="toggleSection('card-transition')">
-          <div class="section-header-left">
-            <div class="section-num">6</div>
-            <div class="section-title">Transition to Next Lesson</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn" onclick="copySection(event, 'content-transition')">Copy</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-transition"></div>
-        </div>
-      </div>
-
-      <div class="section-card voiceover open" id="card-voiceover">
-        <div class="section-header" onclick="toggleSection('card-voiceover')">
-          <div class="section-header-left">
-            <div class="section-num">7</div>
-            <div class="section-title">Voiceover Script</div>
-          </div>
-          <div class="section-header-right">
-            <button class="copy-btn copy-btn-elevenlabs" onclick="copySection(event, 'content-voiceover')">Copy for ElevenLabs →</button>
-            <button class="copy-btn" onclick="downloadVoiceoverScript()">⬇ Download Script</button>
-            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-          </div>
-        </div>
-        <div class="section-body">
-          <div class="section-content" id="content-voiceover"></div>
-          <div class="elevenlabs-note">Paste this directly into ElevenLabs with the Sparky2 voice</div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- STEP 2 -->
+    <div class="step-nav" id="step-nav" style="display:none;">
+      <div class="step-nav-copy">
+        <strong>Step 2 — Generate Voiceover</strong>
+        Your script auto-loads on the next page. Pick a voice and generate your MP3.
+      </div>
+      <a href="voice-tool.html" class="btn-step2">Step 2 — Voiceover →</a>
+    </div>
+
   </div>
 </div>
 
 <script>
   const FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  const MODEL        = 'claude-sonnet-4-6';
+  let currentUser    = null;
+  let titleManuallyEdited = false;
+
+  const FIELDS = ['f-tool-name','f-lesson-title','f-purpose','f-problem','f-results','f-steps','f-client-name','f-before','f-after','f-community','f-next'];
+
   async function authHeaders() {
-    const user = firebase.auth().currentUser;
+    const user  = firebase.auth().currentUser;
     const token = user ? await user.getIdToken() : '';
     let acToken = '';
-    try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r)=>setTimeout(()=>r(),3000))]); acToken = t?.token||""; } catch(e) {}
+    try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r) => setTimeout(() => r(), 3000))]); acToken = t?.token || ''; } catch(e) {}
     return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-Firebase-AppCheck': acToken };
   }
-  const MODEL = 'claude-sonnet-4-6';
-  let currentUser = null;
 
-  const SECTIONS = [
-    { key: 'INTRODUCTION_SCRIPT',      contentId: 'content-intro' },
-    { key: 'SCREEN_DISPLAY_SUGGESTIONS', contentId: 'content-screen' },
-    { key: 'WALKTHROUGH_SCRIPT',       contentId: 'content-walkthrough' },
-    { key: 'EXAMPLE_RESULTS_SECTION',  contentId: 'content-example' },
-    { key: 'COMMUNITY_ACTION',         contentId: 'content-community' },
-    { key: 'TRANSITION_TO_NEXT_LESSON', contentId: 'content-transition' },
-    { key: 'VOICEOVER_SCRIPT',         contentId: 'content-voiceover' },
-  ];
+  // ── PERSISTENCE ──────────────────────────────────────────────────────────────
 
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) { window.location.href = 'signon.html'; return; }
-    currentUser = user;
+  function saveToLocal() {
+    const data = {};
+    FIELDS.forEach(id => { data[id] = document.getElementById(id).value; });
+    localStorage.setItem('lesson_gen_draft', JSON.stringify(data));
+  }
+
+  function loadFromLocal() {
     try {
-      const snap = await db.collection('users').doc(user.uid).get();
-      if (!snap.exists || snap.data().userRole !== 'admin') {
-        document.getElementById('access-denied').style.display = 'flex';
-        return;
-      }
-      document.getElementById('admin-content').style.display = 'flex';
-      document.getElementById('admin-content').style.flexDirection = 'column';
-      loadHistory();
-      const name = snap.data().displayName || user.displayName || 'Admin';
-      document.getElementById('sidebar-name').textContent = name;
-      const av = document.getElementById('sidebar-avatar');
-      if (user.photoURL) av.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-      else av.textContent = name.charAt(0).toUpperCase();
-    } catch(e) {
-      document.getElementById('access-denied').style.display = 'flex';
-    }
-  });
+      const saved = JSON.parse(localStorage.getItem('lesson_gen_draft') || 'null');
+      if (!saved) return;
+      FIELDS.forEach(id => { if (saved[id]) document.getElementById(id).value = saved[id]; });
+      const toolName = saved['f-tool-name'] || '';
+      const title    = saved['f-lesson-title'] || '';
+      if (title && title !== toolName) titleManuallyEdited = true;
+    } catch(e) {}
 
-  function showError(msg) {
-    const el = document.getElementById('error-msg');
-    el.textContent = msg;
-    el.classList.add('visible');
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const savedScript = localStorage.getItem('lesson_script_draft');
+    if (savedScript) showOutput(savedScript, document.getElementById('f-tool-name').value || 'Lesson');
   }
 
-  function clearError() {
-    const el = document.getElementById('error-msg');
-    el.textContent = '';
-    el.classList.remove('visible');
-  }
+  function initListeners() {
+    FIELDS.forEach(id => document.getElementById(id).addEventListener('input', saveToLocal));
 
-  function buildUserMessage(fields) {
-    return `LESSON NUMBER: ${fields.lessonNumber}
-TOOL NAME: ${fields.toolName}
-TOOL PURPOSE: ${fields.toolPurpose}
-PROBLEM IT SOLVES: ${fields.problemSolves}
-RESULTS IT PRODUCES: ${fields.resultsProduces}
-TOOL STEPS / FLOW: ${fields.toolSteps}
-COMPLETION TIME: ${fields.completionTime} minutes
-COMMUNITY ACTION: ${fields.communityAction}
-NEXT LESSON: Lesson ${fields.nextLessonNumber} — ${fields.nextLesson}
-
-Generate a complete lesson package for this ToolSpark tool.`;
-  }
-
-  function parseLessonPackage(raw) {
-    const pkgStart = raw.indexOf('LESSON_PACKAGE_START');
-    const pkgEnd   = raw.indexOf('LESSON_PACKAGE_END');
-    const content  = raw.slice(
-      pkgStart === -1 ? 0 : pkgStart + 'LESSON_PACKAGE_START'.length,
-      pkgEnd   === -1 ? raw.length : pkgEnd
-    );
-
-    const positions = SECTIONS.map(s => ({
-      key: s.key,
-      idx: content.indexOf(s.key + ':')
-    })).filter(p => p.idx !== -1).sort((a, b) => a.idx - b.idx);
-
-    const result = {};
-    positions.forEach((p, i) => {
-      const valueStart = p.idx + p.key.length + 1;
-      const valueEnd   = i + 1 < positions.length ? positions[i + 1].idx : content.length;
-      result[p.key] = content.slice(valueStart, valueEnd).trim();
+    document.getElementById('f-tool-name').addEventListener('input', function() {
+      if (!titleManuallyEdited) document.getElementById('f-lesson-title').value = this.value;
+      saveToLocal();
     });
-    return result;
-  }
-
-  function renderResults(parsed, toolName) {
-    SECTIONS.forEach(s => {
-      const el = document.getElementById(s.contentId);
-      if (el) el.textContent = parsed[s.key] || 'Not generated.';
+    document.getElementById('f-lesson-title').addEventListener('input', function() {
+      const toolName = document.getElementById('f-tool-name').value.trim();
+      titleManuallyEdited = this.value.trim() !== '' && this.value.trim() !== toolName;
+      saveToLocal();
     });
-    document.getElementById('results-sub').textContent =
-      'Lesson package for "' + toolName + '" — all sections ready to use.';
-    document.getElementById('results-section').classList.add('visible');
-    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function saveToFirestore(toolName, lessonNumber, rawResponse) {
-    if (!currentUser) return;
-    try {
-      await db.collection('lesson_packages').add({
-        userId: currentUser.uid,
-        toolName,
-        lessonNumber: parseInt(lessonNumber) || null,
-        fullPackage: rawResponse,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch(e) {
-      console.log('Lesson package save failed:', e.message);
-    }
+  // ── BUILD PROMPT ─────────────────────────────────────────────────────────────
+
+  function buildPrompt() {
+    const toolName    = document.getElementById('f-tool-name').value.trim();
+    const lessonTitle = document.getElementById('f-lesson-title').value.trim() || toolName;
+    const purpose     = document.getElementById('f-purpose').value.trim();
+    const problem     = document.getElementById('f-problem').value.trim();
+    const results     = document.getElementById('f-results').value.trim();
+    const steps       = document.getElementById('f-steps').value.trim();
+    const clientName  = document.getElementById('f-client-name').value.trim() || 'the client';
+    const before      = document.getElementById('f-before').value.trim();
+    const after       = document.getElementById('f-after').value.trim();
+    const community   = document.getElementById('f-community').value.trim();
+    const next        = document.getElementById('f-next').value.trim();
+
+    return `TOOL: ${toolName}
+LESSON TITLE: ${lessonTitle}
+TOOL PURPOSE: ${purpose || '(not provided)'}
+PROBLEM IT SOLVES: ${problem || '(not provided)'}
+RESULTS IT PRODUCES: ${results || '(not provided)'}
+
+WALKTHROUGH STEPS:
+${steps || '(not provided)'}
+
+CLIENT EXAMPLE:
+Name: ${clientName}
+Before: ${before || '(not provided)'}
+After: ${after || '(not provided)'}
+
+COMMUNITY ACTION: ${community || '(not provided)'}
+WHAT'S NEXT: ${next || '(not provided)'}`;
   }
 
-  async function generatePackage() {
+  // ── GENERATE ─────────────────────────────────────────────────────────────────
+
+  async function generateScript() {
+    const toolName = document.getElementById('f-tool-name').value.trim();
+    if (!toolName) { showError('Enter a Tool Name first.'); return; }
+
     clearError();
-    const fields = {
-      lessonNumber:    document.getElementById('lessonNumber').value.trim() || '1',
-      toolName:        document.getElementById('toolName').value.trim(),
-      toolPurpose:     document.getElementById('toolPurpose').value.trim(),
-      problemSolves:   document.getElementById('problemSolves').value.trim(),
-      resultsProduces: document.getElementById('resultsProduces').value.trim(),
-      toolSteps:       document.getElementById('toolSteps').value.trim(),
-      completionTime:  document.getElementById('completionTime').value.trim() || '8',
-      communityAction: document.getElementById('communityAction').value.trim(),
-      nextLesson:      document.getElementById('nextLesson').value.trim(),
-      nextLessonNumber: document.getElementById('nextLessonNumber').value.trim(),
-    };
-    if (!fields.nextLessonNumber) fields.nextLessonNumber = String(parseInt(fields.lessonNumber) + 1);
-
-    if (!fields.toolName)        { showError('Please enter the tool name.'); return; }
-    if (!fields.toolPurpose)     { showError('Please describe the tool purpose.'); return; }
-    if (!fields.problemSolves)   { showError('Please describe the problem it solves.'); return; }
-    if (!fields.resultsProduces) { showError('Please describe the results it produces.'); return; }
-    if (!fields.toolSteps)       { showError('Please describe the tool steps and flow.'); return; }
-
-    const btn = document.getElementById('generate-btn');
-    btn.disabled = true;
-    btn.textContent = 'Generating...';
+    document.getElementById('btn-generate').disabled = true;
     document.getElementById('progress-card').classList.add('visible');
-    document.getElementById('results-section').classList.remove('visible');
+    document.getElementById('output-card').style.display = 'none';
+    document.getElementById('step-nav').style.display   = 'none';
 
     try {
       const res = await fetch(FUNCTION_URL, {
@@ -614,167 +409,130 @@ Generate a complete lesson package for this ToolSpark tool.`;
         headers: await authHeaders(),
         body: JSON.stringify({
           model: MODEL,
-          max_tokens: 4000,
-          messages: [{ role: 'user', content: buildUserMessage(fields) }],
-          _meta: { tool: 'lesson-generator', sessionId: currentUser?.uid || 'anon' }
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: buildPrompt() }],
+          _meta: { tool: 'lesson-generator-v2', sessionId: currentUser?.uid || 'anon' }
         })
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || 'API error ' + res.status);
-      }
+      if (!res.ok) throw new Error('API error ' + res.status);
+      const data   = await res.json();
+      const script = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+      if (!script) throw new Error('No script returned — try again.');
 
-      const data = await res.json();
-      const raw  = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
-      const parsed = parseLessonPackage(raw);
-
-      renderResults(parsed, fields.toolName);
-      lastGeneratedRaw  = { _raw: raw, lessonNumber: fields.lessonNumber };
-      lastGeneratedName = fields.toolName;
-      await saveToFirestore(fields.toolName, fields.lessonNumber, raw);
-      loadHistory();
+      const title = document.getElementById('f-lesson-title').value.trim() || toolName;
+      showOutput(script, title);
+      localStorage.setItem('lesson_script_draft', script);
 
     } catch(e) {
-      showError(e.message || 'Something went wrong. Please try again.');
+      showError(e.message || 'Generation failed — try again.');
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Generate My Lesson Package →';
+      document.getElementById('btn-generate').disabled = false;
       document.getElementById('progress-card').classList.remove('visible');
     }
   }
 
-  function toggleSection(cardId) {
-    document.getElementById(cardId).classList.toggle('open');
+  function showOutput(script, title) {
+    document.getElementById('output-title').textContent = title + ' — Lesson Script';
+    document.getElementById('output-script').value = script;
+    document.getElementById('output-card').style.display = 'block';
+    document.getElementById('step-nav').style.display    = 'flex';
+    updateCharCount(script.length);
+    document.getElementById('output-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── SCREEN RECORDING ──
-  // ── HISTORY ──────────────────────────────────────────────
-  async function loadHistory() {
-    if (!currentUser) return;
-    try {
-      const snap = await db.collection('lesson_packages')
-        .orderBy('createdAt', 'desc')
-        .limit(30)
-        .get();
-
-      const list = document.getElementById('history-list');
-      const countEl = document.getElementById('history-count');
-
-      if (snap.empty) {
-        list.innerHTML = '<div class="history-empty">No previous packages yet.</div>';
-        countEl.textContent = '';
-        return;
-      }
-
-      countEl.textContent = snap.size + ' saved';
-      list.innerHTML = snap.docs.map(doc => {
-        const d = doc.data();
-        const date = d.createdAt?.toDate
-          ? d.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-          : '';
-        return `<div class="history-item" onclick="loadPackage('${doc.id}')">
-          <div>
-            <div class="history-item-name">${d.toolName || 'Untitled'}</div>
-            <div class="history-item-date">${date}</div>
-          </div>
-          <span class="history-load-btn">Load →</span>
-        </div>`;
-      }).join('');
-    } catch(e) {
-      document.getElementById('history-list').innerHTML =
-        '<div class="history-empty">Could not load history.</div>';
-    }
+  function onScriptEdit() {
+    const val = document.getElementById('output-script').value;
+    updateCharCount(val.length);
+    localStorage.setItem('lesson_script_draft', val);
   }
 
-  async function loadPackage(docId) {
-    try {
-      const doc = await db.collection('lesson_packages').doc(docId).get();
-      if (!doc.exists) return;
-      const data = doc.data();
-
-      // New format (screen-recorder workflow): has a single `script` field
-      if (!data.fullPackage && data.script) {
-        const parsed = { VOICEOVER_SCRIPT: data.script };
-        renderResults(parsed, data.toolName || data.lessonTitle || 'Lesson');
-        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-
-      // Old format: full 7-section package
-      const parsed = parseLessonPackage(data.fullPackage || '');
-      renderResults(parsed, data.toolName || 'Lesson');
-      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch(e) {
-      alert('Could not load that package.');
-    }
+  function updateCharCount(len) {
+    const el = document.getElementById('char-count');
+    el.textContent = len.toLocaleString() + ' characters';
+    el.style.color = len > 8000 ? 'var(--coral)' : 'var(--text3)';
   }
 
-  let lastGeneratedRaw  = '';
-  let lastGeneratedName = '';
+  // ── ACTIONS ──────────────────────────────────────────────────────────────────
 
-  async function manualSave() {
-    if (!lastGeneratedRaw) { alert('Nothing generated yet — generate a package first.'); return; }
-    const btn = document.getElementById('saveBtn');
-    btn.textContent = 'Saving…';
-    btn.disabled = true;
-    await saveToFirestore(lastGeneratedName, lastGeneratedRaw.lessonNumber || null, lastGeneratedRaw._raw || '');
-    btn.textContent = '✓ Saved';
-    btn.classList.add('saved');
-    await loadHistory();
-    setTimeout(() => { btn.textContent = '⬇ Save to Library'; btn.classList.remove('saved'); btn.disabled = false; }, 3000);
-  }
-
-  async function importScript() {
-    const text   = document.getElementById('importText').value.trim();
-    const name   = document.getElementById('importName').value.trim();
-    const lesson = document.getElementById('importLesson').value.trim();
-    const status = document.getElementById('importStatus');
-    if (!text) { status.textContent = 'Paste your script first.'; return; }
-    if (!name) { status.textContent = 'Enter the tool name.'; return; }
-    status.textContent = 'Saving…';
-    try {
-      await saveToFirestore(name, lesson ? parseInt(lesson) : null, text);
-      status.style.color = '#2A5C45';
-      status.textContent = '✓ Saved to library — it will now appear in the Slide Builder and Package pages.';
-      document.getElementById('importText').value = '';
-      document.getElementById('importName').value = '';
-      document.getElementById('importLesson').value = '';
-      await loadHistory();
-    } catch(e) {
-      status.style.color = '#C4622D';
-      status.textContent = 'Save failed — make sure Firestore rules are deployed.';
-    }
-  }
-
-  function downloadVoiceoverScript() {
-    const text = document.getElementById('content-voiceover')?.textContent?.trim() || '';
+  function downloadScript() {
+    const text = document.getElementById('output-script').value;
     if (!text) return;
-    const name = (document.getElementById('toolName')?.value?.trim() || 'lesson')
-      .toLowerCase().replace(/\s+/g, '-');
+    const name = (document.getElementById('f-lesson-title').value.trim()
+               || document.getElementById('f-tool-name').value.trim()
+               || 'lesson').toLowerCase().replace(/\s+/g, '-');
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
-    a.download = name + '-voiceover-script.txt';
+    a.href     = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = name + '-script.txt';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
 
-  function copySection(e, contentId) {
-    e.stopPropagation();
-    const text = document.getElementById(contentId)?.textContent || '';
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = e.currentTarget;
-      const orig = btn.textContent;
-      btn.textContent = 'Copied ✓';
-      btn.classList.add('copied');
-      setTimeout(() => {
-        btn.textContent = orig;
-        btn.classList.remove('copied');
-      }, 2000);
-    });
+  async function saveToDashboard() {
+    const btn    = document.getElementById('btn-save');
+    const status = document.getElementById('save-status');
+    const script = document.getElementById('output-script').value.trim();
+    if (!script) { status.className = 'save-status err'; status.textContent = 'Nothing to save yet.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    status.className = 'save-status';
+    status.textContent = '';
+
+    try {
+      await db.collection('lesson_packages').add({
+        toolName:    document.getElementById('f-tool-name').value.trim(),
+        lessonTitle: document.getElementById('f-lesson-title').value.trim() || document.getElementById('f-tool-name').value.trim(),
+        fullPackage: script,
+        userId:      currentUser.uid,
+        createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+      });
+      status.className = 'save-status ok';
+      status.textContent = 'Saved to dashboard.';
+    } catch(e) {
+      status.className = 'save-status err';
+      status.textContent = 'Save failed — script is in localStorage.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save to Dashboard';
+    }
   }
+
+  // ── ERROR ─────────────────────────────────────────────────────────────────────
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+  function clearError() {
+    document.getElementById('error-msg').classList.remove('visible');
+  }
+
+  // ── AUTH ──────────────────────────────────────────────────────────────────────
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex';
+        return;
+      }
+      currentUser = user;
+      document.getElementById('admin-content').style.display = 'flex';
+      const name = snap.data().displayName || user.displayName || 'Admin';
+      document.getElementById('sidebar-name').textContent = name;
+      const av = document.getElementById('sidebar-avatar');
+      if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      else av.textContent = name.charAt(0).toUpperCase();
+
+      loadFromLocal();
+      initListeners();
+    } catch(e) {
+      document.getElementById('access-denied').style.display = 'flex';
+    }
+  });
 </script>
-
-
 </body>
 </html>
