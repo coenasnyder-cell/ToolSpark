@@ -794,15 +794,21 @@
       }
     }
 
+    const hasAnyResults = existingResultIds.size > 0;
     const missingProfiles = Array.from(profileMap.values()).filter(doc => !existingResultIds.has(doc.id));
-    if (!missingProfiles.length) return;
 
-    const batch = db.batch();
-    missingProfiles.forEach(doc => {
-      const resultRef = db.collection('spark_results').doc(doc.id);
-      batch.set(resultRef, buildSparkResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
-    });
-    await batch.commit();
+    if (missingProfiles.length) {
+      const batch = db.batch();
+      missingProfiles.forEach(doc => {
+        const resultRef = db.collection('spark_results').doc(doc.id);
+        batch.set(resultRef, buildSparkResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
+      });
+      await batch.commit();
+    }
+
+    if (hasAnyResults || missingProfiles.length > 0) {
+      db.collection('users').doc(user.uid).update({ sparkComplete: true }).catch(() => {});
+    }
   }
 
   function buildAudienceResultPayloadFromProfile(sessionId, data, user) {
@@ -868,15 +874,21 @@
       }
     }
 
+    const hasAnyResults = existingResultIds.size > 0;
     const missingProfiles = Array.from(profileMap.values()).filter(doc => !existingResultIds.has(doc.id));
-    if (!missingProfiles.length) return;
 
-    const batch = db.batch();
-    missingProfiles.forEach(doc => {
-      const resultRef = db.collection('audience_results').doc(doc.id);
-      batch.set(resultRef, buildAudienceResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
-    });
-    await batch.commit();
+    if (missingProfiles.length) {
+      const batch = db.batch();
+      missingProfiles.forEach(doc => {
+        const resultRef = db.collection('audience_results').doc(doc.id);
+        batch.set(resultRef, buildAudienceResultPayloadFromProfile(doc.id, doc.data() || {}, user), { merge: true });
+      });
+      await batch.commit();
+    }
+
+    if (hasAnyResults || missingProfiles.length > 0) {
+      db.collection('users').doc(user.uid).update({ audienceComplete: true }).catch(() => {});
+    }
   }
 
   // Parse all tool fields directly from the raw actionPlan text saved by clarity.html
