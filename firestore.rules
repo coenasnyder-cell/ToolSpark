@@ -141,14 +141,20 @@ service cloud.firestore {
 }
 match /spark_profiles/{sessionId} {
   allow get: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow list: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow delete: if isAdmin();
 }
@@ -174,14 +180,20 @@ match /spark_results/{resultId} {
     // AUDIENCE TOOL
    match /audience_tool/{sessionId} {
   allow get: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow list: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow create: if isActive();
   allow update: if isActive() && (
-    resource.data.userId == request.auth.uid || isAdmin()
+    resource.data.userId == request.auth.uid ||
+    resource.data.email == request.auth.token.email ||
+    isAdmin()
   );
   allow delete: if isAdmin();
 }
