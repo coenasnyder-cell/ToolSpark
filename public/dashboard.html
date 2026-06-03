@@ -723,15 +723,15 @@
           document.getElementById('stat-days').textContent = days;
         }
 
+        // Sync email verification to Firestore if just verified
+        if (user.emailVerified && !data.isVerified) {
+          db.collection('users').doc(user.uid).update({ isVerified: true }).catch(() => {});
+          data.isVerified = true;
+        }
+
         // My Profile section
         renderMyProfile(user, data);
         renderChecklist(user.uid, data);
-
-        // Onboarding
-        const onboarding = data.onboarding;
-        if (onboarding && !onboarding.completed) {
-          renderChecklist(user.uid, data);
-        }
 
         // Notifications
         checkNotifications(user.uid);
@@ -799,8 +799,10 @@
     const steps = data.onboarding?.steps || {};
     const profileDone = steps.profileComplete || data.profileComplete ||
       !!(data.bio && (data.photoURL || (data.displayName && data.displayName !== data.email)));
+    const emailVerified = !!(auth.currentUser?.emailVerified || data.isVerified);
 
     const allSteps = [
+      { key: 'emailVerified',  label: 'Verify your email',              desc: 'Check your inbox and click the verification link', special: 'verifyEmail', done: emailVerified },
       { key: 'profileComplete', label: 'Update your profile',           desc: 'Add your photo, bio, and what you build', href: 'profile.html', featured: true, done: profileDone },
       { key: 'welcomePost',     label: 'Introduce yourself',            desc: 'Post in the welcome thread',              href: 'community.html',                           done: !!steps.welcomePost },
       { key: 'welcomeCourse',   label: 'Welcome to ToolSpark! Lesson',  desc: 'Start here before anything else',         href: 'courses.html',                             done: !!steps.welcomeCourse },
@@ -819,9 +821,13 @@
       const checkInner = s.done
         ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
         : (i + 1);
+      const onclickAttr = s.done ? '' :
+        s.special === 'verifyEmail'
+          ? ' onclick="sendVerifyEmail(event)"'
+          : ' onclick="ocMarkStep(event,\'' + uid + '\',\'' + s.key + '\',\'' + s.href + '\')"';
+      const hrefAttr = s.done ? '#' : (s.href || '#');
       return '<a class="oc-step' + (s.done ? ' oc-done' : '') + (s.featured ? ' oc-featured' : '') + '"' +
-        ' href="' + (s.done ? '#' : s.href) + '"' +
-        (!s.done ? ' onclick="ocMarkStep(event,\'' + uid + '\',\'' + s.key + '\',\'' + s.href + '\')"' : '') + '>' +
+        ' href="' + hrefAttr + '"' + onclickAttr + '>' +
         '<div class="oc-check ' + checkClass + '">' + checkInner + '</div>' +
         '<div class="oc-body">' +
         '<div class="oc-label' + (s.done ? ' done' : '') + '">' + s.label + '</div>' +
@@ -840,6 +846,23 @@
       await db.collection('users').doc(uid).update(update);
     } catch(err) {}
     window.location.href = href;
+  }
+
+  async function sendVerifyEmail(e) {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return;
+    if (user.emailVerified) { location.reload(); return; }
+    try {
+      await user.sendEmailVerification();
+      alert('Verification email sent! Check your inbox then come back and refresh this page.');
+    } catch(err) {
+      if (err.code === 'auth/too-many-requests') {
+        alert('A verification email was already sent recently. Check your inbox or try again in a few minutes.');
+      } else {
+        alert('Could not send verification email. Please try again.');
+      }
+    }
   }
 
   async function loadStats(uid) {
