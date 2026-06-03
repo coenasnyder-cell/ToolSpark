@@ -181,11 +181,10 @@
   /* ── CARD GRID ── */
   .section-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
     margin-bottom: 16px;
   }
-  @media(max-width:580px){ .section-grid { grid-template-columns: 1fr; } }
 
   .profile-card {
     background: var(--surface);
@@ -310,6 +309,12 @@
   </header>
 
   <div class="page-wrap">
+
+    <!-- CONTEXT NOTE -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;font-size:13px;color:var(--text2);line-height:1.7;">
+      <strong style="color:var(--text);display:block;margin-bottom:4px;">This is your reference document — not a quiz.</strong>
+      You don't need to memorise this. It feeds directly into your next tool. Bookmark this page and come back to it any time you're writing copy, building your tool, or describing who you help.
+    </div>
 
     <!-- PATH BADGE -->
     <div style="text-align:center; margin-bottom:28px;">
@@ -472,20 +477,22 @@ const DEMO = {
 let wordsText = "";
 
 // ── BUILD PROFILE FROM FIRESTORE DOC ──
+// parsed (re-parsed from rawProfile) takes priority over stored fields
+// because stored fields may have been saved with old buggy parsing
 function buildProfile(data, parsed) {
   return {
     name:              data.name              || parsed.name              || DEMO.name,
     audiencePath:      data.audiencePath      || null,
-    whoTheyAre:          data.whoTheyAre          || parsed.whoTheyAre          || DEMO.whoTheyAre,
-    dailyFrustration:    data.dailyFrustration    || parsed.dailyFrustration    || DEMO.dailyFrustration,
-    whatTriggeredThem:   data.whatTriggeredThem   || parsed.whatTriggeredThem   || "",
-    whatTheyHaveTried:   data.whatTheyHaveTried   || parsed.whatTheyHaveTried   || DEMO.whatTheyHaveTried,
-    theirObjections:     data.theirObjections     || parsed.theirObjections     || DEMO.theirObjections,
-    dreamOutcome:        data.dreamOutcome        || parsed.dreamOutcome        || DEMO.dreamOutcome,
-    howTheyWantToBeeSeen: data.howTheyWantToBeeSeen || parsed.howTheyWantToBeeSeen || "",
-    whereToFindThem:     data.whereToFindThem     || parsed.whereToFindThem     || "",
-    theirWords:          data.theirWords          || parsed.theirWords          || DEMO.theirWords,
-    closing:             data.closing             || parsed.closing             || DEMO.closing
+    whoTheyAre:          parsed.whoTheyAre          || data.whoTheyAre          || DEMO.whoTheyAre,
+    dailyFrustration:    parsed.dailyFrustration    || data.dailyFrustration    || DEMO.dailyFrustration,
+    whatTriggeredThem:   parsed.whatTriggeredThem   || data.whatTriggeredThem   || "",
+    whatTheyHaveTried:   parsed.whatTheyHaveTried   || data.whatTheyHaveTried   || DEMO.whatTheyHaveTried,
+    theirObjections:     parsed.theirObjections     || data.theirObjections     || DEMO.theirObjections,
+    dreamOutcome:        parsed.dreamOutcome        || data.dreamOutcome        || DEMO.dreamOutcome,
+    howTheyWantToBeeSeen: parsed.howTheyWantToBeeSeen || data.howTheyWantToBeeSeen || "",
+    whereToFindThem:     parsed.whereToFindThem     || data.whereToFindThem     || "",
+    theirWords:          parsed.theirWords          || data.theirWords          || DEMO.theirWords,
+    closing:             parsed.closing             || data.closing             || DEMO.closing
   };
 }
 
