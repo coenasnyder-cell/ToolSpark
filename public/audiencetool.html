@@ -753,14 +753,14 @@ function showEmailGate() {
 }
 
 function extractProfileBlock(raw) {
-  const match = raw.match(/CLIENT_BIBLE_START[\s\S]*?CLIENT_BIBLE_END/);
+  const match = raw.match(/(CLIENT_BIBLE_START|AUDIENCE_BLUEPRINT_START)[\s\S]*?(CLIENT_BIBLE_END|AUDIENCE_BLUEPRINT_END)/);
   return match ? match[0].trim() : raw.trim();
 }
 
 function parseProfile(raw) {
   const profile = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|CLIENT_BIBLE_END|$)`);
+    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|CLIENT_BIBLE_END|AUDIENCE_BLUEPRINT_END|$)`);
     const match = raw.match(regex);
     return match ? match[1].trim() : "";
   };

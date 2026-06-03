@@ -214,7 +214,7 @@
     <div class="state-eyebrow" style="justify-content:center;">Build Agent</div>
     <h1>You're out of <em>credits</em></h1>
     <p>You've used all your Build Agent credits for now. Reach out and we'll get you topped up so you can keep building.</p>
-    <a href="mailto:hello@toolspark.co" class="start-btn" style="display:block;text-decoration:none;margin-bottom:12px;">Contact Us to Add Credits →</a>
+    <a href="inbox.html" class="start-btn" style="display:block;text-decoration:none;margin-bottom:12px;">Message Us to Add Credits →</a>
     <a href="dashboard.html" style="font-size:13px;color:var(--text3);text-decoration:none;">Back to Dashboard</a>
   </div>
 </div>
@@ -521,7 +521,7 @@ async function startChat() {
 APP_NAME: ${a}
 TOOL_CONCEPT: ${t}
 
-Open the session. Welcome the user in 1 short sentence. Tell them in one sentence what you know they're building and what platform they're on. Then ask: what do they want to work on today?`;
+Open the session with the check-in. Welcome them in 1 short sentence that references their app name. Then start the check-in — ask what they are working on today. Keep it natural and conversational, not a list.`;
 
   try {
     const reply = await callAI(opening);
@@ -554,11 +554,12 @@ auth.onAuthStateChanged(async function(user) {
   try {
     const snap  = await db.collection('users').doc(user.uid).get();
     const data  = snap.exists ? snap.data() : {};
-    credits     = typeof data.buildAgentCredits === 'number' ? data.buildAgentCredits : 0;
+    const isAdmin = data.userRole === 'admin';
+    credits     = isAdmin ? 9999 : (typeof data.buildAgentCredits === 'number' ? data.buildAgentCredits : 0);
 
     updateCreditsUI();
 
-    if (credits <= 0) {
+    if (!isAdmin && credits <= 0) {
       document.getElementById('no-credits-screen').style.display = 'flex';
       return;
     }

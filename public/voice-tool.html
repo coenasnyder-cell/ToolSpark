@@ -772,42 +772,6 @@
     </section>
 
     <!-- Member ElevenLabs callout (non-admin, shown when EL tab active) -->
-    <div id="el-member-callout" style="display:none">
-      <div class="el-callout">
-        <div class="el-callout-icon">🎙️</div>
-        <div class="el-callout-text">
-          <strong>Want to use your own cloned voice?</strong> ElevenLabs lets you clone your voice in minutes with just a short recording.
-        </div>
-        <a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener" class="el-callout-link">$5/month →</a>
-      </div>
-    </div>
-
-    <!-- Admin clone section -->
-    <div id="clone-section" style="display:none">
-      <div class="clone-section">
-        <div class="clone-section-header">
-          <span class="clone-section-title">Clone a Voice</span>
-          <span class="admin-badge">Admin Only</span>
-        </div>
-        <div class="clone-form">
-          <div class="clone-field">
-            <label>Voice Name</label>
-            <input type="text" id="clone-name" placeholder="e.g. My Voice, Coena Studio…" maxlength="64">
-          </div>
-          <div class="clone-field">
-            <label>Audio Sample</label>
-            <div class="upload-area" id="upload-area">
-              <input type="file" id="clone-file" accept="audio/mp3,audio/mpeg,audio/wav,audio/m4a,audio/mp4,audio/*">
-              <div class="upload-icon">🎤</div>
-              <div class="upload-label">Click or drag an audio file here</div>
-              <div class="upload-hint">MP3 or WAV · 1–3 minutes of clear speech recommended<br>Max 20MB</div>
-              <div class="upload-filename" id="upload-filename"></div>
-            </div>
-          </div>
-          <button class="btn-clone" id="btn-clone">Clone Voice</button>
-        </div>
-      </div>
-    </div>
 
     <!-- Result -->
     <div id="result-section" style="display:none">
@@ -1239,7 +1203,7 @@ const cloneFileInput = document.getElementById("clone-file");
 const uploadArea     = document.getElementById("upload-area");
 const uploadFilename = document.getElementById("upload-filename");
 
-cloneFileInput.addEventListener("change", () => {
+if (cloneFileInput) cloneFileInput.addEventListener("change", () => {
   const file = cloneFileInput.files[0];
   if (!file) return;
   if (file.size > 20 * 1024 * 1024) {
@@ -1251,19 +1215,21 @@ cloneFileInput.addEventListener("change", () => {
   uploadFilename.style.display = "block";
 });
 
-uploadArea.addEventListener("dragover", e => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
-uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
-uploadArea.addEventListener("drop", e => {
-  e.preventDefault();
-  uploadArea.classList.remove("drag-over");
-  const file = e.dataTransfer.files[0];
-  if (file) {
-    cloneFileInput.files = e.dataTransfer.files;
-    cloneFileInput.dispatchEvent(new Event("change"));
-  }
-});
+if (uploadArea) {
+  uploadArea.addEventListener("dragover", e => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
+  uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
+  uploadArea.addEventListener("drop", e => {
+    e.preventDefault();
+    uploadArea.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      cloneFileInput.files = e.dataTransfer.files;
+      cloneFileInput.dispatchEvent(new Event("change"));
+    }
+  });
+}
 
-document.getElementById("btn-clone").addEventListener("click", async () => {
+if (document.getElementById("btn-clone")) document.getElementById("btn-clone").addEventListener("click", async () => {
   const name = document.getElementById("clone-name").value.trim();
   const file = cloneFileInput.files[0];
 

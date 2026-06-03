@@ -445,6 +445,12 @@ match /conversations/{conversationId} {
       allow read, delete: if isAdmin();
     }
 
+    // API USAGE (admin-only cost tracking)
+    match /api_usage/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // ADMIN ALERTS (Just Sparked etc.)
     match /admin_alerts/{alertId} {
       allow create: if isActive();

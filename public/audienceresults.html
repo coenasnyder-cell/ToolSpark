@@ -94,7 +94,7 @@
   .hero-eyebrow {
     font-size: 11px; font-weight: 700;
     letter-spacing: 3px; text-transform: uppercase;
-    color: var(--gold); opacity: 0.65;
+    color: #1A1714;
     margin-bottom: 16px;
   }
   .hero-name {
@@ -436,14 +436,14 @@ function escHtml(s) {
 
 // ── PARSE AUDIENCE BLUEPRINT ──
 function extractBlock(raw) {
-  const match = raw.match(/AUDIENCE_BLUEPRINT_START[\s\S]*?AUDIENCE_BLUEPRINT_END/);
+  const match = raw.match(/(AUDIENCE_BLUEPRINT_START|CLIENT_BIBLE_START)[\s\S]*?(AUDIENCE_BLUEPRINT_END|CLIENT_BIBLE_END)/);
   return match ? match[0].trim() : raw.trim();
 }
 
 function parseClientBible(raw) {
   const p = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n[A-Z_]+:|AUDIENCE_BLUEPRINT_END|$)`);
+    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|AUDIENCE_BLUEPRINT_END|CLIENT_BIBLE_END|$)`);
     const m = raw.match(regex);
     return m ? m[1].trim() : "";
   };

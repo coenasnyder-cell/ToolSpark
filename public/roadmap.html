@@ -788,7 +788,10 @@
     if (latestSparkSessionId && !profileMap.has(latestSparkSessionId)) {
       try {
         const latestSnap = await db.collection('spark_profiles').doc(latestSparkSessionId).get();
-        if (latestSnap.exists) profileMap.set(latestSnap.id, latestSnap);
+        if (latestSnap.exists) {
+          const sessionEmail = (latestSnap.data().email || '').toLowerCase();
+          if (sessionEmail === userEmailLower) profileMap.set(latestSnap.id, latestSnap);
+        }
       } catch(e) {
         console.log('Latest Spark session lookup failed:', e);
       }
@@ -868,7 +871,10 @@
     if (latestAudienceSessionId && !profileMap.has(latestAudienceSessionId)) {
       try {
         const latestSnap = await db.collection('audience_tool').doc(latestAudienceSessionId).get();
-        if (latestSnap.exists) profileMap.set(latestSnap.id, latestSnap);
+        if (latestSnap.exists) {
+          const sessionEmail = (latestSnap.data().email || '').toLowerCase();
+          if (sessionEmail === userEmailLower) profileMap.set(latestSnap.id, latestSnap);
+        }
       } catch(e) {
         console.log('Latest Audience session lookup failed:', e);
       }
@@ -1206,14 +1212,37 @@
       });
       if (audienceSessions.length) {
         const aud = audienceSessions[0].data();
+        const sanitizeAud = (val) => {
+          if (!val) return '';
+          return val
+            .replace(/AUDIENCE_BLUEPRINT_END/g, '')
+            .replace(/CLIENT_BIBLE_END/g, '')
+            .replace(/\n\s*\*{0,2}[A-Z][A-Z_]+\*{0,2}:[\s\S]*/g, '')
+            .trim();
+        };
+        const firstSentence = (val, max = 160) => {
+          const clean = sanitizeAud(val);
+          const m = clean.match(/^.+?[.!?](?:\s|$)/);
+          const s = m ? m[0].trim() : clean;
+          return s.length > max ? s.slice(0, max).trimEnd() + '…' : s;
+        };
         const setField = (id, val) => {
           const el = document.getElementById(id);
-          if (el) el.textContent = val || '—';
+          if (el) el.textContent = firstSentence(val) || '—';
         };
         setField('aud-who-they-are', aud.whoTheyAre);
         setField('aud-daily-frustration', aud.dailyFrustration);
         setField('aud-dream-outcome', aud.dreamOutcome);
-        setField('aud-their-words', aud.theirWords);
+
+        const wordsEl = document.getElementById('aud-their-words');
+        if (wordsEl) {
+          const lines = sanitizeAud(aud.theirWords || '')
+            .split(/\n/)
+            .map(l => l.replace(/^[-•*"]+\s*/, '').replace(/["*]+$/, '').trim())
+            .filter(Boolean)
+            .slice(0, 3);
+          wordsEl.textContent = lines.length ? lines.map(l => `"${l}"`).join('  ·  ') : '—';
+        }
         document.getElementById('audience-section').style.display = 'block';
       }
 
