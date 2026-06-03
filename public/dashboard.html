@@ -826,12 +826,16 @@
           ? ' onclick="sendVerifyEmail(event)"'
           : ' onclick="ocMarkStep(event,\'' + uid + '\',\'' + s.key + '\',\'' + s.href + '\')"';
       const hrefAttr = s.done ? '#' : (s.href || '#');
+      const extraContent = (!s.done && s.special === 'verifyEmail')
+        ? '<div style="margin-top:5px;"><a href="#" onclick="sendVerifyEmail(event)" style="font-size:11px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:0.03em;">Resend verification email →</a></div>'
+        : '';
       return '<a class="oc-step' + (s.done ? ' oc-done' : '') + (s.featured ? ' oc-featured' : '') + '"' +
         ' href="' + hrefAttr + '"' + onclickAttr + '>' +
         '<div class="oc-check ' + checkClass + '">' + checkInner + '</div>' +
         '<div class="oc-body">' +
         '<div class="oc-label' + (s.done ? ' done' : '') + '">' + s.label + '</div>' +
         '<div class="oc-desc">' + s.desc + '</div>' +
+        extraContent +
         '</div>' +
         (s.done ? '' : '<svg class="oc-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>') +
         '</a>';
