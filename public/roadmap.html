@@ -1150,8 +1150,8 @@
 
     try {
       const userEmailLower = (user.email || '').toLowerCase();
-      await ensureSparkResultsForUser(user);
-      await ensureAudienceResultsForUser(user);
+      try { await ensureSparkResultsForUser(user); } catch(e) { console.warn('ensureSparkResults failed:', e.message); }
+      try { await ensureAudienceResultsForUser(user); } catch(e) { console.warn('ensureAudienceResults failed:', e.message); }
 
       // Run all tool queries in parallel
       const [
