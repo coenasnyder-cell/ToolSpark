@@ -334,7 +334,6 @@ async function signIn() {
   try {
     const cred = await auth.signInWithEmailAndPassword(email, password);
     try { await ensureUserDoc(cred.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
-    try { await claimSparkSessionsForUser(cred.user); } catch(e) { console.warn('claimSparkSessions failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
     setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
@@ -355,7 +354,6 @@ async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
     try { await ensureUserDoc(result.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
-    try { await claimSparkSessionsForUser(result.user); } catch(e) { console.warn('claimSparkSessions failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
     setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
   } catch(err) {
@@ -395,89 +393,6 @@ async function ensureUserDoc(user) {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
-}
-
-function buildSparkResultPayload(sessionId, data, user) {
-  return {
-    sessionId: data.sessionId || sessionId,
-    name: data.name || '',
-    email: data.email || user.email || '',
-    userId: user.uid,
-    accountEmail: user.email || data.accountEmail || '',
-    statement: data.statement || '',
-    whatYouKnow: data.whatYouKnow || '',
-    whoYouHelp: data.whoYouHelp || '',
-    aiSystems: Array.isArray(data.aiSystems) ? data.aiSystems : [],
-    closing: data.closing || '',
-    rawProfile: data.rawProfile || '',
-    transcript: Array.isArray(data.transcript) ? data.transcript : [],
-    source: data.source || 'find-your-spark',
-    linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp()
-  };
-}
-
-async function claimSparkSessionsForUser(user) {
-  if (!user || !user.uid || !user.email) return;
-
-  const claimedIds = new Set();
-  const sessionsToClaim = [];
-  const userEmailLower = (user.email || '').toLowerCase();
-  const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
-
-  if (latestSparkSessionId) {
-    try {
-      const latestRef = db.collection('spark_profiles').doc(latestSparkSessionId);
-      const latestSnap = await latestRef.get();
-      if (latestSnap.exists) {
-        sessionsToClaim.push({ id: latestSnap.id, data: latestSnap.data() || {} });
-        claimedIds.add(latestSnap.id);
-      }
-    } catch(err) {
-      console.log('Latest Spark session lookup failed:', err);
-    }
-  }
-
-  try {
-    const emailSnap = await db.collection('spark_profiles')
-      .where('email', '==', user.email)
-      .get();
-
-    emailSnap.forEach(doc => {
-      if (claimedIds.has(doc.id)) return;
-      sessionsToClaim.push({ id: doc.id, data: doc.data() || {} });
-      claimedIds.add(doc.id);
-    });
-  } catch(err) {
-    console.log('Spark session email lookup failed:', err);
-  }
-
-  if (userEmailLower && userEmailLower !== user.email) {
-    try {
-      const emailLowerSnap = await db.collection('spark_profiles')
-        .where('email', '==', userEmailLower)
-        .get();
-
-      emailLowerSnap.forEach(doc => {
-        if (claimedIds.has(doc.id)) return;
-        sessionsToClaim.push({ id: doc.id, data: doc.data() || {} });
-        claimedIds.add(doc.id);
-      });
-    } catch(err) {
-      console.log('Spark session lowercase email lookup failed:', err);
-    }
-  }
-
-  if (!sessionsToClaim.length) return;
-
-  const batch = db.batch();
-  sessionsToClaim.forEach(({ id, data }) => {
-    const resultRef = db.collection('spark_results').doc(id);
-    batch.set(resultRef, buildSparkResultPayload(id, data || {}, user), { merge: true });
-  });
-
-  await batch.commit();
-  localStorage.removeItem('toolspark_latest_spark_session');
 }
 
 function friendlyError(code) {
