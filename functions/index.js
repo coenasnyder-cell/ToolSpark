@@ -62,12 +62,16 @@ const VALID_VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx"
 
 async function requireAppCheck(req, res) {
   const token = req.headers["x-firebase-appcheck"];
-  if (!token) return true; // No token — fall through to auth check
+  if (!token) {
+    res.status(401).json({ error: "App Check token missing" });
+    return false;
+  }
   try {
     await admin.appCheck().verifyToken(token);
     return true;
   } catch {
-    res.status(401).json({ error: "Unauthorized" }); return false;
+    res.status(401).json({ error: "App Check token invalid" });
+    return false;
   }
 }
 
@@ -1481,7 +1485,8 @@ const SERVER_SIDE_SYSTEMS = {
 exports.analyze = onRequest({
   cors: true,
   invoker: "public",
-  secrets: ["ANTHROPIC_KEY"]
+  secrets: ["ANTHROPIC_KEY"],
+  enforceAppCheck: true
 }, async (req, res) => {
   if (req.method === "OPTIONS") {
     res.status(204).send("");
