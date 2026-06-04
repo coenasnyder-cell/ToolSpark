@@ -413,11 +413,28 @@
 
   </div>
   <div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
+  <div id="session-id-row" style="display:none;justify-content:center;align-items:center;gap:8px;padding:0 1rem 1.5rem;flex-wrap:wrap;">
+    <span style="font-size:11px;color:var(--text3);">Session ID:</span>
+    <span id="session-id-display" style="font-size:11px;font-family:monospace;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--text2);user-select:all;"></span>
+    <button id="copy-session-btn" onclick="copySessionId()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 10px;font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.15s;">Copy</button>
+  </div>
 </div>
 
 <script>
 function getParam(name) {
   return new URLSearchParams(window.location.search).get(name);
+}
+
+function copySessionId() {
+  const id = document.getElementById("session-id-display")?.textContent;
+  if (!id) return;
+  navigator.clipboard.writeText(id).then(() => {
+    const btn = document.getElementById("copy-session-btn");
+    btn.textContent = "Copied ✓";
+    btn.style.color = "#2A7A55";
+    btn.style.borderColor = "rgba(42,122,85,0.4)";
+    setTimeout(() => { btn.textContent = "Copy"; btn.style.color = ""; btn.style.borderColor = ""; }, 2000);
+  });
 }
 
 function fmt(t) {
@@ -567,6 +584,10 @@ async function init() {
   const dataParam    = getParam("data");
 
   if (sessionParam) {
+    const row = document.getElementById("session-id-row");
+    const idEl = document.getElementById("session-id-display");
+    if (row && idEl) { idEl.textContent = sessionParam; row.style.display = "flex"; }
+
     try {
       const snap = await db.collection("audience_tool").doc(sessionParam).get();
       if (snap.exists) {
