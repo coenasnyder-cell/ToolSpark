@@ -1216,7 +1216,7 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
 Output ONLY this exact format — no intro, no explanation:
 
 WALKTHROUGH_STEPS:
-[Numbered steps describing what a screen recording of the Audience Deep Dive tool shows. The recording follows this flow: open the tool → answer the path splitter question → work through 8 questions one at a time → see the Audience Blueprint results appear → slowly scroll through each section → reach the bottom. Write the steps based on what the client actually answered. Be specific about what appears on screen.]
+[8-10 numbered steps max. Describe what a screen recording of the Audience Deep Dive tool shows. Flow: open the tool → path splitter question appears → client answers → 8 questions answered one at a time → Audience Blueprint results appear → scroll through sections → reach the bottom button. Reference what the client actually answered. Keep each step to one sentence.]
 
 CLIENT_BEFORE:
 [1-2 sentences. Who this person is and what they were struggling with before the session. Use their exact words from the blueprint where possible.]
@@ -1235,7 +1235,7 @@ ${blueprint}`;
         headers: await authHeaders(),
         body: JSON.stringify({
           model: MODEL,
-          max_tokens: 1000,
+          max_tokens: 1500,
           system: systemPrompt,
           messages: [{ role: 'user', content: userMessage }],
           _meta: { tool: 'walkthrough-generator', sessionId: currentUser?.uid || 'anon' }
