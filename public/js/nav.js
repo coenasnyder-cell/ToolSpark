@@ -31,6 +31,10 @@
       key: 'lesson-projects', href: 'lesson-projects.html', label: 'Lesson Generator',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
     },
+    {
+      key: 'useragents', href: 'useragents.html', label: 'My Agents',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>'
+    },
   ];
 
   function injectHeaderStyles() {
