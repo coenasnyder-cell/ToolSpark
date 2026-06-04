@@ -963,9 +963,13 @@ Then ask the path splitter question. Emit [Q:1] at the start.`;
     const reply = await callAI(opening);
     hideThinking();
     addMsg("assistant", reply);
+    setChips(1);
   } catch(e) {
+    const fallback = `[Q:1] Welcome — and I'm so glad you're here. Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they **a lot like you right now**, or **someone you've already been able to help** through something?`;
     hideThinking();
-    addMsg("assistant", `[Q:1] Welcome — and I'm so glad you're here. Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they <b>a lot like you right now</b>, or <b>someone you've already been able to help</b> through something?`);
+    history.push({ role: "assistant", content: fallback });
+    addMsg("assistant", fallback);
+    setChips(1);
   }
   document.getElementById("sendBtn").disabled = false;
 }
@@ -985,7 +989,9 @@ const audienceWelcomeEl = document.getElementById('sparkwelcome');
 audienceWelcomeEl.style.display = 'none';
 auth.onAuthStateChanged(function(user) {
   if (!user) {
-    window.location.href = 'signon.html?redirect=audiencetool';
+    firebase.auth().signInAnonymously().catch(() => {
+      window.location.href = 'signon.html?redirect=audiencetool';
+    });
   } else {
     audienceWelcomeEl.style.display = 'flex';
   }
