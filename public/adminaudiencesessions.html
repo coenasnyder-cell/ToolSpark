@@ -218,6 +218,8 @@
     const av = document.getElementById('sidebar-avatar');
     if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
     else av.textContent = name.charAt(0).toUpperCase();
+    // Auto-run lookup since email is pre-filled
+    if (document.getElementById('lookup-email').value.trim()) lookupSessions();
   });
 
   async function lookupSessions() {
@@ -359,9 +361,6 @@
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Run lookup on load since email is pre-filled
-  window.addEventListener('load', () => { if (firebase.auth().currentUser) lookupSessions(); });
-  auth.onAuthStateChanged(user => { if (user) setTimeout(lookupSessions, 1500); });
 </script>
 </body>
 </html>
