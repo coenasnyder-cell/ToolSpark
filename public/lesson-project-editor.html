@@ -457,7 +457,7 @@
           </div>
         </div>
         <div class="admin-card-body">
-          <div class="walkthrough-note">Copy the Session ID from the bottom of your example client's results page, paste it below, and click Generate. Claude will write the walkthrough steps and client before/after from their actual results.</div>
+          <div class="walkthrough-note">Copy the Session ID from the bottom of your example client's results page and click Generate. Claude writes the Before & After from their actual results — the walkthrough steps are pre-filled as a template you can edit.</div>
           <div class="form-field" style="margin-top:4px;">
             <label class="form-label" for="results-session-id">Session ID (from results page)</label>
             <input class="form-input" id="results-session-id" type="text" placeholder="Paste session ID here">
@@ -465,7 +465,7 @@
           <div class="error-msg" id="gen-walkthrough-error"></div>
           <div class="save-row">
             <button class="btn-primary" id="btn-gen-walkthrough" onclick="generateWalkthroughFromResults()">
-              Generate Walkthrough Details
+              Generate Before &amp; After
             </button>
             <span class="save-msg" id="gen-walkthrough-status"></span>
           </div>
@@ -872,6 +872,7 @@
     });
     if (name === 'slides') reloadSlides();
     if (name === 'voice') populateVoiceScript();
+    if (name === 'walkthrough') prefillWalkthroughSteps();
   }
 
   // ── Auth ──────────────────────────────────────────────────
@@ -1169,6 +1170,22 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     }
   }
 
+  // ── Walkthrough Steps Template ───────────────────────────
+  const WALKTHROUGH_STEPS_TEMPLATE = `1. Click "Open Tool" to launch the Audience Deep Dive.
+2. You'll see a question asking who you most want to help — choose the option that feels right.
+3. The tool will ask you a series of questions one at a time — take your time with each one.
+4. Be honest and don't overthink it — there are no right or wrong answers, just your truth.
+5. Notice how the tool digs deeper when you give a short answer — let it.
+6. After the final question, your complete Audience Blueprint appears on screen.
+7. Scroll slowly through each section — this is the real picture of who you help.
+8. Click the button at the bottom to save your results.`;
+
+  function prefillWalkthroughSteps() {
+    const el = document.getElementById('f-wt-steps');
+    if (!el || el.value.trim()) return; // don't overwrite if already filled
+    el.value = WALKTHROUGH_STEPS_TEMPLATE;
+  }
+
   // ── Generate Walkthrough from Results ────────────────────
   async function generateWalkthroughFromResults() {
     const btn     = document.getElementById('btn-gen-walkthrough');
@@ -1211,18 +1228,15 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
 
       btn.textContent = 'Generating...';
 
-      const systemPrompt = `You help ToolSpark course creators write lesson content. Given an Audience Blueprint from a real session, you generate three pieces of content for the lesson project.
+      const systemPrompt = `You help ToolSpark course creators write lesson content. Given an Audience Blueprint from a real session, write two things.
 
 Output ONLY this exact format — no intro, no explanation:
 
-WALKTHROUGH_STEPS:
-[8-10 numbered steps max. Describe what a screen recording of the Audience Deep Dive tool shows. Flow: open the tool → path splitter question appears → client answers → 8 questions answered one at a time → Audience Blueprint results appear → scroll through sections → reach the bottom button. Reference what the client actually answered. Keep each step to one sentence.]
-
 CLIENT_BEFORE:
-[1-2 sentences. Who this person is and what they were struggling with before the session. Use their exact words from the blueprint where possible.]
+[1-2 sentences. Who this person is and what they were struggling with before the session. Use their exact words from the blueprint where possible. Make it feel real and specific — not generic.]
 
 CLIENT_AFTER:
-[1-2 sentences. What they now have after the session — the clarity, the blueprint, the specific insights that changed things for them. Reference their dream outcome.]`;
+[1-2 sentences. What they now have after the session — the specific clarity, the blueprint, the insights. Reference their dream outcome. Make it feel like a real result, not a vague promise.]`;
 
       const userMessage = `Tool being taught: ${toolName}
 Client name: ${clientName}
@@ -1256,11 +1270,9 @@ ${blueprint}`;
         return (nextKey === -1 ? after : after.slice(0, nextKey)).trim();
       };
 
-      const steps  = extractSection(text, 'WALKTHROUGH_STEPS');
       const before = extractSection(text, 'CLIENT_BEFORE');
       const after  = extractSection(text, 'CLIENT_AFTER');
 
-      if (steps)  { const el = document.getElementById('f-wt-steps');  if (el) el.value = steps; }
       if (before) { const el = document.getElementById('f-wt-before'); if (el) el.value = before; }
       if (after)  { const el = document.getElementById('f-wt-after');  if (el) el.value = after; }
       if (clientName && clientName !== 'the example client') {
