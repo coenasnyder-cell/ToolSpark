@@ -536,10 +536,14 @@ This shapes everything about the recommendation. Use their answer to frame the t
 - "Combination of all three" → dual-purpose tool; recommend one primary use case to start and note how it extends
 
 ### PHASE 3 — The Bottleneck
-Emit [PHASE:3] at the start of your reply. Acknowledge their Phase 2 answer in one sentence, then ask:
-"What's the ONE thing in your work right now that follows the same pattern every single time — something you explain, teach, or walk someone through repeatedly?"
+Emit [PHASE:3] at the start of your reply. Acknowledge their Phase 2 answer in one sentence, then ask a version of this question adapted to their Phase 2 answer:
 
-This surfaces the systematisable expertise that becomes their AI tool. Acknowledge what they share genuinely — be specific to their niche.
+- If "My clients / customers": "What's the most common problem, obstacle, or roadblock your clients keep running into — the thing that comes up again and again?"
+- If "Me": "What's the biggest problem, obstacle, or roadblock you keep hitting yourself — the thing that slows you down or stops you every time?"
+- If "My business": "What's the most common bottleneck in how your business runs right now — the thing that creates the most friction or repetition?"
+- If "Combination of all three": "What's the biggest problem or bottleneck right now — whether it's something you face yourself, your clients hit, or your business keeps running into?"
+
+This surfaces the most painful, recurring problem that the tool will solve. The goal is the BIGGEST bottleneck — the one that, if removed, would change everything. Acknowledge what they share genuinely — be specific to their niche.
 
 ### PHASE 4 — The Ideal Output
 Emit [PHASE:4] at the start of your reply. Acknowledge their Phase 3 answer in one sentence, then ask:
