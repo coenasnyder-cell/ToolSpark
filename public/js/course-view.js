@@ -212,7 +212,8 @@ function loadLesson(index) {
   const iSec = document.getElementById('image-section');
   const imgEl = document.getElementById('lesson-image');
   const imageUrl = currentLesson.imageUrl ? currentLesson.imageUrl.trim() : '';
-  if (imageUrl && iSec && imgEl) {
+  const isImageType = String(currentLesson.lessonType || '').toLowerCase() === 'image';
+  if (imageUrl && isImageType && iSec && imgEl) {
     imgEl.src = imageUrl;
     imgEl.alt = currentLesson.lessonTitle || '';
     iSec.style.display = 'block';
@@ -421,13 +422,11 @@ function renderSidebar() {
         '</div>';
     }
 
-    var statusClass = done ? 'done' : active ? 'current' : 'pending';
-    var statusChar = done ? '✅' : active ? '▶' : '○';
+    var statusChar = done ? '✅' : active ? '▶' : '';
     var thumbHtml = l.imageUrl
       ? '<img class="li-thumb" src="' + escHtml(l.imageUrl) + '" alt="">'
       : '';
     return '<div class="lesson-item' + (active ? ' active' : '') + '" onclick="loadLesson(' + i + ')">' +
-      '<span class="li-status ' + statusClass + '">' + statusChar + '</span>' +
       thumbHtml +
       '<div class="li-body">' +
       '<div class="li-num">Lesson ' + (i + 1) + '</div>' +
@@ -436,6 +435,7 @@ function renderSidebar() {
       (l.lessonDuration ? '<span class="li-dur">' + l.lessonDuration + ' min</span>' : '') +
       '<span class="li-type-icon">' + (typeIcon[l.lessonType] || '') + '</span>' +
       '</div></div>' +
+      (statusChar ? '<span class="li-status-right">' + statusChar + '</span>' : '') +
       '</div>';
   }).join('');
 
