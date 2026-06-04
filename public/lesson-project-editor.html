@@ -595,7 +595,7 @@
             <div class="admin-card-icon">🔊</div>
             <div>
               <div class="admin-card-title">Generate Voiceover</div>
-              <div class="admin-card-desc">Paste your Voice ID, pick a section, and download the MP3</div>
+              <div class="admin-card-desc">Review and edit your script, then generate the MP3</div>
             </div>
           </div>
         </div>
@@ -605,16 +605,24 @@
             <input class="form-input" id="voice-id-input" type="text" placeholder="Paste your Voice ID here (e.g. 21m00Tcm4TlvDq8ikWAM)">
           </div>
           <div class="form-field">
-            <label class="form-label" for="tts-section">Script Section</label>
+            <label class="form-label" for="voice-script">Script</label>
+            <textarea class="script-textarea" id="voice-script" placeholder="Your saved script will appear here. You can edit it before generating." oninput="onVoiceScriptInput()"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-wrap:wrap;gap:6px;">
+              <span style="font-size:11px;color:var(--text3);"><span id="voice-char-count">0</span> characters</span>
+              <span id="voice-length-warning" style="display:none;font-size:12px;font-weight:700;color:#C0392B;">Over 4,000 characters — generate in parts using the section picker below</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="tts-section">Generate a specific section instead <span style="font-weight:400;color:var(--text3);">(optional — use if script is over 4,000 characters)</span></label>
             <select class="form-select" id="tts-section">
-              <option value="full">Full Script</option>
-              <option value="INTRO">Intro</option>
-              <option value="TOOL PURPOSE">Tool Purpose</option>
-              <option value="PROBLEM IT SOLVES">Problem It Solves</option>
-              <option value="RESULTS IT PRODUCES">Results It Produces</option>
-              <option value="WALKTHROUGH">Walkthrough</option>
-              <option value="CLIENT EXAMPLE RESULTS">Client Example Results</option>
-              <option value="NEXT STEPS">Next Steps</option>
+              <option value="full">Full Script (use text box above)</option>
+              <option value="INTRO">Intro only</option>
+              <option value="TOOL PURPOSE">Tool Purpose only</option>
+              <option value="PROBLEM IT SOLVES">Problem It Solves only</option>
+              <option value="RESULTS IT PRODUCES">Results It Produces only</option>
+              <option value="WALKTHROUGH">Walkthrough only</option>
+              <option value="CLIENT EXAMPLE RESULTS">Client Example Results only</option>
+              <option value="NEXT STEPS">Next Steps only</option>
             </select>
           </div>
           <div class="save-row">
@@ -735,6 +743,7 @@
       el.classList.toggle('active', el.id === 'tab-' + name);
     });
     if (name === 'slides') reloadSlides();
+    if (name === 'voice') populateVoiceScript();
   }
 
   // ── Auth ──────────────────────────────────────────────────
@@ -1446,6 +1455,31 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     return raw.slice(startIdx + startTag.length, endIdx).trim();
   }
 
+  // ── Voice Script ──────────────────────────────────────────
+  function populateVoiceScript() {
+    const ta = document.getElementById('voice-script');
+    if (!ta) return;
+    if (!ta.value.trim()) {
+      const raw = projectData.script?.raw || document.getElementById('script-raw').value.trim();
+      ta.value = raw;
+    }
+    updateVoiceCharCount();
+  }
+
+  function onVoiceScriptInput() {
+    updateVoiceCharCount();
+  }
+
+  function updateVoiceCharCount() {
+    const ta  = document.getElementById('voice-script');
+    const cnt = document.getElementById('voice-char-count');
+    const warn = document.getElementById('voice-length-warning');
+    if (!ta || !cnt) return;
+    const len = ta.value.length;
+    cnt.textContent = len.toLocaleString();
+    if (warn) warn.style.display = len > 4000 ? 'inline' : 'none';
+  }
+
   // ── TTS ───────────────────────────────────────────────────
   async function generateTTS() {
     const btn     = document.getElementById('btn-tts');
@@ -1456,9 +1490,10 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
       msg.className = 'save-msg err'; msg.textContent = 'Paste your ElevenLabs Voice ID first.';
       return;
     }
-    const raw = projectData.script?.raw || document.getElementById('script-raw').value.trim();
+    const voiceScriptEl = document.getElementById('voice-script');
+    const raw = (voiceScriptEl?.value.trim()) || projectData.script?.raw || '';
     if (!raw) {
-      msg.className = 'save-msg err'; msg.textContent = 'No script found — generate or save a script first.';
+      msg.className = 'save-msg err'; msg.textContent = 'No script found — go to the Script tab and generate one first.';
       return;
     }
 
