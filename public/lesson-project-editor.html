@@ -196,24 +196,7 @@
   .rec-tip-dot { color: var(--gold); flex-shrink: 0; }
   .walkthrough-note { font-size: 13px; color: var(--text3); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); border-radius: var(--radius-sm); padding: 10px 14px; }
 
-  /* VOICE TAB */
-  .voices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-  .voice-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; transition: border-color 0.15s; display: flex; flex-direction: column; gap: 6px; }
-  .voice-card:hover { border-color: var(--text3); }
-  .voice-card.selected { border-color: var(--gold); background: var(--gold-dim); }
-  .voice-name { font-size: 13px; font-weight: 700; color: var(--text); }
-  .voice-desc { font-size: 11px; color: var(--text3); line-height: 1.4; flex: 1; }
-  .voices-loading { color: var(--text3); font-size: 13px; padding: 1.5rem 0; }
-  .voice-section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-  .btn-preview { padding: 5px 10px; background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; color: var(--text2); font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; width: 100%; }
-  .btn-preview:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-preview:disabled { opacity: 0.5; cursor: default; }
-  .btn-preview.playing { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-  .preview-loading { display: inline-flex; gap: 3px; align-items: center; }
-  .preview-loading span { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: previewdot 0.9s ease infinite; }
-  .preview-loading span:nth-child(2) { animation-delay: 0.15s; }
-  .preview-loading span:nth-child(3) { animation-delay: 0.3s; }
-  @keyframes previewdot { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+  /* VOICE TAB — no grid CSS needed, simplified to input only */
 
   /* EXPORT TAB */
   .checklist { display: flex; flex-direction: column; gap: 10px; }
@@ -572,23 +555,36 @@
 
     <!-- ── VOICE TAB ─────────────────────────────────────── -->
     <div class="tab-content" id="tab-voice">
+
       <div class="admin-card">
         <div class="admin-card-header">
           <div class="admin-card-header-left">
             <div class="admin-card-icon">🎙️</div>
             <div>
-              <div class="admin-card-title">Voice Selection</div>
-              <div class="admin-card-desc">Pick a voice — selection saves to this project</div>
+              <div class="admin-card-title">Get Your Voice</div>
+              <div class="admin-card-desc">Set up a free ElevenLabs account and pick your voice</div>
             </div>
           </div>
-          <button class="btn-outline" onclick="loadVoices()">Refresh Voices</button>
         </div>
         <div class="admin-card-body">
-          <div id="voices-loading" class="voices-loading">Loading voices...</div>
-          <div id="voices-grid" class="voices-grid" style="display:none;"></div>
-          <div class="save-row" style="margin-top:6px;">
-            <button class="btn-primary" id="btn-save-voice" onclick="saveVoice()">Save Voice Selection</button>
-            <span class="save-msg" id="save-msg-voice"></span>
+          <div class="walkthrough-note">You'll need a free ElevenLabs account to generate voiceovers. It takes about 2 minutes to set up.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:12px;font-weight:700;color:var(--gold);width:18px;flex-shrink:0;">1</span>
+              <span style="font-size:13px;color:var(--text2);">Create a free account at <a href="https://elevenlabs.io" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700;">elevenlabs.io</a></span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:12px;font-weight:700;color:var(--gold);width:18px;flex-shrink:0;">2</span>
+              <span style="font-size:13px;color:var(--text2);">Go to <strong>Voices</strong> in the left sidebar and browse the voice library</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:12px;font-weight:700;color:var(--gold);width:18px;flex-shrink:0;">3</span>
+              <span style="font-size:13px;color:var(--text2);">Click a voice you like → open its details → copy the <strong>Voice ID</strong></span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:12px;font-weight:700;color:var(--gold);width:18px;flex-shrink:0;">4</span>
+              <span style="font-size:13px;color:var(--text2);">Paste the Voice ID below and generate your audio</span>
+            </div>
           </div>
         </div>
       </div>
@@ -599,11 +595,15 @@
             <div class="admin-card-icon">🔊</div>
             <div>
               <div class="admin-card-title">Generate Voiceover</div>
-              <div class="admin-card-desc">Uses the saved script — select a section or generate full</div>
+              <div class="admin-card-desc">Paste your Voice ID, pick a section, and download the MP3</div>
             </div>
           </div>
         </div>
         <div class="admin-card-body">
+          <div class="form-field">
+            <label class="form-label" for="voice-id-input">ElevenLabs Voice ID</label>
+            <input class="form-input" id="voice-id-input" type="text" placeholder="Paste your Voice ID here (e.g. 21m00Tcm4TlvDq8ikWAM)">
+          </div>
           <div class="form-field">
             <label class="form-label" for="tts-section">Script Section</label>
             <select class="form-select" id="tts-section">
@@ -623,6 +623,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- ── EXPORT TAB ─────────────────────────────────────── -->
@@ -719,17 +720,10 @@
 
   try { firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true); } catch(e) {}
 
-  const PREVIEW_TEXT = "Hello! This is a preview so you can hear how this voice sounds before generating your full audio.";
-
   let currentUser  = null;
   let projectId    = null;
   let projectData  = {};
-  let selectedVoiceId   = '';
-  let selectedVoiceName = '';
-  let exportStatus      = {};
-  let previewCache  = {};
-  let previewAudio  = null;
-  let activePrevBtn = null;
+  let exportStatus = {};
 
   // ── Tabs ──────────────────────────────────────────────────
   function switchTab(name) {
@@ -741,7 +735,6 @@
       el.classList.toggle('active', el.id === 'tab-' + name);
     });
     if (name === 'slides') reloadSlides();
-    if (name === 'voice' && !document.getElementById('voices-grid').children.length) loadVoices();
   }
 
   // ── Auth ──────────────────────────────────────────────────
@@ -835,8 +828,7 @@
     document.getElementById('char-count').textContent = raw.length;
 
     // Voice
-    selectedVoiceId   = data.voice?.selectedVoiceId   || '';
-    selectedVoiceName = data.voice?.selectedVoiceName || '';
+    setVal('voice-id-input', data.voice?.selectedVoiceId || '');
 
     // Export
     exportStatus = data.exportStatus || {
@@ -1454,136 +1446,14 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     return raw.slice(startIdx + startTag.length, endIdx).trim();
   }
 
-  // ── Voices ────────────────────────────────────────────────
-  let elVoicesCache = null;
-
-  async function loadVoices() {
-    document.getElementById('voices-loading').style.display = 'block';
-    document.getElementById('voices-grid').style.display    = 'none';
-    try {
-      const resp = await fetch(EL_VOICES_URL, { headers: await authHeaders() });
-      if (!resp.ok) throw new Error('Could not load voices');
-      const json = await resp.json();
-      elVoicesCache = json.voices || [];
-      renderVoiceGrid();
-    } catch(e) {
-      document.getElementById('voices-loading').textContent = 'Failed to load voices: ' + e.message;
-    }
-  }
-
-  function renderVoiceGrid() {
-    const voices = elVoicesCache || [];
-    const grid   = document.getElementById('voices-grid');
-    grid.innerHTML = voices.map(v => {
-      const sel = v.id === selectedVoiceId ? ' selected' : '';
-      return `<div class="voice-card${sel}" data-id="${v.id}">
-        <div class="voice-name">${escHtml(v.name)}</div>
-        <div class="voice-desc">${escHtml(v.description || '')}</div>
-        <button class="btn-preview" data-voice="${v.id}"><span class="prev-label">▶ Preview</span></button>
-      </div>`;
-    }).join('');
-    grid.querySelectorAll('.voice-card').forEach(card => {
-      card.addEventListener('click', e => {
-        if (e.target.closest('.btn-preview')) return;
-        const v = voices.find(v => v.id === card.dataset.id);
-        if (v) selectVoice(v.id, v.name);
-      });
-    });
-    grid.querySelectorAll('.btn-preview').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); handleVoicePreview(btn.dataset.voice, btn); });
-    });
-    document.getElementById('voices-loading').style.display = 'none';
-    grid.style.display = 'grid';
-  }
-
-  function selectVoice(id, name) {
-    selectedVoiceId   = id;
-    selectedVoiceName = name;
-    document.querySelectorAll('.voice-card').forEach(c => {
-      c.classList.toggle('selected', c.dataset.id === id);
-    });
-  }
-
-  async function handleVoicePreview(voiceId, btn) {
-    if (previewAudio) {
-      previewAudio.pause();
-      previewAudio = null;
-      if (activePrevBtn) {
-        activePrevBtn.classList.remove('playing');
-        activePrevBtn.querySelector('.prev-label').textContent = '▶ Preview';
-        activePrevBtn.disabled = false;
-      }
-      activePrevBtn = null;
-      if (btn.classList.contains('playing')) return;
-    }
-
-    btn.disabled = true;
-    btn.querySelector('.prev-label').innerHTML =
-      '<span class="preview-loading"><span></span><span></span><span></span></span>';
-
-    try {
-      let url = previewCache[voiceId];
-      if (!url) {
-        const resp = await fetch(EL_TTS_URL, {
-          method: 'POST',
-          headers: await authHeaders(),
-          body: JSON.stringify({ text: PREVIEW_TEXT, voiceId, save: false, style: 0.35, stability: 0.5 })
-        });
-        if (!resp.ok) throw new Error('Preview failed');
-        const blob = await resp.blob();
-        url = URL.createObjectURL(blob);
-        previewCache[voiceId] = url;
-      }
-
-      previewAudio  = new Audio(url);
-      activePrevBtn = btn;
-      btn.classList.add('playing');
-      btn.querySelector('.prev-label').textContent = '■ Stop';
-      btn.disabled = false;
-      previewAudio.play();
-      previewAudio.onended = () => {
-        btn.classList.remove('playing');
-        btn.querySelector('.prev-label').textContent = '▶ Preview';
-        previewAudio = null;
-        activePrevBtn = null;
-      };
-    } catch {
-      btn.disabled = false;
-      btn.querySelector('.prev-label').textContent = '▶ Preview';
-    }
-  }
-
-  async function saveVoice() {
-    const btn = document.getElementById('btn-save-voice');
-    const msg = document.getElementById('save-msg-voice');
-    if (!selectedVoiceId) { msg.className = 'save-msg err'; msg.textContent = 'Select a voice first.'; return; }
-
-    btn.disabled = true; btn.textContent = 'Saving...';
-    msg.className = 'save-msg'; msg.textContent = '';
-
-    try {
-      await db.collection('lesson_projects').doc(projectId).update({
-        'voice.selectedVoiceId':   selectedVoiceId,
-        'voice.selectedVoiceName': selectedVoiceName,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      projectData.voice = { selectedVoiceId, selectedVoiceName };
-      msg.className = 'save-msg ok'; msg.textContent = `Saved: ${selectedVoiceName}`;
-      setTimeout(() => msg.textContent = '', 3000);
-    } catch(e) {
-      msg.className = 'save-msg err'; msg.textContent = 'Save failed: ' + e.message;
-    } finally {
-      btn.disabled = false; btn.textContent = 'Save Voice Selection';
-    }
-  }
-
   // ── TTS ───────────────────────────────────────────────────
   async function generateTTS() {
-    const btn = document.getElementById('btn-tts');
-    const msg = document.getElementById('tts-status');
+    const btn     = document.getElementById('btn-tts');
+    const msg     = document.getElementById('tts-status');
+    const voiceId = document.getElementById('voice-id-input').value.trim();
 
-    if (!selectedVoiceId) {
-      msg.className = 'save-msg err'; msg.textContent = 'Select and save a voice first.';
+    if (!voiceId) {
+      msg.className = 'save-msg err'; msg.textContent = 'Paste your ElevenLabs Voice ID first.';
       return;
     }
     const raw = projectData.script?.raw || document.getElementById('script-raw').value.trim();
@@ -1606,10 +1476,18 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     msg.className = 'save-msg'; msg.textContent = '';
 
     try {
+      // Save voice ID to project so it persists
+      await db.collection('lesson_projects').doc(projectId).update({
+        'voice.selectedVoiceId': voiceId,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      if (!projectData.voice) projectData.voice = {};
+      projectData.voice.selectedVoiceId = voiceId;
+
       const resp = await fetch(EL_TTS_URL, {
         method: 'POST',
         headers: await authHeaders(),
-        body: JSON.stringify({ text, voiceId: selectedVoiceId, save: true, style: 0.35, stability: 0.5 })
+        body: JSON.stringify({ text, voiceId, save: true, style: 0.35, stability: 0.5 })
       });
       if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error || 'TTS failed'); }
       const { url, filename } = await resp.json();
