@@ -311,6 +311,7 @@
       <button class="tab-btn" onclick="switchTab('script')">Script</button>
       <button class="tab-btn" onclick="switchTab('voice')">Voice</button>
       <button class="tab-btn" onclick="switchTab('slides')">Slides</button>
+      <button class="tab-btn" onclick="switchTab('video')">Video</button>
       <button class="tab-btn" onclick="switchTab('export')">Export</button>
     </nav>
 
@@ -634,6 +635,98 @@
 
     </div>
 
+    <!-- ── VIDEO TAB ────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-video">
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon">🎬</div>
+            <div>
+              <div class="admin-card-title">Create Your Lesson Video</div>
+              <div class="admin-card-desc">Use your slides and voiceover to build the final video</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div class="walkthrough-note">Your slides and voiceover are ready — now assemble them into a video. Use HeyGen for an AI avatar video or Canva to combine slides with your audio.</div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px;">
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.125rem;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--text);">HeyGen</div>
+                  <div style="font-size:12px;color:var(--text3);margin-top:2px;">AI avatar videos — your face, your voice, zero recording</div>
+                </div>
+                <a href="https://heygen.com" target="_blank" rel="noopener" class="btn-outline" style="text-decoration:none;white-space:nowrap;">Open HeyGen →</a>
+              </div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.125rem;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--text);">Canva</div>
+                  <div style="font-size:12px;color:var(--text3);margin-top:2px;">Combine your slide images and voiceover MP3 into a polished video</div>
+                </div>
+                <a href="https://canva.com" target="_blank" rel="noopener" class="btn-outline" style="text-decoration:none;white-space:nowrap;">Open Canva →</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon">🎓</div>
+            <div>
+              <div class="admin-card-title">Video Tutorials</div>
+              <div class="admin-card-desc">Watch how to build your lesson video — coming soon</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div id="video-tutorial-section">
+            <div style="background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);padding:2rem;text-align:center;color:var(--text3);font-size:13px;">
+              Tutorial videos coming soon — check back after recording.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon">✅</div>
+            <div>
+              <div class="admin-card-title">Mark Video Done</div>
+              <div class="admin-card-desc">Once your video is ready, mark it complete here</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div class="checklist">
+            <div class="checklist-item" id="ci-video-done">
+              <div class="check-box" id="cb-video-done" onclick="toggleVideoComplete()">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:none;" id="check-video-done"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div class="check-label">Video Created</div>
+                <div class="check-sub">Lesson video assembled and ready to upload</div>
+              </div>
+            </div>
+          </div>
+          <div class="save-row" style="margin-top:10px;">
+            <button class="btn-primary" id="btn-save-video-status" onclick="saveVideoStatus()">Save</button>
+            <span class="save-msg" id="save-msg-video"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
     <!-- ── EXPORT TAB ─────────────────────────────────────── -->
     <div class="tab-content" id="tab-export">
       <div class="admin-card">
@@ -682,6 +775,15 @@
               <div>
                 <div class="check-label">Slides</div>
                 <div class="check-sub">All slide images created and exported</div>
+              </div>
+            </div>
+            <div class="checklist-item" id="ci-video">
+              <div class="check-box" id="cb-video" onclick="toggleExport('hasVideo')">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="display:none;" id="check-video"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div class="check-label">Video</div>
+                <div class="check-sub">Lesson video assembled in HeyGen or Canva</div>
               </div>
             </div>
           </div>
@@ -735,7 +837,7 @@
 
   // ── Tabs ──────────────────────────────────────────────────
   function switchTab(name) {
-    const names = ['overview','walkthrough','script','voice','slides','export'];
+    const names = ['overview','walkthrough','script','voice','slides','video','export'];
     document.querySelectorAll('.tab-btn').forEach((btn, i) => {
       btn.classList.toggle('active', names[i] === name);
     });
@@ -842,8 +944,17 @@
     // Export
     exportStatus = data.exportStatus || {
       hasWalkthroughVideo: false, hasVoiceover1: false,
-      hasVoiceover2: false, hasSlides: false
+      hasVoiceover2: false, hasSlides: false, hasVideo: false
     };
+
+    // Video tab status
+    const videoDone = !!data.videoStatus?.done;
+    const cbVideo = document.getElementById('cb-video-done');
+    const chkVideo = document.getElementById('check-video-done');
+    const ciVideo  = document.getElementById('ci-video-done');
+    if (cbVideo)  cbVideo.classList.toggle('checked', videoDone);
+    if (chkVideo) chkVideo.style.display = videoDone ? 'block' : 'none';
+    if (ciVideo)  ciVideo.classList.toggle('done', videoDone);
     renderExportChecklist();
   }
 
@@ -1540,12 +1651,46 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
     }
   }
 
+  // ── Video Tab ─────────────────────────────────────────────
+  function toggleVideoComplete() {
+    const cb  = document.getElementById('cb-video-done');
+    const chk = document.getElementById('check-video-done');
+    const ci  = document.getElementById('ci-video-done');
+    const isDone = cb.classList.toggle('checked');
+    if (chk) chk.style.display = isDone ? 'block' : 'none';
+    if (ci)  ci.classList.toggle('done', isDone);
+  }
+
+  async function saveVideoStatus() {
+    const btn  = document.getElementById('btn-save-video-status');
+    const msg  = document.getElementById('save-msg-video');
+    const done = document.getElementById('cb-video-done')?.classList.contains('checked') || false;
+    btn.disabled = true; btn.textContent = 'Saving...';
+    msg.className = 'save-msg'; msg.textContent = '';
+    try {
+      await db.collection('lesson_projects').doc(projectId).update({
+        'videoStatus.done': done,
+        'exportStatus.hasVideo': done,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      exportStatus.hasVideo = done;
+      renderExportChecklist();
+      msg.className = 'save-msg ok'; msg.textContent = 'Saved.';
+      setTimeout(() => msg.textContent = '', 3000);
+    } catch(e) {
+      msg.className = 'save-msg err'; msg.textContent = 'Save failed: ' + e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save';
+    }
+  }
+
   // ── Export ────────────────────────────────────────────────
   const EXPORT_FIELDS = {
     hasWalkthroughVideo: { ci: 'ci-walkthrough', cb: 'cb-walkthrough', chk: 'check-walkthrough' },
     hasVoiceover1:       { ci: 'ci-vo1',         cb: 'cb-vo1',         chk: 'check-vo1'         },
     hasVoiceover2:       { ci: 'ci-vo2',         cb: 'cb-vo2',         chk: 'check-vo2'         },
-    hasSlides:           { ci: 'ci-slides',      cb: 'cb-slides',      chk: 'check-slides'      }
+    hasSlides:           { ci: 'ci-slides',      cb: 'cb-slides',      chk: 'check-slides'      },
+    hasVideo:            { ci: 'ci-video',       cb: 'cb-video',       chk: 'check-video'       }
   };
 
   function renderExportChecklist() {
@@ -1574,6 +1719,7 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
         'exportStatus.hasVoiceover1':       !!exportStatus.hasVoiceover1,
         'exportStatus.hasVoiceover2':       !!exportStatus.hasVoiceover2,
         'exportStatus.hasSlides':           !!exportStatus.hasSlides,
+        'exportStatus.hasVideo':            !!exportStatus.hasVideo,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       msg.className = 'save-msg ok'; msg.textContent = 'Saved.';
