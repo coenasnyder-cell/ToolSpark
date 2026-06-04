@@ -1207,6 +1207,12 @@
         document.getElementById('spark-what-you-know').textContent = spark.whatYouKnow || '—';
         document.getElementById('spark-who-you-help').textContent = spark.whoYouHelp || '—';
         document.getElementById('spark-section').style.display = 'block';
+
+        // Wire up View Full Results link with the session ID
+        const sparkResultsLink = document.querySelector('a[href="spark-results.html"].section-results-btn');
+        if (sparkResultsLink) {
+          sparkResultsLink.href = 'spark-results.html?session=' + sparkSessions[0].id;
+        }
       }
 
       // Render Audience section from most recent audience_results doc
@@ -1253,6 +1259,12 @@
           wordsEl.textContent = lines.length ? lines.map(l => `"${l}"`).join('  ·  ') : '—';
         }
         document.getElementById('audience-section').style.display = 'block';
+
+        // Wire up View Full Results link with the session ID
+        const audResultsLink = document.querySelector('a[href="audienceresults.html"].section-results-btn');
+        if (audResultsLink) {
+          audResultsLink.href = 'audienceresults.html?session=' + audienceSessions[0].id;
+        }
       }
 
       // Render Breakthrough roadmap from most recent completed clarity session
