@@ -810,6 +810,25 @@ async function callClaude(userMessage) {
 // ══════════════════════════════════════════
 // FINISH SESSION — save to Firestore & redirect
 // ══════════════════════════════════════════
+function parseActionPlanToResults(plan) {
+  const extract = (key) => {
+    const regex = new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z][A-Z_0-9]*:|\\n###|\\*\\*ACTION_PLAN_END|$)');
+    const m = plan.match(regex);
+    return m ? m[1].trim() : '';
+  };
+  const summaryM = plan.match(/###\s*Business Summary\s*[\r\n]+([\s\S]*?)(?=###|TOOL_1_NAME|$)/);
+  const summary = summaryM ? summaryM[1].trim() : '';
+  const tools = [1, 2, 3].map(i => ({
+    name:           extract(`TOOL_${i}_NAME`),
+    priority:       extract(`TOOL_${i}_PRIORITY`),
+    what_it_does:   extract(`TOOL_${i}_SUMMARY`),
+    why_it_fits:    extract(`TOOL_${i}_WHY`),
+    complexity:     extract(`TOOL_${i}_COMPLEXITY`) || 'Medium',
+    example_prompt: extract(`TOOL_${i}_HOW`) || ''
+  }));
+  return { summary, tools };
+}
+
 async function finishSession(actionPlanText) {
   sessionComplete = true;
   document.getElementById('inputArea').classList.remove('active');
@@ -820,13 +839,12 @@ async function finishSession(actionPlanText) {
 
   showThinking();
 
-  // Parse summary directly from the actionPlan — no extra API call needed
   const summaryMatch = actionPlanText.match(/###\s*Business Summary\s*\n([\s\S]*?)(?=###|TOOL_1_NAME|ACTION_PLAN_END|$)/);
   const summaryText = summaryMatch ? summaryMatch[1].trim() : 'Your Breakthrough session results are ready.';
 
   const sessionId = CLARITY_SESSION_ID;
+  const toolResults = parseActionPlanToResults(actionPlanText);
 
-  // Attach userId if the user is already signed in
   const currentUser = auth.currentUser;
   const userId = currentUser ? currentUser.uid : null;
   const accountEmail = currentUser ? currentUser.email : null;
@@ -842,6 +860,7 @@ async function finishSession(actionPlanText) {
       summary: summaryText,
       transcript: conversationHistory,
       actionPlan: actionPlanText,
+      toolResults,
       chosenTool: null,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       status: 'completed'
@@ -854,8 +873,7 @@ async function finishSession(actionPlanText) {
     console.log('Firestore save failed:', e);
   }
 
-
-  window.location.href = 'results.html';
+  window.location.href = 'results.html?session=' + sessionId;
 }
 
 // ══════════════════════════════════════════
