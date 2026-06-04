@@ -732,7 +732,7 @@ function showEmailGate() {
   gate.id = "emailGate";
   gate.innerHTML = `
     <div class="spark-icon">✦</div>
-    <h3>Your Spark Profile is ready.</h3>
+    <h3>Your Audience Blueprint is ready.</h3>
     <p>Enter your email and I'll send it to you — plus show it to you right now on the next page.</p>
     <div class="email-row">
       <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" />
@@ -929,7 +929,9 @@ async function handleSend() {
       rawResults = reply;
 
       // Show closing message before email gate
-      const beforeProfile = reply.split("CLIENT_BIBLE_START")[0]
+      const beforeProfile = reply
+        .replace(/AUDIENCE_BLUEPRINT_START[\s\S]*/,"")
+        .replace(/CLIENT_BIBLE_START[\s\S]*/,"")
         .replace("[DONE]","").trim();
       if (beforeProfile) addMsg("assistant", beforeProfile);
 
