@@ -548,7 +548,7 @@
     if (!url) return null;
     // YouTube
     const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
-    if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1] + '?rel=0';
+    if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1] + '?rel=0&modestbranding=1';
     // Loom
     const loomMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
     if (loomMatch) return 'https://www.loom.com/embed/' + loomMatch[1];

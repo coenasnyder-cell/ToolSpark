@@ -2215,7 +2215,7 @@ function toYoutubeId(url) {
 }
 function toYoutubeEmbed(url) {
   const id = toYoutubeId(url);
-  return id ? 'https://www.youtube.com/embed/' + id : '';
+  return id ? 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1' : '';
 }
 function showYoutubeInput() {
   document.getElementById('youtube-input-wrap').style.display = 'block';
