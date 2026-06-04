@@ -271,6 +271,11 @@
     word-break: break-word;
   }
   .pt-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .pt-id-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .pt-id { font-size: 11px; color: var(--text3); font-family: monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; user-select: all; }
+  .btn-copy-id { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; color: var(--text3); cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.15s; white-space: nowrap; }
+  .btn-copy-id:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-copy-id.copied { border-color: #2A7A55; color: #2A7A55; }
   .btn-unpin, .btn-pin {
     display: inline-flex;
     align-items: center;
@@ -631,6 +636,10 @@
         <div class="pt-info">
           <div class="pt-title">${title}</div>
           <div class="pt-meta">by ${name} &middot; ${date}</div>
+          <div class="pt-id-row">
+            <span class="pt-id">${id}</span>
+            <button class="btn-copy-id" id="copy-id-${id}" onclick="copyThreadId('${id}')">Copy ID</button>
+          </div>
         </div>
         <button class="${btnClass}" id="pin-btn-${id}" onclick="setPinned('${id}', ${onclickArg}, this)">${btnLabel}</button>
       </div>`;
@@ -660,6 +669,16 @@
     } finally {
       btnEl.disabled = false;
     }
+  }
+
+  function copyThreadId(id) {
+    navigator.clipboard.writeText(id).then(() => {
+      const btn = document.getElementById('copy-id-' + id);
+      if (!btn) return;
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy ID'; btn.classList.remove('copied'); }, 2000);
+    });
   }
 
   function formatThreadDate(value) {
