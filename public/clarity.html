@@ -430,6 +430,45 @@
     color: var(--gold);
   }
 
+  /* ── CHECKBOX OPTIONS (Phase 5) ── */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+    max-width: 780px; margin-left: auto; margin-right: auto;
+    animation: fadeUp 0.35s ease both;
+  }
+  .checkbox-option {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px;
+    background: var(--dark2);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px; color: var(--text2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .checkbox-option:hover { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+  .checkbox-option.checked { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+  .checkbox-option input[type="checkbox"] {
+    width: 13px; height: 13px;
+    accent-color: var(--gold);
+    cursor: pointer; flex-shrink: 0;
+  }
+  .checkbox-submit {
+    display: none;
+    margin: 4px auto 0;
+    padding: 9px 24px;
+    background: var(--gold); color: var(--dark);
+    border: none; border-radius: 8px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .checkbox-submit:hover { background: var(--gold-light); }
+  @media (max-width: 480px) { .checkbox-grid { grid-template-columns: 1fr; } }
+
   /* ── SCROLLBAR ── */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--dark); }
@@ -692,8 +731,46 @@ function updatePhaseBar(phase) {
 function setChips(phase) {
   const container = document.getElementById("chips");
   container.innerHTML = "";
-  const chips = CHIPS_BY_PHASE[phase] || [];
-  chips.forEach(c => {
+  const options = CHIPS_BY_PHASE[phase] || [];
+  if (!options.length) return;
+
+  if (phase === 5) {
+    const grid = document.createElement("div");
+    grid.className = "checkbox-grid";
+
+    const submitBtn = document.createElement("button");
+    submitBtn.className = "checkbox-submit";
+    submitBtn.textContent = "Use selected →";
+
+    options.forEach(opt => {
+      const label = document.createElement("label");
+      label.className = "checkbox-option";
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.value = opt;
+      cb.addEventListener("change", () => {
+        label.classList.toggle("checked", cb.checked);
+        const anyChecked = grid.querySelectorAll("input:checked").length > 0;
+        submitBtn.style.display = anyChecked ? "block" : "none";
+      });
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(opt));
+      grid.appendChild(label);
+    });
+
+    submitBtn.onclick = () => {
+      const checked = [...grid.querySelectorAll("input:checked")].map(c => c.value);
+      if (!checked.length) return;
+      document.getElementById("userInput").value = checked.join(", ");
+      container.innerHTML = "";
+      handleSend();
+    };
+
+    container.appendChild(grid);
+    container.appendChild(submitBtn);
+    return;
+  }
+
+  options.forEach(c => {
     const btn = document.createElement("button");
     btn.className = "chip";
     btn.textContent = c;
