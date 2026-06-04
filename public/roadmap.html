@@ -255,6 +255,9 @@
   .spark-section-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
   .section-tool-btn { margin-left: auto; padding: 5px 13px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text2); text-decoration: none; transition: all 0.15s; flex-shrink: 0; white-space: nowrap; }
   .section-tool-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .section-results-btn { padding: 5px 13px; border: 1px solid var(--gold); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--gold); background: var(--gold-dim); text-decoration: none; transition: all 0.15s; flex-shrink: 0; white-space: nowrap; }
+  .section-results-btn:hover { background: rgba(201,168,76,0.22); }
+  .section-btn-group { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
   .spark-section-body {
     padding: 1.25rem 1.375rem;
     display: flex;
@@ -484,7 +487,10 @@
             <div class="spark-section-title">Find Your Spark</div>
             <div class="spark-section-desc">Your core business identity from your Spark session</div>
           </div>
-          <a href="spark.html" class="section-tool-btn">Open tool →</a>
+          <div class="section-btn-group">
+            <a href="spark-results.html" class="section-results-btn">View Full Results</a>
+            <a href="spark.html" class="section-tool-btn">Open tool →</a>
+          </div>
         </div>
         <div class="spark-section-body">
           <div>
@@ -513,7 +519,10 @@
             <div class="spark-section-title">Audience Deep Dive</div>
             <div class="spark-section-desc">Your client profile from your most recent session</div>
           </div>
-          <a href="audiencetool.html" class="section-tool-btn">Open tool →</a>
+          <div class="section-btn-group">
+            <a href="audienceresults.html" class="section-results-btn">View Full Results</a>
+            <a href="audiencetool.html" class="section-tool-btn">Open tool →</a>
+          </div>
         </div>
         <div class="spark-section-body">
           <div id="aud-who-wrap">
