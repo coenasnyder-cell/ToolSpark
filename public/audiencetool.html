@@ -772,6 +772,9 @@ function parseProfile(raw) {
   profile.theirObjections = extract("THEIR_OBJECTIONS");
   profile.dreamOutcome = extract("DREAM_OUTCOME");
   profile.theirWords = extract("THEIR_WORDS");
+  profile.whatTriggeredThem    = extract("WHAT_TRIGGERED_THEM");
+  profile.howTheyWantToBeeSeen = extract("HOW_THEY_WANT_TO_BE_SEEN");
+  profile.whereToFindThem      = extract("WHERE_TO_FIND_THEM");
   profile.closing = extract("CLOSING");
   return profile;
 }
@@ -789,6 +792,9 @@ function buildAudiencePayload(sessionId, profile, rawProfile, email, currentUser
     theirObjections: profile.theirObjections || "",
     dreamOutcome: profile.dreamOutcome || "",
     theirWords: profile.theirWords || "",
+    whatTriggeredThem:    profile.whatTriggeredThem    || "",
+    howTheyWantToBeeSeen: profile.howTheyWantToBeeSeen || "",
+    whereToFindThem:      profile.whereToFindThem      || "",
     closing: profile.closing || "",
     rawProfile,
     transcript: history,
