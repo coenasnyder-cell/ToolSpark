@@ -87,10 +87,6 @@ function buildLessonEditMarkup(lesson) {
             '<input type="hidden" id="edit-lesson-is-free" value="' + (lesson.isFree === false ? 'false' : 'true') + '">' +
           '</div>' +
         '</div>' +
-        '<div class="editor-field" style="margin-top:14px;">' +
-          '<label class="editor-field-label" for="edit-lesson-description">Short Description</label>' +
-          '<textarea id="edit-lesson-description" rows="2" class="editor-textarea" placeholder="Brief description shown in lesson list...">' + escHtml(lesson.lessonDescription || '') + '</textarea>' +
-        '</div>' +
       '</div>' +
       '<div class="editor-section" id="editor-video-section">' +
         '<div class="editor-section-title">Section 2 - Video</div>' +
@@ -102,7 +98,7 @@ function buildLessonEditMarkup(lesson) {
         '</div>' +
       '</div>' +
       '<div class="editor-section" id="editor-image-section">' +
-        '<div class="editor-section-title">Section 2 - Image</div>' +
+        '<div class="editor-section-title">Thumbnail</div>' +
         '<div class="editor-field">' +
           '<label class="editor-field-label">Lesson Image</label>' +
           '<input type="file" id="lesson-image-file-input" accept="image/*" style="display:none;" onchange="handleLessonImageSelect(event)">' +
@@ -426,13 +422,12 @@ async function saveLessonEdits() {
   var titleInput = document.getElementById('edit-lesson-title');
   var typeInput = document.getElementById('edit-lesson-type');
   var durationInput = document.getElementById('edit-lesson-duration');
-  var descInput = document.getElementById('edit-lesson-description');
   var videoUrlInput = document.getElementById('edit-lesson-video-url');
   var contentInput = document.getElementById('edit-lesson-content');
   var linkedThreadInput = document.getElementById('edit-linked-thread-id');
   var accessInput = document.getElementById('edit-lesson-is-free');
 
-  if (!titleInput || !typeInput || !descInput || !contentInput || !linkedThreadInput || !accessInput) return;
+  if (!titleInput || !typeInput || !contentInput || !linkedThreadInput || !accessInput) return;
 
   saveBtn.disabled = true;
   cancelBtn.disabled = true;
@@ -443,7 +438,7 @@ async function saveLessonEdits() {
     var parsedDuration = durationValue === '' ? '' : Number(durationValue);
     var lessonPayload = {
       lessonTitle: titleInput.value.trim(),
-      lessonDescription: descInput.value.trim(),
+      lessonDescription: '',
       lessonType: typeInput.value,
       lessonDuration: Number.isFinite(parsedDuration) ? parsedDuration : '',
       videoUrl: videoUrlInput ? videoUrlInput.value.trim() : '',

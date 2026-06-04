@@ -63,7 +63,7 @@ function syncLessonVideoSection() {
   if (!typeInput) return;
   var t = typeInput.value;
   if (videoSection) videoSection.style.display = (t === 'video' || t === 'mixed') ? '' : 'none';
-  if (imageSection) imageSection.style.display = t === 'image' ? '' : 'none';
+  if (imageSection) imageSection.style.display = '';
 }
 
 function updateLessonVideoPreview() {
@@ -185,7 +185,13 @@ function loadLesson(index) {
   u.searchParams.set('lessonId', currentLesson.id);
   window.history.pushState({}, '', u);
 
-  document.getElementById('topbar-title').textContent = currentLesson.lessonTitle || 'Untitled';
+  var lessonTitle = currentLesson.lessonTitle || 'Untitled';
+  document.getElementById('topbar-title').textContent = lessonTitle;
+  var contentTitleEl = document.getElementById('lesson-content-title');
+  if (contentTitleEl) {
+    contentTitleEl.textContent = lessonTitle;
+    contentTitleEl.style.display = '';
+  }
   document.getElementById('topbar-dur').textContent =
     currentLesson.lessonDuration ? currentLesson.lessonDuration + ' min' : '';
   refreshMarkBtn();
@@ -417,8 +423,12 @@ function renderSidebar() {
 
     var statusClass = done ? 'done' : active ? 'current' : 'pending';
     var statusChar = done ? '✅' : active ? '▶' : '○';
+    var thumbHtml = l.imageUrl
+      ? '<img class="li-thumb" src="' + escHtml(l.imageUrl) + '" alt="">'
+      : '';
     return '<div class="lesson-item' + (active ? ' active' : '') + '" onclick="loadLesson(' + i + ')">' +
       '<span class="li-status ' + statusClass + '">' + statusChar + '</span>' +
+      thumbHtml +
       '<div class="li-body">' +
       '<div class="li-num">Lesson ' + (i + 1) + '</div>' +
       '<div class="li-title">' + escHtml(l.lessonTitle || 'Untitled') + '</div>' +
