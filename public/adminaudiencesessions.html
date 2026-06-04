@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audience Sessions — ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17;
+    --border-dark: #2A2720; --gold: #C9A84C; --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12); --bg: #F4F2EE; --surface: #FFFFFF;
+    --border: #E4E0D8; --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.3); color: #E0875A; border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 860px; width: 100%; }
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .admin-card-header-left { display: flex; align-items: center; gap: 12px; }
+  .admin-card-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: flex; gap: 10px; align-items: flex-end; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .form-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .form-input { padding: 9px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .form-input:focus { border-color: var(--gold); }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: #1A1714; border: none; border-radius: var(--radius-sm); padding: 9px 18px; font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error-msg { color: #C0392B; font-size: 13px; background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.18); border-radius: var(--radius-sm); padding: 10px 14px; display: none; }
+  .error-msg.visible { display: block; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+
+  /* SESSION LIST */
+  .session-list { display: flex; flex-direction: column; gap: 10px; }
+  .session-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; cursor: pointer; transition: border-color 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .session-card:hover { border-color: var(--gold); }
+  .session-card.active { border-color: var(--gold); background: var(--gold-dim); }
+  .session-meta { font-size: 12px; color: var(--text3); }
+  .session-id-badge { font-size: 11px; font-family: monospace; color: var(--text3); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
+
+  /* TRANSCRIPT */
+  .transcript-section { display: flex; flex-direction: column; gap: 12px; }
+  .qa-block { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .qa-question { background: var(--dark2); color: #C9A84C; font-size: 12px; font-weight: 700; padding: 8px 14px; }
+  .qa-answer { font-size: 14px; color: var(--text); padding: 12px 14px; line-height: 1.6; white-space: pre-wrap; }
+  .qa-answer.empty { color: var(--text3); font-style: italic; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .blueprint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bp-field { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; }
+  .bp-label { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+  .bp-value { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .bp-field.full { grid-column: 1 / -1; }
+
+  #session-result { display: none; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="admindashboard.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Home
+    </a>
+    <a href="adminuserspark.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Spark Sessions
+    </a>
+    <a href="adminaudiencesessions.html" class="nav-item active">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Audience Sessions
+    </a>
+    <a href="adminuserclarity.html" class="nav-item">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+      Clarity Sessions
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-title">Audience Sessions</div>
+    <div class="admin-badge">Admin</div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <a href="admindashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-header-left">
+          <div class="admin-card-icon">🔍</div>
+          <div>
+            <div class="admin-card-title">Look Up Session</div>
+            <div class="admin-card-desc">Enter an email to find their Audience Deep Dive sessions</div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="lookup-email">Email Address</label>
+            <input class="form-input" id="lookup-email" type="email" placeholder="e.g. michellasbling@gmail.com" value="michellasbling@gmail.com">
+          </div>
+          <button class="btn-primary" id="btn-lookup" onclick="lookupSessions()">Look Up</button>
+        </div>
+        <div class="error-msg" id="lookup-error"></div>
+        <div id="session-list-wrap" style="display:none;">
+          <div class="form-label" style="margin-bottom:8px;">Sessions found — click one to view the transcript</div>
+          <div class="session-list" id="session-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card" id="session-result">
+      <div class="admin-card-header">
+        <div class="admin-card-header-left">
+          <div class="admin-card-icon">💬</div>
+          <div>
+            <div class="admin-card-title" id="result-title">Session Transcript</div>
+            <div class="admin-card-desc" id="result-desc"></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="window.print()" style="font-size:12px;padding:6px 14px;">Print / Save</button>
+      </div>
+      <div class="admin-card-body">
+        <div id="transcript-content"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "822894840120",
+    appId: "1:822894840120:web:99c418b3e81ef9a0a11b72"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+  try { firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true); } catch(e) {}
+
+  let allSessions = [];
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== 'admin') {
+        document.getElementById('access-denied').style.display = 'flex'; return;
+      }
+    } catch(e) { document.getElementById('access-denied').style.display = 'flex'; return; }
+    document.getElementById('admin-content').style.display = 'flex';
+    const name = user.displayName || user.email || 'Admin';
+    document.getElementById('sidebar-name').textContent = name;
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    else av.textContent = name.charAt(0).toUpperCase();
+  });
+
+  async function lookupSessions() {
+    const btn   = document.getElementById('btn-lookup');
+    const errEl = document.getElementById('lookup-error');
+    const email = document.getElementById('lookup-email').value.trim().toLowerCase();
+    errEl.className = 'error-msg'; errEl.textContent = '';
+    document.getElementById('session-list-wrap').style.display = 'none';
+    document.getElementById('session-result').style.display = 'none';
+
+    if (!email) { errEl.className = 'error-msg visible'; errEl.textContent = 'Enter an email address.'; return; }
+
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const [byEmail, byEmailOrig] = await Promise.all([
+        db.collection('audience_tool').where('email', '==', email).orderBy('createdAt', 'desc').limit(10).get(),
+        db.collection('audience_tool').where('email', '==', document.getElementById('lookup-email').value.trim()).orderBy('createdAt', 'desc').limit(10).get()
+      ]);
+
+      const map = new Map();
+      [byEmail, byEmailOrig].forEach(snap => snap.forEach(d => { if (!map.has(d.id)) map.set(d.id, d); }));
+      allSessions = Array.from(map.values()).sort((a, b) =>
+        (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0)
+      );
+
+      if (!allSessions.length) {
+        errEl.className = 'error-msg visible';
+        errEl.textContent = 'No sessions found for that email.';
+        return;
+      }
+
+      const list = document.getElementById('session-list');
+      list.innerHTML = allSessions.map((doc, i) => {
+        const d    = doc.data();
+        const date = d.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) || 'Unknown date';
+        const name = d.name || 'Unknown';
+        return `<div class="session-card" onclick="showSession(${i})">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);">Session — ${name}</div>
+            <div class="session-meta">${date} · ${d.audiencePath === 'self' ? 'Path A (like me)' : d.audiencePath === 'other' ? 'Path B (someone I helped)' : 'Path unknown'}</div>
+          </div>
+          <span class="session-id-badge">${doc.id}</span>
+        </div>`;
+      }).join('');
+
+      document.getElementById('session-list-wrap').style.display = 'block';
+      if (allSessions.length === 1) showSession(0);
+    } catch(e) {
+      errEl.className = 'error-msg visible';
+      errEl.textContent = 'Lookup failed: ' + e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Look Up';
+    }
+  }
+
+  function showSession(idx) {
+    document.querySelectorAll('.session-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+
+    const doc  = allSessions[idx];
+    const d    = doc.data();
+    const date = d.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }) || '';
+
+    document.getElementById('result-title').textContent = `Transcript — ${d.name || 'Session'}`;
+    document.getElementById('result-desc').textContent  = `${date} · ID: ${doc.id}`;
+
+    const transcript = Array.isArray(d.transcript) ? d.transcript : [];
+    const content    = document.getElementById('transcript-content');
+
+    // Extract just user answers paired with AI questions
+    const pairs = [];
+    for (let i = 0; i < transcript.length; i++) {
+      const msg = transcript[i];
+      if (msg.role === 'assistant') {
+        const question = cleanText(msg.content);
+        const answer   = transcript[i + 1]?.role === 'user' ? cleanText(transcript[i + 1].content) : '';
+        if (question) pairs.push({ question, answer });
+      }
+    }
+
+    let html = '<div class="transcript-section">';
+
+    if (pairs.length) {
+      pairs.forEach((p, i) => {
+        html += `<div class="qa-block">
+          <div class="qa-question">Q${i + 1}</div>
+          <div class="qa-answer" style="background:var(--dark2);color:#C9A84C;padding:10px 14px;font-size:13px;line-height:1.6;">${escHtml(p.question)}</div>
+          <div class="qa-answer${p.answer ? '' : ' empty'}">${p.answer ? escHtml(p.answer) : 'No answer recorded'}</div>
+        </div>`;
+      });
+    } else {
+      html += '<div style="color:var(--text3);font-size:13px;">No transcript available for this session.</div>';
+    }
+
+    html += '</div>';
+
+    // Blueprint results
+    const fields = [
+      { key: 'whoTheyAre',         label: 'Who They Are',             full: true  },
+      { key: 'dailyFrustration',   label: 'Daily Frustration',        full: false },
+      { key: 'whatTriggeredThem',  label: 'What Triggered Them',      full: false },
+      { key: 'whatTheyHaveTried',  label: 'What They Have Tried',     full: false },
+      { key: 'theirObjections',    label: 'Their Objections',         full: false },
+      { key: 'dreamOutcome',       label: 'Dream Outcome',            full: false },
+      { key: 'howTheyWantToBeeSeen', label: 'How They Want to Be Seen', full: false },
+      { key: 'whereToFindThem',    label: 'Where to Find Them',       full: false },
+      { key: 'theirWords',         label: 'Their Words',              full: true  },
+    ];
+
+    const hasBlueprint = fields.some(f => d[f.key]);
+    if (hasBlueprint) {
+      html += '<div class="section-label">Audience Blueprint</div><div class="blueprint-grid">';
+      fields.forEach(f => {
+        if (!d[f.key]) return;
+        html += `<div class="bp-field${f.full ? ' full' : ''}">
+          <div class="bp-label">${f.label}</div>
+          <div class="bp-value">${escHtml(d[f.key])}</div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+    document.getElementById('session-result').style.display = 'block';
+    document.getElementById('session-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cleanText(text) {
+    if (!text) return '';
+    return text
+      .replace(/\[Q:\d+\]/g, '')
+      .replace(/\[DONE\]/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .trim();
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Run lookup on load since email is pre-filled
+  window.addEventListener('load', () => { if (firebase.auth().currentUser) lookupSessions(); });
+  auth.onAuthStateChanged(user => { if (user) setTimeout(lookupSessions, 1500); });
+</script>
+</body>
+</html>
