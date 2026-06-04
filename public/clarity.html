@@ -810,11 +810,15 @@ async function callClaude(userMessage) {
 // ══════════════════════════════════════════
 // FINISH SESSION — save to Firestore & redirect
 // ══════════════════════════════════════════
-function parseActionPlanToResults(plan) {
+function parseActionPlanToResults(planText) {
+  // Strip ** bold markers from field keys so regex stop patterns work
+  const plan = planText
+    .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, '$1:')
+    .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:');
   const extract = (key) => {
     const regex = new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z][A-Z_0-9]*:|\\n###|\\*\\*ACTION_PLAN_END|$)');
     const m = plan.match(regex);
-    return m ? m[1].trim() : '';
+    return m ? m[1].trim().replace(/\*\*/g, '') : '';
   };
   const summaryM = plan.match(/###\s*Business Summary\s*[\r\n]+([\s\S]*?)(?=###|TOOL_1_NAME|$)/);
   const summary = summaryM ? summaryM[1].trim() : '';

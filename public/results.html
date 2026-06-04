@@ -244,11 +244,19 @@
     background: var(--border);
   }
 
+  #tools-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 960px) { #tools-container { grid-template-columns: 1fr; } }
+
   .tool-card {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-    margin-bottom: 1rem;
     transition: border-color 0.2s;
   }
   .tool-card:hover { border-color: rgba(201,168,76,0.3); }
@@ -838,26 +846,22 @@ function renderResults(displayName, summary, parsed, actionPlan) {
   const priorityClass = ['p1', 'p2', 'p3'];
   const btnClass = ['pb1', 'pb2', 'pb3'];
   const toolsHTML = parsed.tools.map((t, i) => {
+    const howHtml = t.example_prompt
+      ? `<div class="tool-example"><strong>How it works</strong>${escapeHtml(t.example_prompt)}</div>`
+      : '';
     return `
     <div class="tool-card" id="card-${i}">
       <div class="tool-header ${priorityClass[i]}">
-        <div>
-          <div style="margin-bottom:6px;"><span class="tool-priority">${t.priority}</span></div>
-          <div class="tool-name">${t.name}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="margin-bottom:6px;"><span class="tool-priority">${escapeHtml(t.priority)}</span></div>
+          <div class="tool-name">${escapeHtml(t.name)}</div>
         </div>
-        <span class="complexity-badge">Complexity: ${t.complexity}</span>
+        ${t.complexity ? `<span class="complexity-badge">Complexity: ${escapeHtml(t.complexity)}</span>` : ''}
       </div>
       <div class="tool-body">
-        <div class="tool-what">${t.what_it_does}</div>
-        <div class="tool-why">${t.why_it_fits}</div>
-        <div class="tool-example">
-          <strong>Example client prompt</strong>
-          "${t.example_prompt}"
-        </div>
-      </div>
-      <div class="tool-footer">
-        <span class="chosen-indicator" id="chosen-ind-${i}" style="display:none;">✓ Your roadmap tool &nbsp;·&nbsp; <a href="roadmap.html" style="color:var(--gold);font-weight:700;text-decoration:none;">View Roadmap →</a></span>
-        <button class="build-btn ${btnClass[i]}" id="roadmap-btn-${i}" onclick="chooseForRoadmap(${i})">Add to My Roadmap</button>
+        <div class="tool-what">${escapeHtml(t.what_it_does)}</div>
+        <div class="tool-why">${escapeHtml(t.why_it_fits)}</div>
+        ${howHtml}
       </div>
     </div>`;
   }).join('');
