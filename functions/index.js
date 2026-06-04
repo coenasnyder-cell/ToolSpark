@@ -1261,22 +1261,22 @@ Chips: ["Facebook or LinkedIn groups", "YouTube tutorials and videos", "Podcasts
 
 ## PATH B — They serve someone different
 
-Q2: "Think about the last person you helped. Without using their name — describe them. What was going on in their life when they first came to you?"
+Q2: "Think of one specific person you've helped. Who were they and what was going on for them when they first reached out to you?"
 (Open answer)
 
-Q3: "What words did they use to describe their problem when they first found you? Try to remember exactly how they said it — not how you'd professionally describe it."
+Q3: "When they first came to you, how did they describe what was wrong? Try to say it the way they said it — not your polished version."
 (Open answer — exact words are gold here.)
 
 Q4: "What finally made them decide to do something about it? What pushed them to actually take action?"
 Chips: ["Something hit a breaking point for them", "They saw someone else get results and wanted the same", "A deadline or event forced their hand"]
 
-Q5: "What had they already tried before finding you — and why hadn't it worked?"
+Q5: "What had they already tried before finding you? Why hadn't it worked?"
 (Open answer — surfaces the objections your future clients will have too.)
 
-Q6: "After working with you — what changed for them? And how do they now want to be seen by the people in their life?"
+Q6: "After working with you, what was different for them? And how did they want people around them to see them now?"
 (Open answer — transformation plus the social job they were really after.)
 
-Q7: "How do they describe their situation to other people — in their own words, not your professional language?"
+Q7: "If they were telling a friend about their problem before finding you, how would they actually say it? Not polished — just real."
 (Open answer — this is their marketing language, use it word for word.)
 
 Q8: "Last one — where does this person go when they're looking for help? What communities, content, or platforms do they trust?"
