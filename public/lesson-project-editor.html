@@ -449,6 +449,32 @@
       <div class="admin-card">
         <div class="admin-card-header">
           <div class="admin-card-header-left">
+            <div class="admin-card-icon">✨</div>
+            <div>
+              <div class="admin-card-title">Generate from Results</div>
+              <div class="admin-card-desc">Paste the session ID from the results page — Claude fills in the walkthrough details automatically</div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card-body">
+          <div class="walkthrough-note">Copy the Session ID from the bottom of your example client's results page, paste it below, and click Generate. Claude will write the walkthrough steps and client before/after from their actual results.</div>
+          <div class="form-field" style="margin-top:4px;">
+            <label class="form-label" for="results-session-id">Session ID (from results page)</label>
+            <input class="form-input" id="results-session-id" type="text" placeholder="Paste session ID here">
+          </div>
+          <div class="error-msg" id="gen-walkthrough-error"></div>
+          <div class="save-row">
+            <button class="btn-primary" id="btn-gen-walkthrough" onclick="generateWalkthroughFromResults()">
+              Generate Walkthrough Details
+            </button>
+            <span class="save-msg" id="gen-walkthrough-status"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
             <div class="admin-card-icon">📝</div>
             <div>
               <div class="admin-card-title">Walkthrough Details</div>
@@ -1140,6 +1166,118 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
       msg.className = 'save-msg err'; msg.textContent = 'Save failed: ' + e.message;
     } finally {
       btn.disabled = false; btn.textContent = 'Save Walkthrough Details';
+    }
+  }
+
+  // ── Generate Walkthrough from Results ────────────────────
+  async function generateWalkthroughFromResults() {
+    const btn     = document.getElementById('btn-gen-walkthrough');
+    const status  = document.getElementById('gen-walkthrough-status');
+    const errEl   = document.getElementById('gen-walkthrough-error');
+    const sessionId = document.getElementById('results-session-id').value.trim();
+
+    errEl.className = 'error-msg'; errEl.textContent = '';
+    status.className = 'save-msg'; status.textContent = '';
+
+    if (!sessionId) {
+      errEl.className = 'error-msg visible';
+      errEl.textContent = 'Paste a session ID first.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-sm"></span> Fetching results...';
+
+    try {
+      // Fetch the audience blueprint from Firestore
+      const snap = await db.collection('audience_tool').doc(sessionId).get();
+      if (!snap.exists) throw new Error('Session not found — check the ID and try again.');
+      const d = snap.data();
+
+      const toolName = (document.getElementById('f-tool-name').value || projectData.toolName || 'this tool').trim();
+      const clientName = d.name || 'the example client';
+
+      const blueprint = [
+        d.whoTheyAre          ? `WHO THEY ARE: ${d.whoTheyAre}` : '',
+        d.dailyFrustration    ? `DAILY FRUSTRATION: ${d.dailyFrustration}` : '',
+        d.whatTriggeredThem   ? `WHAT TRIGGERED THEM: ${d.whatTriggeredThem}` : '',
+        d.whatTheyHaveTried   ? `WHAT THEY HAVE TRIED: ${d.whatTheyHaveTried}` : '',
+        d.theirObjections     ? `THEIR OBJECTIONS: ${d.theirObjections}` : '',
+        d.dreamOutcome        ? `DREAM OUTCOME: ${d.dreamOutcome}` : '',
+        d.howTheyWantToBeeSeen ? `HOW THEY WANT TO BE SEEN: ${d.howTheyWantToBeeSeen}` : '',
+        d.whereToFindThem     ? `WHERE TO FIND THEM: ${d.whereToFindThem}` : '',
+        d.theirWords          ? `THEIR WORDS: ${d.theirWords}` : '',
+      ].filter(Boolean).join('\n');
+
+      btn.textContent = 'Generating...';
+
+      const systemPrompt = `You help ToolSpark course creators write lesson content. Given an Audience Blueprint from a real session, you generate three pieces of content for the lesson project.
+
+Output ONLY this exact format — no intro, no explanation:
+
+WALKTHROUGH_STEPS:
+[Numbered steps describing what a screen recording of the Audience Deep Dive tool shows. The recording follows this flow: open the tool → answer the path splitter question → work through 8 questions one at a time → see the Audience Blueprint results appear → slowly scroll through each section → reach the bottom. Write the steps based on what the client actually answered. Be specific about what appears on screen.]
+
+CLIENT_BEFORE:
+[1-2 sentences. Who this person is and what they were struggling with before the session. Use their exact words from the blueprint where possible.]
+
+CLIENT_AFTER:
+[1-2 sentences. What they now have after the session — the clarity, the blueprint, the specific insights that changed things for them. Reference their dream outcome.]`;
+
+      const userMessage = `Tool being taught: ${toolName}
+Client name: ${clientName}
+
+AUDIENCE BLUEPRINT:
+${blueprint}`;
+
+      const res = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userMessage }],
+          _meta: { tool: 'walkthrough-generator', sessionId: currentUser?.uid || 'anon' }
+        })
+      });
+
+      if (!res.ok) throw new Error('API error ' + res.status);
+      const data = await res.json();
+      const text = (data?.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+      if (!text) throw new Error('No response — try again.');
+
+      // Parse the three sections
+      const extractSection = (raw, key) => {
+        const idx = raw.indexOf(key + ':');
+        if (idx === -1) return '';
+        const after = raw.slice(idx + key.length + 1);
+        const nextKey = after.search(/\n[A-Z_]+:/);
+        return (nextKey === -1 ? after : after.slice(0, nextKey)).trim();
+      };
+
+      const steps  = extractSection(text, 'WALKTHROUGH_STEPS');
+      const before = extractSection(text, 'CLIENT_BEFORE');
+      const after  = extractSection(text, 'CLIENT_AFTER');
+
+      if (steps)  { const el = document.getElementById('f-wt-steps');  if (el) el.value = steps; }
+      if (before) { const el = document.getElementById('f-wt-before'); if (el) el.value = before; }
+      if (after)  { const el = document.getElementById('f-wt-after');  if (el) el.value = after; }
+      if (clientName && clientName !== 'the example client') {
+        const el = document.getElementById('f-wt-client');
+        if (el && !el.value.trim()) el.value = clientName;
+      }
+
+      status.className = 'save-msg ok';
+      status.textContent = 'Done — review and save below.';
+      document.getElementById('f-wt-steps').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch(e) {
+      errEl.className = 'error-msg visible';
+      errEl.textContent = e.message || 'Generation failed — try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate Walkthrough Details';
     }
   }
 
