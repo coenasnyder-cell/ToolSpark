@@ -712,7 +712,7 @@ function detectPhase(text) {
     if (p !== currentPhase) {
       currentPhase = p;
       updatePhaseBar(p);
-      if (p <= 4) {
+      if (p <= 5) {
         addMessage("phase_header", `Phase ${p}: ${PHASES[p].name}`);
       }
     }
