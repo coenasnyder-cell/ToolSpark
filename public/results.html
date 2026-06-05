@@ -245,13 +245,11 @@
   }
 
   #tools-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     margin-bottom: 2rem;
-    align-items: start;
   }
-  @media (max-width: 960px) { #tools-container { grid-template-columns: 1fr; } }
 
   .tool-card {
     border: 1px solid var(--border);
@@ -284,7 +282,7 @@
   .p2 .tool-priority { background: var(--purple); color: white; }
   .p3 .tool-priority { background: var(--coral); color: white; }
 
-  .tool-name { font-weight: 700; font-size: 17px; }
+  .tool-name { font-weight: 700; font-size: 19px; }
   .p1 .tool-name { color: var(--green-light); }
   .p2 .tool-name { color: #8B7FD4; }
   .p3 .tool-name { color: #E0875A; }
@@ -616,6 +614,30 @@
 
 <script>
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+
+function parseActionPlanToResults(planText) {
+  if (!planText) return null;
+  const plan = planText
+    .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, '$1:')
+    .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:');
+  const extract = (key) => {
+    const regex = new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z][A-Z_0-9]*:|\\n###|\\*\\*ACTION_PLAN_END|$)');
+    const m = plan.match(regex);
+    return m ? m[1].trim().replace(/\*\*/g, '') : '';
+  };
+  const summaryM = plan.match(/###\s*Business Summary\s*[\r\n]+([\s\S]*?)(?=###|TOOL_1_NAME|$)/);
+  const summary = summaryM ? summaryM[1].trim() : '';
+  const tools = [1, 2, 3].map(i => ({
+    name:           extract(`TOOL_${i}_NAME`),
+    priority:       extract(`TOOL_${i}_PRIORITY`),
+    what_it_does:   extract(`TOOL_${i}_SUMMARY`),
+    why_it_fits:    extract(`TOOL_${i}_WHY`),
+    complexity:     extract(`TOOL_${i}_COMPLEXITY`) || 'Medium',
+    example_prompt: extract(`TOOL_${i}_HOW`) || ''
+  }));
+  if (!tools[0].name) return null;
+  return { summary, tools };
+}
 async function authHeaders() {
   const user = firebase.auth().currentUser;
   const token = user ? await user.getIdToken() : "";
@@ -736,14 +758,16 @@ async function markClarityComplete(session) {
 }
 
 async function ensureClientResult(sessionId, session, results) {
-  await db.collection('clientresults').doc(sessionId).set({
-    displayName: session.displayName || '',
-    businessName: session.businessName || '',
-    clientEmail: session.clientEmail || '',
-    clientResults: results,
-    sessionId: sessionId,
-    createdAt: session.createdAt || firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
+  try {
+    await db.collection('clientresults').doc(sessionId).set({
+      displayName: session.displayName || '',
+      businessName: session.businessName || '',
+      clientEmail: session.clientEmail || '',
+      clientResults: results,
+      sessionId: sessionId,
+      createdAt: session.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch(e) { /* non-critical — user may not have update permission */ }
 }
 
 async function waitForSession(sessionId, maxAttempts = 6) {
@@ -769,10 +793,22 @@ async function loadAndAnalyze() {
     if (!doc) { showError(); return; }
 
     const session = doc.data();
-    const extracted = session.extracted;
     currentChosenTool = session.chosenTool || null;
 
-    // If results already exist don't re-analyze
+    // Re-parse from actionPlan when available (guarantees latest parser, fixes corrupt cached toolResults)
+    const reparsed = parseActionPlanToResults(session.actionPlan);
+    if (reparsed) {
+      if (!session.toolResults || !session.toolResults.tools || !session.toolResults.tools[0].name) {
+        await db.collection('clarity_sessions').doc(sessionId).update({ toolResults: reparsed });
+      }
+      await ensureClientResult(sessionId, session, reparsed);
+      renderResults(session.displayName, session.summary || reparsed.summary, reparsed, session.actionPlan);
+      if (currentChosenTool) markChosenTool(currentChosenTool - 1);
+      await markClarityComplete(session);
+      return;
+    }
+
+    // Fall back to saved toolResults if actionPlan parse failed
     if (session.toolResults) {
       await ensureClientResult(sessionId, session, session.toolResults);
       renderResults(session.displayName, session.summary, session.toolResults, session.actionPlan);
@@ -780,6 +816,8 @@ async function loadAndAnalyze() {
       await markClarityComplete(session);
       return;
     }
+
+    const extracted = session.extracted;
 
     // Step 2 — Run AI analysis
     setStep(2);

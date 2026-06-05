@@ -459,7 +459,7 @@
   }
   .checkbox-submit {
     display: none;
-    margin: 4px auto 0;
+    margin: 0;
     padding: 9px 24px;
     background: var(--gold); color: var(--dark);
     border: none; border-radius: 8px;
@@ -620,7 +620,7 @@ const CHIPS_BY_PHASE = {
   2: ["My clients / customers", "Me", "My business", "Combination of all three"],
   3: [],
   4: [],
-  5: ["Personalized Report", "Action Plan", "Checklist", "Worksheet", "Video Script", "Conversation Guide", "Decision Tree", "Daily Plan", "Custom Recommendation", "Something Else"],
+  5: ["Marketing / Content Tool", "Client Clarity / Assessment Tool", "Lead Generation Tool", "Onboarding / Intake Tool", "Research / Analysis Tool", "Strategy / Planning Tool", "Productivity / Workflow Tool", "Custom AI Tool"],
   6: []
 };
 // ══════════════════════════════════════════
@@ -765,8 +765,11 @@ function setChips(phase) {
       handleSend();
     };
 
-    container.appendChild(grid);
-    container.appendChild(submitBtn);
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:10px;";
+    wrap.appendChild(grid);
+    wrap.appendChild(submitBtn);
+    container.appendChild(wrap);
     return;
   }
 

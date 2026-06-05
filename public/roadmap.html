@@ -555,7 +555,10 @@
             <div class="spark-section-title">Discover Your Breakthrough</div>
             <div class="spark-section-desc">Your three recommended tools and build prompts, newest session</div>
           </div>
-          <a href="clarity.html" class="section-tool-btn">Open tool →</a>
+          <div class="section-btn-group">
+            <a href="#" class="section-results-btn" id="breakthrough-results-btn" style="display:none;">View Results</a>
+            <a href="clarity.html" class="section-tool-btn">Open tool →</a>
+          </div>
         </div>
         <div class="spark-section-body">
           <div>
@@ -1286,6 +1289,11 @@
         document.getElementById('content').style.display = 'none';
       } else {
         renderRoadmap(completed[0].data(), completed[0].id);
+        const breakthroughResultsBtn = document.getElementById('breakthrough-results-btn');
+        if (breakthroughResultsBtn) {
+          breakthroughResultsBtn.href = 'results.html?session=' + completed[0].id;
+          breakthroughResultsBtn.style.display = '';
+        }
       }
 
       // Render Tech Stack section from most recent techstack_results doc
