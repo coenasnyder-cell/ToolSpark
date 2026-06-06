@@ -108,35 +108,34 @@
   .course-card.locked { cursor: default; opacity: 0.7; }
   .course-card.locked:hover { box-shadow: var(--shadow); transform: none; }
 
-  .course-thumb { height: 130px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-  .course-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .course-body { padding: 14px 14px 10px; display: flex; flex-direction: column; }
+  .course-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.35; margin-bottom: 10px; }
+
+  .course-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 8px; margin-bottom: 10px; }
+  .course-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .course-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   .course-thumb-1 { background: linear-gradient(135deg, #1a1410, #2d1f0a); }
   .course-thumb-2 { background: linear-gradient(135deg, #0d1a14, #0a2018); }
   .course-thumb-3 { background: linear-gradient(135deg, #12101a, #1a1030); }
   .course-thumb-4 { background: linear-gradient(135deg, #0a1520, #0d2535); }
   .course-thumb-5 { background: linear-gradient(135deg, #1a100a, #2d1505); }
 
-  .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; }
-  .locked-icon { font-size: 28px; }
+  .thumb-status { position: absolute; top: 8px; right: 8px; }
+  .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .locked-icon { font-size: 24px; }
 
-  .course-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
-  .course-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-  .course-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
   .free-badge { font-size: 10px; font-weight: 700; color: var(--green-light); background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); border-radius: 100px; padding: 1px 7px; }
   .complete-badge { font-size: 10px; font-weight: 700; color: white; background: var(--green-light); border-radius: 100px; padding: 2px 8px; }
   .in-progress-badge { font-size: 10px; font-weight: 700; color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; padding: 2px 8px; }
 
-  .course-title { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 6px; }
-  .course-desc { font-size: 13px; color: var(--text3); line-height: 1.6; flex: 1; }
+  .course-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border); margin-top: auto; }
+  .course-meta { font-size: 11px; color: var(--text3); }
+  .course-cta { font-size: 11px; font-weight: 700; color: var(--gold); }
+  .locked-label { font-size: 11px; color: var(--text3); }
 
-  .course-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-  .course-meta { font-size: 12px; color: var(--text3); }
-  .course-cta { font-size: 12px; font-weight: 700; color: var(--gold); }
-  .locked-label { font-size: 12px; color: var(--text3); }
-
-  .progress-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .progress-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
   .progress-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
-  .progress-label { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .progress-label { font-size: 10px; color: var(--text3); margin-bottom: 8px; }
 
   /* ── EMPTY STATE ── */
   .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
@@ -421,9 +420,9 @@
       if (course.isComplete) ctaText = 'Review →';
       else if (course.isStarted) ctaText = 'Continue →';
 
-      const thumbHtml = course.thumbnail
+      const thumbInner = course.thumbnail
         ? '<img src="' + escHtml(course.thumbnail) + '" alt="' + escHtml(course.title) + '">'
-        : '<svg width="40" height="40" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>';
+        : '<div class="course-thumb-placeholder ' + gradClass + '"><svg width="36" height="36" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg></div>';
 
       const progressHtml = course.pct > 0
         ? '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + course.pct + '%"></div></div><div class="progress-label">' + course.completed + ' of ' + course.totallessons + ' lessons complete</div>'
@@ -431,21 +430,17 @@
 
       if (course.locked) {
         return '<div class="course-card locked">' +
-          '<div class="course-thumb ' + gradClass + '"><div class="locked-overlay"><div class="locked-icon">🔒</div></div>' + thumbHtml + '</div>' +
           '<div class="course-body">' +
-          '<div class="course-tags"><span class="course-tag">' + escHtml(course.category) + '</span></div>' +
           '<div class="course-title">' + escHtml(course.title) + '</div>' +
-          '<div class="course-desc">Complete the Welcome Course to unlock this content</div>' +
+          '<div class="course-thumb-wrap"><div class="locked-overlay"><div class="locked-icon">🔒</div></div>' + thumbInner + '</div>' +
           '<div class="course-footer"><span class="course-meta">' + course.totallessons + ' lessons</span><span class="locked-label">🔒 Locked</span></div>' +
           '</div></div>';
       }
 
       return '<div class="course-card" onclick="window.location.href=\'' + url + '\'">' +
-        '<div class="course-thumb ' + gradClass + '">' + thumbHtml + '</div>' +
         '<div class="course-body">' +
-        '<div class="course-tags"><span class="course-tag">' + escHtml(course.category) + '</span>' + statusBadge + '</div>' +
         '<div class="course-title">' + escHtml(course.title) + '</div>' +
-        '<div class="course-desc">' + escHtml(course.description) + '</div>' +
+        '<div class="course-thumb-wrap">' + thumbInner + (statusBadge ? '<div class="thumb-status">' + statusBadge + '</div>' : '') + '</div>' +
         progressHtml +
         '<div class="course-footer"><span class="course-meta">' + course.totallessons + ' lessons · ' + (course.isFree ? 'Free' : 'Members') + '</span><span class="course-cta">' + ctaText + '</span></div>' +
         '</div></div>';

@@ -1987,6 +1987,54 @@ exports.onNewMemberSignup = onDocumentCreated({
   }
 });
 
+// ── ADD TOOL FINDER LEAD TO SENDGRID ─────────────────────────────────────────
+exports.addToolFinderLead = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["SENDGRID_API_KEY"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const { email, firstName, path, sessionId } = req.body || {};
+
+  if (!email || !email.includes("@")) {
+    res.status(400).json({ error: "Valid email required" });
+    return;
+  }
+
+  const body = {
+    contacts: [{
+      email: email.toLowerCase().trim(),
+      first_name: (firstName || "").trim(),
+    }],
+  };
+
+  try {
+    const sgRes = await fetch("https://api.sendgrid.com/v3/marketing/contacts", {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${process.env.SENDGRID_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await sgRes.json();
+
+    if (!sgRes.ok) {
+      console.error(JSON.stringify({ event: "toolfinder_lead_failed", email, status: sgRes.status, data }));
+      res.status(500).json({ error: "SendGrid contact add failed" });
+      return;
+    }
+
+    console.log(JSON.stringify({ event: "toolfinder_lead_added", email, sessionId, path }));
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "toolfinder_lead_error", email, message: err.message }));
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 exports.onWaitlistSignup = onDocumentCreated({
   document: "waitlist/{email}",
   secrets: ["SENDGRID_API_KEY"],
