@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Generator — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --purple: #4B3F8A;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+  /* ── MAIN ── */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+  .page-content { flex: 1; padding: 2rem 2.5rem 4rem; max-width: 780px; width: 100%; }
+
+  /* ── HERO ── */
+  .hero { background: linear-gradient(135deg, #0f1a10 0%, #1a1208 100%); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.5rem; border: 1px solid rgba(42,92,69,0.3); position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 240px; height: 240px; background: radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #7DC4A0; margin-bottom: 8px; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3.5vw, 30px); color: #F2EEE6; line-height: 1.2; margin-bottom: 6px; }
+  .hero-sub { font-size: 13px; color: rgba(240,237,230,0.6); line-height: 1.7; max-width: 480px; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 1.25rem; }
+
+  /* ── CONTENT TYPE TOGGLE ── */
+  .content-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .content-type-btn { padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'Lato', sans-serif; }
+  .content-type-btn:hover { border-color: var(--gold); }
+  .content-type-btn.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .content-type-btn-label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .content-type-btn-label .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .content-type-btn.selected .dot { border-color: var(--gold); background: var(--gold); }
+  .content-type-btn.selected .dot::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fff; display: block; }
+  .content-type-btn-sub { font-size: 11px; color: var(--text3); margin-top: 3px; padding-left: 22px; line-height: 1.4; }
+
+  /* ── LAUNCH FIELDS ── */
+  .launch-fields { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.25rem; }
+  .launch-fields.visible { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── FORM FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .field-input, .field-textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+  .field-input:focus, .field-textarea:focus { border-color: var(--gold); }
+  .field-input::placeholder, .field-textarea::placeholder { color: var(--text3); }
+  .field-textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+  .field-input:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ── TOPIC ROW ── */
+  .topic-row { display: flex; flex-direction: column; gap: 8px; }
+  .auto-topic-check { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 2px 0; }
+  .auto-topic-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+  .auto-topic-check span { font-size: 13px; color: var(--text2); font-weight: 700; }
+
+  /* ── TONE SELECTOR ── */
+  .tone-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tone-btn { padding: 8px 18px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--bg); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .tone-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .tone-btn.selected { background: var(--gold); border-color: var(--gold); color: #0C0B09; }
+
+  /* ── GENERATE BUTTON ── */
+  .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+  .generate-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-spinner { width: 16px; height: 16px; border: 2.5px solid rgba(12,11,9,0.25); border-top-color: #0C0B09; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .btn-spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── OUTPUT SECTION ── */
+  .output-section { display: none; }
+  .output-section.visible { display: block; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .output-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .regenerate-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .regenerate-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── POST CARDS ── */
+  .post-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1rem; overflow: hidden; }
+  .post-card-header { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .post-format-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; }
+  .badge-bold { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.2); color: #C4622D; }
+  .badge-story { background: rgba(75,63,138,0.1); border: 1px solid rgba(75,63,138,0.2); color: #9B8FD0; }
+  .badge-news { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .post-format-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+  .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; background: var(--bg); font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { border-color: var(--green-light); color: var(--green-light); background: rgba(42,92,69,0.06); }
+  .post-body { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; }
+
+  /* ── LOADING STATE ── */
+  .loading-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; margin-bottom: 1rem; }
+  .loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 1rem; }
+  .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: bounce 1.2s infinite; }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+  .loading-text { font-size: 13px; color: var(--text3); }
+
+  /* ── MOBILE ── */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 90; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); justify-content: space-around; }
+  .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: #6B6560; text-decoration: none; padding: 4px 12px; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.15s; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  @media (max-width: 1023px) { .main-wrap { margin-left: 60px; } .nav-item { justify-content: center; padding: 10px; } .nav-item span, .logo-tag, .sidebar-footer { display: none; } .sidebar-logo { justify-content: center; } }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .sidebar-footer { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1rem 1rem 80px; }
+    .content-type-row { grid-template-columns: 1fr; }
+    .mobile-bottom-nav { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header"></header>
+
+  <div class="page-content">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Content Generator</div>
+      <h1 class="hero-title">Write Posts That Stop the Scroll</h1>
+      <p class="hero-sub">Generate three scroll-stopping Facebook posts — a bold statement, a personal story, and a breaking news headline — tailored to your niche and audience.</p>
+    </div>
+
+    <!-- Form -->
+    <div class="card">
+      <div class="card-title">What are you posting about?</div>
+
+      <!-- Content Type -->
+      <div style="margin-bottom:1.25rem;">
+        <div class="field-label" style="margin-bottom:8px;">What's this content for?</div>
+        <div class="content-type-row">
+          <button class="content-type-btn selected" id="btn-general" onclick="selectContentType('general')">
+            <div class="content-type-btn-label"><span class="dot"></span> General Content</div>
+            <div class="content-type-btn-sub">Regular niche content to grow your audience</div>
+          </button>
+          <button class="content-type-btn" id="btn-launch" onclick="selectContentType('launch')">
+            <div class="content-type-btn-label"><span class="dot"></span> Tool Launch</div>
+            <div class="content-type-btn-sub">Announce your AI tool to your audience</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Launch Fields (hidden by default) -->
+      <div class="launch-fields" id="launch-fields">
+        <div class="field-label" style="margin-bottom:2px;">Tell us about your tool</div>
+        <input class="field-input" id="tool-name" type="text" placeholder="Tool name (e.g. Content Creator Pro)">
+        <input class="field-input" id="tool-oneliner" type="text" placeholder="What it does in one sentence (e.g. helps coaches write 3 posts a day in minutes)">
+      </div>
+
+      <!-- Niche -->
+      <div class="field">
+        <label class="field-label" for="niche">Your Niche</label>
+        <input class="field-input" id="niche" type="text" placeholder="e.g. business coaches, health & wellness, real estate agents">
+      </div>
+
+      <!-- Ideal Audience -->
+      <div class="field">
+        <label class="field-label" for="audience">Your Ideal Audience</label>
+        <input class="field-input" id="audience" type="text" placeholder="e.g. overwhelmed entrepreneurs who want to grow without burning out">
+      </div>
+
+      <!-- Topic -->
+      <div class="field">
+        <label class="field-label">Topic</label>
+        <div class="topic-row">
+          <label class="auto-topic-check">
+            <input type="checkbox" id="auto-topic" onchange="toggleAutoTopic()">
+            <span>Pick a topic for me</span>
+          </label>
+          <input class="field-input" id="topic-input" type="text" placeholder="e.g. overcoming imposter syndrome, showing up consistently">
+        </div>
+      </div>
+
+      <!-- Tone -->
+      <div class="field">
+        <label class="field-label">Tone</label>
+        <div class="tone-row">
+          <button class="tone-btn selected" onclick="selectTone(this, 'conversational')">Conversational</button>
+          <button class="tone-btn" onclick="selectTone(this, 'motivational')">Motivational</button>
+          <button class="tone-btn" onclick="selectTone(this, 'educational')">Educational</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Button -->
+    <button class="generate-btn" id="generate-btn" onclick="generatePosts()">
+      <span id="btn-spinner" class="btn-spinner"></span>
+      <span id="btn-text">Generate My Posts →</span>
+    </button>
+
+    <!-- Output -->
+    <div class="output-section" id="output-section">
+      <div class="output-header">
+        <div class="output-title">Your Posts</div>
+        <button class="regenerate-btn" onclick="generatePosts()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Regenerate
+        </button>
+      </div>
+      <div id="posts-wrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item active">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<script>
+  const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  const MODEL = "claude-sonnet-4-6";
+  let selectedTone = 'conversational';
+  let selectedContentType = 'general';
+
+  async function authHeaders() {
+    const user = auth.currentUser;
+    const token = user ? await user.getIdToken() : "";
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + token };
+  }
+
+  function selectContentType(type) {
+    selectedContentType = type;
+    document.getElementById('btn-general').classList.toggle('selected', type === 'general');
+    document.getElementById('btn-launch').classList.toggle('selected', type === 'launch');
+    const launchFields = document.getElementById('launch-fields');
+    launchFields.classList.toggle('visible', type === 'launch');
+  }
+
+  function toggleAutoTopic() {
+    const checked = document.getElementById('auto-topic').checked;
+    const input = document.getElementById('topic-input');
+    input.disabled = checked;
+    if (checked) { input.value = ''; input.placeholder = 'Topic will be chosen automatically'; }
+    else { input.placeholder = 'e.g. overcoming imposter syndrome, showing up consistently'; }
+  }
+
+  function selectTone(btn, tone) {
+    selectedTone = tone;
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function buildPrompt() {
+    const niche = document.getElementById('niche').value.trim();
+    const audience = document.getElementById('audience').value.trim();
+    const autoTopic = document.getElementById('auto-topic').checked;
+    const topic = document.getElementById('topic-input').value.trim();
+    const toolName = document.getElementById('tool-name').value.trim();
+    const toolOneliner = document.getElementById('tool-oneliner').value.trim();
+
+    const topicLine = autoTopic
+      ? 'Choose a high-performing topic that will resonate deeply with this audience right now.'
+      : `Topic: ${topic}`;
+
+    const launchContext = selectedContentType === 'launch' && toolName
+      ? `\n\nIMPORTANT CONTEXT: The creator is launching an AI tool called "${toolName}"${toolOneliner ? ` — ${toolOneliner}` : ''}. All three posts must be written through the lens of this tool launch. The Bold Statement should challenge a belief their clients have about the problem this tool solves. The Personal Story should share why the creator built it. The Breaking News post should announce the launch.`
+      : '';
+
+    return `You are a viral content strategist who has studied millions of high-performing social media posts. You specialise in written Facebook content for introverts who want to grow their audience without video or camera.
+
+Niche: ${niche}
+Ideal Audience: ${audience}
+Tone: ${selectedTone}
+${topicLine}${launchContext}
+
+First, silently identify the top 3 emotional triggers for this audience — their fears, desires, frustrations, and what they secretly want. Do NOT show this analysis to the user. Use these triggers to inform all three posts.
+
+Then write exactly 3 Facebook posts in the following formats. Use clear separators between each post.
+
+FORMAT 1 — BOLD STATEMENT
+A single punchy, scroll-stopping line that challenges a common belief in this niche. Make it bold, quotable, and slightly controversial. No more than 2 sentences. Do NOT use hashtags.
+
+FORMAT 2 — PERSONAL STORY
+A vulnerable, authentic post written in a conversational handwritten style. Should feel like a diary entry or a real moment — not polished or corporate. 4-8 sentences. Do NOT use hashtags.
+
+FORMAT 3 — BREAKING NEWS
+Written like a news headline announcing a surprising result or insight. Opens with a bold statement of fact or result, then backs it up with 2-3 supporting lines. Do NOT use hashtags.
+
+Return your response in EXACTLY this structure, with no extra commentary:
+
+POST_1_START
+[Bold Statement post here]
+POST_1_END
+
+POST_2_START
+[Personal Story post here]
+POST_2_END
+
+POST_3_START
+[Breaking News post here]
+POST_3_END`;
+  }
+
+  async function generatePosts() {
+    const niche = document.getElementById('niche').value.trim();
+    const audience = document.getElementById('audience').value.trim();
+    const autoTopic = document.getElementById('auto-topic').checked;
+    const topic = document.getElementById('topic-input').value.trim();
+
+    if (!niche) { document.getElementById('niche').focus(); return; }
+    if (!audience) { document.getElementById('audience').focus(); return; }
+    if (!autoTopic && !topic) { document.getElementById('topic-input').focus(); return; }
+
+    const btn = document.getElementById('generate-btn');
+    const spinner = document.getElementById('btn-spinner');
+    const btnText = document.getElementById('btn-text');
+    btn.disabled = true;
+    spinner.classList.add('show');
+    btnText.textContent = 'Generating…';
+
+    const outputSection = document.getElementById('output-section');
+    const postsWrap = document.getElementById('posts-wrap');
+    outputSection.classList.add('visible');
+    postsWrap.innerHTML = `<div class="loading-card">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Writing your posts — this takes about 15 seconds…</div>
+    </div>`;
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+      const resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: buildPrompt() }],
+          _meta: { tool: 'content-generator' }
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      const data = await resp.json();
+      const text = data.content.map(b => b.type === 'text' ? b.text : '').join('');
+
+      const post1 = extract(text, 'POST_1_START', 'POST_1_END');
+      const post2 = extract(text, 'POST_2_START', 'POST_2_END');
+      const post3 = extract(text, 'POST_3_START', 'POST_3_END');
+
+      postsWrap.innerHTML = [
+        renderPostCard('Bold Statement', 'badge-bold', post1, 1),
+        renderPostCard('Personal Story', 'badge-story', post2, 2),
+        renderPostCard('Breaking News', 'badge-news', post3, 3),
+      ].join('');
+
+    } catch(err) {
+      console.error(err);
+      postsWrap.innerHTML = `<div class="loading-card"><div class="loading-text" style="color:#C0392B;">Something went wrong — please try again.</div></div>`;
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('show');
+      btnText.textContent = 'Generate My Posts →';
+    }
+  }
+
+  function extract(text, startTag, endTag) {
+    const start = text.indexOf(startTag);
+    const end = text.indexOf(endTag);
+    if (start === -1 || end === -1) return '';
+    return text.slice(start + startTag.length, end).trim();
+  }
+
+  function renderPostCard(name, badgeClass, content, index) {
+    return `<div class="post-card">
+      <div class="post-card-header">
+        <span class="post-format-badge ${badgeClass}">${index === 1 ? 'Bold' : index === 2 ? 'Story' : 'News'}</span>
+        <span class="post-format-name">${escHtml(name)}</span>
+        <button class="copy-btn" id="copy-btn-${index}" onclick="copyPost(${index}, this)">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <div class="post-body" id="post-body-${index}">${escHtml(content)}</div>
+    </div>`;
+  }
+
+  function copyPost(index, btn) {
+    const text = document.getElementById('post-body-' + index).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+      }, 2000);
+    });
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        const u = doc.data();
+        if (!u.sparkBuilder && u.userRole !== 'admin') {
+          window.location.href = 'dashboard.html';
+          return;
+        }
+        const nameEl = document.getElementById('sidebar-name');
+        const roleEl = document.getElementById('sidebar-role');
+        const avatarEl = document.getElementById('sidebar-avatar');
+        if (nameEl) nameEl.textContent = u.displayName || user.email;
+        if (roleEl) roleEl.textContent = u.userRole === 'admin' ? 'Admin' : 'Builder';
+        if (avatarEl) {
+          if (u.photoURL) { avatarEl.innerHTML = `<img src="${u.photoURL}" alt="avatar">`; }
+          else { avatarEl.textContent = (u.displayName || user.email || '?')[0].toUpperCase(); }
+        }
+        // Pre-fill niche/audience from profile if available
+        if (u.sparkStatement && !document.getElementById('niche').value) {
+          document.getElementById('audience').placeholder = u.sparkStatement;
+        }
+      }
+    } catch(e) { console.error(e); }
+  });
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('tools', 'Content Generator');</script>
+</body>
+</html>

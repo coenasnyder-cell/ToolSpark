@@ -609,6 +609,12 @@
                 : `<button class="c2-grant-btn" onclick="grantCourse2('${m.uid}')">Grant Course 2</button>`
               }
             </div>
+            <div id="sb-cell-${m.uid}" style="margin-top:6px;">
+              ${m.sparkBuilder
+                ? `<span class="c2-badge" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.25);color:#9B8FD0;">Spark Builder ✓</span>`
+                : `<button class="c2-grant-btn" style="background:rgba(75,63,138,0.08);border-color:rgba(75,63,138,0.2);color:#9B8FD0;" onclick="grantSparkBuilder('${m.uid}')">Grant Spark Builder</button>`
+              }
+            </div>
           </div>
         </td>
         <td style="color:var(--text3);font-size:12px;">${since}</td>
@@ -660,6 +666,24 @@
     } catch(e) {
       alert('Failed to grant Course 2 access. Please try again.');
       if (btn) { btn.disabled = false; btn.textContent = 'Grant Course 2'; }
+    }
+  }
+
+  async function grantSparkBuilder(uid) {
+    const btn = document.querySelector(`#sb-cell-${uid} button`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Granting…'; }
+    try {
+      await db.collection('users').doc(uid).update({ sparkBuilder: true });
+      const cell = document.getElementById('sb-cell-' + uid);
+      if (cell) cell.innerHTML = `<span class="c2-badge" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.25);color:#9B8FD0;">Spark Builder ✓</span>`;
+      for (const arr of [allMembers, allMembersAll]) {
+        if (!arr) continue;
+        const m = arr.find(x => x.uid === uid);
+        if (m) m.sparkBuilder = true;
+      }
+    } catch(e) {
+      alert('Failed to grant Spark Builder access. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Grant Spark Builder'; }
     }
   }
 

@@ -412,8 +412,13 @@ function renderSidebar() {
     var active = currentLesson && l.id === currentLesson.id;
 
     if (showEditorControls) {
+      var upDisabled = i === 0 ? ' disabled' : '';
+      var downDisabled = i === lessons.length - 1 ? ' disabled' : '';
       return '<div class="lesson-item lesson-item-editing' + (active ? ' active' : '') + '" onclick="loadLesson(' + i + ')">' +
-        '<span class="drag-handle">&#8801;</span>' +
+        '<div class="lesson-move-btns">' +
+        '<button class="lesson-move-btn"' + upDisabled + ' onclick="moveLesson(event,' + i + ',-1)" title="Move up">&#9650;</button>' +
+        '<button class="lesson-move-btn"' + downDisabled + ' onclick="moveLesson(event,' + i + ',1)" title="Move down">&#9660;</button>' +
+        '</div>' +
         '<div class="li-body">' +
         '<div class="li-title">' + escHtml(l.lessonTitle || 'Untitled') + '</div>' +
         '</div>' +

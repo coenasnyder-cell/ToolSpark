@@ -837,7 +837,7 @@ async function handleSend() {
       const summaryBlock = reply.match(/SESSION_SUMMARY_START[\s\S]*?SESSION_SUMMARY_END/)?.[0] || '';
       if (summaryBlock) {
         await saveSession(summaryBlock);
-        addSavedNote();
+        setTimeout(() => addSavedNote(), 3500);
       }
     } else if (reply.includes("Mid-Build Emergency Kit")) {
       addMsg("assistant", reply);

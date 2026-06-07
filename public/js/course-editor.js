@@ -517,6 +517,32 @@ async function addLesson() {
   }
 }
 
+async function moveLesson(event, index, direction) {
+  if (event) event.stopPropagation();
+  if (!isAdmin || !editMode) return;
+  var swapIndex = index + direction;
+  if (swapIndex < 0 || swapIndex >= lessons.length) return;
+
+  var lessonA = lessons[index];
+  var lessonB = lessons[swapIndex];
+  var orderA = typeof lessonA.lessonOrder === 'number' ? lessonA.lessonOrder : index;
+  var orderB = typeof lessonB.lessonOrder === 'number' ? lessonB.lessonOrder : swapIndex;
+
+  try {
+    var batch = db.batch();
+    batch.update(db.collection('courses').doc(courseId).collection('lessons').doc(lessonA.id), { lessonOrder: orderB });
+    batch.update(db.collection('courses').doc(courseId).collection('lessons').doc(lessonB.id), { lessonOrder: orderA });
+    await batch.commit();
+    lessonA.lessonOrder = orderB;
+    lessonB.lessonOrder = orderA;
+    lessons.sort(function(a, b) { return (a.lessonOrder || 0) - (b.lessonOrder || 0); });
+    renderSidebar();
+  } catch(err) {
+    console.error('Move failed', err);
+    alert('Could not reorder — please try again.');
+  }
+}
+
 async function deleteLesson(event, lessonId) {
   if (event) event.stopPropagation();
   if (!isAdmin || !editMode) return;
