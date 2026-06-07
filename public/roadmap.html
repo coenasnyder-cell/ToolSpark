@@ -296,7 +296,7 @@
   /* ── CHOOSE YOUR PATH ── */
   .path-section-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
   }
   .path-option-card {
@@ -335,6 +335,11 @@
     background: rgba(42,92,69,0.1);
     border-color: rgba(42,92,69,0.2);
     color: var(--green-light);
+  }
+  .path-option-card.dwy .path-option-icon {
+    background: rgba(75,63,138,0.1);
+    border-color: rgba(75,63,138,0.2);
+    color: #9B8FD0;
   }
   .path-option-card.dfy .path-option-icon {
     background: var(--gold-dim);
@@ -391,6 +396,15 @@
   }
   .path-option-card.build .path-option-action:hover {
     background: var(--green-light);
+  }
+  .path-option-card.dwy .path-option-action {
+    background: rgba(75,63,138,0.1);
+    color: var(--text);
+    border-color: rgba(75,63,138,0.24);
+  }
+  .path-option-card.dwy .path-option-action:hover {
+    background: rgba(75,63,138,0.18);
+    border-color: rgba(75,63,138,0.4);
   }
   .path-option-card.dfy .path-option-action {
     background: var(--gold-dim);
@@ -602,7 +616,19 @@
               </div>
               <div class="path-option-title">Build It Yourself</div>
               <div class="path-option-copy">You have your prompt. You have your platform. The Build Agent and the community are beside you the whole way.</div>
-              <a href="courses.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'courses.html');">Start Course 2 →</a>
+              <a href="diy.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'diy.html');">Go to Build Hub →</a>
+            </div>
+
+            <div class="path-option-card dwy" id="path-card-dwy">
+              <div class="path-option-head">
+                <div class="path-option-icon">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                </div>
+                <div class="path-choice-badge" id="path-badge-dwy">Selected</div>
+              </div>
+              <div class="path-option-title">Done With You</div>
+              <div class="path-option-copy">We build it together. You stay involved, make the decisions, and walk away knowing exactly how your tool works.</div>
+              <a href="dwy.html" class="path-option-action" onclick="return handlePathSelection(event, 'done_with_you', 'dwy.html');">Go to Collaboration Hub →</a>
             </div>
 
             <div class="path-option-card dfy" id="path-card-dfy">
@@ -1017,16 +1043,20 @@
 
   function renderPathSelection() {
     const buildCard = document.getElementById('path-card-build');
+    const dwyCard = document.getElementById('path-card-dwy');
     const dfyCard = document.getElementById('path-card-dfy');
     const note = document.getElementById('path-status-note');
 
     if (buildCard) buildCard.classList.toggle('selected', currentBuildPathChoice === 'build_it_yourself');
+    if (dwyCard) dwyCard.classList.toggle('selected', currentBuildPathChoice === 'done_with_you');
     if (dfyCard) dfyCard.classList.toggle('selected', currentBuildPathChoice === 'done_for_you');
 
     if (!note) return;
 
     if (currentBuildPathChoice === 'build_it_yourself') {
       note.textContent = 'Current choice: Build It Yourself. We can use this later to guide lessons, support, and build steps.';
+    } else if (currentBuildPathChoice === 'done_with_you') {
+      note.textContent = 'Current choice: Done With You. Your choice is saved. Add your booking link when that page is ready.';
     } else if (currentBuildPathChoice === 'done_for_you') {
       note.textContent = 'Current choice: Done For You. We can use this later to skip builder lessons and route you into the DFY flow.';
     } else {
@@ -1054,14 +1084,15 @@
       currentBuildPathChoice = pathChoice;
       renderPathSelection();
 
-      if (pathChoice === 'done_for_you') {
+      if (pathChoice === 'done_for_you' || pathChoice === 'done_with_you') {
         const resolvedUrl = targetUrl && targetUrl !== '#' ? targetUrl : DONE_FOR_YOU_BOOKING_URL;
         if (resolvedUrl && resolvedUrl !== '#') {
           window.location.href = resolvedUrl;
         } else {
           const note = document.getElementById('path-status-note');
           if (note) {
-            note.textContent = 'Done For You selected. Your choice is saved. Add your booking link here when that page is ready.';
+            const label = pathChoice === 'done_with_you' ? 'Done With You' : 'Done For You';
+            note.textContent = label + ' selected. Your choice is saved. Add your booking link when that page is ready.';
           }
         }
         return false;

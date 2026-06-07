@@ -184,6 +184,35 @@
   .profile-bio { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 14px; color: var(--text2); line-height: 1.7; }
   .profile-bio.empty { color: var(--text3); font-style: italic; }
 
+  /* ── SPARK STATEMENT ── */
+  .spark-statement { margin-top: 1rem; font-size: 15px; font-style: italic; color: var(--gold); font-family: 'Playfair Display', serif; line-height: 1.5; }
+  .spark-statement.hidden { display: none; }
+
+  /* ── SOCIAL LINKS ── */
+  .social-links-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .social-link-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 700;
+    text-decoration: none; border: 1px solid var(--border); color: var(--text2);
+    background: var(--bg); transition: all 0.15s;
+  }
+  .social-link-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .social-links-row.hidden { display: none; }
+
+  /* ── MY TOOL CARD ── */
+  .my-tool-card {
+    margin-top: 1.25rem; padding: 1rem 1.25rem;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-sm); display: flex; align-items: center; gap: 12px;
+  }
+  .my-tool-card.hidden { display: none; }
+  .my-tool-icon { font-size: 22px; flex-shrink: 0; }
+  .my-tool-info { flex: 1; min-width: 0; }
+  .my-tool-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 2px; }
+  .my-tool-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .my-tool-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; color: var(--gold); font-weight: 700; text-decoration: none; }
+  .my-tool-link:hover { color: var(--gold-light); }
+
   /* ── EDIT FORM ── */
   .edit-form { display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); flex-direction: column; gap: 1rem; }
   .edit-form.open { display: flex; }
@@ -447,6 +476,33 @@
           <!-- Bio (read view) -->
           <div class="profile-bio empty" id="profile-bio-view">Loading…</div>
 
+          <!-- Spark Statement (read view) -->
+          <div class="spark-statement hidden" id="profile-spark-view"></div>
+
+          <!-- Social Links (read view) -->
+          <div class="social-links-row hidden" id="profile-social-row">
+            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-youtube-link">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1C4.5 20.4 12 20.4 12 20.4s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+              YouTube
+            </a>
+            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-facebook-link">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+              Facebook
+            </a>
+          </div>
+
+          <!-- My Tool Card (read view) -->
+          <div class="my-tool-card hidden" id="profile-tool-card">
+            <div class="my-tool-icon">🛠️</div>
+            <div class="my-tool-info">
+              <div class="my-tool-label">My Tool</div>
+              <div class="my-tool-name" id="profile-tool-name"></div>
+              <a href="#" target="_blank" rel="noopener" class="my-tool-link hidden" id="profile-tool-link">
+                View Tool <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+
           <!-- Edit form (hidden by default) -->
           <div class="edit-form" id="edit-form">
             <div class="form-field">
@@ -456,6 +512,26 @@
             <div class="form-field">
               <label class="form-label" for="edit-bio">Bio</label>
               <textarea class="form-textarea" id="edit-bio" placeholder="Tell the community about yourself, what you're building, your background…" maxlength="400" rows="4"></textarea>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-spark">Spark Statement</label>
+              <input class="form-input" id="edit-spark" type="text" placeholder="I help [who] do [what]" maxlength="120">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-youtube">YouTube Channel URL</label>
+              <input class="form-input" id="edit-youtube" type="url" placeholder="https://youtube.com/@yourchannel">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-facebook">Facebook Page URL</label>
+              <input class="form-input" id="edit-facebook" type="url" placeholder="https://facebook.com/yourpage">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-tool-name">My Tool Name</label>
+              <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-tool-url">My Tool URL</label>
+              <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
             </div>
             <div class="form-actions">
               <button class="save-btn" id="save-btn" onclick="saveProfile()">Save Changes</button>
@@ -640,6 +716,11 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     if (!currentUser) return;
     const nameVal = document.getElementById('edit-name').value.trim();
     const bioVal = document.getElementById('edit-bio').value.trim();
+    const sparkVal = document.getElementById('edit-spark').value.trim();
+    const youtubeVal = document.getElementById('edit-youtube').value.trim();
+    const facebookVal = document.getElementById('edit-facebook').value.trim();
+    const toolNameVal = document.getElementById('edit-tool-name').value.trim();
+    const toolUrlVal = document.getElementById('edit-tool-url').value.trim();
     if (!nameVal) {
       document.getElementById('edit-name').focus();
       return;
@@ -648,21 +729,39 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
-      const update = { displayName: nameVal, bio: bioVal };
+      const update = {
+        displayName: nameVal, bio: bioVal,
+        sparkStatement: sparkVal, youtubeUrl: youtubeVal,
+        facebookUrl: facebookVal, myToolName: toolNameVal, myToolUrl: toolUrlVal
+      };
       if (pendingPhotoURL) update.photoURL = pendingPhotoURL;
       await currentUser.updateProfile({ displayName: nameVal, ...(pendingPhotoURL && { photoURL: pendingPhotoURL }) });
       await db.collection('users').doc(currentUser.uid).update(update);
       pendingPhotoURL = null;
+
+      // Update read views
       document.getElementById('profile-name').textContent = nameVal;
       document.getElementById('sidebar-name').textContent = nameVal;
       const bioView = document.getElementById('profile-bio-view');
-      if (bioVal) {
-        bioView.textContent = bioVal;
-        bioView.classList.remove('empty');
-      } else {
-        bioView.textContent = 'No bio yet — add one by clicking Edit Profile.';
-        bioView.classList.add('empty');
-      }
+      if (bioVal) { bioView.textContent = bioVal; bioView.classList.remove('empty'); }
+      else { bioView.textContent = 'No bio yet — add one by clicking Edit Profile.'; bioView.classList.add('empty'); }
+      const sparkView = document.getElementById('profile-spark-view');
+      if (sparkVal) { sparkView.textContent = '"' + sparkVal + '"'; sparkView.classList.remove('hidden'); }
+      else { sparkView.classList.add('hidden'); }
+      const ytLink = document.getElementById('profile-youtube-link');
+      const fbLink = document.getElementById('profile-facebook-link');
+      const socialRow = document.getElementById('profile-social-row');
+      if (youtubeVal) { ytLink.href = youtubeVal; ytLink.classList.remove('hidden'); } else { ytLink.classList.add('hidden'); }
+      if (facebookVal) { fbLink.href = facebookVal; fbLink.classList.remove('hidden'); } else { fbLink.classList.add('hidden'); }
+      if (youtubeVal || facebookVal) socialRow.classList.remove('hidden'); else socialRow.classList.add('hidden');
+      const toolCard = document.getElementById('profile-tool-card');
+      if (toolNameVal) {
+        document.getElementById('profile-tool-name').textContent = toolNameVal;
+        toolCard.classList.remove('hidden');
+        const toolLink = document.getElementById('profile-tool-link');
+        if (toolUrlVal) { toolLink.href = toolUrlVal; toolLink.classList.remove('hidden'); } else { toolLink.classList.add('hidden'); }
+      } else { toolCard.classList.add('hidden'); }
+
       document.getElementById('success-msg').classList.add('show');
       setTimeout(() => {
         document.getElementById('success-msg').classList.remove('show');
@@ -756,6 +855,11 @@ function renderBadges(badges) {
 
     const displayName = data.displayName || user.displayName || user.email || 'Builder';
     const bio = data.bio || '';
+    const sparkStatement = data.sparkStatement || '';
+    const youtubeUrl = data.youtubeUrl || '';
+    const facebookUrl = data.facebookUrl || '';
+    const myToolName = data.myToolName || '';
+    const myToolUrl = data.myToolUrl || '';
     const role = data.userRole || 'member';
     const createdAt = data.createdAt || null;
     const photoURL = data.photoURL || user.photoURL || '';
@@ -801,9 +905,40 @@ function renderBadges(badges) {
       bioView.classList.add('empty');
     }
 
+    // Spark Statement view
+    const sparkView = document.getElementById('profile-spark-view');
+    if (sparkStatement) {
+      sparkView.textContent = '"' + sparkStatement + '"';
+      sparkView.classList.remove('hidden');
+    }
+
+    // Social links view
+    const ytLink = document.getElementById('profile-youtube-link');
+    const fbLink = document.getElementById('profile-facebook-link');
+    const socialRow = document.getElementById('profile-social-row');
+    if (youtubeUrl) { ytLink.href = youtubeUrl; ytLink.classList.remove('hidden'); }
+    if (facebookUrl) { fbLink.href = facebookUrl; fbLink.classList.remove('hidden'); }
+    if (youtubeUrl || facebookUrl) socialRow.classList.remove('hidden');
+
+    // My Tool view
+    if (myToolName) {
+      document.getElementById('profile-tool-name').textContent = myToolName;
+      document.getElementById('profile-tool-card').classList.remove('hidden');
+      if (myToolUrl) {
+        const toolLink = document.getElementById('profile-tool-link');
+        toolLink.href = myToolUrl;
+        toolLink.classList.remove('hidden');
+      }
+    }
+
     // Pre-fill edit inputs
     document.getElementById('edit-name').value = displayName;
     document.getElementById('edit-bio').value = bio;
+    document.getElementById('edit-spark').value = sparkStatement;
+    document.getElementById('edit-youtube').value = youtubeUrl;
+    document.getElementById('edit-facebook').value = facebookUrl;
+    document.getElementById('edit-tool-name').value = myToolName;
+    document.getElementById('edit-tool-url').value = myToolUrl;
 
     // Stats
     document.getElementById('stat-days').textContent = daysActive(createdAt);
