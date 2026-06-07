@@ -574,9 +574,12 @@
 <div id="checkin-overlay" class="hidden" style="display:none;">
   <div class="sw-card">
     <div class="sw-eyebrow">Before We Start</div>
-    <h1 style="font-size:26px;margin-bottom:0.5rem;">How are you feeling right now?</h1>
-    <p class="sw-sub" style="margin-bottom:1.5rem;">Be honest — good, behind, scattered, fired up. Whatever it is, say it. That's what we're starting from.</p>
-    <textarea id="checkin-input" placeholder="I've been avoiding it all week and I don't know why..." style="width:100%;min-height:100px;padding:12px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border-dark);border-radius:10px;color:#F0EDE6;font-family:'Lato',sans-serif;font-size:15px;line-height:1.65;resize:none;outline:none;transition:border-color 0.15s;" oninput="document.getElementById('checkin-btn').disabled=!this.value.trim();"></textarea>
+    <h1 style="font-size:26px;margin-bottom:0.5rem;">What are you working on today?</h1>
+    <p class="sw-sub" style="margin-bottom:1rem;">Name the specific task, project, or challenge — be as specific as you can.</p>
+    <input id="workon-input" type="text" placeholder="e.g. ToolSpark Challenge Lesson 3, my client portal MVP..." style="width:100%;padding:12px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border-dark);border-radius:10px;color:#F0EDE6;font-family:'Lato',sans-serif;font-size:15px;outline:none;transition:border-color 0.15s;box-sizing:border-box;" />
+    <h2 style="font-size:18px;margin:1.25rem 0 0.4rem;">How are you feeling right now?</h2>
+    <p class="sw-sub" style="margin-bottom:1rem;">Be honest — good, behind, scattered, fired up. Whatever it is, say it. That's what we're starting from.</p>
+    <textarea id="checkin-input" placeholder="I've been avoiding it all week and I don't know why..." style="width:100%;min-height:90px;padding:12px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border-dark);border-radius:10px;color:#F0EDE6;font-family:'Lato',sans-serif;font-size:15px;line-height:1.65;resize:none;outline:none;transition:border-color 0.15s;" oninput="document.getElementById('checkin-btn').disabled=!this.value.trim();"></textarea>
     <button id="checkin-btn" class="sw-btn" style="margin-top:1rem;" onclick="submitCheckin()" disabled>
       Let's Go →
     </button>
@@ -872,11 +875,12 @@ SESSION_SUMMARY_END`;
 // ─────────────────────────────────────
 // INIT
 // ─────────────────────────────────────
-async function init(feeling) {
+async function init(feeling, workingOn) {
   showThinking();
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   let opening = `[Today is ${todayStr}]\n`;
   const feelingContext = feeling ? `\nHow they're feeling right now (their words): "${feeling}"` : '';
+  const workingOnContext = workingOn ? `\nWhat they're working on this session: "${workingOn}"` : '';
 
   if (lastSession && lastSession.summary) {
     const s = parseSummary(lastSession.summary);
@@ -887,13 +891,13 @@ WINS: ${s.WINS || 'none mentioned'}
 STUCK_ON: ${s.STUCK_ON || 'none mentioned'}
 NEW_IDEAS: ${s.NEW_IDEAS || 'none'}
 NEXT_ACTION: ${s.NEXT_ACTION || 'not recorded'}
-ENERGY: ${s.ENERGY || 'unknown'}${feelingContext}
+ENERGY: ${s.ENERGY || 'unknown'}${feelingContext}${workingOnContext}
 
-Start the check-in warmly. Acknowledge how they're feeling if they shared it. Reference what they said they would work on next. Ask what actually happened since then. One question only — make it specific and direct.`;
+Start the check-in warmly. Acknowledge how they're feeling if they shared it.${workingOn ? ` They told you they're working on "${workingOn}" today — anchor your check-in to that specific task.` : ' Reference what they said they would work on next.'} Ask what actually happened since their last session. One question only — make it specific and direct.`;
   } else {
-    opening += `This is the user's first session with Sparky.${feelingContext}
+    opening += `This is the user's first session with Sparky.${feelingContext}${workingOnContext}
 
-Welcome them warmly in 2-3 sentences. Acknowledge how they're feeling if they shared it. Tell them you're here to help them stay focused and make real progress. Then ask your first question: what are they working on right now? One question only.`;
+Welcome them warmly in 2-3 sentences. Acknowledge how they're feeling if they shared it. Tell them you're here to help them stay focused and make real progress.${workingOn ? ` They told you they're working on "${workingOn}" today — acknowledge that specifically and ask what they want to accomplish with it this session.` : ' Then ask your first question: what are they working on right now?'} One question only.`;
   }
 
   try {
@@ -1001,10 +1005,11 @@ async function startAgent() {
 
 function submitCheckin() {
   const feeling = document.getElementById('checkin-input').value.trim();
+  const workingOn = document.getElementById('workon-input').value.trim();
   const overlay = document.getElementById('checkin-overlay');
   overlay.classList.add('hidden');
   setTimeout(() => { overlay.style.display = 'none'; }, 460);
-  init(feeling);
+  init(feeling, workingOn);
 }
 
 // ─────────────────────────────────────
