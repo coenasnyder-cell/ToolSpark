@@ -438,7 +438,6 @@ function renderSidebar() {
       '<div class="li-title">' + escHtml(l.lessonTitle || 'Untitled') + '</div>' +
       '<div class="li-meta">' +
       (l.lessonDuration ? '<span class="li-dur">' + l.lessonDuration + ' min</span>' : '') +
-      '<span class="li-type-icon">' + (typeIcon[l.lessonType] || '') + '</span>' +
       '</div></div>' +
       (statusChar ? '<span class="li-status-right">' + statusChar + '</span>' : '') +
       '</div>';
