@@ -652,37 +652,6 @@
       <p>Complete a Discover Your Breakthrough session and your personalised tool roadmap will appear here automatically.</p>
       <a href="clarity.html" class="empty-btn">Start My Breakthrough Session →</a>
     </div>
-    <div id="techstack-section" style="display:none;">
-      <div class="spark-section-card">
-        <div class="spark-section-header" style="background:rgba(196,98,45,0.06);">
-          <div class="spark-section-icon" style="background:rgba(196,98,45,0.1);border-color:rgba(196,98,45,0.18);color:var(--coral);">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <div>
-            <div class="spark-section-title">Tech Stack</div>
-            <div class="spark-section-desc">Your recommended platform and build tool</div>
-          </div>
-          <a href="techstack.html" class="section-tool-btn">Open tool →</a>
-        </div>
-        <div class="spark-section-body" id="techstack-body"></div>
-      </div>
-    </div>
-
-    <div id="techstack-empty" style="display:none;">
-      <div class="spark-section-card">
-        <div class="spark-section-header" style="background:rgba(196,98,45,0.04);">
-          <div class="spark-section-icon" style="background:rgba(196,98,45,0.08);border-color:rgba(196,98,45,0.15);color:var(--coral);opacity:0.6;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <div>
-            <div class="spark-section-title" style="color:var(--text2);">Tech Stack</div>
-            <div class="spark-section-desc">Find your recommended platform and build tool</div>
-          </div>
-          <a href="techstack.html" class="section-tool-btn" style="border-color:var(--coral);color:var(--coral);">Start →</a>
-        </div>
-      </div>
-    </div>
-
     <div id="prompt-section" style="display:none;">
       <div class="spark-section-card">
         <div class="spark-section-header" style="background:rgba(29,124,144,0.06);">
@@ -711,40 +680,6 @@
           </div>
           <a href="prompt-generator.html" class="section-tool-btn" style="border-color:#1D7C90;color:#1D7C90;">Start →</a>
         </div>
-      </div>
-    </div>
-
-    <!-- SOFT LAUNCH SECTION -->
-    <div class="spark-section-card">
-      <div class="spark-section-header" style="background:rgba(42,92,69,0.06);">
-        <div class="spark-section-icon" style="background:rgba(42,92,69,0.1);border-color:rgba(42,92,69,0.18);color:var(--green-light);">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        </div>
-        <div>
-          <div class="spark-section-title">Just Sparked</div>
-          <div class="spark-section-desc">Your tool is ready — let the community test it</div>
-        </div>
-        <a href="softlaunch.html" class="section-tool-btn" style="border-color:var(--green-light);color:var(--green-light);">My tool is ready →</a>
-      </div>
-      <div id="just-sparked-body" class="spark-section-body" style="border-top:1px solid var(--border);">
-        <!-- populated by JS -->
-      </div>
-    </div>
-
-    <!-- CERTIFICATION SECTION -->
-    <div class="spark-section-card" style="border-color:rgba(201,168,76,0.3);">
-      <div class="spark-section-header" style="background:rgba(201,168,76,0.06);">
-        <div class="spark-section-icon" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.25);color:var(--gold);font-size:20px;">
-          🎓
-        </div>
-        <div style="flex:1;">
-          <div class="spark-section-title">ToolSpark Certification</div>
-          <div class="spark-section-desc">This is the final step in the ToolSpark Certified Builder path</div>
-        </div>
-        <a href="graduation.html" class="section-tool-btn" style="border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);">Claim your certificate →</a>
-      </div>
-      <div style="padding:1rem 1.375rem;font-size:13px;color:var(--text2);line-height:1.75;border-top:1px solid var(--border);">
-        You've built your tool, launched it to the community, and collected real feedback. That's not nothing — that's everything. Complete your certification and earn your ToolSpark Certified Builder badge and certificate.
       </div>
     </div>
 
@@ -1207,7 +1142,6 @@
         sparkByUser, sparkByEmail, sparkByEmailLower,
         audienceByUser, audienceByEmail, audienceByEmailLower,
         clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm,
-        techstackByUser, techstackByEmail,
         promptResultDoc
       ] = await Promise.all([
         db.collection('spark_results').where('userId', '==', user.uid).get(),
@@ -1220,8 +1154,6 @@
         db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
         db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get(),
-        db.collection('techstack_results').where('userId', '==', user.uid).get(),
-        db.collection('techstack_results').where('accountEmail', '==', userEmailLower).get(),
         db.collection('prompt_results').doc(user.uid).get()
       ]);
 
@@ -1327,29 +1259,6 @@
         }
       }
 
-      // Render Tech Stack section from most recent techstack_results doc
-      const techstackMap = new Map();
-      [techstackByUser, techstackByEmail].forEach(snap => {
-        snap.forEach(d => { if (!techstackMap.has(d.id)) techstackMap.set(d.id, d); });
-      });
-      const techstackSessions = Array.from(techstackMap.values()).sort((a, b) => {
-        const aT = a.data().createdAt?.toMillis?.() || 0;
-        const bT = b.data().createdAt?.toMillis?.() || 0;
-        return bT - aT;
-      });
-      if (techstackSessions.length) {
-        const ts = techstackSessions[0].data();
-        const body = document.getElementById('techstack-body');
-        body.innerHTML = [
-          ts.buildTool   ? `<div><div class="spark-field-label" style="color:var(--coral);">Where You're Building</div><div class="spark-field-value">${escapeHtml(ts.buildTool)}</div></div>` : '',
-          ts.creditNote  ? `<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(196,98,45,0.07);border:1px solid rgba(196,98,45,0.18);border-radius:8px;padding:10px 14px;"><svg width="13" height="13" style="flex-shrink:0;margin-top:2px;color:var(--coral);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div style="font-size:12px;color:var(--coral);line-height:1.6;">${escapeHtml(ts.creditNote)}</div></div>` : '',
-          ts.platform    ? `<div><div class="spark-field-label" style="color:var(--coral);">Your Platform</div><div class="spark-field-value">${escapeHtml(ts.platform)}</div></div>` : ''
-        ].filter(Boolean).join('');
-        document.getElementById('techstack-section').style.display = 'block';
-      } else {
-        document.getElementById('techstack-empty').style.display = 'block';
-      }
-
       // Render Prompt Generator section
       if (promptResultDoc.exists) {
         const pd = promptResultDoc.data();
@@ -1365,49 +1274,6 @@
       } else {
         document.getElementById('prompt-empty').style.display = 'block';
       }
-      // Just Sparked — show their post or encouragement
-      try {
-        const sparkSnap = await db.collection('threads')
-          .where('authorId', '==', user.uid)
-          .where('category', '==', 'Just Sparked')
-          .get();
-
-        const sparkBody = document.getElementById('just-sparked-body');
-        const sparkDocs = sparkSnap.docs.sort((a, b) =>
-          (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0)
-        );
-        if (sparkDocs.length) {
-          const post = sparkDocs[0].data();
-          const threadId = sparkDocs[0].id;
-          const preview = (post.content || '').split('\n')[0].substring(0, 200);
-          const postedDate = post.createdAt
-            ? post.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            : '';
-          sparkBody.innerHTML = `
-            <div>
-              <div class="spark-field-label" style="color:var(--green-light);">Your Post</div>
-              <div class="spark-field-value" style="font-size:13px;color:var(--text2);line-height:1.7;">${escapeHtml(preview)}${post.content && post.content.length > 200 ? '…' : ''}</div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-              ${postedDate ? `<div style="font-size:11px;color:var(--text3);">Posted ${postedDate}</div>` : ''}
-              <a href="community.html?thread=${threadId}" style="font-size:12px;font-weight:700;color:var(--green-light);text-decoration:none;display:inline-flex;align-items:center;gap:5px;">View in community →</a>
-            </div>`;
-        } else {
-          sparkBody.innerHTML = `
-
-            <div style="display:flex;gap:14px;align-items:flex-start;">
-              <div style="font-size:22px;flex-shrink:0;">🚀</div>
-              <div>
-                <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">You're closer than you think.</div>
-                <div style="font-size:13px;color:var(--text2);line-height:1.75;">The people who get the most out of ToolSpark aren't the ones who built the most polished tool — they're the ones who shared it first. One post in the community is all it takes to go from builder to builder who ships.</div>
-                <a href="softlaunch.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 18px;background:rgba(42,92,69,0.12);border:1px solid rgba(42,92,69,0.3);border-radius:20px;font-size:12px;font-weight:700;color:var(--green-light);text-decoration:none;transition:all 0.15s;">Share your tool with the community →</a>
-              </div>
-            </div>`;
-        }
-      } catch(e) {
-        // fail silently — not critical
-      }
-
     } catch(e) {
       console.error('Roadmap load error:', e);
       document.getElementById('loading').textContent = 'Could not load your roadmap right now.';

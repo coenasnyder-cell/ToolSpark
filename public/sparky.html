@@ -967,25 +967,25 @@ function showCertifiedWelcome(name, toolName) {
   const card = document.querySelector('#agentwelcome .sw-card');
   if (!card) return;
   card.innerHTML = `
-    <div class="sw-eyebrow">ToolSpark · Monetization</div>
-    <h1>Your <em>Monetization Guide</em></h1>
-    <p class="sw-sub">Congratulations on certifying, ${name}. You built <strong style="color:var(--gold-light);">${escHtml(toolName)}</strong> — now it's time to build your offer, get comfortable with marketing it, and put it in front of the people it was made for.</p>
+    <div class="sw-eyebrow">ToolSpark · Accountability</div>
+    <h1><em>Sparky</em></h1>
+    <p class="sw-sub">You built <strong style="color:var(--gold-light);">${escHtml(toolName)}</strong> — now let's make sure it actually goes somewhere. Sparky keeps you moving, session by session.</p>
     <div class="sw-promises">
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Knows your tool</strong> — every session starts knowing what you built and where you are in the launch</span>
+        <span><strong>Remembers where you left off</strong> — picks up from your last session so you never start from scratch</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Marketing support</strong> — helps you work through the fear of putting yourself out there, one step at a time</span>
+        <span><strong>Keeps you on one thing</strong> — parks the new ideas and redirects you back to what matters most right now</span>
       </div>
       <div class="sw-promise">
         <span class="sw-promise-icon">✦</span>
-        <span><strong>Step by step</strong> — offer, visibility, marketplace. One focus at a time</span>
+        <span><strong>Honest and direct</strong> — celebrates every win, calls out every stall, asks the one sharp question that moves you forward</span>
       </div>
     </div>
     <div class="sw-time">5–10 minutes · Saves your progress automatically</div>
-    <button class="sw-btn" onclick="startAgent()">Let's Launch ${escHtml(toolName)} →</button>
+    <button class="sw-btn" onclick="startAgent()">Start Check-In →</button>
     <div class="sw-note">Your sessions are saved privately to your account.</div>`;
 }
 
