@@ -91,7 +91,7 @@
   .card-title { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 1.25rem; }
 
   /* ── CONTENT TYPE TOGGLE ── */
-  .content-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .content-type-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
   .content-type-btn { padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'Lato', sans-serif; }
   .content-type-btn:hover { border-color: var(--gold); }
   .content-type-btn.selected { border-color: var(--gold); background: var(--gold-dim); }
@@ -150,11 +150,20 @@
   .badge-bold { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.2); color: #C4622D; }
   .badge-story { background: rgba(75,63,138,0.1); border: 1px solid rgba(75,63,138,0.2); color: #9B8FD0; }
   .badge-news { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .badge-bip-build { background: rgba(29,124,144,0.1); border: 1px solid rgba(29,124,144,0.2); color: #1D7C90; }
+  .badge-bip-mishap { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.2); color: #C4622D; }
+  .badge-bip-win { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); }
   .post-format-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
   .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; background: var(--bg); font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
   .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
   .copy-btn.copied { border-color: var(--green-light); color: var(--green-light); background: rgba(42,92,69,0.06); }
-  .post-body { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; }
+  .post-body { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; border-bottom: 1px solid var(--border); }
+  .image-prompt-wrap { padding: 0.875rem 1.25rem; background: rgba(201,168,76,0.04); display: flex; align-items: flex-start; gap: 10px; }
+  .image-prompt-label { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .image-prompt-text { font-size: 12px; color: var(--text2); line-height: 1.6; flex: 1; font-style: italic; }
+  .image-prompt-copy { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; background: none; font-family: 'Lato', sans-serif; font-size: 10px; font-weight: 700; color: var(--gold); cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; margin-top: 1px; }
+  .image-prompt-copy:hover { background: rgba(201,168,76,0.1); }
+  .image-prompt-copy.copied { border-color: var(--green-light); color: var(--green-light); }
 
   /* ── LOADING STATE ── */
   .loading-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; margin-bottom: 1rem; }
@@ -171,6 +180,10 @@
   .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
 
   @media (max-width: 1023px) { .main-wrap { margin-left: 60px; } .nav-item { justify-content: center; padding: 10px; } .nav-item span, .logo-tag, .sidebar-footer { display: none; } .sidebar-logo { justify-content: center; } }
+  /* ── BIP FIELDS ── */
+  .bip-fields { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.25rem; }
+  .bip-fields.visible { display: flex; flex-direction: column; gap: 10px; }
+
   @media (max-width: 767px) {
     .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
     .sidebar.open { transform: translateX(0); }
@@ -245,6 +258,10 @@
             <div class="content-type-btn-label"><span class="dot"></span> Tool Launch</div>
             <div class="content-type-btn-sub">Announce your AI tool to your audience</div>
           </button>
+          <button class="content-type-btn" id="btn-bip" onclick="selectContentType('bip')">
+            <div class="content-type-btn-label"><span class="dot"></span> Build in Public</div>
+            <div class="content-type-btn-sub">Share your real build journey — wins, mishaps, and lessons</div>
+          </button>
         </div>
       </div>
 
@@ -253,6 +270,14 @@
         <div class="field-label" style="margin-bottom:2px;">Tell us about your tool</div>
         <input class="field-input" id="tool-name" type="text" placeholder="Tool name (e.g. Content Creator Pro)">
         <input class="field-input" id="tool-oneliner" type="text" placeholder="What it does in one sentence (e.g. helps coaches write 3 posts a day in minutes)">
+      </div>
+
+      <!-- Build in Public Fields (hidden by default) -->
+      <div class="bip-fields" id="bip-fields">
+        <div class="field-label" style="margin-bottom:2px;">What's happening in your build?</div>
+        <input class="field-input" id="bip-what" type="text" placeholder="What did you build or work on? (e.g. finished my onboarding flow, launched to first 10 users)">
+        <input class="field-input" id="bip-mishap" type="text" placeholder="What went sideways, surprised you, or made you laugh? (optional)">
+        <input class="field-input" id="bip-lesson" type="text" placeholder="What's the win or lesson? (optional)">
       </div>
 
       <!-- Niche -->
@@ -286,6 +311,15 @@
           <button class="tone-btn selected" onclick="selectTone(this, 'conversational')">Conversational</button>
           <button class="tone-btn" onclick="selectTone(this, 'motivational')">Motivational</button>
           <button class="tone-btn" onclick="selectTone(this, 'educational')">Educational</button>
+        </div>
+      </div>
+
+      <!-- Post Length -->
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">Post Length</label>
+        <div class="tone-row">
+          <button class="tone-btn selected" id="len-short" onclick="selectLength(this, 'short')">Short</button>
+          <button class="tone-btn" id="len-long" onclick="selectLength(this, 'long')">Long</button>
         </div>
       </div>
     </div>
@@ -336,6 +370,7 @@
   const MODEL = "claude-sonnet-4-6";
   let selectedTone = 'conversational';
   let selectedContentType = 'general';
+  let selectedLength = 'short';
 
   async function authHeaders() {
     const user = auth.currentUser;
@@ -347,8 +382,9 @@
     selectedContentType = type;
     document.getElementById('btn-general').classList.toggle('selected', type === 'general');
     document.getElementById('btn-launch').classList.toggle('selected', type === 'launch');
-    const launchFields = document.getElementById('launch-fields');
-    launchFields.classList.toggle('visible', type === 'launch');
+    document.getElementById('btn-bip').classList.toggle('selected', type === 'bip');
+    document.getElementById('launch-fields').classList.toggle('visible', type === 'launch');
+    document.getElementById('bip-fields').classList.toggle('visible', type === 'bip');
   }
 
   function toggleAutoTopic() {
@@ -361,7 +397,13 @@
 
   function selectTone(btn, tone) {
     selectedTone = tone;
-    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
+    btn.closest('.tone-row').querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectLength(btn, length) {
+    selectedLength = length;
+    btn.closest('.tone-row').querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
   }
 
@@ -373,6 +415,57 @@
     const toolName = document.getElementById('tool-name').value.trim();
     const toolOneliner = document.getElementById('tool-oneliner').value.trim();
 
+    if (selectedContentType === 'bip') {
+      const bipWhat = document.getElementById('bip-what').value.trim();
+      const bipMishap = document.getElementById('bip-mishap').value.trim();
+      const bipLesson = document.getElementById('bip-lesson').value.trim();
+
+      const bipLen = selectedLength === 'short' ? '2-3 sentences' : '5-7 sentences';
+      return `You are a viral content strategist who specialises in "build in public" content for introverts who share their real journey building online. You write for Facebook — text-only, no hashtags, no fluff.
+
+Creator niche: ${niche || 'building an AI tool'}
+Ideal audience: ${audience || "people interested in the creator's journey"}
+Tone: ${selectedTone}
+Post length: ${selectedLength === 'short' ? 'SHORT — keep each post to 2-3 sentences maximum. Punchy and direct.' : 'LONG — 5-7 sentences. Room to breathe and tell the story.'}
+What they built or worked on: ${bipWhat}${bipMishap ? `\nWhat went sideways or surprised them: ${bipMishap}` : ''}${bipLesson ? `\nWin or lesson: ${bipLesson}` : ''}
+
+Write exactly 3 Facebook posts that document this real build moment. Make them feel raw, honest, and human — not a polished success story. Each post: ${bipLen}. Do NOT use hashtags.
+
+FORMAT 1 — BEHIND THE BUILD
+A real-talk post about what they actually worked on. Feels like a text message to a friend. Make it specific and relatable.
+
+FORMAT 2 — THE MISHAP
+A self-aware, slightly funny post about what went wrong or surprised them. Makes people laugh and connect.
+
+FORMAT 3 — THE WIN
+A grounded, genuine celebration of a small step forward. Makes the reader want to cheer them on.
+
+Also write one ChatGPT image prompt for each post — a short description of a lifestyle photo or flat-lay image that would pair well with that post on Facebook. No text in the image, no faces. Mood and feeling only.
+
+Return your response in EXACTLY this structure, with no extra commentary:
+
+POST_1_START
+[Behind the Build post here]
+POST_1_END
+IMG_1_START
+[Image prompt for post 1]
+IMG_1_END
+
+POST_2_START
+[The Mishap post here]
+POST_2_END
+IMG_2_START
+[Image prompt for post 2]
+IMG_2_END
+
+POST_3_START
+[The Win post here]
+POST_3_END
+IMG_3_START
+[Image prompt for post 3]
+IMG_3_END`;
+    }
+
     const topicLine = autoTopic
       ? 'Choose a high-performing topic that will resonate deeply with this audience right now.'
       : `Topic: ${topic}`;
@@ -381,39 +474,55 @@
       ? `\n\nIMPORTANT CONTEXT: The creator is launching an AI tool called "${toolName}"${toolOneliner ? ` — ${toolOneliner}` : ''}. All three posts must be written through the lens of this tool launch. The Bold Statement should challenge a belief their clients have about the problem this tool solves. The Personal Story should share why the creator built it. The Breaking News post should announce the launch.`
       : '';
 
+    const shortInstr = selectedLength === 'short'
+      ? 'SHORT posts only — 2-3 sentences maximum per post. Punchy and direct. Stop before the Facebook "See more" cut.'
+      : 'LONG posts — 5-8 sentences per post. Room to tell the full story.';
+
     return `You are a viral content strategist who has studied millions of high-performing social media posts. You specialise in written Facebook content for introverts who want to grow their audience without video or camera.
 
 Niche: ${niche}
 Ideal Audience: ${audience}
 Tone: ${selectedTone}
+Post length: ${shortInstr}
 ${topicLine}${launchContext}
 
 First, silently identify the top 3 emotional triggers for this audience — their fears, desires, frustrations, and what they secretly want. Do NOT show this analysis to the user. Use these triggers to inform all three posts.
 
-Then write exactly 3 Facebook posts in the following formats. Use clear separators between each post.
+Then write exactly 3 Facebook posts in the following formats. Do NOT use hashtags.
 
 FORMAT 1 — BOLD STATEMENT
-A single punchy, scroll-stopping line that challenges a common belief in this niche. Make it bold, quotable, and slightly controversial. No more than 2 sentences. Do NOT use hashtags.
+A punchy, scroll-stopping line that challenges a common belief in this niche. Bold, quotable, slightly controversial.
 
 FORMAT 2 — PERSONAL STORY
-A vulnerable, authentic post written in a conversational handwritten style. Should feel like a diary entry or a real moment — not polished or corporate. 4-8 sentences. Do NOT use hashtags.
+Vulnerable and authentic — feels like a diary entry or a real moment. Conversational, not polished or corporate.
 
 FORMAT 3 — BREAKING NEWS
-Written like a news headline announcing a surprising result or insight. Opens with a bold statement of fact or result, then backs it up with 2-3 supporting lines. Do NOT use hashtags.
+Opens with a bold statement of fact or result, backed up with 2-3 supporting lines.
+
+Also write one ChatGPT image prompt for each post — a short description of a lifestyle photo or flat-lay image that pairs well with that post on Facebook. No text in the image, no faces. Mood and feeling only.
 
 Return your response in EXACTLY this structure, with no extra commentary:
 
 POST_1_START
 [Bold Statement post here]
 POST_1_END
+IMG_1_START
+[Image prompt for post 1]
+IMG_1_END
 
 POST_2_START
 [Personal Story post here]
 POST_2_END
+IMG_2_START
+[Image prompt for post 2]
+IMG_2_END
 
 POST_3_START
 [Breaking News post here]
-POST_3_END`;
+POST_3_END
+IMG_3_START
+[Image prompt for post 3]
+IMG_3_END`;
   }
 
   async function generatePosts() {
@@ -422,9 +531,14 @@ POST_3_END`;
     const autoTopic = document.getElementById('auto-topic').checked;
     const topic = document.getElementById('topic-input').value.trim();
 
-    if (!niche) { document.getElementById('niche').focus(); return; }
-    if (!audience) { document.getElementById('audience').focus(); return; }
-    if (!autoTopic && !topic) { document.getElementById('topic-input').focus(); return; }
+    if (selectedContentType === 'bip') {
+      const bipWhat = document.getElementById('bip-what').value.trim();
+      if (!bipWhat) { document.getElementById('bip-what').focus(); return; }
+    } else {
+      if (!niche) { document.getElementById('niche').focus(); return; }
+      if (!audience) { document.getElementById('audience').focus(); return; }
+      if (!autoTopic && !topic) { document.getElementById('topic-input').focus(); return; }
+    }
 
     const btn = document.getElementById('generate-btn');
     const spinner = document.getElementById('btn-spinner');
@@ -448,7 +562,7 @@ POST_3_END`;
         headers: await authHeaders(),
         body: JSON.stringify({
           model: MODEL,
-          max_tokens: 1200,
+          max_tokens: 1800,
           messages: [{ role: 'user', content: buildPrompt() }],
           _meta: { tool: 'content-generator' }
         })
@@ -461,11 +575,15 @@ POST_3_END`;
       const post1 = extract(text, 'POST_1_START', 'POST_1_END');
       const post2 = extract(text, 'POST_2_START', 'POST_2_END');
       const post3 = extract(text, 'POST_3_START', 'POST_3_END');
+      const img1  = extract(text, 'IMG_1_START', 'IMG_1_END');
+      const img2  = extract(text, 'IMG_2_START', 'IMG_2_END');
+      const img3  = extract(text, 'IMG_3_START', 'IMG_3_END');
 
+      const isBip = selectedContentType === 'bip';
       postsWrap.innerHTML = [
-        renderPostCard('Bold Statement', 'badge-bold', post1, 1),
-        renderPostCard('Personal Story', 'badge-story', post2, 2),
-        renderPostCard('Breaking News', 'badge-news', post3, 3),
+        renderPostCard(isBip ? 'Behind the Build' : 'Bold Statement', isBip ? 'badge-bip-build' : 'badge-bold', post1, 1, img1),
+        renderPostCard(isBip ? 'The Mishap'        : 'Personal Story', isBip ? 'badge-bip-mishap' : 'badge-story', post2, 2, img2),
+        renderPostCard(isBip ? 'The Win'           : 'Breaking News',  isBip ? 'badge-bip-win'   : 'badge-news',  post3, 3, img3),
       ].join('');
 
     } catch(err) {
@@ -485,17 +603,24 @@ POST_3_END`;
     return text.slice(start + startTag.length, end).trim();
   }
 
-  function renderPostCard(name, badgeClass, content, index) {
+  function renderPostCard(name, badgeClass, content, index, imgPrompt) {
+    const shortLabel = badgeClass.startsWith('badge-bip') ? (index === 1 ? 'Build' : index === 2 ? 'Mishap' : 'Win') : (index === 1 ? 'Bold' : index === 2 ? 'Story' : 'News');
+    const imgSection = imgPrompt ? `
+      <div class="image-prompt-wrap">
+        <span class="image-prompt-label">📷 Image</span>
+        <span class="image-prompt-text" id="img-body-${index}">${escHtml(imgPrompt)}</span>
+        <button class="image-prompt-copy" onclick="copyImg(${index}, this)">Copy</button>
+      </div>` : '';
     return `<div class="post-card">
       <div class="post-card-header">
-        <span class="post-format-badge ${badgeClass}">${index === 1 ? 'Bold' : index === 2 ? 'Story' : 'News'}</span>
+        <span class="post-format-badge ${badgeClass}">${shortLabel}</span>
         <span class="post-format-name">${escHtml(name)}</span>
         <button class="copy-btn" id="copy-btn-${index}" onclick="copyPost(${index}, this)">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           Copy
         </button>
       </div>
-      <div class="post-body" id="post-body-${index}">${escHtml(content)}</div>
+      <div class="post-body" id="post-body-${index}">${escHtml(content)}</div>${imgSection}
     </div>`;
   }
 
@@ -508,6 +633,15 @@ POST_3_END`;
         btn.classList.remove('copied');
         btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
       }, 2000);
+    });
+  }
+
+  function copyImg(index, btn) {
+    const text = document.getElementById('img-body-' + index).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'Copy'; }, 2000);
     });
   }
 
