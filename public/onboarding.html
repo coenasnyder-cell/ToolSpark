@@ -71,132 +71,99 @@
   .logo-text span { color: var(--gold); }
   .logo-tag { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; margin-top: 4px; }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 
-  .step-dots { display: flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all 0.2s; flex-shrink: 0; }
-  .dot.active { background: var(--gold); width: 18px; border-radius: 3px; }
-  .dot.done { background: rgba(201,168,76,0.4); }
-
+  /* ── WELCOME STEP ── */
+  .welcome-wrap { padding: 2rem; }
   .step { display: none; }
   .step.visible { display: block; animation: fadeUp 0.3s ease; }
 
-  .step-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 10px; }
-  .step-question { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 6px; }
-  .step-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 1.5rem; }
-
-  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem; }
-
-  /* Stacked full-width option cards for longer answers */
-  .option-cards { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
-  .option-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); cursor: pointer; transition: all 0.15s; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; color: var(--text2); line-height: 1.4; }
-  .option-card:hover { border-color: rgba(201,168,76,0.4); color: var(--text); }
-  .option-card.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-  .option-card-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-  .option-card.selected .option-card-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); display: block; }
-  .chip {
-    padding: 10px 16px;
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text2);
-    background: var(--surface2);
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.4;
-  }
-  .chip:hover { border-color: rgba(201,168,76,0.4); color: var(--text); }
-  .chip.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-
-  /* ── CHECKBOX LIST ── */
-  .check-group { margin-bottom: 1.25rem; }
-  .check-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text3);
-    margin-bottom: 8px;
-    display: block;
-  }
-  .check-items { display: flex; flex-direction: column; gap: 4px; }
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface2);
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-  }
-  .check-item:hover { border-color: rgba(201,168,76,0.3); }
-  .check-item.checked { background: var(--gold-dim); border-color: var(--gold); }
-  .check-box {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    border-radius: 4px;
-    background: var(--surface);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-  .check-item.checked .check-box {
-    background: var(--gold);
-    border-color: var(--gold);
-  }
-  .check-box svg { display: none; }
-  .check-item.checked .check-box svg { display: block; }
-  .check-label { font-size: 14px; font-weight: 700; color: var(--text2); transition: color 0.15s; }
-  .check-item.checked .check-label { color: var(--text); }
-
-  .other-input {
-    display: none;
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 11px 14px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-    margin-top: 6px;
-    margin-bottom: 0.25rem;
-  }
-  .other-input::placeholder { color: var(--text3); }
-  .other-input:focus { border-color: var(--gold); }
-  .other-input.visible { display: block; }
+  .welcome-icon { font-size: 36px; margin-bottom: 1rem; text-align: center; }
+  .welcome-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 0.75rem; text-align: center; }
+  .welcome-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 1.75rem; text-align: center; }
+  .welcome-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.75rem; }
+  .welcome-step-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .welcome-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--gold); flex-shrink: 0; }
+  .welcome-step-label { font-size: 13px; font-weight: 700; color: var(--text2); }
 
   .next-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--gold);
-    color: #0C0B09;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 900;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.03em;
-    margin-top: 0.5rem;
+    width: 100%; padding: 13px; background: var(--gold); color: #0C0B09; border: none;
+    border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px;
+    font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
   }
-  .next-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); }
-  .next-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
+  .next-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
   .skip-link { display: block; text-align: center; margin-top: 1rem; font-size: 12px; color: var(--text3); cursor: pointer; transition: color 0.15s; text-decoration: none; }
   .skip-link:hover { color: var(--text2); }
+
+  /* ── CHAT STEP ── */
+  #step-chat { display: none; flex-direction: column; }
+  #step-chat.visible { display: flex; animation: fadeUp 0.3s ease; }
+
+  .chat-messages {
+    height: 360px;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg-row { display: flex; align-items: flex-end; gap: 8px; }
+  .msg-row.sparky { align-self: flex-start; }
+  .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .sparky-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C 0%, #8B6914 100%);
+    border: 1px solid rgba(201,168,76,0.4);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 0 10px rgba(201,168,76,0.2);
+  }
+
+  .msg { display: flex; flex-direction: column; gap: 4px; max-width: 82%; }
+  .msg-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); padding: 0 4px; }
+  .msg-row.user .msg-label { text-align: right; }
+  .msg-bubble { padding: 11px 14px; font-size: 14px; line-height: 1.65; }
+  .msg-row.sparky .msg-bubble { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 14px 14px 14px 4px; }
+  .msg-row.user .msg-bubble { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); color: var(--text); border-radius: 14px 14px 4px 14px; }
+
+  .typing-wrap { align-self: flex-start; display: flex; align-items: flex-end; gap: 8px; }
+  .typing-bubble { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px 14px 14px 4px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+  .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); animation: typingPulse 1.2s infinite ease-in-out; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingPulse { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+  .chat-input-area { padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text);
+    outline: none; resize: none; max-height: 100px; min-height: 42px;
+    transition: border-color 0.15s; line-height: 1.5;
+  }
+  .chat-input::placeholder { color: var(--text3); }
+  .chat-input:focus { border-color: rgba(201,168,76,0.4); }
+  .chat-send-btn {
+    width: 42px; height: 42px; border-radius: 50%; background: var(--gold);
+    border: none; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  }
+  .chat-send-btn:hover:not(:disabled) { background: var(--gold-light); transform: scale(1.05); }
+  .chat-send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .chat-cta { padding: 1rem; border-top: 1px solid var(--border); display: none; }
+  .chat-cta.visible { display: block; animation: fadeUp 0.3s ease; }
+  .chat-cta-btn {
+    width: 100%; padding: 13px; background: var(--gold); color: #0C0B09; border: none;
+    border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px;
+    font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .chat-cta-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
 </style>
 </head>
 <body>
@@ -207,142 +174,51 @@
     <div class="logo-tag">Builder Platform</div>
   </div>
 
-  <div class="card">
-    <div class="step-dots" id="dots"></div>
+  <div class="card" id="main-card">
 
-    <!-- Step A: Where are you starting from? -->
-    <div class="step visible" id="step-A">
-      <div class="step-eyebrow">One quick step before you dive in</div>
-      <div class="step-question">Where are you starting from?</div>
-      <div class="step-sub">This helps us point you to the right tools and skip the ones you don't need yet.</div>
-      <div class="chips">
-        <div class="chip" onclick="selectSetup(this, 'scratch')">Starting from scratch — nothing set up yet</div>
-        <div class="chip" onclick="selectSetup(this, 'existing')">I have a website but no community or course</div>
-        <div class="chip" onclick="selectSetup(this, 'existing')">I have a community but no AI tools</div>
-        <div class="chip" onclick="selectSetup(this, 'existing')">I already have courses or products running</div>
+    <!-- Step 0: Welcome -->
+    <div class="step visible" id="step-0">
+      <div class="welcome-wrap">
+        <div class="welcome-icon">&#9889;</div>
+        <div class="welcome-title">Welcome to the AI ToolSpark Challenge</div>
+        <div class="welcome-sub">You're in. Here's what happens next — takes less than 5 minutes.</div>
+        <div class="welcome-steps">
+          <div class="welcome-step-row">
+            <div class="welcome-step-num">1</div>
+            <div class="welcome-step-label">Quick chat with Sparky to get you set up</div>
+          </div>
+          <div class="welcome-step-row">
+            <div class="welcome-step-num">2</div>
+            <div class="welcome-step-label">Watch the Start Here video</div>
+          </div>
+          <div class="welcome-step-row">
+            <div class="welcome-step-num">3</div>
+            <div class="welcome-step-label">Unlock your challenge &amp; get building</div>
+          </div>
+        </div>
+        <button class="next-btn" onclick="goFromWelcome()">Let's go &#8594;</button>
+        <a class="skip-link" onclick="skipAll()">Skip setup for now</a>
       </div>
-      <button class="next-btn" id="next-A" disabled onclick="goFromA()">Next →</button>
-      <a class="skip-link" onclick="skipAll()">Skip for now</a>
     </div>
 
-    <!-- Step B: What tools? (conditional — only shown if not scratch) -->
-    <div class="step" id="step-B">
-      <div class="step-eyebrow">Good to know</div>
-      <div class="step-question">What tools are you currently using?</div>
-      <div class="step-sub">Check everything that applies. This helps us build around what you already have instead of starting over.</div>
-
-      <div class="check-group">
-        <span class="check-group-label">Platform</span>
-        <div class="check-items">
-          <div class="check-item" onclick="toggleTool(this, 'Skool')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Skool</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'GoHighLevel (GHL)')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">GoHighLevel (GHL)</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'ClickFunnels')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">ClickFunnels</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'Mighty Networks')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Mighty Networks</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'Kajabi')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Kajabi</span>
-          </div>
-        </div>
+    <!-- Step chat: Sparky onboarding -->
+    <div class="step" id="step-chat">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-area" id="chat-input-area">
+        <textarea
+          class="chat-input"
+          id="chat-input"
+          placeholder="Type your reply..."
+          rows="1"
+          disabled
+        ></textarea>
+        <button class="chat-send-btn" id="chat-send-btn" onclick="handleSend()" disabled title="Send">
+          <svg width="18" height="18" fill="none" stroke="#0C0B09" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
       </div>
-
-      <div class="check-group">
-        <span class="check-group-label">Email</span>
-        <div class="check-items">
-          <div class="check-item" onclick="toggleTool(this, 'Mailchimp')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Mailchimp</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'ActiveCampaign')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">ActiveCampaign</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'ConvertKit (Kit)')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">ConvertKit (Kit)</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'Loops')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Loops</span>
-          </div>
-          <div class="check-item" onclick="toggleTool(this, 'AWeber')">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">AWeber</span>
-          </div>
-        </div>
+      <div class="chat-cta" id="chat-cta">
+        <button class="chat-cta-btn" onclick="goToVideo()">Watch the Start Here Video &#8594;</button>
       </div>
-
-      <div class="check-group">
-        <span class="check-group-label">Other</span>
-        <div class="check-items">
-          <div class="check-item" id="other-check-item" onclick="toggleOther(this)">
-            <div class="check-box"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="#0C0B09" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="check-label">Something else</span>
-          </div>
-        </div>
-        <input
-          class="other-input"
-          id="tools-other-input"
-          type="text"
-          placeholder="e.g. Kajabi, Systeme.io, Teachable..."
-          oninput="onOtherToolInput()"
-        />
-      </div>
-
-      <button class="next-btn" id="next-B" onclick="goToStep('C')" style="margin-top:1rem;">Next →</button>
-      <a class="skip-link" onclick="skipPlatform()">Nothing set up yet / skip this one</a>
-    </div>
-
-    <!-- Step C: What do you want to build? -->
-    <div class="step" id="step-C">
-      <div class="step-eyebrow">Almost there</div>
-      <div class="step-question">How clear are you on what you want to build?</div>
-      <div class="step-sub">Be honest — this shapes where we start you so you're not sitting through steps you don't need.</div>
-      <div class="option-cards">
-        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
-          <div class="option-card-dot"></div>
-          I know my skills and exactly what I want to build
-        </div>
-        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
-          <div class="option-card-dot"></div>
-          I know what I'm good at but not sure what to build with it
-        </div>
-        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
-          <div class="option-card-dot"></div>
-          I have some ideas but need help figuring out if they're right
-        </div>
-        <div class="option-card" onclick="selectOption(this, 'clarityLevel')">
-          <div class="option-card-dot"></div>
-          I'm not sure yet — I need to find out what I have to offer first
-        </div>
-      </div>
-      <button class="next-btn" id="next-C" disabled onclick="goToStep('D')">Next →</button>
-      <a class="skip-link" onclick="skipAll()">Skip for now</a>
-    </div>
-
-    <!-- Step D: Tech comfort -->
-    <div class="step" id="step-D">
-      <div class="step-eyebrow">Last one</div>
-      <div class="step-question">How do you feel about tech?</div>
-      <div class="step-sub">Be honest — this shapes which tools we recommend so you don't end up with something that slows you down.</div>
-      <div class="chips">
-        <div class="chip" onclick="selectSimple(this, 'techComfort')">I avoid it as much as possible</div>
-        <div class="chip" onclick="selectSimple(this, 'techComfort')">I can follow instructions but I don't code</div>
-        <div class="chip" onclick="selectSimple(this, 'techComfort')">I'm comfortable figuring things out</div>
-      </div>
-      <button class="next-btn" id="next-D" disabled onclick="finish()">Let's go →</button>
-      <a class="skip-link" onclick="skipAll()">Skip for now</a>
     </div>
 
   </div>
@@ -350,166 +226,280 @@
 
 <script>
 let currentUser = null;
-let hasPlatformStep = false;
+let firstName = '';
+let chatBusy = false;
+let chatDone = false;
+let pendingIntake = null;
 
-const answers = {
-  currentSetup: null,
-  currentTools: [],
-  clarityLevel: null,
-  techComfort: null
-};
+const START_HERE_URL = 'course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=XQW5SV09fR0fuvkaHT50';
+const FUNCTION_URL   = 'https://analyze-e6qya4oddq-uc.a.run.app';
+const MODEL          = 'claude-sonnet-4-6';
 
-// Steps in order — platform step inserted conditionally after A
-const allSteps = ['A', 'B', 'C', 'D'];
+const chatHistory = [];
 
-function buildDots() {
-  const steps = hasPlatformStep ? allSteps : ['A', 'C', 'D'];
-  const container = document.getElementById('dots');
-  container.innerHTML = '';
-  steps.forEach((s, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i === 0 ? ' active' : '');
-    d.id = 'dot-' + s;
-    container.appendChild(d);
+// ── AUTH HEADERS ──
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  if (!user) return { 'Content-Type': 'application/json' };
+  const token = await user.getIdToken();
+  let acToken = '';
+  try {
+    const t = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise((_, r) => setTimeout(() => r(), 3000))
+    ]);
+    acToken = t?.token || '';
+  } catch(e) {}
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-Firebase-AppCheck': acToken };
+}
+
+// ── API CALL ──
+async function callAI(userMsg) {
+  chatHistory.push({ role: 'user', content: userMsg });
+  const resp = await fetch(FUNCTION_URL, {
+    method: 'POST',
+    headers: await authHeaders(),
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 300,
+      messages: chatHistory,
+      _meta: { tool: 'onboarding-chat' }
+    })
   });
+  if (!resp.ok) throw new Error(`API error ${resp.status}`);
+  const data = await resp.json();
+  if (!Array.isArray(data.content)) throw new Error('Unexpected response');
+  const text = data.content.map(b => b.type === 'text' ? b.text : '').join('');
+  chatHistory.push({ role: 'assistant', content: text });
+  return text;
 }
 
-function updateDots(currentStep) {
-  const steps = hasPlatformStep ? allSteps : ['A', 'C', 'D'];
-  steps.forEach(s => {
-    const d = document.getElementById('dot-' + s);
-    if (!d) return;
-    d.className = 'dot';
-    const idx = steps.indexOf(s);
-    const curIdx = steps.indexOf(currentStep);
-    if (idx < curIdx) d.classList.add('done');
-    else if (idx === curIdx) d.classList.add('active');
-  });
-}
+// ── CHAT UI HELPERS ──
+var SPARKY_AVATAR = '<div class="sparky-avatar"><svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M8 1L1 10h6l-1 7 6-9H6l2-7z" fill="#0C0B09" stroke="#0C0B09" stroke-width="0.5" stroke-linejoin="round"/></svg></div>';
 
-function showStep(stepId) {
-  ['A', 'B', 'C', 'D'].forEach(s => {
-    document.getElementById('step-' + s).classList.remove('visible');
-  });
-  document.getElementById('step-' + stepId).classList.add('visible');
-  updateDots(stepId);
-}
-
-// Step A chip selection
-function selectSetup(el, type) {
-  document.querySelectorAll('#step-A .chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  answers.currentSetup = el.textContent.trim();
-  hasPlatformStep = (type === 'existing');
-  document.getElementById('next-A').disabled = false;
-}
-
-function goFromA() {
-  buildDots();
-  if (hasPlatformStep) {
-    showStep('B');
+function addMessage(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + role;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'msg';
+  msgDiv.innerHTML =
+    '<div class="msg-label">' + (role === 'sparky' ? 'Sparky' : 'You') + '</div>' +
+    '<div class="msg-bubble">' + escapeHtml(text) + '</div>';
+  if (role === 'sparky') {
+    row.appendChild(document.createRange().createContextualFragment(SPARKY_AVATAR));
+    row.appendChild(msgDiv);
   } else {
-    answers.currentPlatform = null;
-    showStep('C');
+    row.appendChild(msgDiv);
+  }
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'typing-wrap';
+  div.id = 'typing-indicator';
+  div.innerHTML = SPARKY_AVATAR + '<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function enableInput() {
+  document.getElementById('chat-input').disabled = false;
+  document.getElementById('chat-input').focus();
+}
+
+function disableInput() {
+  document.getElementById('chat-input').disabled = true;
+  document.getElementById('chat-send-btn').disabled = true;
+}
+
+// ── DETECT COMPLETION MARKER ──
+function parseCompletion(text) {
+  const markerLine = text.split('\n').find(l => l.trim().startsWith('ONBOARDING_COMPLETE'));
+  if (!markerLine) return null;
+  const clean = text.replace(/\n?ONBOARDING_COMPLETE[^\n]*/g, '').trim();
+  const parts = markerLine.split('|');
+  const get = (key) => {
+    const part = parts.find(p => p.startsWith(key + ':'));
+    return part ? part.replace(key + ':', '').trim() : '';
+  };
+  return {
+    visibleText: clean,
+    motivation: get('motivation'),
+    dream: get('dream')
+  };
+}
+
+// ── HANDLE AI REPLY ──
+async function processReply(rawReply) {
+  const completion = parseCompletion(rawReply);
+  if (completion) {
+    if (completion.visibleText) addMessage('sparky', completion.visibleText);
+    pendingIntake = {
+      motivation:  completion.motivation,
+      dreamOutcome: completion.dream,
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await saveIntake();
+    document.getElementById('chat-input-area').style.display = 'none';
+    document.getElementById('chat-cta').classList.add('visible');
+    chatDone = true;
+  } else {
+    addMessage('sparky', rawReply);
+    enableInput();
   }
 }
 
-// Step B: checkbox tools
-function toggleTool(el, name) {
-  el.classList.toggle('checked');
-  if (el.classList.contains('checked')) {
-    if (!answers.currentTools.includes(name)) answers.currentTools.push(name);
-  } else {
-    answers.currentTools = answers.currentTools.filter(t => t !== name);
-  }
-}
+// ── SEND MESSAGE ──
+async function handleSend() {
+  if (chatBusy || chatDone) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
 
-function toggleOther(el) {
-  el.classList.toggle('checked');
-  const input = document.getElementById('tools-other-input');
-  if (el.classList.contains('checked')) {
-    input.classList.add('visible');
-    input.focus();
-  } else {
-    input.classList.remove('visible');
-    input.value = '';
-    answers.currentTools = answers.currentTools.filter(t => !t.startsWith('__other:'));
-  }
-}
-
-function onOtherToolInput() {
-  const val = document.getElementById('tools-other-input').value.trim();
-  answers.currentTools = answers.currentTools.filter(t => !t.startsWith('__other:'));
-  if (val) answers.currentTools.push('__other:' + val);
-}
-
-function skipPlatform() {
-  answers.currentTools = [];
-  goToStep('C');
-}
-
-// Option card selection (Step C)
-function selectOption(el, key) {
-  document.querySelectorAll('#step-C .option-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  answers[key] = el.textContent.trim();
-  document.getElementById('next-C').disabled = false;
-}
-
-// Generic chip selection (Step D)
-function selectSimple(el, key) {
-  const stepMap = { techComfort: 'D' };
-  const stepId = stepMap[key];
-  document.querySelectorAll(`#step-${stepId} .chip`).forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  answers[key] = el.textContent.trim();
-  document.getElementById('next-' + stepId).disabled = false;
-}
-
-function goToStep(stepId) {
-  showStep(stepId);
-}
-
-async function finish() {
-  const btn = document.getElementById('next-D');
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
+  input.value = '';
+  input.style.height = 'auto';
+  disableInput();
+  addMessage('user', text);
+  chatBusy = true;
+  showTyping();
 
   try {
-    if (currentUser) {
-      const cleanTools = answers.currentTools.map(t =>
-        t.startsWith('__other:') ? t.replace('__other:', '').trim() : t
-      ).filter(Boolean);
+    const reply = await callAI(text);
+    hideTyping();
+    await processReply(reply);
+  } catch(e) {
+    hideTyping();
+    addMessage('sparky', "Something went sideways — try sending that again.");
+    enableInput();
+  }
 
-      const intake = {
-        currentSetup:  answers.currentSetup,
-        currentTools:  cleanTools,
-        clarityLevel:  answers.clarityLevel,
-        techComfort:   answers.techComfort,
-        completedAt:   firebase.firestore.FieldValue.serverTimestamp()
-      };
-      await db.collection('users').doc(currentUser.uid).update({ intake, firstVisit: true });
+  chatBusy = false;
+  document.getElementById('chat-send-btn').disabled = false;
+}
+
+// ── INIT CHAT ──
+function buildSystemPrompt() {
+  return `You are Sparky — the ToolSpark mascot and guide. ${firstName ? firstName : 'Someone'} just joined the AI ToolSpark Challenge. This is their very first moment inside the platform.
+
+Your mission: make them feel genuinely welcomed and excited, then ask exactly 2 questions across the conversation:
+1. Why did they want to join the challenge? (their motivation, their story, what brought them here)
+2. In a perfect world, what is the one thing they would solve in their business or personal journey?
+
+Rules:
+- Be warm, energetic, and genuinely encouraging. This is a celebration — they just made a real decision.
+- Keep every message SHORT: 2-3 sentences max. No long paragraphs.
+- Ask ONE question at a time. Never stack two questions in one message.
+- React to their answers with genuine warmth before moving to the next question — make them feel heard.
+- Never make them feel judged, behind, or lacking for any answer they give.
+- After you have both answers, write 2 sentences of genuine, specific encouragement that directly reflects what they shared. Reference their actual words. Then tell them their very first step is the Start Here video.
+- End your final message with this exact line on its own as the very last line — it is hidden from the user and processed by the system:
+ONBOARDING_COMPLETE|motivation:[5-10 word summary of why they joined]|dream:[5-10 word summary of what they want to solve]`;
+}
+
+async function initChat() {
+  document.getElementById('step-0').classList.remove('visible');
+  document.getElementById('step-chat').classList.add('visible');
+  chatBusy = true;
+  showTyping();
+
+  const systemPrompt = buildSystemPrompt();
+  const openingMsg = firstName
+    ? `Welcome ${firstName} — they just landed on the platform for the first time. Greet them by name. Be warm and energetic. Tell them you're Sparky and you're here to get them set up. Then ask your first question: what do they want to build or accomplish with this challenge?`
+    : `Welcome this new member — they just landed on the platform for the first time. Be warm and energetic. Tell them you're Sparky and you're here to get them set up. Then ask your first question: what do they want to build or accomplish with this challenge?`;
+
+  chatHistory.push({ role: 'user', content: systemPrompt + '\n\n' + openingMsg });
+
+  try {
+    const resp = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 300,
+        messages: chatHistory,
+        _meta: { tool: 'onboarding-chat' }
+      })
+    });
+    if (!resp.ok) throw new Error(`API error ${resp.status}`);
+    const data = await resp.json();
+    const text = data.content.map(b => b.type === 'text' ? b.text : '').join('');
+    chatHistory.push({ role: 'assistant', content: text });
+    hideTyping();
+    addMessage('sparky', text);
+    enableInput();
+  } catch(e) {
+    hideTyping();
+    addMessage('sparky', "Hey, welcome! ⚡ I'm Sparky — super glad you're here. What are you looking to build with this challenge?");
+    enableInput();
+  }
+
+  chatBusy = false;
+  document.getElementById('chat-send-btn').disabled = false;
+}
+
+function goFromWelcome() {
+  initChat();
+}
+
+// ── SAVE INTAKE ──
+async function saveIntake() {
+  try {
+    if (currentUser && pendingIntake) {
+      await db.collection('users').doc(currentUser.uid).update({
+        intake: pendingIntake,
+        firstVisit: true,
+        onboardingComplete: false
+      });
     }
   } catch(e) {
     console.error('Intake save error:', e);
   }
-
-  window.location.href = 'community.html';
 }
 
+// ── REDIRECT TO VIDEO ──
+async function goToVideo() {
+  window.location.href = START_HERE_URL;
+}
+
+// ── SKIP ──
 async function skipAll() {
   try {
     if (currentUser) {
       await db.collection('users').doc(currentUser.uid).update({
         'intake.skipped': true,
         'intake.skippedAt': firebase.firestore.FieldValue.serverTimestamp(),
-        firstVisit: true
+        firstVisit: true,
+        onboardingComplete: false
       });
     }
   } catch(e) {}
-  window.location.href = 'community.html';
+  window.location.href = START_HERE_URL;
 }
 
+// ── TEXTAREA AUTO-RESIZE + ENTER TO SEND ──
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  document.getElementById('chat-send-btn').disabled = !this.value.trim() || chatBusy;
+});
+document.getElementById('chat-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+});
+
+// ── AUTH ──
 auth.onAuthStateChanged(async function(user) {
   if (!user) { window.location.href = 'signon.html'; return; }
   currentUser = user;
@@ -517,16 +507,19 @@ auth.onAuthStateChanged(async function(user) {
   try {
     const snap = await db.collection('users').doc(user.uid).get();
     if (snap.exists) {
-      const intake = snap.data().intake;
-      if (intake && (intake.completedAt || intake.skipped)) {
+      const data = snap.data();
+      firstName = data.firstName || data.displayName?.split(' ')[0] || '';
+      if (data.userRole === 'admin' || data.onboardingComplete) {
         window.location.href = 'community.html';
+        return;
+      }
+      const intake = data.intake;
+      if (intake && (intake.completedAt || intake.skipped)) {
+        window.location.href = START_HERE_URL;
         return;
       }
     }
   } catch(e) {}
-
-  // Build initial dots (no platform step yet, determined after step A)
-  buildDots();
 });
 </script>
 </body>

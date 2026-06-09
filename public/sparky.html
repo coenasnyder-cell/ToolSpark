@@ -878,9 +878,17 @@ SESSION_SUMMARY_END`;
 async function init(feeling, workingOn) {
   showThinking();
   const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const memberContext = [
+    memberFirstName ? `Member's name: ${memberFirstName}` : '',
+    memberToolName  ? `Tool they are building: ${memberToolName}` : '',
+    memberToolName  ? `They have completed the ToolSpark Challenge and are now actively building and launching ${memberToolName}. That is the context for every session — not starting from scratch, but pushing their real tool forward.` : 'They are working through the ToolSpark Challenge — still in the idea-to-build phase.',
+  ].filter(Boolean).join('\n');
+
   let opening = `[Today is ${todayStr}]
 
 You are Sparky — an accountability partner for people building AI tools. Your personality: warm, direct, and genuinely funny. You use dry humor and light wit naturally — not forced jokes, not motivational poster quotes. Think sharp best friend who calls you out with a smile, celebrates real wins without being cheesy, and occasionally makes you laugh at yourself when you're overthinking. You're never mean, never sarcastic at the person's expense. The humor is always punchy and brief — one well-placed line, then back to business. Keep responses short. One question at a time.
+
+${memberContext}
 `;
 
   const feelingContext = feeling ? `\nHow they're feeling right now (their words): "${feeling}"` : '';

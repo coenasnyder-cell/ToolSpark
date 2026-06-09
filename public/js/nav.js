@@ -37,6 +37,43 @@
     },
   ];
 
+  var START_HERE_URL = 'course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=XQW5SV09fR0fuvkaHT50';
+  var LOCK_SVG = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;opacity:0.5;flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+
+  function injectOnboardingBanner() {
+    if (document.getElementById('onboarding-banner')) return;
+    var s = document.createElement('style');
+    s.textContent =
+      '#onboarding-banner{background:rgba(201,168,76,0.1);border-bottom:1px solid rgba(201,168,76,0.2);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}' +
+      '#onboarding-banner-text{font-size:12px;color:#E8D5A3;line-height:1.4;flex:1;}' +
+      '#onboarding-banner-btn{font-size:11px;font-weight:700;color:#0C0B09;background:#C9A84C;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;font-family:inherit;}' +
+      '.nav-item.nav-locked{opacity:0.4;cursor:default;pointer-events:none;}';
+    document.head.appendChild(s);
+    var banner = document.createElement('div');
+    banner.id = 'onboarding-banner';
+    banner.innerHTML =
+      '<div id="onboarding-banner-text">Watch the Start Here video to unlock your challenge</div>' +
+      '<button id="onboarding-banner-btn" onclick="window.location.href=\'' + START_HERE_URL + '\'">Watch Now</button>';
+    var sidebar = document.getElementById('sidebar');
+    var nav = document.getElementById('sidebar-nav');
+    if (sidebar && nav) sidebar.insertBefore(banner, nav);
+  }
+
+  function lockNav() {
+    injectOnboardingBanner();
+    var nav = document.getElementById('sidebar-nav');
+    if (!nav) return;
+    nav.querySelectorAll('.nav-item').forEach(function(el) {
+      el.classList.add('nav-locked');
+      if (!el.querySelector('.nav-lock-icon')) {
+        var icon = document.createElement('span');
+        icon.className = 'nav-lock-icon';
+        icon.innerHTML = LOCK_SVG;
+        el.appendChild(icon);
+      }
+    });
+  }
+
   function injectHeaderStyles() {
     if (document.getElementById('nav-header-styles')) return;
     var s = document.createElement('style');
@@ -112,10 +149,13 @@
         authBtn.onclick = function() {
           firebase.auth().signOut().then(function() { window.location.href = 'signon.html'; });
         };
-        // Admin check
+        // Admin + onboarding check
         firebase.firestore().collection('users').doc(user.uid).get().then(function(snap) {
-          if (snap.exists && snap.data().userRole === 'admin') {
+          var data = snap.exists ? snap.data() : {};
+          if (data.userRole === 'admin') {
             adminBtn.style.display = 'inline-flex';
+          } else if (!data.onboardingComplete) {
+            lockNav();
           }
         }).catch(function() {});
         // Notification dot

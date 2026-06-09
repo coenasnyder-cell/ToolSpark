@@ -167,8 +167,8 @@
 
   .composer-card,
   .responses-shell {
-    background: rgba(28,26,23,0.95);
-    border: 1px solid var(--border);
+    background: #F4F2EE;
+    border: 1px solid #E4E0D8;
     border-radius: 24px;
     box-shadow: var(--shadow);
   }
@@ -283,12 +283,12 @@
     font-family: 'Playfair Display', serif;
     font-size: 30px;
     font-weight: 600;
-    color: var(--cream);
+    color: #1A1714;
     margin-bottom: 8px;
   }
 
   .responses-head p {
-    color: var(--text3);
+    color: #6B6560;
     font-size: 14px;
     line-height: 1.75;
     max-width: 720px;
@@ -296,24 +296,23 @@
 
   .advisor-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .advisor-card {
-    border-radius: 18px;
-    border: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(20,18,16,0.98), rgba(12,11,9,0.94));
-    padding: 18px;
-    min-height: 220px;
+    border-radius: 14px;
+    border: 1px solid #E4E0D8;
+    background: #FFFFFF;
+    padding: 20px 22px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .advisor-label {
     color: var(--gold);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -321,13 +320,13 @@
 
   .advisor-name {
     font-family: 'Playfair Display', serif;
-    font-size: 21px;
-    color: var(--cream);
+    font-size: 19px;
+    color: #1A1714;
     line-height: 1.15;
   }
 
   .advisor-response {
-    color: var(--text3);
+    color: #3A3530;
     font-size: 14px;
     line-height: 1.8;
     white-space: pre-wrap;
@@ -354,34 +353,28 @@
   }
 
   .chairman-card {
-    border-radius: 22px;
-    border: 1px solid rgba(201,168,76,0.45);
+    border-radius: 14px;
+    border: 1px solid rgba(201,168,76,0.5);
     background:
-      radial-gradient(circle at top right, rgba(201,168,76,0.10), transparent 38%),
-      linear-gradient(180deg, rgba(28,26,23,0.98), rgba(12,11,9,0.98));
+      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 38%),
+      #FFFDF7;
     padding: 24px;
-    box-shadow: 0 0 0 1px rgba(201,168,76,0.10) inset;
+    box-shadow: 0 2px 12px rgba(201,168,76,0.1);
   }
 
   .chairman-card .advisor-label {
-    color: var(--gold-light);
+    color: var(--gold);
   }
 
   .chairman-card .advisor-name {
-    color: var(--gold);
-    font-size: 28px;
+    color: #1A1714;
+    font-size: 24px;
     margin-bottom: 10px;
   }
 
   .chairman-card .advisor-response {
-    color: var(--cream);
+    color: #1A1714;
     font-size: 15px;
-  }
-
-  @media (max-width: 1100px) {
-    .advisor-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
   }
 
   @media (max-width: 760px) {
@@ -389,7 +382,6 @@
     .hero { padding: 36px 22px 30px; }
     .composer-card,
     .responses-shell { padding: 20px; }
-    .advisor-grid { grid-template-columns: 1fr; }
     .input-label { font-size: 22px; }
     .responses-head h2 { font-size: 26px; }
     .topbar { margin-bottom: 18px; }

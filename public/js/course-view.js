@@ -332,6 +332,9 @@ async function toggleComplete() {
       update.completedAt = firebase.firestore.FieldValue.serverTimestamp();
     }
     await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
+    if (lessonId === 'XQW5SV09fR0fuvkaHT50') {
+      db.collection('users').doc(currentUser.uid).update({ onboardingComplete: true }).catch(function() {});
+    }
     onLessonComplete(currentUser.uid);
     if (completedLessons.size === lessons.length) {
       await onCourseComplete(currentUser.uid, courseData && courseData.courseNumber);
