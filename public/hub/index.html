@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+<meta name="description" content="">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #C9A84C;
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --border-dark: #2A2720;
+    --text-light: #F0EDE6;
+    --text-muted: #9A9488;
+  }
+  html, body { height: 100%; }
+  body { font-family: 'Lato', sans-serif; background: var(--dark); color: var(--text-light); -webkit-font-smoothing: antialiased; }
+
+  /* LOADER */
+  #loader { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
+  #loader.hidden { opacity: 0; pointer-events: none; }
+  .loader-ring { width: 40px; height: 40px; border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* NOT FOUND / COMING SOON */
+  .fullscreen-msg { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; gap: 1rem; }
+  .fullscreen-msg h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; }
+  .fullscreen-msg p { color: var(--text-muted); font-size: 15px; max-width: 340px; line-height: 1.6; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,168,76,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(201,168,76,0.06) 0%, transparent 60%);
+  }
+
+  /* NAV */
+  .hub-nav { position: relative; z-index: 10; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+  .hub-logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .hub-logo-img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; display: none; }
+  .hub-logo-img.visible { display: block; }
+  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--text-light); }
+  .nav-cta { padding: 8px 20px; background: var(--gold); color: var(--dark); font-weight: 700; font-size: 13px; border-radius: 8px; text-decoration: none; transition: opacity 0.15s; letter-spacing: 0.02em; }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO CONTENT */
+  .hero-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; position: relative; z-index: 10; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border: 1px solid rgba(201,168,76,0.3); border-radius: 20px; background: rgba(201,168,76,0.08); font-size: 12px; color: var(--gold); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .hero-badge::before { content: '⚡'; font-size: 11px; }
+  .hero-headline { font-family: 'Playfair Display', serif; font-size: clamp(32px, 6vw, 58px); font-weight: 400; line-height: 1.18; color: var(--text-light); max-width: 800px; margin-bottom: 1.25rem; }
+  .hero-headline em { font-style: italic; color: var(--gold); }
+  .hero-subheadline { font-size: clamp(15px, 2.5vw, 18px); color: var(--text-muted); max-width: 560px; line-height: 1.65; margin-bottom: 2.5rem; }
+  .hero-cta { display: inline-block; padding: 16px 40px; background: var(--gold); color: var(--dark); font-weight: 900; font-size: 16px; border-radius: 10px; text-decoration: none; letter-spacing: 0.03em; transition: opacity 0.15s, transform 0.15s; box-shadow: 0 4px 24px rgba(201,168,76,0.3); }
+  .hero-cta:hover { opacity: 0.88; transform: translateY(-2px); }
+  .hero-sub-text { font-size: 13px; color: #5A5450; margin-top: 1rem; }
+
+  /* FEATURES STRIP */
+  .features { border-top: 1px solid var(--border-dark); background: var(--dark2); padding: 3rem 2rem; }
+  .features-inner { max-width: 760px; margin: 0 auto; }
+  .features-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; text-align: center; margin-bottom: 2rem; color: var(--text-light); }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+  .feature-item { display: flex; align-items: flex-start; gap: 12px; }
+  .feature-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+  .feature-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  /* FOOTER */
+  .hub-footer { border-top: 1px solid var(--border-dark); padding: 1.5rem 2rem; text-align: center; }
+  .hub-footer p { font-size: 12px; color: #3A3530; }
+  .hub-footer a { color: #5A5450; text-decoration: none; }
+  .hub-footer a:hover { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .hub-nav { padding: 1.25rem 1.25rem; }
+    .hero-content { padding: 3rem 1.25rem; }
+    .features { padding: 2rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="loader-ring"></div></div>
+
+<div id="page" style="display:none;">
+
+  <!-- NOT LIVE / NOT FOUND states rendered here -->
+  <div id="not-found" class="fullscreen-msg" style="display:none;">
+    <div style="font-size:48px;margin-bottom:1rem;">⚡</div>
+    <h1>Hub not found</h1>
+    <p>This creator hub doesn't exist yet. Check the URL and try again.</p>
+  </div>
+
+  <div id="coming-soon" class="fullscreen-msg" style="display:none;">
+    <div style="font-size:48px;margin-bottom:1rem;">🚀</div>
+    <h1 id="cs-name">Coming soon</h1>
+    <p>Something exciting is being built here. Check back soon.</p>
+  </div>
+
+  <!-- MAIN LANDING -->
+  <div id="landing" style="display:none;">
+    <div class="hero">
+      <div class="hero-bg" id="hero-bg"></div>
+      <nav class="hub-nav">
+        <div class="hub-logo-wrap">
+          <img id="nav-logo" class="hub-logo-img" src="" alt="logo">
+          <span class="hub-name-text" id="nav-name"></span>
+        </div>
+        <a class="nav-cta" id="nav-cta" href="#">Get Access</a>
+      </nav>
+      <div class="hero-content">
+        <div class="hero-badge" id="tool-badge"></div>
+        <h1 class="hero-headline" id="hero-headline"></h1>
+        <p class="hero-subheadline" id="hero-subheadline"></p>
+        <!-- Simple CTA (no Firebase connected) -->
+        <a class="hero-cta" id="hero-cta" href="#" style="display:none;">Get Access</a>
+
+        <!-- Email capture (Firebase connected) -->
+        <div id="email-capture" style="display:none;width:100%;max-width:420px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="email" id="email-input" placeholder="Enter your email"
+              style="flex:1;min-width:200px;padding:14px 16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--text-light);font-family:Lato,sans-serif;font-size:15px;outline:none;transition:border-color 0.15s;"
+              onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+              onkeydown="if(event.key==='Enter')submitEmail()">
+            <button id="email-btn" onclick="submitEmail()"
+              style="padding:14px 24px;background:var(--gold);color:var(--dark);font-weight:900;font-size:15px;border:none;border-radius:10px;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;letter-spacing:0.02em;"
+              onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+              Get Access
+            </button>
+          </div>
+          <div id="email-msg" style="font-size:13px;margin-top:10px;min-height:18px;"></div>
+        </div>
+
+        <div class="hero-sub-text" id="hero-sub-text"></div>
+      </div>
+    </div>
+
+    <div class="features" id="features-section" style="display:none;">
+      <div class="features-inner">
+        <h2 class="features-title" id="features-title"></h2>
+        <div class="features-grid" id="features-grid"></div>
+      </div>
+    </div>
+
+    <footer class="hub-footer">
+      <p>Powered by <a href="https://toolspark.co" target="_blank">ToolSpark</a></p>
+    </footer>
+  </div>
+
+</div>
+
+<script>
+  var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
+  var HUB = null;
+  var studentDb = null;
+  var ctaDest = '';
+
+  if (!slug) {
+    showNotFound();
+  } else {
+    db.collection('hubs').doc(slug).get().then(function(snap) {
+      if (!snap.exists) { showNotFound(); return; }
+      HUB = snap.data();
+
+      if (!HUB.isLive) {
+        document.getElementById('cs-name').textContent = HUB.hubName || 'Coming soon';
+        show('coming-soon');
+        return;
+      }
+
+      // Init student's Firebase if connected
+      if (HUB.studentFirebase && HUB.studentFirebase.projectId) {
+        try {
+          var studentApp = firebase.initializeApp(HUB.studentFirebase, 'student');
+          studentDb = studentApp.firestore();
+        } catch(e) {}
+      }
+
+      renderLanding(HUB);
+    }).catch(function() { showNotFound(); });
+  }
+
+  function renderLanding(hub) {
+    document.title = (hub.hubName || 'Creator Hub') + ' — ' + (hub.landingHeadline || 'AI Tools');
+
+    var color = hub.primaryColor || '#C9A84C';
+    document.documentElement.style.setProperty('--gold', color);
+
+    if (hub.logoUrl) { var lg = document.getElementById('nav-logo'); lg.src = hub.logoUrl; lg.classList.add('visible'); }
+    document.getElementById('nav-name').textContent = hub.hubName || '';
+
+    ctaDest = hub.membersOnly
+      ? ('/hub/' + slug + '/signup')
+      : (hub.paymentLink || ('/hub/' + slug + '/tool'));
+    document.getElementById('nav-cta').href = ctaDest;
+    document.getElementById('nav-cta').textContent = hub.landingCtaText || 'Get Access';
+
+    if (hub.toolName) {
+      document.getElementById('tool-badge').textContent = hub.toolName;
+    } else {
+      document.getElementById('tool-badge').style.display = 'none';
+    }
+
+    document.getElementById('hero-headline').innerHTML = hub.landingHeadline
+      ? hub.landingHeadline.replace(/\*(.*?)\*/g, '<em>$1</em>')
+      : (hub.hubName || 'AI Tools');
+    document.getElementById('hero-subheadline').textContent = hub.landingSubheadline || hub.toolDescription || '';
+
+    // Email capture if student Firebase is connected, otherwise plain CTA button
+    if (studentDb) {
+      document.getElementById('email-capture').style.display = 'block';
+      document.getElementById('email-btn').textContent = hub.landingCtaText || 'Get Access';
+      document.getElementById('hero-sub-text').textContent = 'No spam, unsubscribe anytime';
+    } else {
+      var heroCta = document.getElementById('hero-cta');
+      heroCta.style.display = 'inline-block';
+      heroCta.href = ctaDest;
+      heroCta.textContent = hub.landingCtaText || 'Get Access';
+      if (!hub.paymentLink) {
+        document.getElementById('hero-sub-text').textContent = 'Free to use — no signup required';
+      }
+    }
+
+    show('landing');
+  }
+
+  function submitEmail() {
+    var emailInput = document.getElementById('email-input');
+    var btn = document.getElementById('email-btn');
+    var msg = document.getElementById('email-msg');
+    var email = emailInput.value.trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      msg.style.color = '#E74C3C';
+      msg.textContent = 'Please enter a valid email address.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    msg.textContent = '';
+
+    studentDb.collection('subscribers').add({
+      email: email,
+      source: 'landing-page',
+      hubSlug: slug,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+      // Redirect after capture
+      window.location.href = ctaDest;
+    }).catch(function() {
+      // Still redirect even if write fails — don't block the user
+      window.location.href = ctaDest;
+    });
+  }
+
+  function show(id) {
+    document.getElementById('page').style.display = 'block';
+    document.getElementById(id).style.display = id === 'landing' ? 'block' : 'flex';
+    hide('loader');
+  }
+
+  function showNotFound() {
+    document.getElementById('page').style.display = 'block';
+    document.getElementById('not-found').style.display = 'flex';
+    hide('loader');
+  }
+
+  function hide(id) {
+    var el = document.getElementById(id);
+    el.classList.add('hidden');
+    setTimeout(function() { el.style.display = 'none'; }, 300);
+  }
+</script>
+</body>
+</html>

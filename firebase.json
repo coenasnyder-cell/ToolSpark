@@ -15,6 +15,22 @@
       {
         "source": "/auth-action",
         "destination": "/auth-action.html"
+      },
+      {
+        "source": "/hub/*/tool",
+        "destination": "/hub/tool.html"
+      },
+      {
+        "source": "/hub/*/signup",
+        "destination": "/hub/signup.html"
+      },
+      {
+        "source": "/hub/*/login",
+        "destination": "/hub/login.html"
+      },
+      {
+        "source": "/hub/*",
+        "destination": "/hub/index.html"
       }
     ]
   },

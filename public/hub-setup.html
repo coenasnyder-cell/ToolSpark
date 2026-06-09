@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Up Your Creator Hub — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --text-light: #F0EDE6;
+    --text-muted: #9A9488;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--dark); color: var(--text-light); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; -webkit-font-smoothing: antialiased; }
+
+  .card { width: 100%; max-width: 520px; background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); padding: 2.5rem; }
+
+  /* PROGRESS */
+  .progress { display: flex; align-items: center; gap: 8px; margin-bottom: 2rem; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-dark); transition: background 0.3s; }
+  .step-dot.active { background: var(--gold); }
+  .step-dot.done { background: rgba(201,168,76,0.4); }
+
+  /* HEADER */
+  .step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 0.5rem; }
+  h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--text-light); line-height: 1.3; margin-bottom: 0.5rem; }
+  .subtitle { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem; }
+
+  /* FORM */
+  .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+  label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+  input[type=text], input[type=password] {
+    width: 100%; padding: 12px 14px; background: var(--dark3); border: 1px solid var(--border-dark);
+    border-radius: var(--radius-sm); color: var(--text-light); font-family: 'Lato', sans-serif;
+    font-size: 15px; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+  input::placeholder { color: #4A4540; }
+
+  /* SLUG PREVIEW */
+  .slug-preview { font-size: 12px; color: var(--text-muted); padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark); border-radius: var(--radius-sm); font-family: monospace; min-height: 36px; transition: color 0.2s; }
+  .slug-preview .url-base { opacity: 0.5; }
+  .slug-preview.taken { color: #E74C3C; border-color: rgba(231,76,60,0.3); }
+  .slug-preview.available { color: #2ECC71; border-color: rgba(46,204,113,0.3); }
+
+  /* KEY WRAP */
+  .key-wrap { position: relative; }
+  .key-wrap input { padding-right: 46px; }
+  .key-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; }
+  .key-toggle:hover { color: var(--text-light); }
+
+  .field-hint { font-size: 12px; color: #5A5450; line-height: 1.5; }
+  .field-hint a { color: var(--gold); text-decoration: none; }
+  .field-hint a:hover { text-decoration: underline; }
+
+  /* BUTTONS */
+  .btn-primary { width: 100%; padding: 14px; background: var(--gold); color: var(--dark); font-weight: 900; font-size: 15px; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; margin-top: 0.5rem; letter-spacing: 0.02em; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-skip { width: 100%; padding: 10px; background: transparent; color: var(--text-muted); font-size: 13px; border: none; cursor: pointer; margin-top: 0.5rem; transition: color 0.15s; }
+  .btn-skip:hover { color: var(--text-light); }
+
+  /* ERROR */
+  .error-msg { font-size: 13px; color: #E74C3C; margin-top: 0.5rem; min-height: 18px; }
+
+  /* STEP VISIBILITY */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* SUCCESS */
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--gold-dim); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 28px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="progress">
+    <div class="step-dot active" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+  </div>
+
+  <!-- STEP 1: Hub Name -->
+  <div class="step active" id="step-1">
+    <div class="step-label">Step 1 of 2</div>
+    <h1>Name your Creator Hub</h1>
+    <p class="subtitle">This is your platform — give it a name that reflects your brand or niche.</p>
+
+    <div class="field">
+      <label for="hubName">Hub Name</label>
+      <input type="text" id="hubName" placeholder="e.g. Sarah's Caption Studio" maxlength="50" oninput="updateSlug()">
+    </div>
+
+    <div class="field">
+      <label>Your hub URL</label>
+      <div class="slug-preview" id="slug-preview">
+        <span class="url-base">toolspark.co/hub/</span><span id="slug-display">your-hub</span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="step1-error"></div>
+
+    <button class="btn-primary" id="step1-btn" onclick="goToStep2()">Continue →</button>
+  </div>
+
+  <!-- STEP 2: API Key -->
+  <div class="step" id="step-2">
+    <div class="step-label">Step 2 of 2</div>
+    <h1>Connect your AI</h1>
+    <p class="subtitle">Your Anthropic API key powers the tool you built. You control your own usage and billing — no credit gates.</p>
+
+    <div class="field">
+      <label for="apiKey">Anthropic API Key</label>
+      <div class="key-wrap">
+        <input type="password" id="apiKey" placeholder="sk-ant-...">
+        <button class="key-toggle" type="button" onclick="toggleKey()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="field-hint">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. Set a monthly spend limit while you're there.</div>
+    </div>
+
+    <div class="error-msg" id="step2-error"></div>
+
+    <button class="btn-primary" id="step2-btn" onclick="createHub()">Launch My Hub ⚡</button>
+    <button class="btn-skip" onclick="createHubWithoutKey()">Skip for now — I'll add my key in settings</button>
+  </div>
+
+  <!-- STEP 3: Done -->
+  <div class="step" id="step-3">
+    <div class="success-icon">⚡</div>
+    <div style="text-align:center;">
+      <div class="step-label" style="text-align:center;">You're live</div>
+      <h1 style="font-size:22px;margin-bottom:0.5rem;">Your hub is ready</h1>
+      <p class="subtitle" style="margin-bottom:1.5rem;">Customize your branding, set up your tool, and build your landing page — all from your hub settings.</p>
+      <button class="btn-primary" id="go-btn" onclick="goToAdmin()" style="max-width:300px;margin:0 auto;">Go to My Hub Settings →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var currentUser = null;
+  var hubSlug = '';
+
+  auth.onAuthStateChanged(function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    currentUser = user;
+    // If they already have a hub, send them straight to admin
+    db.collection('users').doc(user.uid).get().then(function(snap) {
+      var data = snap.exists ? snap.data() : {};
+      if (data.hubSlug) {
+        window.location.href = 'hub-admin.html';
+      }
+    });
+  });
+
+  // ── SLUG GENERATION ──
+  function toSlug(str) {
+    return str.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 40);
+  }
+
+  var slugCheckTimer = null;
+  function updateSlug() {
+    var name = document.getElementById('hubName').value;
+    var slug = toSlug(name) || 'your-hub';
+    document.getElementById('slug-display').textContent = slug;
+    hubSlug = slug;
+
+    var preview = document.getElementById('slug-preview');
+    preview.className = 'slug-preview';
+
+    clearTimeout(slugCheckTimer);
+    if (slug === 'your-hub' || !name.trim()) return;
+
+    slugCheckTimer = setTimeout(function() {
+      db.collection('hubs').doc(slug).get().then(function(snap) {
+        if (snap.exists) {
+          preview.classList.add('taken');
+          document.getElementById('slug-display').textContent = slug + ' (taken)';
+        } else {
+          preview.classList.add('available');
+        }
+      });
+    }, 400);
+  }
+
+  // ── STEP 1 → 2 ──
+  function goToStep2() {
+    var name = document.getElementById('hubName').value.trim();
+    var err = document.getElementById('step1-error');
+    if (!name) { err.textContent = 'Please enter a name for your hub.'; return; }
+    if (!hubSlug) { err.textContent = 'Hub name must contain at least one letter or number.'; return; }
+
+    var preview = document.getElementById('slug-preview');
+    if (preview.classList.contains('taken')) { err.textContent = 'That name is already taken — try something slightly different.'; return; }
+
+    err.textContent = '';
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+    document.getElementById('dot-1').classList.replace('active', 'done');
+    document.getElementById('dot-2').classList.add('active');
+  }
+
+  // ── TOGGLE KEY ──
+  function toggleKey() {
+    var input = document.getElementById('apiKey');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // ── CREATE HUB ──
+  function createHub() { doCreate(document.getElementById('apiKey').value.trim()); }
+  function createHubWithoutKey() { doCreate(''); }
+
+  function doCreate(apiKey) {
+    var btn = document.getElementById('step2-btn');
+    var err = document.getElementById('step2-error');
+    btn.disabled = true;
+    btn.textContent = 'Creating your hub...';
+    err.textContent = '';
+
+    var hubName = document.getElementById('hubName').value.trim();
+
+    var hubData = {
+      hubSlug:          hubSlug,
+      hubName:          hubName,
+      hubTagline:       '',
+      primaryColor:     '#C9A84C',
+      logoUrl:          '',
+      toolName:         '',
+      toolDescription:  '',
+      systemPrompt:     '',
+      inputLabel:       'Your question',
+      inputPlaceholder: 'Type here...',
+      model:            'claude-haiku-4-5-20251001',
+      anthropicApiKey:  apiKey,
+      landingHeadline:  hubName,
+      landingSubheadline: '',
+      landingCtaText:   'Get Access',
+      paymentLink:      '',
+      isLive:           false,
+      customDomain:     '',
+      owner:            currentUser.uid,
+      ownerEmail:       currentUser.email,
+      createdAt:        firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    // Write hub doc + update user record
+    var batch = db.batch();
+    batch.set(db.collection('hubs').doc(hubSlug), hubData);
+    batch.update(db.collection('users').doc(currentUser.uid), { hubSlug: hubSlug });
+
+    batch.commit().then(function() {
+      document.getElementById('step-2').classList.remove('active');
+      document.getElementById('step-3').classList.add('active');
+      document.getElementById('dot-2').classList.replace('active', 'done');
+      document.getElementById('dot-3').classList.add('active');
+    }).catch(function(err2) {
+      err.textContent = 'Something went wrong: ' + err2.message;
+      btn.disabled = false;
+      btn.textContent = 'Launch My Hub ⚡';
+    });
+  }
+
+  function goToAdmin() {
+    window.location.href = 'hub-admin.html';
+  }
+</script>
+</body>
+</html>

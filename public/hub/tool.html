@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #C9A84C;
+    --gold-dim: rgba(201,168,76,0.12);
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --text-light: #F0EDE6;
+    --text-muted: #9A9488;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  html, body { height: 100%; }
+  body { font-family: 'Lato', sans-serif; background: var(--dark); color: var(--text-light); -webkit-font-smoothing: antialiased; }
+
+  /* LOADER */
+  #loader { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
+  #loader.hidden { opacity: 0; pointer-events: none; }
+  .loader-ring { width: 40px; height: 40px; border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LAYOUT */
+  #page { display: none; min-height: 100vh; display: none; flex-direction: column; }
+
+  /* NAV */
+  .hub-nav { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .hub-nav-left { display: flex; align-items: center; gap: 10px; }
+  .hub-logo-img { width: 30px; height: 30px; border-radius: 6px; object-fit: contain; display: none; }
+  .hub-logo-img.visible { display: block; }
+  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 500; }
+  .hub-tool-pill { padding: 3px 10px; border: 1px solid var(--border-dark); border-radius: 12px; font-size: 11px; color: var(--text-muted); font-weight: 700; }
+  .nav-back { font-size: 12px; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.15s; }
+  .nav-back:hover { color: var(--text-light); }
+  .nav-user { display: none; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted); }
+  .nav-user.visible { display: flex; }
+  .nav-user-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-signout { background: none; border: 1px solid var(--border-dark); color: var(--text-muted); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .btn-signout:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* MAIN */
+  .tool-wrap { flex: 1; display: flex; flex-direction: column; max-width: 760px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem; gap: 1.5rem; }
+
+  /* HEADER */
+  .tool-header { text-align: center; }
+  .tool-header h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; margin-bottom: 0.4rem; }
+  .tool-header p { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 460px; margin: 0 auto; }
+
+  /* INPUT CARD */
+  .input-card { background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .input-label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+  textarea {
+    width: 100%; background: var(--dark3); border: 1px solid var(--border-dark); border-radius: var(--radius-sm);
+    color: var(--text-light); font-family: 'Lato', sans-serif; font-size: 15px; padding: 12px 14px;
+    resize: vertical; min-height: 120px; line-height: 1.6; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+  textarea::placeholder { color: #3A3530; }
+  .char-count { font-size: 11px; color: #3A3530; text-align: right; }
+  .btn-generate {
+    width: 100%; padding: 14px; background: var(--gold); color: var(--dark); font-weight: 900;
+    font-size: 15px; border: none; border-radius: var(--radius-sm); cursor: pointer;
+    transition: opacity 0.15s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-generate:hover { opacity: 0.88; }
+  .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-generate .spinner { width: 16px; height: 16px; border: 2px solid rgba(12,11,9,0.3); border-top-color: var(--dark); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .btn-generate.loading .spinner { display: block; }
+
+  /* OUTPUT */
+  .output-card { background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); overflow: hidden; display: none; }
+  .output-card.visible { display: block; }
+  .output-top { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .btn-copy { padding: 6px 14px; background: transparent; border: 1px solid var(--border-dark); color: var(--text-muted); font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-copy.copied { border-color: rgba(46,204,113,0.4); color: #2ECC71; }
+  .output-body { padding: 1.5rem; font-size: 15px; line-height: 1.75; color: var(--text-light); white-space: pre-wrap; word-break: break-word; }
+
+  /* STREAMING cursor */
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--gold); margin-left: 2px; vertical-align: text-bottom; animation: blink 0.8s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ERROR */
+  .error-banner { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 13px; color: #E74C3C; display: none; }
+  .error-banner.visible { display: block; }
+
+  /* NO API KEY */
+  .no-key-msg { text-align: center; padding: 2rem; background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); }
+  .no-key-msg h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 0.5rem; }
+  .no-key-msg p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* FOOTER */
+  .tool-footer { border-top: 1px solid var(--border-dark); padding: 1rem 1.5rem; text-align: center; flex-shrink: 0; }
+  .tool-footer p { font-size: 11px; color: #3A3530; }
+  .tool-footer a { color: #5A5450; text-decoration: none; }
+  .tool-footer a:hover { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .tool-wrap { padding: 1.25rem 1rem; }
+    .input-card { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="loader-ring"></div></div>
+
+<div id="page" style="display:none;">
+
+  <nav class="hub-nav">
+    <div class="hub-nav-left">
+      <img id="nav-logo" class="hub-logo-img" src="" alt="logo">
+      <span class="hub-name-text" id="nav-name"></span>
+      <span class="hub-tool-pill" id="tool-pill"></span>
+    </div>
+    <div class="nav-user" id="nav-user">
+      <span class="nav-user-email" id="nav-user-email"></span>
+      <button class="btn-signout" onclick="doSignOut()">Sign out</button>
+    </div>
+    <a id="nav-back" class="nav-back" href="#">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </a>
+  </nav>
+
+  <div class="tool-wrap">
+    <div class="tool-header">
+      <h1 id="tool-name-heading"></h1>
+      <p id="tool-desc"></p>
+    </div>
+
+    <div id="no-key-msg" class="no-key-msg" style="display:none;">
+      <h3>Tool not configured yet</h3>
+      <p>The hub owner hasn't connected their API key yet. Check back soon.</p>
+    </div>
+
+    <div id="tool-ui" style="display:none;">
+      <div class="input-card">
+        <div class="input-label" id="input-label-text">Your question</div>
+        <textarea id="user-input" rows="5" maxlength="2000" oninput="updateCount()"></textarea>
+        <div class="char-count"><span id="char-count">0</span> / 2000</div>
+        <div class="error-banner" id="error-banner"></div>
+        <button class="btn-generate" id="gen-btn" onclick="generate()">
+          <div class="spinner"></div>
+          <span id="gen-label">Generate</span>
+        </button>
+      </div>
+
+      <div class="output-card" id="output-card">
+        <div class="output-top">
+          <span class="output-label">Result</span>
+          <button class="btn-copy" onclick="copyOutput()">Copy</button>
+        </div>
+        <div class="output-body" id="output-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="tool-footer">
+    <p>Powered by <a href="https://toolspark.co" target="_blank">ToolSpark</a></p>
+  </footer>
+
+</div>
+
+<script>
+  var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
+  var HUB = null;
+  var studentDb = null;
+  var studentAuth = null;
+
+  if (!slug) { showError('Hub not found.'); }
+  else {
+    db.collection('hubs').doc(slug).get().then(function(snap) {
+      if (!snap.exists) { showError('Hub not found.'); return; }
+      HUB = snap.data();
+
+      // Init student's Firebase if connected
+      if (HUB.studentFirebase && HUB.studentFirebase.projectId) {
+        try {
+          var studentApp = firebase.initializeApp(HUB.studentFirebase, 'student');
+          studentDb = studentApp.firestore();
+          studentAuth = studentApp.auth();
+        } catch(e) {}
+      }
+
+      if (HUB.membersOnly && studentAuth) {
+        // Auth gate — wait for auth state before rendering
+        studentAuth.onAuthStateChanged(function(user) {
+          if (!user) {
+            window.location.href = '/hub/' + slug + '/login';
+            return;
+          }
+          // Show user info in nav
+          var userEl = document.getElementById('nav-user');
+          var emailEl = document.getElementById('nav-user-email');
+          if (userEl && emailEl) {
+            emailEl.textContent = user.displayName || user.email;
+            userEl.classList.add('visible');
+          }
+          renderTool(HUB);
+        });
+      } else {
+        renderTool(HUB);
+      }
+
+    }).catch(function() { showError('Could not load hub.'); });
+  }
+
+  function doSignOut() {
+    if (studentAuth) {
+      studentAuth.signOut().then(function() {
+        window.location.href = '/hub/' + slug + '/login';
+      });
+    }
+  }
+
+  function renderTool(hub) {
+    // Primary color
+    var color = hub.primaryColor || '#C9A84C';
+    document.documentElement.style.setProperty('--gold', color);
+
+    document.title = (hub.toolName || 'AI Tool') + ' — ' + (hub.hubName || 'Creator Hub');
+
+    // Nav
+    if (hub.logoUrl) { var lg = document.getElementById('nav-logo'); lg.src = hub.logoUrl; lg.classList.add('visible'); }
+    document.getElementById('nav-name').textContent = hub.hubName || '';
+    document.getElementById('tool-pill').textContent = hub.toolName || 'AI Tool';
+    document.getElementById('nav-back').href = '/hub/' + slug;
+
+    // Tool header
+    document.getElementById('tool-name-heading').textContent = hub.toolName || 'AI Tool';
+    document.getElementById('tool-desc').textContent = hub.toolDescription || '';
+
+    // Input config
+    document.getElementById('input-label-text').textContent = hub.inputLabel || 'Your question';
+    document.getElementById('user-input').placeholder = hub.inputPlaceholder || 'Type here...';
+    document.getElementById('gen-label').textContent = 'Generate with ' + (hub.toolName || 'AI');
+
+    if (!hub.anthropicApiKey || hub.anthropicApiKey === 'YOUR_ANTHROPIC_API_KEY') {
+      document.getElementById('no-key-msg').style.display = 'block';
+    } else {
+      document.getElementById('tool-ui').style.display = 'block';
+    }
+
+    showPage();
+  }
+
+  function updateCount() {
+    document.getElementById('char-count').textContent = document.getElementById('user-input').value.length;
+  }
+
+  // ── GENERATE ──
+  async function generate() {
+    var input = document.getElementById('user-input').value.trim();
+    var err = document.getElementById('error-banner');
+    err.className = 'error-banner';
+
+    if (!input) { err.textContent = 'Please enter something first.'; err.classList.add('visible'); return; }
+
+    var btn = document.getElementById('gen-btn');
+    var outputCard = document.getElementById('output-card');
+    var outputBody = document.getElementById('output-body');
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    document.getElementById('gen-label').textContent = 'Generating...';
+    outputCard.classList.add('visible');
+    outputBody.innerHTML = '<span class="cursor"></span>';
+
+    try {
+      var response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': HUB.anthropicApiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: HUB.model || 'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          stream: true,
+          system: HUB.systemPrompt || 'You are a helpful AI assistant.',
+          messages: [{ role: 'user', content: input }]
+        })
+      });
+
+      if (!response.ok) {
+        var errData = await response.json().catch(function() { return {}; });
+        throw new Error(errData.error && errData.error.message ? errData.error.message : 'API error ' + response.status);
+      }
+
+      // Streaming response
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var fullText = '';
+      outputBody.textContent = '';
+
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+
+        var lines = decoder.decode(chunk.value, { stream: true }).split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line.startsWith('data: ')) continue;
+          var data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            var parsed = JSON.parse(data);
+            if (parsed.type === 'content_block_delta' && parsed.delta && parsed.delta.text) {
+              fullText += parsed.delta.text;
+              outputBody.textContent = fullText;
+            }
+          } catch(e) {}
+        }
+      }
+
+      if (!fullText) outputBody.textContent = '(No output — check your system prompt)';
+
+      // Log usage to student's Firestore
+      if (studentDb && fullText) {
+        studentDb.collection('toolUsage').add({
+          hubSlug: slug,
+          inputLength: input.length,
+          outputLength: fullText.length,
+          model: HUB.model || 'claude-haiku-4-5-20251001',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function() {});
+      }
+
+    } catch(e) {
+      outputBody.textContent = '';
+      outputCard.classList.remove('visible');
+      err.textContent = e.message || 'Something went wrong. Please try again.';
+      err.classList.add('visible');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      document.getElementById('gen-label').textContent = 'Generate again';
+    }
+  }
+
+  function copyOutput() {
+    var text = document.getElementById('output-body').textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.querySelector('.btn-copy');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function showPage() {
+    document.getElementById('page').style.display = 'flex';
+    var l = document.getElementById('loader');
+    l.classList.add('hidden');
+    setTimeout(function() { l.style.display = 'none'; }, 300);
+  }
+
+  function showError(msg) {
+    document.getElementById('page').innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;"><div><div style="font-size:48px;margin-bottom:1rem;">⚡</div><h1 style="font-family:Playfair Display,serif;font-size:24px;font-weight:400;margin-bottom:0.5rem;">' + msg + '</h1><p style="color:#9A9488;font-size:14px;">Check the URL and try again.</p></div></div>';
+    document.getElementById('page').style.display = 'flex';
+    document.getElementById('loader').style.display = 'none';
+  }
+
+  // Enter key submits
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      var btn = document.getElementById('gen-btn');
+      if (btn && !btn.disabled) generate();
+    }
+  });
+</script>
+</body>
+</html>
