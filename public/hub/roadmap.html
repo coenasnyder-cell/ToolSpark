@@ -10,18 +10,110 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="/hub/hub-shell.js"></script>
 <style>
-  .rm-intro { margin-bottom: 2rem; }
-  .rm-intro h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--hub-text-primary, #1A1714); margin-bottom: 6px; }
-  .rm-intro p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
-  .rm-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
-    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
-    padding: 12px 24px; border-radius: 10px; text-decoration: none;
-    transition: opacity 0.15s; margin-top: 1.5rem;
+  .rm-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap;
   }
-  .rm-btn:hover { opacity: 0.85; }
-  .coming-soon { margin-top: 2.5rem; padding: 2rem; background: rgba(201,168,76,0.06); border: 1px dashed rgba(201,168,76,0.2); border-radius: 12px; color: var(--hub-text-muted, #6B6560); font-size: 14px; }
+  .rm-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 400;
+    color: var(--hub-text-primary, #1A1714);
+    margin-bottom: 3px;
+  }
+  .rm-header p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
+  .rm-run-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 9px 18px; border-radius: 8px; text-decoration: none;
+    white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0;
+  }
+  .rm-run-btn:hover { opacity: 0.85; }
+
+  /* STATES */
+  .rm-loading, .rm-empty, .rm-no-db {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--hub-text-muted, #6B6560);
+    font-size: 14px;
+  }
+  .rm-state-icon { font-size: 36px; margin-bottom: 0.75rem; }
+  .rm-loading p, .rm-empty p, .rm-no-db p { margin-bottom: 1rem; }
+  .spinner {
+    width: 26px; height: 26px;
+    border: 3px solid var(--hub-border, #E4E0D8);
+    border-top-color: var(--gold, #C9A84C);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESULTS GRID */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .result-card {
+    background: var(--hub-chat-bg, #fff);
+    border: 1px solid var(--hub-border, #E4E0D8);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 8px;
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .result-card:hover {
+    border-color: var(--gold, #C9A84C);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .result-card-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 8px;
+  }
+  .result-label {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A84C);
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 20px; padding: 3px 8px;
+  }
+  .result-date {
+    font-size: 11px;
+    color: var(--hub-text-muted, #9A9488);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .result-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--hub-text-primary, #1A1714);
+    line-height: 1.3;
+  }
+  .result-summary {
+    font-size: 13px;
+    color: var(--hub-text-muted, #6B6560);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .result-card-footer {
+    display: flex; align-items: center;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid var(--hub-border, #E4E0D8);
+    margin-top: 4px;
+  }
+  .result-view-btn {
+    font-size: 12px; font-weight: 700;
+    color: var(--gold, #C9A84C);
+    display: flex; align-items: center; gap: 4px;
+  }
 </style>
 </head>
 <body>
@@ -31,19 +123,95 @@
 <div id="hs-main">
   <header id="hs-header"></header>
   <main class="hs-content">
-    <div class="rm-intro">
-      <h2>My Roadmap</h2>
-      <p id="rm-sub">Run the tool and generate your personalized results.</p>
+
+    <div class="rm-header">
+      <div>
+        <h2>My Roadmap</h2>
+        <p id="rm-sub">Your generated results and progress.</p>
+      </div>
+      <a id="rm-run-btn" href="#" class="rm-run-btn">⚡ Run Tool Again</a>
     </div>
-    <a id="rm-tool-btn" href="#" class="rm-btn">⚡ Get My Results</a>
-    <div class="coming-soon">Your past results will appear here once you've run the tool. Results history, progress tracking, and saved reports coming soon.</div>
+
+    <div id="rm-loading" class="rm-loading">
+      <div class="spinner"></div>
+      <p>Loading your results...</p>
+    </div>
+
+    <div id="rm-no-db" class="rm-no-db" style="display:none;">
+      <div class="rm-state-icon">🗄️</div>
+      <p>Connect your Firebase database in hub settings to save and view your results history.</p>
+    </div>
+
+    <div id="rm-empty" class="rm-empty" style="display:none;">
+      <div class="rm-state-icon">⚡</div>
+      <p id="rm-empty-text">You haven't generated any results yet.</p>
+      <a id="rm-empty-btn" href="#" class="rm-run-btn">Get My Results</a>
+    </div>
+
+    <div id="rm-results" class="results-grid" style="display:none;"></div>
+
   </main>
 </div>
 
 <script>
-  initHubPage('roadmap', function(hub, slug) {
-    if (hub.toolName) document.getElementById('rm-sub').textContent = 'Run ' + hub.toolName + ' and generate your personalized results.';
-    document.getElementById('rm-tool-btn').href = '/hub/' + slug + '/tool';
+  function formatDate(ts) {
+    if (!ts) return '';
+    var d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  initHubPage('roadmap', function(hub, slug, studentAuth, studentDb) {
+    document.getElementById('rm-run-btn').href   = '/hub/' + slug + '/tool';
+    document.getElementById('rm-empty-btn').href = '/hub/' + slug + '/tool';
+
+    if (hub.toolName) {
+      document.getElementById('rm-sub').textContent = 'All your ' + hub.toolName + ' results in one place.';
+      document.getElementById('rm-empty-text').textContent = 'You haven\'t run ' + hub.toolName + ' yet.';
+    }
+
+    if (!studentDb) {
+      document.getElementById('rm-loading').style.display = 'none';
+      document.getElementById('rm-no-db').style.display = 'block';
+      return;
+    }
+
+    studentDb.collection('toolResults')
+      .where('hubSlug', '==', slug)
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get().then(function(snap) {
+        document.getElementById('rm-loading').style.display = 'none';
+
+        if (snap.empty) {
+          document.getElementById('rm-empty').style.display = 'block';
+          return;
+        }
+
+        var grid = document.getElementById('rm-results');
+        grid.style.display = 'grid';
+
+        snap.docs.forEach(function(doc) {
+          var r = doc.data();
+          var card = document.createElement('a');
+          card.href = '/hub/' + slug + '/results?id=' + doc.id;
+          card.className = 'result-card';
+          card.innerHTML =
+            '<div class="result-card-top">' +
+              '<span class="result-label">⚡ ' + (r.toolName || 'Result') + '</span>' +
+              '<span class="result-date">' + formatDate(r.createdAt) + '</span>' +
+            '</div>' +
+            '<div class="result-title">' + (r.resultTitle || 'My Results') + '</div>' +
+            '<div class="result-summary">' + (r.resultSummary || '') + '</div>' +
+            '<div class="result-card-footer">' +
+              '<span class="result-view-btn">View Results →</span>' +
+            '</div>';
+          grid.appendChild(card);
+        });
+
+      }).catch(function() {
+        document.getElementById('rm-loading').style.display = 'none';
+        document.getElementById('rm-empty').style.display = 'block';
+      });
   });
 </script>
 </body>
