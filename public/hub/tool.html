@@ -664,7 +664,7 @@
     btn.textContent = '⏳ Generating your results...';
 
     try {
-      var triggerMsg = 'I\'ve answered all your questions. Please generate my full ' + (HUB.toolName || 'results') + ' now.';
+      var triggerMsg = 'Generate my full ' + (HUB.toolName || 'results') + ' now. Write the complete report from scratch based on everything I shared. Do not reference previous messages or say I already have it — produce the full output now.';
       var response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -784,7 +784,7 @@
           max_tokens: 1500,
           stream: true,
           system: (HUB.systemPrompt || 'You are a helpful AI assistant.') +
-            '\n\n---\nWhen you have asked enough questions and have all the information you need to generate the final output for this user, include the exact token [READY_TO_GENERATE] on its own line at the very end of your response. Do not include this token until you genuinely have enough context. Never mention or explain this token to the user — it is invisible to them.',
+            '\n\n---\nIMPORTANT SIGNAL INSTRUCTIONS: When you have asked enough questions and have all the information you need, do NOT generate the final output or report in this response. Instead, write a single short closing sentence (e.g. "I have everything I need to build your results!") and then add [READY_TO_GENERATE] on its own line. The actual output will be generated separately when the user clicks the button — do not include it here. Never mention or explain [READY_TO_GENERATE] to the user.',
           messages: messages
         })
       });
