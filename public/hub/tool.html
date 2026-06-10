@@ -476,9 +476,6 @@
 
       <button class="btn-start" id="start-btn" onclick="beginSession()">Get Started →</button>
     </div>
-    <div class="intro-powered">
-      Powered by <a href="https://toolspark.co" target="_blank">ToolSpark</a>
-    </div>
   </div>
 
   <!-- CHAT VIEW -->
@@ -672,11 +669,16 @@
     sendMessageWithText(trigger);
   }
 
-  function updateGenerateButton() {
-    var minTurns = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 4;
-    if (userTurnCount >= minTurns && !document.getElementById('report-view').classList.contains('visible')) {
+  function showGenerateButton() {
+    if (!document.getElementById('report-view').classList.contains('visible')) {
       document.getElementById('generate-row').classList.add('visible');
     }
+  }
+
+  // Fallback: show button after many turns in case AI never signals
+  function updateGenerateButton() {
+    var fallback = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 8;
+    if (userTurnCount >= fallback) showGenerateButton();
   }
 
   // ── REPORT DETECTION ──
@@ -748,7 +750,8 @@
           model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
           max_tokens: 1500,
           stream: true,
-          system: HUB.systemPrompt || 'You are a helpful AI assistant.',
+          system: (HUB.systemPrompt || 'You are a helpful AI assistant.') +
+            '\n\n---\nWhen you have asked enough questions and have all the information you need to generate the final output for this user, include the exact token [READY_TO_GENERATE] on its own line at the very end of your response. Do not include this token until you genuinely have enough context. Never mention or explain this token to the user — it is invisible to them.',
           messages: messages
         })
       });
@@ -785,23 +788,30 @@
         }
       }
 
-      bubble.innerHTML = renderMarkdown(fullText);
+      var readySignal = fullText.indexOf('[READY_TO_GENERATE]') !== -1;
+      var cleanText = fullText.replace(/\[READY_TO_GENERATE\]\s*/g, '').trim();
+
+      bubble.innerHTML = renderMarkdown(cleanText);
       scrollToBottom();
 
-      if (fullText) {
-        messages.push({ role: 'assistant', content: fullText });
+      if (cleanText) {
+        messages.push({ role: 'assistant', content: cleanText });
 
-        if (isReport(fullText)) {
-          setTimeout(function() { showReportView(fullText); }, 600);
+        if (isReport(cleanText)) {
+          setTimeout(function() { showReportView(cleanText); }, 600);
         } else {
-          updateGenerateButton();
+          if (readySignal) {
+            showGenerateButton();
+          } else {
+            updateGenerateButton();
+          }
         }
 
         if (studentDb) {
           studentDb.collection('toolUsage').add({
             hubSlug: slug,
             inputLength: input.length,
-            outputLength: fullText.length,
+            outputLength: cleanText.length,
             model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
             turnCount: messages.length,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
