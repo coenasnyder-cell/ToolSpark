@@ -10,38 +10,137 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="/hub/hub-shell.js"></script>
 <style>
-  .rm-header {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap;
-  }
-  .rm-header h2 {
+  /* PAGE HEADER */
+  .rm-page-header { margin-bottom: 2rem; }
+  .rm-page-header h2 {
     font-family: 'Playfair Display', serif;
     font-size: 26px; font-weight: 400;
     color: var(--hub-text-primary, #1A1714);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
-  .rm-header p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
-  .rm-run-btn {
+  .rm-page-header p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
+
+  /* STAGES */
+  .stages-wrap { margin-bottom: 2.5rem; }
+  .stages-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--hub-text-muted, #9A9488);
+    margin-bottom: 1rem;
+  }
+  .stages-track {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 0;
+  }
+  .stage-connector {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+    padding-top: 28px; /* align with stage number circle */
+  }
+  .stage-connector-line {
+    height: 2px; width: 32px;
+    background: var(--hub-border, #E4E0D8);
+  }
+  .stage {
+    background: var(--hub-chat-bg, #fff);
+    border: 1px solid var(--hub-border, #E4E0D8);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+  }
+  .stage.active {
+    border-color: var(--gold, #C9A84C);
+    box-shadow: 0 2px 16px rgba(201,168,76,0.12);
+  }
+  .stage.locked { opacity: 0.6; }
+
+  .stage-num-row {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 8px;
+  }
+  .stage-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .stage.active .stage-num {
+    background: var(--gold, #C9A84C);
+    color: var(--hub-btn-text, #0C0B09);
+  }
+  .stage.locked .stage-num {
+    background: var(--hub-border, #E4E0D8);
+    color: var(--hub-text-muted, #9A9488);
+  }
+  .stage-status {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+  }
+  .stage.active .stage-status {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold, #C9A84C);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+  .stage.locked .stage-status {
+    background: var(--hub-page-bg, #F4F2EE);
+    color: var(--hub-text-muted, #9A9488);
+    border: 1px solid var(--hub-border, #E4E0D8);
+  }
+  .stage-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--hub-text-primary, #1A1714);
+    line-height: 1.3;
+  }
+  .stage-desc {
+    font-size: 13px;
+    color: var(--hub-text-muted, #6B6560);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .stage-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold, #C9A84C);
+    color: var(--hub-btn-text, #0C0B09);
+    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+    padding: 8px 16px; border-radius: 8px;
+    text-decoration: none; align-self: flex-start;
+    transition: opacity 0.15s; white-space: nowrap;
+  }
+  .stage-btn:hover { opacity: 0.85; }
+  .stage-lock { font-size: 18px; color: var(--hub-text-muted, #C0BAB2); }
+
+  /* RESULTS SECTION */
+  .results-section-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
+  }
+  .results-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--hub-text-muted, #9A9488);
+  }
+  .results-run-btn {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
-    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    padding: 9px 18px; border-radius: 8px; text-decoration: none;
-    white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0;
+    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+    padding: 7px 14px; border-radius: 8px; text-decoration: none;
+    white-space: nowrap; transition: opacity 0.15s;
   }
-  .rm-run-btn:hover { opacity: 0.85; }
+  .results-run-btn:hover { opacity: 0.85; }
 
   /* STATES */
   .rm-loading, .rm-empty, .rm-no-db {
-    padding: 3rem 1.5rem;
+    padding: 2.5rem 1.5rem;
     text-align: center;
     color: var(--hub-text-muted, #6B6560);
     font-size: 14px;
   }
-  .rm-state-icon { font-size: 36px; margin-bottom: 0.75rem; }
+  .rm-state-icon { font-size: 32px; margin-bottom: 0.75rem; }
   .rm-loading p, .rm-empty p, .rm-no-db p { margin-bottom: 1rem; }
   .spinner {
-    width: 26px; height: 26px;
+    width: 24px; height: 24px;
     border: 3px solid var(--hub-border, #E4E0D8);
     border-top-color: var(--gold, #C9A84C);
     border-radius: 50%;
@@ -82,37 +181,34 @@
     border: 1px solid rgba(201,168,76,0.2);
     border-radius: 20px; padding: 3px 8px;
   }
-  .result-date {
-    font-size: 11px;
-    color: var(--hub-text-muted, #9A9488);
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .result-title {
-    font-size: 15px; font-weight: 700;
-    color: var(--hub-text-primary, #1A1714);
-    line-height: 1.3;
-  }
+  .result-date { font-size: 11px; color: var(--hub-text-muted, #9A9488); white-space: nowrap; flex-shrink: 0; }
+  .result-title { font-size: 15px; font-weight: 700; color: var(--hub-text-primary, #1A1714); line-height: 1.3; }
   .result-summary {
-    font-size: 13px;
-    color: var(--hub-text-muted, #6B6560);
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    flex: 1;
+    font-size: 13px; color: var(--hub-text-muted, #6B6560);
+    line-height: 1.5; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
   .result-card-footer {
-    display: flex; align-items: center;
-    justify-content: flex-end;
-    padding-top: 8px;
-    border-top: 1px solid var(--hub-border, #E4E0D8);
-    margin-top: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 8px; border-top: 1px solid var(--hub-border, #E4E0D8); margin-top: 4px;
+    gap: 8px;
   }
   .result-view-btn {
     font-size: 12px; font-weight: 700;
     color: var(--gold, #C9A84C);
-    display: flex; align-items: center; gap: 4px;
+  }
+  .result-rerun-btn {
+    font-size: 11px; color: var(--hub-text-muted, #9A9488);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .result-rerun-btn:hover { color: var(--gold, #C9A84C); }
+
+  /* MOBILE */
+  @media (max-width: 700px) {
+    .stages-track { grid-template-columns: 1fr; }
+    .stage-connector { display: none; }
+    .stage + .stage { margin-top: 0; }
   }
 </style>
 </head>
@@ -124,12 +220,60 @@
   <header id="hs-header"></header>
   <main class="hs-content">
 
-    <div class="rm-header">
-      <div>
-        <h2>My Roadmap</h2>
-        <p id="rm-sub">Your generated results and progress.</p>
+    <div class="rm-page-header">
+      <h2>My Roadmap</h2>
+      <p id="rm-sub">Your transformation journey.</p>
+    </div>
+
+    <!-- STAGES -->
+    <div class="stages-wrap">
+      <div class="stages-label">Your Journey</div>
+      <div class="stages-track">
+
+        <!-- STAGE 1 — active -->
+        <div class="stage active">
+          <div class="stage-num-row">
+            <div class="stage-num">1</div>
+            <span class="stage-status">Active</span>
+          </div>
+          <div class="stage-title" id="stage1-title">Get Your Results</div>
+          <div class="stage-desc" id="stage1-desc">Answer a few questions and get your personalized plan.</div>
+          <a id="stage1-btn" href="#" class="stage-btn">⚡ Launch Tool</a>
+        </div>
+
+        <div class="stage-connector"><div class="stage-connector-line"></div></div>
+
+        <!-- STAGE 2 — coming soon -->
+        <div class="stage locked">
+          <div class="stage-num-row">
+            <div class="stage-num">2</div>
+            <span class="stage-status">Coming Soon</span>
+          </div>
+          <div class="stage-title">Deepen Your Strategy</div>
+          <div class="stage-desc">Build on your results with guided next steps and resources.</div>
+          <div class="stage-lock">🔒</div>
+        </div>
+
+        <div class="stage-connector"><div class="stage-connector-line"></div></div>
+
+        <!-- STAGE 3 — coming soon -->
+        <div class="stage locked">
+          <div class="stage-num-row">
+            <div class="stage-num">3</div>
+            <span class="stage-status">Coming Soon</span>
+          </div>
+          <div class="stage-title">Take Action</div>
+          <div class="stage-desc">Implement your plan with accountability tools and community support.</div>
+          <div class="stage-lock">🔒</div>
+        </div>
+
       </div>
-      <a id="rm-run-btn" href="#" class="rm-run-btn">⚡ Run Tool Again</a>
+    </div>
+
+    <!-- RESULTS HISTORY -->
+    <div class="results-section-header">
+      <div class="results-section-label" id="results-label">Your Results</div>
+      <a id="rm-run-btn" href="#" class="results-run-btn">⚡ Run Again</a>
     </div>
 
     <div id="rm-loading" class="rm-loading">
@@ -145,7 +289,7 @@
     <div id="rm-empty" class="rm-empty" style="display:none;">
       <div class="rm-state-icon">⚡</div>
       <p id="rm-empty-text">You haven't generated any results yet.</p>
-      <a id="rm-empty-btn" href="#" class="rm-run-btn">Get My Results</a>
+      <a id="rm-empty-btn" href="#" class="results-run-btn">Get My Results</a>
     </div>
 
     <div id="rm-results" class="results-grid" style="display:none;"></div>
@@ -161,11 +305,24 @@
   }
 
   initHubPage('roadmap', function(hub, slug, studentAuth, studentDb) {
-    document.getElementById('rm-run-btn').href   = '/hub/' + slug + '/tool';
-    document.getElementById('rm-empty-btn').href = '/hub/' + slug + '/tool';
+    var toolUrl = '/hub/' + slug + '/tool';
+
+    // Stage 1
+    if (hub.toolName) {
+      document.getElementById('stage1-title').textContent = hub.toolName;
+    }
+    if (hub.toolDescription) {
+      document.getElementById('stage1-desc').textContent = hub.toolDescription;
+    }
+    document.getElementById('stage1-btn').href = toolUrl;
+
+    // Run buttons
+    document.getElementById('rm-run-btn').href   = toolUrl;
+    document.getElementById('rm-empty-btn').href = toolUrl;
 
     if (hub.toolName) {
-      document.getElementById('rm-sub').textContent = 'All your ' + hub.toolName + ' results in one place.';
+      document.getElementById('rm-sub').textContent = 'Track your progress with ' + hub.toolName + '.';
+      document.getElementById('results-label').textContent = 'Your ' + hub.toolName + ' Results';
       document.getElementById('rm-empty-text').textContent = 'You haven\'t run ' + hub.toolName + ' yet.';
     }
 
@@ -204,6 +361,7 @@
             '<div class="result-summary">' + (r.resultSummary || '') + '</div>' +
             '<div class="result-card-footer">' +
               '<span class="result-view-btn">View Results →</span>' +
+              '<a class="result-rerun-btn" href="' + toolUrl + '" onclick="event.stopPropagation()">Run again ↩</a>' +
             '</div>';
           grid.appendChild(card);
         });
