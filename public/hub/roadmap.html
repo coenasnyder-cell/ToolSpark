@@ -115,14 +115,20 @@
   }
   .rm-card-date { font-size: 11px; color: var(--hub-text-muted, #9A9488); margin-top: 2px; }
   .rm-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .rm-card-subtitle {
+    font-size: 12px; color: var(--hub-text-muted, #9A9488);
+    margin-top: 2px;
+  }
   .rm-btn-view {
     font-size: 12px; font-weight: 700;
-    background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
-    border: none; border-radius: 7px; padding: 7px 14px;
+    background: none;
+    border: 1px solid var(--gold, #C9A84C);
+    color: var(--gold, #C9A84C);
+    border-radius: 7px; padding: 6px 14px;
     text-decoration: none; cursor: pointer; white-space: nowrap;
-    transition: opacity 0.15s; font-family: 'Lato', sans-serif;
+    transition: all 0.15s; font-family: 'Lato', sans-serif;
   }
-  .rm-btn-view:hover { opacity: 0.85; }
+  .rm-btn-view:hover { background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09); }
   .rm-btn-tool {
     font-size: 12px; font-weight: 700;
     color: var(--hub-text-muted, #6B6560);
@@ -214,6 +220,8 @@
   function renderMarkdown(md) {
     if (!md) return '';
     var html = md
+      // strip horizontal rules
+      .replace(/^---+$/gm, '')
       // headings
       .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
       .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
@@ -265,7 +273,7 @@
 
     studentDb.collection('toolResults')
       .where('hubSlug', '==', slug)
-      .limit(50)
+      .limit(20)
       .get().then(function(snap) {
         document.getElementById('rm-loading').style.display = 'none';
 
@@ -274,41 +282,40 @@
           return;
         }
 
-        var list = document.getElementById('rm-results');
-        list.style.display = 'flex';
-
-        var docs = snap.docs.slice().sort(function(a, b) {
+        // Get only the latest result
+        var sorted = snap.docs.slice().sort(function(a, b) {
           var at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
           var bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
           return bt - at;
         });
 
-        docs.forEach(function(doc) {
-          var r = doc.data();
+        var doc = sorted[0];
+        var r = doc.data();
 
-          var card = document.createElement('div');
-          card.className = 'rm-card';
+        var list = document.getElementById('rm-results');
+        list.style.display = 'flex';
 
-          var iconHtml = hub.logoUrl
-            ? '<div class="rm-card-icon"><img src="' + hub.logoUrl + '" alt=""></div>'
-            : '<div class="rm-card-icon">⚡</div>';
+        var iconHtml = hub.logoUrl
+          ? '<div class="rm-card-icon"><img src="' + hub.logoUrl + '" alt=""></div>'
+          : '<div class="rm-card-icon">⚡</div>';
 
-          card.innerHTML =
-            '<div class="rm-card-header">' +
-              iconHtml +
-              '<div class="rm-card-meta">' +
-                '<div class="rm-card-title">' + (r.resultTitle || r.toolName || 'My Results') + '</div>' +
-                '<div class="rm-card-date">' + formatDate(r.createdAt) + '</div>' +
-              '</div>' +
-              '<div class="rm-card-actions">' +
-                '<a class="rm-btn-view" href="/hub/' + slug + '/results?id=' + doc.id + '">View Full Results</a>' +
-                '<a class="rm-btn-tool" href="' + toolUrl + '">Open tool →</a>' +
-              '</div>' +
+        var card = document.createElement('div');
+        card.className = 'rm-card';
+        card.innerHTML =
+          '<div class="rm-card-header">' +
+            iconHtml +
+            '<div class="rm-card-meta">' +
+              '<div class="rm-card-title">' + (r.toolName || hub.toolName || 'My Results') + '</div>' +
+              '<div class="rm-card-subtitle">' + (hub.toolDescription || '') + '</div>' +
             '</div>' +
-            '<div class="rm-card-body">' + renderMarkdown(r.reportText || r.resultSummary || '') + '</div>';
+            '<div class="rm-card-actions">' +
+              '<a class="rm-btn-view" href="/hub/' + slug + '/results?id=' + doc.id + '">View Full Results</a>' +
+              '<a class="rm-btn-tool" href="' + toolUrl + '">Open tool →</a>' +
+            '</div>' +
+          '</div>' +
+          '<div class="rm-card-body">' + renderMarkdown(r.reportText || '') + '</div>';
 
-          list.appendChild(card);
-        });
+        list.appendChild(card);
 
       }).catch(function() {
         document.getElementById('rm-loading').style.display = 'none';
