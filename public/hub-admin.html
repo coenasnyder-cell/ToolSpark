@@ -259,8 +259,18 @@
             <input type="color" id="primaryColorPicker" value="#C9A84C">
             <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
           </div>
-          <div class="field-hint">Your "Get Started" button, the tool name badge, step circles, and send button — pick your brand color here</div>
+          <div class="field-hint">Your "Get Started" button background, the tool name badge, and step circles</div>
         </div>
+        <div class="field">
+          <label>Button Text Color</label>
+          <div class="color-row">
+            <input type="color" id="btnTextColorPicker" value="#0C0B09">
+            <input type="text" id="btnTextColorHex" placeholder="#0C0B09" maxlength="7">
+          </div>
+          <div class="field-hint">The text on your "Get Started" button — use white (#FFFFFF) if your accent color is dark</div>
+        </div>
+      </div>
+      <div class="field-row">
         <div class="field">
           <label>Page Background</label>
           <div class="color-row">
@@ -269,8 +279,6 @@
           </div>
           <div class="field-hint">The background color behind everything — all pages use this</div>
         </div>
-      </div>
-      <div class="field-row">
         <div class="field">
           <label>Headline &amp; Body Text</label>
           <div class="color-row">
@@ -279,6 +287,8 @@
           </div>
           <div class="field-hint">Your main headline and body text — use a dark color if your background is light</div>
         </div>
+      </div>
+      <div class="field-row">
         <div class="field">
           <label>Description &amp; Label Text</label>
           <div class="color-row">
@@ -287,14 +297,14 @@
           </div>
           <div class="field-hint">Smaller supporting text — the paragraph below your headline, step labels, nav</div>
         </div>
-      </div>
-      <div class="field" style="max-width:50%;">
-        <label>Lines &amp; Borders</label>
-        <div class="color-row">
-          <input type="color" id="borderColorPicker" value="#2A2720">
-          <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
+        <div class="field">
+          <label>Lines &amp; Borders</label>
+          <div class="color-row">
+            <input type="color" id="borderColorPicker" value="#2A2720">
+            <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
+          </div>
+          <div class="field-hint">The thin lines separating sections — nav border, dividers between steps, card outlines</div>
         </div>
-        <div class="field-hint">The thin lines separating sections — nav border, dividers between steps, card outlines</div>
       </div>
     </div>
   </div>
@@ -682,6 +692,7 @@ service cloud.firestore {
   wireColorPair('aiBubbleColorPicker', 'aiBubbleColorHex');
   wireColorPair('userBubbleColorPicker','userBubbleColorHex');
   wireColorPair('inputBgColorPicker',    'inputBgColorHex');
+  wireColorPair('btnTextColorPicker',    'btnTextColorHex');
   wireColorPair('textPrimaryColorPicker','textPrimaryColorHex');
   wireColorPair('textMutedColorPicker',  'textMutedColorHex');
   wireColorPair('borderColorPicker',     'borderColorHex');
@@ -781,7 +792,7 @@ service cloud.firestore {
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
       if (s.primaryColor) { document.getElementById('primaryColorPicker').value = s.primaryColor; document.getElementById('primaryColorHex').value = s.primaryColor.toUpperCase(); }
-      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720' };
+      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720', btnTextColor: '#0C0B09' };
       Object.keys(colorDefaults).forEach(function(field) {
         var val = s[field] || colorDefaults[field];
         document.getElementById(field + 'Picker').value = val;
@@ -841,6 +852,7 @@ service cloud.firestore {
       aiBubbleColor:      document.getElementById('aiBubbleColorHex').value.trim() || document.getElementById('aiBubbleColorPicker').value,
       userBubbleColor:    document.getElementById('userBubbleColorHex').value.trim() || document.getElementById('userBubbleColorPicker').value,
       inputBgColor:       document.getElementById('inputBgColorHex').value.trim() || document.getElementById('inputBgColorPicker').value,
+      btnTextColor:       document.getElementById('btnTextColorHex').value.trim() || document.getElementById('btnTextColorPicker').value,
       textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
       textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
       borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,

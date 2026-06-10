@@ -42,6 +42,7 @@
     --hub-text-primary: #F0EDE6;
     --hub-text-muted:   #9A9488;
     --hub-border:       #2A2720;
+    --hub-btn-text:     #0C0B09;
   }
 
   html { height: 100%; }
@@ -193,7 +194,7 @@
   .btn-start {
     padding: 15px 40px;
     background: var(--gold);
-    color: var(--dark);
+    color: var(--hub-btn-text);
     font-family: 'Lato', sans-serif;
     font-weight: 900;
     font-size: 16px;
@@ -581,7 +582,8 @@
       '--hub-input-bg':     hub.inputBgColor,
       '--hub-text-primary': hub.textPrimaryColor,
       '--hub-text-muted':   hub.textMutedColor,
-      '--hub-border':       hub.borderColor
+      '--hub-border':       hub.borderColor,
+      '--hub-btn-text':     hub.btnTextColor
     };
     Object.keys(colorMap).forEach(function(prop) {
       if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
