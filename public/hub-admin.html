@@ -1048,6 +1048,7 @@ service cloud.firestore {
         community: document.getElementById('feature-community').checked,
         support:   document.getElementById('feature-support').checked
       },
+      ownerEmail:         currentUser.email,
       updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
       status.textContent = '✓ Saved';

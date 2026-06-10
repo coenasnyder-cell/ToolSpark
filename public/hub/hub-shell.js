@@ -82,6 +82,11 @@
         '#hs-main{margin-left:60px;}' +
       '}' +
 
+      /* ADMIN BUTTON */
+      '.hs-admin-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;border:1px solid rgba(201,168,76,0.35);background:rgba(201,168,76,0.08);color:var(--hub-nav-btn,#C9A84C);font-family:"Lato",sans-serif;font-size:12px;font-weight:700;text-decoration:none;transition:all 0.15s;white-space:nowrap;}' +
+      '.hs-admin-btn:hover{background:rgba(201,168,76,0.18);border-color:var(--hub-nav-btn,#C9A84C);}' +
+      '.hs-admin-btn svg{width:13px;height:13px;flex-shrink:0;}' +
+
       /* MOBILE */
       '@media(max-width:767px){' +
         '#hs-sidebar{width:var(--hs-sidebar-width);transform:translateX(-100%);}' +
@@ -201,6 +206,11 @@
           if (logoutBtn) logoutBtn.addEventListener('click', function() {
             studentAuth.signOut().then(function() { window.location.href = '/hub/' + slug + '/login'; });
           });
+          // Show admin button if student user's email matches the hub owner
+          if (hub.ownerEmail && user.email &&
+              user.email.toLowerCase() === hub.ownerEmail.toLowerCase()) {
+            showAdminButton();
+          }
         } else if (hub.membersOnly) {
           window.location.href = '/hub/' + slug + '/login';
         }
@@ -249,6 +259,27 @@
       }
 
       buildShell(hub, slug, activeKey, studentAuth);
+
+      // Show admin button if the logged-in ToolSpark user owns this hub
+      function showAdminButton() {
+        var actionsEl = document.getElementById('hs-header-actions');
+        if (actionsEl && !document.getElementById('hs-admin-btn')) {
+          var btn = document.createElement('a');
+          btn.id = 'hs-admin-btn';
+          btn.href = '/hub/admin-dashboard';
+          btn.className = 'hs-admin-btn';
+          btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Admin';
+          actionsEl.appendChild(btn);
+        }
+      }
+
+      var tsAuth = app.auth();
+      tsAuth.onAuthStateChanged(function(tsUser) {
+        if (!tsUser) return;
+        db.collection('users').doc(tsUser.uid).get().then(function(userSnap) {
+          if (userSnap.exists && userSnap.data().hubSlug === slug) showAdminButton();
+        }).catch(function() {});
+      });
 
       if (callback) callback(hub, slug, studentAuth, studentDb);
 
