@@ -309,6 +309,42 @@
     </div>
   </div>
 
+  <!-- HEADER / NAV COLORS -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">🔝</div>
+      <div><div class="card-title">Header / Navigation</div><div class="card-desc">The bar across the top of every page</div></div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Header Background</label>
+          <div class="color-row">
+            <input type="color" id="navBgColorPicker" value="#0C0B09">
+            <input type="text" id="navBgColorHex" placeholder="#0C0B09" maxlength="7">
+          </div>
+          <div class="field-hint">Background color of the top bar — set it different from the page to make the header stand out</div>
+        </div>
+        <div class="field">
+          <label>Header Text Color</label>
+          <div class="color-row">
+            <input type="color" id="navTextColorPicker" value="#F0EDE6">
+            <input type="text" id="navTextColorHex" placeholder="#F0EDE6" maxlength="7">
+          </div>
+          <div class="field-hint">Your hub name displayed in the top left corner</div>
+        </div>
+      </div>
+      <div class="field" style="max-width:50%;">
+        <label>Header Button Color</label>
+        <div class="color-row">
+          <input type="color" id="navBtnColorPicker" value="#C9A84C">
+          <input type="text" id="navBtnColorHex" placeholder="#C9A84C" maxlength="7">
+        </div>
+        <div class="field-hint">The button in the top right corner — "Get Access" on the landing page, "New Conversation" on the chat page</div>
+      </div>
+    </div>
+  </div>
+
   <!-- CHAT TOOL COLORS -->
   <div class="settings-card">
     <div class="card-header">
@@ -693,6 +729,9 @@ service cloud.firestore {
   wireColorPair('userBubbleColorPicker','userBubbleColorHex');
   wireColorPair('inputBgColorPicker',    'inputBgColorHex');
   wireColorPair('btnTextColorPicker',    'btnTextColorHex');
+  wireColorPair('navBgColorPicker',      'navBgColorHex');
+  wireColorPair('navTextColorPicker',    'navTextColorHex');
+  wireColorPair('navBtnColorPicker',     'navBtnColorHex');
   wireColorPair('textPrimaryColorPicker','textPrimaryColorHex');
   wireColorPair('textMutedColorPicker',  'textMutedColorHex');
   wireColorPair('borderColorPicker',     'borderColorHex');
@@ -792,7 +831,7 @@ service cloud.firestore {
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
       if (s.primaryColor) { document.getElementById('primaryColorPicker').value = s.primaryColor; document.getElementById('primaryColorHex').value = s.primaryColor.toUpperCase(); }
-      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720', btnTextColor: '#0C0B09' };
+      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720', btnTextColor: '#0C0B09', navBgColor: '#0C0B09', navTextColor: '#F0EDE6', navBtnColor: '#C9A84C' };
       Object.keys(colorDefaults).forEach(function(field) {
         var val = s[field] || colorDefaults[field];
         document.getElementById(field + 'Picker').value = val;
@@ -853,6 +892,9 @@ service cloud.firestore {
       userBubbleColor:    document.getElementById('userBubbleColorHex').value.trim() || document.getElementById('userBubbleColorPicker').value,
       inputBgColor:       document.getElementById('inputBgColorHex').value.trim() || document.getElementById('inputBgColorPicker').value,
       btnTextColor:       document.getElementById('btnTextColorHex').value.trim() || document.getElementById('btnTextColorPicker').value,
+      navBgColor:         document.getElementById('navBgColorHex').value.trim() || document.getElementById('navBgColorPicker').value,
+      navTextColor:       document.getElementById('navTextColorHex').value.trim() || document.getElementById('navTextColorPicker').value,
+      navBtnColor:        document.getElementById('navBtnColorHex').value.trim() || document.getElementById('navBtnColorPicker').value,
       textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
       textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
       borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,

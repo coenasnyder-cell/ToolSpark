@@ -35,6 +35,9 @@
     --hub-text-muted:   #9A9488;
     --hub-border:       #2A2720;
     --hub-btn-text:     #0C0B09;
+    --hub-nav-bg:       #0C0B09;
+    --hub-nav-text:     #F0EDE6;
+    --hub-nav-btn:      #C9A84C;
   }
   html, body { height: 100%; }
   body { font-family: 'Lato', sans-serif; background: var(--hub-page-bg); color: var(--hub-text-primary); -webkit-font-smoothing: antialiased; }
@@ -62,12 +65,12 @@
   }
 
   /* NAV */
-  .hub-nav { position: relative; z-index: 10; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+  .hub-nav { position: relative; z-index: 10; padding: 1.5rem 2rem; background: var(--hub-nav-bg); display: flex; align-items: center; justify-content: space-between; }
   .hub-logo-wrap { display: flex; align-items: center; gap: 12px; }
   .hub-logo-img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; display: none; }
   .hub-logo-img.visible { display: block; }
-  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--hub-text-primary); }
-  .nav-cta { padding: 8px 20px; background: var(--gold); color: var(--hub-btn-text); font-weight: 700; font-size: 13px; border-radius: 8px; text-decoration: none; transition: opacity 0.15s; letter-spacing: 0.02em; }
+  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--hub-nav-text); }
+  .nav-cta { padding: 8px 20px; background: var(--hub-nav-btn); color: var(--hub-btn-text); font-weight: 700; font-size: 13px; border-radius: 8px; text-decoration: none; transition: opacity 0.15s; letter-spacing: 0.02em; }
   .nav-cta:hover { opacity: 0.85; }
 
   /* HERO CONTENT */
@@ -216,7 +219,10 @@
       '--hub-text-primary': hub.textPrimaryColor,
       '--hub-text-muted':   hub.textMutedColor,
       '--hub-border':       hub.borderColor,
-      '--hub-btn-text':     hub.btnTextColor
+      '--hub-btn-text':     hub.btnTextColor,
+      '--hub-nav-bg':       hub.navBgColor,
+      '--hub-nav-text':     hub.navTextColor,
+      '--hub-nav-btn':      hub.navBtnColor
     };
     Object.keys(colorMap).forEach(function(prop) {
       if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);

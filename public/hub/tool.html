@@ -43,6 +43,9 @@
     --hub-text-muted:   #9A9488;
     --hub-border:       #2A2720;
     --hub-btn-text:     #0C0B09;
+    --hub-nav-bg:       #0C0B09;
+    --hub-nav-text:     #F0EDE6;
+    --hub-nav-btn:      #C9A84C;
   }
 
   html { height: 100%; }
@@ -65,14 +68,14 @@
   #page { display: none; height: 100%; height: 100dvh; flex-direction: column; overflow: hidden; }
 
   /* NAV */
-  .hub-nav { padding: 0.875rem 1.5rem; border-bottom: 1px solid var(--hub-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 10px; }
+  .hub-nav { padding: 0.875rem 1.5rem; background: var(--hub-nav-bg); border-bottom: 1px solid var(--hub-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 10px; }
   .hub-nav-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
   .hub-logo-img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; display: none; flex-shrink: 0; }
   .hub-logo-img.visible { display: block; }
-  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .hub-name-text { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; color: var(--hub-nav-text); }
   .hub-tool-pill { padding: 3px 10px; border: 1px solid var(--hub-border); border-radius: 12px; font-size: 11px; color: var(--hub-text-muted); font-weight: 700; white-space: nowrap; flex-shrink: 0; }
   .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .btn-new-chat { background: none; border: 1px solid var(--hub-border); color: var(--hub-text-muted); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; white-space: nowrap; }
+  .btn-new-chat { background: none; border: 1px solid var(--hub-nav-btn); color: var(--hub-nav-btn); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; white-space: nowrap; }
   .btn-new-chat:hover { border-color: var(--gold); color: var(--gold); }
   .nav-user { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--hub-text-muted); }
   .nav-user.visible { display: flex; }
@@ -173,7 +176,7 @@
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: var(--hub-text-muted);
+    color: var(--hub-text-primary);
   }
   .intro-step-num {
     width: 22px; height: 22px;
@@ -451,7 +454,6 @@
     <div class="intro-bg"></div>
     <div class="intro-body">
       <img id="intro-logo" class="intro-logo" src="" alt="logo">
-      <div class="intro-badge" id="intro-badge">⚡ AI Tool</div>
       <h1 class="intro-headline" id="intro-headline"></h1>
       <p class="intro-desc" id="intro-desc"></p>
 
@@ -583,7 +585,10 @@
       '--hub-text-primary': hub.textPrimaryColor,
       '--hub-text-muted':   hub.textMutedColor,
       '--hub-border':       hub.borderColor,
-      '--hub-btn-text':     hub.btnTextColor
+      '--hub-btn-text':     hub.btnTextColor,
+      '--hub-nav-bg':       hub.navBgColor,
+      '--hub-nav-text':     hub.navTextColor,
+      '--hub-nav-btn':      hub.navBtnColor
     };
     Object.keys(colorMap).forEach(function(prop) {
       if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
@@ -597,7 +602,6 @@
     document.getElementById('nav-name').textContent = hub.hubName || '';
 
     // Populate intro screen
-    document.getElementById('intro-badge').textContent = '⚡ ' + (hub.toolName || 'AI Tool');
     document.getElementById('report-badge').textContent = '⚡ ' + (hub.toolName || 'Your Report');
 
     var headline = hub.landingHeadline || hub.toolName || 'Your AI Tool';
