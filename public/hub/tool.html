@@ -505,21 +505,6 @@
     </div><!-- /.chat-card -->
   </div>
 
-  <!-- REPORT VIEW -->
-  <div id="report-view">
-    <div class="report-scroll">
-      <div class="report-inner">
-        <div class="report-badge" id="report-badge">⚡ Your Report</div>
-        <div class="report-body" id="report-content"></div>
-      </div>
-    </div>
-    <div class="report-actions">
-      <button class="btn-back-chat" onclick="backToChat()">← Back to Chat</button>
-      <button class="btn-new-session" onclick="newConversation()">Start New Session</button>
-      <span class="report-hint">Scroll up to read your full report</span>
-    </div>
-  </div>
-
   <footer class="tool-footer">
     <p>Powered by <a href="https://toolspark.co" target="_blank">ToolSpark</a></p>
   </footer>
@@ -598,8 +583,6 @@
     document.getElementById('nav-name').textContent = hub.hubName || '';
 
     // Populate intro screen
-    document.getElementById('report-badge').textContent = '⚡ ' + (hub.toolName || 'Your Report');
-
     var headline = hub.landingHeadline || hub.toolName || 'Your AI Tool';
     document.getElementById('intro-headline').innerHTML = headline.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
@@ -611,7 +594,7 @@
     document.getElementById('user-input').placeholder = inputPlaceholder;
 
     // Update generate button label
-    document.getElementById('generate-btn').textContent = '⚡ Generate My ' + (hub.toolName || 'Report');
+    document.getElementById('generate-btn').textContent = '⚡ Get My ' + (hub.toolName || 'Results');
 
     if (!hub.anthropicApiKey || hub.anthropicApiKey === 'YOUR_ANTHROPIC_API_KEY') {
       document.getElementById('no-key-msg').style.display = 'flex';
@@ -637,7 +620,6 @@
     userTurnCount = 0;
     document.getElementById('chat-messages').innerHTML = '';
     document.getElementById('generate-row').classList.remove('visible');
-    hideReportView();
 
     var greeting = hub.customGreeting ||
       ('Hi! I\'m ' + (hub.toolName || 'your AI tool') + '. ' +
@@ -654,59 +636,63 @@
     if (isGenerating) return;
     // Go back to intro screen
     document.getElementById('tool-ui').style.display = 'none';
-    hideReportView();
     document.getElementById('intro-view').classList.add('visible');
     document.getElementById('new-chat-btn').style.display = 'none';
   }
 
   // ── GENERATE REPORT ──
 
-  function generateReport() {
+  async function generateReport() {
     if (isGenerating) return;
-    var toolName = HUB.toolName || 'Report';
-    var trigger = 'I\'ve shared everything you need. Please generate my full ' + toolName + ' now.';
-    document.getElementById('generate-row').classList.remove('visible');
-    sendMessageWithText(trigger);
+    isGenerating = true;
+    var btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating your results...';
+
+    try {
+      var triggerMsg = 'I\'ve answered all your questions. Please generate my full ' + (HUB.toolName || 'results') + ' now.';
+      var response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': HUB.anthropicApiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
+          max_tokens: 2000,
+          system: HUB.systemPrompt || 'You are a helpful AI assistant.',
+          messages: messages.concat([{ role: 'user', content: triggerMsg }])
+        })
+      });
+
+      if (!response.ok) throw new Error('API error ' + response.status);
+      var data = await response.json();
+      var reportText = (data.content || []).map(function(b) { return b.type === 'text' ? b.text : ''; }).join('').trim();
+      if (!reportText) throw new Error('Empty response');
+
+      sessionStorage.setItem('hub_result_' + slug, reportText);
+      window.location.href = '/hub/' + slug + '/results';
+
+    } catch(e) {
+      isGenerating = false;
+      btn.disabled = false;
+      btn.textContent = '⚡ Get My ' + (HUB.toolName || 'Results');
+      var err = document.getElementById('error-banner');
+      err.textContent = 'Something went wrong generating your results. Please try again.';
+      err.className = 'error-banner visible';
+    }
   }
 
   function showGenerateButton() {
-    if (!document.getElementById('report-view').classList.contains('visible')) {
-      document.getElementById('generate-row').classList.add('visible');
-    }
+    document.getElementById('generate-row').classList.add('visible');
   }
 
   // Fallback: show button after many turns in case AI never signals
   function updateGenerateButton() {
     var fallback = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 8;
     if (userTurnCount >= fallback) showGenerateButton();
-  }
-
-  // ── REPORT DETECTION ──
-
-  function isReport(text) {
-    var h2count = (text.match(/^## /gm) || []).length;
-    var h3count = (text.match(/^### /gm) || []).length;
-    return h2count >= 2 || (h2count >= 1 && text.length > 500) || (h3count >= 3 && text.length > 500);
-  }
-
-  function showReportView(text) {
-    document.getElementById('report-content').innerHTML = renderMarkdown(text);
-    document.getElementById('report-view').classList.add('visible');
-    document.getElementById('tool-ui').style.display = 'none';
-    document.getElementById('generate-row').classList.remove('visible');
-    document.getElementById('report-view').querySelector('.report-scroll').scrollTop = 0;
-    document.getElementById('new-chat-btn').style.display = 'block';
-  }
-
-  function hideReportView() {
-    document.getElementById('report-view').classList.remove('visible');
-  }
-
-  function backToChat() {
-    hideReportView();
-    document.getElementById('tool-ui').style.display = 'flex';
-    updateGenerateButton();
-    scrollToBottom();
   }
 
   // ── SEND MESSAGE ──
@@ -797,14 +783,10 @@
       if (cleanText) {
         messages.push({ role: 'assistant', content: cleanText });
 
-        if (isReport(cleanText)) {
-          setTimeout(function() { showReportView(cleanText); }, 600);
+        if (readySignal) {
+          showGenerateButton();
         } else {
-          if (readySignal) {
-            showGenerateButton();
-          } else {
-            updateGenerateButton();
-          }
+          updateGenerateButton();
         }
 
         if (studentDb) {

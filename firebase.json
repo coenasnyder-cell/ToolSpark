@@ -29,6 +29,10 @@
         "destination": "/hub/login.html"
       },
       {
+        "source": "/hub/*/results",
+        "destination": "/hub/results.html"
+      },
+      {
         "source": "/hub/*",
         "destination": "/hub/index.html"
       }
