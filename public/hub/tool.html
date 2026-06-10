@@ -734,21 +734,15 @@
     }
   }
 
-  var _aiSignaledReady = false;
-
+  // AI explicitly signaled — show immediately
   function showGenerateButton() {
-    var min = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 4;
-    if (userTurnCount >= min) {
-      document.getElementById('generate-row').classList.add('visible');
-    } else {
-      _aiSignaledReady = true; // hold until minimum turns reached
-    }
+    document.getElementById('generate-row').classList.add('visible');
   }
 
-  // Fallback: show button once minimum turns passed (also releases early AI signal)
+  // Fallback: show after minimum turns if AI never signals
   function updateGenerateButton() {
     var min = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 4;
-    if (_aiSignaledReady && userTurnCount >= min) {
+    if (userTurnCount >= min) {
       document.getElementById('generate-row').classList.add('visible');
     }
   }
