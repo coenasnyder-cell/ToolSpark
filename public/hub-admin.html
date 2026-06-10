@@ -158,6 +158,11 @@
   .btn-disconnect { background: transparent; border: 1px solid var(--border); color: var(--text3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
   .btn-disconnect:hover { border-color: #C0392B; color: #C0392B; }
 
+  .gen-prompt-btn { background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; white-space: nowrap; }
+  .gen-prompt-btn:hover { background: var(--gold-dim); }
+  .gen-prompt-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .gen-prompt-status { font-size: 12px; color: var(--text3); min-height: 16px; }
+
   @media (max-width: 768px) {
     .page-wrap { margin-left: 0; padding: 1rem; }
     .field-row { grid-template-columns: 1fr; }
@@ -258,8 +263,12 @@
         <input type="text" id="toolDescription" placeholder="e.g. Generate captions for real estate listings in seconds" maxlength="120">
       </div>
       <div class="field">
-        <label for="systemPrompt">System Prompt <span>from your Build Agent</span></label>
-        <textarea class="large" id="systemPrompt" placeholder="Paste your final system prompt here..."></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <label for="systemPrompt" style="margin-bottom:0;">System Prompt</label>
+          <button type="button" class="gen-prompt-btn" id="gen-prompt-btn" onclick="generateSystemPrompt()">⚡ Generate from roadmap</button>
+        </div>
+        <textarea class="large" id="systemPrompt" placeholder="Paste your system prompt here, or click Generate from roadmap to build one from your Spark &amp; Audience data..."></textarea>
+        <div class="gen-prompt-status" id="gen-prompt-status"></div>
       </div>
       <div class="field-row">
         <div class="field">
@@ -505,6 +514,21 @@ service cloud.firestore {
 </div>
 
 <script>
+  var FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  async function authHeaders() {
+    var user = firebase.auth().currentUser;
+    var token = user ? await user.getIdToken() : "";
+    var acToken = "";
+    try {
+      var t = await Promise.race([
+        firebase.appCheck().getToken(false),
+        new Promise(function(_,r){ setTimeout(function(){r();}, 3000); })
+      ]);
+      acToken = t && t.token ? t.token : "";
+    } catch(e) {}
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + token, "X-Firebase-AppCheck": acToken };
+  }
+
   var currentUser = null;
   var hubSlug = null;
   var hubData = null;
@@ -821,6 +845,116 @@ service cloud.firestore {
       badge.textContent = 'Not connected';
       badge.className = 'fb-badge not-connected';
     });
+  }
+
+  // ── GENERATE SYSTEM PROMPT FROM ROADMAP DATA ──
+  function extractBriefSections(brief) {
+    var sections = [];
+    var patterns = [
+      /##\s*What This Is[\s\S]*?(?=\n##|$)/i,
+      /##\s*Who It[''']?s For[\s\S]*?(?=\n##|$)/i,
+      /##\s*The Core AI Tool[\s\S]*?(?=\n##|$)/i
+    ];
+    patterns.forEach(function(p) {
+      var m = brief.match(p);
+      if (m) sections.push(m[0].trim());
+    });
+    return sections.join('\n\n');
+  }
+
+  async function generateSystemPrompt() {
+    var btn = document.getElementById('gen-prompt-btn');
+    var status = document.getElementById('gen-prompt-status');
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    status.textContent = '';
+    status.style.color = 'var(--text3)';
+
+    try {
+      var uid = currentUser.uid;
+
+      var results = await Promise.allSettled([
+        db.collection('spark_results').where('userId', '==', uid).get(),
+        db.collection('audience_results').where('userId', '==', uid).get(),
+        db.collection('prompt_results').doc(uid).get()
+      ]);
+
+      var sparkDocs = (results[0].status === 'fulfilled' && !results[0].value.empty)
+        ? results[0].value.docs.map(function(d){ return d.data(); }) : [];
+      var audDocs = (results[1].status === 'fulfilled' && !results[1].value.empty)
+        ? results[1].value.docs.map(function(d){ return d.data(); }) : [];
+      var promptResult = (results[2].status === 'fulfilled' && results[2].value.exists)
+        ? results[2].value.data() : null;
+
+      var spark = sparkDocs.length ? sparkDocs[sparkDocs.length - 1] : null;
+      var audience = audDocs.length ? audDocs[audDocs.length - 1] : null;
+      var buildBrief = promptResult && promptResult.promptText
+        ? extractBriefSections(promptResult.promptText) : '';
+
+      var toolName = document.getElementById('toolName').value.trim()
+        || (promptResult && promptResult.appName) || 'AI Tool';
+      var toolDesc = document.getElementById('toolDescription').value.trim();
+
+      if (!spark && !audience && !buildBrief) {
+        status.textContent = 'No roadmap data found — complete your Spark and Audience assessments, or generate your build brief in the Prompt Generator first.';
+        btn.disabled = false;
+        btn.textContent = '⚡ Generate from roadmap';
+        return;
+      }
+
+      var ctx = ['TOOL NAME: ' + toolName];
+      if (toolDesc) ctx.push('TOOL DESCRIPTION: ' + toolDesc);
+
+      // Build brief sections are the richest source — include them first
+      if (buildBrief) {
+        ctx.push('\n--- FROM THEIR BUILD BRIEF ---\n' + buildBrief);
+      }
+
+      // Supplement with raw assessment data
+      if (spark) {
+        if (spark.whoYouHelp) ctx.push('WHO THE CREATOR HELPS: ' + spark.whoYouHelp);
+        if (spark.whatYouKnow) ctx.push('CREATOR EXPERTISE: ' + spark.whatYouKnow);
+        if (spark.statement) ctx.push('CREATOR SPARK STATEMENT: ' + spark.statement);
+      }
+      if (audience) {
+        if (audience.whoTheyAre) ctx.push('TARGET AUDIENCE: ' + audience.whoTheyAre);
+        if (audience.dailyFrustration) ctx.push('THEIR DAILY FRUSTRATION: ' + audience.dailyFrustration);
+        if (audience.dreamOutcome) ctx.push('THEIR DREAM OUTCOME: ' + audience.dreamOutcome);
+        if (audience.theirWords) ctx.push('IN THEIR OWN WORDS: "' + audience.theirWords + '"');
+      }
+
+      var sysInstructions = 'You write AI system prompts for solo coaches who built their own AI tool for their audience.\n\nYou may receive a build brief. Focus ONLY on: "What This Is", "Who It\'s For", and "The Core AI Tool" (especially Input and Output). Ignore Features, Design, app infrastructure — those are irrelevant to how the AI behaves.\n\nWrite a system prompt that tells the AI exactly what to do in a session:\n- Open with "You are [Tool Name]..." — what it does and who it helps (2 sentences)\n- Describe the target audience\'s real situation in their own language (1 short paragraph)\n- Define the AI\'s job clearly: what it collects from the user, and the exact format of what it delivers at the end\n- Behavioral guidance: tone, how to guide users through the intake, how to structure the output\n- One closing constraint (e.g. stay focused on this topic, no generic advice)\n\nLength: 200–350 words. Second person ("You are..."). Output ONLY the system prompt — no preamble, no explanation.';
+
+      var headers = await authHeaders();
+      var resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 700,
+          system: sysInstructions,
+          messages: [{ role: 'user', content: 'Write a system prompt for this AI tool:\n\n' + ctx.join('\n') }],
+          _meta: { tool: 'hub-admin-gen-system-prompt' }
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      var data = await resp.json();
+      var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
+      if (!text) throw new Error('Empty response');
+
+      document.getElementById('systemPrompt').value = text;
+      status.style.color = '#2E7D32';
+      status.textContent = '✓ Generated from your build brief — review and edit before saving';
+
+    } catch(e) {
+      console.error('Generate system prompt error:', e);
+      status.style.color = '#C0392B';
+      status.textContent = 'Something went wrong — try again or paste your prompt manually.';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '⚡ Generate from roadmap';
   }
 
   function doDownloadConfig() {
