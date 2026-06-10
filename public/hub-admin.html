@@ -582,6 +582,11 @@ service cloud.firestore {
     document.getElementById('hub-status-label').textContent = live ? 'Live — your hub is public' : 'Preview mode — only you can see it';
     document.getElementById('live-badge').textContent = live ? 'Live' : 'Preview';
     document.getElementById('live-badge').className = 'hub-live-badge ' + (live ? 'live' : 'preview');
+    // Hub Status = Public means open access — auto-clear Members Only
+    if (live) {
+      document.getElementById('membersOnly').checked = false;
+      updateMembersLabel();
+    }
   }
 
   function toggleKey(id, btn) {
