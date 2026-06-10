@@ -243,6 +243,12 @@
     document.getElementById('dash-community-card').href  = '/hub/' + slug + '/community';
     document.getElementById('dash-support-card').href    = '/hub/' + slug + '/support';
 
+    // Hide disabled feature cards
+    var features = hub.features || {};
+    if (features.courses   === false) document.getElementById('dash-courses-card').style.display   = 'none';
+    if (features.community === false) document.getElementById('dash-community-card').style.display = 'none';
+    if (features.support   === false) document.getElementById('dash-support-card').style.display   = 'none';
+
     // Load latest result for roadmap card preview
     if (studentDb) {
       studentDb.collection('toolResults')

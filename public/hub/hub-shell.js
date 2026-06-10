@@ -146,6 +146,11 @@
       ? '<img class="hs-logo-img" src="' + hub.logoUrl + '" alt="">'
       : '<div class="hs-logo-icon">⚡</div>';
 
+    var features = hub.features || {};
+    var visibleItems = NAV_ITEMS.filter(function(item) {
+      return features[item.key] !== false;
+    });
+
     sidebar.innerHTML =
       '<div class="hs-sidebar-logo">' +
         logoHtml +
@@ -153,7 +158,7 @@
         '<button id="hs-close-btn" aria-label="Close">' + CLOSE_SVG + '</button>' +
       '</div>' +
       '<nav id="hs-sidebar-nav">' +
-        NAV_ITEMS.map(function(item) {
+        visibleItems.map(function(item) {
           var cls = 'hs-nav-item' + (item.key === activeKey ? ' active' : '');
           return '<a href="/hub/' + slug + '/' + item.key + '" class="' + cls + '">' +
             item.icon + '<span>' + item.label + '</span></a>';

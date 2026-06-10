@@ -369,6 +369,46 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- FEATURES -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">🧩</div>
+      <div><div class="card-title">Hub Features</div><div class="card-desc">Choose which pages appear in your hub navigation</div></div>
+    </div>
+    <div class="card-body">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Courses</div>
+          <div class="toggle-sub">Training and course library for your members</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-courses" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Community</div>
+          <div class="toggle-sub">Member community and discussion space</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-community" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Support</div>
+          <div class="toggle-sub">Contact form so members can reach you</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="feature-support" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
   <!-- BRANDING -->
   <div class="settings-card">
     <div class="card-header">
@@ -951,6 +991,11 @@ service cloud.firestore {
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
       if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
       if (s.gaTrackingId) document.getElementById('gaTrackingId').value = s.gaTrackingId;
+      var features = s.features || {};
+      ['courses', 'community', 'support'].forEach(function(k) {
+        var el = document.getElementById('feature-' + k);
+        if (el) el.checked = features[k] !== false;
+      });
     });
   }
 
@@ -998,6 +1043,11 @@ service cloud.firestore {
       textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
       borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
       gaTrackingId:       document.getElementById('gaTrackingId').value.trim(),
+      features: {
+        courses:   document.getElementById('feature-courses').checked,
+        community: document.getElementById('feature-community').checked,
+        support:   document.getElementById('feature-support').checked
+      },
       updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
       status.textContent = '✓ Saved';
