@@ -265,7 +265,6 @@
 
     studentDb.collection('toolResults')
       .where('hubSlug', '==', slug)
-      .orderBy('createdAt', 'desc')
       .limit(50)
       .get().then(function(snap) {
         document.getElementById('rm-loading').style.display = 'none';
@@ -278,7 +277,13 @@
         var list = document.getElementById('rm-results');
         list.style.display = 'flex';
 
-        snap.docs.forEach(function(doc) {
+        var docs = snap.docs.slice().sort(function(a, b) {
+          var at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          var bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bt - at;
+        });
+
+        docs.forEach(function(doc) {
           var r = doc.data();
 
           var card = document.createElement('div');

@@ -247,11 +247,15 @@
     if (studentDb) {
       studentDb.collection('toolResults')
         .where('hubSlug', '==', slug)
-        .orderBy('createdAt', 'desc')
-        .limit(1)
+        .limit(10)
         .get().then(function(snap) {
           if (!snap.empty) {
-            var r = snap.docs[0].data();
+            var sorted = snap.docs.slice().sort(function(a, b) {
+              var at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+              var bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+              return bt - at;
+            });
+            var r = sorted[0].data();
             var rmContent = document.getElementById('dash-rm-content');
             rmContent.innerHTML =
               '<div class="rm-preview-title">' + (r.resultTitle || 'Latest Result') + '</div>' +
