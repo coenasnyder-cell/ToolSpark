@@ -540,10 +540,12 @@
 
       if (HUB.studentFirebase && HUB.studentFirebase.projectId) {
         try {
-          var studentApp = firebase.initializeApp(HUB.studentFirebase, 'student');
+          var studentApp;
+          try { studentApp = firebase.app('student'); }
+          catch(e) { studentApp = firebase.initializeApp(HUB.studentFirebase, 'student'); }
           studentDb = studentApp.firestore();
           studentAuth = studentApp.auth();
-        } catch(e) {}
+        } catch(e) { console.warn('Student Firebase init failed:', e); }
       }
 
       if (HUB.membersOnly && studentAuth) {
