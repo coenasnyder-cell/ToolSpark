@@ -286,57 +286,82 @@
       .replace(/`(.+?)`/g, '<code>$1</code>');
   }
 
-  if (!slug) {
+  var resultId = new URLSearchParams(window.location.search).get('id');
+
+  function showResult(reportText) {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('report-body').innerHTML = renderMarkdown(reportText);
+    document.getElementById('results-wrap').style.display = 'block';
+  }
+
+  function showNoResults() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('no-results-state').style.display = 'flex';
+  }
+
+  function applyHubBranding(hub) {
+    var color = hub.primaryColor || '#C9A84C';
+    document.documentElement.style.setProperty('--gold', color);
+    var colorMap = {
+      '--hub-page-bg':      hub.pageBgColor,
+      '--hub-text-primary': hub.textPrimaryColor,
+      '--hub-text-muted':   hub.textMutedColor,
+      '--hub-border':       hub.borderColor,
+      '--hub-btn-text':     hub.btnTextColor,
+      '--hub-nav-bg':       hub.navBgColor,
+      '--hub-nav-text':     hub.navTextColor,
+      '--hub-nav-btn':      hub.navBtnColor
+    };
+    Object.keys(colorMap).forEach(function(prop) {
+      if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
+    });
+    document.title = (hub.toolName || 'Your Results') + ' — ' + (hub.hubName || '');
+    if (hub.logoUrl) {
+      var lg = document.getElementById('nav-logo');
+      lg.src = hub.logoUrl;
+      lg.classList.add('visible');
+    }
+    document.getElementById('nav-name').textContent = hub.hubName || '';
+    document.getElementById('results-label').textContent = '⚡ Your ' + (hub.toolName || 'Results');
+  }
+
+  if (!slug) {
+    showNoResults();
   } else {
     db.collection('hubs').doc(slug).get().then(function(snap) {
-      if (snap.exists) {
-        var hub = snap.data();
-        var color = hub.primaryColor || '#C9A84C';
-        document.documentElement.style.setProperty('--gold', color);
+      var hub = snap.exists ? snap.data() : {};
+      applyHubBranding(hub);
 
-        var colorMap = {
-          '--hub-page-bg':      hub.pageBgColor,
-          '--hub-chat-bg':      hub.chatBgColor,
-          '--hub-text-primary': hub.textPrimaryColor,
-          '--hub-text-muted':   hub.textMutedColor,
-          '--hub-border':       hub.borderColor,
-          '--hub-btn-text':     hub.btnTextColor,
-          '--hub-nav-bg':       hub.navBgColor,
-          '--hub-nav-text':     hub.navTextColor,
-          '--hub-nav-btn':      hub.navBtnColor
-        };
-        Object.keys(colorMap).forEach(function(prop) {
-          if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
-        });
+      if (resultId && hub.studentFirebase && hub.studentFirebase.projectId) {
+        // Load result from student's Firestore
+        try {
+          var studentApp;
+          try { studentApp = firebase.app('student'); }
+          catch(e) { studentApp = firebase.initializeApp(hub.studentFirebase, 'student'); }
+          var studentDb = studentApp.firestore();
 
-        document.title = (hub.toolName || 'Your Results') + ' — ' + (hub.hubName || '');
+          studentDb.collection('toolResults').doc(resultId).get().then(function(doc) {
+            if (doc.exists && doc.data().reportText) {
+              showResult(doc.data().reportText);
+            } else {
+              showNoResults();
+            }
+          }).catch(function() { showNoResults(); });
 
-        if (hub.logoUrl) {
-          var lg = document.getElementById('nav-logo');
-          lg.src = hub.logoUrl;
-          lg.classList.add('visible');
-        }
-        document.getElementById('nav-name').textContent = hub.hubName || '';
-        document.getElementById('results-label').textContent = '⚡ Your ' + (hub.toolName || 'Results');
-      }
+        } catch(e) { showNoResults(); }
 
-      var reportText = sessionStorage.getItem('hub_result_' + slug);
-      document.getElementById('loading-state').style.display = 'none';
-
-      if (reportText) {
-        document.getElementById('report-body').innerHTML = renderMarkdown(reportText);
-        document.getElementById('results-wrap').style.display = 'block';
-        sessionStorage.removeItem('hub_result_' + slug);
       } else {
-        document.getElementById('no-results-state').style.display = 'flex';
+        // Fallback: sessionStorage (no student Firebase connected)
+        var reportText = sessionStorage.getItem('hub_result_' + slug);
+        if (reportText) {
+          sessionStorage.removeItem('hub_result_' + slug);
+          showResult(reportText);
+        } else {
+          showNoResults();
+        }
       }
 
-    }).catch(function() {
-      document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('no-results-state').style.display = 'flex';
-    });
+    }).catch(function() { showNoResults(); });
   }
 </script>
 

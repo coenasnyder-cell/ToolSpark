@@ -283,13 +283,17 @@ service cloud.firestore {
     match /toolUsage/{doc} {
       allow create: if true;
     }
+    match /toolResults/{doc} {
+      allow create: if true;
+      allow read: if true;
+    }
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
   }
 }</pre>
           </div>
-          <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish. This lets your landing page collect emails and log tool usage without requiring login.</div>
+          <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish. This lets your landing page collect emails, log tool usage, and save tool results without requiring login.</div>
         </div>
       </div>
 

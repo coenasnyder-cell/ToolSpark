@@ -672,8 +672,21 @@
       var reportText = (data.content || []).map(function(b) { return b.type === 'text' ? b.text : ''; }).join('').trim();
       if (!reportText) throw new Error('Empty response');
 
-      sessionStorage.setItem('hub_result_' + slug, reportText);
-      window.location.href = '/hub/' + slug + '/results';
+      // Save to student's Firestore if connected, otherwise sessionStorage fallback
+      if (studentDb) {
+        var userId = (studentAuth && studentAuth.currentUser) ? studentAuth.currentUser.uid : null;
+        var docRef = await studentDb.collection('toolResults').add({
+          hubSlug: slug,
+          toolName: HUB.toolName || '',
+          reportText: reportText,
+          userId: userId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        window.location.href = '/hub/' + slug + '/results?id=' + docRef.id;
+      } else {
+        sessionStorage.setItem('hub_result_' + slug, reportText);
+        window.location.href = '/hub/' + slug + '/results';
+      }
 
     } catch(e) {
       isGenerating = false;
