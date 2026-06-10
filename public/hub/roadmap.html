@@ -10,132 +10,67 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="/hub/hub-shell.js"></script>
 <style>
-  /* PAGE HEADER */
-  .rm-page-header { margin-bottom: 2rem; }
-  .rm-page-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px; font-weight: 400;
-    color: var(--hub-text-primary, #1A1714);
-    margin-bottom: 4px;
-  }
-  .rm-page-header p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
 
-  /* STAGES */
-  .stages-wrap { margin-bottom: 2.5rem; }
-  .stages-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--hub-text-muted, #9A9488);
+  /* HERO BANNER */
+  .rm-hero {
+    background: var(--hub-nav-bg, #0C0B09);
+    border-radius: 14px;
+    padding: 2rem 2rem 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .rm-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .rm-hero-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold, #C9A84C);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px; padding: 4px 10px;
     margin-bottom: 1rem;
   }
-  .stages-track {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto 1fr;
-    align-items: stretch;
-    gap: 0;
+  .rm-hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 400;
+    color: #F0EDE6;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
   }
-  .stage-connector {
-    display: flex; align-items: center; justify-content: center;
-    padding: 0 4px;
-    padding-top: 28px; /* align with stage number circle */
+  .rm-hero p {
+    font-size: 14px; line-height: 1.6;
+    color: rgba(240,237,230,0.6);
+    max-width: 500px;
   }
-  .stage-connector-line {
-    height: 2px; width: 32px;
-    background: var(--hub-border, #E4E0D8);
-  }
-  .stage {
-    background: var(--hub-chat-bg, #fff);
-    border: 1px solid var(--hub-border, #E4E0D8);
-    border-radius: 14px;
-    padding: 1.25rem;
-    display: flex; flex-direction: column; gap: 10px;
-    position: relative;
-  }
-  .stage.active {
-    border-color: var(--gold, #C9A84C);
-    box-shadow: 0 2px 16px rgba(201,168,76,0.12);
-  }
-  .stage.locked { opacity: 0.6; }
 
-  .stage-num-row {
-    display: flex; align-items: center;
-    justify-content: space-between; gap: 8px;
-  }
-  .stage-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
-    flex-shrink: 0;
-  }
-  .stage.active .stage-num {
-    background: var(--gold, #C9A84C);
-    color: var(--hub-btn-text, #0C0B09);
-  }
-  .stage.locked .stage-num {
-    background: var(--hub-border, #E4E0D8);
-    color: var(--hub-text-muted, #9A9488);
-  }
-  .stage-status {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
-  }
-  .stage.active .stage-status {
-    background: rgba(201,168,76,0.1);
-    color: var(--gold, #C9A84C);
-    border: 1px solid rgba(201,168,76,0.2);
-  }
-  .stage.locked .stage-status {
-    background: var(--hub-page-bg, #F4F2EE);
-    color: var(--hub-text-muted, #9A9488);
-    border: 1px solid var(--hub-border, #E4E0D8);
-  }
-  .stage-title {
-    font-size: 15px; font-weight: 700;
-    color: var(--hub-text-primary, #1A1714);
-    line-height: 1.3;
-  }
-  .stage-desc {
-    font-size: 13px;
-    color: var(--hub-text-muted, #6B6560);
-    line-height: 1.5;
-    flex: 1;
-  }
-  .stage-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--gold, #C9A84C);
-    color: var(--hub-btn-text, #0C0B09);
-    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
-    padding: 8px 16px; border-radius: 8px;
-    text-decoration: none; align-self: flex-start;
-    transition: opacity 0.15s; white-space: nowrap;
-  }
-  .stage-btn:hover { opacity: 0.85; }
-  .stage-lock { font-size: 18px; color: var(--hub-text-muted, #C0BAB2); }
-
-  /* RESULTS SECTION */
-  .results-section-header {
+  /* SECTION HEADER */
+  .rm-section-header {
     display: flex; align-items: center;
     justify-content: space-between;
     margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
   }
-  .results-section-label {
+  .rm-section-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--hub-text-muted, #9A9488);
   }
-  .results-run-btn {
+  .rm-run-btn {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
     font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
     padding: 7px 14px; border-radius: 8px; text-decoration: none;
     white-space: nowrap; transition: opacity 0.15s;
   }
-  .results-run-btn:hover { opacity: 0.85; }
+  .rm-run-btn:hover { opacity: 0.85; }
 
   /* STATES */
   .rm-loading, .rm-empty, .rm-no-db {
-    padding: 2.5rem 1.5rem;
-    text-align: center;
-    color: var(--hub-text-muted, #6B6560);
-    font-size: 14px;
+    padding: 2.5rem 1.5rem; text-align: center;
+    color: var(--hub-text-muted, #6B6560); font-size: 14px;
   }
   .rm-state-icon { font-size: 32px; margin-bottom: 0.75rem; }
   .rm-loading p, .rm-empty p, .rm-no-db p { margin-bottom: 1rem; }
@@ -149,67 +84,82 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* RESULTS GRID */
-  .results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-  .result-card {
+  /* RESULT CARDS */
+  .rm-results { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .rm-card {
     background: var(--hub-chat-bg, #fff);
     border: 1px solid var(--hub-border, #E4E0D8);
     border-radius: 14px;
-    padding: 1.25rem;
-    display: flex; flex-direction: column; gap: 8px;
-    text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    overflow: hidden;
   }
-  .result-card:hover {
-    border-color: var(--gold, #C9A84C);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  .rm-card-header {
+    display: flex; align-items: center;
+    gap: 12px; padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--hub-border, #E4E0D8);
+    flex-wrap: wrap;
   }
-  .result-card-top {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; gap: 8px;
-  }
-  .result-label {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--gold, #C9A84C);
+  .rm-card-icon {
+    width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
     background: rgba(201,168,76,0.1);
     border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 20px; padding: 3px 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; overflow: hidden;
   }
-  .result-date { font-size: 11px; color: var(--hub-text-muted, #9A9488); white-space: nowrap; flex-shrink: 0; }
-  .result-title { font-size: 15px; font-weight: 700; color: var(--hub-text-primary, #1A1714); line-height: 1.3; }
-  .result-summary {
-    font-size: 13px; color: var(--hub-text-muted, #6B6560);
-    line-height: 1.5; flex: 1;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  .rm-card-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .rm-card-meta { flex: 1; min-width: 0; }
+  .rm-card-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--hub-text-primary, #1A1714);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .result-card-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-top: 8px; border-top: 1px solid var(--hub-border, #E4E0D8); margin-top: 4px;
-    gap: 8px;
-  }
-  .result-view-btn {
+  .rm-card-date { font-size: 11px; color: var(--hub-text-muted, #9A9488); margin-top: 2px; }
+  .rm-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .rm-btn-view {
     font-size: 12px; font-weight: 700;
-    color: var(--gold, #C9A84C);
+    background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
+    border: none; border-radius: 7px; padding: 7px 14px;
+    text-decoration: none; cursor: pointer; white-space: nowrap;
+    transition: opacity 0.15s; font-family: 'Lato', sans-serif;
   }
-  .result-rerun-btn {
-    font-size: 11px; color: var(--hub-text-muted, #9A9488);
-    text-decoration: none;
+  .rm-btn-view:hover { opacity: 0.85; }
+  .rm-btn-tool {
+    font-size: 12px; font-weight: 700;
+    color: var(--hub-text-muted, #6B6560);
+    text-decoration: none; white-space: nowrap;
     transition: color 0.15s;
   }
-  .result-rerun-btn:hover { color: var(--gold, #C9A84C); }
+  .rm-btn-tool:hover { color: var(--gold, #C9A84C); }
 
-  /* MOBILE */
-  @media (max-width: 700px) {
-    .stages-track { grid-template-columns: 1fr; }
-    .stage-connector { display: none; }
-    .stage + .stage { margin-top: 0; }
+  /* CARD BODY — rendered result */
+  .rm-card-body { padding: 1.25rem; }
+
+  .rm-card-body h1, .rm-card-body h2, .rm-card-body h3 {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold, #C9A84C);
+    margin-top: 1.25rem; margin-bottom: 0.4rem;
   }
+  .rm-card-body h1:first-child,
+  .rm-card-body h2:first-child,
+  .rm-card-body h3:first-child { margin-top: 0; }
+
+  .rm-card-body p {
+    font-size: 13px; line-height: 1.65;
+    color: var(--hub-text-primary, #1A1714);
+    margin-bottom: 0.5rem;
+  }
+  .rm-card-body p:last-child { margin-bottom: 0; }
+  .rm-card-body strong { font-weight: 700; }
+  .rm-card-body em { font-style: italic; }
+  .rm-card-body ul, .rm-card-body ol {
+    padding-left: 1.25rem; margin-bottom: 0.5rem;
+  }
+  .rm-card-body li {
+    font-size: 13px; line-height: 1.65;
+    color: var(--hub-text-primary, #1A1714);
+    margin-bottom: 3px;
+  }
+
 </style>
 </head>
 <body>
@@ -220,60 +170,17 @@
   <header id="hs-header"></header>
   <main class="hs-content">
 
-    <div class="rm-page-header">
-      <h2>My Roadmap</h2>
-      <p id="rm-sub">Your transformation journey.</p>
+    <!-- HERO -->
+    <div class="rm-hero">
+      <div class="rm-hero-badge" id="hero-badge">MY ROADMAP</div>
+      <h2 id="hero-heading">Your path forward.</h2>
+      <p id="hero-sub">Each session builds on the last. Run the tool, review your results, and track your progress here.</p>
     </div>
 
-    <!-- STAGES -->
-    <div class="stages-wrap">
-      <div class="stages-label">Your Journey</div>
-      <div class="stages-track">
-
-        <!-- STAGE 1 — active -->
-        <div class="stage active">
-          <div class="stage-num-row">
-            <div class="stage-num">1</div>
-            <span class="stage-status">Active</span>
-          </div>
-          <div class="stage-title" id="stage1-title">Get Your Results</div>
-          <div class="stage-desc" id="stage1-desc">Answer a few questions and get your personalized plan.</div>
-          <a id="stage1-btn" href="#" class="stage-btn">⚡ Launch Tool</a>
-        </div>
-
-        <div class="stage-connector"><div class="stage-connector-line"></div></div>
-
-        <!-- STAGE 2 — coming soon -->
-        <div class="stage locked">
-          <div class="stage-num-row">
-            <div class="stage-num">2</div>
-            <span class="stage-status">Coming Soon</span>
-          </div>
-          <div class="stage-title">Deepen Your Strategy</div>
-          <div class="stage-desc">Build on your results with guided next steps and resources.</div>
-          <div class="stage-lock">🔒</div>
-        </div>
-
-        <div class="stage-connector"><div class="stage-connector-line"></div></div>
-
-        <!-- STAGE 3 — coming soon -->
-        <div class="stage locked">
-          <div class="stage-num-row">
-            <div class="stage-num">3</div>
-            <span class="stage-status">Coming Soon</span>
-          </div>
-          <div class="stage-title">Take Action</div>
-          <div class="stage-desc">Implement your plan with accountability tools and community support.</div>
-          <div class="stage-lock">🔒</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- RESULTS HISTORY -->
-    <div class="results-section-header">
-      <div class="results-section-label" id="results-label">Your Results</div>
-      <a id="rm-run-btn" href="#" class="results-run-btn">⚡ Run Again</a>
+    <!-- RESULTS -->
+    <div class="rm-section-header">
+      <div class="rm-section-label" id="results-label">Your Results</div>
+      <a id="rm-run-btn" href="#" class="rm-run-btn">⚡ Run Tool Again</a>
     </div>
 
     <div id="rm-loading" class="rm-loading">
@@ -289,10 +196,10 @@
     <div id="rm-empty" class="rm-empty" style="display:none;">
       <div class="rm-state-icon">⚡</div>
       <p id="rm-empty-text">You haven't generated any results yet.</p>
-      <a id="rm-empty-btn" href="#" class="results-run-btn">Get My Results</a>
+      <a id="rm-empty-btn" href="#" class="rm-run-btn">Get My Results</a>
     </div>
 
-    <div id="rm-results" class="results-grid" style="display:none;"></div>
+    <div id="rm-results" class="rm-results" style="display:none;"></div>
 
   </main>
 </div>
@@ -304,27 +211,51 @@
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
+  function renderMarkdown(md) {
+    if (!md) return '';
+    var html = md
+      // headings
+      .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+      .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+      .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
+      // bold / italic
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // unordered lists
+      .replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>')
+      // ordered lists
+      .replace(/^\s*\d+\.\s+(.+)$/gm, '<li>$1</li>')
+      // wrap consecutive <li> in <ul>
+      .replace(/(<li>.*<\/li>\n?)+/g, function(m) { return '<ul>' + m + '</ul>'; })
+      // blank lines → paragraph breaks
+      .split(/\n{2,}/)
+      .map(function(block) {
+        block = block.trim();
+        if (!block) return '';
+        if (/^<(h[123]|ul|ol|li)/.test(block)) return block;
+        return '<p>' + block.replace(/\n/g, ' ') + '</p>';
+      })
+      .join('');
+    return html;
+  }
+
   initHubPage('roadmap', function(hub, slug, studentAuth, studentDb) {
     var toolUrl = '/hub/' + slug + '/tool';
 
-    // Stage 1
+    // Hero copy
     if (hub.toolName) {
-      document.getElementById('stage1-title').textContent = hub.toolName;
-    }
-    if (hub.toolDescription) {
-      document.getElementById('stage1-desc').textContent = hub.toolDescription;
-    }
-    document.getElementById('stage1-btn').href = toolUrl;
-
-    // Run buttons
-    document.getElementById('rm-run-btn').href   = toolUrl;
-    document.getElementById('rm-empty-btn').href = toolUrl;
-
-    if (hub.toolName) {
-      document.getElementById('rm-sub').textContent = 'Track your progress with ' + hub.toolName + '.';
+      document.getElementById('hero-heading').textContent = 'Your ' + hub.toolName + ' journey.';
       document.getElementById('results-label').textContent = 'Your ' + hub.toolName + ' Results';
       document.getElementById('rm-empty-text').textContent = 'You haven\'t run ' + hub.toolName + ' yet.';
     }
+    if (hub.hubName) {
+      document.getElementById('hero-sub').textContent =
+        'Every result is saved here. Run ' + (hub.toolName || 'the tool') +
+        ', review what you got, and track your progress over time.';
+    }
+
+    document.getElementById('rm-run-btn').href   = toolUrl;
+    document.getElementById('rm-empty-btn').href = toolUrl;
 
     if (!studentDb) {
       document.getElementById('rm-loading').style.display = 'none';
@@ -344,26 +275,34 @@
           return;
         }
 
-        var grid = document.getElementById('rm-results');
-        grid.style.display = 'grid';
+        var list = document.getElementById('rm-results');
+        list.style.display = 'flex';
 
         snap.docs.forEach(function(doc) {
           var r = doc.data();
-          var card = document.createElement('a');
-          card.href = '/hub/' + slug + '/results?id=' + doc.id;
-          card.className = 'result-card';
+
+          var card = document.createElement('div');
+          card.className = 'rm-card';
+
+          var iconHtml = hub.logoUrl
+            ? '<div class="rm-card-icon"><img src="' + hub.logoUrl + '" alt=""></div>'
+            : '<div class="rm-card-icon">⚡</div>';
+
           card.innerHTML =
-            '<div class="result-card-top">' +
-              '<span class="result-label">⚡ ' + (r.toolName || 'Result') + '</span>' +
-              '<span class="result-date">' + formatDate(r.createdAt) + '</span>' +
+            '<div class="rm-card-header">' +
+              iconHtml +
+              '<div class="rm-card-meta">' +
+                '<div class="rm-card-title">' + (r.resultTitle || r.toolName || 'My Results') + '</div>' +
+                '<div class="rm-card-date">' + formatDate(r.createdAt) + '</div>' +
+              '</div>' +
+              '<div class="rm-card-actions">' +
+                '<a class="rm-btn-view" href="/hub/' + slug + '/results?id=' + doc.id + '">View Full Results</a>' +
+                '<a class="rm-btn-tool" href="' + toolUrl + '">Open tool →</a>' +
+              '</div>' +
             '</div>' +
-            '<div class="result-title">' + (r.resultTitle || 'My Results') + '</div>' +
-            '<div class="result-summary">' + (r.resultSummary || '') + '</div>' +
-            '<div class="result-card-footer">' +
-              '<span class="result-view-btn">View Results →</span>' +
-              '<a class="result-rerun-btn" href="' + toolUrl + '" onclick="event.stopPropagation()">Run again ↩</a>' +
-            '</div>';
-          grid.appendChild(card);
+            '<div class="rm-card-body">' + renderMarkdown(r.reportText || r.resultSummary || '') + '</div>';
+
+          list.appendChild(card);
         });
 
       }).catch(function() {

@@ -162,9 +162,9 @@
         return;
       }
 
-      // Already logged in → send to tool
+      // Already logged in → send to dashboard
       studentAuth.onAuthStateChanged(function(user) {
-        if (user) { window.location.href = '/hub/' + slug + '/tool'; return; }
+        if (user) { window.location.href = '/hub/' + slug + '/dashboard'; return; }
         renderPage(hub);
       });
 
@@ -196,7 +196,7 @@
     setLoading(true);
     studentAuth.signInWithEmailAndPassword(email, password)
       .then(function() {
-        window.location.href = '/hub/' + slug + '/tool';
+        window.location.href = '/hub/' + slug + '/dashboard';
       })
       .catch(function(e) {
         setLoading(false);

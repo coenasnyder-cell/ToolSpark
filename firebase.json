@@ -54,7 +54,7 @@
       },
       {
         "source": "/hub/*",
-        "destination": "/hub/index.html"
+        "destination": "/hub/login.html"
       }
     ]
   },

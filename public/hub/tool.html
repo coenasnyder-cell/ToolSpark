@@ -436,6 +436,7 @@
     <div class="nav-right">
       <button class="btn-new-chat" id="new-chat-btn" onclick="newConversation()" style="display:none;">New conversation</button>
       <div class="nav-user" id="nav-user">
+        <a id="nav-dashboard-link" href="#" class="btn-new-chat" style="text-decoration:none;">My Hub</a>
         <button class="btn-signout" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
@@ -550,6 +551,7 @@
           if (!user) { window.location.href = '/hub/' + slug + '/login'; return; }
           var userEl = document.getElementById('nav-user');
           if (userEl) { userEl.classList.add('visible'); }
+          document.getElementById('nav-dashboard-link').href = '/hub/' + slug + '/dashboard';
           renderTool(HUB);
         });
       } else {

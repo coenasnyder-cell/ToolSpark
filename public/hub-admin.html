@@ -802,8 +802,8 @@ service cloud.firestore {
   function updateUrlDisplay() {
     var url = 'toolspark.co/hub/' + hubSlug;
     document.getElementById('hub-url-display').textContent = url;
-    document.getElementById('hub-url-display').href = '/hub/' + hubSlug;
-    document.getElementById('view-hub-btn').href = '/hub/' + hubSlug;
+    document.getElementById('hub-url-display').href = '/hub/' + hubSlug + '/login';
+    document.getElementById('view-hub-btn').href = '/hub/' + hubSlug + '/login';
     document.getElementById('domain-info-url').textContent = url;
   }
 
