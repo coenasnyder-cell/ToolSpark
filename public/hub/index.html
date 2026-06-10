@@ -56,6 +56,7 @@
   /* HERO */
   .hero {
     min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center;
     position: relative; overflow: hidden;
   }
   .hero-bg {
@@ -65,7 +66,7 @@
   }
 
   /* NAV */
-  .hub-nav { position: relative; z-index: 10; padding: 1.5rem 2rem; background: var(--hub-nav-bg); display: flex; align-items: center; justify-content: space-between; }
+  .hub-nav { position: absolute; top: 0; left: 0; right: 0; z-index: 20; padding: 1.5rem 2rem; background: var(--hub-nav-bg); display: flex; align-items: center; justify-content: space-between; }
   .hub-logo-wrap { display: flex; align-items: center; gap: 12px; }
   .hub-logo-img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; display: none; }
   .hub-logo-img.visible { display: block; }
@@ -137,7 +138,6 @@
         <a class="nav-cta" id="nav-cta" href="#">Get Access</a>
       </nav>
       <div class="hero-content">
-        <div class="hero-badge" id="tool-badge"></div>
         <h1 class="hero-headline" id="hero-headline"></h1>
         <p class="hero-subheadline" id="hero-subheadline"></p>
         <!-- Simple CTA (no Firebase connected) -->
@@ -237,11 +237,7 @@
     document.getElementById('nav-cta').href = ctaDest;
     document.getElementById('nav-cta').textContent = hub.landingCtaText || 'Get Access';
 
-    if (hub.toolName) {
-      document.getElementById('tool-badge').textContent = hub.toolName;
-    } else {
-      document.getElementById('tool-badge').style.display = 'none';
-    }
+
 
     document.getElementById('hero-headline').innerHTML = hub.landingHeadline
       ? hub.landingHeadline.replace(/\*(.*?)\*/g, '<em>$1</em>')

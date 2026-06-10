@@ -80,7 +80,7 @@
   .nav-user { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--hub-text-muted); }
   .nav-user.visible { display: flex; }
   .nav-user-email { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .btn-signout { background: none; border: 1px solid var(--hub-border); color: var(--hub-text-muted); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-signout { background: transparent; border: 1px solid var(--hub-nav-btn); color: var(--hub-nav-btn); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .btn-signout:hover { border-color: var(--gold); color: var(--gold); }
 
   /* NO KEY */
@@ -254,6 +254,7 @@
   .msg.assistant { align-self: flex-start; }
 
   .msg-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-top: 2px; }
+  .msg-avatar img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
   .msg.assistant .msg-avatar { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); }
   .msg.user .msg-avatar { background: rgba(255,255,255,0.06); border: 1px solid var(--hub-border); color: var(--hub-text-muted); }
 
@@ -435,7 +436,6 @@
     <div class="nav-right">
       <button class="btn-new-chat" id="new-chat-btn" onclick="newConversation()" style="display:none;">New conversation</button>
       <div class="nav-user" id="nav-user">
-        <span class="nav-user-email" id="nav-user-email"></span>
         <button class="btn-signout" onclick="doSignOut()">Sign out</button>
       </div>
     </div>
@@ -556,8 +556,7 @@
         studentAuth.onAuthStateChanged(function(user) {
           if (!user) { window.location.href = '/hub/' + slug + '/login'; return; }
           var userEl = document.getElementById('nav-user');
-          var emailEl = document.getElementById('nav-user-email');
-          if (userEl && emailEl) { emailEl.textContent = user.displayName || user.email; userEl.classList.add('visible'); }
+          if (userEl) { userEl.classList.add('visible'); }
           renderTool(HUB);
         });
       } else {
@@ -674,8 +673,8 @@
   }
 
   function updateGenerateButton() {
-    // Show generate button after user has sent at least 2 messages
-    if (userTurnCount >= 2 && !document.getElementById('report-view').classList.contains('visible')) {
+    var minTurns = (HUB && HUB.minQuestionsBeforeGenerate) ? parseInt(HUB.minQuestionsBeforeGenerate) : 4;
+    if (userTurnCount >= minTurns && !document.getElementById('report-view').classList.contains('visible')) {
       document.getElementById('generate-row').classList.add('visible');
     }
   }
@@ -833,7 +832,14 @@
 
     var avatarEl = document.createElement('div');
     avatarEl.className = 'msg-avatar';
-    avatarEl.textContent = role === 'assistant' ? '⚡' : 'U';
+    if (role === 'assistant' && HUB && HUB.logoUrl) {
+      var logoImg = document.createElement('img');
+      logoImg.src = HUB.logoUrl;
+      logoImg.alt = '';
+      avatarEl.appendChild(logoImg);
+    } else {
+      avatarEl.textContent = role === 'assistant' ? '⚡' : 'U';
+    }
 
     var bubbleEl = document.createElement('div');
     bubbleEl.className = 'msg-bubble';
@@ -858,7 +864,14 @@
 
     var avatarEl = document.createElement('div');
     avatarEl.className = 'msg-avatar';
-    avatarEl.textContent = '⚡';
+    if (HUB && HUB.logoUrl) {
+      var logoImg = document.createElement('img');
+      logoImg.src = HUB.logoUrl;
+      logoImg.alt = '';
+      avatarEl.appendChild(logoImg);
+    } else {
+      avatarEl.textContent = '⚡';
+    }
 
     var bubbleEl = document.createElement('div');
     bubbleEl.className = 'msg-bubble';

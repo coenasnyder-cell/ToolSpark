@@ -209,6 +209,93 @@
     <div id="live-badge" class="hub-live-badge preview">Preview</div>
   </div>
 
+  <!-- YOUR FIREBASE DATABASE — STEP 1 -->
+  <div class="settings-card" style="border-color: rgba(201,168,76,0.4); box-shadow: 0 0 0 3px rgba(201,168,76,0.08), var(--shadow);">
+    <div class="card-header" style="background: rgba(201,168,76,0.06);">
+      <div class="card-icon">🗄️</div>
+      <div>
+        <div class="card-title">Step 1 — Connect Your Firebase Database</div>
+        <div class="card-desc">Do this first — your audience data, tool results, and subscribers go here. You own it from day one.</div>
+      </div>
+      <div id="fb-status-badge" class="fb-badge not-connected">Not connected</div>
+    </div>
+    <div class="card-body">
+
+      <!-- NOT CONNECTED -->
+      <div id="fb-connect-section">
+        <div class="fb-instructions">
+          <div class="fb-instruction-row">
+            <div class="fb-step-num">1</div>
+            <div class="fb-instruction-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → create a new project (the free Spark plan is fine)</div>
+          </div>
+          <div class="fb-instruction-row">
+            <div class="fb-step-num">2</div>
+            <div class="fb-instruction-text">In your project: click <strong>Firestore Database</strong> → Create database → choose a region → Start in <strong>test mode</strong></div>
+          </div>
+          <div class="fb-instruction-row">
+            <div class="fb-step-num">3</div>
+            <div class="fb-instruction-text">Click <strong>Authentication</strong> → Get started → Sign-in method → enable <strong>Email/Password</strong></div>
+          </div>
+          <div class="fb-instruction-row">
+            <div class="fb-step-num">4</div>
+            <div class="fb-instruction-text">Go to <strong>Project Settings</strong> → scroll to "Your apps" → Add a web app → copy the firebaseConfig and paste it below</div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:1rem;">
+          <label for="student-fb-input">Paste your Firebase config</label>
+          <textarea id="student-fb-input" rows="6" placeholder="const firebaseConfig = {
+  apiKey: &quot;AIzaSy...&quot;,
+  authDomain: &quot;your-project.firebaseapp.com&quot;,
+  projectId: &quot;your-project&quot;,
+  storageBucket: &quot;your-project.firebasestorage.app&quot;,
+  messagingSenderId: &quot;123456789&quot;,
+  appId: &quot;1:123...&quot;
+};"></textarea>
+          <div class="modal-error" id="student-fb-error"></div>
+        </div>
+
+        <button class="btn-save" style="margin-top:0.5rem;width:auto;" onclick="connectStudentFirebase()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+          Connect Database
+        </button>
+      </div>
+
+      <!-- CONNECTED -->
+      <div id="fb-connected-section" style="display:none;">
+        <div class="fb-connected-box">
+          <div class="fb-connected-detail">
+            <strong id="fb-project-id-display">project-id</strong>
+            Your audience data writes to this Firebase project
+          </div>
+          <button class="btn-disconnect" onclick="disconnectStudentFirebase()">Disconnect</button>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <div class="fb-rules-label">Firestore security rules — paste these in your Firebase console</div>
+          <div class="fb-rules-box">
+            <pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /subscribers/{doc} {
+      allow create: if true;
+    }
+    match /toolUsage/{doc} {
+      allow create: if true;
+    }
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre>
+          </div>
+          <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish. This lets your landing page collect emails and log tool usage without requiring login.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- BRANDING -->
   <div class="settings-card">
     <div class="card-header">
@@ -259,7 +346,7 @@
             <input type="color" id="primaryColorPicker" value="#C9A84C">
             <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
           </div>
-          <div class="field-hint">The color of your buttons, the badge above your headline, and the numbered circles — this is your main brand color</div>
+          <div class="field-hint">Your main brand color — controls the Get Started button background, the numbered step circles (1, 2, 3) and their text</div>
         </div>
         <div class="field">
           <label>Button Text Color</label>
@@ -267,7 +354,7 @@
             <input type="color" id="btnTextColorPicker" value="#0C0B09">
             <input type="text" id="btnTextColorHex" placeholder="#0C0B09" maxlength="7">
           </div>
-          <div class="field-hint">The text on your "Get Started" button — use white (#FFFFFF) if your accent color is dark</div>
+          <div class="field-hint">Only controls the text written ON your buttons (like "Get Started" and "Get Access") — use white if your button color is dark</div>
         </div>
       </div>
       <div class="field-row">
@@ -285,7 +372,7 @@
             <input type="color" id="textPrimaryColorPicker" value="#F0EDE6">
             <input type="text" id="textPrimaryColorHex" placeholder="#F0EDE6" maxlength="7">
           </div>
-          <div class="field-hint">Your main headline and body text — use a dark color if your background is light</div>
+          <div class="field-hint">Your main headline and the step labels ("Answer a few questions", etc.) — use a dark color if your background is light</div>
         </div>
       </div>
       <div class="field-row">
@@ -295,7 +382,7 @@
             <input type="color" id="textMutedColorPicker" value="#9A9488">
             <input type="text" id="textMutedColorHex" placeholder="#9A9488" maxlength="7">
           </div>
-          <div class="field-hint">Smaller supporting text — the paragraph below your headline, step labels, nav</div>
+          <div class="field-hint">The supporting paragraph text below your headline, your landing page subheadline, and the typing dots in chat — NOT the step labels or numbers</div>
         </div>
         <div class="field">
           <label>Lines &amp; Borders</label>
@@ -303,7 +390,7 @@
             <input type="color" id="borderColorPicker" value="#2A2720">
             <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
           </div>
-          <div class="field-hint">The thin lines separating sections — nav border, dividers between steps, card outlines</div>
+          <div class="field-hint">The line under your header, the dashes connecting steps (1 — 2 — 3), the outline around your chat box, message bubbles, and text input box</div>
         </div>
       </div>
     </div>
@@ -340,7 +427,7 @@
           <input type="color" id="navBtnColorPicker" value="#C9A84C">
           <input type="text" id="navBtnColorHex" placeholder="#C9A84C" maxlength="7">
         </div>
-        <div class="field-hint">The button in the top right corner — "Get Access" on the landing page, "New Conversation" on the chat page</div>
+        <div class="field-hint">The buttons in the top right corner — "Get Access" on the landing page, "New Conversation" and "Sign Out" on the chat page</div>
       </div>
     </div>
   </div>
@@ -414,6 +501,11 @@
       <div class="field">
         <label for="toolDescription">Tool Description</label>
         <input type="text" id="toolDescription" placeholder="e.g. Generate captions for real estate listings in seconds" maxlength="120">
+      </div>
+      <div class="field" style="max-width:50%;">
+        <label for="minQuestionsBeforeGenerate">Questions Before Generate Button Appears</label>
+        <input type="number" id="minQuestionsBeforeGenerate" min="1" max="20" value="4" placeholder="4">
+        <div class="field-hint">How many questions your tool asks before the "Generate My Report" button shows up — set this to match how many questions are in your flow</div>
       </div>
       <div class="field">
         <label for="customGreeting">Custom Greeting <span>optional</span></label>
@@ -514,90 +606,6 @@
       <div class="domain-info">
         <p>During the certification your hub is live at <strong id="domain-info-url">toolspark.co/hub/...</strong>. At graduation you'll connect your own domain — we'll walk you through it step by step.</p>
       </div>
-    </div>
-  </div>
-
-  <!-- YOUR FIREBASE DATABASE -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🗄️</div>
-      <div><div class="card-title">Your Firebase Database</div><div class="card-desc">Audience data goes to your own Firebase — you own it from day one</div></div>
-      <div id="fb-status-badge" class="fb-badge not-connected">Not connected</div>
-    </div>
-    <div class="card-body">
-
-      <!-- NOT CONNECTED -->
-      <div id="fb-connect-section">
-        <div class="fb-instructions">
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">1</div>
-            <div class="fb-instruction-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → create a new project (the free Spark plan is fine)</div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">2</div>
-            <div class="fb-instruction-text">In your project: click <strong>Firestore Database</strong> → Create database → choose a region → Start in <strong>test mode</strong></div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">3</div>
-            <div class="fb-instruction-text">Click <strong>Authentication</strong> → Get started → Sign-in method → enable <strong>Email/Password</strong></div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">4</div>
-            <div class="fb-instruction-text">Go to <strong>Project Settings</strong> → scroll to "Your apps" → Add a web app → copy the firebaseConfig and paste it below</div>
-          </div>
-        </div>
-
-        <div class="field" style="margin-top:1rem;">
-          <label for="student-fb-input">Paste your Firebase config</label>
-          <textarea id="student-fb-input" rows="6" placeholder="const firebaseConfig = {
-  apiKey: &quot;AIzaSy...&quot;,
-  authDomain: &quot;your-project.firebaseapp.com&quot;,
-  projectId: &quot;your-project&quot;,
-  storageBucket: &quot;your-project.firebasestorage.app&quot;,
-  messagingSenderId: &quot;123456789&quot;,
-  appId: &quot;1:123...&quot;
-};"></textarea>
-          <div class="modal-error" id="student-fb-error"></div>
-        </div>
-
-        <button class="btn-save" style="margin-top:0.5rem;width:auto;" onclick="connectStudentFirebase()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
-          Connect Database
-        </button>
-      </div>
-
-      <!-- CONNECTED -->
-      <div id="fb-connected-section" style="display:none;">
-        <div class="fb-connected-box">
-          <div class="fb-connected-detail">
-            <strong id="fb-project-id-display">project-id</strong>
-            Your audience data writes to this Firebase project
-          </div>
-          <button class="btn-disconnect" onclick="disconnectStudentFirebase()">Disconnect</button>
-        </div>
-
-        <div style="margin-top:1rem;">
-          <div class="fb-rules-label">Firestore security rules — paste these in your Firebase console</div>
-          <div class="fb-rules-box">
-            <pre>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /subscribers/{doc} {
-      allow create: if true;
-    }
-    match /toolUsage/{doc} {
-      allow create: if true;
-    }
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}</pre>
-          </div>
-          <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish. This lets your landing page collect emails and log tool usage without requiring login.</div>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -842,6 +850,7 @@ service cloud.firestore {
       if (s.toolModel) document.getElementById('toolModel').value = s.toolModel;
       if (s.toolDescription) document.getElementById('toolDescription').value = s.toolDescription;
       if (s.systemPrompt) document.getElementById('systemPrompt').value = s.systemPrompt;
+      if (s.minQuestionsBeforeGenerate) document.getElementById('minQuestionsBeforeGenerate').value = s.minQuestionsBeforeGenerate;
       if (s.customGreeting) document.getElementById('customGreeting').value = s.customGreeting;
       if (s.inputLabel) document.getElementById('inputLabel').value = s.inputLabel;
       if (s.inputPlaceholder) document.getElementById('inputPlaceholder').value = s.inputPlaceholder;
@@ -875,6 +884,7 @@ service cloud.firestore {
       toolModel:          document.getElementById('toolModel').value,
       toolDescription:    document.getElementById('toolDescription').value.trim(),
       systemPrompt:       document.getElementById('systemPrompt').value.trim(),
+      minQuestionsBeforeGenerate: parseInt(document.getElementById('minQuestionsBeforeGenerate').value) || 4,
       customGreeting:     document.getElementById('customGreeting').value.trim(),
       inputLabel:         document.getElementById('inputLabel').value.trim(),
       inputPlaceholder:   document.getElementById('inputPlaceholder').value.trim(),
