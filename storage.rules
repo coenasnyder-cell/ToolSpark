@@ -74,6 +74,15 @@ service firebase.storage {
       allow write: if false;
     }
 
+    // HUB LOGOS — uploaded by hub owners, publicly readable
+    match /hub-logos/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;

@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
@@ -95,8 +96,14 @@
   .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
   .toggle input:checked + .toggle-slider { background: var(--gold); }
   .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
-  .logo-preview { width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); object-fit: contain; display: none; }
+  .logo-preview { width: 56px; height: 56px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); object-fit: contain; display: none; flex-shrink: 0; }
   .logo-preview.visible { display: block; }
+  .logo-upload-wrap { display: flex; align-items: center; gap: 12px; }
+  .btn-upload-logo { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px dashed var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-upload-logo:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .upload-progress { width: 100%; height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; display: none; margin-top: 6px; }
+  .upload-progress-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.2s; width: 0%; }
+  .upload-status-text { font-size: 12px; margin-top: 4px; min-height: 16px; }
   .domain-info { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius-sm); padding: 1rem 1.25rem; }
   .domain-info p { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
@@ -220,19 +227,119 @@
         </div>
       </div>
       <div class="field">
-        <label>Primary Color</label>
-        <div class="color-row">
-          <input type="color" id="primaryColorPicker" value="#C9A84C">
-          <div class="field" style="flex:1;">
-            <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
+        <label>Logo <span>optional</span></label>
+        <div class="logo-upload-wrap">
+          <img id="logo-preview" class="logo-preview" src="" alt="Logo">
+          <div style="flex:1;">
+            <label class="btn-upload-logo" for="logo-file-input">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+              <span id="upload-btn-label">Upload image</span>
+            </label>
+            <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" style="display:none;" onchange="uploadLogo(this)">
+            <div class="upload-progress" id="upload-progress"><div class="upload-progress-fill" id="upload-progress-fill"></div></div>
+            <div class="upload-status-text" id="upload-status"></div>
           </div>
         </div>
+        <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
       </div>
-      <div class="field">
-        <label for="logoUrl">Logo URL <span>optional</span></label>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <input type="url" id="logoUrl" placeholder="https://..." style="flex:1;">
-          <img id="logo-preview" class="logo-preview" src="" alt="Logo">
+    </div>
+  </div>
+
+  <!-- PAGE & SITE COLORS -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">🌐</div>
+      <div><div class="card-title">Page &amp; Site Colors</div><div class="card-desc">These colors apply everywhere — the intro screen, nav, and all pages</div></div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Accent Color</label>
+          <div class="color-row">
+            <input type="color" id="primaryColorPicker" value="#C9A84C">
+            <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
+          </div>
+          <div class="field-hint">Your "Get Started" button, the tool name badge, step circles, and send button — pick your brand color here</div>
+        </div>
+        <div class="field">
+          <label>Page Background</label>
+          <div class="color-row">
+            <input type="color" id="pageBgColorPicker" value="#0C0B09">
+            <input type="text" id="pageBgColorHex" placeholder="#0C0B09" maxlength="7">
+          </div>
+          <div class="field-hint">The background color behind everything — all pages use this</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Headline &amp; Body Text</label>
+          <div class="color-row">
+            <input type="color" id="textPrimaryColorPicker" value="#F0EDE6">
+            <input type="text" id="textPrimaryColorHex" placeholder="#F0EDE6" maxlength="7">
+          </div>
+          <div class="field-hint">Your main headline and body text — use a dark color if your background is light</div>
+        </div>
+        <div class="field">
+          <label>Description &amp; Label Text</label>
+          <div class="color-row">
+            <input type="color" id="textMutedColorPicker" value="#9A9488">
+            <input type="text" id="textMutedColorHex" placeholder="#9A9488" maxlength="7">
+          </div>
+          <div class="field-hint">Smaller supporting text — the paragraph below your headline, step labels, nav</div>
+        </div>
+      </div>
+      <div class="field" style="max-width:50%;">
+        <label>Lines &amp; Borders</label>
+        <div class="color-row">
+          <input type="color" id="borderColorPicker" value="#2A2720">
+          <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
+        </div>
+        <div class="field-hint">The thin lines separating sections — nav border, dividers between steps, card outlines</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT TOOL COLORS -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">💬</div>
+      <div><div class="card-title">Chat Tool Colors</div><div class="card-desc">Colors inside the chat interface — only visible once someone clicks Get Started</div></div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Chat Box Background</label>
+          <div class="color-row">
+            <input type="color" id="chatBgColorPicker" value="#141210">
+            <input type="text" id="chatBgColorHex" placeholder="#141210" maxlength="7">
+          </div>
+          <div class="field-hint">The card the whole conversation sits inside</div>
+        </div>
+        <div class="field">
+          <label>Tool Response Bubbles</label>
+          <div class="color-row">
+            <input type="color" id="aiBubbleColorPicker" value="#1C1A17">
+            <input type="text" id="aiBubbleColorHex" placeholder="#1C1A17" maxlength="7">
+          </div>
+          <div class="field-hint">Background color of the messages your AI tool sends</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>User Reply Bubbles</label>
+          <div class="color-row">
+            <input type="color" id="userBubbleColorPicker" value="#1D1A0F">
+            <input type="text" id="userBubbleColorHex" placeholder="#1D1A0F" maxlength="7">
+          </div>
+          <div class="field-hint">Background color of the messages your users send</div>
+        </div>
+        <div class="field">
+          <label>Message Input Box</label>
+          <div class="color-row">
+            <input type="color" id="inputBgColorPicker" value="#141210">
+            <input type="text" id="inputBgColorHex" placeholder="#141210" maxlength="7">
+          </div>
+          <div class="field-hint">The text box at the bottom where users type their message</div>
         </div>
       </div>
     </div>
@@ -261,6 +368,11 @@
       <div class="field">
         <label for="toolDescription">Tool Description</label>
         <input type="text" id="toolDescription" placeholder="e.g. Generate captions for real estate listings in seconds" maxlength="120">
+      </div>
+      <div class="field">
+        <label for="customGreeting">Custom Greeting <span>optional</span></label>
+        <textarea id="customGreeting" rows="3" placeholder="e.g. Hey! I'm your Caption Generator. Tell me a bit about your listing and I'll write something that stops the scroll. What are you working on today?"></textarea>
+        <div class="field-hint">This is the first message your users see when they open the tool. If left blank, a greeting is generated automatically from your tool name and description.</div>
       </div>
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -554,14 +666,25 @@ service cloud.firestore {
   }
 
   // ── COLOR SYNC ──
-  document.getElementById('primaryColorPicker').addEventListener('input', function() {
-    document.getElementById('primaryColorHex').value = this.value.toUpperCase();
-  });
-  document.getElementById('primaryColorHex').addEventListener('input', function() {
-    if (/^#[0-9A-Fa-f]{6}$/.test(this.value.trim())) {
-      document.getElementById('primaryColorPicker').value = this.value.trim();
-    }
-  });
+  function wireColorPair(pickerId, hexId) {
+    document.getElementById(pickerId).addEventListener('input', function() {
+      document.getElementById(hexId).value = this.value.toUpperCase();
+    });
+    document.getElementById(hexId).addEventListener('input', function() {
+      if (/^#[0-9A-Fa-f]{6}$/.test(this.value.trim())) {
+        document.getElementById(pickerId).value = this.value.trim();
+      }
+    });
+  }
+  wireColorPair('primaryColorPicker', 'primaryColorHex');
+  wireColorPair('pageBgColorPicker',   'pageBgColorHex');
+  wireColorPair('chatBgColorPicker',   'chatBgColorHex');
+  wireColorPair('aiBubbleColorPicker', 'aiBubbleColorHex');
+  wireColorPair('userBubbleColorPicker','userBubbleColorHex');
+  wireColorPair('inputBgColorPicker',    'inputBgColorHex');
+  wireColorPair('textPrimaryColorPicker','textPrimaryColorHex');
+  wireColorPair('textMutedColorPicker',  'textMutedColorHex');
+  wireColorPair('borderColorPicker',     'borderColorHex');
 
   // ── LOGO PREVIEW ──
   document.getElementById('logoUrl').addEventListener('input', function() {
@@ -589,6 +712,59 @@ service cloud.firestore {
     }
   }
 
+  // ── LOGO UPLOAD ──
+  async function uploadLogo(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    var statusEl  = document.getElementById('upload-status');
+    var progressEl = document.getElementById('upload-progress');
+    var fillEl    = document.getElementById('upload-progress-fill');
+    var labelEl   = document.getElementById('upload-btn-label');
+
+    statusEl.style.color = 'var(--text3)';
+    statusEl.textContent = 'Uploading...';
+    progressEl.style.display = 'block';
+    fillEl.style.width = '10%';
+    labelEl.textContent = 'Uploading...';
+
+    try {
+      var ext = file.name.split('.').pop().toLowerCase();
+      var path = 'hub-logos/' + currentUser.uid + '/logo-' + Date.now() + '.' + ext;
+      var ref = firebase.storage().ref().child(path);
+
+      var uploadTask = ref.put(file, { contentType: file.type });
+
+      uploadTask.on('state_changed', function(snap) {
+        var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 90) + 10;
+        fillEl.style.width = pct + '%';
+      });
+
+      await uploadTask;
+      fillEl.style.width = '100%';
+
+      var url = await ref.getDownloadURL();
+      document.getElementById('logoUrl').value = url;
+
+      var preview = document.getElementById('logo-preview');
+      preview.src = url;
+      preview.classList.add('visible');
+
+      labelEl.textContent = 'Change image';
+      statusEl.style.color = '#2E7D32';
+      statusEl.textContent = '✓ Uploaded — click Save Settings to apply';
+      setTimeout(function() { progressEl.style.display = 'none'; fillEl.style.width = '0%'; }, 1200);
+
+    } catch(e) {
+      progressEl.style.display = 'none';
+      fillEl.style.width = '0%';
+      labelEl.textContent = 'Upload image';
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'Upload failed — ' + (e.message || 'try again');
+    }
+
+    input.value = '';
+  }
+
   function toggleKey(id, btn) {
     var input = document.getElementById(id);
     input.type = input.type === 'password' ? 'text' : 'password';
@@ -605,11 +781,18 @@ service cloud.firestore {
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
       if (s.primaryColor) { document.getElementById('primaryColorPicker').value = s.primaryColor; document.getElementById('primaryColorHex').value = s.primaryColor.toUpperCase(); }
+      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720' };
+      Object.keys(colorDefaults).forEach(function(field) {
+        var val = s[field] || colorDefaults[field];
+        document.getElementById(field + 'Picker').value = val;
+        document.getElementById(field + 'Hex').value = val.toUpperCase();
+      });
       if (s.logoUrl) { document.getElementById('logoUrl').value = s.logoUrl; var p = document.getElementById('logo-preview'); p.src = s.logoUrl; p.classList.add('visible'); }
       if (s.toolName) document.getElementById('toolName').value = s.toolName;
       if (s.toolModel) document.getElementById('toolModel').value = s.toolModel;
       if (s.toolDescription) document.getElementById('toolDescription').value = s.toolDescription;
       if (s.systemPrompt) document.getElementById('systemPrompt').value = s.systemPrompt;
+      if (s.customGreeting) document.getElementById('customGreeting').value = s.customGreeting;
       if (s.inputLabel) document.getElementById('inputLabel').value = s.inputLabel;
       if (s.inputPlaceholder) document.getElementById('inputPlaceholder').value = s.inputPlaceholder;
       if (s.anthropicApiKey) document.getElementById('anthropicApiKey').value = s.anthropicApiKey;
@@ -642,6 +825,7 @@ service cloud.firestore {
       toolModel:          document.getElementById('toolModel').value,
       toolDescription:    document.getElementById('toolDescription').value.trim(),
       systemPrompt:       document.getElementById('systemPrompt').value.trim(),
+      customGreeting:     document.getElementById('customGreeting').value.trim(),
       inputLabel:         document.getElementById('inputLabel').value.trim(),
       inputPlaceholder:   document.getElementById('inputPlaceholder').value.trim(),
       anthropicApiKey:    document.getElementById('anthropicApiKey').value.trim(),
@@ -652,6 +836,14 @@ service cloud.firestore {
       isLive:             document.getElementById('isLive').checked,
       membersOnly:        document.getElementById('membersOnly').checked,
       customDomain:       document.getElementById('customDomain').value.trim(),
+      pageBgColor:        document.getElementById('pageBgColorHex').value.trim() || document.getElementById('pageBgColorPicker').value,
+      chatBgColor:        document.getElementById('chatBgColorHex').value.trim() || document.getElementById('chatBgColorPicker').value,
+      aiBubbleColor:      document.getElementById('aiBubbleColorHex').value.trim() || document.getElementById('aiBubbleColorPicker').value,
+      userBubbleColor:    document.getElementById('userBubbleColorHex').value.trim() || document.getElementById('userBubbleColorPicker').value,
+      inputBgColor:       document.getElementById('inputBgColorHex').value.trim() || document.getElementById('inputBgColorPicker').value,
+      textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
+      textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
+      borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
       updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
       status.textContent = '✓ Saved';
