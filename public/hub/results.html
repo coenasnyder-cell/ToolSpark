@@ -163,6 +163,20 @@
     transition: opacity 0.15s;
   }
   .btn-start-new:hover { opacity: 0.85; }
+  .btn-download {
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--hub-border);
+    color: var(--hub-text-muted);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.15s;
+  }
+  .btn-download:hover { border-color: var(--hub-text-muted); color: var(--hub-text-primary); }
 
   /* LOADING / ERROR */
   .state-center {
@@ -224,6 +238,7 @@
     <div class="report-body" id="report-body"></div>
     <div class="results-actions">
       <a id="new-session-link" href="#" class="btn-start-new">Start New Session</a>
+      <button class="btn-download" onclick="downloadResults()">Download Results</button>
     </div>
   </div>
 </div>
@@ -286,9 +301,27 @@
       .replace(/`(.+?)`/g, '<code>$1</code>');
   }
 
+  var currentReportText = '';
+
+  function downloadResults() {
+    if (!currentReportText) return;
+    var toolName = document.getElementById('results-label').textContent.replace('⚡ Your ', '') || 'Results';
+    var filename = toolName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-results.txt';
+    var blob = new Blob([currentReportText], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   var resultId = new URLSearchParams(window.location.search).get('id');
 
   function showResult(reportText) {
+    currentReportText = reportText;
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('report-body').innerHTML = renderMarkdown(reportText);
     document.getElementById('results-wrap').style.display = 'block';
