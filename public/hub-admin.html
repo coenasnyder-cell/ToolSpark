@@ -165,6 +165,25 @@
   .stat-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--gold); line-height: 1; margin-bottom: 6px; }
   .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
   .fb-rules-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+
+  /* INBOX */
+  .inbox-item { border-bottom: 1px solid var(--border); }
+  .inbox-item:last-child { border-bottom: none; }
+  .inbox-item-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; cursor: pointer; gap: 8px; }
+  .inbox-item-header:hover .inbox-sender { color: var(--gold); }
+  .inbox-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .inbox-sender { font-size: 13px; font-weight: 700; color: var(--text1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .inbox-subject { font-size: 13px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .inbox-date { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .inbox-chevron { font-size: 12px; color: var(--text3); }
+  .inbox-read .inbox-sender { font-weight: 400; color: var(--text2); }
+  .inbox-item-body { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .inbox-meta { font-size: 12px; color: var(--text3); }
+  .inbox-meta a { color: var(--gold); text-decoration: none; }
+  .inbox-message { font-size: 13px; color: var(--text1); line-height: 1.6; white-space: pre-wrap; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .inbox-mark-read { align-self: flex-start; background: none; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text2); padding: 5px 12px; cursor: pointer; }
+  .inbox-mark-read:hover { border-color: var(--gold); color: var(--gold); }
+  .inbox-read-label { font-size: 11px; color: var(--text3); }
   .btn-disconnect { background: transparent; border: 1px solid var(--border); color: var(--text3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
   .btn-disconnect:hover { border-color: #C0392B; color: #C0392B; }
 
@@ -290,6 +309,10 @@ service cloud.firestore {
       allow create: if true;
       allow read: if true;
     }
+    match /supportRequests/{doc} {
+      allow create: if true;
+      allow read, update: if request.auth != null;
+    }
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
@@ -326,6 +349,23 @@ service cloud.firestore {
         </div>
       </div>
       <div class="field-hint" style="margin-top:1rem;" id="analytics-updated"></div>
+    </div>
+  </div>
+
+  <!-- INBOX -->
+  <div class="settings-card" id="inbox-card" style="display:none;">
+    <div class="card-header">
+      <div class="card-icon">📬</div>
+      <div>
+        <div class="card-title">Inbox <span id="inbox-unread-badge" style="display:none;background:var(--gold,#C9A84C);color:#0C0B09;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;"></span></div>
+        <div class="card-desc">Support messages from your hub members</div>
+      </div>
+      <button class="btn-disconnect" onclick="loadInbox()" style="font-size:12px;padding:5px 12px;">Refresh</button>
+    </div>
+    <div class="card-body">
+      <div id="inbox-loading" style="font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">Loading messages…</div>
+      <div id="inbox-empty" style="display:none;font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">No support messages yet.</div>
+      <div id="inbox-list"></div>
     </div>
   </div>
 
@@ -1118,7 +1158,9 @@ service cloud.firestore {
     badge.textContent = 'Connected';
     badge.className = 'fb-badge connected';
     document.getElementById('analytics-card').style.display = 'block';
+    document.getElementById('inbox-card').style.display = 'block';
     loadAnalytics();
+    loadInbox();
   }
 
   function loadAnalytics() {
@@ -1148,6 +1190,111 @@ service cloud.firestore {
       document.getElementById('analytics-updated').textContent =
         'Could not load stats — check your Firestore rules allow reads.';
     });
+  }
+
+  function loadInbox() {
+    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;
+    var cfg = hubData.studentFirebase;
+
+    var studentApp;
+    try { studentApp = firebase.app('student-admin'); }
+    catch(e) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
+    var sdb = studentApp.firestore();
+
+    document.getElementById('inbox-loading').style.display = 'block';
+    document.getElementById('inbox-empty').style.display = 'none';
+    document.getElementById('inbox-list').innerHTML = '';
+
+    sdb.collection('supportRequests')
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get().then(function(snap) {
+        document.getElementById('inbox-loading').style.display = 'none';
+        if (snap.empty) {
+          document.getElementById('inbox-empty').style.display = 'block';
+          document.getElementById('inbox-unread-badge').style.display = 'none';
+          return;
+        }
+
+        var unread = 0;
+        var list = document.getElementById('inbox-list');
+        snap.docs.forEach(function(doc) {
+          var r = doc.data();
+          if (!r.read) unread++;
+          var ts = r.createdAt ? (r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt)) : null;
+          var dateStr = ts ? ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+          var item = document.createElement('div');
+          item.className = 'inbox-item' + (r.read ? ' inbox-read' : '');
+          item.setAttribute('data-id', doc.id);
+          item.innerHTML =
+            '<div class="inbox-item-header" onclick="toggleInboxItem(this)">' +
+              '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
+                (!r.read ? '<span class="inbox-dot"></span>' : '<span style="width:8px;flex-shrink:0;"></span>') +
+                '<span class="inbox-sender">' + escHtml(r.name || 'Anonymous') + '</span>' +
+                '<span class="inbox-subject">' + escHtml(r.subject || '(No subject)') + '</span>' +
+              '</div>' +
+              '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+                '<span class="inbox-date">' + dateStr + '</span>' +
+                '<span class="inbox-chevron">▾</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="inbox-item-body" style="display:none;">' +
+              '<div class="inbox-meta">From: <a href="mailto:' + escHtml(r.email || '') + '">' + escHtml(r.email || '') + '</a></div>' +
+              '<div class="inbox-message">' + escHtml(r.message || '') + '</div>' +
+              (!r.read ?
+                '<button class="inbox-mark-read" onclick="markRead(\'' + doc.id + '\', this, event)">Mark as read</button>'
+                : '<span class="inbox-read-label">Read</span>') +
+            '</div>';
+          list.appendChild(item);
+        });
+
+        if (unread > 0) {
+          var badge = document.getElementById('inbox-unread-badge');
+          badge.textContent = unread;
+          badge.style.display = 'inline';
+        } else {
+          document.getElementById('inbox-unread-badge').style.display = 'none';
+        }
+
+      }).catch(function(e) {
+        document.getElementById('inbox-loading').textContent = 'Could not load messages — check your Firestore rules.';
+      });
+  }
+
+  function toggleInboxItem(headerEl) {
+    var body = headerEl.nextElementSibling;
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    headerEl.querySelector('.inbox-chevron').textContent = open ? '▾' : '▴';
+  }
+
+  function markRead(docId, btn, e) {
+    e.stopPropagation();
+    if (!hubData || !hubData.studentFirebase) return;
+    var cfg = hubData.studentFirebase;
+    var studentApp;
+    try { studentApp = firebase.app('student-admin'); }
+    catch(ex) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
+    var sdb = studentApp.firestore();
+
+    sdb.collection('supportRequests').doc(docId).update({ read: true }).then(function() {
+      var item = btn.closest('.inbox-item');
+      item.classList.add('inbox-read');
+      btn.replaceWith(Object.assign(document.createElement('span'), { className: 'inbox-read-label', textContent: 'Read' }));
+      // Remove dot
+      var dot = item.querySelector('.inbox-dot');
+      if (dot) { dot.style.display = 'none'; }
+      // Decrement badge
+      var badge = document.getElementById('inbox-unread-badge');
+      var count = parseInt(badge.textContent) - 1;
+      if (count <= 0) { badge.style.display = 'none'; }
+      else { badge.textContent = count; }
+    }).catch(function() {});
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function connectStudentFirebase() {
