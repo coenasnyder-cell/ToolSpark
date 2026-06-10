@@ -131,6 +131,17 @@
 </div>
 
 <script>
+  function injectGA(id) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', id);
+  }
+
   var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
   var studentAuth = null;
   var studentDb = null;
@@ -174,6 +185,7 @@
     var color = hub.primaryColor || '#C9A84C';
     document.documentElement.style.setProperty('--gold', color);
     document.title = 'Create Account — ' + (hub.hubName || 'Creator Hub');
+    if (hub.gaTrackingId) injectGA(hub.gaTrackingId);
 
     if (hub.logoUrl) { var lg = document.getElementById('nav-logo'); lg.src = hub.logoUrl; lg.classList.add('visible'); }
     document.getElementById('nav-name').textContent = hub.hubName || '';

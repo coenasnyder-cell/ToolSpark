@@ -33,6 +33,26 @@
         "destination": "/hub/results.html"
       },
       {
+        "source": "/hub/*/dashboard",
+        "destination": "/hub/dashboard.html"
+      },
+      {
+        "source": "/hub/*/roadmap",
+        "destination": "/hub/roadmap.html"
+      },
+      {
+        "source": "/hub/*/community",
+        "destination": "/hub/community.html"
+      },
+      {
+        "source": "/hub/*/courses",
+        "destination": "/hub/courses.html"
+      },
+      {
+        "source": "/hub/*/support",
+        "destination": "/hub/support.html"
+      },
+      {
         "source": "/hub/*",
         "destination": "/hub/index.html"
       }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="/hub/hub-shell.js"></script>
+<style>
+  .dash-welcome { margin-bottom: 2rem; }
+  .dash-welcome h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--hub-text-primary, #1A1714); margin-bottom: 6px; }
+  .dash-welcome p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
+  .dash-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold, #C9A84C); color: var(--hub-btn-text, #0C0B09);
+    font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700;
+    padding: 12px 24px; border-radius: 10px; text-decoration: none;
+    transition: opacity 0.15s; margin-top: 1.5rem;
+  }
+  .dash-cta:hover { opacity: 0.85; }
+  .coming-soon { margin-top: 2.5rem; padding: 2rem; background: rgba(201,168,76,0.06); border: 1px dashed rgba(201,168,76,0.2); border-radius: 12px; color: var(--hub-text-muted, #6B6560); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div id="hs-overlay"></div>
+<aside id="hs-sidebar"></aside>
+<div id="hs-main">
+  <header id="hs-header"></header>
+  <main class="hs-content">
+    <div class="dash-welcome">
+      <h2 id="dash-headline">Welcome back</h2>
+      <p id="dash-sub">Here's what's happening in your hub.</p>
+    </div>
+    <a id="dash-tool-btn" href="#" class="dash-cta">⚡ Launch My Tool</a>
+    <div class="coming-soon">More dashboard features coming soon — results history, member activity, and analytics cards.</div>
+  </main>
+</div>
+
+<script>
+  initHubPage('dashboard', function(hub, slug) {
+    if (hub.hubName) document.getElementById('dash-headline').textContent = 'Welcome to ' + hub.hubName;
+    if (hub.toolName) document.getElementById('dash-sub').textContent = 'Launch ' + hub.toolName + ' or explore your hub below.';
+    document.getElementById('dash-tool-btn').href = '/hub/' + slug + '/tool';
+  });
+</script>
+</body>
+</html>

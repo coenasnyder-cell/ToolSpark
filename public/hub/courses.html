@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="/hub/hub-shell.js"></script>
+<style>
+  .page-intro h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--hub-text-primary, #1A1714); margin-bottom: 6px; }
+  .page-intro p { font-size: 14px; color: var(--hub-text-muted, #6B6560); }
+  .coming-soon { margin-top: 2rem; padding: 2rem; background: rgba(201,168,76,0.06); border: 1px dashed rgba(201,168,76,0.2); border-radius: 12px; color: var(--hub-text-muted, #6B6560); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div id="hs-overlay"></div>
+<aside id="hs-sidebar"></aside>
+<div id="hs-main">
+  <header id="hs-header"></header>
+  <main class="hs-content">
+    <div class="page-intro">
+      <h2>Courses</h2>
+      <p id="courses-sub">Learn and grow with guided courses.</p>
+    </div>
+    <div class="coming-soon">Courses coming soon — your hub owner will add training materials and resources here.</div>
+  </main>
+</div>
+
+<script>
+  initHubPage('courses', function(hub, slug) {
+    if (hub.hubName) document.getElementById('courses-sub').textContent = 'Courses and training from ' + hub.hubName + '.';
+  });
+</script>
+</body>
+</html>

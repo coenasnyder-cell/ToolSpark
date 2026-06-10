@@ -575,6 +575,21 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- ANALYTICS -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div><div class="card-title">Analytics</div><div class="card-desc">Track visits and user behavior on your hub pages</div></div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label for="gaTrackingId">Google Analytics Tracking ID</label>
+        <input type="text" id="gaTrackingId" placeholder="G-XXXXXXXXXX" maxlength="20">
+        <div class="field-hint">Go to analytics.google.com → Admin → Data Streams → your stream → copy the Measurement ID starting with G-</div>
+      </div>
+    </div>
+  </div>
+
   <!-- PUBLISH -->
   <div class="settings-card">
     <div class="card-header">
@@ -866,6 +881,7 @@ service cloud.firestore {
       if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); }
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
       if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
+      if (s.gaTrackingId) document.getElementById('gaTrackingId').value = s.gaTrackingId;
     });
   }
 
@@ -912,6 +928,7 @@ service cloud.firestore {
       textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
       textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
       borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
+      gaTrackingId:       document.getElementById('gaTrackingId').value.trim(),
       updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
       status.textContent = '✓ Saved';

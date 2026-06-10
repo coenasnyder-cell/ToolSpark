@@ -244,6 +244,17 @@
 </div>
 
 <script>
+  function injectGA(id) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', id);
+  }
+
   var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
 
   function toolUrl() { return '/hub/' + slug + '/tool'; }
@@ -349,6 +360,7 @@
       if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
     });
     document.title = (hub.toolName || 'Your Results') + ' — ' + (hub.hubName || '');
+    if (hub.gaTrackingId) injectGA(hub.gaTrackingId);
     if (hub.logoUrl) {
       var lg = document.getElementById('nav-logo');
       lg.src = hub.logoUrl;

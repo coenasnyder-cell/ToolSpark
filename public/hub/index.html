@@ -178,6 +178,17 @@
 </div>
 
 <script>
+  function injectGA(id) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', id);
+  }
+
   var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
   var HUB = null;
   var studentDb = null;
@@ -210,6 +221,7 @@
 
   function renderLanding(hub) {
     document.title = (hub.hubName || 'Creator Hub') + ' — ' + (hub.landingHeadline || 'AI Tools');
+    if (hub.gaTrackingId) injectGA(hub.gaTrackingId);
 
     var color = hub.primaryColor || '#C9A84C';
     document.documentElement.style.setProperty('--gold', color);
