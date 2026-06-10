@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Generator — Creator Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<script src="/js/nav.js" defer></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 60px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role-label { font-size: 11px; color: var(--text3); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* MAIN */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; padding: 0 2rem; gap: 1rem; position: sticky; top: 0; z-index: 50; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; align-items: center; justify-content: center; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; flex: 1; }
+  .page-content { flex: 1; padding: 2rem; max-width: 860px; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.75rem; }
+
+  /* ROADMAP CONTEXT CARDS */
+  .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .context-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .context-card-head { display: flex; align-items: center; gap: 10px; }
+  .context-card-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .context-card-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .context-card-body { display: flex; flex-direction: column; gap: 6px; }
+  .context-row { display: flex; flex-direction: column; gap: 2px; }
+  .context-row-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+  .context-row-value { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .context-missing {
+    font-size: 12px; color: var(--text3); font-style: italic;
+    padding: 0.5rem 0;
+  }
+  .context-link { font-size: 12px; font-weight: 700; color: var(--gold); text-decoration: none; }
+  .context-link:hover { text-decoration: underline; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); }
+
+  /* GENERATE SECTION */
+  .generate-card {
+    background: var(--dark);
+    border-radius: var(--radius);
+    padding: 2rem;
+    display: flex; flex-direction: column; gap: 1.25rem;
+  }
+  .generate-card-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 400;
+    color: #F0EDE6;
+  }
+  .generate-card-sub { font-size: 13px; color: rgba(240,237,230,0.6); line-height: 1.6; max-width: 560px; }
+  .generate-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .btn-agent {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    border: 1px solid rgba(201,168,76,0.4);
+    background: rgba(201,168,76,0.08);
+    color: var(--gold); font-family: 'Lato', sans-serif;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-agent:hover { background: rgba(201,168,76,0.16); border-color: var(--gold); }
+  .btn-generate {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px; border-radius: var(--radius-sm);
+    background: var(--gold); color: #0C0B09;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .btn-generate:hover:not(:disabled) { opacity: 0.85; }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+  .generate-status { font-size: 12px; color: rgba(240,237,230,0.5); }
+
+  /* PROMPT OUTPUT SECTION */
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .prompt-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .prompt-card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .prompt-card-meta { font-size: 12px; color: var(--text3); }
+  .prompt-textarea {
+    width: 100%; min-height: 320px;
+    padding: 1.25rem; border: none; resize: vertical;
+    font-family: 'Lato', sans-serif; font-size: 13px;
+    color: var(--text); background: var(--bg);
+    line-height: 1.7; outline: none;
+  }
+  .prompt-textarea::placeholder { color: var(--text3); }
+  .prompt-card-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .prompt-hint { font-size: 12px; color: var(--text3); line-height: 1.5; max-width: 440px; }
+  .btn-save {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: var(--radius-sm);
+    background: var(--gold); color: #0C0B09;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .btn-save:hover:not(:disabled) { opacity: 0.85; }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-status { font-size: 12px; font-weight: 700; }
+  .save-status.success { color: #2E7D32; }
+  .save-status.error { color: #C0392B; }
+
+  /* MOBILE */
+  @media (max-width: 1023px) { .context-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 767px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-close-btn { display: block; }
+    .sidebar-overlay { display: block; }
+    .main-wrap { margin-left: 0; }
+    .hamburger-btn { display: flex; }
+    .page-content { padding: 1.25rem; }
+    .context-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Creator Hub</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role-label">Hub Owner</div>
+      </div>
+    </div>
+    <button class="logout-btn" id="logout-btn">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <button class="hamburger-btn" id="hamburger-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="header-title">Prompt Generator</div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- ROADMAP CONTEXT -->
+    <div>
+      <div class="section-label">Your Roadmap Data</div>
+      <div class="context-grid">
+
+        <div class="context-card">
+          <div class="context-card-head">
+            <div class="context-card-icon">⚡</div>
+            <div class="context-card-title">Your Spark</div>
+          </div>
+          <div class="context-card-body" id="spark-body">
+            <div class="context-missing">Loading...</div>
+          </div>
+        </div>
+
+        <div class="context-card">
+          <div class="context-card-head">
+            <div class="context-card-icon">🎯</div>
+            <div class="context-card-title">Your Audience</div>
+          </div>
+          <div class="context-card-body" id="audience-body">
+            <div class="context-missing">Loading...</div>
+          </div>
+        </div>
+
+        <div class="context-card">
+          <div class="context-card-head">
+            <div class="context-card-icon">📋</div>
+            <div class="context-card-title">Your Build Brief</div>
+          </div>
+          <div class="context-card-body" id="brief-body">
+            <div class="context-missing">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- GENERATE SECTION -->
+    <div class="generate-card">
+      <div>
+        <div class="generate-card-heading">Generate Your Hub Prompt</div>
+        <div class="generate-card-sub">The Build Agent helps you define the exact questions your tool should ask. Once you've run it, click Generate to create a system prompt using your roadmap data. CRITICAL RULES for the two-phase interview flow are automatically included.</div>
+      </div>
+      <div class="generate-actions">
+        <a href="/build-agent.html" target="_blank" class="btn-agent">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
+          Open Build Agent
+        </a>
+        <button class="btn-generate" id="gen-btn" onclick="generatePrompt()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generate Prompt
+        </button>
+      </div>
+      <div class="generate-status" id="gen-status"></div>
+    </div>
+
+    <!-- PROMPT OUTPUT -->
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div>
+          <div class="prompt-card-title">Your Hub Prompt</div>
+          <div class="prompt-card-meta" id="prompt-meta">Review and edit before saving</div>
+        </div>
+      </div>
+      <textarea
+        class="prompt-textarea"
+        id="prompt-textarea"
+        placeholder="Your generated prompt will appear here. You can edit it freely before saving.&#10;&#10;If you already have a prompt, paste it here and click Save."
+      ></textarea>
+      <div class="prompt-card-footer">
+        <div class="prompt-hint">The CRITICAL RULES block (two-phase conversation + [READY_TO_GENERATE] signal) is baked into every generated prompt automatically.</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          <span class="save-status" id="save-status"></span>
+          <button class="btn-save" id="save-btn" onclick="savePrompt()">Save Prompt</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  var currentUser = null;
+  var hubSlug = null;
+
+  // Sidebar mobile toggle
+  var sidebar   = document.getElementById('sidebar');
+  var overlay   = document.getElementById('sidebar-overlay');
+  var hamburger = document.getElementById('hamburger-btn');
+  var closeBtn  = document.getElementById('sidebar-close-btn');
+  function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+  if (overlay)   overlay.addEventListener('click', closeSidebar);
+  document.getElementById('logout-btn').addEventListener('click', function() {
+    auth.signOut().then(function() { window.location.href = '/signon.html'; });
+  });
+
+  async function authHeaders() {
+    var user = firebase.auth().currentUser;
+    var token = user ? await user.getIdToken() : '';
+    var acToken = '';
+    try {
+      var t = await Promise.race([
+        firebase.appCheck().getToken(false),
+        new Promise(function(_,r){ setTimeout(r, 3000); })
+      ]);
+      acToken = t && t.token ? t.token : '';
+    } catch(e) {}
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, 'X-Firebase-AppCheck': acToken };
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderContextRow(label, value) {
+    if (!value) return '';
+    return '<div class="context-row"><div class="context-row-label">' + esc(label) + '</div><div class="context-row-value">' + esc(value) + '</div></div>';
+  }
+
+  function missingHtml(label, href) {
+    return '<div class="context-missing">No ' + label + ' data yet. <a href="' + href + '" class="context-link">Complete it →</a></div>';
+  }
+
+  function extractBriefSections(brief) {
+    var sections = [];
+    var patterns = [
+      /##\s*What This Is[\s\S]*?(?=\n##|$)/i,
+      /##\s*Who It[''']?s For[\s\S]*?(?=\n##|$)/i,
+      /##\s*The Core AI Tool[\s\S]*?(?=\n##|$)/i
+    ];
+    patterns.forEach(function(p) {
+      var m = brief.match(p);
+      if (m) sections.push(m[0].trim());
+    });
+    return sections.join('\n\n');
+  }
+
+  var roadmapData = { spark: null, audience: null, brief: null };
+
+  async function loadRoadmapData(uid, email) {
+    var emailLower = (email || '').toLowerCase();
+    var results = await Promise.allSettled([
+      db.collection('spark_results').where('userId', '==', uid).get(),
+      db.collection('spark_results').where('accountEmail', '==', emailLower).get(),
+      db.collection('audience_results').where('userId', '==', uid).get(),
+      db.collection('audience_results').where('accountEmail', '==', emailLower).get(),
+      db.collection('prompt_results').doc(uid).get()
+    ]);
+
+    var sparkDocs = [];
+    [results[0], results[1]].forEach(function(r) {
+      if (r.status === 'fulfilled' && !r.value.empty) {
+        r.value.docs.forEach(function(d) { sparkDocs.push(d.data()); });
+      }
+    });
+    var audDocs = [];
+    [results[2], results[3]].forEach(function(r) {
+      if (r.status === 'fulfilled' && !r.value.empty) {
+        r.value.docs.forEach(function(d) { audDocs.push(d.data()); });
+      }
+    });
+    var promptDoc = (results[4].status === 'fulfilled' && results[4].value.exists)
+      ? results[4].value.data() : null;
+
+    roadmapData.spark    = sparkDocs.length ? sparkDocs[sparkDocs.length - 1] : null;
+    roadmapData.audience = audDocs.length   ? audDocs[audDocs.length - 1]     : null;
+    roadmapData.brief    = promptDoc;
+
+    renderSparkCard(roadmapData.spark);
+    renderAudienceCard(roadmapData.audience);
+    renderBriefCard(roadmapData.brief);
+  }
+
+  function renderSparkCard(spark) {
+    var el = document.getElementById('spark-body');
+    if (!spark) { el.innerHTML = missingHtml('Spark', '/spark.html'); return; }
+    el.innerHTML =
+      renderContextRow('Who You Help', spark.whoYouHelp) +
+      renderContextRow('Your Expertise', spark.whatYouKnow) +
+      renderContextRow('Your Statement', spark.statement) ||
+      '<div class="context-missing">Spark data found but fields are empty.</div>';
+  }
+
+  function renderAudienceCard(audience) {
+    var el = document.getElementById('audience-body');
+    if (!audience) { el.innerHTML = missingHtml('Audience Blueprint', '/audience.html'); return; }
+    el.innerHTML =
+      renderContextRow('Who They Are', audience.whoTheyAre) +
+      renderContextRow('Their Frustration', audience.dailyFrustration) +
+      renderContextRow('Dream Outcome', audience.dreamOutcome) ||
+      '<div class="context-missing">Audience data found but fields are empty.</div>';
+  }
+
+  function renderBriefCard(brief) {
+    var el = document.getElementById('brief-body');
+    if (!brief || !brief.promptText) { el.innerHTML = missingHtml('Build Brief', '/prompt-generator.html'); return; }
+    var appName = brief.appName || 'Your Tool';
+    var brief3 = extractBriefSections(brief.promptText);
+    var preview = brief3
+      ? brief3.replace(/##[^\n]*/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, 200)
+      : (brief.promptText || '').trim().slice(0, 200);
+    el.innerHTML =
+      '<div class="context-row"><div class="context-row-label">App Name</div><div class="context-row-value">' + esc(appName) + '</div></div>' +
+      '<div class="context-row"><div class="context-row-label">Brief Preview</div><div class="context-row-value" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;">' + esc(preview) + (brief.promptText.length > 200 ? '…' : '') + '</div></div>';
+  }
+
+  async function generatePrompt() {
+    var btn    = document.getElementById('gen-btn');
+    var status = document.getElementById('gen-status');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Generating…';
+    status.textContent = 'Pulling your roadmap data and building your prompt…';
+
+    try {
+      var spark    = roadmapData.spark;
+      var audience = roadmapData.audience;
+      var brief    = roadmapData.brief;
+
+      if (!spark && !audience && !brief) {
+        status.textContent = 'No roadmap data found. Complete your Spark, Audience Blueprint, and Build Brief first.';
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Prompt';
+        return;
+      }
+
+      var hubSnap = await db.collection('hubs').doc(hubSlug).get();
+      var hub = hubSnap.exists ? hubSnap.data() : {};
+      var toolName = hub.toolName || (brief && brief.appName) || 'AI Tool';
+      var toolDesc = hub.toolDescription || '';
+
+      var ctx = ['TOOL NAME: ' + toolName];
+      if (toolDesc) ctx.push('TOOL DESCRIPTION: ' + toolDesc);
+
+      if (brief && brief.promptText) {
+        var briefSections = extractBriefSections(brief.promptText);
+        if (briefSections) ctx.push('\n--- BUILD BRIEF ---\n' + briefSections);
+      }
+      if (spark) {
+        if (spark.whoYouHelp)  ctx.push('WHO THE CREATOR HELPS: ' + spark.whoYouHelp);
+        if (spark.whatYouKnow) ctx.push('CREATOR EXPERTISE: '     + spark.whatYouKnow);
+        if (spark.statement)   ctx.push('CREATOR STATEMENT: '     + spark.statement);
+      }
+      if (audience) {
+        if (audience.whoTheyAre)        ctx.push('TARGET AUDIENCE: '      + audience.whoTheyAre);
+        if (audience.dailyFrustration)  ctx.push('THEIR FRUSTRATION: '    + audience.dailyFrustration);
+        if (audience.dreamOutcome)      ctx.push('THEIR DREAM OUTCOME: '  + audience.dreamOutcome);
+        if (audience.theirWords)        ctx.push('IN THEIR OWN WORDS: "'  + audience.theirWords + '"');
+      }
+
+      var outputName = toolName.replace(/\b(AI|Tool|Hub)\b/g, '').trim() + ' Results';
+
+      var sysInstructions = 'You write AI system prompts for solo creators who built their own AI tool for their audience.\n\nYou may receive a build brief — focus on: "What This Is", "Who It\'s For", and "The Core AI Tool" (Input and Output). Ignore Features, Design, tech infrastructure.\n\nWrite a system prompt with these sections in this exact order:\n\n1. IDENTITY (2 sentences) — "You are [Tool Name], a [what it does] for [who it helps]."\n\n2. AUDIENCE CONTEXT (1 short paragraph) — Who the user is and their real situation. The AI reads this for context — do NOT restate it to the user.\n\n3. YOUR JOB — What the AI collects (via questions) and what it produces at the end.\n\n4. INTAKE QUESTIONS — A numbered list of 3–5 specific questions to ask the user ONE AT A TIME. Each question must directly produce what is needed for the output. No generic demographics (age, income, location). No duplicate questions.\n\n5. CRITICAL RULES — Copy this block exactly, replacing [output name] with the tool\'s specific output name:\n\nCRITICAL RULES\nCONVERSATION PHASE: Your only job is to ask the intake questions and collect answers. Do NOT generate the [output name] during this phase.\nWhen you have received an answer to every single question, write one short closing sentence (e.g., "I have everything I need!") and add [READY_TO_GENERATE] on its own line. Nothing else — no output, no summary.\nGENERATION PHASE: When asked to generate, write the complete [output name] from scratch based on everything shared. Do not say you already provided it or reference this message.\n\n6. OUTPUT FORMAT — The exact structure and sections of the final [output name].\n\n7. TONE — One sentence on voice and tone.\n\nOutput ONLY the system prompt. Second person ("You are..."). 300–450 words. No preamble, no explanation, no markdown wrapper.';
+
+      var headers = await authHeaders();
+      var resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 800,
+          system: sysInstructions,
+          messages: [{ role: 'user', content: 'Write a system prompt for this AI tool:\n\n' + ctx.join('\n') }],
+          _meta: { tool: 'hub-prompt-generator' }
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      var data = await resp.json();
+      var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
+      if (!text) throw new Error('Empty response');
+
+      document.getElementById('prompt-textarea').value = text;
+      document.getElementById('prompt-meta').textContent = 'Generated from your roadmap — review and edit, then save';
+      status.textContent = '✓ Prompt generated — review it below and click Save when ready';
+
+    } catch(e) {
+      console.error('Generate error:', e);
+      status.textContent = 'Something went wrong — try again or paste your prompt manually.';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Prompt';
+  }
+
+  function savePrompt() {
+    var btn    = document.getElementById('save-btn');
+    var status = document.getElementById('save-status');
+    var text   = document.getElementById('prompt-textarea').value.trim();
+    if (!text) { status.textContent = 'Nothing to save.'; status.className = 'save-status error'; return; }
+    btn.disabled = true;
+    status.textContent = '';
+    db.collection('hubs').doc(hubSlug).update({
+      systemPrompt: text,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+      status.textContent = '✓ Saved';
+      status.className = 'save-status success';
+      btn.disabled = false;
+      setTimeout(function() { status.textContent = ''; }, 3000);
+    }).catch(function(e) {
+      status.textContent = 'Error: ' + e.message;
+      status.className = 'save-status error';
+      btn.disabled = false;
+    });
+  }
+
+  auth.onAuthStateChanged(function(user) {
+    if (!user) { window.location.href = '/signon.html'; return; }
+    currentUser = user;
+
+    var avatarEl = document.getElementById('sidebar-avatar');
+    var nameEl   = document.getElementById('sidebar-name');
+    if (avatarEl) avatarEl.textContent = (user.email || 'H')[0].toUpperCase();
+    if (nameEl)   nameEl.textContent   = user.displayName || user.email || 'Hub Owner';
+
+    db.collection('users').doc(user.uid).get().then(function(snap) {
+      var data = snap.exists ? snap.data() : {};
+      if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
+      hubSlug = data.hubSlug;
+
+      // Load existing system prompt
+      db.collection('hubs').doc(hubSlug).get().then(function(hubSnap) {
+        if (hubSnap.exists && hubSnap.data().systemPrompt) {
+          document.getElementById('prompt-textarea').value = hubSnap.data().systemPrompt;
+          document.getElementById('prompt-meta').textContent = 'Loaded from your hub — edit and save to update';
+        }
+      }).catch(function() {});
+
+      // Load roadmap data
+      loadRoadmapData(user.uid, user.email).catch(function() {});
+    });
+  });
+
+  if (typeof initNav === 'function') initNav('hub-admin', 'Prompt Generator');
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initNav === 'function') initNav('hub-admin', 'Prompt Generator');
+  });
+</script>
+</body>
+</html>
