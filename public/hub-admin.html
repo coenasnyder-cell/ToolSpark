@@ -161,6 +161,9 @@
   .fb-connected-detail strong { color: #2E7D32; font-size: 14px; display: block; margin-bottom: 2px; }
   .fb-rules-box { background: #1A1714; border-radius: var(--radius-sm); padding: 1rem 1.25rem; }
   .fb-rules-box pre { font-family: monospace; font-size: 12px; color: #C9A84C; line-height: 1.6; white-space: pre-wrap; margin: 0; }
+  .stat-tile { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--gold); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
   .fb-rules-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
   .btn-disconnect { background: transparent; border: 1px solid var(--border); color: var(--text3); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
   .btn-disconnect:hover { border-color: #C0392B; color: #C0392B; }
@@ -297,6 +300,32 @@ service cloud.firestore {
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- HUB ANALYTICS -->
+  <div class="settings-card" id="analytics-card" style="display:none;">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div><div class="card-title">Hub Analytics</div><div class="card-desc">Activity from your connected Firebase database</div></div>
+      <button class="btn-disconnect" onclick="loadAnalytics()" style="font-size:12px;padding:5px 12px;">Refresh</button>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+        <div class="stat-tile">
+          <div class="stat-value" id="stat-subscribers">—</div>
+          <div class="stat-label">Subscribers</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-value" id="stat-sessions">—</div>
+          <div class="stat-label">Tool Sessions</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-value" id="stat-results">—</div>
+          <div class="stat-label">Results Generated</div>
+        </div>
+      </div>
+      <div class="field-hint" style="margin-top:1rem;" id="analytics-updated"></div>
     </div>
   </div>
 
@@ -1080,6 +1109,7 @@ service cloud.firestore {
     }
   }
 
+
   function showFbConnected(projectId) {
     document.getElementById('fb-connect-section').style.display = 'none';
     document.getElementById('fb-connected-section').style.display = 'block';
@@ -1087,6 +1117,37 @@ service cloud.firestore {
     var badge = document.getElementById('fb-status-badge');
     badge.textContent = 'Connected';
     badge.className = 'fb-badge connected';
+    document.getElementById('analytics-card').style.display = 'block';
+    loadAnalytics();
+  }
+
+  function loadAnalytics() {
+    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;
+    var cfg = hubData.studentFirebase;
+
+    var studentApp;
+    try { studentApp = firebase.app('student-admin'); }
+    catch(e) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
+    var sdb = studentApp.firestore();
+
+    document.getElementById('stat-subscribers').textContent = '…';
+    document.getElementById('stat-sessions').textContent    = '…';
+    document.getElementById('stat-results').textContent     = '…';
+
+    Promise.all([
+      sdb.collection('subscribers').get(),
+      sdb.collection('toolUsage').get(),
+      sdb.collection('toolResults').get()
+    ]).then(function(results) {
+      document.getElementById('stat-subscribers').textContent = results[0].size;
+      document.getElementById('stat-sessions').textContent    = results[1].size;
+      document.getElementById('stat-results').textContent     = results[2].size;
+      document.getElementById('analytics-updated').textContent =
+        'Last updated: ' + new Date().toLocaleTimeString();
+    }).catch(function(e) {
+      document.getElementById('analytics-updated').textContent =
+        'Could not load stats — check your Firestore rules allow reads.';
+    });
   }
 
   function connectStudentFirebase() {
