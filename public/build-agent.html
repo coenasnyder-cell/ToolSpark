@@ -82,16 +82,23 @@
   .state-card h1 em { font-style:italic; color:var(--gold); }
   .state-card p { font-size:14px; color:var(--text3); line-height:1.7; font-weight:300; margin-bottom:20px; }
 
-  /* context pills on welcome */
-  .context-row { display:flex; flex-direction:column; gap:8px; margin-bottom:24px; }
-  .context-pill {
-    display:flex; align-items:flex-start; gap:10px;
-    padding:10px 14px; border-radius:10px;
-    background:rgba(201,168,76,0.07); border:1px solid var(--border);
-  }
-  .context-pill-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); flex-shrink:0; padding-top:2px; min-width:64px; }
-  .context-pill-value { font-size:13px; color:#D4CFCA; line-height:1.5; }
-  .context-missing { font-size:12px; color:var(--text3); font-style:italic; }
+  /* tool name field */
+  .tool-name-field { margin-bottom:16px; }
+  .tool-name-field label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); display:block; margin-bottom:6px; }
+  .tool-name-input { width:100%; background:var(--dark3); border:1px solid var(--border-mid); border-radius:10px; padding:10px 14px; color:#E8E4DC; font-family:'Lato',sans-serif; font-size:14px; outline:none; transition:border-color 0.2s; }
+  .tool-name-input:focus { border-color:var(--gold); }
+  .tool-name-input::placeholder { color:var(--text3); }
+
+  /* tool type selector */
+  .tool-type-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); margin-bottom:10px; }
+  .tool-type-grid { display:flex; flex-direction:column; gap:7px; margin-bottom:22px; }
+  .tool-type-item { display:flex; align-items:flex-start; gap:11px; padding:10px 14px; border-radius:10px; background:rgba(201,168,76,0.04); border:1px solid var(--border); cursor:pointer; transition:all 0.15s; }
+  .tool-type-item:hover { border-color:var(--border-mid); background:rgba(201,168,76,0.08); }
+  .tool-type-item.selected { border-color:var(--gold); background:var(--gold-dim); }
+  .tool-type-check { width:16px; height:16px; border-radius:4px; border:1.5px solid rgba(201,168,76,0.3); flex-shrink:0; margin-top:2px; transition:all 0.15s; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--dark); }
+  .tool-type-item.selected .tool-type-check { background:var(--gold); border-color:var(--gold); }
+  .tool-type-name { font-size:13px; font-weight:700; color:#E8E4DC; }
+  .tool-type-desc { font-size:12px; color:var(--text3); margin-top:2px; line-height:1.4; }
 
   .start-btn {
     width:100%; background:var(--gold); color:var(--dark);
@@ -141,6 +148,34 @@
     letter-spacing:0.04em;
   }
   .copy-prompt-btn:hover { background:var(--gold); color:var(--dark); }
+
+  /* generate CTA */
+  .generate-prompt-cta { display:flex; justify-content:center; margin:4px 0 24px; animation:fadeUp 0.35s ease both; }
+  .btn-get-tool-prompt {
+    background:var(--gold); color:var(--dark);
+    border:none; padding:14px 32px; border-radius:12px;
+    font-family:'Lato',sans-serif; font-size:15px; font-weight:700;
+    cursor:pointer; transition:all 0.2s; letter-spacing:0.03em;
+  }
+  .btn-get-tool-prompt:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .btn-get-tool-prompt:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  /* prompt saved banner */
+  .prompt-saved-banner {
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding:22px 28px; border-radius:14px;
+    background:var(--green-dim); border:1px solid rgba(61,138,101,0.3);
+    text-align:center; animation:fadeUp 0.35s ease both;
+  }
+  .prompt-saved-title { font-size:15px; font-weight:700; color:#c8e6d6; }
+  .btn-lets-build {
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--gold); color:var(--dark);
+    border:none; padding:12px 26px; border-radius:10px;
+    font-family:'Lato',sans-serif; font-size:14px; font-weight:700;
+    text-decoration:none; transition:all 0.2s;
+  }
+  .btn-lets-build:hover { background:var(--gold-light); }
 
   /* thinking dots */
   .thinking { display:flex; gap:12px; align-items:flex-end; margin-bottom:22px; animation:fadeUp 0.3s ease both; }
@@ -224,8 +259,13 @@
   <div class="state-card">
     <div class="state-eyebrow">ToolSpark · Course 2</div>
     <h1>Your <em>Build Agent</em></h1>
-    <p>Describe what you want to change or fix — I'll give you the exact prompt to paste into your builder. No code, just prompts.</p>
-    <div class="context-row" id="context-row"></div>
+    <p>Tell me about your tool and I'll help you write the perfect system prompt for it.</p>
+    <div class="tool-name-field">
+      <label for="tool-name-input">Tool Name</label>
+      <input type="text" id="tool-name-input" class="tool-name-input" placeholder="e.g. Caption Generator, Clarity Coach…">
+    </div>
+    <p class="tool-type-label">What type of tool are you building?</p>
+    <div class="tool-type-grid" id="tool-type-grid"></div>
     <button class="start-btn" onclick="startChat()">Let's Build →</button>
   </div>
 </div>
@@ -262,7 +302,18 @@ let busy          = false;
 let credits       = 0;
 let currentUser   = null;
 let history       = [];
-let buildContext  = { platform: '', appName: '', toolConcept: '' };
+let hubSlug       = null;
+let buildContext  = { appName: '', toolType: '' };
+
+const TOOL_TYPES = [
+  { id: 'clarity',  name: 'Clarity Tool',        desc: 'Ask questions and give personalized insights or a report' },
+  { id: 'quiz',     name: 'Quiz or Assessment',   desc: 'Score-based questions with tiered results or recommendations' },
+  { id: 'content',  name: 'Content Generator',    desc: 'Turn their input into ready-to-use content like posts, emails, or scripts' },
+  { id: 'planner',  name: 'Action Planner',       desc: 'Take their goals and give them a step-by-step plan' },
+  { id: 'coach',    name: 'AI Coach',             desc: 'An ongoing conversation tool that guides, supports, and holds them accountable' },
+  { id: 'feedback', name: 'Feedback Tool',        desc: 'Review their work and give structured critique and improvements' },
+  { id: 'ideas',    name: 'Idea Generator',       desc: 'Brainstorm partner that generates ideas based on their niche and goals' },
+];
 
 // ── CREDITS ──
 function updateCreditsUI() {
@@ -287,55 +338,37 @@ async function deductCredit() {
 }
 
 // ── CONTEXT LOADING ──
-function extractToolFromActionPlan(actionPlan) {
-  if (!actionPlan) return '';
-  const nameMatch    = actionPlan.match(/TOOL_1_NAME:\s*([^\n]+)/);
-  const summaryMatch = actionPlan.match(/TOOL_1_SUMMARY:\s*([\s\S]+?)(?=TOOL_1_COMPLEXITY:|TOOL_2_NAME:|ACTION_PLAN_END|$)/);
-  const name    = nameMatch    ? nameMatch[1].trim()    : '';
-  const summary = summaryMatch ? summaryMatch[1].trim() : '';
-  return name ? `${name}${summary ? ' — ' + summary.split('.')[0] + '.' : ''}` : '';
-}
-
 async function loadContext(uid, email) {
-  const emailLower = (email || '').toLowerCase();
-
-  const [techSnap, promptSnap, claritySnap] = await Promise.all([
-    db.collection('techstack_results').where('userId','==',uid).orderBy('createdAt','desc').limit(1).get().catch(()=>null),
-    db.collection('prompt_results').doc(uid).get().catch(()=>null),
-    db.collection('clarity_sessions').where('userId','==',uid).orderBy('createdAt','desc').limit(1).get().catch(()=>null)
-  ]);
-
-  // Platform
-  if (techSnap && !techSnap.empty) {
-    buildContext.platform = techSnap.docs[0].data().buildTool || '';
-  }
-
-  // App name (from saved prompt)
+  const promptSnap = await db.collection('prompt_results').doc(uid).get().catch(()=>null);
   if (promptSnap && promptSnap.exists) {
     buildContext.appName = promptSnap.data().appName || '';
   }
-
-  // Tool concept (from latest clarity session)
-  if (claritySnap && !claritySnap.empty) {
-    const session = claritySnap.docs[0].data();
-    if (session.actionPlan) {
-      buildContext.toolConcept = extractToolFromActionPlan(session.actionPlan);
-    }
-  }
 }
 
-function renderContextRow() {
-  const row = document.getElementById('context-row');
-  const pills = [
-    { label: 'Platform',  value: buildContext.platform   || null, fallback: 'Not set — will use Lovable format' },
-    { label: 'App',       value: buildContext.appName    || null, fallback: 'Name not set' },
-    { label: 'Building',  value: buildContext.toolConcept|| null, fallback: 'Complete your Breakthrough session first' },
-  ];
-  row.innerHTML = pills.map(p => `
-    <div class="context-pill">
-      <span class="context-pill-label">${p.label}</span>
-      <span class="context-pill-value ${p.value ? '' : 'context-missing'}">${escHtml(p.value || p.fallback)}</span>
+function renderWelcome() {
+  // Pre-fill tool name if loaded from Firestore
+  const nameInput = document.getElementById('tool-name-input');
+  if (nameInput && buildContext.appName) nameInput.value = buildContext.appName;
+
+  // Render tool type grid
+  const grid = document.getElementById('tool-type-grid');
+  grid.innerHTML = TOOL_TYPES.map(t => `
+    <div class="tool-type-item" id="type-${t.id}" onclick="selectToolType('${t.id}')">
+      <div class="tool-type-check" id="check-${t.id}"></div>
+      <div>
+        <div class="tool-type-name">${t.name}</div>
+        <div class="tool-type-desc">${t.desc}</div>
+      </div>
     </div>`).join('');
+}
+
+function selectToolType(id) {
+  TOOL_TYPES.forEach(t => {
+    document.getElementById('type-' + t.id).classList.toggle('selected', t.id === id);
+    const chk = document.getElementById('check-' + t.id);
+    chk.textContent = t.id === id ? '✓' : '';
+  });
+  buildContext.toolType = id;
 }
 
 // ── RENDER ──
@@ -441,22 +474,23 @@ function hideThinking() {
 }
 
 // ── API ──
-async function callAI(userMsg) {
+async function callAI(userMsg, maxTokens, toolKey) {
   history.push({ role: 'user', content: userMsg });
+  const body = {
+    model: MODEL,
+    max_tokens: maxTokens || 800,
+    messages: history,
+    _meta: {
+      tool: toolKey || 'build-agent-conversation',
+      userId: currentUser?.uid,
+      appName: buildContext.appName,
+      toolType: buildContext.toolType
+    }
+  };
   const resp = await fetch(FUNCTION_URL, {
     method: 'POST',
     headers: await authHeaders(),
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 800,
-      messages: history,
-      _meta: {
-        tool: 'build-agent-conversation',
-        userId: currentUser?.uid,
-        platform: buildContext.platform,
-        appName: buildContext.appName
-      }
-    })
+    body: JSON.stringify(body)
   });
   if (!resp.ok) {
     const err = await resp.json().catch(()=>({}));
@@ -493,7 +527,10 @@ async function handleSend() {
     const reply = await callAI(text);
     await deductCredit();
     hideThinking();
-    addMsg('assistant', reply);
+    const hasReady = reply.includes('[GENERATE_READY]');
+    const cleanReply = reply.replace(/\[GENERATE_READY\]\s*$/m, '').trim();
+    addMsg('assistant', cleanReply);
+    if (hasReady) showGenerateCTA();
   } catch(e) {
     hideThinking();
     addMsg('assistant', "Something went sideways — give it another try in a moment.");
@@ -507,21 +544,26 @@ async function handleSend() {
 
 // ── START CHAT ──
 async function startChat() {
+  // Read form values
+  const nameInput = document.getElementById('tool-name-input');
+  const toolName = (nameInput && nameInput.value.trim()) || 'your tool';
+  buildContext.appName = toolName;
+
+  if (!buildContext.toolType) {
+    alert('Please select a tool type to continue.');
+    return;
+  }
+
+  const typeLabel = TOOL_TYPES.find(t => t.id === buildContext.toolType)?.name || buildContext.toolType;
+
   document.getElementById('welcome-screen').style.display = 'none';
   document.getElementById('chatWrap').classList.add('active');
   document.getElementById('inputArea').classList.add('active');
   document.getElementById('sendBtn').disabled = true;
   showThinking();
 
-  const p = buildContext.platform || 'your builder';
-  const a = buildContext.appName  || 'your app';
-  const t = buildContext.toolConcept || 'not yet specified';
-
-  const opening = `PLATFORM: ${p}
-APP_NAME: ${a}
-TOOL_CONCEPT: ${t}
-
-Open the session with the check-in. Welcome them in 1 short sentence that references their app name. Then start the check-in — ask what they are working on today. Keep it natural and conversational, not a list.`;
+  const opening = `TOOL_NAME: ${toolName}
+TOOL_TYPE: ${typeLabel}`;
 
   try {
     const reply = await callAI(opening);
@@ -530,10 +572,69 @@ Open the session with the check-in. Welcome them in 1 short sentence that refere
     addMsg('assistant', reply);
   } catch(e) {
     hideThinking();
-    addMsg('assistant', `Hey — I know you're building ${escHtml(a)} in ${escHtml(p)}. What do you want to change or fix today?`);
+    addMsg('assistant', `Hey! Let's build the system prompt for ${escHtml(toolName)}. What's the main transformation your tool creates for someone?`);
   }
 
   document.getElementById('sendBtn').disabled = false;
+}
+
+// ── GENERATE CTA ──
+function showGenerateCTA() {
+  const wrap = document.getElementById('chatWrap');
+  const cta = document.createElement('div');
+  cta.id = 'gen-prompt-cta';
+  cta.className = 'generate-prompt-cta';
+  cta.innerHTML = `<button class="btn-get-tool-prompt" id="gen-tool-prompt-btn" onclick="generateToolPrompt()">Get My Tool Prompt →</button>`;
+  wrap.appendChild(cta);
+  wrap.scrollTop = wrap.scrollHeight;
+  // Hide input — conversation is done
+  document.getElementById('inputArea').classList.remove('active');
+}
+
+async function generateToolPrompt() {
+  const btn = document.getElementById('gen-tool-prompt-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Building your prompt…'; }
+  showThinking();
+
+  const typeLabel = TOOL_TYPES.find(t => t.id === buildContext.toolType)?.name || buildContext.toolType;
+
+  const genMsg = `Write the complete system prompt for ${buildContext.appName} — a ${typeLabel}. Use everything discussed in this conversation as the source material.`;
+
+  if (!hubSlug) {
+    const ctaEl = document.getElementById('gen-prompt-cta');
+    if (ctaEl) ctaEl.innerHTML = `<div class="prompt-saved-banner" style="background:rgba(196,98,45,0.15);border-color:rgba(196,98,45,0.3);"><div class="prompt-saved-title" style="color:#f4a98a;">No hub connected to your account. Set up your hub first, then come back to generate your prompt.</div><a href="/hub-admin" class="btn-lets-build">Set Up Hub →</a></div>`;
+    document.getElementById('chatWrap').scrollTop = document.getElementById('chatWrap').scrollHeight;
+    return;
+  }
+
+  try {
+    const prompt = await callAI(genMsg, 1500, 'build-agent-generate');
+    await deductCredit();
+    hideThinking();
+
+    await db.collection('hubs').doc(hubSlug).update({
+      systemPrompt: prompt,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Replace CTA with success banner
+    const ctaEl = document.getElementById('gen-prompt-cta');
+    if (ctaEl) {
+      ctaEl.innerHTML = `
+        <div class="prompt-saved-banner">
+          <div class="prompt-saved-title">Your tool prompt was saved.</div>
+          <a href="/hub/prompt-generator" class="btn-lets-build">Let's Build It →</a>
+        </div>`;
+    }
+    document.getElementById('chatWrap').scrollTop = document.getElementById('chatWrap').scrollHeight;
+
+  } catch(e) {
+    hideThinking();
+    const btn2 = document.getElementById('gen-tool-prompt-btn');
+    if (btn2) { btn2.disabled = false; btn2.textContent = 'Get My Tool Prompt →'; }
+    addMsg('assistant', 'Something went wrong — give it another try.');
+    console.error(e);
+  }
 }
 
 // ── INPUT BEHAVIOUR ──
@@ -556,6 +657,7 @@ auth.onAuthStateChanged(async function(user) {
     const data  = snap.exists ? snap.data() : {};
     const isAdmin = data.userRole === 'admin';
     credits     = isAdmin ? 9999 : (typeof data.buildAgentCredits === 'number' ? data.buildAgentCredits : 0);
+    hubSlug     = data.hubSlug || null;
 
     updateCreditsUI();
 
@@ -565,7 +667,7 @@ auth.onAuthStateChanged(async function(user) {
     }
 
     await loadContext(user.uid, user.email);
-    renderContextRow();
+    renderWelcome();
     document.getElementById('welcome-screen').style.display = 'flex';
 
   } catch(e) {
