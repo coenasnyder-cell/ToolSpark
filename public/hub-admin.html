@@ -192,17 +192,66 @@
   .gen-prompt-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .gen-prompt-status { font-size: 12px; color: var(--text3); min-height: 16px; }
 
+  /* WIZARD */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .step-track { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin-bottom: 2rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .step-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid var(--border); background: var(--surface); color: var(--text3); transition: all 0.25s; }
+  .step-dot.active { border-color: var(--gold); background: var(--gold); color: var(--dark); }
+  .step-dot.done { border-color: rgba(46,125,50,0.4); background: rgba(46,125,50,0.1); color: #2E7D32; }
+  .step-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+  .step-label.active { color: var(--gold); }
+  .step-label.done { color: #2E7D32; }
+  .step-connector { height: 2px; width: 52px; background: var(--border); margin-top: 14px; transition: background 0.25s; }
+  .step-connector.done { background: rgba(46,125,50,0.35); }
+
+  .wizard-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; gap: 1rem; }
+  .btn-back { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 14px; font-weight: 700; padding: 10px 24px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-next { background: var(--gold); color: var(--dark); font-weight: 700; font-size: 14px; border: none; padding: 10px 28px; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-next:hover { opacity: 0.88; }
+
   @media (max-width: 768px) {
     .page-wrap { margin-left: 0; padding: 1rem; }
     .field-row { grid-template-columns: 1fr; }
+    .step-connector { width: 28px; }
   }
+
+  /* CELEBRATE */
+  @keyframes celebPop { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(340px) rotate(720deg); opacity: 0; }
+  }
+  .confetti-wrap { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .confetti-piece { position:absolute; width:8px; height:8px; border-radius:2px; animation: confettiFall linear forwards; }
 </style>
 </head>
 <body>
 
 <!-- Nav injected by nav.js -->
 
-<div class="page-wrap">
+<!-- NAME YOUR HUB — pre-screen for new creators -->
+<div id="setup-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;padding:2rem;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:460px;width:100%;box-shadow:var(--shadow-md);">
+    <div style="font-size:36px;margin-bottom:1rem;">✨</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;margin-bottom:0.5rem;color:var(--text);">Name your hub</h2>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.6;">This becomes your hub's URL. You can update the display name any time.</p>
+    <div class="field" style="margin-bottom:1rem;">
+      <label for="setup-hub-name">Hub Name</label>
+      <input type="text" id="setup-hub-name" placeholder="e.g. Sarah's Caption Studio" maxlength="50" oninput="previewSlug()">
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);">
+      Your URL: <span style="font-family:monospace;color:var(--gold);">toolspark.co/hub/<span id="slug-preview">...</span></span>
+    </div>
+    <div class="modal-error" id="setup-error" style="margin-bottom:0.75rem;"></div>
+    <button class="btn-save" id="setup-btn" onclick="createHub()" style="width:100%;justify-content:center;">Create My Hub →</button>
+  </div>
+</div>
+
+<div class="page-wrap" id="main-wrap">
 
   <!-- TOP BAR -->
   <div class="top-bar">
@@ -231,42 +280,63 @@
     <div id="live-badge" class="hub-live-badge preview">Preview</div>
   </div>
 
-  <!-- YOUR FIREBASE DATABASE — STEP 1 -->
-  <div class="settings-card" style="border-color: rgba(201,168,76,0.4); box-shadow: 0 0 0 3px rgba(201,168,76,0.08), var(--shadow);">
-    <div class="card-header" style="background: rgba(201,168,76,0.06);">
-      <div class="card-icon">🗄️</div>
-      <div>
-        <div class="card-title">Step 1 — Connect Your Firebase Database</div>
-        <div class="card-desc">Do this first — your audience data, tool results, and subscribers go here. You own it from day one.</div>
-      </div>
-      <div id="fb-status-badge" class="fb-badge not-connected">Not connected</div>
+  <!-- STEP INDICATOR -->
+  <div class="step-track">
+    <div class="step-item">
+      <div class="step-dot active" id="sd-1">1</div>
+      <div class="step-label active" id="sl-1">Firebase</div>
     </div>
-    <div class="card-body">
+    <div class="step-connector" id="sc-1"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd-2">2</div>
+      <div class="step-label" id="sl-2">Account</div>
+    </div>
+    <div class="step-connector" id="sc-2"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd-3">3</div>
+      <div class="step-label" id="sl-3">Brand</div>
+    </div>
+    <div class="step-connector" id="sc-3"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd-4">4</div>
+      <div class="step-label" id="sl-4">Publish</div>
+    </div>
+  </div>
 
-      <!-- NOT CONNECTED -->
-      <div id="fb-connect-section">
-        <div class="fb-instructions">
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">1</div>
-            <div class="fb-instruction-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → create a new project (the free Spark plan is fine)</div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">2</div>
-            <div class="fb-instruction-text">In your project: click <strong>Firestore Database</strong> → Create database → choose a region → Start in <strong>test mode</strong></div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">3</div>
-            <div class="fb-instruction-text">Click <strong>Authentication</strong> → Get started → Sign-in method → enable <strong>Email/Password</strong></div>
-          </div>
-          <div class="fb-instruction-row">
-            <div class="fb-step-num">4</div>
-            <div class="fb-instruction-text">Go to <strong>Project Settings</strong> → scroll to "Your apps" → Add a web app → copy the firebaseConfig and paste it below</div>
-          </div>
+  <!-- PANEL 1: FIREBASE -->
+  <div id="panel-1" class="step-panel active">
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">🗄️</div>
+        <div>
+          <div class="card-title">Connect Your Firebase Database</div>
+          <div class="card-desc">Your audience data, tool results, and subscribers go here. You own it from day one.</div>
         </div>
-
-        <div class="field" style="margin-top:1rem;">
-          <label for="student-fb-input">Paste your Firebase config</label>
-          <textarea id="student-fb-input" rows="6" placeholder="const firebaseConfig = {
+        <div id="fb-status-badge" class="fb-badge not-connected">Not connected</div>
+      </div>
+      <div class="card-body">
+        <div id="fb-connect-section">
+          <div class="fb-instructions">
+            <div class="fb-instruction-row">
+              <div class="fb-step-num">1</div>
+              <div class="fb-instruction-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → create a new project (the free Spark plan is fine)</div>
+            </div>
+            <div class="fb-instruction-row">
+              <div class="fb-step-num">2</div>
+              <div class="fb-instruction-text">In your project: click <strong>Firestore Database</strong> → Create database → choose a region → Start in <strong>test mode</strong></div>
+            </div>
+            <div class="fb-instruction-row">
+              <div class="fb-step-num">3</div>
+              <div class="fb-instruction-text">Click <strong>Authentication</strong> → Get started → Sign-in method → enable <strong>Email/Password</strong></div>
+            </div>
+            <div class="fb-instruction-row">
+              <div class="fb-step-num">4</div>
+              <div class="fb-instruction-text">Go to <strong>Project Settings</strong> → scroll to "Your apps" → Add a web app → copy the firebaseConfig and paste it below</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top:1rem;">
+            <label for="student-fb-input">Paste your Firebase config</label>
+            <textarea id="student-fb-input" rows="6" placeholder="const firebaseConfig = {
   apiKey: &quot;AIzaSy...&quot;,
   authDomain: &quot;your-project.firebaseapp.com&quot;,
   projectId: &quot;your-project&quot;,
@@ -274,29 +344,25 @@
   messagingSenderId: &quot;123456789&quot;,
   appId: &quot;1:123...&quot;
 };"></textarea>
-          <div class="modal-error" id="student-fb-error"></div>
-        </div>
-
-        <button class="btn-save" style="margin-top:0.5rem;width:auto;" onclick="connectStudentFirebase()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
-          Connect Database
-        </button>
-      </div>
-
-      <!-- CONNECTED -->
-      <div id="fb-connected-section" style="display:none;">
-        <div class="fb-connected-box">
-          <div class="fb-connected-detail">
-            <strong id="fb-project-id-display">project-id</strong>
-            Your audience data writes to this Firebase project
+            <div class="modal-error" id="student-fb-error"></div>
           </div>
-          <button class="btn-disconnect" onclick="disconnectStudentFirebase()">Disconnect</button>
+          <button class="btn-save" style="margin-top:0.5rem;width:auto;" onclick="connectStudentFirebase()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+            Connect Database
+          </button>
         </div>
-
-        <div style="margin-top:1rem;">
-          <div class="fb-rules-label">Firestore security rules — paste these in your Firebase console</div>
-          <div class="fb-rules-box">
-            <pre>rules_version = '2';
+        <div id="fb-connected-section" style="display:none;">
+          <div class="fb-connected-box">
+            <div class="fb-connected-detail">
+              <strong id="fb-project-id-display">project-id</strong>
+              Your audience data writes to this Firebase project
+            </div>
+            <button class="btn-disconnect" onclick="disconnectStudentFirebase()">Disconnect</button>
+          </div>
+          <div style="margin-top:1rem;">
+            <div class="fb-rules-label">Firestore security rules — paste these in your Firebase console</div>
+            <div class="fb-rules-box">
+              <pre>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /subscribers/{doc} {
@@ -318,164 +384,171 @@ service cloud.firestore {
     }
   }
 }</pre>
-          </div>
-          <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish. This lets your landing page collect emails, log tool usage, and save tool results without requiring login.</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- FEATURES -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🧩</div>
-      <div><div class="card-title">Hub Features</div><div class="card-desc">Choose which pages appear in your hub navigation</div></div>
-    </div>
-    <div class="card-body">
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Courses</div>
-          <div class="toggle-sub">Training and course library for your members</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-courses" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Community</div>
-          <div class="toggle-sub">Member community and discussion space</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-community" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Support</div>
-          <div class="toggle-sub">Contact form so members can reach you</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="feature-support" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- BRANDING -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🎨</div>
-      <div><div class="card-title">Branding</div><div class="card-desc">Your hub's name, colors, and logo</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label for="hubName">Hub Name</label>
-          <input type="text" id="hubName" placeholder="e.g. Sarah's Caption Studio" maxlength="50">
-        </div>
-        <div class="field">
-          <label for="hubTagline">Tagline <span>optional</span></label>
-          <input type="text" id="hubTagline" placeholder="e.g. AI tools for real estate agents" maxlength="80">
-        </div>
-      </div>
-      <div class="field">
-        <label>Logo <span>optional</span></label>
-        <div class="logo-upload-wrap">
-          <img id="logo-preview" class="logo-preview" src="" alt="Logo">
-          <div style="flex:1;">
-            <label class="btn-upload-logo" for="logo-file-input">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-              <span id="upload-btn-label">Upload image</span>
-            </label>
-            <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" style="display:none;" onchange="uploadLogo(this)">
-            <div class="upload-progress" id="upload-progress"><div class="upload-progress-fill" id="upload-progress-fill"></div></div>
-            <div class="upload-status-text" id="upload-status"></div>
+            </div>
+            <div class="field-hint" style="margin-top:8px;">In Firebase Console → Firestore → Rules → paste the above → Publish.</div>
           </div>
         </div>
-        <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
       </div>
     </div>
   </div>
 
-  <!-- LANDING PAGE -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🚀</div>
-      <div><div class="card-title">Landing Page</div><div class="card-desc">What people see before they sign up</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field">
-        <label for="landingHeadline">Headline</label>
-        <input type="text" id="landingHeadline" placeholder="e.g. Generate Real Estate Captions in Seconds" maxlength="80">
-      </div>
-      <div class="field">
-        <label for="landingSubheadline">Subheadline</label>
-        <textarea id="landingSubheadline" rows="3" placeholder="Describe who this is for and what they get..."></textarea>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="landingCtaText">Button Text</label>
-          <input type="text" id="landingCtaText" placeholder="Get Access" maxlength="30">
-        </div>
-        <div class="field">
-          <label for="paymentLink">Payment / Access Link</label>
-          <input type="url" id="paymentLink" placeholder="https://buy.stripe.com/...">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PUBLISH -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🌐</div>
-      <div><div class="card-title">Publish</div><div class="card-desc">Control who can see your hub</div></div>
-    </div>
-    <div class="card-body">
-      <div class="toggle-row">
+  <!-- PANEL 2: ADMIN ACCOUNT -->
+  <div id="panel-2" class="step-panel">
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">🔑</div>
         <div>
-          <div class="toggle-label">Hub Status</div>
-          <div class="toggle-sub" id="hub-status-label">Preview mode — only you can see it</div>
+          <div class="card-title">Create Your Admin Account</div>
+          <div class="card-desc">This is how you'll log in to manage your hub and members</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="isLive" onchange="updateStatusLabel()">
-          <span class="toggle-slider"></span>
-        </label>
+        <div id="admin-acct-badge" class="fb-badge not-connected">Not set up</div>
       </div>
-      <div class="toggle-row">
-        <div>
-          <div class="toggle-label">Members Only</div>
-          <div class="toggle-sub" id="members-only-label">Tool is public — anyone can use it</div>
+      <div class="card-body">
+        <div id="admin-acct-form">
+          <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem;">Create your admin credentials. You'll use this email and password to log in to your hub as the owner.</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="admin-email">Email</label>
+              <input type="text" id="admin-email" placeholder="you@example.com">
+            </div>
+            <div class="field">
+              <label for="admin-password">Password</label>
+              <div class="key-wrap">
+                <input type="password" id="admin-password" placeholder="min 8 characters">
+                <button type="button" class="key-toggle" onclick="toggleKey('admin-password', this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-error" id="admin-acct-error" style="margin-top:0.25rem;"></div>
+          <button class="btn-save" style="margin-top:0.75rem;width:auto;" onclick="createAdminAccount(this)">Create Account</button>
         </div>
-        <label class="toggle">
-          <input type="checkbox" id="membersOnly" onchange="updateMembersLabel()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="field">
-        <label for="customDomain">Custom Domain <span>optional — connect at graduation</span></label>
-        <input type="text" id="customDomain" placeholder="e.g. tools.yourdomain.com">
-      </div>
-      <div class="domain-info">
-        <p>During the certification your hub is live at <strong id="domain-info-url">toolspark.co/hub/...</strong>. At graduation you'll connect your own domain — we'll walk you through it step by step.</p>
+        <div id="admin-acct-connected" style="display:none;">
+          <div class="fb-connected-box">
+            <div class="fb-connected-detail">
+              <strong id="admin-email-display"></strong>
+              Admin account created — use this to log in to your hub
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="save-bar">
-    <div class="save-status" id="save-status"></div>
-    <button class="btn-save" id="save-btn" onclick="saveSettings()">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      Save Settings
-    </button>
+  <!-- PANEL 3: BRAND -->
+  <div id="panel-3" class="step-panel">
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">🎨</div>
+        <div><div class="card-title">Your Brand</div><div class="card-desc">Give your hub a name, tagline, and logo</div></div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label for="hubName">Hub Name</label>
+            <input type="text" id="hubName" placeholder="e.g. Sarah's Caption Studio" maxlength="50">
+          </div>
+          <div class="field">
+            <label for="hubTagline">Tagline <span>optional</span></label>
+            <input type="text" id="hubTagline" placeholder="e.g. AI tools for real estate agents" maxlength="80">
+          </div>
+        </div>
+        <div class="field">
+          <label>Logo <span>optional</span></label>
+          <div class="logo-upload-wrap">
+            <img id="logo-preview" class="logo-preview" src="" alt="Logo">
+            <div style="flex:1;">
+              <label class="btn-upload-logo" for="logo-file-input">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+                <span id="upload-btn-label">Upload image</span>
+              </label>
+              <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" style="display:none;" onchange="uploadLogo(this)">
+              <div class="upload-progress" id="upload-progress"><div class="upload-progress-fill" id="upload-progress-fill"></div></div>
+              <div class="upload-status-text" id="upload-status"></div>
+            </div>
+          </div>
+          <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- PANEL 4: FEATURES + PUBLISH -->
+  <div id="panel-4" class="step-panel">
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">🧩</div>
+        <div><div class="card-title">Hub Features</div><div class="card-desc">Choose which pages appear in your hub navigation</div></div>
+      </div>
+      <div class="card-body">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Courses</div><div class="toggle-sub">Training and course library for your members</div></div>
+          <label class="toggle"><input type="checkbox" id="feature-courses" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Community</div><div class="toggle-sub">Member community and discussion space</div></div>
+          <label class="toggle"><input type="checkbox" id="feature-community" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Support</div><div class="toggle-sub">Contact form so members can reach you</div></div>
+          <label class="toggle"><input type="checkbox" id="feature-support" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="settings-card" style="border-color: rgba(46,204,113,0.3); box-shadow: 0 0 0 3px rgba(46,204,113,0.06), var(--shadow);">
+      <div class="card-header" style="background: rgba(46,204,113,0.05);">
+        <div class="card-icon">🚀</div>
+        <div><div class="card-title">Publish Your Hub</div><div class="card-desc">Flip the switch and share your hub with the world</div></div>
+      </div>
+      <div class="card-body">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Hub Status</div><div class="toggle-sub" id="hub-status-label">Preview mode — only you can see it</div></div>
+          <label class="toggle"><input type="checkbox" id="isLive" onchange="updateStatusLabel()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Members Only</div><div class="toggle-sub" id="members-only-label">Tool is public — anyone can use it</div></div>
+          <label class="toggle"><input type="checkbox" id="membersOnly" onchange="updateMembersLabel()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="domain-info">
+          <p>Your hub is live at <strong id="domain-info-url">toolspark.co/hub/...</strong>. At graduation you'll connect your own domain — we'll walk you through it step by step.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIZARD NAV -->
+  <div class="wizard-nav">
+    <button class="btn-back" id="wizard-back" onclick="prevStep()" style="visibility:hidden;">← Back</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="save-status" id="save-status"></span>
+      <button class="btn-next" id="wizard-next" onclick="nextStep()">Next →</button>
+      <button class="btn-save" id="save-btn" onclick="saveSettings()" style="display:none;">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Save &amp; Publish
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- CELEBRATE OVERLAY -->
+<div id="celebrate-overlay" style="display:none;position:fixed;inset:0;background:rgba(12,11,9,0.85);z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;">
+  <div id="celebrate-card" style="background:#fff;border-radius:24px;padding:3rem 2.5rem;max-width:460px;width:90%;text-align:center;position:relative;overflow:hidden;animation:celebPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;">
+    <div style="font-size:56px;margin-bottom:1rem;">🎉</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:#1A1714;margin-bottom:0.5rem;">Your hub is live!</h2>
+    <p style="font-size:14px;color:#6B6560;margin-bottom:1.75rem;line-height:1.6;">Share this link with your audience and start welcoming members.</p>
+    <div style="background:#F4F2EE;border:1px solid #E4E0D8;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:1.5rem;">
+      <span id="celebrate-url" style="font-family:monospace;font-size:13px;color:#C9A84C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button onclick="copyCelebUrl()" style="background:var(--gold,#C9A84C);color:#0C0B09;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;" id="copy-celeb-btn">Copy</button>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <a id="celebrate-hub-link" href="#" target="_blank" style="flex:1;background:#2A5C45;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">View My Hub →</a>
+      <button onclick="closeCelebrate()" style="flex:1;background:none;border:1px solid #E4E0D8;border-radius:10px;padding:12px;font-size:14px;font-weight:700;color:#6B6560;cursor:pointer;">Back to Settings</button>
+    </div>
+    <!-- confetti pieces -->
+    <div class="confetti-wrap" id="confetti-wrap"></div>
+  </div>
 </div>
 
 <!-- EXPORT MODAL -->
@@ -563,7 +636,11 @@ service cloud.firestore {
     currentUser = user;
     db.collection('users').doc(user.uid).get().then(function(snap) {
       var data = snap.exists ? snap.data() : {};
-      if (!data.hubSlug) { window.location.href = 'hub-setup.html'; return; }
+      if (!data.hubSlug) {
+        document.getElementById('setup-screen').style.display = 'flex';
+        document.getElementById('main-wrap').style.display = 'none';
+        return;
+      }
       hubSlug = data.hubSlug;
       updateUrlDisplay();
       loadSettings();
@@ -681,23 +758,22 @@ service cloud.firestore {
       if (!snap.exists) return;
       var s = snap.data();
       hubData = s;
+      if (s.hubOnboarding === 'done') {
+        window.location.href = '/hub/' + hubSlug + '/login';
+        return;
+      }
       loadStudentFirebase(s);
+      if (s.hubAdminEmail) showAdminAccountConnected(s.hubAdminEmail);
+      // Start on the first incomplete step
+      var startStep = 1;
+      if (s.studentFirebase && s.studentFirebase.projectId) startStep = 2;
+      if (s.hubAdminEmail) startStep = 3;
+      goToStep(startStep);
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
-      var colorDefaults = {};
-      Object.keys(colorDefaults).forEach(function(field) {
-        var val = s[field] || colorDefaults[field];
-        document.getElementById(field + 'Picker').value = val;
-        document.getElementById(field + 'Hex').value = val.toUpperCase();
-      });
       if (s.logoUrl) { document.getElementById('logoUrl').value = s.logoUrl; var p = document.getElementById('logo-preview'); p.src = s.logoUrl; p.classList.add('visible'); }
-      if (s.landingHeadline) document.getElementById('landingHeadline').value = s.landingHeadline;
-      if (s.landingSubheadline) document.getElementById('landingSubheadline').value = s.landingSubheadline;
-      if (s.landingCtaText) document.getElementById('landingCtaText').value = s.landingCtaText;
-      if (s.paymentLink) document.getElementById('paymentLink').value = s.paymentLink;
-      if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); }
+      if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); wasLiveBefore = true; }
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
-      if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
       var features = s.features || {};
       ['courses', 'community', 'support'].forEach(function(k) {
         var el = document.getElementById('feature-' + k);
@@ -707,6 +783,8 @@ service cloud.firestore {
   }
 
   // ── SAVE ──
+  var wasLiveBefore = false;
+
   function saveSettings() {
     var btn = document.getElementById('save-btn');
     var status = document.getElementById('save-status');
@@ -714,30 +792,36 @@ service cloud.firestore {
     status.textContent = '';
     status.className = 'save-status';
 
-    db.collection('hubs').doc(hubSlug).update({
-      hubName:            document.getElementById('hubName').value.trim(),
-      hubTagline:         document.getElementById('hubTagline').value.trim(),
-      logoUrl:            document.getElementById('logoUrl').value.trim(),
-      landingHeadline:    document.getElementById('landingHeadline').value.trim(),
-      landingSubheadline: document.getElementById('landingSubheadline').value.trim(),
-      landingCtaText:     document.getElementById('landingCtaText').value.trim(),
-      paymentLink:        document.getElementById('paymentLink').value.trim(),
-      isLive:             document.getElementById('isLive').checked,
-      membersOnly:        document.getElementById('membersOnly').checked,
-      customDomain:       document.getElementById('customDomain').value.trim(),
+    var goingLive = document.getElementById('isLive').checked;
+    var firstPublish = goingLive && !wasLiveBefore;
+
+    var updatePayload = {
+      hubName:    document.getElementById('hubName').value.trim(),
+      hubTagline: document.getElementById('hubTagline').value.trim(),
+      logoUrl:    document.getElementById('logoUrl').value.trim(),
+      isLive:     document.getElementById('isLive').checked,
+      membersOnly: document.getElementById('membersOnly').checked,
       features: {
         courses:   document.getElementById('feature-courses').checked,
         community: document.getElementById('feature-community').checked,
         support:   document.getElementById('feature-support').checked
       },
-      ownerEmail:         currentUser.email,
-      updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function() {
+      ownerEmail: currentUser.email,
+      updatedAt:  firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (firstPublish) {
+      updatePayload.hubOnboarding = 'done';
+      db.collection('users').doc(currentUser.uid).update({ hubOnboarding: 'done' });
+    }
+
+    db.collection('hubs').doc(hubSlug).update(updatePayload).then(function() {
+      wasLiveBefore = document.getElementById('isLive').checked;
       status.textContent = '✓ Saved';
       status.className = 'save-status success';
       btn.disabled = false;
       btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Save Settings';
       setTimeout(function() { status.textContent = ''; }, 3000);
+      if (firstPublish) showCelebrate();
     }).catch(function(e) {
       status.textContent = 'Error: ' + e.message;
       status.className = 'save-status error';
@@ -759,6 +843,48 @@ service cloud.firestore {
 
   function closeExportModal() {
     document.getElementById('export-modal').style.display = 'none';
+  }
+
+  // ── CELEBRATE ──
+  function showCelebrate() {
+    var url = 'toolspark.co/hub/' + hubSlug + '/login';
+    document.getElementById('celebrate-url').textContent = url;
+    document.getElementById('celebrate-hub-link').href = '/hub/' + hubSlug + '/login';
+    var overlay = document.getElementById('celebrate-overlay');
+    overlay.style.display = 'flex';
+    spawnConfetti();
+  }
+
+  function closeCelebrate() {
+    document.getElementById('celebrate-overlay').style.display = 'none';
+  }
+
+  function copyCelebUrl() {
+    var url = 'https://toolspark.co/hub/' + hubSlug + '/login';
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.getElementById('copy-celeb-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+
+  function spawnConfetti() {
+    var wrap = document.getElementById('confetti-wrap');
+    wrap.innerHTML = '';
+    var colors = ['#C9A84C','#2A5C45','#E8D5A3','#3D8A65','#F4F2EE','#C9A84C','#FFD700'];
+    for (var i = 0; i < 48; i++) {
+      var el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.top = '-10px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width = (6 + Math.random() * 6) + 'px';
+      el.style.height = (6 + Math.random() * 6) + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.animationDuration = (1.2 + Math.random() * 1.5) + 's';
+      el.style.animationDelay = (Math.random() * 0.6) + 's';
+      wrap.appendChild(el);
+    }
   }
 
   function exportBackToStep1() {
@@ -917,6 +1043,7 @@ service cloud.firestore {
       hubData = hubData || {};
       hubData.studentFirebase = cfg;
       showFbConnected(cfg.projectId);
+      setTimeout(function() { goToStep(2); }, 600);
     }).catch(function(e) {
       errEl.textContent = 'Save failed: ' + e.message;
     });
@@ -953,6 +1080,129 @@ service cloud.firestore {
     return sections.join('\n\n');
   }
 
+
+  // ── WIZARD ──
+  var currentStep = 1;
+
+  function goToStep(n) {
+    for (var i = 1; i <= 4; i++) {
+      var panel = document.getElementById('panel-' + i);
+      if (panel) panel.classList.toggle('active', i === n);
+      var dot = document.getElementById('sd-' + i);
+      var lbl = document.getElementById('sl-' + i);
+      if (dot) {
+        if (i < n)       { dot.className = 'step-dot done'; dot.textContent = '✓'; }
+        else if (i === n){ dot.className = 'step-dot active'; dot.textContent = i; }
+        else             { dot.className = 'step-dot'; dot.textContent = i; }
+      }
+      if (lbl) lbl.className = 'step-label' + (i < n ? ' done' : i === n ? ' active' : '');
+      if (i < 4) {
+        var conn = document.getElementById('sc-' + i);
+        if (conn) conn.className = 'step-connector' + (i < n ? ' done' : '');
+      }
+    }
+    currentStep = n;
+    document.getElementById('wizard-back').style.visibility = n === 1 ? 'hidden' : 'visible';
+    document.getElementById('wizard-next').style.display = n < 4 ? 'inline-flex' : 'none';
+    document.getElementById('save-btn').style.display = n === 4 ? 'inline-flex' : 'none';
+    window.scrollTo(0, 0);
+  }
+
+  function nextStep() {
+    if (currentStep < 4) goToStep(currentStep + 1);
+  }
+
+  function prevStep() {
+    if (currentStep > 1) goToStep(currentStep - 1);
+  }
+
+  // ── HUB NAME PRE-SCREEN ──
+  function previewSlug() {
+    var name = document.getElementById('setup-hub-name').value;
+    var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || '...';
+    document.getElementById('slug-preview').textContent = slug;
+  }
+
+  function createHub() {
+    var name = document.getElementById('setup-hub-name').value.trim();
+    var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    var errEl = document.getElementById('setup-error');
+    var btn = document.getElementById('setup-btn');
+    errEl.textContent = '';
+    if (!name || !slug) { errEl.textContent = 'Please enter a hub name.'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    db.collection('hubs').doc(slug).get().then(function(snap) {
+      if (snap.exists) {
+        errEl.textContent = 'That URL is already taken — try a different name.';
+        btn.disabled = false;
+        btn.textContent = 'Create My Hub →';
+        return;
+      }
+      return db.collection('hubs').doc(slug).set({
+        hubName: name,
+        ownerEmail: currentUser.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        isLive: false,
+        features: { courses: true, community: true, support: true }
+      }).then(function() {
+        return db.collection('users').doc(currentUser.uid).update({ hubSlug: slug });
+      }).then(function() {
+        hubSlug = slug;
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('main-wrap').style.display = '';
+        updateUrlDisplay();
+        loadSettings();
+      });
+    }).catch(function(e) {
+      errEl.textContent = 'Error: ' + e.message;
+      btn.disabled = false;
+      btn.textContent = 'Create My Hub →';
+    });
+  }
+
+  // ── ADMIN ACCOUNT CREATION ──
+  async function createAdminAccount(btn) {
+    var email = document.getElementById('admin-email').value.trim();
+    var password = document.getElementById('admin-password').value;
+    var errEl = document.getElementById('admin-acct-error');
+    errEl.textContent = '';
+    if (!email || !password) { errEl.textContent = 'Email and password are required.'; return; }
+    if (password.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) {
+      errEl.textContent = 'Connect your Firebase database first (Step 1).'; return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    try {
+      var appName = 'hub-admin-' + hubSlug;
+      var studentApp;
+      try { studentApp = firebase.app(appName); } catch(e) {
+        studentApp = firebase.initializeApp(hubData.studentFirebase, appName);
+      }
+      await studentApp.auth().createUserWithEmailAndPassword(email, password);
+      await db.collection('hubs').doc(hubSlug).update({
+        hubAdminEmail: email,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      hubData.hubAdminEmail = email;
+      showAdminAccountConnected(email);
+      setTimeout(function() { goToStep(3); }, 600);
+    } catch(e) {
+      errEl.textContent = e.message || 'Account creation failed.';
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
+  }
+
+  function showAdminAccountConnected(email) {
+    document.getElementById('admin-acct-form').style.display = 'none';
+    document.getElementById('admin-acct-connected').style.display = 'block';
+    document.getElementById('admin-email-display').textContent = email;
+    var badge = document.getElementById('admin-acct-badge');
+    badge.textContent = 'Set up';
+    badge.className = 'fb-badge connected';
+  }
 
   function doDownloadConfig() {
     var content = generateConfigJs(hubData || {}, parsedFirebaseConfig || {});

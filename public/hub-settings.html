@@ -40,24 +40,27 @@
   body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
   .page-wrap { margin-left: var(--sidebar-width); padding: 2rem; max-width: 900px; }
 
-  /* TOP BAR */
-  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
-  .top-bar-left h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: var(--text); }
-  .top-bar-left p { font-size: 13px; color: var(--text3); margin-top: 2px; }
-  .top-bar-right { display: flex; gap: 10px; align-items: center; }
-  .btn-view { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.15s; }
-  .btn-view:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-export { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
-  .btn-export:hover { border-color: var(--gold); color: var(--gold); }
+  /* PAGE HEADER */
+  .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .btn-back-nav { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--text2); text-decoration: none; padding: 6px 10px; border-radius: var(--radius-sm); transition: all 0.15s; white-space: nowrap; }
+  .btn-back-nav:hover { color: var(--gold); background: var(--gold-dim); }
+  .page-header-divider { width: 1px; height: 18px; background: var(--border); }
+  .page-header h1 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); }
 
   /* HUB URL BANNER */
-  .hub-url-bar { background: var(--dark); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-  .hub-url-label { font-size: 12px; color: #9A9488; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
-  .hub-url-link { font-family: monospace; font-size: 14px; color: var(--gold); text-decoration: none; }
+  .hub-url-bar { background: var(--dark); border-radius: var(--radius); padding: 0.875rem 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .hub-url-left { display: flex; flex-direction: column; gap: 2px; }
+  .hub-url-label { font-size: 11px; color: #9A9488; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+  .hub-url-link { font-family: monospace; font-size: 13px; color: var(--gold); text-decoration: none; }
   .hub-url-link:hover { text-decoration: underline; }
-  .hub-live-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .hub-url-actions { display: flex; align-items: center; gap: 8px; }
+  .hub-live-badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
   .hub-live-badge.live { background: rgba(46,204,113,0.15); color: #2ECC71; border: 1px solid rgba(46,204,113,0.3); }
   .hub-live-badge.preview { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .btn-view { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); color: #C8C4BC; font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.15s; }
+  .btn-view:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+  .btn-export { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); color: #C8C4BC; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .btn-export:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
 
   /* CARDS */
   .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1.5rem; }
@@ -204,31 +207,33 @@
 
 <div class="page-wrap">
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <h1>Hub Settings</h1>
-      <p>Customize your hub — changes save to Firestore and go live instantly</p>
-    </div>
-    <div class="top-bar-right">
-      <a id="view-hub-btn" href="#" target="_blank" class="btn-view">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        View Hub
-      </a>
-      <button class="btn-export" onclick="showExportModal()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export Hub
-      </button>
-    </div>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <a onclick="history.back()" class="btn-back-nav" style="cursor:pointer;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+    <div class="page-header-divider"></div>
+    <h1>Hub Settings</h1>
   </div>
 
-  <!-- HUB URL BANNER -->
+  <!-- HUB URL + ACTIONS -->
   <div class="hub-url-bar">
-    <div>
+    <div class="hub-url-left">
       <div class="hub-url-label">Your hub URL</div>
       <a id="hub-url-display" href="#" target="_blank" class="hub-url-link">toolspark.co/hub/...</a>
     </div>
-    <div id="live-badge" class="hub-live-badge preview">Preview</div>
+    <div class="hub-url-actions">
+      <div id="live-badge" class="hub-live-badge preview">Preview</div>
+      <a id="view-hub-btn" href="#" target="_blank" class="btn-view">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        View Hub
+      </a>
+      <button class="btn-export" onclick="showExportModal()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Hub
+      </button>
+    </div>
   </div>
 
   <!-- YOUR FIREBASE DATABASE — STEP 1 -->
@@ -326,49 +331,6 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- HUB ANALYTICS -->
-  <div class="settings-card" id="analytics-card" style="display:none;">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div><div class="card-title">Hub Analytics</div><div class="card-desc">Activity from your connected Firebase database</div></div>
-      <button class="btn-disconnect" onclick="loadAnalytics()" style="font-size:12px;padding:5px 12px;">Refresh</button>
-    </div>
-    <div class="card-body">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-subscribers">—</div>
-          <div class="stat-label">Subscribers</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-sessions">—</div>
-          <div class="stat-label">Tool Sessions</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-results">—</div>
-          <div class="stat-label">Results Generated</div>
-        </div>
-      </div>
-      <div class="field-hint" style="margin-top:1rem;" id="analytics-updated"></div>
-    </div>
-  </div>
-
-  <!-- INBOX -->
-  <div class="settings-card" id="inbox-card" style="display:none;">
-    <div class="card-header">
-      <div class="card-icon">📬</div>
-      <div>
-        <div class="card-title">Inbox <span id="inbox-unread-badge" style="display:none;background:var(--gold,#C9A84C);color:#0C0B09;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;"></span></div>
-        <div class="card-desc">Support messages from your hub members</div>
-      </div>
-      <button class="btn-disconnect" onclick="loadInbox()" style="font-size:12px;padding:5px 12px;">Refresh</button>
-    </div>
-    <div class="card-body">
-      <div id="inbox-loading" style="font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">Loading messages…</div>
-      <div id="inbox-empty" style="display:none;font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">No support messages yet.</div>
-      <div id="inbox-list"></div>
-    </div>
-  </div>
-
   <!-- FEATURES -->
   <div class="settings-card">
     <div class="card-header">
@@ -441,260 +403,6 @@ service cloud.firestore {
           </div>
         </div>
         <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE & SITE COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🌐</div>
-      <div><div class="card-title">Page &amp; Site Colors</div><div class="card-desc">These colors apply everywhere — the intro screen, nav, and all pages</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Button &amp; Highlight Color</label>
-          <div class="color-row">
-            <input type="color" id="primaryColorPicker" value="#C9A84C">
-            <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
-          </div>
-          <div class="field-hint">Your main brand color — controls the Get Started button background, the numbered step circles (1, 2, 3) and their text</div>
-        </div>
-        <div class="field">
-          <label>Button Text Color</label>
-          <div class="color-row">
-            <input type="color" id="btnTextColorPicker" value="#0C0B09">
-            <input type="text" id="btnTextColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">Only controls the text written ON your buttons (like "Get Started" and "Get Access") — use white if your button color is dark</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Page Background</label>
-          <div class="color-row">
-            <input type="color" id="pageBgColorPicker" value="#0C0B09">
-            <input type="text" id="pageBgColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">The background color behind everything — all pages use this</div>
-        </div>
-        <div class="field">
-          <label>Headline &amp; Body Text</label>
-          <div class="color-row">
-            <input type="color" id="textPrimaryColorPicker" value="#F0EDE6">
-            <input type="text" id="textPrimaryColorHex" placeholder="#F0EDE6" maxlength="7">
-          </div>
-          <div class="field-hint">Your main headline and the step labels ("Answer a few questions", etc.) — use a dark color if your background is light</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Description &amp; Label Text</label>
-          <div class="color-row">
-            <input type="color" id="textMutedColorPicker" value="#9A9488">
-            <input type="text" id="textMutedColorHex" placeholder="#9A9488" maxlength="7">
-          </div>
-          <div class="field-hint">The supporting paragraph text below your headline, your landing page subheadline, and the typing dots in chat — NOT the step labels or numbers</div>
-        </div>
-        <div class="field">
-          <label>Lines &amp; Borders</label>
-          <div class="color-row">
-            <input type="color" id="borderColorPicker" value="#2A2720">
-            <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
-          </div>
-          <div class="field-hint">The line under your header, the dashes connecting steps (1 — 2 — 3), the outline around your chat box, message bubbles, and text input box</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- HEADER / NAV COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🔝</div>
-      <div><div class="card-title">Header / Navigation</div><div class="card-desc">The bar across the top of every page</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Header Background</label>
-          <div class="color-row">
-            <input type="color" id="navBgColorPicker" value="#0C0B09">
-            <input type="text" id="navBgColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the top bar — set it different from the page to make the header stand out</div>
-        </div>
-        <div class="field">
-          <label>Header Text Color</label>
-          <div class="color-row">
-            <input type="color" id="navTextColorPicker" value="#F0EDE6">
-            <input type="text" id="navTextColorHex" placeholder="#F0EDE6" maxlength="7">
-          </div>
-          <div class="field-hint">Your hub name displayed in the top left corner</div>
-        </div>
-      </div>
-      <div class="field" style="max-width:50%;">
-        <label>Header Button Color</label>
-        <div class="color-row">
-          <input type="color" id="navBtnColorPicker" value="#C9A84C">
-          <input type="text" id="navBtnColorHex" placeholder="#C9A84C" maxlength="7">
-        </div>
-        <div class="field-hint">The buttons in the top right corner — "Get Access" on the landing page, "New Conversation" and "Sign Out" on the chat page</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAT TOOL COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">💬</div>
-      <div><div class="card-title">Chat Tool Colors</div><div class="card-desc">Colors inside the chat interface — only visible once someone clicks Get Started</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Chat Box Background</label>
-          <div class="color-row">
-            <input type="color" id="chatBgColorPicker" value="#141210">
-            <input type="text" id="chatBgColorHex" placeholder="#141210" maxlength="7">
-          </div>
-          <div class="field-hint">The card the whole conversation sits inside</div>
-        </div>
-        <div class="field">
-          <label>Tool Response Bubbles</label>
-          <div class="color-row">
-            <input type="color" id="aiBubbleColorPicker" value="#1C1A17">
-            <input type="text" id="aiBubbleColorHex" placeholder="#1C1A17" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the messages your AI tool sends</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>User Reply Bubbles</label>
-          <div class="color-row">
-            <input type="color" id="userBubbleColorPicker" value="#1D1A0F">
-            <input type="text" id="userBubbleColorHex" placeholder="#1D1A0F" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the messages your users send</div>
-        </div>
-        <div class="field">
-          <label>Message Input Box</label>
-          <div class="color-row">
-            <input type="color" id="inputBgColorPicker" value="#141210">
-            <input type="text" id="inputBgColorHex" placeholder="#141210" maxlength="7">
-          </div>
-          <div class="field-hint">The text box at the bottom where users type their message</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI TOOL -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">⚡</div>
-      <div><div class="card-title">Your AI Tool</div><div class="card-desc">The tool your audience will use</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label for="toolName">Tool Name</label>
-          <input type="text" id="toolName" placeholder="e.g. Caption Generator" maxlength="60">
-        </div>
-        <div class="field">
-          <label for="toolModel">AI Model</label>
-          <select id="toolModel">
-            <option value="claude-haiku-4-5-20251001">Claude Haiku (faster, cheaper)</option>
-            <option value="claude-sonnet-4-6">Claude Sonnet (smarter)</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label for="toolDescription">Tool Description</label>
-        <input type="text" id="toolDescription" placeholder="e.g. Generate captions for real estate listings in seconds" maxlength="120">
-      </div>
-      <div class="field" style="max-width:50%;">
-        <label for="minQuestionsBeforeGenerate">Questions Before Generate Button Appears</label>
-        <input type="number" id="minQuestionsBeforeGenerate" min="1" max="20" value="4" placeholder="4">
-        <div class="field-hint">How many questions your tool asks before the "Generate My Report" button shows up — set this to match how many questions are in your flow</div>
-      </div>
-      <div class="field">
-        <label for="customGreeting">Custom Greeting <span>optional</span></label>
-        <textarea id="customGreeting" rows="3" placeholder="e.g. Hey! I'm your Caption Generator. Tell me a bit about your listing and I'll write something that stops the scroll. What are you working on today?"></textarea>
-        <div class="field-hint">This is the first message your users see when they open the tool. If left blank, a greeting is generated automatically from your tool name and description.</div>
-      </div>
-      <div class="field">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <label for="systemPrompt" style="margin-bottom:0;">System Prompt</label>
-          <button type="button" class="gen-prompt-btn" id="gen-prompt-btn" onclick="generateSystemPrompt()">⚡ Generate from roadmap</button>
-        </div>
-        <textarea class="large" id="systemPrompt" placeholder="Paste your system prompt here, or click Generate from roadmap to build one from your Spark &amp; Audience data..."></textarea>
-        <div class="gen-prompt-status" id="gen-prompt-status"></div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="inputLabel">Input Field Label</label>
-          <input type="text" id="inputLabel" placeholder="e.g. Describe your listing" maxlength="60">
-        </div>
-        <div class="field">
-          <label for="inputPlaceholder">Input Placeholder</label>
-          <input type="text" id="inputPlaceholder" placeholder="e.g. 3-bed home in Austin..." maxlength="100">
-        </div>
-      </div>
-      <div class="field">
-        <label for="anthropicApiKey">Anthropic API Key</label>
-        <div class="key-wrap">
-          <input type="password" id="anthropicApiKey" placeholder="sk-ant-...">
-          <button class="key-toggle" type="button" onclick="toggleKey('anthropicApiKey',this)">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-        <div class="field-hint">Get your key at console.anthropic.com — set a monthly spend limit there.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LANDING PAGE -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🚀</div>
-      <div><div class="card-title">Landing Page</div><div class="card-desc">What people see before they sign up</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field">
-        <label for="landingHeadline">Headline</label>
-        <input type="text" id="landingHeadline" placeholder="e.g. Generate Real Estate Captions in Seconds" maxlength="80">
-      </div>
-      <div class="field">
-        <label for="landingSubheadline">Subheadline</label>
-        <textarea id="landingSubheadline" rows="3" placeholder="Describe who this is for and what they get..."></textarea>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="landingCtaText">Button Text</label>
-          <input type="text" id="landingCtaText" placeholder="Get Access" maxlength="30">
-        </div>
-        <div class="field">
-          <label for="paymentLink">Payment / Access Link</label>
-          <input type="url" id="paymentLink" placeholder="https://buy.stripe.com/...">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ANALYTICS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div><div class="card-title">Analytics</div><div class="card-desc">Track visits and user behavior on your hub pages</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field">
-        <label for="gaTrackingId">Google Analytics Tracking ID</label>
-        <input type="text" id="gaTrackingId" placeholder="G-XXXXXXXXXX" maxlength="20">
-        <div class="field-hint">Go to analytics.google.com → Admin → Data Streams → your stream → copy the Measurement ID starting with G-</div>
       </div>
     </div>
   </div>
@@ -847,31 +555,6 @@ service cloud.firestore {
     document.getElementById('domain-info-url').textContent = url;
   }
 
-  // ── COLOR SYNC ──
-  function wireColorPair(pickerId, hexId) {
-    document.getElementById(pickerId).addEventListener('input', function() {
-      document.getElementById(hexId).value = this.value.toUpperCase();
-    });
-    document.getElementById(hexId).addEventListener('input', function() {
-      if (/^#[0-9A-Fa-f]{6}$/.test(this.value.trim())) {
-        document.getElementById(pickerId).value = this.value.trim();
-      }
-    });
-  }
-  wireColorPair('primaryColorPicker', 'primaryColorHex');
-  wireColorPair('pageBgColorPicker',   'pageBgColorHex');
-  wireColorPair('chatBgColorPicker',   'chatBgColorHex');
-  wireColorPair('aiBubbleColorPicker', 'aiBubbleColorHex');
-  wireColorPair('userBubbleColorPicker','userBubbleColorHex');
-  wireColorPair('inputBgColorPicker',    'inputBgColorHex');
-  wireColorPair('btnTextColorPicker',    'btnTextColorHex');
-  wireColorPair('navBgColorPicker',      'navBgColorHex');
-  wireColorPair('navTextColorPicker',    'navTextColorHex');
-  wireColorPair('navBtnColorPicker',     'navBtnColorHex');
-  wireColorPair('textPrimaryColorPicker','textPrimaryColorHex');
-  wireColorPair('textMutedColorPicker',  'textMutedColorHex');
-  wireColorPair('borderColorPicker',     'borderColorHex');
-
   // ── LOGO PREVIEW ──
   document.getElementById('logoUrl').addEventListener('input', function() {
     var preview = document.getElementById('logo-preview');
@@ -966,31 +649,10 @@ service cloud.firestore {
       loadStudentFirebase(s);
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
-      if (s.primaryColor) { document.getElementById('primaryColorPicker').value = s.primaryColor; document.getElementById('primaryColorHex').value = s.primaryColor.toUpperCase(); }
-      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720', btnTextColor: '#0C0B09', navBgColor: '#0C0B09', navTextColor: '#F0EDE6', navBtnColor: '#C9A84C' };
-      Object.keys(colorDefaults).forEach(function(field) {
-        var val = s[field] || colorDefaults[field];
-        document.getElementById(field + 'Picker').value = val;
-        document.getElementById(field + 'Hex').value = val.toUpperCase();
-      });
       if (s.logoUrl) { document.getElementById('logoUrl').value = s.logoUrl; var p = document.getElementById('logo-preview'); p.src = s.logoUrl; p.classList.add('visible'); }
-      if (s.toolName) document.getElementById('toolName').value = s.toolName;
-      if (s.toolModel) document.getElementById('toolModel').value = s.toolModel;
-      if (s.toolDescription) document.getElementById('toolDescription').value = s.toolDescription;
-      if (s.systemPrompt) document.getElementById('systemPrompt').value = s.systemPrompt;
-      if (s.minQuestionsBeforeGenerate) document.getElementById('minQuestionsBeforeGenerate').value = s.minQuestionsBeforeGenerate;
-      if (s.customGreeting) document.getElementById('customGreeting').value = s.customGreeting;
-      if (s.inputLabel) document.getElementById('inputLabel').value = s.inputLabel;
-      if (s.inputPlaceholder) document.getElementById('inputPlaceholder').value = s.inputPlaceholder;
-      if (s.anthropicApiKey) document.getElementById('anthropicApiKey').value = s.anthropicApiKey;
-      if (s.landingHeadline) document.getElementById('landingHeadline').value = s.landingHeadline;
-      if (s.landingSubheadline) document.getElementById('landingSubheadline').value = s.landingSubheadline;
-      if (s.landingCtaText) document.getElementById('landingCtaText').value = s.landingCtaText;
-      if (s.paymentLink) document.getElementById('paymentLink').value = s.paymentLink;
       if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); }
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
       if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
-      if (s.gaTrackingId) document.getElementById('gaTrackingId').value = s.gaTrackingId;
       var features = s.features || {};
       ['courses', 'community', 'support'].forEach(function(k) {
         var el = document.getElementById('feature-' + k);
@@ -1007,42 +669,13 @@ service cloud.firestore {
     status.textContent = '';
     status.className = 'save-status';
 
-    var colorHex = document.getElementById('primaryColorHex').value.trim() || document.getElementById('primaryColorPicker').value;
-
     db.collection('hubs').doc(hubSlug).update({
-      hubName:            document.getElementById('hubName').value.trim(),
-      hubTagline:         document.getElementById('hubTagline').value.trim(),
-      primaryColor:       colorHex,
-      logoUrl:            document.getElementById('logoUrl').value.trim(),
-      toolName:           document.getElementById('toolName').value.trim(),
-      toolModel:          document.getElementById('toolModel').value,
-      toolDescription:    document.getElementById('toolDescription').value.trim(),
-      systemPrompt:       document.getElementById('systemPrompt').value.trim(),
-      minQuestionsBeforeGenerate: parseInt(document.getElementById('minQuestionsBeforeGenerate').value) || 4,
-      customGreeting:     document.getElementById('customGreeting').value.trim(),
-      inputLabel:         document.getElementById('inputLabel').value.trim(),
-      inputPlaceholder:   document.getElementById('inputPlaceholder').value.trim(),
-      anthropicApiKey:    document.getElementById('anthropicApiKey').value.trim(),
-      landingHeadline:    document.getElementById('landingHeadline').value.trim(),
-      landingSubheadline: document.getElementById('landingSubheadline').value.trim(),
-      landingCtaText:     document.getElementById('landingCtaText').value.trim(),
-      paymentLink:        document.getElementById('paymentLink').value.trim(),
-      isLive:             document.getElementById('isLive').checked,
-      membersOnly:        document.getElementById('membersOnly').checked,
-      customDomain:       document.getElementById('customDomain').value.trim(),
-      pageBgColor:        document.getElementById('pageBgColorHex').value.trim() || document.getElementById('pageBgColorPicker').value,
-      chatBgColor:        document.getElementById('chatBgColorHex').value.trim() || document.getElementById('chatBgColorPicker').value,
-      aiBubbleColor:      document.getElementById('aiBubbleColorHex').value.trim() || document.getElementById('aiBubbleColorPicker').value,
-      userBubbleColor:    document.getElementById('userBubbleColorHex').value.trim() || document.getElementById('userBubbleColorPicker').value,
-      inputBgColor:       document.getElementById('inputBgColorHex').value.trim() || document.getElementById('inputBgColorPicker').value,
-      btnTextColor:       document.getElementById('btnTextColorHex').value.trim() || document.getElementById('btnTextColorPicker').value,
-      navBgColor:         document.getElementById('navBgColorHex').value.trim() || document.getElementById('navBgColorPicker').value,
-      navTextColor:       document.getElementById('navTextColorHex').value.trim() || document.getElementById('navTextColorPicker').value,
-      navBtnColor:        document.getElementById('navBtnColorHex').value.trim() || document.getElementById('navBtnColorPicker').value,
-      textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
-      textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
-      borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
-      gaTrackingId:       document.getElementById('gaTrackingId').value.trim(),
+      hubName:     document.getElementById('hubName').value.trim(),
+      hubTagline:  document.getElementById('hubTagline').value.trim(),
+      logoUrl:     document.getElementById('logoUrl').value.trim(),
+      isLive:      document.getElementById('isLive').checked,
+      membersOnly: document.getElementById('membersOnly').checked,
+      customDomain: document.getElementById('customDomain').value.trim(),
       features: {
         courses:   document.getElementById('feature-courses').checked,
         community: document.getElementById('feature-community').checked,

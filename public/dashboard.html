@@ -660,7 +660,7 @@
         if (data.hubSlug) {
           var card = document.getElementById('creator-hub-card');
           if (card) {
-            card.href = 'hub-admin.html';
+            card.href = '/hub/' + data.hubSlug + '/login';
             document.getElementById('creator-hub-card-title').textContent = 'My Creator Hub';
             document.getElementById('creator-hub-card-sub').textContent = 'toolspark.co/hub/' + data.hubSlug;
           }
