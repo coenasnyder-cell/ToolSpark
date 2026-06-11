@@ -265,7 +265,6 @@
       inputLabel:       'Your question',
       inputPlaceholder: 'Type here...',
       model:            'claude-haiku-4-5-20251001',
-      anthropicApiKey:  apiKey,
       landingHeadline:  hubName,
       landingSubheadline: '',
       landingCtaText:   'Get Access',
@@ -283,6 +282,14 @@
     batch.update(db.collection('users').doc(currentUser.uid), { hubSlug: hubSlug });
 
     batch.commit().then(function() {
+      // Store API key in restricted sub-collection — never in the public hub doc
+      var keyWrite = apiKey
+        ? db.collection('hubs').doc(hubSlug).collection('secrets').doc('config')
+            .set({ anthropicApiKey: apiKey })
+        : Promise.resolve();
+
+      return keyWrite;
+    }).then(function() {
       document.getElementById('step-2').classList.remove('active');
       document.getElementById('step-3').classList.add('active');
       document.getElementById('dot-2').classList.replace('active', 'done');

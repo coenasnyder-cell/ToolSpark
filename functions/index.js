@@ -1740,7 +1740,7 @@ exports.journeyVoiceToken = onRequest({
 });
 
 // ── HUB TOOL — server-side proxy so hub API keys never reach the browser ────
-exports.hubTool = onRequest({
+exports.hubtool = onRequest({
   cors: true,
   invoker: "public",
 }, async (req, res) => {
@@ -1757,11 +1757,14 @@ exports.hubTool = onRequest({
   }
 
   try {
-    const hubSnap = await admin.firestore().collection("hubs").doc(hubSlug).get();
+    const [hubSnap, secretsSnap] = await Promise.all([
+      admin.firestore().collection("hubs").doc(hubSlug).get(),
+      admin.firestore().collection("hubs").doc(hubSlug).collection("secrets").doc("config").get()
+    ]);
     if (!hubSnap.exists) { res.status(404).json({ error: "Hub not found" }); return; }
     const hub = hubSnap.data();
 
-    const apiKey = hub.anthropicApiKey;
+    const apiKey = (secretsSnap.exists && secretsSnap.data().anthropicApiKey) || hub.anthropicApiKey;
     if (!apiKey) { res.status(400).json({ error: "no-key" }); return; }
 
     const slotKey = "tool" + (slot || "1");
