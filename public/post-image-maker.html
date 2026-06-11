@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Image Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#111114;
+    --spark:#FFC820;
+    --volt:#6B2FB3;
+    --paper:#FFFFFF;
+    --smoke:#17171C;
+    --panel:#1F1F26;
+    --line:#33333D;
+    --ash:#9A9AA6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--smoke);
+    color:var(--paper);
+    font-family:'Space Grotesk',sans-serif;
+    min-height:100vh;
+  }
+  header{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 28px;border-bottom:1px solid var(--line);
+  }
+  header svg{flex-shrink:0}
+  header h1{font-size:18px;font-weight:700;letter-spacing:.02em}
+  header p{font-size:13px;color:var(--ash)}
+  .wrap{
+    display:grid;grid-template-columns:380px 1fr;gap:0;
+    min-height:calc(100vh - 61px);
+  }
+  /* ---------- controls ---------- */
+  .controls{
+    border-right:1px solid var(--line);
+    padding:24px;overflow-y:auto;max-height:calc(100vh - 61px);
+  }
+  .group{margin-bottom:22px}
+  label{
+    display:block;font-size:11px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ash);margin-bottom:8px;
+  }
+  textarea,input[type=text],select{
+    width:100%;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;color:var(--paper);font-family:'Space Grotesk',sans-serif;
+    font-size:15px;padding:10px 12px;outline:none;
+  }
+  textarea:focus,input[type=text]:focus,select:focus{border-color:var(--spark)}
+  textarea{resize:vertical;min-height:84px}
+  .tmpl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tmpl{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:12px 10px;cursor:pointer;text-align:left;color:var(--paper);
+    font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;
+  }
+  .tmpl span{display:block;font-size:11px;font-weight:400;color:var(--ash);margin-top:3px}
+  .tmpl.active{border-color:var(--spark);background:#2A2410}
+  .opt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .opt-row b{
+    width:30px;height:30px;flex-shrink:0;border-radius:50%;
+    background:var(--spark);color:var(--ink);display:flex;
+    align-items:center;justify-content:center;font-size:14px;
+  }
+  .toggle-row{display:flex;align-items:center;gap:10px}
+  .toggle-row input{width:auto;accent-color:var(--spark)}
+  .toggle-row span{font-size:14px}
+  .file-row{display:grid;grid-template-columns:64px 64px 1fr;gap:8px}
+  .hint{font-size:12px;color:var(--ash);margin-top:6px;line-height:1.45}
+  .filename{
+    margin-top:8px;font-size:13px;color:var(--spark);
+    font-weight:500;word-break:break-all;
+  }
+  .dl{
+    width:100%;background:var(--spark);color:var(--ink);border:none;
+    border-radius:10px;font-family:'Space Grotesk',sans-serif;
+    font-size:16px;font-weight:700;padding:14px;cursor:pointer;margin-top:4px;
+  }
+  .dl:hover{background:#FFD64F}
+  .dl:focus-visible,.tmpl:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
+  /* ---------- preview ---------- */
+  .preview{
+    display:flex;align-items:center;justify-content:center;
+    padding:32px;background:
+      radial-gradient(circle at 30% 20%, #20202A 0%, var(--smoke) 60%);
+  }
+  canvas{
+    width:min(560px, 100%);height:auto;border-radius:12px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  .hide{display:none}
+  @media(max-width:880px){
+    .wrap{grid-template-columns:1fr}
+    .controls{border-right:none;border-bottom:1px solid var(--line);max-height:none}
+    .preview{padding:20px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true">
+    <polygon points="58,2 18,58 42,58 34,98 82,38 52,38" fill="#FFC820"/>
+  </svg>
+  <div>
+    <h1>Post Image Maker</h1>
+    <p>Type. Download. Post. No Canva was harmed.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+
+    <div class="group">
+      <label>Style</label>
+      <div class="tmpl-row" role="group" aria-label="Image style">
+        <button class="tmpl active" data-t="ask">Ask <span>Yellow, big question</span></button>
+        <button class="tmpl" data-t="bold">Bold <span>Black, loud statement</span></button>
+        <button class="tmpl" data-t="vote">Vote <span>A/B/C/D options</span></button>
+        <button class="tmpl" data-t="quote">Quote <span>Clean, morning posts</span></button>
+      </div>
+    </div>
+
+    <div class="group">
+      <label for="headline">Main text</label>
+      <textarea id="headline" maxlength="220">What's buried in YOUR business graveyard? 🪦</textarea>
+      <p class="hint">Keep it punchy — shorter text renders bigger. Emoji work.</p>
+    </div>
+
+    <div class="group" id="subGroup">
+      <label for="subline">Small line under it (optional)</label>
+      <input type="text" id="subline" maxlength="90" value="Confess in the comments 👇">
+    </div>
+
+    <div class="group hide" id="voteGroup">
+      <label>Options</label>
+      <div class="opt-row"><b>A</b><input type="text" class="vopt" maxlength="60" value="Coming up with the idea"></div>
+      <div class="opt-row"><b>B</b><input type="text" class="vopt" maxlength="60" value="Making the thing"></div>
+      <div class="opt-row"><b>C</b><input type="text" class="vopt" maxlength="60" value="Getting it seen"></div>
+      <div class="opt-row"><b>D</b><input type="text" class="vopt" maxlength="60" value="Pretending you're fine"></div>
+      <p class="hint">Leave an option blank to show fewer than four.</p>
+    </div>
+
+    <div class="group">
+      <label for="footerText">Footer</label>
+      <div class="toggle-row" style="margin-bottom:8px">
+        <input type="checkbox" id="footerOn">
+        <span>Show footer text</span>
+      </div>
+      <input type="text" id="footerText" maxlength="40" value="⚡ TOOLSPARK">
+      <p class="hint">Leave this OFF for Week 1–2 posts — no product name until Week 3.</p>
+    </div>
+
+    <div class="group">
+      <label>File name</label>
+      <div class="file-row">
+        <input type="text" id="fWeek" value="1" aria-label="Week number">
+        <input type="text" id="fDay" value="5" aria-label="Day number">
+        <input type="text" id="fKey" value="graveyard" aria-label="Keyword">
+      </div>
+      <p class="filename" id="fileOut">w1-d5-ask-graveyard.png</p>
+    </div>
+
+    <button class="dl" id="download">Download PNG (1080 × 1080)</button>
+  </div>
+
+  <div class="preview">
+    <canvas id="cv" width="1080" height="1080" aria-label="Post image preview"></canvas>
+  </div>
+</div>
+
+<script>
+(function(){
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const S = 1080, PAD = 110;
+
+  const C = {
+    ink:'#111114',
+    spark:'#FFC820',
+    volt:'#6B2FB3',
+    paper:'#FFFFFF'
+  };
+
+  let template = 'ask';
+
+  // ---------- helpers ----------
+  function bolt(x, y, h, color){
+    // lightning bolt scaled to height h, anchored top-left of its box
+    const w = h * 0.66;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(w/100, h/100);
+    ctx.beginPath();
+    ctx.moveTo(58,2); ctx.lineTo(18,58); ctx.lineTo(42,58);
+    ctx.lineTo(34,98); ctx.lineTo(82,38); ctx.lineTo(52,38);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function wrapLines(text, size, maxW){
+    ctx.font = size + 'px "Archivo Black"';
+    const out = [];
+    for(const raw of text.split('\n')){
+      const words = raw.split(/\s+/).filter(Boolean);
+      if(!words.length){ out.push(''); continue; }
+      let line = words[0];
+      for(let i=1;i<words.length;i++){
+        const test = line + ' ' + words[i];
+        if(ctx.measureText(test).width > maxW){ out.push(line); line = words[i]; }
+        else line = test;
+      }
+      out.push(line);
+    }
+    return out;
+  }
+
+  // shrink font until the block fits maxW x maxH; returns {size, lines, lineH}
+  function fitBlock(text, maxW, maxH, startSize){
+    let size = startSize;
+    while(size > 26){
+      const lines = wrapLines(text, size, maxW);
+      const lineH = size * 1.18;
+      if(lines.length * lineH <= maxH && lines.every(l => { ctx.font = size+'px "Archivo Black"'; return ctx.measureText(l).width <= maxW; }))
+        return {size, lines, lineH};
+      size -= 4;
+    }
+    const lines = wrapLines(text, size, maxW);
+    return {size, lines, lineH:size*1.18};
+  }
+
+  function drawBlock(block, x, yTop, color, align){
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = align || 'left';
+    ctx.font = block.size + 'px "Archivo Black"';
+    block.lines.forEach((l,i)=> ctx.fillText(l, x, yTop + i*block.lineH));
+    return yTop + block.lines.length * block.lineH;
+  }
+
+  function footer(color){
+    if(!document.getElementById('footerOn').checked) return;
+    const t = document.getElementById('footerText').value.trim();
+    if(!t) return;
+    ctx.font = '700 30px "Space Grotesk"';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(t, S/2, S - 52);
+  }
+
+  // ---------- templates ----------
+  function drawAsk(h, sub){
+    ctx.fillStyle = C.spark; ctx.fillRect(0,0,S,S);
+    // thick frame
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 14;
+    ctx.strokeRect(34,34,S-68,S-68);
+    bolt(S-235, 78, 150, C.ink);
+    const block = fitBlock(h, S-PAD*2, 600, 104);
+    const total = block.lines.length*block.lineH + (sub?80:0);
+    let y = (S - total)/2 - 20;
+    y = drawBlock(block, PAD, y, C.ink, 'left');
+    // purple underline bar
+    ctx.fillStyle = C.volt; ctx.fillRect(PAD, y+26, 220, 16);
+    if(sub){
+      ctx.font = '700 40px "Space Grotesk"';
+      ctx.fillStyle = C.ink; ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillText(sub, PAD, y+72);
+    }
+    footer(C.ink);
+  }
+
+  function drawBold(h, sub){
+    ctx.fillStyle = C.ink; ctx.fillRect(0,0,S,S);
+    // corner bolts
+    bolt(70, 70, 130, C.spark);
+    bolt(S-170, S-220, 130, C.volt);
+    const block = fitBlock(h, S-PAD*2, 600, 104);
+    const total = block.lines.length*block.lineH + (sub?80:0);
+    let y = (S - total)/2;
+    y = drawBlock(block, PAD, y, C.spark, 'left');
+    if(sub){
+      ctx.font = '700 40px "Space Grotesk"';
+      ctx.fillStyle = C.paper; ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillText(sub, PAD, y+50);
+    }
+    footer(C.spark);
+  }
+
+  function drawVote(h){
+    ctx.fillStyle = C.spark; ctx.fillRect(0,0,S,S);
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 14;
+    ctx.strokeRect(34,34,S-68,S-68);
+    bolt(S-215, 76, 120, C.ink);
+    const block = fitBlock(h, S-PAD*2-130, 280, 84);
+    let y = drawBlock(block, PAD, 100, C.ink, 'left');
+    y += 50;
+    const opts = [...document.querySelectorAll('.vopt')]
+      .map(i=>i.value.trim()).filter(Boolean);
+    const letters = ['A','B','C','D'];
+    const rowH = Math.min(150, (S - y - 110) / Math.max(opts.length,1));
+    opts.forEach((o, i)=>{
+      const cy = y + i*rowH + rowH/2;
+      // badge
+      ctx.beginPath();
+      ctx.arc(PAD+44, cy, 44, 0, Math.PI*2);
+      ctx.fillStyle = C.ink; ctx.fill();
+      ctx.font = '46px "Archivo Black"';
+      ctx.fillStyle = C.spark; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(letters[i], PAD+44, cy+4);
+      // text — shrink to fit one line
+      let os = 50;
+      ctx.textAlign='left';
+      while(os > 24){
+        ctx.font = os + 'px "Archivo Black"';
+        if(ctx.measureText(o).width <= S - (PAD+120) - PAD) break;
+        os -= 2;
+      }
+      ctx.fillStyle = C.ink;
+      ctx.fillText(o, PAD+120, cy+4);
+    });
+    footer(C.ink);
+  }
+
+  function drawQuote(h, sub){
+    ctx.fillStyle = C.paper; ctx.fillRect(0,0,S,S);
+    // big purple quote mark
+    ctx.font = '300px "Archivo Black"';
+    ctx.fillStyle = C.volt; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    ctx.globalAlpha = 0.16;
+    ctx.fillText('\u201C', 60, 300);
+    ctx.globalAlpha = 1;
+    const block = fitBlock(h, S-PAD*2, 560, 88);
+    const total = block.lines.length*block.lineH + (sub?90:0);
+    let y = (S - total)/2;
+    y = drawBlock(block, S/2, y, C.ink, 'center');
+    // yellow bar
+    ctx.fillStyle = C.spark;
+    ctx.fillRect(S/2-110, y+30, 220, 14);
+    if(sub){
+      ctx.font = '500 36px "Space Grotesk"';
+      ctx.fillStyle = '#55555E'; ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText(sub, S/2, y+76);
+    }
+    bolt(S/2-33, S-190, 100, C.volt);
+    footer(C.volt);
+  }
+
+  // ---------- render ----------
+  function render(){
+    const h = document.getElementById('headline').value.trim() || ' ';
+    const sub = document.getElementById('subline').value.trim();
+    ctx.clearRect(0,0,S,S);
+    if(template==='ask') drawAsk(h, sub);
+    else if(template==='bold') drawBold(h, sub);
+    else if(template==='vote') drawVote(h);
+    else drawQuote(h, sub);
+    updateName();
+  }
+
+  function updateName(){
+    const w = document.getElementById('fWeek').value.trim() || '1';
+    const d = document.getElementById('fDay').value.trim() || '1';
+    const k = (document.getElementById('fKey').value.trim() || 'post')
+      .toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    document.getElementById('fileOut').textContent =
+      `w${w}-d${d}-${template}-${k}.png`;
+  }
+
+  // ---------- events ----------
+  document.querySelectorAll('.tmpl').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.tmpl').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      template = b.dataset.t;
+      document.getElementById('voteGroup').classList.toggle('hide', template!=='vote');
+      document.getElementById('subGroup').classList.toggle('hide', template==='vote');
+      render();
+    });
+  });
+
+  ['headline','subline','footerText','fWeek','fDay','fKey']
+    .forEach(id=> document.getElementById(id).addEventListener('input', render));
+  document.getElementById('footerOn').addEventListener('change', render);
+  document.querySelectorAll('.vopt').forEach(i=> i.addEventListener('input', render));
+
+  document.getElementById('download').addEventListener('click', ()=>{
+    cv.toBlob(blob=>{
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = document.getElementById('fileOut').textContent;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  });
+
+  // wait for fonts, then first paint
+  Promise.all([
+    document.fonts.load('100px "Archivo Black"'),
+    document.fonts.load('700 30px "Space Grotesk"')
+  ]).then(render).catch(render);
+})();
+</script>
+</body>
+</html>
