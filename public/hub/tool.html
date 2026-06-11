@@ -18,7 +18,8 @@
     appId: "1:82966513796:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  const db   = firebase.firestore();
+  const auth = firebase.auth();
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -524,6 +525,18 @@
     gtag('config', id);
   }
 
+  var HUB_TOOL_URL = 'https://hubtool-e6qya4oddq-uc.a.run.app';
+
+  async function authHeaders() {
+    try {
+      if (!auth.currentUser) await auth.signInAnonymously();
+      var token = await auth.currentUser.getIdToken();
+      return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    } catch(e) {
+      return { 'Content-Type': 'application/json' };
+    }
+  }
+
   var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
   var slot = new URLSearchParams(window.location.search).get('slot') || '1';
   var HUB = null;
@@ -673,21 +686,10 @@
     btn.textContent = '⏳ Generating your results...';
 
     try {
-      var triggerMsg = 'Generate my full ' + (HUB.toolName || 'results') + ' now. Write the complete report from scratch based on everything I shared. Do not reference previous messages or say I already have it — produce the full output now.';
-      var response = await fetch('https://api.anthropic.com/v1/messages', {
+      var response = await fetch(HUB_TOOL_URL, {
         method: 'POST',
-        headers: {
-          'x-api-key': HUB.anthropicApiKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
-          max_tokens: 2000,
-          system: 'You are a report generator. The intake conversation is complete. Your ONLY job is to write the full, complete ' + (HUB.toolName || 'results') + ' report from scratch based on everything shared in the conversation. Write it now — do not ask questions, do not reference previous messages, do not explain what you are doing. Just produce the complete report.',
-          messages: messages.concat([{ role: 'user', content: triggerMsg }])
-        })
+        headers: await authHeaders(),
+        body: JSON.stringify({ hubSlug: slug, slot: slot, messages: messages, generateMode: true })
       });
 
       if (!response.ok) throw new Error('API error ' + response.status);
@@ -783,22 +785,10 @@
     var typingEl = appendTyping();
 
     try {
-      var response = await fetch('https://api.anthropic.com/v1/messages', {
+      var response = await fetch(HUB_TOOL_URL, {
         method: 'POST',
-        headers: {
-          'x-api-key': HUB.anthropicApiKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
-          max_tokens: 1500,
-          stream: true,
-          system: (HUB.systemPrompt || 'You are a helpful AI assistant.') +
-            '\n\n---\nIMPORTANT SIGNAL INSTRUCTIONS: When you have asked enough questions and have all the information you need, do NOT generate the final output or report in this response. Instead, write a single short closing sentence (e.g. "I have everything I need to build your results!") and then add [READY_TO_GENERATE] on its own line. The actual output will be generated separately when the user clicks the button — do not include it here. Never mention or explain [READY_TO_GENERATE] to the user.',
-          messages: messages
-        })
+        headers: await authHeaders(),
+        body: JSON.stringify({ hubSlug: slug, slot: slot, messages: messages })
       });
 
       if (!response.ok) {
