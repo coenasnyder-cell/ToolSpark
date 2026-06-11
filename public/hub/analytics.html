@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creator Hub Admin</title>
+<title>Analytics — Creator Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -28,6 +28,7 @@
     --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
     --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
     --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --sidebar-width: 220px;
@@ -51,8 +52,7 @@
   .nav-item.active .nav-icon { opacity: 1; }
   .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
   .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
   .user-info { flex: 1; min-width: 0; }
   .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .user-role { font-size: 11px; color: var(--text3); }
@@ -69,61 +69,54 @@
   .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; align-items: center; justify-content: center; }
   .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
   .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; flex: 1; }
-  .page-content { flex: 1; padding: 2rem; max-width: 920px; }
-
-  /* HUB URL BANNER */
-  .hub-url-bar { background: var(--dark); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-  .hub-url-label { font-size: 11px; color: #9A9488; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 3px; }
-  .hub-url-link { font-family: monospace; font-size: 14px; color: var(--gold); text-decoration: none; }
-  .hub-url-link:hover { text-decoration: underline; }
-  .hub-name-display { font-family: 'Playfair Display', serif; font-size: 14px; color: #F0EDE6; }
+  .page-content { flex: 1; padding: 2rem; max-width: 780px; }
 
   /* PAGE HEADER */
-  .page-header { margin-bottom: 1.75rem; }
-  .page-header h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
-  .page-header p { font-size: 13px; color: var(--text3); }
+  .page-header { margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; }
+  .back-btn { display: flex; align-items: center; gap: 6px; color: var(--text3); font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: var(--radius-sm); transition: all 0.15s; border: 1px solid var(--border); background: var(--surface); }
+  .back-btn:hover { color: var(--text); border-color: var(--text3); }
+  .page-header-text h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: var(--text); margin-bottom: 2px; }
+  .page-header-text p { font-size: 13px; color: var(--text3); }
 
-  /* CARD GRID */
-  .admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  /* SETTINGS CARD */
+  .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
+  .card-header { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .card-icon { font-size: 22px; flex-shrink: 0; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .card-body { padding: 1.5rem; }
+  .card-actions { display: flex; justify-content: flex-end; padding: 0 1.5rem 1.25rem; }
 
-  /* ADMIN CARD */
-  .admin-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1.75rem 1.5rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-    aspect-ratio: 1;
-  }
-  .admin-card:hover {
-    border-color: var(--gold);
-    box-shadow: 0 4px 24px rgba(201,168,76,0.12);
-    transform: translateY(-2px);
-  }
-  .admin-card-icon {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: var(--gold-dim);
-    border: 1px solid rgba(201,168,76,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-    margin-bottom: 4px;
-  }
-  .admin-card-title { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .admin-card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex: 1; }
-  .admin-card-arrow { font-size: 15px; color: var(--text3); align-self: flex-end; margin-top: auto; }
+  /* STAT TILES */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .stat-tile { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1rem; text-align: center; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+  /* FIELD */
+  .field { margin-bottom: 1.25rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+  .field input:focus { border-color: var(--green-light); }
+  .field-hint { font-size: 12px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+
+  /* BUTTONS */
+  .btn-primary { background: var(--green); color: #fff; border: none; padding: 10px 22px; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--green-light); }
+  .btn-refresh { background: none; border: 1px solid var(--border); color: var(--text2); padding: 6px 14px; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; margin-left: auto; }
+  .btn-refresh:hover { border-color: var(--text2); color: var(--text); }
+
+  /* NO FIREBASE NOTICE */
+  .notice { background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius-sm); padding: 1rem 1.25rem; font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .notice a { color: var(--green); font-weight: 700; text-decoration: none; }
+  .notice a:hover { text-decoration: underline; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--dark); color: #F0EDE6; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; }
+  .toast.show { opacity: 1; }
 
   /* MOBILE */
-  @media (max-width: 1023px) {
-    .admin-grid { grid-template-columns: repeat(2, 1fr); }
-  }
   @media (max-width: 767px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
@@ -132,16 +125,14 @@
     .main-wrap { margin-left: 0; }
     .hamburger-btn { display: flex; }
     .page-content { padding: 1.25rem; }
-    .admin-card { aspect-ratio: auto; padding: 1.25rem; }
-    .admin-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  }
-  @media (max-width: 420px) {
-    .admin-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+    .stat-value { font-size: 26px; }
   }
 </style>
 </head>
 <body>
 
+<div class="toast" id="toast"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <aside class="sidebar" id="sidebar">
@@ -175,69 +166,67 @@
     <button class="hamburger-btn" id="hamburger-btn">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <div class="header-title">Creator Hub</div>
+    <div class="header-title">Analytics</div>
   </header>
 
   <div class="page-content">
 
-    <div class="hub-url-bar">
-      <div>
-        <div class="hub-url-label">Your Hub URL</div>
-        <a id="hub-url-display" class="hub-url-link" href="#" target="_blank">loading...</a>
-      </div>
-      <div id="hub-name-display" class="hub-name-display"></div>
-    </div>
-
     <div class="page-header">
-      <h2>Hub Admin</h2>
-      <p>Everything you need to manage your hub in one place.</p>
+      <a href="/hub/admin-dashboard" class="back-btn">← Back</a>
+      <div class="page-header-text">
+        <h2>Analytics</h2>
+        <p>Member activity and tracking settings for your hub</p>
+      </div>
     </div>
 
-    <div class="admin-grid">
-
-      <a id="card-settings" href="/hub-settings" class="admin-card">
-        <div class="admin-card-icon">⚙️</div>
-        <div class="admin-card-title">Hub Settings</div>
-        <div class="admin-card-desc">Branding, colors, features, prompts, and publishing</div>
-        <span class="admin-card-arrow">→</span>
-      </a>
-
-      <a id="card-prompt" href="/hub/prompt-generator" class="admin-card">
-        <div class="admin-card-icon">✨</div>
-        <div class="admin-card-title">Prompt Generator</div>
-        <div class="admin-card-desc">Build and customize your AI tool's conversation prompt</div>
-        <span class="admin-card-arrow">→</span>
-      </a>
-
-      <a id="card-inbox" href="#" class="admin-card">
-        <div class="admin-card-icon">📬</div>
-        <div class="admin-card-title">Inbox</div>
-        <div class="admin-card-desc">Support messages and requests from your members</div>
-        <span class="admin-card-arrow">→</span>
-      </a>
-
-      <a id="card-analytics" href="/hub/analytics" class="admin-card">
-        <div class="admin-card-icon">📊</div>
-        <div class="admin-card-title">Analytics</div>
-        <div class="admin-card-desc">Member activity, tool usage, and results data</div>
-        <span class="admin-card-arrow">→</span>
-      </a>
-
-      <a id="card-view-hub" href="#" target="_blank" class="admin-card">
-        <div class="admin-card-icon">👁️</div>
-        <div class="admin-card-title">View Hub</div>
-        <div class="admin-card-desc">Preview the member-facing side of your hub</div>
-        <span class="admin-card-arrow">→</span>
-      </a>
-
+    <!-- HUB STATS -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div style="flex:1">
+          <div class="card-title">Hub Activity</div>
+          <div class="card-desc">Live data from your connected Firebase database</div>
+        </div>
+        <button class="btn-refresh" id="refresh-btn" onclick="loadStats()">Refresh</button>
+      </div>
+      <div class="card-body">
+        <div id="stats-content">
+          <div class="notice">
+            Connect your Firebase database in <a href="/hub-settings">Hub Settings</a> to see member activity stats.
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- GOOGLE ANALYTICS -->
+    <div class="settings-card">
+      <div class="card-header">
+        <div class="card-icon">📈</div>
+        <div>
+          <div class="card-title">Google Analytics</div>
+          <div class="card-desc">Track visits and user behavior on your hub pages</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label for="gaTrackingId">Google Analytics Measurement ID</label>
+          <input type="text" id="gaTrackingId" placeholder="G-XXXXXXXXXX" maxlength="20">
+          <div class="field-hint">Go to analytics.google.com → Admin → Data Streams → your stream → copy the Measurement ID starting with G-</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="btn-primary" onclick="saveGA()">Save</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
   var hubSlug = null;
+  var hubData = null;
 
-  // Sidebar mobile toggle
+  // Sidebar toggle
   var sidebar   = document.getElementById('sidebar');
   var overlay   = document.getElementById('sidebar-overlay');
   var hamburger = document.getElementById('hamburger-btn');
@@ -248,51 +237,96 @@
   if (closeBtn)  closeBtn.addEventListener('click', closeSidebar);
   if (overlay)   overlay.addEventListener('click', closeSidebar);
 
-  // Auth
   document.getElementById('logout-btn').addEventListener('click', function() {
     auth.signOut().then(function() { window.location.href = '/signon.html'; });
   });
 
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2500);
+  }
+
   auth.onAuthStateChanged(function(user) {
     if (!user) { window.location.href = '/signon.html'; return; }
 
-    // Sidebar avatar + name
     var avatarEl = document.getElementById('sidebar-avatar');
     var nameEl   = document.getElementById('sidebar-name');
     if (avatarEl) avatarEl.textContent = (user.email || 'H')[0].toUpperCase();
     if (nameEl)   nameEl.textContent   = user.displayName || user.email || 'Hub Owner';
 
     db.collection('users').doc(user.uid).get().then(function(snap) {
-      var data = snap.exists ? snap.data() : {};
+      if (!snap.exists) { window.location.href = '/signon.html'; return; }
+      var data = snap.data();
       if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
       hubSlug = data.hubSlug;
 
-      // URL bar
-      var urlEl = document.getElementById('hub-url-display');
-      urlEl.textContent = 'toolspark.co/hub/' + hubSlug;
-      urlEl.href = '/hub/' + hubSlug + '/login';
-
-      // Card links
-      document.getElementById('card-view-hub').href = '/hub/' + hubSlug + '/dashboard';
-
-      // Load hub name
       db.collection('hubs').doc(hubSlug).get().then(function(hubSnap) {
-        if (hubSnap.exists && hubSnap.data().hubName) {
-          document.getElementById('hub-name-display').textContent = hubSnap.data().hubName;
+        if (!hubSnap.exists) return;
+        hubData = hubSnap.data();
+
+        // Populate GA field
+        if (hubData.gaTrackingId) {
+          document.getElementById('gaTrackingId').value = hubData.gaTrackingId;
         }
-      }).catch(function() {});
+
+        // Load stats if Firebase is connected
+        if (hubData.studentFirebase && hubData.studentFirebase.projectId) {
+          loadStats();
+        }
+      });
     });
   });
+
+  function loadStats() {
+    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;
+    var cfg = hubData.studentFirebase;
+
+    var statsEl = document.getElementById('stats-content');
+    statsEl.innerHTML = '<div class="stat-grid">' +
+      '<div class="stat-tile"><div class="stat-value" id="stat-subscribers">…</div><div class="stat-label">Subscribers</div></div>' +
+      '<div class="stat-tile"><div class="stat-value" id="stat-sessions">…</div><div class="stat-label">Tool Sessions</div></div>' +
+      '<div class="stat-tile"><div class="stat-value" id="stat-results">…</div><div class="stat-label">Results Generated</div></div>' +
+      '</div>' +
+      '<div class="field-hint" id="stats-updated"></div>';
+
+    var studentApp;
+    try { studentApp = firebase.app('student-analytics'); }
+    catch(e) { studentApp = firebase.initializeApp(cfg, 'student-analytics'); }
+    var sdb = studentApp.firestore();
+
+    Promise.all([
+      sdb.collection('subscribers').get(),
+      sdb.collection('toolUsage').get(),
+      sdb.collection('toolResults').get()
+    ]).then(function(results) {
+      document.getElementById('stat-subscribers').textContent = results[0].size;
+      document.getElementById('stat-sessions').textContent    = results[1].size;
+      document.getElementById('stat-results').textContent     = results[2].size;
+      document.getElementById('stats-updated').textContent    = 'Last updated: ' + new Date().toLocaleTimeString();
+    }).catch(function() {
+      document.getElementById('stats-updated').textContent = 'Could not load stats — check your Firestore rules allow reads.';
+    });
+  }
+
+  function saveGA() {
+    if (!hubSlug) return;
+    var gaId = document.getElementById('gaTrackingId').value.trim();
+    db.collection('hubs').doc(hubSlug).update({ gaTrackingId: gaId })
+      .then(function() { showToast('Saved'); })
+      .catch(function() { showToast('Save failed — try again'); });
+  }
 
   // Build admin sidebar nav
   (function() {
     var nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     var items = [
-      { href: '/hub/admin-dashboard', label: 'Admin Dashboard', active: true },
+      { href: '/hub/admin-dashboard', label: 'Admin Dashboard' },
       { href: '/hub-settings',        label: 'Hub Settings' },
       { href: '/hub/prompt-generator', label: 'Prompt Generator' },
-      { href: '/hub/analytics',       label: 'Analytics' },
+      { href: '/hub/analytics',       label: 'Analytics', active: true },
     ];
     nav.innerHTML = items.map(function(i) {
       return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';

@@ -326,32 +326,6 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- HUB ANALYTICS -->
-  <div class="settings-card" id="analytics-card" style="display:none;">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div><div class="card-title">Hub Analytics</div><div class="card-desc">Activity from your connected Firebase database</div></div>
-      <button class="btn-disconnect" onclick="loadAnalytics()" style="font-size:12px;padding:5px 12px;">Refresh</button>
-    </div>
-    <div class="card-body">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-subscribers">—</div>
-          <div class="stat-label">Subscribers</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-sessions">—</div>
-          <div class="stat-label">Tool Sessions</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-value" id="stat-results">—</div>
-          <div class="stat-label">Results Generated</div>
-        </div>
-      </div>
-      <div class="field-hint" style="margin-top:1rem;" id="analytics-updated"></div>
-    </div>
-  </div>
-
   <!-- INBOX -->
   <div class="settings-card" id="inbox-card" style="display:none;">
     <div class="card-header">
@@ -684,21 +658,6 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- ANALYTICS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div><div class="card-title">Analytics</div><div class="card-desc">Track visits and user behavior on your hub pages</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field">
-        <label for="gaTrackingId">Google Analytics Tracking ID</label>
-        <input type="text" id="gaTrackingId" placeholder="G-XXXXXXXXXX" maxlength="20">
-        <div class="field-hint">Go to analytics.google.com → Admin → Data Streams → your stream → copy the Measurement ID starting with G-</div>
-      </div>
-    </div>
-  </div>
-
   <!-- PUBLISH -->
   <div class="settings-card">
     <div class="card-header">
@@ -990,7 +949,6 @@ service cloud.firestore {
       if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); }
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
       if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
-      if (s.gaTrackingId) document.getElementById('gaTrackingId').value = s.gaTrackingId;
       var features = s.features || {};
       ['courses', 'community', 'support'].forEach(function(k) {
         var el = document.getElementById('feature-' + k);
@@ -1042,7 +1000,6 @@ service cloud.firestore {
       textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
       textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
       borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
-      gaTrackingId:       document.getElementById('gaTrackingId').value.trim(),
       features: {
         courses:   document.getElementById('feature-courses').checked,
         community: document.getElementById('feature-community').checked,
@@ -1208,40 +1165,10 @@ service cloud.firestore {
     var badge = document.getElementById('fb-status-badge');
     badge.textContent = 'Connected';
     badge.className = 'fb-badge connected';
-    document.getElementById('analytics-card').style.display = 'block';
     document.getElementById('inbox-card').style.display = 'block';
-    loadAnalytics();
     loadInbox();
   }
 
-  function loadAnalytics() {
-    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;
-    var cfg = hubData.studentFirebase;
-
-    var studentApp;
-    try { studentApp = firebase.app('student-admin'); }
-    catch(e) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
-    var sdb = studentApp.firestore();
-
-    document.getElementById('stat-subscribers').textContent = '…';
-    document.getElementById('stat-sessions').textContent    = '…';
-    document.getElementById('stat-results').textContent     = '…';
-
-    Promise.all([
-      sdb.collection('subscribers').get(),
-      sdb.collection('toolUsage').get(),
-      sdb.collection('toolResults').get()
-    ]).then(function(results) {
-      document.getElementById('stat-subscribers').textContent = results[0].size;
-      document.getElementById('stat-sessions').textContent    = results[1].size;
-      document.getElementById('stat-results').textContent     = results[2].size;
-      document.getElementById('analytics-updated').textContent =
-        'Last updated: ' + new Date().toLocaleTimeString();
-    }).catch(function(e) {
-      document.getElementById('analytics-updated').textContent =
-        'Could not load stats — check your Firestore rules allow reads.';
-    });
-  }
 
   function loadInbox() {
     if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;

@@ -23,7 +23,6 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
-<script src="/js/nav.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -566,10 +565,20 @@
     });
   });
 
-  if (typeof initNav === 'function') initNav('hub-admin', 'Prompt Generator');
-  document.addEventListener('DOMContentLoaded', function() {
-    if (typeof initNav === 'function') initNav('hub-admin', 'Prompt Generator');
-  });
+  // Build admin sidebar nav
+  (function() {
+    var nav = document.getElementById('sidebar-nav');
+    if (!nav) return;
+    var items = [
+      { href: '/hub/admin-dashboard', label: '← Admin Dashboard' },
+      { href: '/hub-settings',        label: 'Hub Settings' },
+      { href: '/hub/prompt-generator', label: 'Prompt Generator', active: true },
+      { href: '/hub/analytics',       label: 'Analytics' },
+    ];
+    nav.innerHTML = items.map(function(i) {
+      return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';
+    }).join('');
+  })();
 </script>
 </body>
 </html>

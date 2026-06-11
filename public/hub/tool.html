@@ -678,7 +678,7 @@
         body: JSON.stringify({
           model: HUB.toolModel || HUB.model || 'claude-haiku-4-5-20251001',
           max_tokens: 2000,
-          system: HUB.systemPrompt || 'You are a helpful AI assistant.',
+          system: 'You are a report generator. The intake conversation is complete. Your ONLY job is to write the full, complete ' + (HUB.toolName || 'results') + ' report from scratch based on everything shared in the conversation. Write it now — do not ask questions, do not reference previous messages, do not explain what you are doing. Just produce the complete report.',
           messages: messages.concat([{ role: 'user', content: triggerMsg }])
         })
       });
