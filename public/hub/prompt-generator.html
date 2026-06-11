@@ -70,7 +70,7 @@
   .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.75rem; }
 
   /* ROADMAP CONTEXT CARDS */
-  .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .context-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
   .context-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -174,7 +174,6 @@
   .save-status.error { color: #C0392B; }
 
   /* MOBILE */
-  @media (max-width: 1023px) { .context-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 767px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
@@ -183,7 +182,6 @@
     .main-wrap { margin-left: 0; }
     .hamburger-btn { display: flex; }
     .page-content { padding: 1.25rem; }
-    .context-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
