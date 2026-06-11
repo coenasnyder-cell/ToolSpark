@@ -525,7 +525,7 @@
     gtag('config', id);
   }
 
-  var HUB_TOOL_URL = 'https://hubtool-e6qya4oddq-uc.a.run.app';
+  var HUB_TOOL_URL = 'https://us-central1-toolspark-2d62d.cloudfunctions.net/hubtool';
 
   async function authHeaders() {
     try {
@@ -632,12 +632,7 @@
     // Update generate button label
     document.getElementById('generate-btn').textContent = '⚡ Get My ' + (hub.toolName || 'Results');
 
-    if (!hub.anthropicApiKey || hub.anthropicApiKey === 'YOUR_ANTHROPIC_API_KEY') {
-      document.getElementById('no-key-msg').style.display = 'flex';
-      document.getElementById('intro-view').style.display = 'none';
-    } else {
-      document.getElementById('intro-view').classList.add('visible');
-    }
+    document.getElementById('intro-view').classList.add('visible');
 
     showPage();
   }

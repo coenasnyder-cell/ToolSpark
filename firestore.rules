@@ -445,6 +445,11 @@ match /conversations/{conversationId} {
       allow create: if isActive() && request.resource.data.owner == request.auth.uid;
       allow update: if isActive() && (resource.data.owner == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
+
+      // Secrets sub-collection — API keys; readable only by Cloud Functions via Admin SDK
+      match /secrets/{docId} {
+        allow read, write: if false;
+      }
     }
 
     // WAITLIST (public signups — no auth required)

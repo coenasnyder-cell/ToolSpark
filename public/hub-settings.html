@@ -195,6 +195,20 @@
   .gen-prompt-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .gen-prompt-status { font-size: 12px; color: var(--text3); min-height: 16px; }
 
+  /* THEME PICKER */
+  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .theme-option { position: relative; cursor: pointer; }
+  .theme-option input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .theme-swatch { border: 2px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: border-color 0.15s; }
+  .theme-option input:checked + .theme-swatch { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+  .theme-swatch-preview { height: 64px; display: flex; flex-direction: column; overflow: hidden; }
+  .theme-swatch-nav { height: 18px; display: flex; align-items: center; padding: 0 8px; gap: 5px; flex-shrink: 0; }
+  .theme-swatch-nav-dot { width: 20px; height: 5px; border-radius: 3px; opacity: 0.6; }
+  .theme-swatch-body { flex: 1; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .theme-swatch-bubble { height: 10px; border-radius: 3px; width: 70%; }
+  .theme-swatch-bubble.user { width: 50%; align-self: flex-end; }
+  .theme-swatch-label { padding: 6px 8px; font-size: 12px; font-weight: 700; color: var(--text); }
+
   @media (max-width: 768px) {
     .page-wrap { margin-left: 0; padding: 1rem; }
     .field-row { grid-template-columns: 1fr; }
@@ -403,6 +417,67 @@ service cloud.firestore {
           </div>
         </div>
         <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT APPEARANCE -->
+  <div class="settings-card">
+    <div class="card-header">
+      <div class="card-icon">🎨</div>
+      <div><div class="card-title">Chat Appearance</div><div class="card-desc">Choose a color theme for your tool page</div></div>
+    </div>
+    <div class="card-body">
+      <div class="theme-grid">
+
+        <label class="theme-option">
+          <input type="radio" name="chatTheme" value="dark" checked>
+          <div class="theme-swatch">
+            <div class="theme-swatch-preview" style="background:#0C0B09;">
+              <div class="theme-swatch-nav" style="background:#0C0B09;">
+                <div class="theme-swatch-nav-dot" style="background:#C9A84C;"></div>
+              </div>
+              <div class="theme-swatch-body" style="background:#141210;">
+                <div class="theme-swatch-bubble" style="background:#1C1A17;"></div>
+                <div class="theme-swatch-bubble user" style="background:#1D1A0F;"></div>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Dark (Default)</div>
+          </div>
+        </label>
+
+        <label class="theme-option">
+          <input type="radio" name="chatTheme" value="light">
+          <div class="theme-swatch">
+            <div class="theme-swatch-preview" style="background:#F4F2EE;">
+              <div class="theme-swatch-nav" style="background:#1A1714;">
+                <div class="theme-swatch-nav-dot" style="background:#C9A84C;"></div>
+              </div>
+              <div class="theme-swatch-body" style="background:#FFFFFF;">
+                <div class="theme-swatch-bubble" style="background:#F8F6F2;border:1px solid #E4E0D8;"></div>
+                <div class="theme-swatch-bubble user" style="background:#FFF8E8;border:1px solid #E8D9A0;"></div>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Light</div>
+          </div>
+        </label>
+
+        <label class="theme-option">
+          <input type="radio" name="chatTheme" value="navy">
+          <div class="theme-swatch">
+            <div class="theme-swatch-preview" style="background:#0D1B2A;">
+              <div class="theme-swatch-nav" style="background:#0D1B2A;">
+                <div class="theme-swatch-nav-dot" style="background:#C9A84C;"></div>
+              </div>
+              <div class="theme-swatch-body" style="background:#1B2B3D;">
+                <div class="theme-swatch-bubble" style="background:#243447;"></div>
+                <div class="theme-swatch-bubble user" style="background:#1F2E3F;"></div>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Navy</div>
+          </div>
+        </label>
+
       </div>
     </div>
   </div>
@@ -653,6 +728,12 @@ service cloud.firestore {
       if (s.isLive) { document.getElementById('isLive').checked = true; updateStatusLabel(); }
       if (s.membersOnly) { document.getElementById('membersOnly').checked = true; updateMembersLabel(); }
       if (s.customDomain) document.getElementById('customDomain').value = s.customDomain;
+      // Detect saved theme by page background color
+      var theme = 'dark';
+      if (s.pageBgColor === '#F4F2EE') theme = 'light';
+      else if (s.pageBgColor === '#0D1B2A') theme = 'navy';
+      var themeRadio = document.querySelector('input[name=chatTheme][value="' + theme + '"]');
+      if (themeRadio) themeRadio.checked = true;
       var features = s.features || {};
       ['courses', 'community', 'support'].forEach(function(k) {
         var el = document.getElementById('feature-' + k);
@@ -660,6 +741,27 @@ service cloud.firestore {
       });
     });
   }
+
+  var THEMES = {
+    dark: {
+      primaryColor: '#C9A84C', pageBgColor: '#0C0B09', chatBgColor: '#141210',
+      aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210',
+      textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720',
+      btnTextColor: '#0C0B09', navBgColor: '#0C0B09', navTextColor: '#F0EDE6', navBtnColor: '#C9A84C'
+    },
+    light: {
+      primaryColor: '#C9A84C', pageBgColor: '#F4F2EE', chatBgColor: '#FFFFFF',
+      aiBubbleColor: '#F8F6F2', userBubbleColor: '#FFF8E8', inputBgColor: '#F4F2EE',
+      textPrimaryColor: '#1A1714', textMutedColor: '#6B6560', borderColor: '#E4E0D8',
+      btnTextColor: '#FFFFFF', navBgColor: '#1A1714', navTextColor: '#F0EDE6', navBtnColor: '#C9A84C'
+    },
+    navy: {
+      primaryColor: '#C9A84C', pageBgColor: '#0D1B2A', chatBgColor: '#1B2B3D',
+      aiBubbleColor: '#243447', userBubbleColor: '#1F2E3F', inputBgColor: '#1B2B3D',
+      textPrimaryColor: '#E8EEF4', textMutedColor: '#8A9DB0', borderColor: '#2A3D52',
+      btnTextColor: '#0D1B2A', navBgColor: '#0D1B2A', navTextColor: '#E8EEF4', navBtnColor: '#C9A84C'
+    }
+  };
 
   // ── SAVE ──
   function saveSettings() {
@@ -669,7 +771,10 @@ service cloud.firestore {
     status.textContent = '';
     status.className = 'save-status';
 
-    db.collection('hubs').doc(hubSlug).update({
+    var selectedTheme = (document.querySelector('input[name=chatTheme]:checked') || {}).value || 'dark';
+    var themeColors = THEMES[selectedTheme] || THEMES.dark;
+
+    db.collection('hubs').doc(hubSlug).update(Object.assign({
       hubName:     document.getElementById('hubName').value.trim(),
       hubTagline:  document.getElementById('hubTagline').value.trim(),
       logoUrl:     document.getElementById('logoUrl').value.trim(),
@@ -681,8 +786,8 @@ service cloud.firestore {
         community: document.getElementById('feature-community').checked,
         support:   document.getElementById('feature-support').checked
       },
-      updatedAt:          firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function() {
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, themeColors)).then(function() {
       status.textContent = '✓ Saved';
       status.className = 'save-status success';
       btn.disabled = false;
