@@ -1579,6 +1579,15 @@ exports.analyze = onRequest({
       ];
     }
 
+    // Audience Deep Dive: use Haiku for Q&A turns, Sonnet only for blueprint generation.
+    // The blueprint fires on turn 9 when history has 16+ messages; Q&A turns have fewer.
+    if (tool === "audience-conversation") {
+      const msgCount = Array.isArray(anthropicBody.messages) ? anthropicBody.messages.length : 0;
+      if (msgCount < 15) {
+        anthropicBody.model = "claude-haiku-4-5-20251001";
+      }
+    }
+
     // Attach Anthropic's official user tracking field
     if (sessionId !== "unknown") {
       anthropicBody.metadata = { user_id: sessionId };
@@ -1602,10 +1611,12 @@ exports.analyze = onRequest({
       const outputTokens     = data.usage.output_tokens                 || 0;
       const cacheWriteTokens = data.usage.cache_creation_input_tokens   || 0;
       const cacheReadTokens  = data.usage.cache_read_input_tokens       || 0;
-      const costUsd = (inputTokens      / 1_000_000 * 3.00)  +
-                      (outputTokens     / 1_000_000 * 15.00) +
-                      (cacheWriteTokens / 1_000_000 * 3.75)  +
-                      (cacheReadTokens  / 1_000_000 * 0.30);
+      const usedModel = (data.model || anthropicBody.model || "").toLowerCase();
+      const isHaiku   = usedModel.includes("haiku");
+      const costUsd = (inputTokens      / 1_000_000 * (isHaiku ? 0.80 : 3.00))  +
+                      (outputTokens     / 1_000_000 * (isHaiku ? 4.00 : 15.00)) +
+                      (cacheWriteTokens / 1_000_000 * (isHaiku ? 1.00 : 3.75))  +
+                      (cacheReadTokens  / 1_000_000 * (isHaiku ? 0.08 : 0.30));
 
       const usageRecord = {
         tool,
