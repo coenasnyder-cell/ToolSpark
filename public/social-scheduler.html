@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>31-Day Post Planner — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SIDEBAR (nav.js injects this) ── */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .mobile-overlay { display: none; }
+  .hamburger-btn { display: none; }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .mobile-overlay.visible { opacity: 1; pointer-events: all; }
+    .hamburger-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: none; border: none; cursor: pointer; color: var(--text); }
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .page-wrap {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 768px) { .page-wrap { margin-left: 0; } }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 12px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .save-status { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+  .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
+  .save-status.saving .save-dot { background: var(--gold); animation: pulse 1s infinite; }
+  .save-status.saved .save-dot { background: var(--green-light); }
+  .save-status.error .save-dot { background: #C4622D; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; padding: 1.5rem 2rem 4rem; max-width: 900px; width: 100%; }
+  @media (max-width: 600px) { .content { padding: 1rem 1rem 3rem; } }
+
+  /* ── DAY NAVIGATION ── */
+  .day-nav-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .day-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .day-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .day-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .day-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .day-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    text-align: center;
+    flex: 1;
+  }
+  .day-label span { color: var(--gold); }
+  .progress-line {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .progress-line b { color: var(--green-light); }
+
+  /* ── DAY PILLS ── */
+  .day-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .day-pill {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .day-pill:hover { border-color: var(--gold); color: var(--gold); }
+  .day-pill.current { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .day-pill.has-content { background: rgba(42,92,69,0.12); border-color: rgba(42,92,69,0.4); color: var(--green-light); }
+  .day-pill.has-content.current { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+
+  /* ── POST CARDS ── */
+  .posts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .post-card.has-content { border-color: rgba(42,92,69,0.3); }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.01);
+  }
+  .post-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .post-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+  }
+  .post-char-count {
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .post-char-count.over { color: #C4622D; }
+
+  .post-body {
+    padding: 16px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  @media (max-width: 500px) { .post-body { flex-direction: column; } }
+
+  /* CAPTION */
+  .caption-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .caption-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .caption-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'Lato', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    resize: none;
+    min-height: 100px;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .caption-textarea:focus { border-color: var(--gold); }
+  .caption-textarea::placeholder { color: var(--text3); }
+
+  /* IMAGE UPLOAD */
+  .image-col { flex-shrink: 0; width: 150px; display: flex; flex-direction: column; gap: 6px; }
+  .image-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .upload-zone {
+    width: 150px;
+    height: 120px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .upload-zone.uploading { border-color: var(--gold); opacity: 0.7; cursor: wait; }
+  .upload-zone.has-image { border-style: solid; border-color: rgba(42,92,69,0.4); padding: 0; }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+  .upload-zone.uploading input[type=file] { pointer-events: none; }
+  .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; }
+  .upload-icon { font-size: 24px; }
+  .upload-text { font-size: 10px; font-weight: 700; color: var(--text3); text-align: center; line-height: 1.4; }
+  .upload-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .upload-preview.visible { display: block; }
+  .upload-spinner { display: none; font-size: 18px; }
+  .upload-zone.uploading .upload-spinner { display: block; animation: spin 1s linear infinite; }
+  .upload-zone.uploading .upload-placeholder { display: none; }
+  @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .btn-remove-img {
+    display: none;
+    width: 100%;
+    padding: 5px 0;
+    background: rgba(196,98,45,0.08);
+    color: #C4622D;
+    border: 1px solid rgba(196,98,45,0.25);
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-remove-img.visible { display: block; }
+  .btn-remove-img:hover { background: rgba(196,98,45,0.15); }
+
+  /* ── WEEK LABELS ── */
+  .week-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 0;
+    width: 100%;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+<div class="page-wrap">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="page-title">31-Day Post Planner</div>
+    </div>
+    <div class="save-status" id="saveStatus">
+      <div class="save-dot"></div>
+      <span id="saveText">—</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- DAY NAVIGATION -->
+    <div class="day-nav-bar">
+      <div class="day-controls">
+        <button class="day-btn" id="btnPrev" onclick="changeDay(-1)">← Prev</button>
+        <div class="day-label">Day <span id="dayNum">1</span></div>
+        <button class="day-btn" id="btnNext" onclick="changeDay(1)">Next →</button>
+      </div>
+
+      <div class="progress-line" id="progressLine">Loading…</div>
+
+      <!-- 31 pills -->
+      <div class="day-pills" id="dayPills"></div>
+    </div>
+
+    <!-- POST CARDS -->
+    <div class="posts-grid" id="postsGrid"></div>
+
+  </div>
+</div>
+
+<script src="js/nav.js"></script>
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentDay = 1;
+  let uid = null;
+  let allData = {};       // { "d1_p1": { caption, imageUrl, imagePath }, ... }
+  let saveTimer = null;
+
+  // ── Auth ────────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    uid = user.uid;
+    await loadAllData();
+    buildPills();
+    renderDay(currentDay);
+  });
+
+  // ── Firestore ────────────────────────────────────────────────────────────────
+  async function loadAllData() {
+    try {
+      const snap = await db.collection('social_scheduler').doc(uid).get();
+      allData = snap.exists ? (snap.data() || {}) : {};
+      delete allData.updatedAt;
+    } catch(e) { allData = {}; }
+  }
+
+  function scheduleSave() {
+    setSaveStatus('saving');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveAllData, 900);
+  }
+
+  async function saveAllData() {
+    try {
+      const payload = { ...allData, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+      await db.collection('social_scheduler').doc(uid).set(payload, { merge: true });
+      setSaveStatus('saved');
+      updatePills();
+      updateProgress();
+    } catch(e) {
+      setSaveStatus('error');
+    }
+  }
+
+  // ── UI helpers ───────────────────────────────────────────────────────────────
+  function setSaveStatus(state, text) {
+    const el = document.getElementById('saveStatus');
+    const txt = document.getElementById('saveText');
+    el.className = 'save-status ' + state;
+    txt.textContent = state === 'saving' ? 'Saving…' : state === 'saved' ? 'All saved' : 'Save error';
+  }
+
+  function key(day, post) { return `d${day}_p${post}`; }
+
+  function getEntry(day, post) {
+    return allData[key(day, post)] || { caption: '', imageUrl: '', imagePath: '' };
+  }
+
+  function setCaption(day, post, val) {
+    if (!allData[key(day, post)]) allData[key(day, post)] = {};
+    allData[key(day, post)].caption = val;
+    scheduleSave();
+  }
+
+  function dayHasContent(day) {
+    return [1, 2, 3].some(p => {
+      const e = allData[key(day, p)];
+      return e && (e.caption || e.imageUrl);
+    });
+  }
+
+  function countFilledDays() {
+    return Array.from({ length: 31 }, (_, i) => i + 1).filter(dayHasContent).length;
+  }
+
+  // ── Day Pills ────────────────────────────────────────────────────────────────
+  function buildPills() {
+    const container = document.getElementById('dayPills');
+    container.innerHTML = '';
+
+    const weeks = [
+      { label: 'Week 1', days: [1,2,3,4,5,6,7] },
+      { label: 'Week 2', days: [8,9,10,11,12,13,14] },
+      { label: 'Week 3', days: [15,16,17,18,19,20,21] },
+      { label: 'Week 4', days: [22,23,24,25,26,27,28] },
+      { label: 'Days 29–31', days: [29,30,31] },
+    ];
+
+    weeks.forEach(week => {
+      const wl = document.createElement('div');
+      wl.className = 'week-label';
+      wl.textContent = week.label;
+      container.appendChild(wl);
+
+      week.days.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'day-pill';
+        btn.id = 'pill-' + d;
+        btn.textContent = d;
+        btn.onclick = () => goToDay(d);
+        container.appendChild(btn);
+      });
+    });
+
+    updatePills();
+  }
+
+  function updatePills() {
+    for (let d = 1; d <= 31; d++) {
+      const pill = document.getElementById('pill-' + d);
+      if (!pill) continue;
+      pill.className = 'day-pill' +
+        (d === currentDay ? ' current' : '') +
+        (dayHasContent(d) ? ' has-content' : '');
+    }
+  }
+
+  function updateProgress() {
+    const filled = countFilledDays();
+    const el = document.getElementById('progressLine');
+    if (filled === 0) {
+      el.innerHTML = 'Start filling in your posts — one day at a time.';
+    } else {
+      el.innerHTML = `<b>${filled}</b> of 31 days have content`;
+    }
+  }
+
+  // ── Day Navigation ────────────────────────────────────────────────────────────
+  function goToDay(d) {
+    currentDay = d;
+    document.getElementById('dayNum').textContent = d;
+    document.getElementById('btnPrev').disabled = d === 1;
+    document.getElementById('btnNext').disabled = d === 31;
+    renderDay(d);
+    updatePills();
+  }
+
+  function changeDay(delta) {
+    const next = currentDay + delta;
+    if (next < 1 || next > 31) return;
+    goToDay(next);
+  }
+
+  // ── Render Posts ──────────────────────────────────────────────────────────────
+  function renderDay(day) {
+    const grid = document.getElementById('postsGrid');
+    grid.innerHTML = '';
+    [1, 2, 3].forEach(p => grid.appendChild(buildPostCard(day, p)));
+    updateProgress();
+  }
+
+  function buildPostCard(day, postNum) {
+    const entry = getEntry(day, postNum);
+    const k = key(day, postNum);
+    const hasContent = !!(entry.caption || entry.imageUrl);
+
+    const card = document.createElement('div');
+    card.className = 'post-card' + (hasContent ? ' has-content' : '');
+    card.id = 'card-' + k;
+
+    const charCount = entry.caption ? entry.caption.length : 0;
+    const charOver = charCount > 2200;
+
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="post-num">${postNum}</div>
+        <div class="post-label">Post ${postNum}</div>
+        <div class="post-char-count${charOver ? ' over' : ''}" id="chars-${k}">${charCount > 0 ? charCount + ' chars' : ''}</div>
+      </div>
+      <div class="post-body">
+        <div class="caption-wrap">
+          <div class="caption-label">Caption</div>
+          <textarea
+            class="caption-textarea"
+            id="caption-${k}"
+            placeholder="Write your caption here…"
+            rows="5"
+          >${escHtml(entry.caption || '')}</textarea>
+        </div>
+        <div class="image-col">
+          <div class="image-label">Image</div>
+          <div class="upload-zone${entry.imageUrl ? ' has-image' : ''}" id="zone-${k}">
+            <input type="file" accept="image/*" id="file-${k}" onchange="handleImageUpload(event, ${day}, ${postNum})">
+            <div class="upload-placeholder">
+              <div class="upload-icon">🖼</div>
+              <div class="upload-text">Click to upload<br>image</div>
+            </div>
+            <div class="upload-spinner">⏳</div>
+            <img class="upload-preview${entry.imageUrl ? ' visible' : ''}" id="preview-${k}" src="${entry.imageUrl || ''}" alt="">
+          </div>
+          <button class="btn-remove-img${entry.imageUrl ? ' visible' : ''}" id="removeBtn-${k}" onclick="removeImage(${day}, ${postNum})">✕ Remove image</button>
+        </div>
+      </div>
+    `;
+
+    // Caption input handler
+    card.querySelector(`#caption-${k}`).addEventListener('input', (e) => {
+      const val = e.target.value;
+      setCaption(day, postNum, val);
+      const count = val.length;
+      const el = document.getElementById('chars-' + k);
+      el.textContent = count > 0 ? count + ' chars' : '';
+      el.className = 'post-char-count' + (count > 2200 ? ' over' : '');
+      const c = document.getElementById('card-' + k);
+      if (val || getEntry(day, postNum).imageUrl) c.classList.add('has-content');
+      else c.classList.remove('has-content');
+    });
+
+    return card;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Image Upload ──────────────────────────────────────────────────────────────
+  async function handleImageUpload(event, day, postNum) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const k = key(day, postNum);
+    const zone = document.getElementById('zone-' + k);
+
+    zone.classList.add('uploading');
+
+    try {
+      const path = `social-scheduler/${uid}/${k}`;
+      const ref = storage.ref(path);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+
+      if (!allData[k]) allData[k] = {};
+      allData[k].imageUrl = url;
+      allData[k].imagePath = path;
+
+      // Update UI
+      const preview = document.getElementById('preview-' + k);
+      preview.src = url;
+      preview.classList.add('visible');
+      zone.classList.remove('uploading');
+      zone.classList.add('has-image');
+      document.getElementById('removeBtn-' + k).classList.add('visible');
+      document.getElementById('card-' + k).classList.add('has-content');
+
+      await saveAllData();
+    } catch(e) {
+      zone.classList.remove('uploading');
+      setSaveStatus('error');
+    }
+  }
+
+  async function removeImage(day, postNum) {
+    const k = key(day, postNum);
+    const entry = allData[k] || {};
+
+    if (entry.imagePath) {
+      try { await storage.ref(entry.imagePath).delete(); } catch(e) {}
+    }
+
+    if (allData[k]) {
+      allData[k].imageUrl = '';
+      allData[k].imagePath = '';
+    }
+
+    const preview = document.getElementById('preview-' + k);
+    preview.src = '';
+    preview.classList.remove('visible');
+    const zone = document.getElementById('zone-' + k);
+    zone.classList.remove('has-image');
+    document.getElementById('removeBtn-' + k).classList.remove('visible');
+    document.getElementById('file-' + k).value = '';
+
+    const caption = (allData[k] || {}).caption || '';
+    if (!caption) document.getElementById('card-' + k).classList.remove('has-content');
+
+    await saveAllData();
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────────
+  function toggleSidebar() {
+    const s = document.querySelector('.sidebar');
+    const o = document.getElementById('mobileOverlay');
+    s.classList.toggle('open');
+    o.classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('mobileOverlay').classList.remove('visible');
+  }
+</script>
+<script>initNav('social-scheduler', '31-Day Post Planner');</script>
+</body>
+</html>
