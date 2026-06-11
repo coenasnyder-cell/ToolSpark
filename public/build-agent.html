@@ -614,6 +614,7 @@ async function generateToolPrompt() {
 
     await db.collection('hubs').doc(hubSlug).update({
       systemPrompt: prompt,
+      toolBuilt: true,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
@@ -622,8 +623,8 @@ async function generateToolPrompt() {
     if (ctaEl) {
       ctaEl.innerHTML = `
         <div class="prompt-saved-banner">
-          <div class="prompt-saved-title">Your tool prompt was saved.</div>
-          <a href="/hub/prompt-generator" class="btn-lets-build">Let's Build It →</a>
+          <div class="prompt-saved-title">Your tool is built.</div>
+          <a href="/hub/${hubSlug}/tool" class="btn-lets-build">View Your Tool →</a>
         </div>`;
     }
     document.getElementById('chatWrap').scrollTop = document.getElementById('chatWrap').scrollHeight;

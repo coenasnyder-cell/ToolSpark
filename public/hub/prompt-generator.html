@@ -165,6 +165,26 @@
   .save-status.success { color: #2E7D32; }
   .save-status.error { color: #C0392B; }
 
+  /* YOUR TOOL ROW */
+  .tool-built-row {
+    display: none;
+    align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem 1.25rem; border-radius: var(--radius);
+    background: var(--dark); border: 1px solid rgba(201,168,76,0.25);
+  }
+  .tool-built-row.visible { display: flex; }
+  .tool-built-info { display: flex; flex-direction: column; gap: 3px; }
+  .tool-built-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(201,168,76,0.6); }
+  .tool-built-name { font-size: 15px; font-weight: 700; color: #F0EDE6; }
+  .btn-open-tool {
+    display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    background: var(--gold); color: #0C0B09;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    text-decoration: none; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .btn-open-tool:hover { opacity: 0.85; }
+
   /* MOBILE */
   @media (max-width: 767px) {
     .sidebar { transform: translateX(-100%); }
@@ -220,6 +240,18 @@
   </header>
 
   <div class="page-content">
+
+    <!-- YOUR TOOL ROW -->
+    <div class="tool-built-row" id="tool-built-row">
+      <div class="tool-built-info">
+        <div class="tool-built-label">Your Tool</div>
+        <div class="tool-built-name" id="tool-built-name">—</div>
+      </div>
+      <a href="#" id="tool-built-link" class="btn-open-tool">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Tool
+      </a>
+    </div>
 
     <!-- ROADMAP CONTEXT -->
     <div>
@@ -450,11 +482,19 @@
       if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
       hubSlug = data.hubSlug;
 
-      // Load existing system prompt
+      // Load hub data — system prompt + tool built state
       db.collection('hubs').doc(hubSlug).get().then(function(hubSnap) {
-        if (hubSnap.exists && hubSnap.data().systemPrompt) {
-          document.getElementById('prompt-textarea').value = hubSnap.data().systemPrompt;
+        if (!hubSnap.exists) return;
+        var hub = hubSnap.data();
+        if (hub.systemPrompt) {
+          document.getElementById('prompt-textarea').value = hub.systemPrompt;
           document.getElementById('prompt-meta').textContent = 'Loaded from your hub — edit and save to update';
+        }
+        if (hub.toolBuilt) {
+          var toolName = hub.toolName || hub.hubName || 'Your Tool';
+          document.getElementById('tool-built-name').textContent = toolName;
+          document.getElementById('tool-built-link').href = '/hub/' + hubSlug + '/tool';
+          document.getElementById('tool-built-row').classList.add('visible');
         }
       }).catch(function() {});
 
