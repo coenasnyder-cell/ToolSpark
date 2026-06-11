@@ -326,23 +326,6 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- INBOX -->
-  <div class="settings-card" id="inbox-card" style="display:none;">
-    <div class="card-header">
-      <div class="card-icon">📬</div>
-      <div>
-        <div class="card-title">Inbox <span id="inbox-unread-badge" style="display:none;background:var(--gold,#C9A84C);color:#0C0B09;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;"></span></div>
-        <div class="card-desc">Support messages from your hub members</div>
-      </div>
-      <button class="btn-disconnect" onclick="loadInbox()" style="font-size:12px;padding:5px 12px;">Refresh</button>
-    </div>
-    <div class="card-body">
-      <div id="inbox-loading" style="font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">Loading messages…</div>
-      <div id="inbox-empty" style="display:none;font-size:13px;color:var(--text-muted,#6B6560);padding:8px 0;">No support messages yet.</div>
-      <div id="inbox-list"></div>
-    </div>
-  </div>
-
   <!-- FEATURES -->
   <div class="settings-card">
     <div class="card-header">
@@ -415,217 +398,6 @@ service cloud.firestore {
           </div>
         </div>
         <input type="url" id="logoUrl" placeholder="or paste an image URL..." style="margin-top:8px;">
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE & SITE COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🌐</div>
-      <div><div class="card-title">Page &amp; Site Colors</div><div class="card-desc">These colors apply everywhere — the intro screen, nav, and all pages</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Button &amp; Highlight Color</label>
-          <div class="color-row">
-            <input type="color" id="primaryColorPicker" value="#C9A84C">
-            <input type="text" id="primaryColorHex" placeholder="#C9A84C" maxlength="7">
-          </div>
-          <div class="field-hint">Your main brand color — controls the Get Started button background, the numbered step circles (1, 2, 3) and their text</div>
-        </div>
-        <div class="field">
-          <label>Button Text Color</label>
-          <div class="color-row">
-            <input type="color" id="btnTextColorPicker" value="#0C0B09">
-            <input type="text" id="btnTextColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">Only controls the text written ON your buttons (like "Get Started" and "Get Access") — use white if your button color is dark</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Page Background</label>
-          <div class="color-row">
-            <input type="color" id="pageBgColorPicker" value="#0C0B09">
-            <input type="text" id="pageBgColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">The background color behind everything — all pages use this</div>
-        </div>
-        <div class="field">
-          <label>Headline &amp; Body Text</label>
-          <div class="color-row">
-            <input type="color" id="textPrimaryColorPicker" value="#F0EDE6">
-            <input type="text" id="textPrimaryColorHex" placeholder="#F0EDE6" maxlength="7">
-          </div>
-          <div class="field-hint">Your main headline and the step labels ("Answer a few questions", etc.) — use a dark color if your background is light</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Description &amp; Label Text</label>
-          <div class="color-row">
-            <input type="color" id="textMutedColorPicker" value="#9A9488">
-            <input type="text" id="textMutedColorHex" placeholder="#9A9488" maxlength="7">
-          </div>
-          <div class="field-hint">The supporting paragraph text below your headline, your landing page subheadline, and the typing dots in chat — NOT the step labels or numbers</div>
-        </div>
-        <div class="field">
-          <label>Lines &amp; Borders</label>
-          <div class="color-row">
-            <input type="color" id="borderColorPicker" value="#2A2720">
-            <input type="text" id="borderColorHex" placeholder="#2A2720" maxlength="7">
-          </div>
-          <div class="field-hint">The line under your header, the dashes connecting steps (1 — 2 — 3), the outline around your chat box, message bubbles, and text input box</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- HEADER / NAV COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">🔝</div>
-      <div><div class="card-title">Header / Navigation</div><div class="card-desc">The bar across the top of every page</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Header Background</label>
-          <div class="color-row">
-            <input type="color" id="navBgColorPicker" value="#0C0B09">
-            <input type="text" id="navBgColorHex" placeholder="#0C0B09" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the top bar — set it different from the page to make the header stand out</div>
-        </div>
-        <div class="field">
-          <label>Header Text Color</label>
-          <div class="color-row">
-            <input type="color" id="navTextColorPicker" value="#F0EDE6">
-            <input type="text" id="navTextColorHex" placeholder="#F0EDE6" maxlength="7">
-          </div>
-          <div class="field-hint">Your hub name displayed in the top left corner</div>
-        </div>
-      </div>
-      <div class="field" style="max-width:50%;">
-        <label>Header Button Color</label>
-        <div class="color-row">
-          <input type="color" id="navBtnColorPicker" value="#C9A84C">
-          <input type="text" id="navBtnColorHex" placeholder="#C9A84C" maxlength="7">
-        </div>
-        <div class="field-hint">The buttons in the top right corner — "Get Access" on the landing page, "New Conversation" and "Sign Out" on the chat page</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAT TOOL COLORS -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">💬</div>
-      <div><div class="card-title">Chat Tool Colors</div><div class="card-desc">Colors inside the chat interface — only visible once someone clicks Get Started</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Chat Box Background</label>
-          <div class="color-row">
-            <input type="color" id="chatBgColorPicker" value="#141210">
-            <input type="text" id="chatBgColorHex" placeholder="#141210" maxlength="7">
-          </div>
-          <div class="field-hint">The card the whole conversation sits inside</div>
-        </div>
-        <div class="field">
-          <label>Tool Response Bubbles</label>
-          <div class="color-row">
-            <input type="color" id="aiBubbleColorPicker" value="#1C1A17">
-            <input type="text" id="aiBubbleColorHex" placeholder="#1C1A17" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the messages your AI tool sends</div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>User Reply Bubbles</label>
-          <div class="color-row">
-            <input type="color" id="userBubbleColorPicker" value="#1D1A0F">
-            <input type="text" id="userBubbleColorHex" placeholder="#1D1A0F" maxlength="7">
-          </div>
-          <div class="field-hint">Background color of the messages your users send</div>
-        </div>
-        <div class="field">
-          <label>Message Input Box</label>
-          <div class="color-row">
-            <input type="color" id="inputBgColorPicker" value="#141210">
-            <input type="text" id="inputBgColorHex" placeholder="#141210" maxlength="7">
-          </div>
-          <div class="field-hint">The text box at the bottom where users type their message</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI TOOL -->
-  <div class="settings-card">
-    <div class="card-header">
-      <div class="card-icon">⚡</div>
-      <div><div class="card-title">Your AI Tool</div><div class="card-desc">The tool your audience will use</div></div>
-    </div>
-    <div class="card-body">
-      <div class="field-row">
-        <div class="field">
-          <label for="toolName">Tool Name</label>
-          <input type="text" id="toolName" placeholder="e.g. Caption Generator" maxlength="60">
-        </div>
-        <div class="field">
-          <label for="toolModel">AI Model</label>
-          <select id="toolModel">
-            <option value="claude-haiku-4-5-20251001">Claude Haiku (faster, cheaper)</option>
-            <option value="claude-sonnet-4-6">Claude Sonnet (smarter)</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label for="toolDescription">Tool Description</label>
-        <input type="text" id="toolDescription" placeholder="e.g. Generate captions for real estate listings in seconds" maxlength="120">
-      </div>
-      <div class="field" style="max-width:50%;">
-        <label for="minQuestionsBeforeGenerate">Questions Before Generate Button Appears</label>
-        <input type="number" id="minQuestionsBeforeGenerate" min="1" max="20" value="4" placeholder="4">
-        <div class="field-hint">How many questions your tool asks before the "Generate My Report" button shows up — set this to match how many questions are in your flow</div>
-      </div>
-      <div class="field">
-        <label for="customGreeting">Custom Greeting <span>optional</span></label>
-        <textarea id="customGreeting" rows="3" placeholder="e.g. Hey! I'm your Caption Generator. Tell me a bit about your listing and I'll write something that stops the scroll. What are you working on today?"></textarea>
-        <div class="field-hint">This is the first message your users see when they open the tool. If left blank, a greeting is generated automatically from your tool name and description.</div>
-      </div>
-      <div class="field">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <label for="systemPrompt" style="margin-bottom:0;">System Prompt</label>
-          <button type="button" class="gen-prompt-btn" id="gen-prompt-btn" onclick="generateSystemPrompt()">⚡ Generate from roadmap</button>
-        </div>
-        <textarea class="large" id="systemPrompt" placeholder="Paste your system prompt here, or click Generate from roadmap to build one from your Spark &amp; Audience data..."></textarea>
-        <div class="gen-prompt-status" id="gen-prompt-status"></div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="inputLabel">Input Field Label</label>
-          <input type="text" id="inputLabel" placeholder="e.g. Describe your listing" maxlength="60">
-        </div>
-        <div class="field">
-          <label for="inputPlaceholder">Input Placeholder</label>
-          <input type="text" id="inputPlaceholder" placeholder="e.g. 3-bed home in Austin..." maxlength="100">
-        </div>
-      </div>
-      <div class="field">
-        <label for="anthropicApiKey">Anthropic API Key</label>
-        <div class="key-wrap">
-          <input type="password" id="anthropicApiKey" placeholder="sk-ant-...">
-          <button class="key-toggle" type="button" onclick="toggleKey('anthropicApiKey',this)">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-        <div class="field-hint">Get your key at console.anthropic.com — set a monthly spend limit there.</div>
       </div>
     </div>
   </div>
@@ -817,19 +589,6 @@ service cloud.firestore {
       }
     });
   }
-  wireColorPair('primaryColorPicker', 'primaryColorHex');
-  wireColorPair('pageBgColorPicker',   'pageBgColorHex');
-  wireColorPair('chatBgColorPicker',   'chatBgColorHex');
-  wireColorPair('aiBubbleColorPicker', 'aiBubbleColorHex');
-  wireColorPair('userBubbleColorPicker','userBubbleColorHex');
-  wireColorPair('inputBgColorPicker',    'inputBgColorHex');
-  wireColorPair('btnTextColorPicker',    'btnTextColorHex');
-  wireColorPair('navBgColorPicker',      'navBgColorHex');
-  wireColorPair('navTextColorPicker',    'navTextColorHex');
-  wireColorPair('navBtnColorPicker',     'navBtnColorHex');
-  wireColorPair('textPrimaryColorPicker','textPrimaryColorHex');
-  wireColorPair('textMutedColorPicker',  'textMutedColorHex');
-  wireColorPair('borderColorPicker',     'borderColorHex');
 
   // ── LOGO PREVIEW ──
   document.getElementById('logoUrl').addEventListener('input', function() {
@@ -925,23 +684,13 @@ service cloud.firestore {
       loadStudentFirebase(s);
       if (s.hubName) document.getElementById('hubName').value = s.hubName;
       if (s.hubTagline) document.getElementById('hubTagline').value = s.hubTagline;
-      if (s.primaryColor) { document.getElementById('primaryColorPicker').value = s.primaryColor; document.getElementById('primaryColorHex').value = s.primaryColor.toUpperCase(); }
-      var colorDefaults = { pageBgColor: '#0C0B09', chatBgColor: '#141210', aiBubbleColor: '#1C1A17', userBubbleColor: '#1D1A0F', inputBgColor: '#141210', textPrimaryColor: '#F0EDE6', textMutedColor: '#9A9488', borderColor: '#2A2720', btnTextColor: '#0C0B09', navBgColor: '#0C0B09', navTextColor: '#F0EDE6', navBtnColor: '#C9A84C' };
+      var colorDefaults = {};
       Object.keys(colorDefaults).forEach(function(field) {
         var val = s[field] || colorDefaults[field];
         document.getElementById(field + 'Picker').value = val;
         document.getElementById(field + 'Hex').value = val.toUpperCase();
       });
       if (s.logoUrl) { document.getElementById('logoUrl').value = s.logoUrl; var p = document.getElementById('logo-preview'); p.src = s.logoUrl; p.classList.add('visible'); }
-      if (s.toolName) document.getElementById('toolName').value = s.toolName;
-      if (s.toolModel) document.getElementById('toolModel').value = s.toolModel;
-      if (s.toolDescription) document.getElementById('toolDescription').value = s.toolDescription;
-      if (s.systemPrompt) document.getElementById('systemPrompt').value = s.systemPrompt;
-      if (s.minQuestionsBeforeGenerate) document.getElementById('minQuestionsBeforeGenerate').value = s.minQuestionsBeforeGenerate;
-      if (s.customGreeting) document.getElementById('customGreeting').value = s.customGreeting;
-      if (s.inputLabel) document.getElementById('inputLabel').value = s.inputLabel;
-      if (s.inputPlaceholder) document.getElementById('inputPlaceholder').value = s.inputPlaceholder;
-      if (s.anthropicApiKey) document.getElementById('anthropicApiKey').value = s.anthropicApiKey;
       if (s.landingHeadline) document.getElementById('landingHeadline').value = s.landingHeadline;
       if (s.landingSubheadline) document.getElementById('landingSubheadline').value = s.landingSubheadline;
       if (s.landingCtaText) document.getElementById('landingCtaText').value = s.landingCtaText;
@@ -965,22 +714,10 @@ service cloud.firestore {
     status.textContent = '';
     status.className = 'save-status';
 
-    var colorHex = document.getElementById('primaryColorHex').value.trim() || document.getElementById('primaryColorPicker').value;
-
     db.collection('hubs').doc(hubSlug).update({
       hubName:            document.getElementById('hubName').value.trim(),
       hubTagline:         document.getElementById('hubTagline').value.trim(),
-      primaryColor:       colorHex,
       logoUrl:            document.getElementById('logoUrl').value.trim(),
-      toolName:           document.getElementById('toolName').value.trim(),
-      toolModel:          document.getElementById('toolModel').value,
-      toolDescription:    document.getElementById('toolDescription').value.trim(),
-      systemPrompt:       document.getElementById('systemPrompt').value.trim(),
-      minQuestionsBeforeGenerate: parseInt(document.getElementById('minQuestionsBeforeGenerate').value) || 4,
-      customGreeting:     document.getElementById('customGreeting').value.trim(),
-      inputLabel:         document.getElementById('inputLabel').value.trim(),
-      inputPlaceholder:   document.getElementById('inputPlaceholder').value.trim(),
-      anthropicApiKey:    document.getElementById('anthropicApiKey').value.trim(),
       landingHeadline:    document.getElementById('landingHeadline').value.trim(),
       landingSubheadline: document.getElementById('landingSubheadline').value.trim(),
       landingCtaText:     document.getElementById('landingCtaText').value.trim(),
@@ -988,18 +725,6 @@ service cloud.firestore {
       isLive:             document.getElementById('isLive').checked,
       membersOnly:        document.getElementById('membersOnly').checked,
       customDomain:       document.getElementById('customDomain').value.trim(),
-      pageBgColor:        document.getElementById('pageBgColorHex').value.trim() || document.getElementById('pageBgColorPicker').value,
-      chatBgColor:        document.getElementById('chatBgColorHex').value.trim() || document.getElementById('chatBgColorPicker').value,
-      aiBubbleColor:      document.getElementById('aiBubbleColorHex').value.trim() || document.getElementById('aiBubbleColorPicker').value,
-      userBubbleColor:    document.getElementById('userBubbleColorHex').value.trim() || document.getElementById('userBubbleColorPicker').value,
-      inputBgColor:       document.getElementById('inputBgColorHex').value.trim() || document.getElementById('inputBgColorPicker').value,
-      btnTextColor:       document.getElementById('btnTextColorHex').value.trim() || document.getElementById('btnTextColorPicker').value,
-      navBgColor:         document.getElementById('navBgColorHex').value.trim() || document.getElementById('navBgColorPicker').value,
-      navTextColor:       document.getElementById('navTextColorHex').value.trim() || document.getElementById('navTextColorPicker').value,
-      navBtnColor:        document.getElementById('navBtnColorHex').value.trim() || document.getElementById('navBtnColorPicker').value,
-      textPrimaryColor:   document.getElementById('textPrimaryColorHex').value.trim() || document.getElementById('textPrimaryColorPicker').value,
-      textMutedColor:     document.getElementById('textMutedColorHex').value.trim() || document.getElementById('textMutedColorPicker').value,
-      borderColor:        document.getElementById('borderColorHex').value.trim() || document.getElementById('borderColorPicker').value,
       features: {
         courses:   document.getElementById('feature-courses').checked,
         community: document.getElementById('feature-community').checked,
@@ -1165,111 +890,9 @@ service cloud.firestore {
     var badge = document.getElementById('fb-status-badge');
     badge.textContent = 'Connected';
     badge.className = 'fb-badge connected';
-    document.getElementById('inbox-card').style.display = 'block';
-    loadInbox();
   }
 
 
-  function loadInbox() {
-    if (!hubData || !hubData.studentFirebase || !hubData.studentFirebase.projectId) return;
-    var cfg = hubData.studentFirebase;
-
-    var studentApp;
-    try { studentApp = firebase.app('student-admin'); }
-    catch(e) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
-    var sdb = studentApp.firestore();
-
-    document.getElementById('inbox-loading').style.display = 'block';
-    document.getElementById('inbox-empty').style.display = 'none';
-    document.getElementById('inbox-list').innerHTML = '';
-
-    sdb.collection('supportRequests')
-      .orderBy('createdAt', 'desc')
-      .limit(50)
-      .get().then(function(snap) {
-        document.getElementById('inbox-loading').style.display = 'none';
-        if (snap.empty) {
-          document.getElementById('inbox-empty').style.display = 'block';
-          document.getElementById('inbox-unread-badge').style.display = 'none';
-          return;
-        }
-
-        var unread = 0;
-        var list = document.getElementById('inbox-list');
-        snap.docs.forEach(function(doc) {
-          var r = doc.data();
-          if (!r.read) unread++;
-          var ts = r.createdAt ? (r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt)) : null;
-          var dateStr = ts ? ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-
-          var item = document.createElement('div');
-          item.className = 'inbox-item' + (r.read ? ' inbox-read' : '');
-          item.setAttribute('data-id', doc.id);
-          item.innerHTML =
-            '<div class="inbox-item-header" onclick="toggleInboxItem(this)">' +
-              '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
-                (!r.read ? '<span class="inbox-dot"></span>' : '<span style="width:8px;flex-shrink:0;"></span>') +
-                '<span class="inbox-sender">' + escHtml(r.name || 'Anonymous') + '</span>' +
-                '<span class="inbox-subject">' + escHtml(r.subject || '(No subject)') + '</span>' +
-              '</div>' +
-              '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
-                '<span class="inbox-date">' + dateStr + '</span>' +
-                '<span class="inbox-chevron">▾</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="inbox-item-body" style="display:none;">' +
-              '<div class="inbox-meta">From: <a href="mailto:' + escHtml(r.email || '') + '">' + escHtml(r.email || '') + '</a></div>' +
-              '<div class="inbox-message">' + escHtml(r.message || '') + '</div>' +
-              (!r.read ?
-                '<button class="inbox-mark-read" onclick="markRead(\'' + doc.id + '\', this, event)">Mark as read</button>'
-                : '<span class="inbox-read-label">Read</span>') +
-            '</div>';
-          list.appendChild(item);
-        });
-
-        if (unread > 0) {
-          var badge = document.getElementById('inbox-unread-badge');
-          badge.textContent = unread;
-          badge.style.display = 'inline';
-        } else {
-          document.getElementById('inbox-unread-badge').style.display = 'none';
-        }
-
-      }).catch(function(e) {
-        document.getElementById('inbox-loading').textContent = 'Could not load messages — check your Firestore rules.';
-      });
-  }
-
-  function toggleInboxItem(headerEl) {
-    var body = headerEl.nextElementSibling;
-    var open = body.style.display !== 'none';
-    body.style.display = open ? 'none' : 'block';
-    headerEl.querySelector('.inbox-chevron').textContent = open ? '▾' : '▴';
-  }
-
-  function markRead(docId, btn, e) {
-    e.stopPropagation();
-    if (!hubData || !hubData.studentFirebase) return;
-    var cfg = hubData.studentFirebase;
-    var studentApp;
-    try { studentApp = firebase.app('student-admin'); }
-    catch(ex) { studentApp = firebase.initializeApp(cfg, 'student-admin'); }
-    var sdb = studentApp.firestore();
-
-    sdb.collection('supportRequests').doc(docId).update({ read: true }).then(function() {
-      var item = btn.closest('.inbox-item');
-      item.classList.add('inbox-read');
-      btn.replaceWith(Object.assign(document.createElement('span'), { className: 'inbox-read-label', textContent: 'Read' }));
-      // Remove dot
-      var dot = item.querySelector('.inbox-dot');
-      if (dot) { dot.style.display = 'none'; }
-      // Decrement badge
-      var badge = document.getElementById('inbox-unread-badge');
-      var count = parseInt(badge.textContent) - 1;
-      if (count <= 0) { badge.style.display = 'none'; }
-      else { badge.textContent = count; }
-    }).catch(function() {});
-  }
 
   function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1330,100 +953,6 @@ service cloud.firestore {
     return sections.join('\n\n');
   }
 
-  async function generateSystemPrompt() {
-    var btn = document.getElementById('gen-prompt-btn');
-    var status = document.getElementById('gen-prompt-status');
-    btn.disabled = true;
-    btn.textContent = 'Generating...';
-    status.textContent = '';
-    status.style.color = 'var(--text3)';
-
-    try {
-      var uid = currentUser.uid;
-
-      var results = await Promise.allSettled([
-        db.collection('spark_results').where('userId', '==', uid).get(),
-        db.collection('audience_results').where('userId', '==', uid).get(),
-        db.collection('prompt_results').doc(uid).get()
-      ]);
-
-      var sparkDocs = (results[0].status === 'fulfilled' && !results[0].value.empty)
-        ? results[0].value.docs.map(function(d){ return d.data(); }) : [];
-      var audDocs = (results[1].status === 'fulfilled' && !results[1].value.empty)
-        ? results[1].value.docs.map(function(d){ return d.data(); }) : [];
-      var promptResult = (results[2].status === 'fulfilled' && results[2].value.exists)
-        ? results[2].value.data() : null;
-
-      var spark = sparkDocs.length ? sparkDocs[sparkDocs.length - 1] : null;
-      var audience = audDocs.length ? audDocs[audDocs.length - 1] : null;
-      var buildBrief = promptResult && promptResult.promptText
-        ? extractBriefSections(promptResult.promptText) : '';
-
-      var toolName = document.getElementById('toolName').value.trim()
-        || (promptResult && promptResult.appName) || 'AI Tool';
-      var toolDesc = document.getElementById('toolDescription').value.trim();
-
-      if (!spark && !audience && !buildBrief) {
-        status.textContent = 'No roadmap data found — complete your Spark and Audience assessments, or generate your build brief in the Prompt Generator first.';
-        btn.disabled = false;
-        btn.textContent = '⚡ Generate from roadmap';
-        return;
-      }
-
-      var ctx = ['TOOL NAME: ' + toolName];
-      if (toolDesc) ctx.push('TOOL DESCRIPTION: ' + toolDesc);
-
-      // Build brief sections are the richest source — include them first
-      if (buildBrief) {
-        ctx.push('\n--- FROM THEIR BUILD BRIEF ---\n' + buildBrief);
-      }
-
-      // Supplement with raw assessment data
-      if (spark) {
-        if (spark.whoYouHelp) ctx.push('WHO THE CREATOR HELPS: ' + spark.whoYouHelp);
-        if (spark.whatYouKnow) ctx.push('CREATOR EXPERTISE: ' + spark.whatYouKnow);
-        if (spark.statement) ctx.push('CREATOR SPARK STATEMENT: ' + spark.statement);
-      }
-      if (audience) {
-        if (audience.whoTheyAre) ctx.push('TARGET AUDIENCE: ' + audience.whoTheyAre);
-        if (audience.dailyFrustration) ctx.push('THEIR DAILY FRUSTRATION: ' + audience.dailyFrustration);
-        if (audience.dreamOutcome) ctx.push('THEIR DREAM OUTCOME: ' + audience.dreamOutcome);
-        if (audience.theirWords) ctx.push('IN THEIR OWN WORDS: "' + audience.theirWords + '"');
-      }
-
-      var sysInstructions = 'You write AI system prompts for solo coaches who built their own AI tool for their audience.\n\nYou may receive a build brief. Focus ONLY on: "What This Is", "Who It\'s For", and "The Core AI Tool" (especially Input and Output). Ignore Features, Design, app infrastructure.\n\nWrite a system prompt with these exact sections in this order:\n\n1. IDENTITY (2 sentences) — "You are [Tool Name], a [what it does] for [who it helps]."\n\n2. AUDIENCE CONTEXT (1 short paragraph) — Describe the user\'s real situation in plain language so the AI understands who it\'s talking to. Do NOT restate this to the user.\n\n3. YOUR JOB — Explain what the AI collects and what it produces at the end.\n\n4. INTAKE QUESTIONS — Write a numbered list of 3–5 specific questions to ask the user, ONE AT A TIME, waiting for each answer before continuing. These should be the exact questions needed to produce the output — no more, no less. Each question should be specific to the tool\'s purpose. Do NOT include generic demographic questions (age, income, location, gender) — these can be inferred. Do NOT ask the same thing two different ways.\n\n5. INSTRUCTIONS — "Ask these questions one at a time. Wait for each answer before asking the next. Do not ask demographic questions like age or income — infer those from context. You MUST ask every question in the list above before signaling readiness — do not skip any. Only after you have received an answer to every single question, write one short closing sentence (e.g. \"I have everything I need!\") and then include [READY_TO_GENERATE] on its own line. Do not generate the final output yourself — the user will click a button to generate it."\n\n6. OUTPUT FORMAT — Describe the exact structure and format of the final output.\n\n7. TONE — One sentence on tone/voice.\n\nLength: 250–400 words. Second person ("You are..."). Output ONLY the system prompt — no preamble, no explanation, no markdown headers.';
-
-      var headers = await authHeaders();
-      var resp = await fetch(FUNCTION_URL, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 700,
-          system: sysInstructions,
-          messages: [{ role: 'user', content: 'Write a system prompt for this AI tool:\n\n' + ctx.join('\n') }],
-          _meta: { tool: 'hub-admin-gen-system-prompt' }
-        })
-      });
-
-      if (!resp.ok) throw new Error('API error ' + resp.status);
-      var data = await resp.json();
-      var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
-      if (!text) throw new Error('Empty response');
-
-      document.getElementById('systemPrompt').value = text;
-      status.style.color = '#2E7D32';
-      status.textContent = '✓ Generated from your build brief — review and edit before saving';
-
-    } catch(e) {
-      console.error('Generate system prompt error:', e);
-      status.style.color = '#C0392B';
-      status.textContent = 'Something went wrong — try again or paste your prompt manually.';
-    }
-
-    btn.disabled = false;
-    btn.textContent = '⚡ Generate from roadmap';
-  }
 
   function doDownloadConfig() {
     var content = generateConfigJs(hubData || {}, parsedFirebaseConfig || {});
