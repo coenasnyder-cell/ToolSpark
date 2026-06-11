@@ -3,8 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Members & Activity — ToolSpark</title>
+<title>Community — ToolSpark Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -12,6 +30,7 @@
     --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
     --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
     --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
@@ -19,10 +38,9 @@
   }
   body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-  /* SIDEBAR */
   .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
   .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
   .logo-text span { color: var(--gold); }
   .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
   .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
@@ -33,9 +51,8 @@
   .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
   .nav-item.active .nav-icon { opacity: 1; }
   .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; }
-  .sidebar-user:hover { background: rgba(255,255,255,0.05); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left; }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
   .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
   .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -43,42 +60,31 @@
   .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .user-role { font-size: 11px; color: var(--text3); }
 
-  /* MAIN */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
   .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
   .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
   .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
   .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.3); color: #E0875A; border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem 3rem; max-width: 900px; width: 100%; }
 
-  /* TOOL GRID */
+  .page-intro-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--text); margin-bottom: 6px; }
+  .page-intro-sub { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 560px; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+
   .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-  .tool-card {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    padding: 1.125rem 1.25rem;
-    background: linear-gradient(135deg, #FFFDF8 0%, #F6F0E4 100%);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--shadow); text-decoration: none; color: inherit;
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-  }
+  @media (max-width: 640px) { .tool-grid { grid-template-columns: 1fr; } }
+
+  .tool-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem; background: linear-gradient(135deg, #FFFDF8 0%, #F6F0E4 100%); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
   .tool-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(201,168,76,0.45); }
-  .tool-card-copy { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
-  .tool-card-icon {
-    width: 42px; height: 42px; border-radius: 12px;
-    background: rgba(201,168,76,0.14); border: 1px solid rgba(201,168,76,0.22);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-  }
-  .tool-card-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .tool-card-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
-  .tool-card-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); line-height: 1.2; }
+  .tool-card-copy { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+  .tool-card-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(201,168,76,0.14); border: 1px solid rgba(201,168,76,0.22); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .tool-card-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .tool-card-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; }
+  .tool-card-title { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--text); line-height: 1.2; }
   .tool-card-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
   .tool-card-arrow { font-size: 20px; color: var(--gold); flex-shrink: 0; }
 
   #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
-
-  @media (max-width: 900px) { .tool-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 640px) { .page-content { padding: 1.25rem 1rem; } .tool-grid { grid-template-columns: 1fr; } .tool-card { padding: 1rem; } .tool-card-title { font-size: 18px; } }
 </style>
 </head>
 <body>
@@ -107,7 +113,7 @@
       Inbox
     </a>
     <a href="events.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Events
     </a>
     <a href="dashboard.html" class="nav-item">
@@ -117,10 +123,6 @@
     <a href="admindashboard.html" class="nav-item">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Admin
-    </a>
-    <a href="admintoollist.html" class="nav-item active">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-      Members & Activity
     </a>
     <a href="adminapiusage.html" class="nav-item">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
@@ -134,7 +136,7 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
       Courses Admin
     </a>
-    <a href="admin-community-hub.html" class="nav-item">
+    <a href="admin-community-hub.html" class="nav-item active">
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Community Admin
     </a>
@@ -157,8 +159,8 @@
 <div class="main-wrap">
   <header class="top-header">
     <div>
-      <div class="header-title">Members & Activity</div>
-      <div class="header-subtitle">Member profiles, sessions, and activity across the platform</div>
+      <div class="header-title">Community</div>
+      <div class="header-subtitle">Manage threads, events, and community activity</div>
     </div>
     <div class="admin-badge">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -173,165 +175,48 @@
     <a href="dashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back to Dashboard</a>
   </div>
 
-  <main class="page-content" id="admin-content" style="display:none;">
+  <main class="page-content" id="main-content" style="display:none;">
 
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:-0.25rem;">Platform Management</div>
+    <div class="page-intro-title">Community</div>
+    <p class="page-intro-sub">Manage threads, pin posts, and keep events organised for your members.</p>
+
     <div class="tool-grid">
 
-      <a class="tool-card" href="adminuserprofiles.html">
+      <a class="tool-card" href="adminthreads.html">
         <div class="tool-card-copy">
-          <div class="tool-card-icon">&#128101;</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Members</div>
-            <div class="tool-card-title">User Profiles</div>
-            <div class="tool-card-desc">Manage member accounts, roles, and access controls.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminuserclarity.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">&#128302;</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Sessions</div>
-            <div class="tool-card-title">Clarity Sessions</div>
-            <div class="tool-card-desc">Review all clarity sessions and summaries across members.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminuserspark.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">&#10022;</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Sessions</div>
-            <div class="tool-card-title">Spark Sessions</div>
-            <div class="tool-card-desc">Review saved Spark profiles across all members.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminjustsparked.html" style="border-color:rgba(42,92,69,0.25);">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon" style="background:rgba(42,92,69,0.1);border-color:rgba(42,92,69,0.2);">⚡</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Engagement</div>
-            <div class="tool-card-title">Just Sparked</div>
-            <div class="tool-card-desc">Track soft launches, copy the feedback template, and mark threads as commented.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow" style="color:#3D8A65;">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminwaitlist.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">📋</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Growth</div>
-            <div class="tool-card-title">Waitlist</div>
-            <div class="tool-card-desc">View and export everyone who signed up for early access.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminaudiencesessions.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">👥</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Members</div>
-            <div class="tool-card-title">Audience Sessions</div>
-            <div class="tool-card-desc">Look up a member's Audience Deep Dive transcript and blueprint results.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="adminagentknowledge.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">🤖</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Build Agent</div>
-            <div class="tool-card-title">Agent Knowledge</div>
-            <div class="tool-card-desc">Add struggles and guidance that get injected into the Build Agent.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-      <a class="tool-card" href="admincertificates.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">🎓</div>
-          <div class="tool-card-text">
-            <div class="tool-card-label">Milestones</div>
-            <div class="tool-card-title">Certificates</div>
-            <div class="tool-card-desc">View pending physical certificate requests and mark as mailed.</div>
-          </div>
-        </div>
-        <div class="tool-card-arrow">&rarr;</div>
-      </a>
-
-
-      <a class="tool-card" href="adminevents.html">
-        <div class="tool-card-copy">
-          <div class="tool-card-icon">&#128197;</div>
+          <div class="tool-card-icon">💬</div>
           <div class="tool-card-text">
             <div class="tool-card-label">Community</div>
-            <div class="tool-card-title">Events</div>
-            <div class="tool-card-desc">Create and manage upcoming community events and sessions.</div>
+            <div class="tool-card-title">Threads</div>
+            <div class="tool-card-desc">Manage community threads and pinned posts.</div>
           </div>
         </div>
-        <div class="tool-card-arrow">&rarr;</div>
+        <div class="tool-card-arrow">→</div>
       </a>
 
-
-
-      <a class="tool-card" href="adminapiusage.html" style="border-color:rgba(75,63,138,0.25);">
+      <a class="tool-card" href="adminevents.html" style="border-color:rgba(42,92,69,0.2);">
         <div class="tool-card-copy">
-          <div class="tool-card-icon" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.2);">💰</div>
+          <div class="tool-card-icon" style="background:rgba(42,92,69,0.1);border-color:rgba(42,92,69,0.2);">📅</div>
           <div class="tool-card-text">
-            <div class="tool-card-label">Costs</div>
-            <div class="tool-card-title">API Usage</div>
-            <div class="tool-card-desc">Track token usage and estimated costs by tool across all members.</div>
+            <div class="tool-card-label">Events</div>
+            <div class="tool-card-title">Events</div>
+            <div class="tool-card-desc">Create and manage events for the community calendar.</div>
           </div>
         </div>
-        <div class="tool-card-arrow" style="color:#4B3F8A;">&rarr;</div>
+        <div class="tool-card-arrow" style="color:var(--green-light);">→</div>
       </a>
 
     </div>
+
   </main>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
-    authDomain: "toolspark-2d62d.firebaseapp.com",
-    projectId: "toolspark-2d62d",
-    storageBucket: "toolspark-2d62d.firebasestorage.app",
-    messagingSenderId: "82966513396",
-    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
-
-  try {
-    firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true);
-  } catch(e) {}
-
-  auth.onAuthStateChanged(async user => {
+  auth.onAuthStateChanged(async (user) => {
     if (!user) { window.location.href = 'signon.html'; return; }
     try {
       const snap = await db.collection('users').doc(user.uid).get();
-      const role = snap.exists ? snap.data().userRole : 'member';
-      if (role !== 'admin') {
+      if (!snap.exists || snap.data().userRole !== 'admin') {
         document.getElementById('access-denied').style.display = 'flex';
         return;
       }
@@ -339,7 +224,7 @@
       document.getElementById('access-denied').style.display = 'flex';
       return;
     }
-    document.getElementById('admin-content').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'flex';
     const name = user.displayName || user.email || 'Admin';
     document.getElementById('sidebar-name').textContent = name;
     const av = document.getElementById('sidebar-avatar');

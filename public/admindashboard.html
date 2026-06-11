@@ -373,6 +373,14 @@
       <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       Content Tools
     </a>
+    <a href="admin-courses-hub.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      Courses Admin
+    </a>
+    <a href="admin-community-hub.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community Admin
+    </a>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-user">
@@ -411,6 +419,27 @@
   </div>
 
   <main class="page-content" id="admin-content" style="display:none;">
+
+    <!-- SPARKY CTA -->
+    <a href="sparky.html" style="
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #C9A84C 0%, #E8D5A3 60%, #C9A84C 100%);
+      border-radius: 14px;
+      padding: 18px 28px;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(201,168,76,0.45)'"
+         onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(201,168,76,0.35)'">
+      <div style="font-size: 32px; line-height:1;">✦</div>
+      <div style="flex:1;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;color:#0C0B09;font-weight:700;line-height:1.2;">Chat with Sparky</div>
+        <div style="font-size:13px;color:rgba(12,11,9,0.65);margin-top:3px;">Check in, stay on task, get unstuck.</div>
+      </div>
+      <div style="font-size:22px;color:#0C0B09;opacity:0.6;">→</div>
+    </a>
 
      <!-- ANALYTICS OVERVIEW -->
     <div class="admin-card">
@@ -501,22 +530,22 @@
      
     <!-- ADMIN SECTION SHORTCUTS -->
     <div class="admin-shortcut-row">
-           <a class="admin-shortcut-card" href="adminthreads.html">
+           <a class="admin-shortcut-card" href="admin-community-hub.html">
         <div class="admin-shortcut-copy">
           <div class="admin-shortcut-icon">&#128172;</div>
           <div class="admin-shortcut-text">
             <div class="admin-shortcut-label">Section Shortcut</div>
-            <div class="admin-shortcut-title">Community Threads</div>
-            <div class="admin-shortcut-desc">Open the dedicated community threads page and manage pinned posts.</div>
+            <div class="admin-shortcut-title">Community</div>
+            <div class="admin-shortcut-desc">Manage community threads, pinned posts, and events.</div>
           </div>
         </div>
         <div class="admin-shortcut-arrow">&rarr;</div>
       </a>
-      <a class="admin-shortcut-card" href="admincourses.html">
+      <a class="admin-shortcut-card" href="admin-courses-hub.html">
         <div class="admin-shortcut-copy">
           <div class="admin-shortcut-icon">&#127891;</div>
           <div class="admin-shortcut-text">
-            <div class="admin-shortcut-label">Editor Shortcut</div>
+            <div class="admin-shortcut-label">Platform</div>
             <div class="admin-shortcut-title">Courses</div>
             <div class="admin-shortcut-desc">Create a new course, manage published visibility, and open the lesson editor for each one.</div>
           </div>
@@ -527,7 +556,7 @@
         <div class="admin-shortcut-copy">
           <div class="admin-shortcut-icon" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.2);">💰</div>
           <div class="admin-shortcut-text">
-            <div class="admin-shortcut-label">Admin Tools</div>
+            <div class="admin-shortcut-label">Platform</div>
             <div class="admin-shortcut-title">API Usage</div>
             <div class="admin-shortcut-desc">Track token usage and estimated costs by tool across all members.</div>
           </div>
@@ -538,9 +567,9 @@
         <div class="admin-shortcut-copy">
           <div class="admin-shortcut-icon">🛠️</div>
           <div class="admin-shortcut-text">
-            <div class="admin-shortcut-label">Admin Tools</div>
-            <div class="admin-shortcut-title">Admin Tools</div>
-            <div class="admin-shortcut-desc">View all admin management pages in one place.</div>
+            <div class="admin-shortcut-label">Platform</div>
+            <div class="admin-shortcut-title">Members & Activity</div>
+            <div class="admin-shortcut-desc">Member profiles, sessions, and activity across the platform.</div>
           </div>
         </div>
         <div class="admin-shortcut-arrow">&rarr;</div>
@@ -551,7 +580,7 @@
           <div class="admin-shortcut-text">
             <div class="admin-shortcut-label">Content Creation</div>
             <div class="admin-shortcut-title">Content Tools</div>
-            <div class="admin-shortcut-desc">Post Ideas, Post Image Maker, and 31-Day Planner — all in one place.</div>
+            <div class="admin-shortcut-desc">Post Ideas, Image Maker, Planner, Lessons, and more — all in one place.</div>
           </div>
         </div>
         <div class="admin-shortcut-arrow" style="color:var(--gold);">&rarr;</div>
