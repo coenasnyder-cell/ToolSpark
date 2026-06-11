@@ -525,6 +525,7 @@
   }
 
   var slug = window.location.pathname.split('/').filter(Boolean)[1] || '';
+  var slot = new URLSearchParams(window.location.search).get('slot') || '1';
   var HUB = null;
   var studentDb = null;
   var studentAuth = null;
@@ -537,6 +538,12 @@
     db.collection('hubs').doc(slug).get().then(function(snap) {
       if (!snap.exists) { showError('Hub not found.'); return; }
       HUB = snap.data();
+
+      // Overlay the selected tool slot's data over the flat hub fields
+      var toolSlotData = HUB['tool' + slot] || {};
+      if (toolSlotData.systemPrompt) HUB.systemPrompt = toolSlotData.systemPrompt;
+      if (toolSlotData.toolName)     HUB.toolName     = toolSlotData.toolName;
+      if (toolSlotData.toolType)     HUB.toolType     = toolSlotData.toolType;
 
       if (HUB.studentFirebase && HUB.studentFirebase.projectId) {
         try {

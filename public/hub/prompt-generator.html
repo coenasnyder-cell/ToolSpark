@@ -241,18 +241,6 @@
 
   <div class="page-content">
 
-    <!-- YOUR TOOL ROW -->
-    <div class="tool-built-row" id="tool-built-row">
-      <div class="tool-built-info">
-        <div class="tool-built-label">Your Tool</div>
-        <div class="tool-built-name" id="tool-built-name">—</div>
-      </div>
-      <a href="#" id="tool-built-link" class="btn-open-tool">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Open Tool
-      </a>
-    </div>
-
     <!-- ROADMAP CONTEXT -->
     <div>
       <div class="section-label">Your Roadmap Data</div>
@@ -291,38 +279,100 @@
       </div>
     </div>
 
-    <!-- BUILD AGENT CTA -->
+    <!-- TOOL 1 -->
+    <div class="divider"></div>
+    <div class="section-label">Tool 1</div>
+
+    <div class="tool-built-row" id="tool1-built-row">
+      <div class="tool-built-info">
+        <div class="tool-built-label">Tool 1</div>
+        <div class="tool-built-name" id="tool1-built-name">—</div>
+      </div>
+      <a href="#" id="tool1-built-link" class="btn-open-tool">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Tool 1
+      </a>
+    </div>
+
     <div class="generate-card">
       <div>
-        <div class="generate-card-heading">Build Your Hub Prompt</div>
-        <div class="generate-card-sub">The Build Agent walks you through a short interview and writes your system prompt based on your answers. Once it's done, your prompt is saved here automatically.</div>
+        <div class="generate-card-heading">Build Tool 1</div>
+        <div class="generate-card-sub">The Build Agent walks you through a short interview and writes your system prompt based on your answers. Once done, your prompt is saved here automatically.</div>
       </div>
       <div class="generate-actions">
-        <a href="/build-agent" class="btn-generate">
+        <a href="/build-agent?slot=1" class="btn-generate">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
           Open Build Agent
         </a>
       </div>
     </div>
 
-    <!-- PROMPT OUTPUT -->
     <div class="prompt-card">
       <div class="prompt-card-header">
         <div>
-          <div class="prompt-card-title">Your Hub Prompt</div>
-          <div class="prompt-card-meta" id="prompt-meta">Review and edit before saving</div>
+          <div class="prompt-card-title">Tool 1 Prompt</div>
+          <div class="prompt-card-meta" id="tool1-prompt-meta">Review and edit before saving</div>
         </div>
       </div>
       <textarea
         class="prompt-textarea"
-        id="prompt-textarea"
-        placeholder="Your generated prompt will appear here. You can edit it freely before saving.&#10;&#10;If you already have a prompt, paste it here and click Save."
+        id="tool1-prompt-textarea"
+        placeholder="Your Tool 1 prompt will appear here after running the Build Agent. You can also paste a prompt directly and click Save."
       ></textarea>
       <div class="prompt-card-footer">
-        <div class="prompt-hint">You can edit your prompt here at any time. Changes are saved when you click Save Prompt.</div>
+        <div class="prompt-hint">You can edit your prompt here at any time. Changes are saved when you click Save.</div>
         <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
-          <span class="save-status" id="save-status"></span>
-          <button class="btn-save" id="save-btn" onclick="savePrompt()">Save Prompt</button>
+          <span class="save-status" id="tool1-save-status"></span>
+          <button class="btn-save" id="tool1-save-btn" onclick="savePrompt(1)">Save Tool 1 Prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOL 2 -->
+    <div class="divider"></div>
+    <div class="section-label">Tool 2</div>
+
+    <div class="tool-built-row" id="tool2-built-row">
+      <div class="tool-built-info">
+        <div class="tool-built-label">Tool 2</div>
+        <div class="tool-built-name" id="tool2-built-name">—</div>
+      </div>
+      <a href="#" id="tool2-built-link" class="btn-open-tool">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Tool 2
+      </a>
+    </div>
+
+    <div class="generate-card">
+      <div>
+        <div class="generate-card-heading">Build Tool 2</div>
+        <div class="generate-card-sub">Build a second AI tool for your hub — a different use case, a different audience experience, or a companion to Tool 1.</div>
+      </div>
+      <div class="generate-actions">
+        <a href="/build-agent?slot=2" class="btn-generate">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
+          Open Build Agent
+        </a>
+      </div>
+    </div>
+
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div>
+          <div class="prompt-card-title">Tool 2 Prompt</div>
+          <div class="prompt-card-meta" id="tool2-prompt-meta">Review and edit before saving</div>
+        </div>
+      </div>
+      <textarea
+        class="prompt-textarea"
+        id="tool2-prompt-textarea"
+        placeholder="Your Tool 2 prompt will appear here after running the Build Agent. You can also paste a prompt directly and click Save."
+      ></textarea>
+      <div class="prompt-card-footer">
+        <div class="prompt-hint">You can edit your prompt here at any time. Changes are saved when you click Save.</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          <span class="save-status" id="tool2-save-status"></span>
+          <button class="btn-save" id="tool2-save-btn" onclick="savePrompt(2)">Save Tool 2 Prompt</button>
         </div>
       </div>
     </div>
@@ -333,6 +383,7 @@
 <script>
   var currentUser = null;
   var hubSlug = null;
+  var hubData = {};
 
   // Sidebar mobile toggle
   var sidebar   = document.getElementById('sidebar');
@@ -446,17 +497,17 @@
       '<div class="context-row"><div class="context-row-label">Brief Preview</div><div class="context-row-value" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;">' + esc(preview) + (brief.promptText.length > 200 ? '…' : '') + '</div></div>';
   }
 
-  function savePrompt() {
-    var btn    = document.getElementById('save-btn');
-    var status = document.getElementById('save-status');
-    var text   = document.getElementById('prompt-textarea').value.trim();
+  function savePrompt(slot) {
+    var btn    = document.getElementById('tool' + slot + '-save-btn');
+    var status = document.getElementById('tool' + slot + '-save-status');
+    var text   = document.getElementById('tool' + slot + '-prompt-textarea').value.trim();
     if (!text) { status.textContent = 'Nothing to save.'; status.className = 'save-status error'; return; }
     btn.disabled = true;
     status.textContent = '';
-    db.collection('hubs').doc(hubSlug).update({
-      systemPrompt: text,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function() {
+    var update = {};
+    update['tool' + slot + '.systemPrompt'] = text;
+    update.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    db.collection('hubs').doc(hubSlug).update(update).then(function() {
       status.textContent = '✓ Saved';
       status.className = 'save-status success';
       btn.disabled = false;
@@ -482,19 +533,34 @@
       if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
       hubSlug = data.hubSlug;
 
-      // Load hub data — system prompt + tool built state
+      // Load hub data — tool slot prompts + built state
       db.collection('hubs').doc(hubSlug).get().then(function(hubSnap) {
         if (!hubSnap.exists) return;
         var hub = hubSnap.data();
-        if (hub.systemPrompt) {
-          document.getElementById('prompt-textarea').value = hub.systemPrompt;
-          document.getElementById('prompt-meta').textContent = 'Loaded from your hub — edit and save to update';
+        hubData = hub;
+
+        // Tool 1
+        var t1 = hub.tool1 || {};
+        if (t1.systemPrompt) {
+          document.getElementById('tool1-prompt-textarea').value = t1.systemPrompt;
+          document.getElementById('tool1-prompt-meta').textContent = 'Loaded from your hub — edit and save to update';
         }
-        if (hub.toolBuilt) {
-          var toolName = hub.toolName || hub.hubName || 'Your Tool';
-          document.getElementById('tool-built-name').textContent = toolName;
-          document.getElementById('tool-built-link').href = '/hub/' + hubSlug + '/tool';
-          document.getElementById('tool-built-row').classList.add('visible');
+        if (t1.toolBuilt) {
+          document.getElementById('tool1-built-name').textContent = t1.toolName || 'Tool 1';
+          document.getElementById('tool1-built-link').href = '/hub/' + hubSlug + '/tool?slot=1';
+          document.getElementById('tool1-built-row').classList.add('visible');
+        }
+
+        // Tool 2
+        var t2 = hub.tool2 || {};
+        if (t2.systemPrompt) {
+          document.getElementById('tool2-prompt-textarea').value = t2.systemPrompt;
+          document.getElementById('tool2-prompt-meta').textContent = 'Loaded from your hub — edit and save to update';
+        }
+        if (t2.toolBuilt) {
+          document.getElementById('tool2-built-name').textContent = t2.toolName || 'Tool 2';
+          document.getElementById('tool2-built-link').href = '/hub/' + hubSlug + '/tool?slot=2';
+          document.getElementById('tool2-built-row').classList.add('visible');
         }
       }).catch(function() {});
 

@@ -257,8 +257,8 @@
 <!-- WELCOME -->
 <div class="fullpage" id="welcome-screen" style="display:none;">
   <div class="state-card">
-    <div class="state-eyebrow">ToolSpark · Course 2</div>
-    <h1>Your <em>Build Agent</em></h1>
+    <div class="state-eyebrow">Build Agent · <span id="slot-eyebrow">Tool 1</span></div>
+    <h1>Build <em>Tool <span id="slot-num">1</span></em></h1>
     <p>Tell me about your tool and I'll help you write the perfect system prompt for it.</p>
     <div class="tool-name-field">
       <label for="tool-name-input">Tool Name</label>
@@ -288,6 +288,9 @@
 
 <script>
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+const slot    = new URLSearchParams(window.location.search).get('slot') || '1';
+const slotKey = 'tool' + slot;
+
 async function authHeaders() {
   const user = firebase.auth().currentUser;
   const token = user ? await user.getIdToken() : "";
@@ -339,13 +342,31 @@ async function deductCredit() {
 
 // ── CONTEXT LOADING ──
 async function loadContext(uid, email) {
-  const promptSnap = await db.collection('prompt_results').doc(uid).get().catch(()=>null);
-  if (promptSnap && promptSnap.exists) {
-    buildContext.appName = promptSnap.data().appName || '';
+  // Load existing slot data from hub first
+  if (hubSlug) {
+    const hubSnap = await db.collection('hubs').doc(hubSlug).get().catch(()=>null);
+    if (hubSnap && hubSnap.exists) {
+      const toolData = hubSnap.data()[slotKey] || {};
+      if (toolData.toolName)  buildContext.appName  = toolData.toolName;
+      if (toolData.toolType)  buildContext.toolType = toolData.toolType;
+    }
+  }
+  // Fall back to prompt_results for appName if not already set
+  if (!buildContext.appName) {
+    const promptSnap = await db.collection('prompt_results').doc(uid).get().catch(()=>null);
+    if (promptSnap && promptSnap.exists) {
+      buildContext.appName = promptSnap.data().appName || '';
+    }
   }
 }
 
 function renderWelcome() {
+  // Set slot labels
+  const slotEyebrow = document.getElementById('slot-eyebrow');
+  const slotNum     = document.getElementById('slot-num');
+  if (slotEyebrow) slotEyebrow.textContent = 'Tool ' + slot;
+  if (slotNum)     slotNum.textContent     = slot;
+
   // Pre-fill tool name if loaded from Firestore
   const nameInput = document.getElementById('tool-name-input');
   if (nameInput && buildContext.appName) nameInput.value = buildContext.appName;
@@ -360,6 +381,9 @@ function renderWelcome() {
         <div class="tool-type-desc">${t.desc}</div>
       </div>
     </div>`).join('');
+
+  // Pre-select tool type if previously saved
+  if (buildContext.toolType) selectToolType(buildContext.toolType);
 }
 
 function selectToolType(id) {
@@ -612,19 +636,23 @@ async function generateToolPrompt() {
     await deductCredit();
     hideThinking();
 
-    await db.collection('hubs').doc(hubSlug).update({
+    const slotUpdate = {};
+    slotUpdate[slotKey] = {
+      toolName:     buildContext.appName,
+      toolType:     buildContext.toolType,
       systemPrompt: prompt,
-      toolBuilt: true,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+      toolBuilt:    true
+    };
+    slotUpdate.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection('hubs').doc(hubSlug).update(slotUpdate);
 
     // Replace CTA with success banner
     const ctaEl = document.getElementById('gen-prompt-cta');
     if (ctaEl) {
       ctaEl.innerHTML = `
         <div class="prompt-saved-banner">
-          <div class="prompt-saved-title">Your tool is built.</div>
-          <a href="/hub/${hubSlug}/tool" class="btn-lets-build">View Your Tool →</a>
+          <div class="prompt-saved-title">Tool ${slot} is built.</div>
+          <a href="/hub/${hubSlug}/tool?slot=${slot}" class="btn-lets-build">View Your Tool →</a>
         </div>`;
     }
     document.getElementById('chatWrap').scrollTop = document.getElementById('chatWrap').scrollHeight;

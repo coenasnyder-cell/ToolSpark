@@ -732,9 +732,10 @@ service cloud.firestore {
 
     // Build summary
     var hub = hubData || {};
+    var t1Name = (hub.tool1 && hub.tool1.toolName) || hub.toolName || '';
     var rows = [
-      ['Hub name',    hub.hubName || '(not set)',         !!hub.hubName],
-      ['Tool name',   hub.toolName || '(not set)',        !!hub.toolName],
+      ['Hub name',    hub.hubName || '(not set)',           !!hub.hubName],
+      ['Tool 1 name', t1Name || '(not set)',                !!t1Name],
       ['Model',       hub.model || 'claude-haiku-4-5-20251001', true],
       ['API key',     hub.anthropicApiKey ? '••••••••' + hub.anthropicApiKey.slice(-4) : '(not set)', !!hub.anthropicApiKey],
       ['Firebase',    cfg.projectId,                      true],
@@ -762,6 +763,7 @@ service cloud.firestore {
 
   function generateConfigJs(hub, fb) {
     function q(v) { return JSON.stringify(v || ''); }
+    var t1 = hub.tool1 || {};
     return [
       '// ─────────────────────────────────────────────',
       '//  HUB CONFIGURATION — only edit this file',
@@ -787,9 +789,9 @@ service cloud.firestore {
       '  logoUrl:      ' + q(hub.logoUrl) + ',',
       '',
       '  // ── Your AI Tool ──────────────────────────',
-      '  toolName:         ' + q(hub.toolName) + ',',
+      '  toolName:         ' + q(t1.toolName || hub.toolName) + ',',
       '  toolDescription:  ' + q(hub.toolDescription) + ',',
-      '  systemPrompt:     ' + q(hub.systemPrompt) + ',',
+      '  systemPrompt:     ' + q(t1.systemPrompt || hub.systemPrompt) + ',',
       '  anthropicApiKey:  ' + q(hub.anthropicApiKey) + ',',
       '  inputLabel:       ' + q(hub.inputLabel || 'Your question') + ',',
       '  inputPlaceholder: ' + q(hub.inputPlaceholder || 'Type here...') + ',',
