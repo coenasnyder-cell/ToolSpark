@@ -156,6 +156,9 @@
   .badge-morning-hope { background: rgba(29,124,144,0.1); border: 1px solid rgba(29,124,144,0.2); color: #1D7C90; }
   .badge-morning-humor { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.2); color: #C4622D; }
   .badge-morning-mixed { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .badge-midday-ab   { background: rgba(100,80,200,0.1); border: 1px solid rgba(100,80,200,0.2); color: #6450C8; }
+  .badge-midday-abcd { background: rgba(29,124,144,0.1); border: 1px solid rgba(29,124,144,0.2); color: #1D7C90; }
+  .badge-midday-open { background: rgba(42,92,69,0.1);   border: 1px solid rgba(42,92,69,0.2);   color: var(--green-light); }
   .post-format-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
   .copy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; background: var(--bg); font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
   .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
@@ -287,6 +290,10 @@
             <div class="content-type-btn-label"><span class="dot"></span> Morning Motivation</div>
             <div class="content-type-btn-sub">1–2 sentence hope &amp; humor posts to start someone's day right</div>
           </button>
+          <button class="content-type-btn" id="btn-midday" onclick="selectContentType('midday')" style="grid-column: span 2;">
+            <div class="content-type-btn-label"><span class="dot"></span> Midday Question</div>
+            <div class="content-type-btn-sub">A/B or A/B/C/D poll style question to drive engagement and comments</div>
+          </button>
         </div>
       </div>
 
@@ -303,6 +310,12 @@
         <input class="field-input" id="bip-what" type="text" placeholder="What did you build or work on? (e.g. finished my onboarding flow, launched to first 10 users)">
         <input class="field-input" id="bip-mishap" type="text" placeholder="What went sideways, surprised you, or made you laugh? (optional)">
         <input class="field-input" id="bip-lesson" type="text" placeholder="What's the win or lesson? (optional)">
+      </div>
+
+      <!-- Midday Question Fields (hidden by default) -->
+      <div class="launch-fields" id="midday-fields">
+        <div class="field-label" style="margin-bottom:2px;">What's the poll about?</div>
+        <input class="field-input" id="midday-topic" type="text" placeholder="What topic or theme? (e.g. building struggles, introvert life, productivity)">
       </div>
 
       <!-- Niche -->
@@ -410,8 +423,10 @@
     document.getElementById('btn-launch').classList.toggle('selected', type === 'launch');
     document.getElementById('btn-bip').classList.toggle('selected', type === 'bip');
     document.getElementById('btn-morning').classList.toggle('selected', type === 'morning');
+    document.getElementById('btn-midday').classList.toggle('selected', type === 'midday');
     document.getElementById('launch-fields').classList.toggle('visible', type === 'launch');
     document.getElementById('bip-fields').classList.toggle('visible', type === 'bip');
+    document.getElementById('midday-fields').classList.toggle('visible', type === 'midday');
   }
 
   function toggleAutoTopic() {
@@ -464,6 +479,33 @@ POST_2_START
 POST_2_END
 POST_3_START
 [Mixed post here]
+POST_3_END`;
+    }
+
+    if (selectedContentType === 'midday') {
+      const middayTopic = document.getElementById('midday-topic').value.trim();
+      const topicLine = middayTopic ? `Topic/theme: ${middayTopic}` : 'Pick an engaging theme relevant to people building an online audience or business.';
+      return `You write engaging Facebook poll-style questions for introverts building an audience online. Your polls make people stop scrolling and pick a side — no hashtags, no fluff, no generic openers.
+
+${topicLine}
+Tone: ${selectedTone}
+
+Write exactly 3 Facebook poll posts. Each one opens with a short compelling setup line (1 sentence), then presents the poll options clearly. Do NOT use hashtags.
+
+POST FORMAT 1 — A/B POLL: A this-or-that question with exactly 2 options (A and B). Make it feel like a personal identity reveal — "which one are you?"
+POST FORMAT 2 — A/B/C/D POLL: A multiple-choice question with exactly 4 options (A, B, C, D). Each option feels like a distinct real experience someone has had.
+POST FORMAT 3 — OPEN POLL: A question with 3 lettered options where the last option is "D: Other — comment yours below 👇". This one invites people to reply.
+
+Return your response in EXACTLY this structure, no extra commentary:
+
+POST_1_START
+[A/B poll post here]
+POST_1_END
+POST_2_START
+[A/B/C/D poll post here]
+POST_2_END
+POST_3_START
+[Open poll post here]
 POST_3_END`;
     }
 
@@ -608,8 +650,8 @@ COMMENTS_3_END`;
     if (selectedContentType === 'bip') {
       const bipWhat = document.getElementById('bip-what').value.trim();
       if (!bipWhat) { document.getElementById('bip-what').focus(); return; }
-    } else if (selectedContentType === 'morning') {
-      // no required fields — topic is optional
+    } else if (selectedContentType === 'morning' || selectedContentType === 'midday') {
+      // no required fields — topic/theme is optional
     } else {
       if (!niche) { document.getElementById('niche').focus(); return; }
       if (!audience) { document.getElementById('audience').focus(); return; }
@@ -658,12 +700,15 @@ COMMENTS_3_END`;
       const com2  = extractComments(text, 'COMMENTS_2_START', 'COMMENTS_2_END');
       const com3  = extractComments(text, 'COMMENTS_3_START', 'COMMENTS_3_END');
 
-      const isBip = selectedContentType === 'bip';
+      const isBip     = selectedContentType === 'bip';
       const isMorning = selectedContentType === 'morning';
+      const isMidday  = selectedContentType === 'midday';
+      const noImg     = isMorning || isMidday;
+      const noCom     = isMorning || isMidday;
       postsWrap.innerHTML = [
-        renderPostCard(isMorning ? 'Hopeful' : isBip ? 'Behind the Build' : 'Bold Statement', isMorning ? 'badge-morning-hope' : isBip ? 'badge-bip-build' : 'badge-bold', post1, 1, isMorning ? null : img1, isMorning ? [] : com1),
-        renderPostCard(isMorning ? 'Humor'   : isBip ? 'The Mishap'       : 'Personal Story', isMorning ? 'badge-morning-humor' : isBip ? 'badge-bip-mishap' : 'badge-story', post2, 2, isMorning ? null : img2, isMorning ? [] : com2),
-        renderPostCard(isMorning ? 'Mixed'   : isBip ? 'The Win'          : 'Breaking News',  isMorning ? 'badge-morning-mixed' : isBip ? 'badge-bip-win'   : 'badge-news',  post3, 3, isMorning ? null : img3, isMorning ? [] : com3),
+        renderPostCard(isMidday ? 'A/B Poll'   : isMorning ? 'Hopeful' : isBip ? 'Behind the Build' : 'Bold Statement', isMidday ? 'badge-midday-ab'   : isMorning ? 'badge-morning-hope' : isBip ? 'badge-bip-build'   : 'badge-bold',  post1, 1, noImg ? null : img1, noCom ? [] : com1),
+        renderPostCard(isMidday ? 'A/B/C/D Poll': isMorning ? 'Humor'  : isBip ? 'The Mishap'       : 'Personal Story', isMidday ? 'badge-midday-abcd' : isMorning ? 'badge-morning-humor': isBip ? 'badge-bip-mishap' : 'badge-story', post2, 2, noImg ? null : img2, noCom ? [] : com2),
+        renderPostCard(isMidday ? 'Open Poll'  : isMorning ? 'Mixed'  : isBip ? 'The Win'           : 'Breaking News',  isMidday ? 'badge-midday-open' : isMorning ? 'badge-morning-mixed': isBip ? 'badge-bip-win'   : 'badge-news',  post3, 3, noImg ? null : img3, noCom ? [] : com3),
       ].join('');
 
     } catch(err) {
