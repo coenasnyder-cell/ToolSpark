@@ -27,387 +27,189 @@
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --dark: #0C0B09;
-    --dark2: #141210;
-    --dark3: #1C1A17;
-    --border-dark: #2A2720;
-    --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE;
-    --surface: #FFFFFF;
-    --border: #E4E0D8;
-    --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #9E9891;
-    --green: #2A5C45;
-    --green-light: #3D8A65;
-    --radius: 14px;
-    --radius-sm: 8px;
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65;
+    --radius: 12px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --sidebar-width: 220px;
   }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
 
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── SIDEBAR (nav.js injects this) ── */
-  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
-  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
-  .logo-text span { color: var(--gold); }
-  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
-  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
-  .nav-item.active .nav-icon { opacity: 1; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .mobile-overlay { display: none; }
-  .hamburger-btn { display: none; }
-  @media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); }
-    .sidebar.open { transform: translateX(0); }
-    .mobile-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-    .mobile-overlay.visible { opacity: 1; pointer-events: all; }
-    .hamburger-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: none; border: none; cursor: pointer; color: var(--text); }
-  }
-
-  /* ── MAIN LAYOUT ── */
-  .page-wrap {
-    margin-left: var(--sidebar-width);
-    flex: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  @media (max-width: 768px) { .page-wrap { margin-left: 0; } }
+  /* ── MAIN WRAP ── */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
 
   /* ── TOP BAR ── */
   .top-bar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    background: var(--dark2); border-bottom: 1px solid var(--border-dark);
+    height: 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem; position: sticky; top: 0; z-index: 50; flex-shrink: 0;
   }
   .top-bar-left { display: flex; align-items: center; gap: 12px; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .hamburger-btn { background: none; border: none; color: #9A9488; cursor: pointer; padding: 6px; border-radius: 6px; display: flex; }
+  .hamburger-btn:hover { color: #F0EDE6; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 18px; color: #F0EDE6; }
   .save-status { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
   .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
   .save-status.saving .save-dot { background: var(--gold); animation: pulse 1s infinite; }
   .save-status.saved .save-dot { background: var(--green-light); }
   .save-status.error .save-dot { background: #C4622D; }
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .save-btn { background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 7px 16px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+  .save-btn:hover { opacity: 0.85; }
 
-  /* ── CONTENT ── */
-  .content { flex: 1; padding: 1.5rem 2rem 4rem; max-width: 900px; width: 100%; }
-  @media (max-width: 600px) { .content { padding: 1rem 1rem 3rem; } }
+  /* ── TABS ── */
+  .tab-bar {
+    background: var(--dark); border-bottom: 1px solid var(--border-dark);
+    display: flex; gap: 0; padding: 0 1.5rem; flex-shrink: 0;
+  }
+  .tab-btn {
+    padding: 14px 20px; background: none; border: none; border-bottom: 3px solid transparent;
+    color: #9A9488; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: #F0EDE6; }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-  /* ── DAY NAVIGATION ── */
-  .day-nav-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-  }
-  .day-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 14px;
-  }
-  .day-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .day-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
-  .day-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .day-label {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: var(--text);
-    text-align: center;
-    flex: 1;
-  }
-  .day-label span { color: var(--gold); }
-  .progress-line {
-    font-size: 12px;
-    color: var(--text3);
-    text-align: center;
-    margin-bottom: 14px;
-  }
-  .progress-line b { color: var(--green-light); }
+  /* ── GRID CONTENT ── */
+  .grid-scroll { flex: 1; overflow-y: auto; padding: 1.5rem; }
+  .day-row { display: flex; gap: 12px; margin-bottom: 12px; }
 
-  /* ── DAY PILLS ── */
-  .day-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .day-pill {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    font-family: 'Lato', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text3);
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .day-pill:hover { border-color: var(--gold); color: var(--gold); }
-  .day-pill.current { background: var(--gold); border-color: var(--gold); color: var(--dark); }
-  .day-pill.has-content { background: rgba(42,92,69,0.12); border-color: rgba(42,92,69,0.4); color: var(--green-light); }
-  .day-pill.has-content.current { background: var(--gold); border-color: var(--gold); color: var(--dark); }
-
-  /* ── POST CARDS ── */
-  .posts-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .post-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .post-card.has-content { border-color: rgba(42,92,69,0.3); }
-
-  .post-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.01);
-  }
-  .post-num {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--gold-dim);
-    border: 1px solid rgba(201,168,76,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    flex-shrink: 0;
-  }
-  .post-label {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    flex: 1;
-  }
-  .post-char-count {
-    font-size: 11px;
-    color: var(--text3);
-  }
-  .post-char-count.over { color: #C4622D; }
-
-  .post-body {
-    padding: 16px 20px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  @media (max-width: 500px) { .post-body { flex-direction: column; } }
-
-  /* CAPTION */
-  .caption-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .caption-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
-  .caption-textarea {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 13px;
-    font-family: 'Lato', sans-serif;
-    color: var(--text);
-    background: var(--bg);
-    outline: none;
-    resize: none;
-    min-height: 100px;
-    line-height: 1.6;
+  /* ── DAY CELL ── */
+  .day-cell {
+    flex: 1; min-width: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; overflow: hidden;
     transition: border-color 0.15s;
   }
-  .caption-textarea:focus { border-color: var(--gold); }
-  .caption-textarea::placeholder { color: var(--text3); }
+  .day-cell.is-posted { border-color: rgba(42,92,69,0.4); }
 
-  /* IMAGE UPLOAD */
-  .image-col { flex-shrink: 0; width: 150px; display: flex; flex-direction: column; gap: 6px; }
-  .image-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
-  .upload-zone {
-    width: 150px;
-    height: 120px;
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-sm);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--bg);
-    position: relative;
-    overflow: hidden;
+  .cell-header {
+    padding: 7px 10px; background: var(--bg); border-bottom: 1px solid var(--border);
+    font-size: 10px; font-weight: 900; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .upload-zone:hover { border-color: var(--gold); background: var(--gold-dim); }
-  .upload-zone.uploading { border-color: var(--gold); opacity: 0.7; cursor: wait; }
-  .upload-zone.has-image { border-style: solid; border-color: rgba(42,92,69,0.4); padding: 0; }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
-  .upload-zone.uploading input[type=file] { pointer-events: none; }
-  .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; }
-  .upload-icon { font-size: 24px; }
-  .upload-text { font-size: 10px; font-weight: 700; color: var(--text3); text-align: center; line-height: 1.4; }
-  .upload-preview { width: 100%; height: 100%; object-fit: cover; display: none; }
-  .upload-preview.visible { display: block; }
-  .upload-spinner { display: none; font-size: 18px; }
-  .upload-zone.uploading .upload-spinner { display: block; animation: spin 1s linear infinite; }
-  .upload-zone.uploading .upload-placeholder { display: none; }
+  .cell-header-day { color: var(--text2); }
+
+  /* Image zone */
+  .cell-image-zone {
+    width: 100%; height: 130px; position: relative;
+    background: var(--bg); cursor: pointer; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .cell-image-zone.has-image { height: auto; overflow: visible; }
+  .cell-image-zone:hover { background: rgba(201,168,76,0.06); }
+  .cell-image-zone.uploading { opacity: 0.6; cursor: wait; }
+  .cell-image-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; width: 100%; height: 100%; min-height: 130px; }
+  .cell-image-zone.uploading input[type=file] { pointer-events: none; }
+  .cell-img-placeholder { display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
+  .cell-img-placeholder svg { opacity: 0.3; }
+  .cell-img-placeholder span { font-size: 10px; color: var(--text3); font-weight: 700; }
+  .cell-img-preview { width: 100%; height: auto; object-fit: contain; display: none; position: relative; }
+  .cell-img-preview.visible { display: block; }
+  .cell-img-spinner { font-size: 20px; animation: spin 1s linear infinite; position: absolute; pointer-events: none; }
   @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-
-  .btn-remove-img {
-    display: none;
-    width: 100%;
-    padding: 5px 0;
-    background: rgba(196,98,45,0.08);
-    color: #C4622D;
-    border: 1px solid rgba(196,98,45,0.25);
-    border-radius: var(--radius-sm);
-    font-family: 'Lato', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
+  .cell-remove-img {
+    position: absolute; top: 5px; right: 5px; z-index: 3;
+    background: rgba(12,11,9,0.65); color: #fff; border: none;
+    border-radius: 50%; width: 20px; height: 20px; font-size: 10px;
+    cursor: pointer; display: none; align-items: center; justify-content: center;
+    line-height: 1;
   }
-  .btn-remove-img.visible { display: block; }
-  .btn-remove-img:hover { background: rgba(196,98,45,0.15); }
+  .cell-image-zone.has-image .cell-remove-img { display: flex; }
+  .cell-image-zone.has-image .cell-img-placeholder { display: none; }
 
-  /* ── WEEK LABELS ── */
-  .week-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 2px 0;
-    width: 100%;
-    margin-top: 4px;
+  /* Caption */
+  .cell-caption {
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  .cell-caption textarea {
+    width: 100%; resize: none; border: none; outline: none;
+    font-family: 'Lato', sans-serif; font-size: 12px; color: var(--text);
+    background: transparent; line-height: 1.5;
+    min-height: 48px;
+  }
+  .cell-caption textarea::placeholder { color: var(--text3); }
+
+  /* Posted toggle */
+  .cell-footer { padding: 6px 8px; display: flex; align-items: center; justify-content: space-between; }
+  .posted-toggle {
+    padding: 4px 10px; border-radius: 100px; font-family: 'Lato', sans-serif;
+    font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text3);
+  }
+  .posted-toggle.posted {
+    background: rgba(42,92,69,0.1); border-color: rgba(42,92,69,0.3); color: var(--green-light);
+  }
+  .cell-chars { font-size: 10px; color: var(--text3); }
+  .cell-chars.over { color: #C4622D; }
+
+  @media (max-width: 900px) {
+    .main-wrap { margin-left: 60px; }
+    .day-row { flex-wrap: wrap; }
+    .day-cell { min-width: calc(50% - 6px); flex: none; }
+  }
+  @media (max-width: 560px) {
+    .main-wrap { margin-left: 0; }
+    .day-cell { min-width: 100%; }
+    .tab-btn { padding: 12px 14px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
 
-<div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+<div class="main-wrap">
 
-<div class="page-wrap">
-
-  <!-- TOP BAR -->
   <div class="top-bar">
     <div class="top-bar-left">
       <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="page-title">31-Day Post Planner</div>
+      <div class="page-title">30-Day Post Planner</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <div class="save-status" id="saveStatus">
-        <div class="save-dot"></div>
-        <span id="saveText">—</span>
-      </div>
-      <button onclick="saveAllData()" style="background:var(--gold);color:#0C0B09;border:none;border-radius:8px;padding:7px 16px;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save</button>
+      <div class="save-status" id="saveStatus"><div class="save-dot"></div><span id="saveText">—</span></div>
+      <button class="save-btn" onclick="saveAllData()">Save</button>
     </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- DAY NAVIGATION -->
-    <div class="day-nav-bar">
-      <div class="day-controls">
-        <button class="day-btn" id="btnPrev" onclick="changeDay(-1)">← Prev</button>
-        <div class="day-label">Day <span id="dayNum">1</span></div>
-        <button class="day-btn" id="btnNext" onclick="changeDay(1)">Next →</button>
-      </div>
-
-      <div class="progress-line" id="progressLine">Loading…</div>
-
-      <!-- 31 pills -->
-      <div class="day-pills" id="dayPills"></div>
-    </div>
-
-    <!-- POST CARDS -->
-    <div class="posts-grid" id="postsGrid"></div>
-
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="morning" onclick="switchTab('morning')">☀️ Morning Motivations</button>
+    <button class="tab-btn" data-tab="midday" onclick="switchTab('midday')">💬 Midday Questions</button>
+    <button class="tab-btn" data-tab="drama" onclick="switchTab('drama')">⚡ ToolSpark Drama</button>
   </div>
+
+  <div class="grid-scroll" id="grid-scroll">
+    <!-- built by JS -->
+  </div>
+
 </div>
 
-<script src="js/nav.js"></script>
 <script>
-  // ── State ──────────────────────────────────────────────────────────────────
-  let currentDay = 1;
+  const DAYS = 30;
+  const TABS = ['morning', 'midday', 'drama'];
+
   let uid = null;
-  let allData = {};       // { "d1_p1": { caption, imageUrl, imagePath }, ... }
+  let allData = {};
+  let activeTab = 'morning';
   let saveTimer = null;
 
-  // ── Auth ────────────────────────────────────────────────────────────────────
-  auth.onAuthStateChanged(async (user) => {
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async user => {
     if (!user) { window.location.href = 'signon.html'; return; }
     uid = user.uid;
     await loadAllData();
-    buildPills();
-    renderDay(currentDay);
+    renderGrid(activeTab);
   });
 
-  // ── Firestore ────────────────────────────────────────────────────────────────
+  // ── Firestore ────────────────────────────────────────────────────────────
   async function loadAllData() {
     try {
       const snap = await db.collection('social_scheduler').doc(uid).get();
@@ -427,192 +229,132 @@
       const payload = { ...allData, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
       await db.collection('social_scheduler').doc(uid).set(payload, { merge: true });
       setSaveStatus('saved');
-      updatePills();
-      updateProgress();
-    } catch(e) {
-      setSaveStatus('error');
-    }
+    } catch(e) { setSaveStatus('error'); }
   }
 
-  // ── UI helpers ───────────────────────────────────────────────────────────────
-  function setSaveStatus(state, text) {
+  function setSaveStatus(state) {
     const el = document.getElementById('saveStatus');
     const txt = document.getElementById('saveText');
     el.className = 'save-status ' + state;
     txt.textContent = state === 'saving' ? 'Saving…' : state === 'saved' ? 'All saved' : 'Save error';
   }
 
-  function key(day, post) { return `d${day}_p${post}`; }
+  function dataKey(tab, day) { return `${tab}_d${day}`; }
 
-  function getEntry(day, post) {
-    return allData[key(day, post)] || { caption: '', imageUrl: '', imagePath: '' };
+  function getEntry(tab, day) {
+    return allData[dataKey(tab, day)] || { caption: '', imageUrl: '', imagePath: '', posted: false };
   }
 
-  function setCaption(day, post, val) {
-    if (!allData[key(day, post)]) allData[key(day, post)] = {};
-    allData[key(day, post)].caption = val;
-    scheduleSave();
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    renderGrid(tab);
   }
 
-  function dayHasContent(day) {
-    return [1, 2, 3].some(p => {
-      const e = allData[key(day, p)];
-      return e && (e.caption || e.imageUrl);
+  // ── Grid ──────────────────────────────────────────────────────────────────
+  function buildRows() {
+    const rows = [];
+    let day = 1;
+    let rowIndex = 0;
+    while (day <= DAYS) {
+      const count = rowIndex % 2 === 0 ? 4 : 3;
+      const row = [];
+      for (let i = 0; i < count && day <= DAYS; i++) row.push(day++);
+      rows.push(row);
+      rowIndex++;
+    }
+    return rows;
+  }
+
+  function renderGrid(tab) {
+    const scroll = document.getElementById('grid-scroll');
+    scroll.innerHTML = '';
+    const rows = buildRows();
+    rows.forEach(days => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'day-row';
+      days.forEach(day => rowEl.appendChild(buildCell(tab, day)));
+      scroll.appendChild(rowEl);
     });
   }
 
-  function countFilledDays() {
-    return Array.from({ length: 31 }, (_, i) => i + 1).filter(dayHasContent).length;
-  }
+  function buildCell(tab, day) {
+    const k = dataKey(tab, day);
+    const entry = getEntry(tab, day);
+    const hasImage = !!entry.imageUrl;
+    const isPosted = !!entry.posted;
 
-  // ── Day Pills ────────────────────────────────────────────────────────────────
-  function buildPills() {
-    const container = document.getElementById('dayPills');
-    container.innerHTML = '';
+    const cell = document.createElement('div');
+    cell.className = 'day-cell' + (isPosted ? ' is-posted' : '');
+    cell.id = 'cell-' + k;
 
-    const weeks = [
-      { label: 'Week 1', days: [1,2,3,4,5,6,7] },
-      { label: 'Week 2', days: [8,9,10,11,12,13,14] },
-      { label: 'Week 3', days: [15,16,17,18,19,20,21] },
-      { label: 'Week 4', days: [22,23,24,25,26,27,28] },
-      { label: 'Days 29–31', days: [29,30,31] },
-    ];
-
-    weeks.forEach(week => {
-      const wl = document.createElement('div');
-      wl.className = 'week-label';
-      wl.textContent = week.label;
-      container.appendChild(wl);
-
-      week.days.forEach(d => {
-        const btn = document.createElement('button');
-        btn.className = 'day-pill';
-        btn.id = 'pill-' + d;
-        btn.textContent = d;
-        btn.onclick = () => goToDay(d);
-        container.appendChild(btn);
-      });
-    });
-
-    updatePills();
-  }
-
-  function updatePills() {
-    for (let d = 1; d <= 31; d++) {
-      const pill = document.getElementById('pill-' + d);
-      if (!pill) continue;
-      pill.className = 'day-pill' +
-        (d === currentDay ? ' current' : '') +
-        (dayHasContent(d) ? ' has-content' : '');
-    }
-  }
-
-  function updateProgress() {
-    const filled = countFilledDays();
-    const el = document.getElementById('progressLine');
-    if (filled === 0) {
-      el.innerHTML = 'Start filling in your posts — one day at a time.';
-    } else {
-      el.innerHTML = `<b>${filled}</b> of 31 days have content`;
-    }
-  }
-
-  // ── Day Navigation ────────────────────────────────────────────────────────────
-  function goToDay(d) {
-    currentDay = d;
-    document.getElementById('dayNum').textContent = d;
-    document.getElementById('btnPrev').disabled = d === 1;
-    document.getElementById('btnNext').disabled = d === 31;
-    renderDay(d);
-    updatePills();
-  }
-
-  function changeDay(delta) {
-    const next = currentDay + delta;
-    if (next < 1 || next > 31) return;
-    goToDay(next);
-  }
-
-  // ── Render Posts ──────────────────────────────────────────────────────────────
-  function renderDay(day) {
-    const grid = document.getElementById('postsGrid');
-    grid.innerHTML = '';
-    [1, 2, 3].forEach(p => grid.appendChild(buildPostCard(day, p)));
-    updateProgress();
-  }
-
-  function buildPostCard(day, postNum) {
-    const entry = getEntry(day, postNum);
-    const k = key(day, postNum);
-    const hasContent = !!(entry.caption || entry.imageUrl);
-
-    const card = document.createElement('div');
-    card.className = 'post-card' + (hasContent ? ' has-content' : '');
-    card.id = 'card-' + k;
-
-    const charCount = entry.caption ? entry.caption.length : 0;
-    const charOver = charCount > 2200;
-
-    card.innerHTML = `
-      <div class="post-header">
-        <div class="post-num">${postNum}</div>
-        <div class="post-label">Post ${postNum}</div>
-        <div class="post-char-count${charOver ? ' over' : ''}" id="chars-${k}">${charCount > 0 ? charCount + ' chars' : ''}</div>
+    cell.innerHTML = `
+      <div class="cell-header">
+        <span class="cell-header-day">Day ${day}</span>
       </div>
-      <div class="post-body">
-        <div class="caption-wrap">
-          <div class="caption-label">Caption</div>
-          <textarea
-            class="caption-textarea"
-            id="caption-${k}"
-            placeholder="Write your caption here…"
-            rows="5"
-          >${escHtml(entry.caption || '')}</textarea>
+      <div class="cell-image-zone${hasImage ? ' has-image' : ''}" id="zone-${k}">
+        <input type="file" accept="image/*" title="Upload image for Day ${day}">
+        <div class="cell-img-placeholder">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Upload image</span>
         </div>
-        <div class="image-col">
-          <div class="image-label">Image</div>
-          <div class="upload-zone${entry.imageUrl ? ' has-image' : ''}" id="zone-${k}">
-            <input type="file" accept="image/*" id="file-${k}" onchange="handleImageUpload(event, ${day}, ${postNum})">
-            <div class="upload-placeholder">
-              <div class="upload-icon">🖼</div>
-              <div class="upload-text">Click to upload<br>image</div>
-            </div>
-            <div class="upload-spinner">⏳</div>
-            <img class="upload-preview${entry.imageUrl ? ' visible' : ''}" id="preview-${k}" src="${entry.imageUrl || ''}" alt="">
-          </div>
-          <button class="btn-remove-img${entry.imageUrl ? ' visible' : ''}" id="removeBtn-${k}" onclick="removeImage(${day}, ${postNum})">✕ Remove image</button>
-        </div>
+        <span class="cell-img-spinner" id="spinner-${k}" style="display:none;">⏳</span>
+        <img class="cell-img-preview${hasImage ? ' visible' : ''}" id="preview-${k}" src="${entry.imageUrl || ''}" alt="">
+        <button class="cell-remove-img" id="removeBtn-${k}" onclick="removeImage(event,'${tab}',${day})">✕</button>
+      </div>
+      <div class="cell-caption">
+        <textarea id="caption-${k}" placeholder="Caption…" rows="3">${escHtml(entry.caption || '')}</textarea>
+      </div>
+      <div class="cell-footer">
+        <button class="posted-toggle${isPosted ? ' posted' : ''}" id="toggle-${k}" onclick="togglePosted('${tab}',${day})">
+          ${isPosted ? '✓ Posted' : 'Not Posted'}
+        </button>
+        <span class="cell-chars${(entry.caption || '').length > 2200 ? ' over' : ''}" id="chars-${k}">${(entry.caption || '').length > 0 ? (entry.caption.length + ' ch') : ''}</span>
       </div>
     `;
 
-    // Caption input handler
-    card.querySelector(`#caption-${k}`).addEventListener('input', (e) => {
+    // File input
+    cell.querySelector('input[type=file]').addEventListener('change', e => handleImageUpload(e, tab, day));
+
+    // Caption
+    cell.querySelector(`#caption-${k}`).addEventListener('input', e => {
       const val = e.target.value;
-      setCaption(day, postNum, val);
-      const count = val.length;
-      const el = document.getElementById('chars-' + k);
-      el.textContent = count > 0 ? count + ' chars' : '';
-      el.className = 'post-char-count' + (count > 2200 ? ' over' : '');
-      const c = document.getElementById('card-' + k);
-      if (val || getEntry(day, postNum).imageUrl) c.classList.add('has-content');
-      else c.classList.remove('has-content');
+      if (!allData[k]) allData[k] = {};
+      allData[k].caption = val;
+      const chars = document.getElementById('chars-' + k);
+      chars.textContent = val.length > 0 ? val.length + ' ch' : '';
+      chars.className = 'cell-chars' + (val.length > 2200 ? ' over' : '');
+      scheduleSave();
     });
 
-    return card;
+    return cell;
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // ── Posted toggle ─────────────────────────────────────────────────────────
+  function togglePosted(tab, day) {
+    const k = dataKey(tab, day);
+    if (!allData[k]) allData[k] = {};
+    allData[k].posted = !allData[k].posted;
+    const isPosted = allData[k].posted;
+    const btn = document.getElementById('toggle-' + k);
+    btn.className = 'posted-toggle' + (isPosted ? ' posted' : '');
+    btn.textContent = isPosted ? '✓ Posted' : 'Not Posted';
+    const cell = document.getElementById('cell-' + k);
+    cell.classList.toggle('is-posted', isPosted);
+    scheduleSave();
   }
 
-  // ── Image Upload ──────────────────────────────────────────────────────────────
-  async function handleImageUpload(event, day, postNum) {
+  // ── Image upload ──────────────────────────────────────────────────────────
+  async function handleImageUpload(event, tab, day) {
     const file = event.target.files[0];
     if (!file) return;
-    const k = key(day, postNum);
+    const k = dataKey(tab, day);
     const zone = document.getElementById('zone-' + k);
+    const spinner = document.getElementById('spinner-' + k);
 
     zone.classList.add('uploading');
+    spinner.style.display = 'block';
 
     try {
       const path = `social-scheduler/${uid}/${k}`;
@@ -624,61 +366,47 @@
       allData[k].imageUrl = url;
       allData[k].imagePath = path;
 
-      // Update UI
       const preview = document.getElementById('preview-' + k);
       preview.src = url;
       preview.classList.add('visible');
       zone.classList.remove('uploading');
       zone.classList.add('has-image');
-      document.getElementById('removeBtn-' + k).classList.add('visible');
-      document.getElementById('card-' + k).classList.add('has-content');
+      spinner.style.display = 'none';
 
       await saveAllData();
     } catch(e) {
       zone.classList.remove('uploading');
+      spinner.style.display = 'none';
       setSaveStatus('error');
     }
   }
 
-  async function removeImage(day, postNum) {
-    const k = key(day, postNum);
+  async function removeImage(event, tab, day) {
+    event.stopPropagation();
+    const k = dataKey(tab, day);
     const entry = allData[k] || {};
 
     if (entry.imagePath) {
       try { await storage.ref(entry.imagePath).delete(); } catch(e) {}
     }
 
-    if (allData[k]) {
-      allData[k].imageUrl = '';
-      allData[k].imagePath = '';
-    }
+    if (allData[k]) { allData[k].imageUrl = ''; allData[k].imagePath = ''; }
 
     const preview = document.getElementById('preview-' + k);
     preview.src = '';
     preview.classList.remove('visible');
     const zone = document.getElementById('zone-' + k);
     zone.classList.remove('has-image');
-    document.getElementById('removeBtn-' + k).classList.remove('visible');
-    document.getElementById('file-' + k).value = '';
-
-    const caption = (allData[k] || {}).caption || '';
-    if (!caption) document.getElementById('card-' + k).classList.remove('has-content');
 
     await saveAllData();
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────────
-  function toggleSidebar() {
-    const s = document.querySelector('.sidebar');
-    const o = document.getElementById('mobileOverlay');
-    s.classList.toggle('open');
-    o.classList.toggle('visible');
-  }
-  function closeSidebar() {
-    document.querySelector('.sidebar').classList.remove('open');
-    document.getElementById('mobileOverlay').classList.remove('visible');
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
-<script>initNav('social-scheduler', '31-Day Post Planner');</script>
+<script src="js/nav.js"></script>
+<script>initNav('social-scheduler', '30-Day Post Planner');</script>
 </body>
 </html>
