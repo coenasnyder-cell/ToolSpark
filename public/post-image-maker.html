@@ -72,6 +72,12 @@
   .toggle-row span{font-size:14px}
   .file-row{display:grid;grid-template-columns:64px 64px 1fr;gap:8px}
   .hint{font-size:12px;color:var(--ash);margin-top:6px;line-height:1.45}
+  .color-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .color-swatch{display:flex;flex-direction:column;gap:6px}
+  .color-swatch label{margin-bottom:0}
+  .color-swatch input[type=color]{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;padding:2px 4px}
+  .color-swatch input[type=color]::-webkit-color-swatch-wrapper{padding:0;border-radius:6px}
+  .color-swatch input[type=color]::-webkit-color-swatch{border:none;border-radius:6px}
   .filename{
     margin-top:8px;font-size:13px;color:var(--spark);
     font-weight:500;word-break:break-all;
@@ -123,6 +129,25 @@
         <button class="tmpl" data-t="vote">Vote <span>A/B/C/D options</span></button>
         <button class="tmpl" data-t="quote">Quote <span>Clean, morning posts</span></button>
       </div>
+    </div>
+
+    <div class="group">
+      <label>Colours</label>
+      <div class="color-row">
+        <div class="color-swatch">
+          <label for="cBg">Background</label>
+          <input type="color" id="cBg" value="#FFC820">
+        </div>
+        <div class="color-swatch">
+          <label for="cText">Text</label>
+          <input type="color" id="cText" value="#111114">
+        </div>
+        <div class="color-swatch">
+          <label for="cAccent">Accent</label>
+          <input type="color" id="cAccent" value="#6B2FB3">
+        </div>
+      </div>
+      <p class="hint">Colours update the preview live. Switch styles to reset to defaults.</p>
     </div>
 
     <div class="group">
@@ -187,6 +212,30 @@
   };
 
   let template = 'ask';
+
+  // Default colours per template [bg, text, accent]
+  const DEFAULTS = {
+    ask:   ['#FFC820','#111114','#6B2FB3'],
+    bold:  ['#111114','#FFC820','#6B2FB3'],
+    vote:  ['#FFC820','#111114','#6B2FB3'],
+    quote: ['#FFFFFF','#111114','#6B2FB3'],
+  };
+
+  function syncColors(){
+    C.spark = document.getElementById('cBg').value;
+    C.ink   = document.getElementById('cText').value;
+    C.volt  = document.getElementById('cAccent').value;
+    // keep paper in sync for quote template bg
+    if(template === 'quote') C.paper = C.spark;
+  }
+
+  function resetColors(t){
+    const [bg, text, accent] = DEFAULTS[t];
+    document.getElementById('cBg').value    = bg;
+    document.getElementById('cText').value  = text;
+    document.getElementById('cAccent').value = accent;
+    syncColors();
+  }
 
   // ---------- helpers ----------
   function bolt(x, y, h, color){
@@ -354,6 +403,7 @@
 
   // ---------- render ----------
   function render(){
+    syncColors();
     const h = document.getElementById('headline').value.trim() || ' ';
     const sub = document.getElementById('subline').value.trim();
     ctx.clearRect(0,0,S,S);
@@ -381,9 +431,14 @@
       template = b.dataset.t;
       document.getElementById('voteGroup').classList.toggle('hide', template!=='vote');
       document.getElementById('subGroup').classList.toggle('hide', template==='vote');
+      resetColors(template);
       render();
     });
   });
+
+  ['cBg','cText','cAccent'].forEach(id =>
+    document.getElementById(id).addEventListener('input', render)
+  );
 
   ['headline','subline','footerText','fWeek','fDay','fKey']
     .forEach(id=> document.getElementById(id).addEventListener('input', render));
