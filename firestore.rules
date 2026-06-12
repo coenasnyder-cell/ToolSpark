@@ -480,6 +480,12 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // SOCIAL SCHEDULER (31-day post planner — one doc per user, keyed by uid)
+    match /social_scheduler/{userId} {
+      allow read, write: if isActive() && isOwner(userId);
+      allow read: if isAdmin();
+    }
+
     // NOTIFICATIONS
     match /notifications/{notificationId} {
       allow read: if isActive() && (
