@@ -10,7 +10,7 @@
 <style>
   :root{
     --ink:#111114;
-    --spark:#FFC820;
+    --spark:#C9A84C;
     --volt:#6B2FB3;
     --paper:#FFFFFF;
     --smoke:#17171C;
@@ -73,11 +73,13 @@
   .file-row{display:grid;grid-template-columns:64px 64px 1fr;gap:8px}
   .hint{font-size:12px;color:var(--ash);margin-top:6px;line-height:1.45}
   .color-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .color-swatch{display:flex;flex-direction:column;gap:6px}
+  .color-swatch{display:flex;flex-direction:column;gap:4px}
   .color-swatch label{margin-bottom:0}
-  .color-swatch input[type=color]{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;padding:2px 4px}
-  .color-swatch input[type=color]::-webkit-color-swatch-wrapper{padding:0;border-radius:6px}
-  .color-swatch input[type=color]::-webkit-color-swatch{border:none;border-radius:6px}
+  .color-swatch input[type=color]{width:100%;height:34px;border:1px solid var(--line);border-radius:8px 8px 0 0;background:var(--panel);cursor:pointer;padding:2px 4px}
+  .color-swatch input[type=color]::-webkit-color-swatch-wrapper{padding:0;border-radius:6px 6px 0 0}
+  .color-swatch input[type=color]::-webkit-color-swatch{border:none;border-radius:6px 6px 0 0}
+  .hex-input{width:100%;background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;color:var(--paper);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:5px 8px;outline:none;text-transform:uppercase;letter-spacing:0.04em;}
+  .hex-input:focus{border-color:var(--spark);}
   .filename{
     margin-top:8px;font-size:13px;color:var(--spark);
     font-weight:500;word-break:break-all;
@@ -87,7 +89,7 @@
     border-radius:10px;font-family:'Space Grotesk',sans-serif;
     font-size:16px;font-weight:700;padding:14px;cursor:pointer;margin-top:4px;
   }
-  .dl:hover{background:#FFD64F}
+  .dl:hover{background:#E8D5A3}
   .dl:focus-visible,.tmpl:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
   /* ---------- preview ---------- */
   .preview{
@@ -110,7 +112,7 @@
 <body>
 <header>
   <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true">
-    <polygon points="58,2 18,58 42,58 34,98 82,38 52,38" fill="#FFC820"/>
+    <polygon points="58,2 18,58 42,58 34,98 82,38 52,38" fill="#C9A84C"/>
   </svg>
   <div>
     <h1>Post Image Maker</h1>
@@ -136,18 +138,31 @@
       <div class="color-row">
         <div class="color-swatch">
           <label for="cBg">Background</label>
-          <input type="color" id="cBg" value="#FFC820">
+          <input type="color" id="cBg" value="#C9A84C">
+          <input class="hex-input" id="cBgHex" type="text" maxlength="7" value="#C9A84C" spellcheck="false">
         </div>
         <div class="color-swatch">
           <label for="cText">Text</label>
           <input type="color" id="cText" value="#111114">
+          <input class="hex-input" id="cTextHex" type="text" maxlength="7" value="#111114" spellcheck="false">
         </div>
         <div class="color-swatch">
           <label for="cAccent">Accent</label>
           <input type="color" id="cAccent" value="#6B2FB3">
+          <input class="hex-input" id="cAccentHex" type="text" maxlength="7" value="#6B2FB3" spellcheck="false">
         </div>
       </div>
       <p class="hint">Colours update the preview live. Switch styles to reset to defaults.</p>
+    </div>
+
+    <div class="group">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        Text Size
+        <span id="sizeVal" style="font-size:13px;font-weight:700;color:var(--spark);">104</span>
+      </label>
+      <input type="range" id="textSize" min="36" max="160" step="4" value="104"
+        style="width:100%;accent-color:var(--spark);cursor:pointer;margin-top:4px;">
+      <p class="hint" style="margin-top:6px;">Drag right for bigger text. Auto-shrinks if text still doesn't fit.</p>
     </div>
 
     <div class="group">
@@ -159,6 +174,14 @@
     <div class="group" id="subGroup">
       <label for="subline">Small line under it (optional)</label>
       <input type="text" id="subline" maxlength="90" value="Confess in the comments 👇">
+    </div>
+
+    <div class="group hide" id="quoteMarkGroup">
+      <div class="toggle-row">
+        <input type="checkbox" id="quoteMarkOn">
+        <span>Show quote marks</span>
+      </div>
+      <p class="hint" style="margin-top:6px;">Colour follows the Text picker above.</p>
     </div>
 
     <div class="group hide" id="voteGroup">
@@ -206,19 +229,21 @@
 
   const C = {
     ink:'#111114',
-    spark:'#FFC820',
+    spark:'#C9A84C',
     volt:'#6B2FB3',
     paper:'#FFFFFF'
   };
 
   let template = 'ask';
 
-  // Default colours per template [bg, text, accent]
+  function textSize() { return parseInt(document.getElementById('textSize').value, 10); }
+
+  // Default colours and text size per template [bg, text, accent, size]
   const DEFAULTS = {
-    ask:   ['#FFC820','#111114','#6B2FB3'],
-    bold:  ['#111114','#FFC820','#6B2FB3'],
-    vote:  ['#FFC820','#111114','#6B2FB3'],
-    quote: ['#FFFFFF','#111114','#6B2FB3'],
+    ask:   ['#C9A84C','#111114','#6B2FB3', 104],
+    bold:  ['#111114','#C9A84C','#6B2FB3', 104],
+    vote:  ['#C9A84C','#111114','#6B2FB3',  84],
+    quote: ['#FFFFFF','#111114','#C9A84C',  88],
   };
 
   function syncColors(){
@@ -230,10 +255,12 @@
   }
 
   function resetColors(t){
-    const [bg, text, accent] = DEFAULTS[t];
-    document.getElementById('cBg').value    = bg;
-    document.getElementById('cText').value  = text;
-    document.getElementById('cAccent').value = accent;
+    const [bg, text, accent, size] = DEFAULTS[t];
+    document.getElementById('cBg').value       = bg;    document.getElementById('cBgHex').value     = bg.toUpperCase();
+    document.getElementById('cText').value     = text;  document.getElementById('cTextHex').value   = text.toUpperCase();
+    document.getElementById('cAccent').value   = accent; document.getElementById('cAccentHex').value = accent.toUpperCase();
+    document.getElementById('textSize').value  = size;
+    document.getElementById('sizeVal').textContent = size;
     syncColors();
   }
 
@@ -311,7 +338,7 @@
     ctx.strokeStyle = C.ink; ctx.lineWidth = 14;
     ctx.strokeRect(34,34,S-68,S-68);
     bolt(S-235, 78, 150, C.ink);
-    const block = fitBlock(h, S-PAD*2, 600, 104);
+    const block = fitBlock(h, S-PAD*2, 600, textSize());
     const total = block.lines.length*block.lineH + (sub?80:0);
     let y = (S - total)/2 - 20;
     y = drawBlock(block, PAD, y, C.ink, 'left');
@@ -330,7 +357,7 @@
     // corner bolts
     bolt(70, 70, 130, C.spark);
     bolt(S-170, S-220, 130, C.volt);
-    const block = fitBlock(h, S-PAD*2, 600, 104);
+    const block = fitBlock(h, S-PAD*2, 600, textSize());
     const total = block.lines.length*block.lineH + (sub?80:0);
     let y = (S - total)/2;
     y = drawBlock(block, PAD, y, C.spark, 'left');
@@ -347,7 +374,7 @@
     ctx.strokeStyle = C.ink; ctx.lineWidth = 14;
     ctx.strokeRect(34,34,S-68,S-68);
     bolt(S-215, 76, 120, C.ink);
-    const block = fitBlock(h, S-PAD*2-130, 280, 84);
+    const block = fitBlock(h, S-PAD*2-130, 280, textSize());
     let y = drawBlock(block, PAD, 100, C.ink, 'left');
     y += 50;
     const opts = [...document.querySelectorAll('.vopt')]
@@ -379,13 +406,14 @@
 
   function drawQuote(h, sub){
     ctx.fillStyle = C.paper; ctx.fillRect(0,0,S,S);
-    // big purple quote mark
-    ctx.font = '300px "Archivo Black"';
-    ctx.fillStyle = C.volt; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-    ctx.globalAlpha = 0.16;
-    ctx.fillText('\u201C', 60, 300);
-    ctx.globalAlpha = 1;
-    const block = fitBlock(h, S-PAD*2, 560, 88);
+    if(document.getElementById('quoteMarkOn').checked){
+      ctx.font = '300px "Archivo Black"';
+      ctx.fillStyle = C.ink; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+      ctx.globalAlpha = 0.18;
+      ctx.fillText('\u201C', 60, 300);
+      ctx.globalAlpha = 1;
+    }
+    const block = fitBlock(h, S-PAD*2, 560, textSize());
     const total = block.lines.length*block.lineH + (sub?90:0);
     let y = (S - total)/2;
     y = drawBlock(block, S/2, y, C.ink, 'center');
@@ -431,8 +459,27 @@
       template = b.dataset.t;
       document.getElementById('voteGroup').classList.toggle('hide', template!=='vote');
       document.getElementById('subGroup').classList.toggle('hide', template==='vote');
+      document.getElementById('quoteMarkGroup').classList.toggle('hide', template!=='quote');
       resetColors(template);
       render();
+    });
+  });
+
+  // Two-way sync: colour picker ↔ hex text field
+  [['cBg','cBgHex'],['cText','cTextHex'],['cAccent','cAccentHex']].forEach(([pickerId, hexId]) => {
+    const picker = document.getElementById(pickerId);
+    const hex    = document.getElementById(hexId);
+    picker.addEventListener('input', () => { hex.value = picker.value.toUpperCase(); render(); });
+    hex.addEventListener('input', () => {
+      const v = hex.value.trim();
+      if(/^#[0-9A-Fa-f]{6}$/.test(v)){ picker.value = v; render(); }
+    });
+    hex.addEventListener('blur', () => {
+      // normalise on blur: prepend # if missing, pad short values
+      let v = hex.value.trim().replace(/^#+/,'');
+      if(v.length === 3) v = v.split('').map(c=>c+c).join('');
+      if(/^[0-9A-Fa-f]{6}$/.test(v)){ picker.value = '#'+v; hex.value = ('#'+v).toUpperCase(); render(); }
+      else { hex.value = picker.value.toUpperCase(); } // revert bad input
     });
   });
 
@@ -442,7 +489,12 @@
 
   ['headline','subline','footerText','fWeek','fDay','fKey']
     .forEach(id=> document.getElementById(id).addEventListener('input', render));
+  document.getElementById('textSize').addEventListener('input', e => {
+    document.getElementById('sizeVal').textContent = e.target.value;
+    render();
+  });
   document.getElementById('footerOn').addEventListener('change', render);
+  document.getElementById('quoteMarkOn').addEventListener('change', render);
   document.querySelectorAll('.vopt').forEach(i=> i.addEventListener('input', render));
 
   document.getElementById('download').addEventListener('click', ()=>{
