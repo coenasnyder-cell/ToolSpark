@@ -83,6 +83,16 @@ service firebase.storage {
         request.resource.contentType.matches('image/.*');
     }
 
+    // SOCIAL SCHEDULER IMAGES — owner only, 10MB max
+    match /social-scheduler/{userId}/{fileName} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;
