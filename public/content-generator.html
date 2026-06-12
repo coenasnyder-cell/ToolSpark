@@ -336,6 +336,7 @@
           <button class="tone-btn selected" onclick="selectTone(this, 'conversational')">Conversational</button>
           <button class="tone-btn" onclick="selectTone(this, 'motivational')">Motivational</button>
           <button class="tone-btn" onclick="selectTone(this, 'educational')">Educational</button>
+          <button class="tone-btn" onclick="selectTone(this, 'humorous')">Humorous</button>
         </div>
       </div>
 
@@ -493,7 +494,7 @@ A grounded, genuine celebration of a small step forward. Makes the reader want t
 
 Also write one ChatGPT image prompt for each post — a short description of a lifestyle photo or flat-lay image that would pair well with that post on Facebook. No text in the image, no faces. Mood and feeling only.
 
-Also write 5 comments per post for the creator to post under their own Facebook post to boost the algorithm. Comments 1-3 are posted 1-2 minutes apart right after publishing. Comments 4-5 are optional, posted ~45 and ~60 minutes later. Keep comments short (1-2 sentences), conversational, and designed to invite replies or reactions.
+Also write 1 comment per post for the creator to post under their own Facebook post right after publishing to boost early engagement. Keep it 1-2 sentences, conversational, and designed to invite replies or reactions.
 
 Return your response in EXACTLY this structure, with no extra commentary:
 
@@ -504,15 +505,7 @@ IMG_1_START
 [Image prompt for post 1]
 IMG_1_END
 COMMENTS_1_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_1_END
 
 POST_2_START
@@ -522,15 +515,7 @@ IMG_2_START
 [Image prompt for post 2]
 IMG_2_END
 COMMENTS_2_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_2_END
 
 POST_3_START
@@ -540,15 +525,7 @@ IMG_3_START
 [Image prompt for post 3]
 IMG_3_END
 COMMENTS_3_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_3_END`;
     }
 
@@ -587,7 +564,7 @@ Opens with a bold statement of fact or result, backed up with 2-3 supporting lin
 
 Also write one ChatGPT image prompt for each post — a short description of a lifestyle photo or flat-lay image that pairs well with that post on Facebook. No text in the image, no faces. Mood and feeling only.
 
-Also write 5 comments per post for the creator to post under their own Facebook post to boost the algorithm. Comments 1-3 are posted 1-2 minutes apart right after publishing. Comments 4-5 are optional, posted ~45 and ~60 minutes later. Keep comments short (1-2 sentences), conversational, and designed to invite replies or reactions.
+Also write 1 comment per post for the creator to post under their own Facebook post right after publishing to boost early engagement. Keep it 1-2 sentences, conversational, and designed to invite replies or reactions.
 
 Return your response in EXACTLY this structure, with no extra commentary:
 
@@ -598,15 +575,7 @@ IMG_1_START
 [Image prompt for post 1]
 IMG_1_END
 COMMENTS_1_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_1_END
 
 POST_2_START
@@ -616,15 +585,7 @@ IMG_2_START
 [Image prompt for post 2]
 IMG_2_END
 COMMENTS_2_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_2_END
 
 POST_3_START
@@ -634,15 +595,7 @@ IMG_3_START
 [Image prompt for post 3]
 IMG_3_END
 COMMENTS_3_START
-[Comment 1]
----
-[Comment 2]
----
-[Comment 3]
----
-[Comment 4]
----
-[Comment 5]
+[Comment]
 COMMENTS_3_END`;
   }
 
@@ -737,7 +690,7 @@ COMMENTS_3_END`;
   }
 
   const COMMENT_TIMING = [
-    { label: 'Post immediately', optional: false },
+    { label: 'Post immediately after publishing', optional: false },
     { label: '1–2 min later', optional: false },
     { label: '3–4 min later', optional: false },
     { label: 'Optional — ~45 min later', optional: true },
@@ -767,11 +720,11 @@ COMMENTS_3_END`;
       }).join('');
       commentsSection = `
         <button class="comments-toggle" onclick="toggleComments(this)">
-          💬 Post these comments to boost reach
+          💬 Post this comment to boost reach
           <span class="comments-toggle-arrow">▼</span>
         </button>
         <div class="comments-body">
-          <div class="comments-note">Post comments 1–3 right away, 1–2 minutes apart. They signal early engagement to Facebook and push the post to more people. Comments 4–5 are optional — use them to revive reach later.</div>
+          <div class="comments-note">Post this comment immediately after publishing. It signals early engagement to Facebook and helps push the post to more people.</div>
           ${rows}
         </div>`;
     }
