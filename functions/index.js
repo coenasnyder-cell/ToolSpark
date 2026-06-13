@@ -1,7 +1,9 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const {onDocumentCreated, onDocumentUpdated} = require("firebase-functions/v2/firestore");
 const crypto = require("crypto");
-const sgMail = require("@sendgrid/mail");
+const fs = require("fs");
+const path = require("path");
+const fetch = require("node-fetch");
 const admin = require("firebase-admin");
 const Anthropic = require("@anthropic-ai/sdk");
 if (!admin.apps.length) admin.initializeApp();
@@ -9,6 +11,45 @@ if (!admin.apps.length) admin.initializeApp();
 // Sonnet 4.6 pricing per million tokens
 const PRICE_INPUT  = 3.00;
 const PRICE_OUTPUT = 15.00;
+
+// ── RESEND HELPER ─────────────────────────────────────────────────────────────
+async function sendEmail({ to, subject, html, replyTo }) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Coena at ToolSpark <hello@toolspark.co>",
+      reply_to: replyTo || "coenasnyder@gmail.com",
+      to,
+      subject,
+      html,
+    }),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(JSON.stringify(result));
+  return result;
+}
+
+function emailShell(firstName, bodyHtml) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:'Georgia',serif;">
+  <div style="max-width:560px;margin:0 auto;padding:48px 32px;">
+    <div style="margin-bottom:32px;">
+      <span style="font-family:'Georgia',serif;font-size:22px;color:#111111;">Tool<span style="color:#C9A84C;">Spark</span></span>
+    </div>
+    <p style="font-size:16px;color:#111111;line-height:1.7;margin:0 0 20px;">Hey ${firstName},</p>
+    ${bodyHtml}
+    <hr style="border:none;border-top:1px solid #e0e0e0;margin:32px 0 24px;">
+    <p style="font-size:12px;color:#999999;line-height:1.6;margin:0;">© 2026 ToolSpark · <a href="https://toolspark.co" style="color:#999999;">toolspark.co</a></p>
+  </div>
+</body>
+</html>`;
+}
 
 const JOURNEY_COMPANION_VOICE_PROMPT = `You are the ToolSpark Journey Companion, now running as a live voice conversation.
 
@@ -1833,7 +1874,7 @@ exports.hubtool = onRequest({
 
 exports.onGraduation = onDocumentUpdated({
   document: "users/{uid}",
-  secrets: ["SENDGRID_API_KEY"],
+  secrets: ["RESEND_API_KEY"],
 }, async (event) => {
   const before = event.data.before.data();
   const after  = event.data.after.data();
@@ -1877,49 +1918,19 @@ exports.onGraduation = onDocumentUpdated({
 
   // 3. Congratulations email
   if (!email) return;
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   const firstName = after.firstName || after.displayName || "there";
 
+  const graduationBody = `
+    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE GRADUATION EMAIL CONTENT HERE --></p>
+    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 28px;"><em style="color:#C9A84C;">${toolName}</em> is officially certified and live on the marketplace.</p>
+    <a href="https://toolspark.co/graduation.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">View Your Celebration Page →</a>
+  `;
+
   try {
-    await sgMail.send({
-      to:      email,
-      from:    { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
-      subject: `You did it, ${firstName} 🎓`,
-      html: `
-<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0C0B09;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
-<table width="520" cellpadding="0" cellspacing="0" style="background:#141210;border:1px solid #2A2720;border-radius:16px;overflow:hidden;">
-  <tr><td style="padding:40px 40px 32px;text-align:center;border-bottom:1px solid #2A2720;">
-    <div style="font-family:Georgia,serif;font-size:26px;color:#F2EEE6;">Tool<span style="color:#C9A84C;">Spark</span></div>
-    <div style="font-size:10px;color:#5A5650;text-transform:uppercase;letter-spacing:0.16em;margin-top:4px;">Builder Platform</div>
-  </td></tr>
-  <tr><td style="padding:40px;">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:100px;padding:6px 18px;font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:0.12em;">ToolSpark Certified Builder</div>
-    </div>
-    <h1 style="font-family:Georgia,serif;font-size:30px;font-weight:400;color:#F2EEE6;text-align:center;margin:0 0 16px;line-height:1.3;">You did it, ${firstName}.</h1>
-    <p style="font-size:15px;color:#9A9488;line-height:1.75;text-align:center;margin:0 0 24px;">
-      <em style="color:#E8D5A3;">${toolName}</em> is officially certified and live on the marketplace. This is a big deal — you built something real.
-    </p>
-    <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:8px 0 32px;">
-      <a href="https://toolspark.co/graduation.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">View Your Celebration Page →</a>
-    </td></tr></table>
-    <p style="font-size:13px;color:#5A5650;text-align:center;line-height:1.7;margin:0;">
-      You can download your certificate and choose how you'd like to receive it on your celebration page.
-    </p>
-  </td></tr>
-  <tr><td style="padding:20px 40px;border-top:1px solid #2A2720;text-align:center;">
-    <p style="font-size:11px;color:#5A5650;margin:0;line-height:1.6;">
-      © 2025 ToolSpark · <a href="https://toolspark.co/privacy-policy.html" style="color:#9A9488;text-decoration:none;">Privacy</a>
-    </p>
-  </td></tr>
-</table>
-</td></tr></table>
-</body></html>`,
-    });
-    console.log(JSON.stringify({ event: "graduation_email_sent", uid, email }));
+    const result = await sendEmail({ to: email, subject: `You did it, ${firstName} 🎓`, html: emailShell(firstName, graduationBody) });
+    console.log(JSON.stringify({ event: "graduation_email_sent", uid, email, resend_id: result.id }));
   } catch (err) {
-    console.error(JSON.stringify({ event: "graduation_email_failed", uid, message: err.message, response: err.response?.body }));
+    console.error(JSON.stringify({ event: "graduation_email_failed", uid, message: err.message }));
   }
 });
 
@@ -1927,7 +1938,7 @@ exports.onGraduation = onDocumentUpdated({
 exports.deliverCertificate = onRequest({
   cors: true,
   invoker: "public",
-  secrets: ["SENDGRID_API_KEY"],
+  secrets: ["RESEND_API_KEY"],
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
@@ -1949,30 +1960,13 @@ exports.deliverCertificate = onRequest({
     const firstName = user.firstName || user.displayName || "there";
     const toolName  = user.toolName  || "your tool";
 
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    await sgMail.send({
-      to:      email,
-      from:    { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
-      subject: `Your ToolSpark Certificate, ${firstName}`,
-      html: `
-<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0C0B09;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
-<table width="520" cellpadding="0" cellspacing="0" style="background:#141210;border:1px solid #2A2720;border-radius:16px;overflow:hidden;">
-  <tr><td style="padding:40px 40px 32px;text-align:center;border-bottom:1px solid #2A2720;">
-    <div style="font-family:Georgia,serif;font-size:26px;color:#F2EEE6;">Tool<span style="color:#C9A84C;">Spark</span></div>
-  </td></tr>
-  <tr><td style="padding:40px;text-align:center;">
-    <p style="font-size:15px;color:#9A9488;line-height:1.75;margin:0 0 28px;">Here is your ToolSpark Certified Builder certificate, ${firstName}. You earned it.</p>
-    <a href="https://toolspark.co/certificate.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;">View & Download Certificate →</a>
-    <p style="font-size:12px;color:#5A5650;margin:28px 0 0;line-height:1.6;">Open the link above to view and download your printable PDF certificate for <em style="color:#9A9488;">${toolName}</em>.</p>
-  </td></tr>
-  <tr><td style="padding:20px 40px;border-top:1px solid #2A2720;text-align:center;">
-    <p style="font-size:11px;color:#5A5650;margin:0;">© 2025 ToolSpark</p>
-  </td></tr>
-</table>
-</td></tr></table>
-</body></html>`,
-    });
+    const certBody = `
+      <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE CERTIFICATE EMAIL CONTENT HERE --></p>
+      <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 28px;">Your certificate is ready for <em style="color:#C9A84C;">${toolName}</em>.</p>
+      <a href="https://toolspark.co/certificate.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">View & Download Certificate →</a>
+    `;
+
+    await sendEmail({ to: email, subject: `Your ToolSpark Certificate, ${firstName}`, html: emailShell(firstName, certBody) });
 
     await admin.firestore().collection("users").doc(uid).update({ certificateEmailSent: true });
     console.log(JSON.stringify({ event: "certificate_email_sent", uid, email }));
@@ -2045,7 +2039,7 @@ exports.deleteAccount = onRequest({
 
 exports.onNewMemberSignup = onDocumentCreated({
   document: "users/{uid}",
-  secrets: ["SENDGRID_API_KEY"],
+  secrets: ["RESEND_API_KEY"],
 }, async (event) => {
   const data = event.data.data();
   const email = data.userEmail || data.clientEmail || '';
@@ -2053,39 +2047,27 @@ exports.onNewMemberSignup = onDocumentCreated({
   const firstName = displayName.split(' ')[0] || 'there';
 
   console.log(JSON.stringify({ event: "new_member_signup_triggered", email }));
+  if (!email) { console.error("onNewMemberSignup: no email in user document"); return; }
 
-  if (!email) {
-    console.error("onNewMemberSignup: no email in user document");
-    return;
-  }
-
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const body = `
+    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;">Welcome to ToolSpark — your account is ready.</p>
+    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE WELCOME EMAIL CONTENT HERE --></p>
+    <a href="https://toolspark.co/community.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">Go to your dashboard →</a>
+  `;
 
   try {
-    await sgMail.send({
-      to: email,
-      from: { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
-      templateId: "d-7f60caa60ebc4bbbb04978be5d4960b0",
-      dynamicTemplateData: { firstName },
-    });
-    console.log(JSON.stringify({ event: "new_member_welcome_email_sent", email }));
+    const result = await sendEmail({ to: email, subject: `Welcome to ToolSpark, ${firstName}!`, html: emailShell(firstName, body) });
+    console.log(JSON.stringify({ event: "new_member_welcome_email_sent", email, resend_id: result.id }));
   } catch (err) {
-    console.error(JSON.stringify({
-      event: "new_member_welcome_email_failed",
-      email,
-      status: err.code,
-      message: err.message,
-      response: err.response?.body,
-    }));
+    console.error(JSON.stringify({ event: "new_member_welcome_email_failed", email, message: err.message }));
     throw err;
   }
 });
 
-// ── ADD TOOL FINDER LEAD TO SENDGRID ─────────────────────────────────────────
+// ── ADD TOOL FINDER LEAD ──────────────────────────────────────────────────────
 exports.addToolFinderLead = onRequest({
   cors: true,
   invoker: "public",
-  secrets: ["SENDGRID_API_KEY"],
 }, async (req, res) => {
   if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
@@ -2096,30 +2078,14 @@ exports.addToolFinderLead = onRequest({
     return;
   }
 
-  const body = {
-    contacts: [{
-      email: email.toLowerCase().trim(),
-      first_name: (firstName || "").trim(),
-    }],
-  };
-
   try {
-    const sgRes = await fetch("https://api.sendgrid.com/v3/marketing/contacts", {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${process.env.SENDGRID_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await sgRes.json();
-
-    if (!sgRes.ok) {
-      console.error(JSON.stringify({ event: "toolfinder_lead_failed", email, status: sgRes.status, data }));
-      res.status(500).json({ error: "SendGrid contact add failed" });
-      return;
-    }
+    await admin.firestore().collection("toolfinder_leads").doc(email.toLowerCase().trim()).set({
+      email: email.toLowerCase().trim(),
+      firstName: (firstName || "").trim(),
+      path: path || null,
+      sessionId: sessionId || null,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
 
     console.log(JSON.stringify({ event: "toolfinder_lead_added", email, sessionId, path }));
     res.status(200).json({ success: true });
@@ -2131,10 +2097,11 @@ exports.addToolFinderLead = onRequest({
 
 exports.onWaitlistSignup = onDocumentCreated({
   document: "waitlist/{email}",
-  secrets: ["SENDGRID_API_KEY"],
+  secrets: ["RESEND_API_KEY"],
 }, async (event) => {
   const data = event.data.data();
-  const { name, email } = data;
+  const { name } = data;
+  const email = data.email || event.params.email;
 
   console.log(JSON.stringify({ event: "waitlist_signup_triggered", email, name }));
 
@@ -2143,25 +2110,36 @@ exports.onWaitlistSignup = onDocumentCreated({
     return;
   }
 
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
   const firstName = name || "there";
+  const LAUNCH_DATE = "July 15, 2026";
+
+  const html = fs.readFileSync(path.join(__dirname, "emails", "waitlist-confirmation.html"), "utf8")
+    .replace(/\{\{first_name\}\}/g, firstName)
+    .replace(/\{\{launch_date\}\}/g, LAUNCH_DATE)
+    .replace(/\{\{unsubscribe_url\}\}/g, `https://toolspark.co/unsubscribe.html?email=${encodeURIComponent(email)}`);
 
   try {
-    await sgMail.send({
-      to: email,
-      from: { name: "Coena @ ToolSpark", email: "support@toolspark.co" },
-      templateId: "d-0bdf7ef6978d498385eb8c0ac3745c5c",
-      dynamicTemplateData: { firstName },
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Coena at ToolSpark <hello@toolspark.co>",
+        to: email,
+        reply_to: "coenasnyder@gmail.com",
+        subject: "You're on the list 👀",
+        html,
+      }),
     });
-    console.log(JSON.stringify({ event: "waitlist_email_sent", email }));
+    const result = await response.json();
+    console.log(JSON.stringify({ event: "waitlist_email_sent", email, resend_id: result.id }));
   } catch (err) {
     console.error(JSON.stringify({
       event: "waitlist_email_failed",
       email,
-      status: err.code,
       message: err.message,
-      response: err.response?.body,
     }));
     throw err;
   }
