@@ -186,11 +186,19 @@
 
     <div class="group hide" id="voteGroup">
       <label>Options</label>
+      <div class="toggle-row" style="margin-bottom:10px;">
+        <input type="checkbox" id="showBadges" checked>
+        <span>Show letter badges (A B C D)</span>
+      </div>
+      <div class="toggle-row" style="margin-bottom:12px;">
+        <input type="checkbox" id="abOnly">
+        <span>A/B only (2 options)</span>
+      </div>
       <div class="opt-row"><b>A</b><input type="text" class="vopt" maxlength="60" value="Coming up with the idea"></div>
       <div class="opt-row"><b>B</b><input type="text" class="vopt" maxlength="60" value="Making the thing"></div>
-      <div class="opt-row"><b>C</b><input type="text" class="vopt" maxlength="60" value="Getting it seen"></div>
-      <div class="opt-row"><b>D</b><input type="text" class="vopt" maxlength="60" value="Pretending you're fine"></div>
-      <p class="hint">Leave an option blank to show fewer than four.</p>
+      <div class="opt-row" id="optRowC"><b>C</b><input type="text" class="vopt" maxlength="60" value="Getting it seen"></div>
+      <div class="opt-row" id="optRowD"><b>D</b><input type="text" class="vopt" maxlength="60" value="Pretending you're fine"></div>
+      <p class="hint">Turn off letter badges to use emojis in the option text instead.</p>
     </div>
 
     <div class="group">
@@ -377,29 +385,34 @@
     const block = fitBlock(h, S-PAD*2-130, 280, textSize());
     let y = drawBlock(block, PAD, 100, C.ink, 'left');
     y += 50;
-    const opts = [...document.querySelectorAll('.vopt')]
+    const showBadge = document.getElementById('showBadges').checked;
+    const abOnly    = document.getElementById('abOnly').checked;
+    let opts = [...document.querySelectorAll('.vopt')]
       .map(i=>i.value.trim()).filter(Boolean);
-    const letters = ['A','B','C','D'];
+    if(abOnly) opts = opts.slice(0, 2);
+    const letters  = ['A','B','C','D'];
+    const textX    = showBadge ? PAD+120 : PAD;
+    const textMaxW = showBadge ? S-(PAD+120)-PAD : S-PAD*2;
     const rowH = Math.min(150, (S - y - 110) / Math.max(opts.length,1));
     opts.forEach((o, i)=>{
       const cy = y + i*rowH + rowH/2;
-      // badge
-      ctx.beginPath();
-      ctx.arc(PAD+44, cy, 44, 0, Math.PI*2);
-      ctx.fillStyle = C.ink; ctx.fill();
-      ctx.font = '46px "Archivo Black"';
-      ctx.fillStyle = C.spark; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(letters[i], PAD+44, cy+4);
-      // text — shrink to fit one line
+      if(showBadge){
+        ctx.beginPath();
+        ctx.arc(PAD+44, cy, 44, 0, Math.PI*2);
+        ctx.fillStyle = C.ink; ctx.fill();
+        ctx.font = '46px "Archivo Black"';
+        ctx.fillStyle = C.spark; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(letters[i], PAD+44, cy+4);
+      }
       let os = 50;
       ctx.textAlign='left';
       while(os > 24){
         ctx.font = os + 'px "Archivo Black"';
-        if(ctx.measureText(o).width <= S - (PAD+120) - PAD) break;
+        if(ctx.measureText(o).width <= textMaxW) break;
         os -= 2;
       }
       ctx.fillStyle = C.ink;
-      ctx.fillText(o, PAD+120, cy+4);
+      ctx.fillText(o, textX, cy+4);
     });
     footer(C.ink);
   }
@@ -495,6 +508,13 @@
   });
   document.getElementById('footerOn').addEventListener('change', render);
   document.getElementById('quoteMarkOn').addEventListener('change', render);
+  document.getElementById('showBadges').addEventListener('change', render);
+  document.getElementById('abOnly').addEventListener('change', () => {
+    const on = document.getElementById('abOnly').checked;
+    document.getElementById('optRowC').classList.toggle('hide', on);
+    document.getElementById('optRowD').classList.toggle('hide', on);
+    render();
+  });
   document.querySelectorAll('.vopt').forEach(i=> i.addEventListener('input', render));
 
   document.getElementById('download').addEventListener('click', ()=>{
