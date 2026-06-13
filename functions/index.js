@@ -1920,14 +1920,13 @@ exports.onGraduation = onDocumentUpdated({
   if (!email) return;
   const firstName = after.firstName || after.displayName || "there";
 
-  const graduationBody = `
-    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE GRADUATION EMAIL CONTENT HERE --></p>
-    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 28px;"><em style="color:#C9A84C;">${toolName}</em> is officially certified and live on the marketplace.</p>
-    <a href="https://toolspark.co/graduation.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">View Your Celebration Page →</a>
-  `;
+  const graduationHtml = fs.readFileSync(path.join(__dirname, "emails", "grad-email.html"), "utf8")
+    .replace(/\{\{first_name\}\}/g, firstName)
+    .replace(/\{\{graduation_url\}\}/g, "https://toolspark.co/graduation.html")
+    .replace(/\{\{unsubscribe_url\}\}/g, `https://toolspark.co/unsubscribe.html?email=${encodeURIComponent(email)}`);
 
   try {
-    const result = await sendEmail({ to: email, subject: `You did it, ${firstName} 🎓`, html: emailShell(firstName, graduationBody) });
+    const result = await sendEmail({ to: email, subject: `You did it, ${firstName} 🎓`, html: graduationHtml });
     console.log(JSON.stringify({ event: "graduation_email_sent", uid, email, resend_id: result.id }));
   } catch (err) {
     console.error(JSON.stringify({ event: "graduation_email_failed", uid, message: err.message }));
@@ -1960,13 +1959,12 @@ exports.deliverCertificate = onRequest({
     const firstName = user.firstName || user.displayName || "there";
     const toolName  = user.toolName  || "your tool";
 
-    const certBody = `
-      <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE CERTIFICATE EMAIL CONTENT HERE --></p>
-      <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 28px;">Your certificate is ready for <em style="color:#C9A84C;">${toolName}</em>.</p>
-      <a href="https://toolspark.co/certificate.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">View & Download Certificate →</a>
-    `;
+    const certHtml = fs.readFileSync(path.join(__dirname, "emails", "certificate-email.html"), "utf8")
+      .replace(/\{\{first_name\}\}/g, firstName)
+      .replace(/\{\{certificate_url\}\}/g, "https://toolspark.co/certificate.html")
+      .replace(/\{\{unsubscribe_url\}\}/g, `https://toolspark.co/unsubscribe.html?email=${encodeURIComponent(email)}`);
 
-    await sendEmail({ to: email, subject: `Your ToolSpark Certificate, ${firstName}`, html: emailShell(firstName, certBody) });
+    await sendEmail({ to: email, subject: `Your ToolSpark Certificate, ${firstName}`, html: certHtml });
 
     await admin.firestore().collection("users").doc(uid).update({ certificateEmailSent: true });
     console.log(JSON.stringify({ event: "certificate_email_sent", uid, email }));
@@ -2049,14 +2047,13 @@ exports.onNewMemberSignup = onDocumentCreated({
   console.log(JSON.stringify({ event: "new_member_signup_triggered", email }));
   if (!email) { console.error("onNewMemberSignup: no email in user document"); return; }
 
-  const body = `
-    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;">Welcome to ToolSpark — your account is ready.</p>
-    <p style="font-size:16px;color:#F0EDE6;line-height:1.7;margin:0 0 20px;"><!-- WRITE WELCOME EMAIL CONTENT HERE --></p>
-    <a href="https://toolspark.co/community.html" style="display:inline-block;background:#C9A84C;color:#0C0B09;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;padding:14px 32px;letter-spacing:0.02em;">Go to your dashboard →</a>
-  `;
+  const welcomeHtml = fs.readFileSync(path.join(__dirname, "emails", "welcome.html"), "utf8")
+    .replace(/\{\{first_name\}\}/g, firstName)
+    .replace(/\{\{hub_url\}\}/g, "https://toolspark.co/creator-hub.html")
+    .replace(/\{\{unsubscribe_url\}\}/g, `https://toolspark.co/unsubscribe.html?email=${encodeURIComponent(email)}`);
 
   try {
-    const result = await sendEmail({ to: email, subject: `Welcome to ToolSpark, ${firstName}!`, html: emailShell(firstName, body) });
+    const result = await sendEmail({ to: email, subject: `Welcome to ToolSpark, ${firstName}!`, html: welcomeHtml });
     console.log(JSON.stringify({ event: "new_member_welcome_email_sent", email, resend_id: result.id }));
   } catch (err) {
     console.error(JSON.stringify({ event: "new_member_welcome_email_failed", email, message: err.message }));
