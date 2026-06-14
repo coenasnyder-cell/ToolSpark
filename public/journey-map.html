@@ -279,6 +279,10 @@
   // ── PARSE TOOLS FROM ACTION PLAN (same regex as roadmap.html) ──
   function parseToolsFromActionPlan(actionPlan) {
     if (!actionPlan) return [];
+    // Strip ** bold markers from field keys (AI wraps keys like **TOOL_1_NAME:**)
+    var plan = actionPlan
+      .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, '$1:')
+      .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:');
     var fieldDefs = [
       { key: 'name', tag: 'NAME' },
       { key: 'summary', tag: 'SUMMARY' }
@@ -288,8 +292,8 @@
       var tool = {};
       fieldDefs.forEach(function(def) {
         var re = new RegExp('TOOL_' + i + '_' + def.tag + ':[\\s\\S]+?(?=TOOL_\\d+_[A-Z_]+:|\\*\\*ACTION_PLAN_END|$)');
-        var match = actionPlan.match(re);
-        tool[def.key] = match ? stripMd(match[0].replace('TOOL_' + i + '_' + def.tag + ':', '').trim()) : '';
+        var match = plan.match(re);
+        tool[def.key] = match ? stripMd(match[0].replace('TOOL_' + i + '_' + def.tag + ':', '').replace(/\*\*/g, '').trim()) : '';
       });
       tools.push(tool);
     }

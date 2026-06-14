@@ -232,6 +232,19 @@
       </div>
     </div>
 
+    <!-- ALREADY COMPLETED -->
+    <div class="card" id="completed-card" style="display:none;">
+      <div class="blocker-center">
+        <div class="blocker-icon">✅</div>
+        <h2>Your funnel pages have been generated</h2>
+        <p>Your lead page, sales page, and thank you page are ready. To download fresh copies, re-generate below — it only takes a few seconds.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn-gold" onclick="showSetupFromCompleted()">Re-generate your funnel →</button>
+          <a href="launch-map.html" style="display:inline-flex;align-items:center;padding:11px 20px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;text-decoration:none;">View Launch Map</a>
+        </div>
+      </div>
+    </div>
+
     <!-- SETUP -->
     <div id="setup-section" style="display:none;">
 
@@ -448,14 +461,16 @@
       var results = await Promise.allSettled([
         db.collection('journey_maps').doc(user.uid).get(),
         db.collection('offer_sort_results').doc(user.uid).get(),
-        db.collection('offer_results').doc(user.uid).get()
+        db.collection('offer_results').doc(user.uid).get(),
+        db.collection('funnel_generator_results').doc(user.uid).get()
       ]);
 
-      var journeySnap   = results[0];
-      var offerSortSnap = results[1];
+      var journeySnap      = results[0];
+      var offerSortSnap    = results[1];
       var offerBuilderSnap = results[2];
+      var funnelResultSnap = results[3];
 
-      // Journey Map is required
+      // Journey Map is required and must have a tool in Box 2
       if (journeySnap.status !== 'fulfilled' || !journeySnap.value.exists) {
         document.getElementById('loading-card').style.display = 'none';
         document.getElementById('blocker-card').style.display = 'block';
@@ -463,10 +478,15 @@
       }
 
       var jm = journeySnap.value.data();
-      fData.toolName = (jm.box2 && jm.box2.toolName) ? jm.box2.toolName : '';
-      fData.toolDescription = (jm.box2 && jm.box2.toolDescription) ? jm.box2.toolDescription : '';
+      if (!jm.box2 || !jm.box2.toolName) {
+        document.getElementById('loading-card').style.display = 'none';
+        document.getElementById('blocker-card').style.display = 'block';
+        return;
+      }
+      fData.toolName = (jm.box2 && jm.box2.toolName) ? stripMd(jm.box2.toolName) : '';
+      fData.toolDescription = (jm.box2 && jm.box2.toolDescription) ? stripMd(jm.box2.toolDescription) : '';
       fData.toolPrice = (jm.box2 && jm.box2.price) ? jm.box2.price : '';
-      fData.coreToolName = (jm.box3 && jm.box3.toolName) ? jm.box3.toolName : '';
+      fData.coreToolName = (jm.box3 && jm.box3.toolName) ? stripMd(jm.box3.toolName) : '';
       fData.coreToolPrice = (jm.box3 && jm.box3.price) ? jm.box3.price : '';
       fData.discovery = jm.discovery || '';
 
@@ -490,6 +510,13 @@
       buildQ1Buttons();
       buildPreviewStrip();
       document.getElementById('loading-card').style.display = 'none';
+
+      // If already completed, show the completed card instead of the setup form
+      if (funnelResultSnap.status === 'fulfilled' && funnelResultSnap.value.exists) {
+        document.getElementById('completed-card').style.display = 'block';
+        return;
+      }
+
       document.getElementById('setup-section').style.display = 'block';
       validateSetup();
     } catch(e) {
@@ -878,6 +905,13 @@
     var a = document.createElement('a');
     a.href = url; a.download = names[key]; a.click();
     setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function showSetupFromCompleted() {
+    document.getElementById('completed-card').style.display = 'none';
+    document.getElementById('setup-section').style.display = 'block';
+    document.getElementById('setup-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    validateSetup();
   }
 
   function toggleCheck(el) {

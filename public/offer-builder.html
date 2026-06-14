@@ -84,6 +84,10 @@
   .no-data-note { font-size: 13px; color: var(--text2); padding: 0.875rem 1rem; background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm); margin: 1.25rem 0; line-height: 1.55; }
   .btn-start { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; background: var(--gold); color: var(--dark); font-weight: 900; font-size: 15px; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.02em; font-family: 'Lato', sans-serif; }
   .btn-start:hover { opacity: 0.88; }
+  .blocker-center { text-align: center; padding: 1.5rem 0; }
+  .blocker-icon { font-size: 32px; margin-bottom: 1rem; }
+  .blocker-center h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 0.5rem; }
+  .blocker-center p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 1.5rem; }
 
   /* CHAT */
   .chat-messages { display: flex; flex-direction: column; gap: 14px; }
@@ -215,6 +219,16 @@
       </div>
     </div>
 
+    <!-- BLOCKER: no Offer Sort -->
+    <div class="card" id="blocker-card" style="display:none;">
+      <div class="blocker-center">
+        <div class="blocker-icon">📦</div>
+        <h2>Complete Offer Sort first</h2>
+        <p>Offer Builder uses your sorted offer stack to generate the right price. Run Offer Sort first, then come back here.</p>
+        <a class="btn-start" href="offer-sort.html">Go to Offer Sort →</a>
+      </div>
+    </div>
+
     <!-- INTRO -->
     <div class="card" id="intro-card" style="display:none;">
       <div class="card-title">Build Your Offer</div>
@@ -273,6 +287,10 @@
   var roadmapData = { toolName: '', audience: '' };
   var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
   var MODEL = 'claude-sonnet-4-6';
+
+  function stripMd(str) {
+    return String(str || '').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`(.+?)`/g,'$1').trim();
+  }
   var answers = {};
   var currentQ = 0;
 
@@ -371,8 +389,17 @@
       var results = await Promise.allSettled([
         db.collection('spark_results').where('userId', '==', uid).get(),
         db.collection('audience_results').where('userId', '==', uid).get(),
-        db.collection('prompt_results').doc(uid).get()
+        db.collection('prompt_results').doc(uid).get(),
+        db.collection('offer_sort_results').doc(uid).get()
       ]);
+
+      // Gate: Offer Sort must be completed first
+      var offerSortSnap = results[3];
+      if (!(offerSortSnap.status === 'fulfilled' && offerSortSnap.value.exists)) {
+        document.getElementById('loading-card').style.display = 'none';
+        document.getElementById('blocker-card').style.display = 'block';
+        return;
+      }
 
       var sparkDocs = (results[0].status === 'fulfilled' && !results[0].value.empty)
         ? results[0].value.docs.map(function(d) { return d.data(); }) : [];
@@ -390,8 +417,8 @@
 
       if (roadmapData.toolName || roadmapData.audience) {
         document.getElementById('intro-prefill').style.display = 'flex';
-        document.getElementById('prefill-tool').textContent = roadmapData.toolName || 'Your AI tool';
-        document.getElementById('prefill-audience').textContent = roadmapData.audience || 'Your audience';
+        document.getElementById('prefill-tool').textContent = stripMd(roadmapData.toolName) || 'Your AI tool';
+        document.getElementById('prefill-audience').textContent = stripMd(roadmapData.audience) || 'Your audience';
       } else {
         document.getElementById('intro-no-data').style.display = 'block';
       }

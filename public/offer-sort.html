@@ -71,6 +71,13 @@
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); }
   .card-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 0.4rem; }
   .card-sub { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .loading-row { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text2); }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .blocker-center { text-align: center; padding: 1.5rem 0; }
+  .blocker-icon { font-size: 32px; margin-bottom: 1rem; }
+  .blocker-center h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 0.5rem; }
+  .blocker-center p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 1.5rem; }
 
   /* INTRO EXPLAINER */
   .rule-row { display: flex; gap: 12px; margin-top: 1.25rem; }
@@ -193,8 +200,23 @@
 
   <main class="page-content">
 
+    <!-- LOADING -->
+    <div class="card" id="loading-card">
+      <div class="loading-row"><div class="spinner"></div><span>Checking your progress...</span></div>
+    </div>
+
+    <!-- BLOCKER: no Breakthrough -->
+    <div class="card" id="blocker-card" style="display:none;">
+      <div class="blocker-center">
+        <div class="blocker-icon">💡</div>
+        <h2>Complete your Breakthrough first</h2>
+        <p>Offer Sort needs your chosen tool idea before it can filter your offer. Finish Discover Your Breakthrough and then come back.</p>
+        <a class="btn-next" href="clarity.html">Go to Discover Your Breakthrough →</a>
+      </div>
+    </div>
+
     <!-- INTRO -->
-    <div class="card">
+    <div class="card" id="intro-card" style="display:none;">
       <div class="card-title">Offer Sort</div>
       <p class="card-sub">Dump everything you're thinking of including. Sparky filters it against your transformation and keeps a maximum of two additions — the rest becomes confident positioning copy for your sales page.</p>
       <div class="rule-row">
@@ -208,7 +230,7 @@
     </div>
 
     <!-- FORM -->
-    <div class="card" id="form-card">
+    <div class="card" id="form-card" style="display:none;">
       <div class="field-group">
 
         <div class="field">
@@ -326,7 +348,7 @@
   }
 
   // AUTH
-  auth.onAuthStateChanged(function(user) {
+  auth.onAuthStateChanged(async function(user) {
     if (!user) { window.location.href = 'signon.html?redirect=offer-sort'; return; }
     currentUser = user;
     var initials = (user.displayName || user.email || '?').charAt(0).toUpperCase();
@@ -334,8 +356,42 @@
     var nameEl = document.getElementById('sidebar-name');
     if (avatarEl) avatarEl.textContent = initials;
     if (nameEl) nameEl.textContent = user.displayName || user.email || 'Builder';
-    wireForm();
+    await checkGate(user);
   });
+
+  async function checkGate(user) {
+    var uid = user.uid;
+    var email = user.email || '';
+    var emailLower = email.toLowerCase();
+    try {
+      var results = await Promise.allSettled([
+        db.collection('clarity_sessions').where('userId', '==', uid).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', email).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', emailLower).get(),
+        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get()
+      ]);
+      var sessionMap = new Map();
+      results.forEach(function(r) {
+        if (r.status === 'fulfilled') {
+          r.value.forEach(function(d) { if (!sessionMap.has(d.id)) sessionMap.set(d.id, d); });
+        }
+      });
+      var hasBreakthrough = Array.from(sessionMap.values()).some(function(d) {
+        var data = d.data();
+        return data.status === 'completed' && data.breakthroughComplete === true;
+      });
+      document.getElementById('loading-card').style.display = 'none';
+      if (!hasBreakthrough) {
+        document.getElementById('blocker-card').style.display = 'block';
+        return;
+      }
+      document.getElementById('intro-card').style.display = 'block';
+      document.getElementById('form-card').style.display = 'block';
+      wireForm();
+    } catch(e) {
+      document.getElementById('loading-card').innerHTML = '<div style="font-size:14px;color:var(--text2);">Failed to load. Please refresh and try again.</div>';
+    }
+  }
 
   // FORM WIRING
   function wireForm() {
@@ -468,7 +524,7 @@
     }
 
     var items = [];
-    var lines = block.split('\n').filter(function(l) { return l.trim(); });
+    var lines = block.split('\n').filter(function(l) { return l.trim() && !/^[-—–\s]+$/.test(l.trim()); });
     lines.forEach(function(line) {
       var clean = line.replace(/^\d+\.\s*/, '').trim();
       // Split on em dash (—), en dash (–), or " - "

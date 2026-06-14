@@ -374,9 +374,9 @@
   function renderJourneyMap(data) {
     var boxes = [
       { cls: 'discovery', label: 'How they find you', name: data.discovery || '—', desc: '', price: null },
-      { cls: 'entry',     label: 'Entry Offer',       name: data.box2 && data.box2.toolName ? data.box2.toolName : 'To be decided', desc: data.box2 && data.box2.toolDescription ? data.box2.toolDescription : '', price: data.box2 && data.box2.price ? data.box2.price : null, empty: !data.box2 || !data.box2.toolName },
-      { cls: 'core',      label: 'Core Offer',        name: data.box3 && data.box3.toolName ? data.box3.toolName : 'To be decided', desc: data.box3 && data.box3.toolDescription ? data.box3.toolDescription : '', price: data.box3 && data.box3.price ? data.box3.price : null, empty: !data.box3 || !data.box3.toolName },
-      { cls: 'next',      label: 'Next Step',         name: data.box4 && data.box4.toolName ? data.box4.toolName : 'To be decided', desc: data.box4 && data.box4.toolDescription ? data.box4.toolDescription : '', price: data.box4 && data.box4.price ? data.box4.price : null, empty: !data.box4 || !data.box4.toolName }
+      { cls: 'entry',     label: 'Entry Offer',       name: data.box2 && data.box2.toolName ? stripMd(data.box2.toolName) : 'To be decided', desc: data.box2 && data.box2.toolDescription ? stripMd(data.box2.toolDescription) : '', price: data.box2 && data.box2.price ? data.box2.price : null, empty: !data.box2 || !data.box2.toolName },
+      { cls: 'core',      label: 'Core Offer',        name: data.box3 && data.box3.toolName ? stripMd(data.box3.toolName) : 'To be decided', desc: data.box3 && data.box3.toolDescription ? stripMd(data.box3.toolDescription) : '', price: data.box3 && data.box3.price ? data.box3.price : null, empty: !data.box3 || !data.box3.toolName },
+      { cls: 'next',      label: 'Next Step',         name: data.box4 && data.box4.toolName ? stripMd(data.box4.toolName) : 'To be decided', desc: data.box4 && data.box4.toolDescription ? stripMd(data.box4.toolDescription) : '', price: data.box4 && data.box4.price ? data.box4.price : null, empty: !data.box4 || !data.box4.toolName }
     ];
 
     var html = '<div class="journey-map">';
@@ -456,7 +456,7 @@
       sections += sectionCard('04', 'Funnel Generator', true, false,
         '<p style="font-size:14px;color:var(--text2);margin-bottom:1rem;">Your lead page, sales page, and thank you page have been generated.</p>' +
         '<a class="btn-go" href="funnel-generator.html">Re-generate or download →</a>',
-        'funnel-generator.html');
+        null);
     } else {
       sections += sectionCard('04', 'Funnel Generator', false, false,
         '<p class="incomplete-msg">Build your lead page, sales page, and thank you page — ready to download and publish.</p>' +
