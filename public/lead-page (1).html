@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coena — Free Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Lato', sans-serif; background: #0c0b09; color: #FFFFFF; min-height: 100vh; display: flex; flex-direction: column; align-items: center; -webkit-font-smoothing: antialiased; }
+.logo { padding: 2rem 1.5rem 0; font-size: 17px; font-weight: 900; letter-spacing: 0.05em; opacity: 0.65; text-align: center; }
+.hero { width: 100%; max-width: 660px; padding: 3rem 1.5rem 3rem; text-align: center; }
+h1 { font-size: clamp(26px, 4.5vw, 42px); font-weight: 900; line-height: 1.2; margin-bottom: 2rem; }
+.bullets { text-align: left; display: inline-block; margin-bottom: 2.5rem; }
+.bullet { display: flex; align-items: flex-start; gap: 10px; font-size: 16px; line-height: 1.5; margin-bottom: 0.75rem; }
+.check { color: #c9a84c; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+form { display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto 1.25rem; }
+input { padding: 14px 16px; border: 2px solid rgba(128,128,128,0.3); border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 15px; background: rgba(255,255,255,0.1); color: #FFFFFF; outline: none; }
+input::placeholder { opacity: 0.55; }
+input:focus { border-color: #c9a84c; }
+.cta-btn { padding: 15px; background: #c9a84c; color: #1A1714; font-family: 'Lato', sans-serif; font-size: 16px; font-weight: 900; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 0.03em; }
+.trust { font-size: 13px; opacity: 0.45; }
+</style>
+</head>
+<body>
+<div class="logo">Coena</div>
+<div class="hero">
+  <h1>Get free access to The Clarity Compass and finally identify exactly who you help and what you offer in one clear sentence — without weeks of overthinking
+
+LEAD_BULLET_1: Uncover your niche in 20 minutes, not 20 weeks
+LEAD_BULLET_2: Walk away with a personalised direction report and real next steps
+LEAD_BULLET_3: Stop second-guessing your offer and start talking about it with confidence</h1>
+  <div class="bullets">
+    <div class="bullet"><span class="check">&#10003;</span><span>Uncover your niche in 20 minutes, not 20 weeks
+LEAD_BULLET_2: Walk away with a personalised direction report and real next steps
+LEAD_BULLET_3: Stop second-guessing your offer and start talking about it with confidence</span></div>
+    <div class="bullet"><span class="check">&#10003;</span><span>Walk away with a personalised direction report and real next steps
+LEAD_BULLET_3: Stop second-guessing your offer and start talking about it with confidence</span></div>
+    <div class="bullet"><span class="check">&#10003;</span><span>Stop second-guessing your offer and start talking about it with confidence</span></div>
+  </div>
+  <!-- Connect your email provider here — paste your form embed code or action URL -->
+  <form onsubmit="return false;">
+    <input type="text" name="name" placeholder="Your first name" required>
+    <input type="email" name="email" placeholder="Your email address" required>
+    <button type="submit" class="cta-btn">Get Free Access &#8594;</button>
+  </form>
+  <p class="trust">No spam. Just clarity. Unsubscribe whenever you like.</p>
+</div>
+</body>
+</html>

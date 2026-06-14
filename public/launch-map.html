@@ -96,6 +96,7 @@
   .placeholder .section-status-dot { background: var(--border); }
   .section-number { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
   .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); }
+  .section-updated { font-size: 11px; color: var(--text3); margin-top: 2px; }
   .btn-edit-link { padding: 7px 14px; background: transparent; border: 1px solid var(--border); color: var(--text2); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
   .btn-edit-link:hover { border-color: var(--gold); color: var(--gold); }
 
@@ -246,7 +247,7 @@
 
   // ── OFFER SORT OUTPUT PARSER (mirrors offer-sort.html) ──
   function stripMd(str) {
-    return String(str || '').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`(.+?)`/g,'$1').trim();
+    return String(str || '').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`(.+?)`/g,'$1').replace(/\*+/g,'').trim();
   }
 
   function parseItems(block) {
@@ -398,8 +399,15 @@
     return html;
   }
 
-  function sectionCard(number, title, isComplete, isPlaceholder, bodyHtml, editHref) {
+  function fmtDate(ts) {
+    if (!ts) return '';
+    var d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function sectionCard(number, title, isComplete, isPlaceholder, bodyHtml, editHref, updatedTs) {
     var cls = isPlaceholder ? 'placeholder' : (isComplete ? 'complete' : 'incomplete');
+    var dateStr = (isComplete && updatedTs) ? fmtDate(updatedTs) : '';
     return '<div class="section-card ' + cls + '">' +
       '<div class="section-head">' +
         '<div class="section-head-left">' +
@@ -407,6 +415,7 @@
           '<div>' +
             '<div class="section-number">' + number + '</div>' +
             '<div class="section-title">' + title + '</div>' +
+            (dateStr ? '<div class="section-updated">Updated ' + dateStr + '</div>' : '') +
           '</div>' +
         '</div>' +
         (editHref ? '<a class="btn-edit-link" href="' + editHref + '">Edit</a>' : '') +
@@ -423,7 +432,7 @@
     // 1 — Offer Sort
     if (offerSort) {
       completed++;
-      sections += sectionCard('01', 'Offer Sort', true, false, renderOfferSort(offerSort), 'offer-sort.html');
+      sections += sectionCard('01', 'Offer Sort', true, false, renderOfferSort(offerSort), 'offer-sort.html', offerSort.updatedAt);
     } else {
       sections += sectionCard('01', 'Offer Sort', false, false,
         '<p class="incomplete-msg">You haven\'t packaged your offer yet.</p><a class="btn-go" href="offer-sort.html">Go to Offer Sort →</a>',
@@ -433,7 +442,7 @@
     // 2 — Offer Builder
     if (offerBuilder) {
       completed++;
-      sections += sectionCard('02', 'Offer Builder', true, false, renderOfferBuilder(offerBuilder), 'offer-builder.html');
+      sections += sectionCard('02', 'Offer Builder', true, false, renderOfferBuilder(offerBuilder), 'offer-builder.html', offerBuilder.updatedAt);
     } else {
       sections += sectionCard('02', 'Offer Builder', false, false,
         '<p class="incomplete-msg">You haven\'t set your pricing yet.</p><a class="btn-go" href="offer-builder.html">Go to Offer Builder →</a>',
@@ -443,7 +452,7 @@
     // 3 — Journey Map
     if (journeyMap) {
       completed++;
-      sections += sectionCard('03', 'Journey Map', true, false, renderJourneyMap(journeyMap), 'journey-map.html');
+      sections += sectionCard('03', 'Journey Map', true, false, renderJourneyMap(journeyMap), 'journey-map.html', journeyMap.completedAt);
     } else {
       sections += sectionCard('03', 'Journey Map', false, false,
         '<p class="incomplete-msg">You haven\'t mapped your customer journey yet.</p><a class="btn-go" href="journey-map.html">Go to Journey Map →</a>',
@@ -456,7 +465,7 @@
       sections += sectionCard('04', 'Funnel Generator', true, false,
         '<p style="font-size:14px;color:var(--text2);margin-bottom:1rem;">Your lead page, sales page, and thank you page have been generated.</p>' +
         '<a class="btn-go" href="funnel-generator.html">Re-generate or download →</a>',
-        null);
+        null, funnelGen.completedAt);
     } else {
       sections += sectionCard('04', 'Funnel Generator', false, false,
         '<p class="incomplete-msg">Build your lead page, sales page, and thank you page — ready to download and publish.</p>' +

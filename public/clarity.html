@@ -517,7 +517,7 @@
   <div class="start-card">
     <div class="start-logo-mark">ToolSpark</div>
     <h1>Discover Your <em>Breakthrough</em></h1>
-    <p class="start-sub">4 focused questions built around your Spark Profile and Audience Blueprint — walk away knowing exactly what AI tool to build first.</p>
+    <p class="start-sub">Focused questions built around your Spark Profile and Audience Blueprint — walk away knowing exactly what AI tool to build first.</p>
     <div class="start-field">
       <label>Your first name</label>
       <input type="text" id="s_displayName" placeholder="e.g. Sarah" autocomplete="given-name" />
@@ -870,7 +870,8 @@ async function finishSession(actionPlanText) {
       businessName,
       clientEmail,
       clientEmailLower: (clientEmail || '').toLowerCase(),
-      ...(userId && { userId, accountEmail }),
+      userId: userId || null,
+      accountEmail: accountEmail || clientEmail || null,
       summary: summaryText,
       transcript: conversationHistory,
       actionPlan: actionPlanText,

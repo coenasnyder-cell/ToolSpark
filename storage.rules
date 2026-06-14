@@ -93,6 +93,13 @@ service firebase.storage {
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // FUNNEL PAGES — publicly readable, owner can upload
+    match /pages/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;

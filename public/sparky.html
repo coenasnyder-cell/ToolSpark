@@ -741,8 +741,9 @@ function addMsg(role, content) {
 function fmt(t) {
   return t
     .replace(/SESSION_SUMMARY_START[\s\S]*?SESSION_SUMMARY_END/g, "")
-    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/\*\*([\s\S]*?)\*\*/g, "<b>$1</b>")
+    .replace(/\*([\s\S]*?)\*/g, "<em>$1</em>")
+    .replace(/\*+/g, "")
     .replace(/\n/g, "<br>")
     .trim();
 }

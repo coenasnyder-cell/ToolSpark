@@ -43,7 +43,7 @@ Display the three pre-filled tools in a preview card so the student can see what
 
 This answer populates Box 1 (Discovery).
 
-**If they select "I don't have traffic yet":** Box 1 shows "ToolSpark Marketplace" as the default with a note: *"Your Marketplace listing is your starting point — we'll make sure it's live before you send traffic."*
+**If they select "I don't have traffic yet":** Box 1 shows "ToolSpark Marketplace" as the default with a note: "Your Marketplace listing is your starting point — we'll make sure it's live before you send traffic."
 
 ---
 
@@ -51,31 +51,7 @@ This answer populates Box 1 (Discovery).
 
 Display a horizontal 4-box map with arrows between each box. On mobile, stack vertically with down arrows.
 
-### Box 1 — Discovery
-**Label:** HOW THEY FIND YOU  
-**Content:** [Their answer from the question]  
-**Color:** Neutral / offwhite border
-
-### Box 2 — Entry
-**Label:** ENTRY OFFER  
-**Content:** [Tool 1 name]  
-**Sub-content:** [Tool 1 description, truncated to 1 line]  
-**Price badge:** [Accessible price or $7–$47 default]  
-**Color:** Gold border (`#C9A84C`)
-
-### Box 3 — Core
-**Label:** CORE OFFER  
-**Content:** [Tool 2 name]  
-**Sub-content:** [Tool 2 description, truncated to 1 line]  
-**Price badge:** [Confident price or $47–$197 default]  
-**Color:** Gold border, slightly heavier weight than Box 2
-
-### Box 4 — Next
-**Label:** NEXT STEP  
-**Content:** [Tool 3 name]  
-**Sub-content:** [Tool 3 description, truncated to 1 line]  
-**Price badge:** [Premium price or $197+ default]  
-**Color:** Dashed gold border (signals "future")
+Journey Map
 
 ### Arrows between boxes
 Simple right-pointing arrow (→) between each box. Color: muted gold. On mobile: down arrow (↓).

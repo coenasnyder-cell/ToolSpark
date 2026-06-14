@@ -43,6 +43,10 @@ auth.onAuthStateChanged(async user => {
     var userRole = userSnap.exists ? userSnap.data().userRole : '';
     if (userRole === 'admin') {
       isAdmin = true;
+    } else {
+      ['sidebar-add-section-bar','sidebar-editor-bar','sidebar-edit-header','edit-mode-btn'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.remove();
+      });
     }
     updateEditModeButton();
     await Promise.all([loadCourse(), loadProgress()]);
@@ -317,7 +321,9 @@ async function toggleComplete() {
 
   if (wasDone) {
     completedLessons.delete(lessonId);
-    await db.collection('userProgress').doc(progressDocId).update({
+    refreshMarkBtn();
+    renderSidebar();
+    db.collection('userProgress').doc(progressDocId).update({
       completedLessons: firebase.firestore.FieldValue.arrayRemove(lessonId),
       percentComplete: calcPct()
     }).catch(function() {});
@@ -331,7 +337,9 @@ async function toggleComplete() {
     if (completedLessons.size === lessons.length) {
       update.completedAt = firebase.firestore.FieldValue.serverTimestamp();
     }
-    await db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
+    refreshMarkBtn();
+    renderSidebar();
+    db.collection('userProgress').doc(progressDocId).update(update).catch(function() {});
     if (lessonId === 'XQW5SV09fR0fuvkaHT50') {
       db.collection('users').doc(currentUser.uid).update({ onboardingComplete: true }).catch(function() {});
     }
@@ -342,8 +350,6 @@ async function toggleComplete() {
     }
   }
 
-  refreshMarkBtn();
-  renderSidebar();
   btn.disabled = false;
 }
 

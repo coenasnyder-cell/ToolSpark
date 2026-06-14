@@ -320,10 +320,17 @@
 <script>
 let signingIn = false;
 
-function getRedirectTarget() {
+async function getSmartRedirect(uid) {
   const allowed = { userclaritytools: 'userclaritytools.html', roadmap: 'roadmap.html', dashboard: 'dashboard.html' };
   const param = new URLSearchParams(window.location.search).get('redirect');
-  return (param && allowed[param]) || 'community.html';
+  if (param && allowed[param]) return allowed[param];
+  try {
+    const snap = await db.collection('users').doc(uid).get();
+    const data = snap.exists ? snap.data() : {};
+    if (data.userRole === 'admin' || data.onboardingComplete === true) return 'community.html';
+    return 'onboarding.html';
+  } catch(e) {}
+  return 'community.html';
 }
 
 function showMsg(text, type) {
@@ -350,13 +357,15 @@ async function signIn() {
     const cred = await auth.signInWithEmailAndPassword(email, password);
     try { await ensureUserDoc(cred.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
+    const target = await getSmartRedirect(cred.user.uid);
+    setTimeout(() => { window.location.href = target; }, 800);
   } catch(err) {
     signingIn = false;
     setLoading(false);
     // If auth succeeded but something else failed, still redirect
     if (auth.currentUser) {
-      setTimeout(() => { window.location.href = getRedirectTarget(); }, 400);
+      const target = await getSmartRedirect(auth.currentUser.uid);
+      setTimeout(() => { window.location.href = target; }, 400);
       return;
     }
     showMsg(friendlyError(err.code), 'error');
@@ -370,11 +379,13 @@ async function signInWithGoogle() {
     const result = await auth.signInWithPopup(provider);
     try { await ensureUserDoc(result.user); } catch(e) { console.warn('ensureUserDoc failed:', e.message); }
     showMsg('Signed in! Redirecting...', 'success');
-    setTimeout(() => { window.location.href = getRedirectTarget(); }, 800);
+    const target = await getSmartRedirect(result.user.uid);
+    setTimeout(() => { window.location.href = target; }, 800);
   } catch(err) {
     signingIn = false;
     if (auth.currentUser) {
-      setTimeout(() => { window.location.href = getRedirectTarget(); }, 400);
+      const target = await getSmartRedirect(auth.currentUser.uid);
+      setTimeout(() => { window.location.href = target; }, 400);
       return;
     }
     if (err.code !== 'auth/popup-closed-by-user') {
@@ -437,8 +448,11 @@ function friendlyError(code) {
 }
 
 // Redirect if already signed in (but not mid-sign-in flow)
-auth.onAuthStateChanged(user => {
-  if (user && !signingIn) window.location.href = getRedirectTarget();
+auth.onAuthStateChanged(async user => {
+  if (user && !signingIn) {
+    const target = await getSmartRedirect(user.uid);
+    window.location.href = target;
+  }
 });
 </script>
 </body>
