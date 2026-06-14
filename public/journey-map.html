@@ -115,7 +115,7 @@
   /* 4-BOX MAP */
   .journey-map { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr; align-items: center; gap: 0; }
   .map-arrow { display: flex; align-items: center; justify-content: center; color: rgba(201,168,76,0.5); font-size: 22px; flex-shrink: 0; }
-  .map-box { border-radius: var(--radius-sm); padding: 1.1rem 1.1rem 1rem; min-height: 150px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .map-box { border-radius: var(--radius-sm); padding: 1.1rem 1.1rem 1rem; min-height: 150px; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px; position: relative; }
   .map-box.discovery { background: var(--bg); border: 1px solid var(--border); }
   .map-box.entry { background: rgba(201,168,76,0.04); border: 1.5px solid var(--gold); }
   .map-box.core { background: rgba(201,168,76,0.06); border: 2px solid var(--gold); }
@@ -252,6 +252,7 @@
 
       <div class="map-actions">
         <a class="btn-primary" href="funnel-generator.html" id="funnel-btn">Build your funnel →</a>
+        <a class="btn-primary" href="launch-map.html" style="background:transparent;border:1px solid var(--border);color:var(--text2);">See your full Launch Map →</a>
         <span class="save-note" id="save-note">Saving...</span>
       </div>
     </div>
@@ -271,6 +272,10 @@
   var isEditMode = false;
   var hasOfferBuilder = false;
 
+  function stripMd(str) {
+    return String(str || '').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/_(.+?)_/g,'$1').trim();
+  }
+
   // ── PARSE TOOLS FROM ACTION PLAN (same regex as roadmap.html) ──
   function parseToolsFromActionPlan(actionPlan) {
     if (!actionPlan) return [];
@@ -284,7 +289,7 @@
       fieldDefs.forEach(function(def) {
         var re = new RegExp('TOOL_' + i + '_' + def.tag + ':[\\s\\S]+?(?=TOOL_\\d+_[A-Z_]+:|\\*\\*ACTION_PLAN_END|$)');
         var match = actionPlan.match(re);
-        tool[def.key] = match ? match[0].replace('TOOL_' + i + '_' + def.tag + ':', '').trim() : '';
+        tool[def.key] = match ? stripMd(match[0].replace('TOOL_' + i + '_' + def.tag + ':', '').trim()) : '';
       });
       tools.push(tool);
     }
@@ -312,22 +317,42 @@
     if (avatarEl) avatarEl.textContent = initials;
     if (nameEl) nameEl.textContent = user.displayName || user.email || 'Builder';
 
-    await loadData(user.uid);
+    await loadData(user, user.uid);
   });
 
-  async function loadData(uid) {
+  async function loadData(user, uid) {
+    var email = user.email || '';
+    var emailLower = email.toLowerCase();
     try {
       var results = await Promise.allSettled([
-        db.collection('clarity_sessions').where('userId', '==', uid).orderBy('createdAt', 'desc').limit(1).get(),
+        // Query clarity_sessions the same 4 ways roadmap.html does — no orderBy (avoids index requirement)
+        db.collection('clarity_sessions').where('userId', '==', uid).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', email).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', emailLower).get(),
+        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get(),
         db.collection('offer_results').doc(uid).get(),
         db.collection('journey_maps').doc(uid).get()
       ]);
 
-      var sessionSnap = results[0];
-      var offerSnap = results[1];
-      var existingMapSnap = results[2];
+      var offerSnap = results[4];
+      var existingMapSnap = results[5];
 
-      // Check for existing saved map — if complete, jump straight to map
+      // Deduplicate and filter to completed sessions, sort by createdAt descending
+      var sessionMap = new Map();
+      results.slice(0, 4).forEach(function(r) {
+        if (r.status === 'fulfilled') {
+          r.value.forEach(function(d) { if (!sessionMap.has(d.id)) sessionMap.set(d.id, d); });
+        }
+      });
+      var completed = Array.from(sessionMap.values())
+        .filter(function(d) { return d.data().status === 'completed'; })
+        .sort(function(a, b) {
+          var aT = (a.data().createdAt && a.data().createdAt.toMillis) ? a.data().createdAt.toMillis() : 0;
+          var bT = (b.data().createdAt && b.data().createdAt.toMillis) ? b.data().createdAt.toMillis() : 0;
+          return bT - aT;
+        });
+
+      // Check for existing saved map
       if (existingMapSnap.status === 'fulfilled' && existingMapSnap.value.exists) {
         var saved = existingMapSnap.value.data();
         if (saved.discovery) {
@@ -337,15 +362,13 @@
             box3: saved.box3 || mapData.box3,
             box4: saved.box4 || mapData.box4
           };
-          document.getElementById('loading-card').style.display = 'none';
-          // Still need to load the question card to populate preview, then auto-show map
         }
       }
 
-      // Breakthrough session
+      // Breakthrough session — must be completed and have an actionPlan
       var session = null;
-      if (sessionSnap.status === 'fulfilled' && !sessionSnap.value.empty) {
-        session = sessionSnap.value.docs[0].data();
+      if (completed.length) {
+        session = completed[0].data();
       }
 
       if (!session || !session.actionPlan) {
@@ -355,7 +378,8 @@
       }
 
       var tools = parseToolsFromActionPlan(session.actionPlan);
-      var chosenIdx = typeof session.chosenTool === 'number' ? session.chosenTool : 0;
+      // chosenTool is stored 1-indexed by roadmap.html; convert to 0-indexed
+      var chosenIdx = typeof session.chosenTool === 'number' ? Math.max(0, session.chosenTool - 1) : 0;
 
       // Build ordered tool list: chosen first, then others in original order
       var orderedTools = [];

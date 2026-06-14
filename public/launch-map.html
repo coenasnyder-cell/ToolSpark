@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Map — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-bg: rgba(42,92,69,0.07); --green-border: rgba(42,92,69,0.2);
+    --red: #C0392B; --red-bg: rgba(192,57,43,0.05); --red-border: rgba(192,57,43,0.18);
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* LAYOUT */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.75rem; padding: 1.75rem 2rem 6rem; max-width: 900px; width: 100%; }
+
+  /* LOADING */
+  .loading-row { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: 14px; padding: 1.5rem; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* PAGE HEADER */
+  .page-header { padding: 0 0 0.25rem; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 1rem; }
+  .completion-bar-wrap { display: flex; align-items: center; gap: 12px; }
+  .completion-track { flex: 1; max-width: 240px; height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
+  .completion-fill { height: 100%; background: var(--gold); border-radius: 100px; transition: width 0.5s ease; }
+  .completion-text { font-size: 13px; color: var(--text2); font-weight: 700; }
+
+  /* SECTION CARDS */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .section-card.complete { border-left: 3px solid var(--gold); }
+  .section-card.incomplete { border-left: 3px solid var(--border); }
+  .section-card.placeholder { border: 2px dashed var(--border); background: var(--bg); box-shadow: none; }
+
+  .section-head { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .section-card.placeholder .section-head { border-bottom: none; }
+  .section-head-left { display: flex; align-items: center; gap: 10px; }
+  .section-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .complete .section-status-dot { background: var(--gold); }
+  .incomplete .section-status-dot { background: var(--border); }
+  .placeholder .section-status-dot { background: var(--border); }
+  .section-number { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); }
+  .btn-edit-link { padding: 7px 14px; background: transparent; border: 1px solid var(--border); color: var(--text2); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+  .btn-edit-link:hover { border-color: var(--gold); color: var(--gold); }
+
+  .section-body { padding: 1.5rem; }
+
+  /* INCOMPLETE STATE */
+  .incomplete-msg { font-size: 14px; color: var(--text2); margin-bottom: 1rem; }
+  .btn-go { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--dark); color: var(--gold); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; text-decoration: none; transition: opacity 0.15s; }
+  .btn-go:hover { opacity: 0.85; }
+
+  /* OFFER SORT — completed */
+  .offer-stack { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; }
+  .stack-item { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; padding: 9px 12px; border-radius: var(--radius-sm); }
+  .stack-item.keep { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .stack-item.core { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); }
+  .stack-icon { flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+  .stack-name { font-weight: 700; color: var(--text); }
+  .stack-reason { font-size: 13px; color: var(--text2); margin-top: 1px; }
+
+  .cut-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text2); cursor: pointer; padding: 0; background: none; border: none; font-family: 'Lato', sans-serif; margin-top: 0.25rem; }
+  .cut-toggle:hover { color: var(--text); }
+  .cut-toggle-arrow { transition: transform 0.2s; display: inline-block; font-size: 11px; }
+  .cut-toggle-arrow.open { transform: rotate(90deg); }
+  .cut-list-inner { display: none; flex-direction: column; gap: 6px; margin-top: 0.75rem; }
+  .cut-list-inner.open { display: flex; }
+  .cut-list-label { font-size: 11px; color: var(--text3); font-style: italic; margin-bottom: 2px; }
+  .cut-item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; padding: 9px 12px; border-radius: var(--radius-sm); background: var(--bg); border: 1px solid var(--border); }
+  .cut-item-text { flex: 1; }
+  .cut-item-name { font-weight: 700; color: var(--text); text-decoration: line-through; opacity: 0.55; margin-bottom: 2px; }
+  .cut-item-reason { color: var(--text2); font-style: italic; }
+  .btn-copy-sm { padding: 4px 10px; background: transparent; border: 1px solid var(--border); color: var(--text3); font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; border-radius: 5px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; margin-top: 2px; }
+  .btn-copy-sm:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-copy-sm.copied { border-color: var(--green-border); color: var(--green); }
+
+  /* OFFER BUILDER — completed */
+  .price-badges { display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .price-badge { flex: 1; min-width: 130px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.1rem; }
+  .price-badge.confident { border-color: rgba(201,168,76,0.45); background: rgba(201,168,76,0.05); }
+  .badge-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 4px; }
+  .badge-amount { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; margin-bottom: 2px; }
+  .price-badge.confident .badge-amount { color: var(--gold); }
+  .format-line { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; }
+  .format-line strong { color: var(--text); }
+  .just-block { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: var(--radius-sm); padding: 1rem 1.25rem; }
+  .just-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 6px; }
+  .just-quote { font-size: 14px; color: var(--text); line-height: 1.75; font-style: italic; margin-bottom: 0.875rem; }
+  .btn-copy-just { padding: 7px 16px; background: var(--dark); color: var(--gold); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.15s; }
+  .btn-copy-just:hover { opacity: 0.85; }
+  .btn-copy-just.copied { background: var(--green); color: #fff; }
+
+  /* JOURNEY MAP — completed */
+  .journey-map { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr; align-items: stretch; gap: 0; }
+  .map-arrow { display: flex; align-items: center; justify-content: center; color: rgba(201,168,76,0.45); font-size: 22px; flex-shrink: 0; }
+  .map-box { border-radius: var(--radius-sm); padding: 1.1rem; min-height: 140px; display: flex; flex-direction: column; gap: 5px; }
+  .map-box.discovery { background: var(--bg); border: 1px solid var(--border); }
+  .map-box.entry { background: rgba(201,168,76,0.04); border: 1.5px solid var(--gold); }
+  .map-box.core { background: rgba(201,168,76,0.06); border: 2px solid var(--gold); }
+  .map-box.next { background: rgba(201,168,76,0.03); border: 2px dashed rgba(201,168,76,0.5); }
+  .map-box.empty-tool { opacity: 0.6; }
+  .box-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); }
+  .box-label.gold { color: var(--gold); }
+  .box-name { font-size: 13px; font-weight: 900; color: var(--text); line-height: 1.3; }
+  .box-desc { font-size: 11px; color: var(--text2); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .box-price { display: inline-flex; align-items: center; padding: 3px 8px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; font-size: 10px; font-weight: 700; color: var(--gold); margin-top: auto; align-self: flex-start; }
+  .marketplace-callout { background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 13px; color: var(--text2); line-height: 1.55; margin-top: 1rem; }
+
+  /* FUNNEL PLACEHOLDER */
+  .funnel-placeholder { padding: 1.5rem; text-align: center; }
+  .funnel-placeholder h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .funnel-placeholder p { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 1rem; font-style: italic; }
+  .btn-grey { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--bg); color: var(--text3); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: not-allowed; text-decoration: none; opacity: 0.7; }
+
+  /* MOBILE */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: none; }
+    .main-wrap { margin-left: 60px; }
+    .nav-item { justify-content: center; padding: 10px; }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; }
+    .sidebar-overlay { display: block; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1.25rem 1rem 5rem; }
+    .journey-map { grid-template-columns: 1fr; gap: 4px; }
+    .map-arrow { transform: rotate(90deg); height: 24px; min-height: unset; }
+    .map-box { min-height: auto; }
+    .price-badges { flex-direction: column; }
+    .section-head { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(function(){ window.location.href='signon.html'; })">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header"></header>
+
+  <main class="page-content" id="page-content">
+    <div class="loading-row"><div class="spinner"></div><span>Loading your launch assets...</span></div>
+  </main>
+</div>
+
+<script src="js/nav.js"></script>
+<script>
+  var TOTAL_SECTIONS = 3; // Funnel Generator not counted until built
+
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function truncate(str, max) {
+    if (!str) return '';
+    return str.length > max ? str.slice(0, max).trimEnd() + '...' : str;
+  }
+
+  // ── OFFER SORT OUTPUT PARSER (mirrors offer-sort.html) ──
+  function stripMd(str) {
+    return String(str || '').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/__(.+?)__/g,'$1').replace(/_(.+?)_/g,'$1').replace(/`(.+?)`/g,'$1').trim();
+  }
+
+  function parseItems(block) {
+    if (!block) return [];
+    if (/nothing from your list/i.test(block) || /offer is already clean/i.test(block) || /nothing to sort/i.test(block)) {
+      return [{ name: null, reason: stripMd(block.trim()) }];
+    }
+    var items = [];
+    var lines = block.split('\n').filter(function(l) { return l.trim(); });
+    lines.forEach(function(line) {
+      var clean = line.replace(/^\d+\.\s*/, '').trim();
+      var dashIdx = clean.search(/\s[—–]\s|\s-\s/);
+      if (dashIdx > -1) {
+        var name = stripMd(clean.slice(0, dashIdx).trim());
+        var reason = stripMd(clean.slice(dashIdx).replace(/^[\s—–-]+/, '').trim());
+        if (name && reason) items.push({ name: name, reason: reason });
+      } else if (clean.length > 0) {
+        items.push({ name: null, reason: stripMd(clean) });
+      }
+    });
+    return items;
+  }
+
+  function parseOfferSortOutput(text) {
+    var keepMatch = text.match(/✅\s*KEEP\s*([\s\S]*?)(?=❌\s*CUT|$)/i);
+    var cutMatch  = text.match(/❌\s*CUT\s*([\s\S]*?)$/i);
+    return {
+      keep: keepMatch ? parseItems(keepMatch[1].trim()) : [],
+      cut:  cutMatch  ? parseItems(cutMatch[1].trim())  : []
+    };
+  }
+
+  // ── COPY HELPER ──
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.classList.remove('copied'); btn.textContent = btn.dataset.label || 'Copy'; }, 2500);
+    }).catch(function() {
+      var el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.classList.remove('copied'); btn.textContent = btn.dataset.label || 'Copy'; }, 2500);
+    });
+  }
+  window.copyJust = function(btn) {
+    var text = document.getElementById('just-text').textContent;
+    copyText(text, btn);
+  };
+  window.copyCutReason = function(btn, text) { copyText(text, btn); };
+  window.toggleCutList = function(btn) {
+    var list = document.getElementById('cut-list-inner');
+    var arrow = document.getElementById('cut-arrow');
+    if (!list) return;
+    var isOpen = list.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open', isOpen);
+  };
+
+  // ── RENDERERS ──
+
+  function renderOfferSort(data) {
+    var parsed = data.rawOutput ? parseOfferSortOutput(data.rawOutput) : { keep: [], cut: [] };
+
+    var stackHtml = '';
+    // Core delivery + obstacle remover always first
+    if (data.coreDelivery) {
+      stackHtml += '<div class="stack-item core"><span class="stack-icon">✅</span><div><div class="stack-name">' + esc(data.coreDelivery) + '</div><div class="stack-reason">Core delivery</div></div></div>';
+    }
+    if (data.obstacleRemover) {
+      stackHtml += '<div class="stack-item core"><span class="stack-icon">✅</span><div><div class="stack-name">' + esc(data.obstacleRemover) + '</div><div class="stack-reason">Obstacle remover</div></div></div>';
+    }
+    parsed.keep.forEach(function(item) {
+      if (!item.name) return;
+      stackHtml += '<div class="stack-item keep"><span class="stack-icon">✅</span><div><div class="stack-name">' + esc(item.name) + '</div><div class="stack-reason">' + esc(item.reason) + '</div></div></div>';
+    });
+
+    var cutHtml = '';
+    parsed.cut.forEach(function(item) {
+      if (!item.name && !item.reason) return;
+      var reason = item.reason || '';
+      cutHtml += '<div class="cut-item">' +
+        '<span class="stack-icon">❌</span>' +
+        '<div class="cut-item-text">' +
+          (item.name ? '<div class="cut-item-name">' + esc(item.name) + '</div>' : '') +
+          '<div class="cut-item-reason">' + esc(reason) + '</div>' +
+        '</div>' +
+        (reason ? '<button class="btn-copy-sm" data-label="Copy" onclick="copyCutReason(this,' + JSON.stringify(reason) + ')">Copy</button>' : '') +
+      '</div>';
+    });
+
+    return '<div class="offer-stack">' + (stackHtml || '<div style="font-size:13px;color:var(--text3);">No items parsed.</div>') + '</div>' +
+      (cutHtml ? (
+        '<button class="cut-toggle" onclick="toggleCutList(this)">' +
+          '<span class="cut-toggle-arrow" id="cut-arrow">›</span>' +
+          'Cut List — Your Marketing Copy' +
+        '</button>' +
+        '<div class="cut-list-inner" id="cut-list-inner">' +
+          '<div class="cut-list-label">These didn\'t make the offer — but they make great content and bonuses.</div>' +
+          cutHtml +
+        '</div>'
+      ) : '');
+  }
+
+  function renderOfferBuilder(data) {
+    return '<div class="price-badges">' +
+        '<div class="price-badge"><div class="badge-label">🟡 Accessible</div><div class="badge-amount">' + esc(data.accessiblePrice || '—') + '</div></div>' +
+        '<div class="price-badge confident"><div class="badge-label">⚡ Confident</div><div class="badge-amount">' + esc(data.confidentPrice || '—') + '</div></div>' +
+        '<div class="price-badge"><div class="badge-label">🏅 Premium</div><div class="badge-amount">' + esc(data.premiumPrice || '—') + '</div></div>' +
+      '</div>' +
+      (data.format ? '<div class="format-line"><strong>Format:</strong> ' + esc(data.format) + '</div>' : '') +
+      (data.justification ? (
+        '<div class="just-block">' +
+          '<div class="just-label">The sentence that justifies your price</div>' +
+          '<div class="just-quote" id="just-text">' + esc(data.justification) + '</div>' +
+          '<button class="btn-copy-just" data-label="Copy" onclick="copyJust(this)">Copy</button>' +
+        '</div>'
+      ) : '');
+  }
+
+  function renderJourneyMap(data) {
+    var boxes = [
+      { cls: 'discovery', label: 'How they find you', name: data.discovery || '—', desc: '', price: null },
+      { cls: 'entry',     label: 'Entry Offer',       name: data.box2 && data.box2.toolName ? data.box2.toolName : 'To be decided', desc: data.box2 && data.box2.toolDescription ? data.box2.toolDescription : '', price: data.box2 && data.box2.price ? data.box2.price : null, empty: !data.box2 || !data.box2.toolName },
+      { cls: 'core',      label: 'Core Offer',        name: data.box3 && data.box3.toolName ? data.box3.toolName : 'To be decided', desc: data.box3 && data.box3.toolDescription ? data.box3.toolDescription : '', price: data.box3 && data.box3.price ? data.box3.price : null, empty: !data.box3 || !data.box3.toolName },
+      { cls: 'next',      label: 'Next Step',         name: data.box4 && data.box4.toolName ? data.box4.toolName : 'To be decided', desc: data.box4 && data.box4.toolDescription ? data.box4.toolDescription : '', price: data.box4 && data.box4.price ? data.box4.price : null, empty: !data.box4 || !data.box4.toolName }
+    ];
+
+    var html = '<div class="journey-map">';
+    boxes.forEach(function(box, i) {
+      html += '<div class="map-box ' + box.cls + (box.empty ? ' empty-tool' : '') + '">' +
+        '<div class="box-label' + (box.cls !== 'discovery' ? ' gold' : '') + '">' + esc(box.label) + '</div>' +
+        '<div class="box-name">' + esc(box.name) + '</div>' +
+        (box.desc ? '<div class="box-desc">' + esc(truncate(box.desc, 80)) + '</div>' : '') +
+        (box.price ? '<div class="box-price">' + esc(box.price) + '</div>' : '') +
+      '</div>';
+      if (i < boxes.length - 1) html += '<div class="map-arrow">→</div>';
+    });
+    html += '</div>';
+
+    var isMarketplace = data.discovery === 'ToolSpark Marketplace';
+    if (isMarketplace) {
+      html += '<div class="marketplace-callout">⚡ <strong>Your Marketplace listing is your Box 1.</strong> Make sure it\'s live and complete before you drive traffic to your funnel.</div>';
+    }
+    return html;
+  }
+
+  function sectionCard(number, title, isComplete, isPlaceholder, bodyHtml, editHref) {
+    var cls = isPlaceholder ? 'placeholder' : (isComplete ? 'complete' : 'incomplete');
+    return '<div class="section-card ' + cls + '">' +
+      '<div class="section-head">' +
+        '<div class="section-head-left">' +
+          '<div class="section-status-dot"></div>' +
+          '<div>' +
+            '<div class="section-number">' + number + '</div>' +
+            '<div class="section-title">' + title + '</div>' +
+          '</div>' +
+        '</div>' +
+        (editHref ? '<a class="btn-edit-link" href="' + editHref + '">Edit</a>' : '') +
+      '</div>' +
+      '<div class="section-body">' + bodyHtml + '</div>' +
+    '</div>';
+  }
+
+  // ── MAIN RENDER ──
+  function renderPage(offerSort, offerBuilder, journeyMap) {
+    var completed = 0;
+    var sections = '';
+
+    // 1 — Offer Sort
+    if (offerSort) {
+      completed++;
+      sections += sectionCard('01', 'Offer Sort', true, false, renderOfferSort(offerSort), 'offer-sort.html');
+    } else {
+      sections += sectionCard('01', 'Offer Sort', false, false,
+        '<p class="incomplete-msg">You haven\'t packaged your offer yet.</p><a class="btn-go" href="offer-sort.html">Go to Offer Sort →</a>',
+        null);
+    }
+
+    // 2 — Offer Builder
+    if (offerBuilder) {
+      completed++;
+      sections += sectionCard('02', 'Offer Builder', true, false, renderOfferBuilder(offerBuilder), 'offer-builder.html');
+    } else {
+      sections += sectionCard('02', 'Offer Builder', false, false,
+        '<p class="incomplete-msg">You haven\'t set your pricing yet.</p><a class="btn-go" href="offer-builder.html">Go to Offer Builder →</a>',
+        null);
+    }
+
+    // 3 — Journey Map
+    if (journeyMap) {
+      completed++;
+      sections += sectionCard('03', 'Journey Map', true, false, renderJourneyMap(journeyMap), 'journey-map.html');
+    } else {
+      sections += sectionCard('03', 'Journey Map', false, false,
+        '<p class="incomplete-msg">You haven\'t mapped your customer journey yet.</p><a class="btn-go" href="journey-map.html">Go to Journey Map →</a>',
+        null);
+    }
+
+    // 4 — Funnel Generator (placeholder)
+    sections += sectionCard('04', 'Funnel Generator', false, true,
+      '<div class="funnel-placeholder">' +
+        '<h3>Your Funnel</h3>' +
+        '<p>Coming next — build your lead page, sales page, and thank you page.</p>' +
+        '<span class="btn-grey">Build Your Funnel →</span>' +
+      '</div>',
+      null);
+
+    var fillPct = Math.round((completed / TOTAL_SECTIONS) * 100);
+
+    var html =
+      '<div class="page-header">' +
+        '<div class="page-title">Your Launch Map</div>' +
+        '<div class="page-sub">Everything you\'ve built, in one place. Use this to launch, share, and grow.</div>' +
+        '<div class="completion-bar-wrap">' +
+          '<div class="completion-track"><div class="completion-fill" style="width:' + fillPct + '%"></div></div>' +
+          '<div class="completion-text">' + completed + ' of ' + TOTAL_SECTIONS + ' complete</div>' +
+        '</div>' +
+      '</div>' +
+      sections;
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  // ── AUTH + LOAD ──
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html?redirect=launch-map'; return; }
+
+    var avatarEl = document.getElementById('sidebar-avatar');
+    var nameEl = document.getElementById('sidebar-name');
+    if (avatarEl) avatarEl.textContent = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+    if (nameEl) nameEl.textContent = user.displayName || user.email || 'Builder';
+
+    try {
+      var results = await Promise.allSettled([
+        db.collection('offer_sort_results').doc(user.uid).get(),
+        db.collection('offer_results').doc(user.uid).get(),
+        db.collection('journey_maps').doc(user.uid).get()
+      ]);
+
+      var offerSort    = (results[0].status === 'fulfilled' && results[0].value.exists) ? results[0].value.data() : null;
+      var offerBuilder = (results[1].status === 'fulfilled' && results[1].value.exists) ? results[1].value.data() : null;
+      var journeyMap   = (results[2].status === 'fulfilled' && results[2].value.exists) ? results[2].value.data() : null;
+
+      renderPage(offerSort, offerBuilder, journeyMap);
+    } catch(e) {
+      document.getElementById('page-content').innerHTML =
+        '<div style="padding:2rem;font-size:14px;color:var(--text2);">Something went wrong loading your launch assets. Please refresh and try again.</div>';
+    }
+  });
+
+  initNav('launch-map', 'Launch Map');
+</script>
+</body>
+</html>
