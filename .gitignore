@@ -75,6 +75,7 @@ skills-lock.json
 # Local only
 chat-prompts.txt
 test-email.js
+ECOSYSTEM-BLUEPRINT.md
 
 # Root-level package files (accidental install — packages belong in /functions)
 package.json
