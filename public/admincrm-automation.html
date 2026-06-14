@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Automation - ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --sage: #2F6C57;
+    --sage-dim: rgba(47,108,87,0.1);
+    --rose: #A05A4A;
+    --rose-dim: rgba(160,90,74,0.1);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --surface-alt: #FBF8F1;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 18px 48px rgba(12,11,9,0.06);
+    --sidebar-width: 228px;
+    --header-height: 68px;
+  }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: radial-gradient(circle at top, #FAF6EC 0%, var(--bg) 36%, #EFEAE1 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #0B0907 0%, #15120F 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid var(--border-dark);
+    z-index: 40;
+  }
+  .sidebar-logo { padding: 1.6rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; color: #F3EFE7; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin-top: 4px; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: #4B4438; text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.45rem; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 10px; color: #9A9488; font-size: 14px; text-decoration: none;
+    transition: all 0.15s; border: 1px solid transparent;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(201,168,76,0.2); font-weight: 700; }
+  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.78; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.28);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 13px; font-weight: 700; overflow: hidden;
+  }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-name { color: #F0EDE6; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { color: var(--text3); font-size: 11px; }
+  .logout-btn {
+    width: 100%; margin-top: 6px; border: none; background: none; color: #7F706B;
+    padding: 9px 12px; border-radius: 10px; font-family: inherit; font-size: 13px;
+    text-align: left; cursor: pointer; transition: all 0.15s;
+  }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .top-header {
+    position: sticky; top: 0; z-index: 35; height: var(--header-height); padding: 0 2rem;
+    background: rgba(20,18,16,0.96); border-bottom: 1px solid var(--border-dark);
+    display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(12px);
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 22px; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
+    background: rgba(196,98,45,0.15); color: #E0875A; border: 1px solid rgba(196,98,45,0.3);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .page-content {
+    padding: 1.75rem 2rem 2rem;
+    display: flex; flex-direction: column; gap: 1.5rem; max-width: 1220px; width: 100%;
+  }
+  .page-shell { display: none; flex-direction: column; gap: 1.5rem; }
+  .access-state {
+    display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column;
+    gap: 1rem; padding: 3rem; text-align: center;
+  }
+  .hero-card, .panel, .rule-card {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .hero-card {
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem;
+    padding: 1.5rem; background: linear-gradient(135deg, rgba(255,252,245,0.97) 0%, rgba(249,244,233,0.94) 100%);
+  }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: 34px; line-height: 1.1; max-width: 13ch; }
+  .hero-copy { display: flex; flex-direction: column; gap: 0.8rem; }
+  .hero-copy p { color: var(--text2); max-width: 58ch; }
+  .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.35rem; }
+  .btn, .btn-soft, .btn-link, .field, .select, .textarea { font-family: inherit; }
+  .btn, .btn-soft {
+    border: none; border-radius: 999px; padding: 10px 16px; font-size: 13px;
+    font-weight: 700; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .btn { background: linear-gradient(135deg, var(--gold) 0%, #DEBF68 100%); color: #0C0B09; box-shadow: 0 10px 24px rgba(201,168,76,0.18); }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-soft { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-soft:hover { border-color: rgba(201,168,76,0.45); color: var(--gold); }
+  .btn-link { border: none; background: none; color: var(--text2); font-size: 12px; font-weight: 700; cursor: pointer; }
+  .hero-side {
+    border-radius: 18px; padding: 1rem; background: linear-gradient(180deg, #11100D 0%, #1C1813 100%);
+    color: #F3EFE7; display: flex; flex-direction: column; gap: 0.85rem; justify-content: center;
+  }
+  .hero-side-kicker { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #B8AA86; font-weight: 700; }
+  .hero-side-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 13px; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .hero-side-row strong { color: #F3EFE7; font-size: 16px; }
+  .hero-side small { color: #B8AA86; display: block; }
+
+  .back-row { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.82); border: 1px solid var(--border); color: var(--text2);
+    text-decoration: none; font-size: 13px; font-weight: 700; transition: all 0.15s;
+  }
+  .back-link:hover { border-color: rgba(201,168,76,0.45); color: var(--gold); }
+
+  .panel-header {
+    padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .panel-title { font-weight: 800; font-size: 15px; }
+  .panel-desc { color: var(--text3); font-size: 12px; margin-top: 2px; }
+  .panel-body { padding: 1.15rem 1.2rem 1.25rem; }
+
+  .layout-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 1rem; }
+  .rule-list { display: flex; flex-direction: column; gap: 0.8rem; }
+  .rule-card {
+    padding: 1rem; cursor: pointer; transition: all 0.15s;
+    background: linear-gradient(180deg, #FFFDF9 0%, #F8F2E7 100%);
+  }
+  .rule-card.active { border-color: rgba(201,168,76,0.45); box-shadow: 0 16px 26px rgba(201,168,76,0.09); transform: translateY(-1px); }
+  .rule-card:hover { border-color: rgba(201,168,76,0.35); }
+  .rule-card-title { font-weight: 800; }
+  .rule-card-copy { font-size: 12px; color: var(--text2); margin-top: 0.35rem; }
+  .pill-row { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.65rem; }
+  .pill {
+    display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 9px;
+    font-size: 11px; font-weight: 700; border: 1px solid transparent;
+  }
+  .pill.good { background: var(--sage-dim); color: var(--sage); border-color: rgba(47,108,87,0.15); }
+  .pill.warn { background: var(--rose-dim); color: var(--rose); border-color: rgba(160,90,74,0.15); }
+  .pill.new { background: var(--gold-dim); color: #8B6A19; border-color: rgba(201,168,76,0.14); }
+  .empty-state {
+    padding: 1.15rem; border-radius: 16px; background: linear-gradient(180deg, #FFFDF8 0%, #F7F1E6 100%);
+    border: 1px dashed rgba(201,168,76,0.34); color: var(--text2); font-size: 13px;
+  }
+  .field, .select, .textarea {
+    width: 100%; background: #FBF8F1; border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px; color: var(--text); font-size: 13px; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field:focus, .select:focus, .textarea:focus { border-color: rgba(201,168,76,0.55); box-shadow: 0 0 0 4px rgba(201,168,76,0.08); }
+  .textarea { min-height: 100px; resize: vertical; line-height: 1.55; }
+  .meta-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; }
+  .meta-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hint-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin-top: 1rem; }
+  .hint-card {
+    border: 1px solid rgba(228,224,216,0.96); border-radius: 16px; background: var(--surface-alt);
+    padding: 0.95rem; font-size: 13px; color: var(--text2);
+  }
+  .hint-card strong { display: block; color: var(--text); margin-bottom: 0.35rem; }
+
+  @media (max-width: 1120px) {
+    .hero-card, .layout-grid, .hint-grid, .meta-grid, .meta-grid.two { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 860px) {
+    .sidebar { display: none; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; }
+    .page-content { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <div class="nav-section-label">Admin</div>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="admincrm.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+      CRM
+    </a>
+    <a href="admincrm-automation.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l2.92-2.92a5 5 0 00-7.07-7.07l-1.68 1.68"/><path d="M14 11a5 5 0 00-7.54-.54L3.54 13.4a5 5 0 107.07 7.07l1.67-1.67"/></svg>
+      Automation
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">CRM Automation</div>
+      <div class="header-subtitle">The simple rule layer that decides who gets tagged, enrolled, or stopped.</div>
+    </div>
+    <div class="admin-badge">Admin</div>
+  </header>
+
+  <div id="access-denied" class="access-state">
+    <div style="font-size:30px;">Restricted</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;">You need admin access to open automation.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;text-decoration:none;">Back to dashboard</a>
+  </div>
+
+  <main id="page-shell" class="page-content page-shell">
+    <div class="back-row">
+      <a href="admindashboard.html" class="back-link">Back to Dashboard</a>
+      <a href="admincrm.html" class="back-link">Back to CRM</a>
+    </div>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-title">Make the rules readable.</div>
+        <p>This page keeps automation separate from leads and email copy so the CRM stays calm. The basic version is focused on active rules, trigger types, conditions, and actions.</p>
+        <div class="hero-actions">
+          <button class="btn" id="new-rule-btn">New Rule</button>
+          <button class="btn-soft" id="refresh-btn">Refresh Rules</button>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-side-kicker">What belongs here</div>
+        <div style="font-size:18px;line-height:1.45;">Use this page for logic only. Leads live in CRM. Email copy lives in Sequences.</div>
+        <div class="hero-side-row">
+          <div><small>Triggers</small><strong>Source · Tag · Stage</strong></div>
+          <div><small>Actions</small><strong>Tag · Enroll · Stop</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Rule Manager</div>
+          <div class="panel-desc">A compact first version: review the active rules, make edits, and add new ones without leaving the page.</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="layout-grid">
+          <div id="rule-list" class="rule-list">
+            <div class="empty-state">Loading rules...</div>
+          </div>
+          <div>
+            <div id="rule-editor" class="empty-state">Select a rule to edit it, or create a new one.</div>
+            <div class="hint-grid">
+              <div class="hint-card">
+                <strong>Source created</strong>
+                Fires when a lead first lands in the CRM from Tool Finder, waitlist, signup, or another capture source.
+              </div>
+              <div class="hint-card">
+                <strong>Tag added</strong>
+                Fires when a lead picks up a specific tag, which is useful for nurture entry rules.
+              </div>
+              <div class="hint-card">
+                <strong>Stage changed</strong>
+                Fires when a lead moves in the pipeline, which is useful for stronger-intent follow-up.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (err) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const CRM_API_URL = `https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/crmAdmin`;
+
+  const state = {
+    snapshot: null,
+    selectedRuleId: null,
+  };
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  async function authHeaders() {
+    const token = await auth.currentUser.getIdToken();
+    return {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
+  }
+
+  async function crmRequest(action, payload = {}) {
+    const response = await fetch(CRM_API_URL, {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({ action, payload })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `CRM request failed (${response.status})`);
+    return data;
+  }
+
+  function renderRuleList() {
+    const rules = state.snapshot?.rules || [];
+    if (!state.selectedRuleId && rules.length) {
+      state.selectedRuleId = rules[0].id;
+    }
+    const selected = state.selectedRuleId;
+    document.getElementById("rule-list").innerHTML = rules.length ? rules.map((rule) => `
+      <div class="rule-card ${rule.id === selected ? "active" : ""}" onclick="selectRule('${rule.id}')">
+        <div class="rule-card-title">${escapeHtml(rule.name)}</div>
+        <div class="rule-card-copy">${escapeHtml(rule.description || "")}</div>
+        <div class="pill-row">
+          <span class="pill ${rule.active ? "good" : "warn"}">${rule.active ? "Active" : "Paused"}</span>
+          <span class="pill new">${escapeHtml(rule.triggerType || "")}</span>
+        </div>
+      </div>
+    `).join("") : `<div class="empty-state">No rules yet. Create your first one to start shaping automation.</div>`;
+  }
+
+  function renderRuleEditor() {
+    const selected = (state.snapshot?.rules || []).find((rule) => rule.id === state.selectedRuleId);
+    const editor = document.getElementById("rule-editor");
+    if (!selected) {
+      editor.innerHTML = `<div class="empty-state">Select a rule to edit it, or create a new one.</div>`;
+      return;
+    }
+
+    editor.innerHTML = `
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">${escapeHtml(selected.name || "Rule")}</div>
+            <div class="panel-desc">Keep the logic simple enough that future-you understands it in one read.</div>
+          </div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:0.9rem;">
+          <input id="rule-name" class="field" type="text" value="${escapeHtml(selected.name || "")}" placeholder="Rule name">
+          <textarea id="rule-description" class="textarea" placeholder="Short explanation.">${escapeHtml(selected.description || "")}</textarea>
+          <div class="meta-grid">
+            <select id="rule-trigger" class="select">
+              <option value="source_created" ${selected.triggerType === "source_created" ? "selected" : ""}>Source created</option>
+              <option value="tag_added" ${selected.triggerType === "tag_added" ? "selected" : ""}>Tag added</option>
+              <option value="stage_changed" ${selected.triggerType === "stage_changed" ? "selected" : ""}>Stage changed</option>
+            </select>
+            <input id="rule-match" class="field" type="text" value="${escapeHtml(selected.matchValue || "")}" placeholder="Match value">
+            <select id="rule-action" class="select">
+              <option value="add_tag" ${selected.actionType === "add_tag" ? "selected" : ""}>Add tag</option>
+              <option value="enroll_sequence" ${selected.actionType === "enroll_sequence" ? "selected" : ""}>Enroll sequence</option>
+              <option value="stop_sequence_group" ${selected.actionType === "stop_sequence_group" ? "selected" : ""}>Stop sequence group</option>
+            </select>
+          </div>
+          <div class="meta-grid two">
+            <input id="rule-action-value" class="field" type="text" value="${escapeHtml(selected.actionValue || "")}" placeholder="Action value">
+            <input id="rule-order" class="field" type="number" min="1" value="${Number(selected.order || 99)}" placeholder="Sort order">
+          </div>
+          <div class="meta-grid two">
+            <select id="rule-active" class="select">
+              <option value="true" ${selected.active ? "selected" : ""}>Active</option>
+              <option value="false" ${!selected.active ? "selected" : ""}>Paused</option>
+            </select>
+            <input class="field" type="text" value="${escapeHtml(selected.id || "")}" disabled>
+          </div>
+          <div style="display:flex;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+            <button class="btn-soft" onclick="startNewRule()">New Rule</button>
+            <button class="btn" onclick="saveCurrentRule()">Save Rule</button>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  function startNewRule() {
+    state.selectedRuleId = null;
+    document.getElementById("rule-editor").innerHTML = `
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">New automation rule</div>
+            <div class="panel-desc">Start small. One trigger and one action is enough for a clean first pass.</div>
+          </div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:0.9rem;">
+          <input id="rule-name" class="field" type="text" placeholder="Rule name">
+          <textarea id="rule-description" class="textarea" placeholder="Short explanation."></textarea>
+          <div class="meta-grid">
+            <select id="rule-trigger" class="select">
+              <option value="source_created">Source created</option>
+              <option value="tag_added">Tag added</option>
+              <option value="stage_changed">Stage changed</option>
+            </select>
+            <input id="rule-match" class="field" type="text" placeholder="Match value">
+            <select id="rule-action" class="select">
+              <option value="add_tag">Add tag</option>
+              <option value="enroll_sequence">Enroll sequence</option>
+              <option value="stop_sequence_group">Stop sequence group</option>
+            </select>
+          </div>
+          <div class="meta-grid two">
+            <input id="rule-action-value" class="field" type="text" placeholder="Action value">
+            <input id="rule-order" class="field" type="number" min="1" value="99" placeholder="Sort order">
+          </div>
+          <div class="meta-grid two">
+            <select id="rule-active" class="select">
+              <option value="true">Active</option>
+              <option value="false">Paused</option>
+            </select>
+            <input class="field" type="text" value="New rule" disabled>
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn" onclick="saveCurrentRule()">Create Rule</button>
+          </div>
+        </div>
+      </section>`;
+  }
+
+  async function saveCurrentRule() {
+    const selected = (state.snapshot?.rules || []).find((rule) => rule.id === state.selectedRuleId);
+    await crmRequest("saveRule", {
+      id: selected?.id,
+      name: document.getElementById("rule-name").value.trim(),
+      description: document.getElementById("rule-description").value.trim(),
+      triggerType: document.getElementById("rule-trigger").value,
+      matchValue: document.getElementById("rule-match").value.trim(),
+      actionType: document.getElementById("rule-action").value,
+      actionValue: document.getElementById("rule-action-value").value.trim(),
+      order: Number(document.getElementById("rule-order").value || 99),
+      active: document.getElementById("rule-active").value === "true",
+    });
+    await loadSnapshot();
+  }
+
+  function selectRule(ruleId) {
+    state.selectedRuleId = ruleId;
+    renderRuleList();
+    renderRuleEditor();
+  }
+
+  async function loadSnapshot() {
+    const data = await crmRequest("bootstrap");
+    state.snapshot = data;
+    if (!state.selectedRuleId && data.rules?.length) {
+      state.selectedRuleId = data.rules[0].id;
+    }
+    renderRuleList();
+    renderRuleEditor();
+  }
+
+  document.getElementById("new-rule-btn").addEventListener("click", startNewRule);
+  document.getElementById("refresh-btn").addEventListener("click", loadSnapshot);
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "signon.html";
+      return;
+    }
+    try {
+      const snap = await db.collection("users").doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== "admin") {
+        document.getElementById("access-denied").style.display = "flex";
+        return;
+      }
+    } catch (err) {
+      document.getElementById("access-denied").style.display = "flex";
+      return;
+    }
+
+    document.getElementById("page-shell").style.display = "flex";
+    const name = user.displayName || user.email || "Admin";
+    document.getElementById("sidebar-name").textContent = name;
+    const avatar = document.getElementById("sidebar-avatar");
+    if (user.photoURL) {
+      avatar.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    } else {
+      avatar.textContent = name.charAt(0).toUpperCase();
+    }
+    await loadSnapshot();
+  });
+
+  window.selectRule = selectRule;
+  window.startNewRule = startNewRule;
+  window.saveCurrentRule = saveCurrentRule;
+</script>
+</body>
+</html>

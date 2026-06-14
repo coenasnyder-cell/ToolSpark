@@ -446,6 +446,14 @@ match /conversations/{conversationId} {
       allow update: if isActive() && (resource.data.owner == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
 
+      match /pages/{pageId} {
+        allow read: if pageId == "sales";
+        allow create, update: if isActive() &&
+          (get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid || isAdmin());
+        allow delete: if isAdmin() ||
+          (isActive() && get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid);
+      }
+
       // Secrets sub-collection — API keys; readable only by Cloud Functions via Admin SDK
       match /secrets/{docId} {
         allow read, write: if false;

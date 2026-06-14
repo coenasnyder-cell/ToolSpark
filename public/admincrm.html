@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM - ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1B1814;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --sage: #2F6C57;
+    --sage-dim: rgba(47,108,87,0.1);
+    --blue: #3E6B9C;
+    --blue-dim: rgba(62,107,156,0.1);
+    --rose: #A05A4A;
+    --rose-dim: rgba(160,90,74,0.1);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --surface-alt: #FBF8F1;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 18px 48px rgba(12,11,9,0.06);
+    --shadow-soft: 0 10px 24px rgba(12,11,9,0.05);
+    --sidebar-width: 228px;
+    --header-height: 68px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: radial-gradient(circle at top, #FAF6EC 0%, var(--bg) 36%, #EFEAE1 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #0B0907 0%, #15120F 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-right: 1px solid var(--border-dark);
+    z-index: 40;
+  }
+  .sidebar-logo { padding: 1.6rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; color: #F3EFE7; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin-top: 4px; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 700; color: #4B4438; text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.45rem; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #9A9488;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(201,168,76,0.2); font-weight: 700; }
+  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.78; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.28);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 13px; font-weight: 700; overflow: hidden;
+  }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-name { color: #F0EDE6; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { color: var(--text3); font-size: 11px; }
+  .logout-btn {
+    width: 100%;
+    margin-top: 6px;
+    border: none;
+    background: none;
+    color: #7F706B;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .top-header {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    height: var(--header-height);
+    padding: 0 2rem;
+    background: rgba(20,18,16,0.96);
+    border-bottom: 1px solid var(--border-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+  }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 22px; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(196,98,45,0.15);
+    color: #E0875A; border: 1px solid rgba(196,98,45,0.3);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  .page-content {
+    padding: 1.75rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 1300px;
+    width: 100%;
+  }
+  .page-shell { display: none; flex-direction: column; gap: 1.5rem; }
+  .access-state {
+    display: none;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .hero-card, .panel, .summary-card, .drawer-card {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .hero-card {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(255,252,245,0.97) 0%, rgba(249,244,233,0.94) 100%);
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    line-height: 1.1;
+    max-width: 12ch;
+  }
+  .hero-copy { display: flex; flex-direction: column; gap: 0.75rem; }
+  .hero-copy p { color: var(--text2); max-width: 58ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.35rem; }
+  .btn, .btn-soft, .btn-link, .stage-select, .field, .select, .textarea, .chip-btn {
+    font-family: inherit;
+  }
+  .btn, .btn-soft {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .btn {
+    background: linear-gradient(135deg, var(--gold) 0%, #DEBF68 100%);
+    color: #0C0B09;
+    box-shadow: 0 10px 24px rgba(201,168,76,0.18);
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-soft {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-soft:hover { border-color: rgba(201,168,76,0.45); color: var(--gold); }
+  .btn-link {
+    border: none;
+    background: none;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .hero-side {
+    border-radius: 18px;
+    padding: 1rem;
+    background: linear-gradient(180deg, #11100D 0%, #1C1813 100%);
+    color: #F3EFE7;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    justify-content: center;
+  }
+  .hero-side-kicker { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #B8AA86; font-weight: 700; }
+  .hero-side-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 13px; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .hero-side-row strong { color: #F3EFE7; font-size: 16px; }
+  .hero-side small { color: #B8AA86; display: block; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .summary-card {
+    padding: 1rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .summary-label { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; }
+  .summary-value { font-family: 'Playfair Display', serif; font-size: 29px; line-height: 1; }
+  .summary-note { font-size: 12px; color: var(--text2); }
+
+  .tabs {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.4rem;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    width: fit-content;
+  }
+  .tab-btn {
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: #11100D; color: #F7F3E9; box-shadow: 0 10px 18px rgba(12,11,9,0.12); }
+
+  .panel { overflow: hidden; }
+  .panel-header {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .panel-title { font-weight: 800; font-size: 15px; }
+  .panel-desc { color: var(--text3); font-size: 12px; margin-top: 2px; }
+  .panel-body { padding: 1.15rem 1.2rem 1.25rem; }
+
+  .toolbar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .toolbar-left, .toolbar-right {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .field, .select, .textarea {
+    background: #FBF8F1;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field:focus, .select:focus, .textarea:focus {
+    border-color: rgba(201,168,76,0.55);
+    box-shadow: 0 0 0 4px rgba(201,168,76,0.08);
+  }
+  .field { min-width: 220px; }
+  .select { min-width: 160px; }
+  .textarea { width: 100%; min-height: 92px; resize: vertical; line-height: 1.55; }
+  .meta-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 0.8rem 0.75rem;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    background: #FBF8F1;
+  }
+  td {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 1px solid rgba(228,224,216,0.86);
+    vertical-align: top;
+    font-size: 13px;
+  }
+  tbody tr:hover td { background: rgba(251,248,241,0.78); }
+  .lead-name { font-weight: 700; }
+  .lead-email { color: var(--text3); font-size: 12px; margin-top: 2px; }
+
+  .tag-row { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .tag-pill, .status-pill, .sequence-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .tag-pill { background: var(--gold-dim); color: #8B6A19; border-color: rgba(201,168,76,0.14); }
+  .status-pill.new { background: var(--gold-dim); color: #8B6A19; border-color: rgba(201,168,76,0.14); }
+  .status-pill.good { background: var(--sage-dim); color: var(--sage); border-color: rgba(47,108,87,0.15); }
+  .status-pill.cool { background: var(--blue-dim); color: var(--blue); border-color: rgba(62,107,156,0.14); }
+  .status-pill.warn { background: var(--rose-dim); color: var(--rose); border-color: rgba(160,90,74,0.15); }
+  .status-pill.muted { background: rgba(140,132,120,0.1); color: #786F67; border-color: rgba(140,132,120,0.15); }
+  .sequence-pill { background: rgba(17,16,13,0.08); color: #474039; border-color: rgba(17,16,13,0.08); }
+
+  .table-actions { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+  .chip-btn, .table-btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text2);
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip-btn:hover, .table-btn:hover { border-color: rgba(201,168,76,0.4); color: var(--gold); }
+
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .pipe-col {
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(250,247,240,0.92) 100%);
+    border-radius: 18px;
+    padding: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-height: 220px;
+  }
+  .pipe-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(228,224,216,0.7);
+  }
+  .pipe-head strong { font-size: 14px; }
+  .pipe-count {
+    min-width: 30px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(17,16,13,0.08);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .lead-card {
+    padding: 0.9rem;
+    border-radius: 14px;
+    border: 1px solid rgba(228,224,216,0.96);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .lead-card-top { display: flex; justify-content: space-between; gap: 0.75rem; }
+  .lead-card-title { font-weight: 800; }
+  .lead-card small { color: var(--text3); }
+  .mini-select {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #FBF8F1;
+    padding: 8px 9px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .sequence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .sequence-card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.95rem;
+    background: linear-gradient(180deg, #FFFDF9 0%, #F8F2E7 100%);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sequence-card.active { border-color: rgba(201,168,76,0.45); box-shadow: 0 16px 26px rgba(201,168,76,0.09); transform: translateY(-1px); }
+  .sequence-card:hover { border-color: rgba(201,168,76,0.35); }
+  .sequence-card-title { font-weight: 800; }
+  .sequence-card-copy { font-size: 12px; color: var(--text2); margin-top: 0.35rem; }
+  .sequence-editor { display: flex; flex-direction: column; gap: 1rem; }
+  .sequence-step {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem;
+    background: #FFF;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .sequence-step-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .step-badge {
+    display: inline-flex;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--gold-dim);
+    color: #8B6A19;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .mini-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .mini-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    background: #FBF8F1;
+    border: 1px solid rgba(228,224,216,0.86);
+    font-size: 13px;
+  }
+  .mini-row strong { font-size: 15px; }
+
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(540px, 100vw);
+    height: 100vh;
+    background: rgba(244,242,238,0.92);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    background: rgba(255,255,255,0.9);
+  }
+  .drawer-body {
+    padding: 1rem 1.1rem 1.4rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .drawer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 1rem;
+  }
+  .drawer-card { padding: 1rem; }
+  .drawer-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 0.65rem; }
+  .drawer-meta {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .meta-block small { display: block; color: var(--text3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem; }
+  .timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+  .timeline-item {
+    position: relative;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(201,168,76,0.18);
+  }
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  .timeline-item strong { display: block; font-size: 13px; }
+  .timeline-item small { color: var(--text3); display: block; margin-top: 2px; }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(12,11,9,0.46);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 90;
+  }
+  .modal.open { display: flex; }
+  .modal-card {
+    width: min(640px, 100%);
+    background: #fff;
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 80px rgba(12,11,9,0.22);
+    overflow: hidden;
+  }
+  .modal-head {
+    padding: 1rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-body { padding: 1.1rem 1.2rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .empty-state {
+    padding: 1.15rem;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #FFFDF8 0%, #F7F1E6 100%);
+    border: 1px dashed rgba(201,168,76,0.34);
+    color: var(--text2);
+    font-size: 13px;
+  }
+  .loading {
+    padding: 1.2rem;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+  .hidden { display: none !important; }
+
+  @media (max-width: 1160px) {
+    .summary-grid, .report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pipeline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .split-grid, .drawer-grid, .hero-card { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 860px) {
+    .sidebar { position: static; width: 100%; min-height: auto; display: none; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1rem; }
+    .summary-grid, .pipeline-grid, .report-grid, .two-col, .meta-row { grid-template-columns: 1fr; }
+    .top-header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <div class="nav-section-label">Admin</div>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Dashboard
+    </a>
+    <a href="admintoollist.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Members & Activity
+    </a>
+    <a href="admincrm.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+      CRM
+    </a>
+    <a href="admincrm-automation.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l2.92-2.92a5 5 0 00-7.07-7.07l-1.68 1.68"/><path d="M14 11a5 5 0 00-7.54-.54L3.54 13.4a5 5 0 107.07 7.07l1.67-1.67"/></svg>
+      Automation
+    </a>
+    <a href="adminuserprofiles.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Members
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div>
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Internal CRM</div>
+      <div class="header-subtitle">A calm place to manage leads, pipeline, sequences, and follow-up.</div>
+    </div>
+    <div class="admin-badge">Admin</div>
+  </header>
+
+  <div id="access-denied" class="access-state">
+    <div style="font-size:30px;">Restricted</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;">You need admin access to open the CRM.</div>
+    <a href="dashboard.html" style="color:var(--gold);font-weight:700;text-decoration:none;">Back to dashboard</a>
+  </div>
+
+  <main id="page-shell" class="page-content page-shell">
+    <section class="hero-card">
+      <div class="hero-copy">
+        <div class="summary-label">Lead Engine</div>
+        <div class="hero-title">See the whole path from capture to follow-up.</div>
+        <p>This CRM keeps ToolSpark leads, stages, notes, tags, and campaign sequences in one place. It is designed to feel clear at a glance so you can move people forward without digging.</p>
+        <div class="hero-actions">
+          <button class="btn" id="new-lead-btn">New Lead</button>
+          <a href="admincrm-automation.html" class="btn-soft" style="text-decoration:none;display:inline-flex;align-items:center;">Automation</a>
+          <button class="btn-soft" id="refresh-btn">Refresh CRM</button>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-side-kicker">Current Focus</div>
+        <div style="font-size:18px;line-height:1.45;">Automatic enrollment is live. Tool Finder leads and qualified leads can move into the right sequences without manual chasing.</div>
+        <div class="hero-side-row">
+          <div><small>Default Mode</small><strong>Automatic</strong></div>
+          <div><small>Sending</small><strong>Resend</strong></div>
+          <div><small>CRM Scope</small><strong>Internal</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="summary-grid" class="summary-grid"></section>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="leads">Leads</button>
+      <button class="tab-btn" data-tab="pipeline">Pipeline</button>
+      <button class="tab-btn" data-tab="sequences">Sequences</button>
+      <button class="tab-btn" data-tab="reporting">Reporting</button>
+    </div>
+
+    <section class="panel" data-panel="leads">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Lead Table</div>
+          <div class="panel-desc">The essential columns only: name, email, source, tags, stage, and last activity.</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input class="field" id="search-input" type="text" placeholder="Search by name or email">
+            <select class="select" id="source-filter"></select>
+            <select class="select" id="stage-filter"></select>
+          </div>
+          <div class="toolbar-right">
+            <div id="lead-count" style="font-size:12px;color:var(--text3);"></div>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Lead</th>
+                <th>Source</th>
+                <th>Tags</th>
+                <th>Stage</th>
+                <th>Last Activity</th>
+                <th>Sequence</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leads-body">
+              <tr><td colspan="7" class="loading">Loading CRM...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel hidden" data-panel="pipeline">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Pipeline Board</div>
+          <div class="panel-desc">A simple Kanban flow. Change stages right on the card when someone moves.</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="pipeline-grid" class="pipeline-grid"></div>
+      </div>
+    </section>
+
+    <section class="panel hidden" data-panel="sequences">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Sequences</div>
+          <div class="panel-desc">Keep the builder linear and readable. One step, one job, one clear next move.</div>
+        </div>
+        <div class="toolbar-right">
+          <a href="admincrm-automation.html" class="btn-soft" style="text-decoration:none;display:inline-flex;align-items:center;">Open Automation</a>
+          <button class="btn-soft" id="new-sequence-btn">New Sequence</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="split-grid">
+          <div class="sequence-list" id="sequence-list"></div>
+          <div class="sequence-editor">
+            <div id="sequence-editor-panel" class="empty-state">Select a sequence to edit its timing and copy.</div>
+            <div class="empty-state">
+              Automation has its own page now so this screen can stay focused on sequence copy and timing.
+              <div style="margin-top:0.75rem;">
+                <a href="admincrm-automation.html" class="btn-soft" style="text-decoration:none;display:inline-flex;align-items:center;">Go to Automation</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel hidden" data-panel="reporting">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Reporting</div>
+          <div class="panel-desc">Enough signal to understand the funnel without building a wall of charts.</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="report-grid">
+          <div class="drawer-card">
+            <h3>Stage Counts</h3>
+            <div id="stage-report" class="mini-list"></div>
+          </div>
+          <div class="drawer-card">
+            <h3>Source Mix</h3>
+            <div id="source-report" class="mini-list"></div>
+          </div>
+          <div class="drawer-card">
+            <h3>Sequence Health</h3>
+            <div id="sequence-report" class="mini-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<aside id="contact-drawer" class="drawer">
+  <div class="drawer-header">
+    <div>
+      <div id="drawer-title" class="panel-title">Lead detail</div>
+      <div id="drawer-subtitle" class="panel-desc">Loading...</div>
+    </div>
+    <button class="btn-link" id="close-drawer-btn">Close</button>
+  </div>
+  <div id="drawer-body" class="drawer-body">
+    <div class="loading">Loading contact...</div>
+  </div>
+</aside>
+
+<div id="lead-modal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="panel-title">Create lead</div>
+        <div class="panel-desc">Useful for manual adds or quick cleanup.</div>
+      </div>
+      <button class="btn-link" id="close-lead-modal-btn">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="two-col">
+        <input id="lead-first-name" class="field" type="text" placeholder="First name">
+        <input id="lead-last-name" class="field" type="text" placeholder="Last name">
+      </div>
+      <input id="lead-email" class="field" type="email" placeholder="Email address">
+      <div class="two-col">
+        <select id="lead-source" class="select"></select>
+        <select id="lead-stage" class="select"></select>
+      </div>
+      <div class="two-col">
+        <select id="lead-consent" class="select">
+          <option value="marketing_unknown">Marketing unknown</option>
+          <option value="marketing_opt_in">Marketing opt-in</option>
+          <option value="transactional_only">Transactional only</option>
+        </select>
+        <input id="lead-source-detail" class="field" type="text" placeholder="Source detail">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
+        <button class="btn-soft" id="cancel-lead-save-btn">Cancel</button>
+        <button class="btn" id="save-lead-btn">Save Lead</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (err) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const FUNCTION_REGION = "us-central1";
+  const CRM_API_URL = `https://${FUNCTION_REGION}-${firebaseConfig.projectId}.cloudfunctions.net/crmAdmin`;
+
+  const state = {
+    snapshot: null,
+    currentTab: "leads",
+    selectedSequenceId: null,
+    selectedContactId: null,
+  };
+
+  const stageLabelMap = {
+    stage_new: "new",
+    stage_contacted: "cool",
+    stage_qualified: "good",
+    stage_proposal: "cool",
+    stage_won: "good",
+    stage_lost: "warn",
+  };
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function prettyDate(value) {
+    if (!value) return "No recent activity";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "No recent activity";
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function stageName(stageId) {
+    const stage = state.snapshot?.stages?.find((item) => item.id === stageId);
+    return stage ? stage.name : "New";
+  }
+
+  function tagById(tagId) {
+    return state.snapshot?.tags?.find((item) => item.id === tagId);
+  }
+
+  function activeEnrollmentsFor(contactId) {
+    return state.snapshot?.enrollmentSummary?.[contactId] || [];
+  }
+
+  async function authHeaders() {
+    const user = auth.currentUser;
+    const token = await user.getIdToken();
+    return {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
+  }
+
+  async function crmRequest(action, payload = {}) {
+    const response = await fetch(CRM_API_URL, {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({ action, payload })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `CRM request failed (${response.status})`);
+    }
+    return data;
+  }
+
+  function setTab(tabName) {
+    state.currentTab = tabName;
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+    document.querySelectorAll("[data-panel]").forEach((panel) => {
+      panel.classList.toggle("hidden", panel.dataset.panel !== tabName);
+    });
+  }
+
+  function filteredContacts() {
+    const contacts = state.snapshot?.contacts || [];
+    const query = (document.getElementById("search-input")?.value || "").trim().toLowerCase();
+    const source = document.getElementById("source-filter")?.value || "";
+    const stage = document.getElementById("stage-filter")?.value || "";
+    return contacts.filter((contact) => {
+      const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim().toLowerCase();
+      const matchesQuery = !query || fullName.includes(query) || String(contact.emailLower || "").includes(query);
+      const matchesSource = !source || contact.source === source;
+      const matchesStage = !stage || contact.stageId === stage;
+      return matchesQuery && matchesSource && matchesStage;
+    });
+  }
+
+  function buildStageSelect(contact, className = "mini-select") {
+    return `<select class="${className}" onchange="moveStage('${contact.id}', this.value)">
+      ${(state.snapshot.stages || []).map((stage) => `
+        <option value="${stage.id}" ${stage.id === contact.stageId ? "selected" : ""}>${escapeHtml(stage.name)}</option>
+      `).join("")}
+    </select>`;
+  }
+
+  function contactSequenceBadge(contact) {
+    const enrollment = activeEnrollmentsFor(contact.id)[0];
+    if (!enrollment) return `<span class="status-pill muted">Not in sequence</span>`;
+    return `<span class="status-pill cool">In sequence</span><div style="font-size:11px;color:var(--text3);margin-top:4px;">${escapeHtml(enrollment.sequenceName || "Active sequence")}</div>`;
+  }
+
+  function renderSummary() {
+    const report = state.snapshot?.report || {};
+    document.getElementById("summary-grid").innerHTML = `
+      <div class="summary-card">
+        <div class="summary-label">Total Leads</div>
+        <div class="summary-value">${report.totalContacts || 0}</div>
+        <div class="summary-note">Every lead source normalized into one contact model.</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">In Sequence</div>
+        <div class="summary-value">${report.inSequenceCount || 0}</div>
+        <div class="summary-note">Contacts actively moving through automated follow-up.</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Won</div>
+        <div class="summary-value">${report.wonCount || 0}</div>
+        <div class="summary-note">Leads already moved into the won stage.</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Lost</div>
+        <div class="summary-value">${report.lostCount || 0}</div>
+        <div class="summary-note">Useful for spotting where the pipeline needs cleanup.</div>
+      </div>`;
+  }
+
+  function renderFilters() {
+    const sourceFilter = document.getElementById("source-filter");
+    const stageFilter = document.getElementById("stage-filter");
+    const leadSource = document.getElementById("lead-source");
+    const leadStage = document.getElementById("lead-stage");
+
+    const sources = Array.from(new Set((state.snapshot?.contacts || []).map((item) => item.source).filter(Boolean))).sort();
+    const sourceOptions = `<option value="">All sources</option>${sources.map((source) => `<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("")}`;
+    const stageOptions = (state.snapshot?.stages || []).map((stage) => `<option value="${stage.id}">${escapeHtml(stage.name)}</option>`).join("");
+
+    sourceFilter.innerHTML = sourceOptions;
+    stageFilter.innerHTML = `<option value="">All stages</option>${stageOptions}`;
+    leadSource.innerHTML = `<option value="manual">manual</option>${sources.map((source) => `<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join("")}`;
+    leadStage.innerHTML = stageOptions;
+  }
+
+  function renderLeads() {
+    const contacts = filteredContacts();
+    document.getElementById("lead-count").textContent = `${contacts.length} shown`;
+    const body = document.getElementById("leads-body");
+    if (!contacts.length) {
+      body.innerHTML = `<tr><td colspan="7"><div class="empty-state">No leads match those filters yet.</div></td></tr>`;
+      return;
+    }
+    body.innerHTML = contacts.map((contact) => {
+      const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Unnamed lead";
+      const tagIds = Array.isArray(contact.tagIds) ? contact.tagIds : [];
+      return `
+        <tr>
+          <td>
+            <div class="lead-name">${escapeHtml(fullName)}</div>
+            <div class="lead-email">${escapeHtml(contact.emailLower || "")}</div>
+          </td>
+          <td>
+            <div>${escapeHtml(contact.source || "manual")}</div>
+            <div class="lead-email">${escapeHtml(contact.sourceDetail || "")}</div>
+          </td>
+          <td>
+            <div class="tag-row">
+              ${tagIds.length ? tagIds.map((tagId) => `<span class="tag-pill">${escapeHtml(tagById(tagId)?.name || tagId)}</span>`).join("") : `<span class="status-pill muted">No tags</span>`}
+            </div>
+          </td>
+          <td>
+            <span class="status-pill ${stageLabelMap[contact.stageId] || "new"}">${escapeHtml(stageName(contact.stageId))}</span>
+          </td>
+          <td>${prettyDate(contact.updatedAt)}</td>
+          <td>${contactSequenceBadge(contact)}</td>
+          <td>
+            <div class="table-actions">
+              <button class="table-btn" onclick="openContact('${contact.id}')">Open</button>
+              ${buildStageSelect(contact)}
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  function renderPipeline() {
+    const pipelineGrid = document.getElementById("pipeline-grid");
+    const contacts = filteredContacts();
+    pipelineGrid.innerHTML = (state.snapshot?.stages || []).map((stage) => {
+      const stageContacts = contacts.filter((contact) => contact.stageId === stage.id);
+      return `
+        <div class="pipe-col">
+          <div class="pipe-head">
+            <strong>${escapeHtml(stage.name)}</strong>
+            <span class="pipe-count">${stageContacts.length}</span>
+          </div>
+          ${stageContacts.length ? stageContacts.map((contact) => {
+            const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Unnamed lead";
+            return `
+              <div class="lead-card">
+                <div class="lead-card-top">
+                  <div>
+                    <div class="lead-card-title">${escapeHtml(fullName)}</div>
+                    <small>${escapeHtml(contact.emailLower || "")}</small>
+                  </div>
+                  <button class="btn-link" onclick="openContact('${contact.id}')">Open</button>
+                </div>
+                <small>${escapeHtml(contact.source || "manual")}</small>
+                ${buildStageSelect(contact)}
+              </div>`;
+          }).join("") : `<div class="empty-state">No leads in ${escapeHtml(stage.name)} yet.</div>`}
+        </div>`;
+    }).join("");
+  }
+
+  function renderSequences() {
+    const sequences = state.snapshot?.sequences || [];
+    if (!state.selectedSequenceId && sequences.length) {
+      state.selectedSequenceId = sequences[0].id;
+    }
+    const selected = sequences.find((item) => item.id === state.selectedSequenceId);
+    document.getElementById("sequence-list").innerHTML = sequences.map((sequence) => `
+      <div class="sequence-card ${sequence.id === state.selectedSequenceId ? "active" : ""}" onclick="selectSequence('${sequence.id}')">
+        <div class="sequence-card-title">${escapeHtml(sequence.name)}</div>
+        <div class="sequence-card-copy">${escapeHtml(sequence.description || "No description yet.")}</div>
+        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.65rem;">
+          <span class="status-pill ${sequence.active ? "good" : "muted"}">${sequence.active ? "Active" : "Paused"}</span>
+          <span class="status-pill ${sequence.allowUnknownConsent ? "cool" : "warn"}">${sequence.allowUnknownConsent ? "Allows unknown consent" : "Opt-in only"}</span>
+        </div>
+      </div>
+    `).join("") || `<div class="empty-state">No sequences yet. Start with a simple nurture flow.</div>`;
+
+    const editor = document.getElementById("sequence-editor-panel");
+    if (!selected) {
+      editor.innerHTML = `<div class="empty-state">Select a sequence to edit it.</div>`;
+      return;
+    }
+
+    editor.innerHTML = `
+      <div class="panel" style="box-shadow:none;border-radius:18px;">
+        <div class="panel-body sequence-editor">
+          <input id="sequence-name" class="field" type="text" value="${escapeHtml(selected.name || "")}" placeholder="Sequence name">
+          <textarea id="sequence-description" class="textarea" placeholder="What this sequence is for.">${escapeHtml(selected.description || "")}</textarea>
+          <div class="meta-row">
+            <select id="sequence-active" class="select">
+              <option value="true" ${selected.active ? "selected" : ""}>Active</option>
+              <option value="false" ${!selected.active ? "selected" : ""}>Paused</option>
+            </select>
+            <select id="sequence-consent" class="select">
+              <option value="true" ${selected.allowUnknownConsent ? "selected" : ""}>Allow unknown consent</option>
+              <option value="false" ${!selected.allowUnknownConsent ? "selected" : ""}>Opt-in only</option>
+            </select>
+            <input id="sequence-group" class="field" type="text" value="${escapeHtml(selected.groupKey || "")}" placeholder="Group key, e.g. sales">
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>Sequence steps</strong>
+            <button class="btn-soft" onclick="addSequenceStep()">Add Step</button>
+          </div>
+          <div id="sequence-steps-wrap">
+            ${(selected.steps || []).map((step, index) => renderSequenceStep(step, index)).join("")}
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn" onclick="saveCurrentSequence()">Save Sequence</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderSequenceStep(step, index) {
+    return `
+      <div class="sequence-step" data-step-index="${index}">
+        <div class="sequence-step-top">
+          <span class="step-badge">Step ${index + 1}</span>
+          <button class="btn-link" onclick="removeSequenceStep(${index})">Remove</button>
+        </div>
+        <input class="field step-subject" type="text" value="${escapeHtml(step.subject || "")}" placeholder="Subject line">
+        <input class="field step-preview" type="text" value="${escapeHtml(step.previewText || "")}" placeholder="Preview text">
+        <div class="two-col">
+          <input class="field step-delay" type="number" min="0" value="${Number(step.delayHours || 0)}" placeholder="Delay in hours">
+          <input class="field step-cta-label" type="text" value="${escapeHtml(step.ctaLabel || "")}" placeholder="CTA label">
+        </div>
+        <input class="field step-cta-url" type="text" value="${escapeHtml(step.ctaUrl || "")}" placeholder="CTA URL">
+        <textarea class="textarea step-body" placeholder="Email body HTML or simple paragraphs.">${escapeHtml(step.bodyHtml || "")}</textarea>
+      </div>`;
+  }
+
+  function renderReporting() {
+    const report = state.snapshot?.report || {};
+    document.getElementById("stage-report").innerHTML = (state.snapshot?.stages || []).map((stage) => `
+      <div class="mini-row">
+        <span>${escapeHtml(stage.name)}</span>
+        <strong>${report.stageCounts?.[stage.id] || 0}</strong>
+      </div>
+    `).join("");
+
+    const sourceEntries = Object.entries(report.sourceCounts || {}).sort((a, b) => b[1] - a[1]);
+    document.getElementById("source-report").innerHTML = sourceEntries.length ? sourceEntries.map(([source, count]) => `
+      <div class="mini-row">
+        <span>${escapeHtml(source)}</span>
+        <strong>${count}</strong>
+      </div>
+    `).join("") : `<div class="empty-state">Source counts will show up once leads land in the CRM.</div>`;
+
+    document.getElementById("sequence-report").innerHTML = (report.sequenceStats || []).length ? (report.sequenceStats || []).map((item) => `
+      <div class="mini-row">
+        <div>
+          <div>${escapeHtml(item.sequenceName)}</div>
+          <small style="color:var(--text3);">Active ${item.active} · Completed ${item.completed} · Stopped ${item.stopped}</small>
+        </div>
+      </div>
+    `).join("") : `<div class="empty-state">Sequence activity will show up as people enter flows.</div>`;
+  }
+
+  async function loadSnapshot(keepSelection = true) {
+    const selectedSequenceId = keepSelection ? state.selectedSequenceId : null;
+    const selectedContactId = keepSelection ? state.selectedContactId : null;
+    const data = await crmRequest("bootstrap");
+    state.snapshot = data;
+    state.contactDetailCache = {};
+    renderSummary();
+    renderFilters();
+    renderLeads();
+    renderPipeline();
+    state.selectedSequenceId = selectedSequenceId || data.sequences?.[0]?.id || null;
+    renderSequences();
+    renderReporting();
+    if (selectedContactId) {
+      await openContact(selectedContactId, true);
+    }
+  }
+
+  async function moveStage(contactId, stageId) {
+    await crmRequest("moveStage", { contactId, stageId });
+    await loadSnapshot();
+  }
+
+  async function openContact(contactId, keepOpen = false) {
+    state.selectedContactId = contactId;
+    document.getElementById("contact-drawer").classList.add("open");
+    if (!keepOpen) {
+      document.getElementById("drawer-body").innerHTML = `<div class="loading">Loading contact...</div>`;
+    }
+    const detail = await crmRequest("getContact", { contactId });
+    state.contactDetailCache = state.contactDetailCache || {};
+    state.contactDetailCache[contactId] = detail;
+    renderDrawer(detail);
+    renderLeads();
+  }
+
+  function renderDrawer(detail) {
+    const contact = detail.contact;
+    const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Unnamed lead";
+    document.getElementById("drawer-title").textContent = fullName;
+    document.getElementById("drawer-subtitle").textContent = contact.emailLower || "";
+    const enrollments = detail.enrollments || [];
+    const notes = detail.notes || [];
+    const events = detail.events || [];
+    const drawerBody = document.getElementById("drawer-body");
+
+    drawerBody.innerHTML = `
+      <div class="drawer-grid">
+        <div class="drawer-card">
+          <h3>Lead profile</h3>
+          <div class="drawer-meta">
+            <div class="meta-block">
+              <small>Source</small>
+              <div>${escapeHtml(contact.source || "manual")}</div>
+              <div class="lead-email">${escapeHtml(contact.sourceDetail || "")}</div>
+            </div>
+            <div class="meta-block">
+              <small>Consent</small>
+              <div>${escapeHtml(contact.marketingConsent || "marketing_unknown")}</div>
+            </div>
+            <div class="meta-block">
+              <small>Stage</small>
+              ${buildStageSelect(contact)}
+            </div>
+            <div class="meta-block">
+              <small>Tags</small>
+              <div class="tag-row">
+                ${(state.snapshot.tags || []).map((tag) => {
+                  const active = (contact.tagIds || []).includes(tag.id);
+                  return `<button class="chip-btn" style="${active ? 'border-color:rgba(201,168,76,0.4);color:var(--gold);' : ''}" onclick="toggleTag('${contact.id}','${tag.id}')">${escapeHtml(tag.name)}</button>`;
+                }).join("")}
+              </div>
+            </div>
+            <div class="meta-block">
+              <small>Actions</small>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="table-btn" onclick="unsubscribeContact('${contact.id}')">Unsubscribe</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-card">
+          <h3>Sequence status</h3>
+          ${enrollments.length ? enrollments.map((item) => `
+            <div class="mini-row" style="margin-bottom:0.6rem;">
+              <div>
+                <div>${escapeHtml(item.sequenceName || item.sequenceId)}</div>
+                <small style="color:var(--text3);">Next step ${item.nextStepOrder || '-'} · ${prettyDate(item.nextSendAt)}</small>
+              </div>
+              <span class="status-pill ${item.status === 'completed' ? 'good' : item.status === 'stopped' ? 'warn' : 'cool'}">${escapeHtml(item.status)}</span>
+            </div>
+          `).join("") : `<div class="empty-state">This lead is not in any active sequence yet.</div>`}
+        </div>
+      </div>
+      <div class="drawer-grid">
+        <div class="drawer-card">
+          <h3>Notes</h3>
+          <textarea id="drawer-note-input" class="textarea" placeholder="Add a note that future-you will thank you for."></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;">
+            <button class="btn" onclick="saveNote('${contact.id}')">Save Note</button>
+          </div>
+          <div class="timeline" style="margin-top:1rem;">
+            ${notes.length ? notes.map((note) => `
+              <div class="timeline-item">
+                <strong>${escapeHtml(note.body)}</strong>
+                <small>${prettyDate(note.createdAt)}</small>
+              </div>
+            `).join("") : `<div class="empty-state">No notes yet. Add quick context here after a call or review.</div>`}
+          </div>
+        </div>
+        <div class="drawer-card">
+          <h3>Timeline</h3>
+          <div class="timeline">
+            ${events.length ? events.map((event) => `
+              <div class="timeline-item">
+                <strong>${escapeHtml(event.summary || event.eventType)}</strong>
+                <small>${prettyDate(event.createdAt)}</small>
+              </div>
+            `).join("") : `<div class="empty-state">Timeline activity will appear here as this lead moves.</div>`}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function toggleTag(contactId, tagId) {
+    await crmRequest("toggleTag", { contactId, tagId });
+    await loadSnapshot();
+  }
+
+  async function saveNote(contactId) {
+    const input = document.getElementById("drawer-note-input");
+    const body = (input?.value || "").trim();
+    if (!body) return;
+    await crmRequest("addNote", { contactId, body });
+    await loadSnapshot();
+  }
+
+  async function unsubscribeContact(contactId) {
+    await crmRequest("unsubscribe", { contactId });
+    await loadSnapshot();
+  }
+
+  function selectSequence(sequenceId) {
+    state.selectedSequenceId = sequenceId;
+    renderSequences();
+  }
+
+  function sequenceStepDataFromDom() {
+    return Array.from(document.querySelectorAll("#sequence-steps-wrap .sequence-step")).map((step) => ({
+      subject: step.querySelector(".step-subject").value.trim(),
+      previewText: step.querySelector(".step-preview").value.trim(),
+      delayHours: Number(step.querySelector(".step-delay").value || 0),
+      ctaLabel: step.querySelector(".step-cta-label").value.trim(),
+      ctaUrl: step.querySelector(".step-cta-url").value.trim(),
+      bodyHtml: step.querySelector(".step-body").value.trim(),
+    }));
+  }
+
+  function addSequenceStep() {
+    const wrap = document.getElementById("sequence-steps-wrap");
+    const index = wrap.querySelectorAll(".sequence-step").length;
+    wrap.insertAdjacentHTML("beforeend", renderSequenceStep({
+      subject: "",
+      previewText: "",
+      delayHours: 24,
+      ctaLabel: "",
+      ctaUrl: "",
+      bodyHtml: ""
+    }, index));
+  }
+
+  function removeSequenceStep(index) {
+    const steps = Array.from(document.querySelectorAll("#sequence-steps-wrap .sequence-step"));
+    if (steps.length === 1) return;
+    steps[index]?.remove();
+    const selected = state.snapshot.sequences.find((item) => item.id === state.selectedSequenceId);
+    selected.steps = sequenceStepDataFromDom();
+    renderSequences();
+  }
+
+  async function saveCurrentSequence() {
+    const selected = state.snapshot.sequences.find((item) => item.id === state.selectedSequenceId);
+    if (!selected) return;
+    await crmRequest("saveSequence", {
+      id: selected.id,
+      name: document.getElementById("sequence-name").value.trim(),
+      description: document.getElementById("sequence-description").value.trim(),
+      active: document.getElementById("sequence-active").value === "true",
+      allowUnknownConsent: document.getElementById("sequence-consent").value === "true",
+      groupKey: document.getElementById("sequence-group").value.trim(),
+      steps: sequenceStepDataFromDom(),
+    });
+    await loadSnapshot();
+  }
+
+  function startNewSequence() {
+    state.selectedSequenceId = null;
+    const editor = document.getElementById("sequence-editor-panel");
+    editor.innerHTML = `
+      <div class="panel" style="box-shadow:none;border-radius:18px;">
+        <div class="panel-body sequence-editor">
+          <input id="sequence-name" class="field" type="text" placeholder="Sequence name">
+          <textarea id="sequence-description" class="textarea" placeholder="What this sequence is for."></textarea>
+          <div class="meta-row">
+            <select id="sequence-active" class="select">
+              <option value="true">Active</option>
+              <option value="false">Paused</option>
+            </select>
+            <select id="sequence-consent" class="select">
+              <option value="true">Allow unknown consent</option>
+              <option value="false">Opt-in only</option>
+            </select>
+            <input id="sequence-group" class="field" type="text" placeholder="Group key, e.g. sales">
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>Sequence steps</strong>
+            <button class="btn-soft" onclick="addSequenceStep()">Add Step</button>
+          </div>
+          <div id="sequence-steps-wrap">${renderSequenceStep({ subject: "", previewText: "", delayHours: 0, ctaLabel: "", ctaUrl: "", bodyHtml: "" }, 0)}</div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn" onclick="saveNewSequence()">Create Sequence</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function saveNewSequence() {
+    await crmRequest("saveSequence", {
+      name: document.getElementById("sequence-name").value.trim(),
+      description: document.getElementById("sequence-description").value.trim(),
+      active: document.getElementById("sequence-active").value === "true",
+      allowUnknownConsent: document.getElementById("sequence-consent").value === "true",
+      groupKey: document.getElementById("sequence-group").value.trim(),
+      steps: sequenceStepDataFromDom(),
+    });
+    await loadSnapshot(false);
+  }
+
+  function openLeadModal() {
+    document.getElementById("lead-modal").classList.add("open");
+  }
+
+  function closeLeadModal() {
+    document.getElementById("lead-modal").classList.remove("open");
+  }
+
+  async function saveLead() {
+    const payload = {
+      firstName: document.getElementById("lead-first-name").value.trim(),
+      lastName: document.getElementById("lead-last-name").value.trim(),
+      email: document.getElementById("lead-email").value.trim(),
+      source: document.getElementById("lead-source").value,
+      stageId: document.getElementById("lead-stage").value,
+      marketingConsent: document.getElementById("lead-consent").value,
+      sourceDetail: document.getElementById("lead-source-detail").value.trim(),
+      marketingConsentSource: "manual_admin"
+    };
+    if (!payload.email) return;
+    await crmRequest("saveContact", payload);
+    closeLeadModal();
+    await loadSnapshot(false);
+  }
+
+  function closeDrawer() {
+    document.getElementById("contact-drawer").classList.remove("open");
+    state.selectedContactId = null;
+  }
+
+  document.querySelectorAll(".tab-btn").forEach((button) => {
+    button.addEventListener("click", () => setTab(button.dataset.tab));
+  });
+  document.getElementById("search-input").addEventListener("input", () => { renderLeads(); renderPipeline(); });
+  document.getElementById("source-filter").addEventListener("change", () => { renderLeads(); renderPipeline(); });
+  document.getElementById("stage-filter").addEventListener("change", () => { renderLeads(); renderPipeline(); });
+  document.getElementById("refresh-btn").addEventListener("click", () => loadSnapshot());
+  document.getElementById("new-lead-btn").addEventListener("click", openLeadModal);
+  document.getElementById("new-sequence-btn").addEventListener("click", startNewSequence);
+  document.getElementById("close-drawer-btn").addEventListener("click", closeDrawer);
+  document.getElementById("close-lead-modal-btn").addEventListener("click", closeLeadModal);
+  document.getElementById("cancel-lead-save-btn").addEventListener("click", closeLeadModal);
+  document.getElementById("save-lead-btn").addEventListener("click", saveLead);
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "signon.html";
+      return;
+    }
+    try {
+      const snap = await db.collection("users").doc(user.uid).get();
+      if (!snap.exists || snap.data().userRole !== "admin") {
+        document.getElementById("access-denied").style.display = "flex";
+        return;
+      }
+    } catch (err) {
+      document.getElementById("access-denied").style.display = "flex";
+      return;
+    }
+
+    document.getElementById("page-shell").style.display = "flex";
+    const name = user.displayName || user.email || "Admin";
+    document.getElementById("sidebar-name").textContent = name;
+    const avatar = document.getElementById("sidebar-avatar");
+    if (user.photoURL) {
+      avatar.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+    } else {
+      avatar.textContent = name.charAt(0).toUpperCase();
+    }
+    await loadSnapshot(false);
+  });
+
+  window.moveStage = moveStage;
+  window.openContact = openContact;
+  window.toggleTag = toggleTag;
+  window.saveNote = saveNote;
+  window.unsubscribeContact = unsubscribeContact;
+  window.selectSequence = selectSequence;
+  window.addSequenceStep = addSequenceStep;
+  window.removeSequenceStep = removeSequenceStep;
+  window.saveCurrentSequence = saveCurrentSequence;
+  window.saveNewSequence = saveNewSequence;
+</script>
+</body>
+</html>
