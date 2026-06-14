@@ -798,12 +798,15 @@ function showEmailGate() {
   wrap.appendChild(gate);
   wrap.scrollTop = wrap.scrollHeight;
 
-  // Enter key submits
+  // Pre-fill email from auth, then focus
   setTimeout(() => {
-    document.getElementById("emailInput")?.addEventListener("keydown", e => {
-      if (e.key === "Enter") submitEmail();
-    });
-    document.getElementById("emailInput")?.focus();
+    const emailEl = document.getElementById("emailInput");
+    if (emailEl) {
+      const user = auth.currentUser;
+      if (user && user.email) emailEl.value = user.email;
+      emailEl.addEventListener("keydown", e => { if (e.key === "Enter") submitEmail(); });
+      emailEl.focus();
+    }
   }, 400);
 }
 
