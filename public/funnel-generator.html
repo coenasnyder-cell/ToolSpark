@@ -714,41 +714,49 @@
   function buildLeadPage(copy, brandName, primary, accent) {
     var onPrimary = contrastText(primary);
     var onAccent  = contrastText(accent);
+    var styles =
+      '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+      'body { font-family: \'Lato\', sans-serif; background: ' + primary + '; color: ' + onPrimary + '; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.25rem 3rem; -webkit-font-smoothing: antialiased; }\n' +
+      '.wrap { width: 100%; max-width: 580px; display: flex; flex-direction: column; align-items: center; text-align: center; }\n' +
+      '.brand { font-size: 13px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: 2.25rem; }\n' +
+      '.badge { display: inline-block; padding: 5px 14px; border: 1px solid ' + accent + '; border-radius: 100px; color: ' + accent + '; font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.5rem; }\n' +
+      'h1 { font-family: \'Playfair Display\', Georgia, serif; font-size: clamp(28px, 5vw, 46px); font-weight: 400; line-height: 1.18; margin-bottom: 1.75rem; max-width: 520px; }\n' +
+      '.bullets { text-align: left; display: inline-flex; flex-direction: column; gap: 0.65rem; margin-bottom: 2.5rem; }\n' +
+      '.bullet { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; line-height: 1.5; opacity: 0.9; }\n' +
+      '.check { width: 20px; height: 20px; background: ' + accent + '; color: ' + onAccent + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0; margin-top: 2px; }\n' +
+      '.form-card { width: 100%; background: rgba(255,255,255,0.97); border-radius: 16px; padding: 2rem 2rem 1.75rem; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }\n' +
+      '.form-card form { display: flex; flex-direction: column; gap: 10px; }\n' +
+      '.form-card input { padding: 14px 16px; border: 1.5px solid #E0DDD8; border-radius: 8px; font-family: \'Lato\', sans-serif; font-size: 15px; color: #1a1814; background: #FAFAF8; outline: none; transition: border-color 0.15s; }\n' +
+      '.form-card input::placeholder { color: #A09A90; }\n' +
+      '.form-card input:focus { border-color: ' + accent + '; background: #fff; }\n' +
+      '.cta-btn { padding: 16px; background: ' + accent + '; color: ' + onAccent + '; font-family: \'Lato\', sans-serif; font-size: 16px; font-weight: 900; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 0.04em; margin-top: 4px; transition: opacity 0.15s; }\n' +
+      '.cta-btn:hover { opacity: 0.88; }\n' +
+      '.trust { font-size: 12px; color: #A09A90; margin-top: 0.875rem; }\n' +
+      '@media (max-width: 480px) { .form-card { padding: 1.5rem 1.25rem; } h1 { font-size: 26px; } }\n';
+
     return '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
       '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
       '<title>' + esc(brandName) + ' — Free Access</title>\n' +
-      '<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">\n' +
-      '<style>\n' +
-      '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n' +
-      'body { font-family: \'Lato\', sans-serif; background: ' + primary + '; color: ' + onPrimary + '; min-height: 100vh; display: flex; flex-direction: column; align-items: center; -webkit-font-smoothing: antialiased; }\n' +
-      '.logo { padding: 2rem 1.5rem 0; font-size: 17px; font-weight: 900; letter-spacing: 0.05em; opacity: 0.65; text-align: center; }\n' +
-      '.hero { width: 100%; max-width: 660px; padding: 3rem 1.5rem 3rem; text-align: center; }\n' +
-      'h1 { font-size: clamp(26px, 4.5vw, 42px); font-weight: 900; line-height: 1.2; margin-bottom: 2rem; }\n' +
-      '.bullets { text-align: left; display: inline-block; margin-bottom: 2.5rem; }\n' +
-      '.bullet { display: flex; align-items: flex-start; gap: 10px; font-size: 16px; line-height: 1.5; margin-bottom: 0.75rem; }\n' +
-      '.check { color: ' + accent + '; font-size: 18px; flex-shrink: 0; margin-top: 1px; }\n' +
-      'form { display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto 1.25rem; }\n' +
-      'input { padding: 14px 16px; border: 2px solid rgba(128,128,128,0.3); border-radius: 8px; font-family: \'Lato\', sans-serif; font-size: 15px; background: rgba(255,255,255,0.1); color: ' + onPrimary + '; outline: none; }\n' +
-      'input::placeholder { opacity: 0.55; }\n' +
-      'input:focus { border-color: ' + accent + '; }\n' +
-      '.cta-btn { padding: 15px; background: ' + accent + '; color: ' + onAccent + '; font-family: \'Lato\', sans-serif; font-size: 16px; font-weight: 900; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 0.03em; }\n' +
-      '.trust { font-size: 13px; opacity: 0.45; }\n' +
-      '</style>\n</head>\n<body>\n' +
-      '<div class="logo">' + esc(brandName) + '</div>\n' +
-      '<div class="hero">\n' +
+      '<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">\n' +
+      '<style>\n' + styles + '</style>\n</head>\n<body>\n' +
+      '<div class="wrap">\n' +
+      '  <div class="brand">' + esc(brandName) + '</div>\n' +
+      '  <div class="badge">Free Access</div>\n' +
       '  <h1>' + esc(copy.leadHeadline) + '</h1>\n' +
       '  <div class="bullets">\n' +
-      '    <div class="bullet"><span class="check">&#10003;</span><span>' + esc(copy.leadBullet1) + '</span></div>\n' +
-      '    <div class="bullet"><span class="check">&#10003;</span><span>' + esc(copy.leadBullet2) + '</span></div>\n' +
-      '    <div class="bullet"><span class="check">&#10003;</span><span>' + esc(copy.leadBullet3) + '</span></div>\n' +
+      '    <div class="bullet"><div class="check">&#10003;</div><span>' + esc(copy.leadBullet1) + '</span></div>\n' +
+      '    <div class="bullet"><div class="check">&#10003;</div><span>' + esc(copy.leadBullet2) + '</span></div>\n' +
+      '    <div class="bullet"><div class="check">&#10003;</div><span>' + esc(copy.leadBullet3) + '</span></div>\n' +
       '  </div>\n' +
-      '  <!-- Connect your email provider here — paste your form embed code or action URL -->\n' +
-      '  <form onsubmit="return false;">\n' +
-      '    <input type="text" name="name" placeholder="Your first name" required>\n' +
-      '    <input type="email" name="email" placeholder="Your email address" required>\n' +
-      '    <button type="submit" class="cta-btn">Get Free Access &#8594;</button>\n' +
-      '  </form>\n' +
-      '  <p class="trust">' + esc(copy.leadTrust) + '</p>\n' +
+      '  <div class="form-card">\n' +
+      '    <!-- Connect your email provider here — paste your form embed code or action URL -->\n' +
+      '    <form onsubmit="return false;">\n' +
+      '      <input type="text" name="name" placeholder="Your first name" required>\n' +
+      '      <input type="email" name="email" placeholder="Your email address" required>\n' +
+      '      <button type="submit" class="cta-btn">Get Free Access &rarr;</button>\n' +
+      '    </form>\n' +
+      '    <p class="trust">' + esc(copy.leadTrust) + '</p>\n' +
+      '  </div>\n' +
       '</div>\n</body>\n</html>';
   }
 
