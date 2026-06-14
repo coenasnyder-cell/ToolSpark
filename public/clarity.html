@@ -27,17 +27,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root {
+    --bg:         #F4F2EE;
+    --surface:    #FFFFFF;
     --dark:       #0C0B09;
     --dark2:      #141210;
     --gold:       #C9A84C;
-    --gold-light: #E8D5A3;
+    --gold-light: #B8922E;
     --gold-dim:   rgba(201,168,76,0.12);
+    --gold-mid:   rgba(201,168,76,0.20);
     --gold-glow:  rgba(201,168,76,0.25);
-    --bg:         #F4F2EE;
-    --surface:    #FFFFFF;
     --border:     #E4E0D8;
+    --border-mid: rgba(0,0,0,0.10);
     --text:       #1A1714;
-    --text2:      #6B6560;
+    --text2:      #4A453F;
     --text3:      #9E9891;
     --green:      #2A5C45;
     --green-light:#3D8A65;
@@ -56,64 +58,91 @@
     flex-direction: column;
   }
 
-  /* ── TOP NAV ── */
-  .nav {
+  /* ── SITE HEADER ── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #141210;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    flex-shrink: 0;
+  }
+  .site-header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 28px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky; top: 0; z-index: 50;
-    flex-shrink: 0;
   }
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--gold);
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
     text-decoration: none;
-    letter-spacing: 0.5px;
   }
-  .nav-title {
-    font-size: 13px;
+  .brand-mark {
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.22);
+    box-shadow: 0 10px 24px rgba(201,168,76,0.10);
+  }
+  .brand-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 29px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #F0EDE6;
+  }
+  .brand-text span { color: var(--gold); }
+  .nav-tag {
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--text2);
-    opacity: 0.8;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.22);
+    padding: 5px 12px;
+    border-radius: 100px;
+    opacity: 0.9;
   }
 
-  /* ── START SCREEN ── */
+  /* ── START SCREEN (dark overlay) ── */
   .start-screen {
-    flex: 1;
-    display: flex;
+    position: fixed;
+    inset: 0;
+    background: var(--dark);
+    display: none;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    z-index: 40;
+    overflow-y: auto;
     padding: 40px 20px;
+    transition: opacity 0.45s ease;
   }
+  .start-screen.hidden { opacity: 0; pointer-events: none; }
   .start-card {
-    max-width: 520px;
+    max-width: 600px;
     width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: var(--shadow);
+    text-align: center;
     animation: fadeUp 0.5s ease both;
   }
   .start-logo-mark {
-    font-family: 'Playfair Display', serif;
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 24px;
+    color: var(--gold);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    margin-bottom: 28px;
   }
   .start-logo-mark::before, .start-logo-mark::after {
     content: '';
@@ -124,30 +153,51 @@
   }
   .start-card h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 28px;
+    font-size: clamp(42px, 8vw, 62px);
     font-weight: 400;
-    color: var(--text);
-    line-height: 1.3;
-    margin-bottom: 10px;
-    text-align: center;
+    color: #F0EDE6;
+    line-height: 1.1;
+    margin-bottom: 16px;
   }
   .start-card h1 em { font-style: italic; color: var(--gold); }
-  .start-card .start-sub {
+  .start-sub {
+    font-size: 16px;
     color: var(--text3);
-    font-size: 14px;
     line-height: 1.7;
-    margin-bottom: 32px;
-    text-align: center;
+    margin-bottom: 28px;
     font-weight: 300;
   }
+  .start-promises {
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .start-promise {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+  .start-promise-icon { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+  .start-promise strong { color: #D7D0C6; font-weight: 700; }
   .start-field {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    text-align: left;
   }
   .start-field label {
     display: block;
     font-size: 11px;
     font-weight: 700;
     color: var(--gold);
+    opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 8px;
@@ -161,45 +211,50 @@
   }
   .start-field input {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.25);
     border-radius: 10px;
     padding: 12px 16px;
     font-family: 'Lato', sans-serif;
     font-size: 15px;
-    color: var(--text);
+    color: #F0EDE6;
     outline: none;
     transition: border-color 0.15s;
   }
-  .start-field input:focus { border-color: var(--green-light); }
-  .start-field input::placeholder { color: var(--text3); }
+  .start-field input:focus { border-color: var(--gold); }
+  .start-field input::placeholder { color: rgba(158,152,145,0.5); }
   .start-expect {
-    background: var(--green-dim);
-    border: 1px solid rgba(61,138,101,0.2);
+    background: rgba(42,92,69,0.15);
+    border: 1px solid rgba(61,138,101,0.25);
     border-radius: 10px;
     padding: 12px 16px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     font-size: 13px;
-    color: var(--text2);
+    color: #9E9891;
     line-height: 1.6;
-    font-weight: 300;
+    text-align: left;
   }
-  .start-expect strong { color: var(--green); font-weight: 700; }
+  .start-expect strong { color: var(--green-light); font-weight: 700; }
   .start-btn {
     width: 100%;
-    background: var(--green);
-    color: #fff;
+    background: var(--gold);
+    color: var(--dark);
     border: none;
-    padding: 14px;
+    padding: 18px;
     border-radius: 12px;
     font-family: 'Lato', sans-serif;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
     letter-spacing: 0.04em;
   }
-  .start-btn:hover { background: var(--green-light); transform: translateY(-1px); }
+  .start-btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .start-note {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text3);
+  }
 
   /* ── PHASE PROGRESS ── */
   .phase-bar {
@@ -483,41 +538,63 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
+    .site-header-inner { padding: 12px 16px; }
+    .brand-mark { width: 38px; height: 38px; border-radius: 12px; }
+    .brand-text { font-size: 24px; }
+    .nav-tag { display: none; }
     .phase-label { display: none; }
     .phase-bar { padding: 10px 16px; }
     .chat-wrapper { padding: 20px 12px 130px; }
     .bubble { font-size: 14px; }
-    .nav { padding: 12px 16px; }
-    .start-card { padding: 28px 20px; }
+    .start-promises { padding: 16px 18px; }
+    .start-card h1 { font-size: 36px; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <a href="dashboard.html" class="nav-logo">ToolSpark</a>
-  <span class="nav-title">Discover Your Breakthrough</span>
-  <div style="width:100px"></div>
-</nav>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="dashboard.html" class="brand-lockup" aria-label="ToolSpark">
+      <div class="brand-text">Tool<span>Spark</span></div>
+    </a>
+    <span class="nav-tag">Breakthrough Session</span>
+  </div>
+</header>
 
 <!-- START SCREEN -->
 <div class="start-screen" id="locked-screen" style="display:none;">
-  <div class="start-card" style="text-align:center;">
+  <div class="start-card">
     <div class="start-logo-mark">ToolSpark</div>
-    <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
-    <h1 style="margin-bottom:0.5rem;">You've completed your<br><em>5 Breakthrough sessions</em></h1>
-    <p class="start-sub" style="margin-bottom:1.5rem;">You've already uncovered your best tool opportunities. Head to your roadmap to pick one and start building — or reach out if you'd like to run another session.</p>
-    <a href="roadmap.html" class="start-btn" style="display:inline-block;text-decoration:none;margin-bottom:0.75rem;">View My Roadmap →</a>
-    <div style="font-size:13px;color:var(--text3);">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold);font-weight:700;">Contact us</a></div>
+    <div style="font-size:2.5rem;margin-bottom:16px;">🔒</div>
+    <h1 style="margin-bottom:12px;">You've completed your<br><em>5 Breakthrough sessions</em></h1>
+    <p class="start-sub">You've already uncovered your best tool opportunities. Head to your roadmap to pick one and start building.</p>
+    <a href="roadmap.html" class="start-btn" style="display:block;text-decoration:none;margin-bottom:14px;">View My Roadmap →</a>
+    <div class="start-note">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold);font-weight:700;">Contact us</a></div>
   </div>
 </div>
 
 <div class="start-screen" id="start-screen" style="display:none;">
   <div class="start-card">
-    <div class="start-logo-mark">ToolSpark</div>
     <h1>Discover Your <em>Breakthrough</em></h1>
     <p class="start-sub">Focused questions built around your Spark Profile and Audience Blueprint — walk away knowing exactly what AI tool to build first.</p>
+
+    <div class="start-promises">
+      <div class="start-promise">
+        <span class="start-promise-icon">✦</span>
+        <span><strong>Your top tool recommendation</strong> — the exact AI tool matched to your business right now</span>
+      </div>
+      <div class="start-promise">
+        <span class="start-promise-icon">✦</span>
+        <span><strong>Why it fits</strong> — a clear explanation of why this tool is right for you specifically</span>
+      </div>
+      <div class="start-promise">
+        <span class="start-promise-icon">✦</span>
+        <span><strong>Your roadmap</strong> — results saved to your profile so you can start building immediately</span>
+      </div>
+    </div>
+
     <div class="start-field">
       <label>Your first name</label>
       <input type="text" id="s_displayName" placeholder="e.g. Sarah" autocomplete="given-name" />
@@ -636,7 +713,9 @@ const CHIPS_BY_PHASE = {
 function startSession() {
   displayName = document.getElementById('s_displayName').value.trim() || 'there';
 
-  document.getElementById('start-screen').style.display = 'none';
+  const ss = document.getElementById('start-screen');
+  ss.classList.add('hidden');
+  setTimeout(() => { ss.style.display = 'none'; ss.classList.remove('hidden'); }, 450);
   document.getElementById('phaseBar').classList.add('active');
   document.getElementById('chatWrapper').classList.add('active');
   document.getElementById('inputArea').classList.add('active');

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity Session — ToolSpark</title>
+<title>Find Your Spark — ToolSpark</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -57,10 +57,60 @@
     flex-direction: column;
   }
 
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: #141210;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .site-header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.22);
+    box-shadow: 0 10px 24px rgba(201,168,76,0.10);
+  }
+  .brand-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 29px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #F0EDE6;
+  }
+  .brand-text span { color: var(--gold); }
+  .nav-tag {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.22);
+    padding: 5px 12px; border-radius: 100px;
+  }
+
   /* ── HERO HEADER ── */
   .hero {
     text-align: center;
-    padding: 48px 24px 32px;
+    padding: 42px 24px 32px;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     position: relative;
@@ -77,10 +127,17 @@
     pointer-events: none;
   }
   .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(201,168,76,0.22);
+    background: rgba(201,168,76,0.08);
     font-size: 11px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: var(--gold); opacity: 0.7;
-    margin-bottom: 14px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 18px;
   }
   .hero h1 {
     font-family: 'Playfair Display', serif;
@@ -283,6 +340,19 @@
     max-width: 700px; margin: 0 auto 10px;
     display: flex; flex-wrap: wrap; gap: 7px;
   }
+  .input-hint {
+    max-width: 700px;
+    margin: 0 auto 10px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text2);
+    display: none;
+  }
+  .input-hint.visible { display: block; }
+  .input-hint b {
+    color: var(--text);
+    font-weight: 700;
+  }
   .chip {
     padding: 7px 15px;
     background: var(--surface);
@@ -379,6 +449,13 @@
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius:10px; }
 
   @media(max-width:580px){
+    .site-header-inner { padding: 12px 16px; }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+    }
+    .brand-text { font-size: 24px; }
     .hero { padding: 32px 16px 24px; }
     .chat-wrap { padding: 20px 12px 160px; }
     .email-row { flex-direction: column; }
@@ -503,7 +580,6 @@
 <!-- SPARK WELCOME -->
 <div id="sparkwelcome">
   <div class="sw-card">
-    <div class="sw-eyebrow">ToolSpark · Free Tool</div>
     <h1>Find Your <em>Spark</em></h1>
     <p class="sw-sub">Most people are sitting on years of real experience and have no idea how to turn it into something. This finds it — in your words, in about 8 minutes.</p>
 
@@ -524,17 +600,18 @@
     <button class="sw-btn" onclick="startSpark()">
       Find My Spark →
     </button>
-    <div class="sw-note">Already a member? Your results will save to your profile automatically.</div>
+    <div class="sw-note">Your results will save to your profile automatically.</div>
   </div>
 </div>
 
-<!-- HERO -->
-<header class="hero">
-  <div class="hero-eyebrow">ToolSpark · Free Tool</div>
-  <h1>Find Your <em>Spark</em></h1>
-  <p class="hero-sub">You already have something valuable inside you. <b>Let's find it together</b> — and turn it into something that can change your life.</p>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="dashboard.html" class="brand-lockup" aria-label="ToolSpark">
+      <div class="brand-text">Tool<span>Spark</span></div>
+    </a>
+    <span class="nav-tag">Find Your Spark</span>
+  </div>
 </header>
-
 <!-- PROGRESS -->
 <div class="progress-wrap">
   <span class="progress-txt">YOUR JOURNEY</span>
@@ -551,6 +628,7 @@
     <button class="voice-toggle-btn" id="voiceToggleBtn" onclick="toggleVoice()">🔊 Voice on</button>
   </div>
   <div class="chips-row" id="chips"></div>
+  <div class="input-hint" id="inputHint"></div>
   <div class="input-row">
     <textarea id="userInput" class="input-box" placeholder="Share your thoughts…" rows="1"></textarea>
     <button class="mic-btn" id="micBtn" title="Speak your answer" onclick="toggleMic()">🎤</button>
@@ -601,7 +679,10 @@ const CHIPS = {
   4: ["They went from stuck to taking action", "Something finally clicked for them", "They got clarity and direction"],
   5: ["Stuck in a job they hate", "Overwhelmed, unsure where to start", "Skills they haven't monetised yet"],
   6: ["It doesn't have to be this hard", "That mindset matters more than strategy", "Fear is the real blocker, not knowledge"],
-  7: ["Getting clear on their direction", "Teaching what I know really well", "Walking them through a process"],
+};
+
+const QUESTION_HINTS = {
+  7: "<b>Examples:</b> Getting clear on their direction, teaching what you know really well, or walking them through a process."
 };
 
 // ─────────────────────────────────────
@@ -663,7 +744,10 @@ function hideThinking() {
 
 function setChips(qNum) {
   const c = document.getElementById("chips");
+  const hint = document.getElementById("inputHint");
   c.innerHTML = "";
+  hint.innerHTML = QUESTION_HINTS[qNum] || "";
+  hint.classList.toggle("visible", Boolean(QUESTION_HINTS[qNum]));
   (CHIPS[qNum] || []).forEach(txt => {
     const b = document.createElement("button");
     b.className = "chip"; b.textContent = txt;

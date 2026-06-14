@@ -57,6 +57,54 @@
     flex-direction: column;
   }
 
+  /* ── SITE HEADER ── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: #141210;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .site-header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+  .brand-mark {
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.22);
+    box-shadow: 0 10px 24px rgba(201,168,76,0.10);
+  }
+  .brand-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 29px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #F0EDE6;
+  }
+  .brand-text span { color: var(--gold); }
+  .nav-tag {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.22);
+    padding: 5px 12px; border-radius: 100px;
+  }
+
   /* ── HERO HEADER ── */
   .hero {
     text-align: center;
@@ -77,10 +125,17 @@
     pointer-events: none;
   }
   .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(201,168,76,0.22);
+    background: rgba(201,168,76,0.08);
     font-size: 11px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: var(--gold); opacity: 0.7;
-    margin-bottom: 14px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 18px;
   }
   .hero h1 {
     font-family: 'Playfair Display', serif;
@@ -379,6 +434,9 @@
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius:10px; }
 
   @media(max-width:580px){
+    .site-header-inner { padding: 12px 16px; }
+    .brand-mark { width: 38px; height: 38px; border-radius: 12px; }
+    .brand-text { font-size: 24px; }
     .hero { padding: 32px 16px 24px; }
     .chat-wrap { padding: 20px 12px 160px; }
     .email-row { flex-direction: column; }
@@ -503,7 +561,6 @@
 <!-- SPARK WELCOME -->
 <div id="sparkwelcome">
   <div class="sw-card">
-    <div class="sw-eyebrow">ToolSpark · Free Tool</div>
     <h1>Audience <em>Deep Dive</em></h1>
     <p class="sw-sub">Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. This finds them — in your words, in about 10 minutes.</p>
 
@@ -524,17 +581,18 @@
     <button class="sw-btn" onclick="startSpark()">
       Start My Audience Deep Dive →
     </button>
-    <div class="sw-note">Already a member? Your results will save to your profile automatically.</div>
+    <div class="sw-note">Your results will save to your profile automatically.</div>
   </div>
 </div>
 
-<!-- HERO -->
-<header class="hero">
-  <div class="hero-eyebrow">ToolSpark · Free Tool</div>
-  <h1>Audience <em>Deep Dive</em></h1>
-  <p class="hero-sub">Stop guessing at who you're talking to. <b>Let's build your Client Profile together</b> — in your words, from your real experience.</p>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="dashboard.html" class="brand-lockup" aria-label="ToolSpark">
+      <div class="brand-text">Tool<span>Spark</span></div>
+    </a>
+    <span class="nav-tag">Audience Deep Dive</span>
+  </div>
 </header>
-
 <!-- PROGRESS -->
 <div class="progress-wrap">
   <span class="progress-txt">YOUR JOURNEY</span>
@@ -645,7 +703,6 @@ const CHIPS = {
   1: ["A lot like me", "Someone I've helped"],
   2: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over"],
   4: ["Something broke down and I couldn't ignore it", "I watched someone else succeed and felt left behind", "I hit the same wall one too many times"],
-  8: ["Facebook or LinkedIn groups", "YouTube and podcasts", "Google searches and blog posts"],
 };
 
 // ─────────────────────────────────────
