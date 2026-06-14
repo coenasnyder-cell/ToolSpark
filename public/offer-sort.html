@@ -448,27 +448,36 @@
     return { keep: keepItems, cut: cutItems };
   }
 
+  function stripMd(str) {
+    return String(str || '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/__(.+?)__/g, '$1')
+      .replace(/_(.+?)_/g, '$1')
+      .replace(/`(.+?)`/g, '$1')
+      .trim();
+  }
+
   function parseItems(block) {
     if (!block) return [];
 
     // If this is the "nothing made the cut" message
     if (/nothing from your list/i.test(block) || /offer is already clean/i.test(block) || /nothing to sort/i.test(block)) {
-      return [{ name: null, reason: block.trim() }];
+      return [{ name: null, reason: stripMd(block.trim()) }];
     }
 
     var items = [];
-    // Each item: "Name — Reason" (em dash or regular dash)
     var lines = block.split('\n').filter(function(l) { return l.trim(); });
     lines.forEach(function(line) {
       var clean = line.replace(/^\d+\.\s*/, '').trim();
       // Split on em dash (—), en dash (–), or " - "
       var dashIdx = clean.search(/\s[—–]\s|\s-\s/);
       if (dashIdx > -1) {
-        var name = clean.slice(0, dashIdx).trim();
-        var reason = clean.slice(dashIdx).replace(/^[\s—–-]+/, '').trim();
+        var name = stripMd(clean.slice(0, dashIdx).trim());
+        var reason = stripMd(clean.slice(dashIdx).replace(/^[\s—–-]+/, '').trim());
         if (name && reason) items.push({ name: name, reason: reason });
       } else if (clean.length > 0) {
-        items.push({ name: null, reason: clean });
+        items.push({ name: null, reason: stripMd(clean) });
       }
     });
     return items;
