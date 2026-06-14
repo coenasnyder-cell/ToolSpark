@@ -87,9 +87,9 @@
   /* PREVIEW ROW */
   .preview-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.75rem; }
   .preview-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-  .preview-tool { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.875rem 1rem; }
+  .preview-tool { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.875rem 1rem; min-width: 0; overflow: hidden; }
   .preview-tool-pos { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 4px; }
-  .preview-tool-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .preview-tool-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .preview-tool-desc { font-size: 12px; color: var(--text3); margin-top: 3px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .preview-tool.empty { border-style: dashed; opacity: 0.6; }
 

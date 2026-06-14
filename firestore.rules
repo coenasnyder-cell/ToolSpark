@@ -350,6 +350,14 @@ match /graduation_requests/{requestId} {
       allow delete: if isAdmin();
     }
 
+    // FUNNEL GENERATOR RESULTS (keyed by uid)
+    match /funnel_generator_results/{userId} {
+      allow read: if isActive() && (isOwner(userId) || isAdmin());
+      allow create: if isActive() && isOwner(userId);
+      allow update: if isActive() && isOwner(userId);
+      allow delete: if isAdmin();
+    }
+
     // PROMPT RESULTS
     match /prompt_results/{userId} {
       allow read: if isActive() && (isOwner(userId) || isAdmin());

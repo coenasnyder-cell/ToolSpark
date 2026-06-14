@@ -232,7 +232,7 @@
 
 <script src="js/nav.js"></script>
 <script>
-  var TOTAL_SECTIONS = 3; // Funnel Generator not counted until built
+  var TOTAL_SECTIONS = 4;
 
   function esc(str) {
     if (!str) return '';
@@ -416,7 +416,7 @@
   }
 
   // ── MAIN RENDER ──
-  function renderPage(offerSort, offerBuilder, journeyMap) {
+  function renderPage(offerSort, offerBuilder, journeyMap, funnelGen) {
     var completed = 0;
     var sections = '';
 
@@ -450,14 +450,19 @@
         null);
     }
 
-    // 4 — Funnel Generator (placeholder)
-    sections += sectionCard('04', 'Funnel Generator', false, true,
-      '<div class="funnel-placeholder">' +
-        '<h3>Your Funnel</h3>' +
-        '<p>Coming next — build your lead page, sales page, and thank you page.</p>' +
-        '<span class="btn-grey">Build Your Funnel →</span>' +
-      '</div>',
-      null);
+    // 4 — Funnel Generator
+    if (funnelGen) {
+      completed++;
+      sections += sectionCard('04', 'Funnel Generator', true, false,
+        '<p style="font-size:14px;color:var(--text2);margin-bottom:1rem;">Your lead page, sales page, and thank you page have been generated.</p>' +
+        '<a class="btn-go" href="funnel-generator.html">Re-generate or download →</a>',
+        'funnel-generator.html');
+    } else {
+      sections += sectionCard('04', 'Funnel Generator', false, false,
+        '<p class="incomplete-msg">Build your lead page, sales page, and thank you page — ready to download and publish.</p>' +
+        '<a class="btn-go" href="funnel-generator.html">Build Your Funnel →</a>',
+        null);
+    }
 
     var fillPct = Math.round((completed / TOTAL_SECTIONS) * 100);
 
@@ -488,14 +493,16 @@
       var results = await Promise.allSettled([
         db.collection('offer_sort_results').doc(user.uid).get(),
         db.collection('offer_results').doc(user.uid).get(),
-        db.collection('journey_maps').doc(user.uid).get()
+        db.collection('journey_maps').doc(user.uid).get(),
+        db.collection('funnel_generator_results').doc(user.uid).get()
       ]);
 
       var offerSort    = (results[0].status === 'fulfilled' && results[0].value.exists) ? results[0].value.data() : null;
       var offerBuilder = (results[1].status === 'fulfilled' && results[1].value.exists) ? results[1].value.data() : null;
       var journeyMap   = (results[2].status === 'fulfilled' && results[2].value.exists) ? results[2].value.data() : null;
+      var funnelGen    = (results[3].status === 'fulfilled' && results[3].value.exists) ? results[3].value.data() : null;
 
-      renderPage(offerSort, offerBuilder, journeyMap);
+      renderPage(offerSort, offerBuilder, journeyMap, funnelGen);
     } catch(e) {
       document.getElementById('page-content').innerHTML =
         '<div style="padding:2rem;font-size:14px;color:var(--text2);">Something went wrong loading your launch assets. Please refresh and try again.</div>';
