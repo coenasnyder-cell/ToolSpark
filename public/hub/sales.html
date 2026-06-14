@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Page</title>
+<meta name="description" content="Sales page">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent: #c9a84c;
+    --page-bg: #100d0a;
+    --page-bg-soft: #17120e;
+    --page-text: #f4efe8;
+    --page-muted: rgba(244,239,232,0.72);
+    --page-border: rgba(255,255,255,0.1);
+    --card-bg: rgba(255,255,255,0.04);
+    --button-text: #130f0c;
+  }
+  body {
+    min-height: 100vh;
+    font-family: 'Lato', sans-serif;
+    color: var(--page-text);
+    background:
+      radial-gradient(circle at top, color-mix(in srgb, var(--accent) 16%, transparent), transparent 30%),
+      linear-gradient(180deg, var(--page-bg-soft), var(--page-bg));
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  .loader {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: var(--page-bg); z-index: 20; transition: opacity 0.25s;
+  }
+  .loader.hidden { opacity: 0; pointer-events: none; }
+  .ring { width: 42px; height: 42px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.14); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .shell { display: none; min-height: 100vh; }
+  .message {
+    min-height: 100vh; display: none; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .message-card {
+    width: min(620px, 100%);
+    border-radius: 28px;
+    padding: 2rem;
+    border: 1px solid var(--page-border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.24);
+  }
+  .message-mark { font-size: 42px; color: var(--accent); margin-bottom: 0.9rem; }
+  .message-card h1 { font-family: 'Playfair Display', serif; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; margin-bottom: 0.75rem; }
+  .message-card p { color: var(--page-muted); line-height: 1.72; max-width: 470px; margin: 0 auto; }
+  .message-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 1.3rem; }
+
+  .page-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 60px; }
+  .nav {
+    padding: 22px 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand-logo {
+    width: 42px; height: 42px; border-radius: 12px; object-fit: cover;
+    background: rgba(255,255,255,0.08); display: none;
+  }
+  .brand-logo.visible { display: block; }
+  .brand-name { font-family: 'Playfair Display', serif; font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-sub { font-size: 12px; color: var(--page-muted); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 13px 22px; border-radius: 999px; font-weight: 900;
+    background: var(--accent); color: var(--button-text);
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .ghost-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 13px 22px; border-radius: 999px; font-weight: 900;
+    border: 1px solid var(--page-border); color: var(--page-text);
+  }
+
+  .hero {
+    padding: 30px;
+    border-radius: 30px;
+    border: 1px solid var(--page-border);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 32%),
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 900; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .kicker::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.02;
+    margin-top: 0.9rem;
+    max-width: 760px;
+  }
+  .hero-copy { margin-top: 1rem; max-width: 720px; }
+  .hero-copy p, .section-copy p { color: var(--page-muted); line-height: 1.78; margin-bottom: 0.8rem; }
+  .hero-copy ul, .section-copy ul { padding-left: 18px; color: var(--page-muted); display: grid; gap: 8px; line-height: 1.7; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.2rem; }
+  .meta-pill {
+    display: inline-flex; align-items: center;
+    padding: 9px 13px; border-radius: 999px;
+    border: 1px solid var(--page-border);
+    background: rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.35rem; }
+
+  .sections { display: grid; gap: 18px; margin-top: 18px; }
+  .section {
+    border-radius: 28px;
+    border: 1px solid var(--page-border);
+    background: var(--card-bg);
+    padding: 26px;
+  }
+  .section.proof { border-style: dashed; }
+  .section.final { background: linear-gradient(180deg, rgba(201,168,76,0.13), rgba(201,168,76,0.04)); }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 900; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 0.7rem;
+  }
+  .section-label::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+  }
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.08;
+    margin-bottom: 0.8rem;
+  }
+  .footer-note { margin-top: 0.9rem; font-size: 12px; color: var(--page-muted); }
+  .powered {
+    text-align: center; padding: 28px 0 6px; color: rgba(244,239,232,0.5); font-size: 12px;
+  }
+  .powered a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    .page-wrap { padding: 0 16px 48px; }
+    .nav { padding: 18px 0; flex-wrap: wrap; }
+    .hero, .section, .message-card { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="ring"></div></div>
+
+<div class="message" id="not-found">
+  <div class="message-card">
+    <div class="message-mark">+</div>
+    <h1>Hub not found</h1>
+    <p>This Creator Hub does not exist yet, or the URL is off. Check the hub slug and try again.</p>
+  </div>
+</div>
+
+<div class="message" id="not-published">
+  <div class="message-card">
+    <div class="message-mark">+</div>
+    <h1 id="not-published-title">Sales page not published yet</h1>
+    <p id="not-published-copy">This hub has not published its sales page yet. Check back soon, or visit the main hub page for the current entry point.</p>
+    <div class="message-actions">
+      <a class="ghost-btn" id="main-hub-link" href="/">Visit main hub</a>
+      <a class="btn" href="https://toolspark.co">ToolSpark</a>
+    </div>
+  </div>
+</div>
+
+<div class="shell" id="shell">
+  <div class="page-wrap">
+    <nav class="nav">
+      <div class="brand">
+        <img id="brand-logo" class="brand-logo" src="" alt="logo">
+        <div>
+          <div class="brand-name" id="brand-name"></div>
+          <div class="brand-sub" id="brand-sub"></div>
+        </div>
+      </div>
+      <a class="btn" id="nav-cta" href="#">Get Access</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="kicker" id="hero-kicker">Offer</div>
+        <h1 id="hero-headline"></h1>
+        <div class="hero-copy" id="hero-copy"></div>
+        <div class="hero-meta" id="hero-meta"></div>
+        <div class="hero-actions">
+          <a class="btn" id="hero-cta" href="#">Get Access</a>
+          <a class="ghost-btn" id="secondary-cta" href="#">Visit main hub</a>
+        </div>
+        <div class="footer-note" id="hero-note"></div>
+      </section>
+
+      <div class="sections" id="sections"></div>
+    </main>
+
+    <div class="powered">Powered by <a href="https://toolspark.co" target="_blank" rel="noopener">ToolSpark</a></div>
+  </div>
+</div>
+
+<script>
+  const slug = window.location.pathname.split('/').filter(Boolean)[1] || "";
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function hideLoader() {
+    const loader = document.getElementById("loader");
+    loader.classList.add("hidden");
+    setTimeout(function() { loader.style.display = "none"; }, 260);
+  }
+
+  function show(id) {
+    document.getElementById(id).style.display = "flex";
+    hideLoader();
+  }
+
+  function showShell() {
+    document.getElementById("shell").style.display = "block";
+    hideLoader();
+  }
+
+  function bodyTextToHtml(body) {
+    const lines = String(body || "").split(/\r?\n/);
+    const chunks = [];
+    let listItems = [];
+    function flushList() {
+      if (!listItems.length) return;
+      chunks.push("<ul>" + listItems.map(function(item) { return "<li>" + escapeHtml(item) + "</li>"; }).join("") + "</ul>");
+      listItems = [];
+    }
+    lines.forEach(function(line) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        flushList();
+        return;
+      }
+      if (/^[-*•]\s+/.test(trimmed)) {
+        listItems.push(trimmed.replace(/^[-*•]\s+/, ""));
+      } else {
+        flushList();
+        chunks.push("<p>" + escapeHtml(trimmed) + "</p>");
+      }
+    });
+    flushList();
+    return chunks.join("");
+  }
+
+  function getOfferKicker(page) {
+    if (page.offerType === "community") return "Community offer";
+    if (page.offerType === "tool") return "Tool offer";
+    return "Program offer";
+  }
+
+  function sectionLabel(section) {
+    return section && section.title ? section.title : "Section";
+  }
+
+  function renderPage(hub, page) {
+    document.title = (page.offerName || hub.hubName || "Sales Page") + " - " + (hub.hubName || "Creator Hub");
+    const accent = hub.primaryColor || "#c9a84c";
+    document.documentElement.style.setProperty("--accent", accent);
+
+    const brandLogo = document.getElementById("brand-logo");
+    if (hub.logoUrl) {
+      brandLogo.src = hub.logoUrl;
+      brandLogo.classList.add("visible");
+    }
+
+    document.getElementById("brand-name").textContent = hub.hubName || "Creator Hub";
+    document.getElementById("brand-sub").textContent = page.offerName || "Sales page";
+    document.getElementById("hero-kicker").textContent = getOfferKicker(page);
+
+    const ctaUrl = page.ctaUrl || hub.paymentLink || ("/hub/" + slug);
+    const ctaLabel = page.ctaLabel || "Get Access";
+    const liveSections = (page.sections || []).filter(function(section) {
+      return section && section.enabled !== false;
+    });
+    const hero = liveSections.find(function(section) { return section.id === "hero"; }) || liveSections[0] || { headline: page.offerName || hub.hubName || "Sales page", body: "" };
+    const rest = liveSections.filter(function(section) { return section !== hero; });
+
+    document.getElementById("nav-cta").href = ctaUrl;
+    document.getElementById("nav-cta").textContent = ctaLabel;
+    document.getElementById("hero-cta").href = ctaUrl;
+    document.getElementById("hero-cta").textContent = ctaLabel;
+    document.getElementById("secondary-cta").href = "/hub/" + slug;
+    document.getElementById("hero-headline").textContent = hero.headline || page.offerName || "Sales page";
+    document.getElementById("hero-copy").innerHTML = bodyTextToHtml(hero.body || "");
+
+    const meta = [];
+    if (page.priceText) meta.push('<div class="meta-pill">' + escapeHtml(page.priceText) + '</div>');
+    if (page.pageMode === "two_page_funnel") meta.push('<div class="meta-pill">Live variant: ' + escapeHtml(page.liveVariant || "page1") + '</div>');
+    if (page.offerType) meta.push('<div class="meta-pill">' + escapeHtml(page.offerType) + '</div>');
+    document.getElementById("hero-meta").innerHTML = meta.join("");
+    document.getElementById("hero-note").textContent = page.reportText || "";
+
+    document.getElementById("main-hub-link").href = "/hub/" + slug;
+
+    document.getElementById("sections").innerHTML = rest.map(function(section) {
+      const className = "section" +
+        ((section.id === "proof" && !page.proofText) ? " proof" : "") +
+        (section.id === "final_cta" ? " final" : "");
+      const ctaBlock = section.id === "final_cta"
+        ? '<div class="hero-actions" style="margin-top:1rem;"><a class="btn" href="' + escapeHtml(ctaUrl) + '">' + escapeHtml(ctaLabel) + '</a></div>'
+        : "";
+      return [
+        '<section class="' + className + '">',
+        '  <div class="section-label">' + escapeHtml(sectionLabel(section)) + '</div>',
+        '  <h2>' + escapeHtml(section.headline || "") + '</h2>',
+        '  <div class="section-copy">' + bodyTextToHtml(section.body || "") + '</div>',
+        ctaBlock,
+        '</section>'
+      ].join("");
+    }).join("");
+
+    showShell();
+  }
+
+  async function loadPage() {
+    if (!slug) {
+      show("not-found");
+      return;
+    }
+    try {
+      const hubSnap = await db.collection("hubs").doc(slug).get();
+      if (!hubSnap.exists) {
+        show("not-found");
+        return;
+      }
+      const hub = hubSnap.data() || {};
+      const pageSnap = await db.collection("hubs").doc(slug).collection("pages").doc("sales").get();
+      if (!pageSnap.exists || !pageSnap.data().isPublished) {
+        document.getElementById("not-published-title").textContent = (hub.hubName || "This hub") + " has not published its sales page yet";
+        document.getElementById("main-hub-link").href = "/hub/" + slug;
+        show("not-published");
+        return;
+      }
+      renderPage(hub, pageSnap.data() || {});
+    } catch (error) {
+      console.error("Sales page load error:", error);
+      show("not-found");
+    }
+  }
+
+  loadPage();
+</script>
+</body>
+</html>

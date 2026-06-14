@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ToolSpark Certification — Become a Certified AI Tool Builder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #FFC820;
+      --purple: #6B2FB3;
+      --black: #0f0f0f;
+      --offwhite: #F7F5F0;
+      --gray: #6b6b6b;
+      --light-gray: #e8e6e1;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--offwhite);
+      color: var(--black);
+      line-height: 1.7;
+      font-size: 18px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--black);
+      padding: 1.25rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--yellow);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+    .logo span { color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--black);
+      color: #fff;
+      padding: 7rem 4rem 6rem;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--purple);
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.4rem 1.25rem;
+      border-radius: 100px;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+      line-height: 1.1;
+      max-width: 900px;
+      margin: 0 auto 1.5rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--yellow);
+    }
+    .hero p.sub {
+      font-family: sans-serif;
+      font-size: 1.25rem;
+      color: #ccc;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+    }
+    .btn-primary {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--black);
+      font-family: sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 1.1rem 2.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .hero-note {
+      margin-top: 1.25rem;
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* ── BRIDGE (Challenge → Cert) ── */
+    .bridge {
+      background: var(--purple);
+      color: #fff;
+      padding: 3rem 4rem;
+      text-align: center;
+    }
+    .bridge p {
+      max-width: 780px;
+      margin: 0 auto;
+      font-size: 1.2rem;
+      line-height: 1.7;
+    }
+    .bridge strong { color: var(--yellow); }
+
+    /* ── SECTIONS SHARED ── */
+    .section { padding: 6rem 4rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 1rem;
+    }
+    .section h2 {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .section p { color: #333; margin-bottom: 1rem; font-size: 1.05rem; }
+
+    /* ── PHASES ── */
+    .phases { background: #fff; }
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .phase-card {
+      border: 2px solid var(--light-gray);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+    }
+    .phase-number {
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 0.75rem;
+    }
+    .phase-card h3 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+    .phase-card p {
+      font-size: 1rem;
+      color: #555;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── WHAT YOU WALK AWAY WITH ── */
+    .deliverables { background: var(--black); color: #fff; }
+    .deliverables .section-label { color: var(--yellow); }
+    .deliverables h2 { color: #fff; }
+    .deliverables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .deliverable {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .deliverable-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .deliverable h4 {
+      font-size: 1.15rem;
+      color: var(--yellow);
+      margin-bottom: 0.6rem;
+      font-family: sans-serif;
+    }
+    .deliverable p {
+      font-size: 0.95rem;
+      color: #aaa;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── MARKETPLACE CALLOUT ── */
+    .marketplace-callout {
+      background: var(--yellow);
+      padding: 5rem 4rem;
+      text-align: center;
+    }
+    .marketplace-callout h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      max-width: 800px;
+      margin: 0 auto 1.25rem;
+      line-height: 1.2;
+    }
+    .marketplace-callout p {
+      max-width: 680px;
+      margin: 0 auto;
+      font-family: sans-serif;
+      font-size: 1.1rem;
+      color: #3a2000;
+      line-height: 1.7;
+    }
+
+    /* ── OBJECTIONS ── */
+    .objections { background: var(--offwhite); }
+    .obj-list { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 2rem; }
+    .obj-item {
+      border-left: 4px solid var(--purple);
+      padding-left: 1.75rem;
+    }
+    .obj-item .q {
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      font-size: 1.1rem;
+    }
+    .obj-item .a {
+      font-size: 1rem;
+      color: #444;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── CTA ── */
+    .cta-block {
+      background: var(--black);
+      color: #fff;
+      padding: 7rem 4rem;
+      text-align: center;
+    }
+    .cta-block h2 {
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      margin-bottom: 1rem;
+    }
+    .cta-block p.cta-sub {
+      font-family: sans-serif;
+      color: #aaa;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .price-display {
+      font-family: sans-serif;
+      margin-bottom: 2.5rem;
+    }
+    .price-amount {
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: var(--yellow);
+    }
+    .price-label {
+      font-size: 1rem;
+      color: #888;
+      display: block;
+      margin-top: 0.25rem;
+    }
+    .what-included {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+      margin: 0 auto 3rem;
+      font-family: sans-serif;
+      font-size: 1rem;
+      color: #ccc;
+    }
+    .what-included li { list-style: none; padding-left: 1.75rem; position: relative; }
+    .what-included li::before {
+      content: "✓";
+      color: var(--yellow);
+      position: absolute;
+      left: 0;
+      font-weight: 700;
+    }
+    .cta-note {
+      margin-top: 1.5rem;
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f0f0f;
+      color: #555;
+      text-align: center;
+      padding: 2rem;
+      font-family: sans-serif;
+      font-size: 0.8rem;
+      border-top: 1px solid #222;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 3.5rem 1.25rem 3rem; }
+      .section { padding: 3rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="logo" href="#">Tool<span>Spark</span></a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">⚡ ToolSpark Certification Program</div>
+    <h1>Become a <em>certified AI tool builder</em> — with a credential, a portfolio, and a way to get clients.</h1>
+    <p class="sub">No audience required. No coding required. No camera required.</p>
+    <a href="#enroll" class="btn-primary">Get Certified — $97</a>
+    <p class="hero-note">Includes your branded Creator Hub + Marketplace listing. Yours to keep.</p>
+  </section>
+
+  <!-- BRIDGE -->
+  <div class="bridge">
+    <p>The Challenge gets you <strong>one working tool</strong>. The Certification makes you <strong>a builder</strong> — with a credential, a client-ready portfolio, and a marketplace where people can find you without you having to chase them.</p>
+  </div>
+
+  <!-- PHASES -->
+  <section class="section phases">
+    <div class="section-inner">
+      <p class="section-label">What you do here</p>
+      <h2>Three phases. One transformation.</h2>
+      <p>You move through Clarity → Build → Monetize/Launch in order. Each phase has a clear exit — something you made, something you know, something you can use.</p>
+
+      <div class="phase-grid">
+        <div class="phase-card">
+          <p class="phase-number">Phase 01</p>
+          <h3>Clarity</h3>
+          <p>You leave knowing exactly who you help, what you build for them, and why it matters — in one sentence. No more spinning on "what should I even offer."</p>
+        </div>
+        <div class="phase-card">
+          <p class="phase-number">Phase 02</p>
+          <h3>Build</h3>
+          <p>You build real, working AI tools in your own branded Creator Hub. Not one tool — the repeatable skill of turning any client problem into a tool.</p>
+        </div>
+        <div class="phase-card">
+          <p class="phase-number">Phase 03</p>
+          <h3>Monetize &amp; Launch</h3>
+          <p>You price it, package it, and put it in front of people. This is the phase your audience freezes on. You leave with an offer and a plan to sell it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section class="section deliverables">
+    <div class="section-inner">
+      <p class="section-label">What you walk away holding</p>
+      <h2>Not just knowledge. Actual things.</h2>
+
+      <div class="deliverables-grid">
+        <div class="deliverable">
+          <div class="deliverable-icon">🏅</div>
+          <h4>ToolSpark Certified Badge</h4>
+          <p>A real credential. Proof you know how to do this — something you can put on your site, your bio, your offers.</p>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">🛍️</div>
+          <h4>Marketplace Listing</h4>
+          <p>Your tools listed where people are already looking for them. You can get found and get clients without having an audience first.</p>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">🏠</div>
+          <h4>Your Own Branded Creator Hub</h4>
+          <p>Not renting space on someone else's platform. Your hub, your brand, your data. Full ownership — it's yours after you complete the program.</p>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">🔁</div>
+          <h4>The Repeatable Skill</h4>
+          <p>You don't just walk out with one tool. You walk out knowing how to build the next one, and the one after that.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKETPLACE CALLOUT -->
+  <div class="marketplace-callout">
+    <h2>"But I don't have a following."</h2>
+    <p>That's exactly what the Marketplace is for. You don't build an audience first and then launch. You launch, and the Marketplace puts you in front of people who are already looking. The Certification is specifically designed for people who are starting from zero — and who don't want to be on camera to make it work.</p>
+  </div>
+
+  <!-- OBJECTIONS -->
+  <section class="section objections">
+    <div class="section-inner">
+      <p class="section-label">Before you click away</p>
+      <h2>A few things worth saying out loud.</h2>
+
+      <div class="obj-list">
+        <div class="obj-item">
+          <p class="q">I'm not technical enough for this.</p>
+          <p class="a">The Creator Hub is built for people who have never written a line of code. If you can fill out a form, you can build a tool. That's the whole point.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">I don't know what to build.</p>
+          <p class="a">Phase 01 is entirely about that. You don't need to know going in — discovering it is the first thing you do.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">$97 for a certification seems low. Is this real?</p>
+          <p class="a">Yes. The entry price reflects where ToolSpark is right now — early, and intentionally accessible. The Marketplace listing, the Hub, and the badge are all included. It goes up as the platform grows.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">What if I already did the Challenge?</p>
+          <p class="a">The Challenge gets you one working tool. The Certification gets you the credential, the portfolio, and the way to actually monetize it. They're designed to stack.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-block" id="enroll">
+    <h2>Ready to become a certified builder?</h2>
+    <p class="cta-sub">You have expertise your audience wants. You just need a way to package it that doesn't require coding, a budget, or being on camera.</p>
+
+    <div class="price-display">
+      <span class="price-amount">$97</span>
+      <span class="price-label">one-time — everything included</span>
+    </div>
+
+    <ul class="what-included">
+      <li>Full Clarity → Build → Monetize/Launch program</li>
+      <li>ToolSpark Certified badge</li>
+      <li>Marketplace listing (get found without an audience)</li>
+      <li>Your own branded Creator Hub — yours to keep</li>
+      <li>The repeatable skill of building AI tools</li>
+    </ul>
+
+    <a href="#" class="btn-primary">Get Certified — $97</a>
+    <p class="cta-note">Self-paced. No camera required. No coding required.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© ToolSpark · <a href="#" style="color:#555;">Marketplace</a> · <a href="#" style="color:#555;">The Challenge</a></p>
+  </footer>
+
+</body>
+</html>

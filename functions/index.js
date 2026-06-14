@@ -6,6 +6,7 @@ const path = require("path");
 const fetch = require("node-fetch");
 const admin = require("firebase-admin");
 const Anthropic = require("@anthropic-ai/sdk");
+const crm = require("./crm");
 if (!admin.apps.length) admin.initializeApp();
 
 // Sonnet 4.6 pricing per million tokens
@@ -1529,6 +1530,32 @@ Structure to follow:
 
 Output only the script text. Nothing else. No intro like "Here is your script". Just start speaking.`;
 
+const SALES_PAGE_GENERATOR_SYSTEM = `You are ToolSpark's sales page strategist and conversion copywriter.
+
+Your job is to turn a member's roadmap context into a calm, premium, easy-to-read sales page draft that can be published as a live public page.
+
+Core rules:
+- Use the member's Spark, Audience, Breakthrough, and Prompt context heavily.
+- Tailor the copy to the offer type: program, community, or tool.
+- Keep the writing clear, confident, and human. Avoid hype, jargon, and clutter.
+- Never invent proof, testimonials, revenue claims, or case studies.
+- If proof is missing, create a visible placeholder section that clearly asks the creator to add real proof.
+- Keep sections concise and scannable. Use short paragraphs and bullet lines where helpful.
+- The CTA should match the requested CTA type and offer stage.
+- For two_page_funnel mode, create two draft variants: page1 and page2. For sales_page mode, create one variant: main.
+
+Output rules:
+- Return valid JSON only.
+- Do not wrap the JSON in markdown fences.
+- The top-level JSON must include: ctaLabel, reportText, liveVariant, variants.
+- variants must be an object containing either main, or page1 and page2.
+- Each variant value must be an array of section objects.
+- Every section object must include: id, title, enabled, headline, body.
+- Use only these section ids: hero, problem, solution, offer, proof, objections, faq, final_cta.
+- body should be plain text with line breaks. Use lines beginning with "- " for bullet items when needed.
+
+The output must be polished enough for a first draft, but still honest about any missing proof or specifics.`;
+
 const SERVER_SIDE_SYSTEMS = {
   "spark-council": SPARK_COUNCIL_SYSTEM,
   "spark-conversation": FIND_YOUR_SPARK_SYSTEM,
@@ -1545,6 +1572,7 @@ const SERVER_SIDE_SYSTEMS = {
   "lesson-generator-v2": LESSON_GENERATOR_V2_SYSTEM,
   "member-lesson-script": MEMBER_LESSON_SCRIPT_SYSTEM,
   "audience-conversation": AUDIENCE_SYSTEM,
+  "sales-page-generator": SALES_PAGE_GENERATOR_SYSTEM,
 };
 
 exports.analyze = onRequest({
@@ -2059,6 +2087,21 @@ exports.onNewMemberSignup = onDocumentCreated({
     console.error(JSON.stringify({ event: "new_member_welcome_email_failed", email, message: err.message }));
     throw err;
   }
+
+  try {
+    await crm.upsertContactFromSource(admin.firestore(), {
+      source: "signup",
+      sourceDetail: "member_signup",
+      email,
+      firstName,
+      linkedUserId: event.params.uid,
+      linkedAccountEmail: email,
+      marketingConsent: data.emailOptIn ? "marketing_opt_in" : "transactional_only",
+      marketingConsentSource: data.emailOptIn ? "signup_checkbox" : "account_signup",
+    });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "crm_signup_sync_failed", email, message: err.message }));
+  }
 });
 
 // ── ADD TOOL FINDER LEAD ──────────────────────────────────────────────────────
@@ -2085,6 +2128,20 @@ exports.addToolFinderLead = onRequest({
     }, { merge: true });
 
     console.log(JSON.stringify({ event: "toolfinder_lead_added", email, sessionId, path }));
+
+    try {
+      await crm.upsertContactFromSource(admin.firestore(), {
+        source: "toolfinder",
+        sourceDetail: path || "toolfinder_phase_one",
+        email,
+        firstName,
+        marketingConsent: "marketing_unknown",
+        marketingConsentSource: "toolfinder_email_gate",
+      });
+    } catch (crmErr) {
+      console.error(JSON.stringify({ event: "crm_tfinder_sync_failed", email, message: crmErr.message }));
+    }
+
     res.status(200).json({ success: true });
   } catch (err) {
     console.error(JSON.stringify({ event: "toolfinder_lead_error", email, message: err.message }));
@@ -2140,4 +2197,21 @@ exports.onWaitlistSignup = onDocumentCreated({
     }));
     throw err;
   }
+
+  try {
+    await crm.upsertContactFromSource(admin.firestore(), {
+      source: "waitlist",
+      sourceDetail: "public_waitlist",
+      email,
+      firstName,
+      marketingConsent: "marketing_opt_in",
+      marketingConsentSource: "waitlist_signup",
+    });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "crm_waitlist_sync_failed", email, message: err.message }));
+  }
 });
+
+exports.crmAdmin = crm.crmAdmin;
+exports.crmPublicUnsubscribe = crm.crmPublicUnsubscribe;
+exports.runCrmSequenceQueue = crm.runCrmSequenceQueue;

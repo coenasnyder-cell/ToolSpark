@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The ToolSpark Challenge — Build Your First AI Tool in 5 Days</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-light: rgba(201, 168, 76, 0.12);
+      --black: #0C0B09;
+      --black-2: #141210;
+      --black-3: #1C1A17;
+      --cream: #F2EEC6;
+      --cream-dim: rgba(242, 238, 230, 0.6);
+      --cream-faint: rgba(242, 238, 230, 0.08);
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--black);
+      color: var(--cream);
+      line-height: 1.7;
+      font-size: 18px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--black);
+      border-bottom: 1px solid var(--black-3);
+      padding: 1.25rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: sans-serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--cream);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+    .logo span { color: var(--gold); }
+    .nav-price {
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      color: var(--cream-dim);
+    }
+    .nav-price strong { color: var(--gold); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--black);
+      padding: 7rem 4rem 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "⚡";
+      position: absolute;
+      font-size: 40rem;
+      opacity: 0.025;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      line-height: 1;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--gold-light);
+      color: var(--gold);
+      font-family: sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.4rem 1.25rem;
+      border-radius: 100px;
+      border: 1px solid rgba(201, 168, 76, 0.3);
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+      line-height: 1.1;
+      max-width: 900px;
+      margin: 0 auto 1.5rem;
+      color: var(--cream);
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .hero p.sub {
+      font-family: sans-serif;
+      font-size: 1.2rem;
+      color: var(--cream-dim);
+      max-width: 580px;
+      margin: 0 auto 3rem;
+      line-height: 1.7;
+    }
+    .btn-primary {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--black);
+      font-family: sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 1.1rem 2.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .hero-note {
+      margin-top: 1.25rem;
+      font-family: sans-serif;
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+    }
+
+    /* ── OUTCOME STRIP ── */
+    .outcome-strip {
+      background: var(--gold);
+      padding: 2rem 4rem;
+      text-align: center;
+    }
+    .outcome-strip p {
+      font-size: 1.2rem;
+      color: var(--black);
+      max-width: 800px;
+      margin: 0 auto;
+      font-family: sans-serif;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    /* ── SECTIONS ── */
+    .section { padding: 6rem 4rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .section h2 {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+      color: var(--cream);
+    }
+    .section p {
+      color: var(--cream-dim);
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    /* ── PHASES ── */
+    .phases { background: var(--black-2); }
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .phase-card {
+      background: var(--black-3);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+    .phase-card::before {
+      content: attr(data-lightning);
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 1.25rem;
+      opacity: 0.4;
+    }
+    .phase-number {
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .phase-card h3 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      color: var(--cream);
+    }
+    .phase-card p {
+      font-size: 1rem;
+      color: var(--cream-dim);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── FOR WHO ── */
+    .for-who { background: var(--black); }
+    .for-who-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+    @media (max-width: 700px) { .for-who-grid { grid-template-columns: 1fr; } }
+    .for-column h4 {
+      font-family: sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .for-column.yes h4 { color: var(--gold); }
+    .for-column.no h4 { color: var(--cream-dim); }
+    .for-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+    .for-list li {
+      font-size: 1rem;
+      color: var(--cream-dim);
+      padding-left: 1.5rem;
+      position: relative;
+      line-height: 1.5;
+    }
+    .for-column.yes .for-list li::before { content: "✓"; color: var(--gold); position: absolute; left: 0; font-weight: 700; }
+    .for-column.no .for-list li::before { content: "✗"; color: #555; position: absolute; left: 0; }
+
+    /* ── OBJECTIONS ── */
+    .objections { background: var(--black-2); }
+    .obj-list { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 2rem; }
+    .obj-item {
+      border-left: 3px solid var(--gold);
+      padding-left: 1.75rem;
+    }
+    .obj-item .q {
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      font-size: 1.1rem;
+      color: var(--cream);
+    }
+    .obj-item .a {
+      font-size: 1rem;
+      color: var(--cream-dim);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ── CTA ── */
+    .cta-block {
+      background: var(--black);
+      padding: 7rem 4rem;
+      text-align: center;
+      border-top: 1px solid var(--black-3);
+    }
+    .cta-block h2 {
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      margin-bottom: 1rem;
+      color: var(--cream);
+    }
+    .cta-block p.cta-sub {
+      font-family: sans-serif;
+      color: var(--cream-dim);
+      font-size: 1.1rem;
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .price-display {
+      font-family: sans-serif;
+      margin-bottom: 2.5rem;
+    }
+    .price-amount {
+      font-size: 5rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .price-label {
+      font-size: 1rem;
+      color: var(--cream-dim);
+      display: block;
+      margin-top: 0.5rem;
+    }
+    .what-included {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+      margin: 0 auto 3rem;
+      font-family: sans-serif;
+      font-size: 1rem;
+      color: var(--cream-dim);
+    }
+    .what-included li { list-style: none; padding-left: 1.75rem; position: relative; }
+    .what-included li::before {
+      content: "⚡";
+      position: absolute;
+      left: 0;
+      font-size: 0.9rem;
+    }
+    .cta-note {
+      margin-top: 1.5rem;
+      font-family: sans-serif;
+      font-size: 0.88rem;
+      color: #555;
+    }
+    .upsell-note {
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--black-3);
+      font-family: sans-serif;
+      font-size: 0.95rem;
+      color: var(--cream-dim);
+    }
+    .upsell-note a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .upsell-note a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black-2);
+      color: #444;
+      text-align: center;
+      padding: 2rem;
+      font-family: sans-serif;
+      font-size: 0.8rem;
+      border-top: 1px solid var(--black-3);
+    }
+    footer a { color: #555; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { padding: 4rem 1.5rem 3rem; }
+      .outcome-strip { padding: 1.75rem 1.5rem; }
+      .section { padding: 4rem 1.5rem; }
+      .cta-block { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="logo" href="#">Tool<span>Spark</span></a>
+    <span class="nav-price">5-Day Challenge · <strong>$7</strong></span>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">⚡ The ToolSpark Challenge</div>
+    <h1>You walk in with an idea.<br>You walk out with a <em>working AI tool.</em></h1>
+    <p class="sub">5 days. No code. No camera. No developer budget. Just you, your expertise, and a tool your audience can actually use.</p>
+    <a href="#enroll" class="btn-primary">Start the Challenge — $7</a>
+    <p class="hero-note">Self-paced · Instant access · Yours to keep</p>
+  </section>
+
+  <!-- OUTCOME STRIP -->
+  <div class="outcome-strip">
+    <p>From "I have an idea but I'm not technical enough to do anything with it" → "I built a working AI tool, and here's the link."</p>
+  </div>
+
+  <!-- PHASES -->
+  <section class="section phases">
+    <div class="section-inner">
+      <p class="section-label">What you do here</p>
+      <h2>Three phases. Five days. One real thing built.</h2>
+      <p>You move through each phase in order. Every phase has a clear exit — not a lesson to watch, but something you made.</p>
+
+      <div class="phase-grid">
+        <div class="phase-card" data-lightning="⚡">
+          <p class="phase-number">Phase 01 · Days 1–2</p>
+          <h3>Find Your Spark</h3>
+          <p>You get clarity on the ONE idea worth pursuing. Most people are stuck not because they have no ideas — they have 47. You leave this phase with a single, validated direction instead of a notebook of maybes.</p>
+        </div>
+        <div class="phase-card" data-lightning="⚡">
+          <p class="phase-number">Phase 02 · Day 3</p>
+          <h3>Discover Your Breakthrough</h3>
+          <p>You identify the exact problem your audience already asks you about constantly, and the simple tool that solves it. You leave with a clear blueprint — what you're building and why someone wants it.</p>
+        </div>
+        <div class="phase-card" data-lightning="⚡">
+          <p class="phase-number">Phase 03 · Days 4–5</p>
+          <h3>Build It</h3>
+          <p>You actually build the thing. In your own branded Creator Hub. No code, no developer, no waiting. You leave with a real, working AI tool — something a client could use today.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR WHO -->
+  <section class="section for-who">
+    <div class="section-inner">
+      <p class="section-label">Is this for you?</p>
+      <h2>This was built for one specific person.</h2>
+      <p>A coach, consultant, or online business owner who is smart and capable — and has been told building a tool requires a developer and a budget they don't have.</p>
+
+      <div class="for-who-grid">
+        <div class="for-column yes">
+          <h4>This is for you if</h4>
+          <ul class="for-list">
+            <li>You have expertise your audience keeps asking about</li>
+            <li>You've been sitting on an idea for months (or years)</li>
+            <li>You want to build something without being on camera</li>
+            <li>You're an introvert who'd rather make something useful than go viral</li>
+            <li>You don't have a big audience yet and need a way to get found</li>
+          </ul>
+        </div>
+        <div class="for-column no">
+          <h4>This isn't for you if</h4>
+          <ul class="for-list">
+            <li>You want someone else to build it for you</li>
+            <li>You're looking for a passive income shortcut</li>
+            <li>You already have a working AI tool and a client pipeline</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJECTIONS -->
+  <section class="section objections">
+    <div class="section-inner">
+      <p class="section-label">Before you close this tab</p>
+      <h2>The things you're probably thinking.</h2>
+
+      <div class="obj-list">
+        <div class="obj-item">
+          <p class="q">I'm not technical enough to build an AI tool.</p>
+          <p class="a">The Creator Hub is built for people who have never written a line of code. If you can fill out a form, you can build the tool. That's the whole design.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">I don't know what to build.</p>
+          <p class="a">That's exactly what Phase 01 is for. You don't pick an idea going in — discovering it is literally the first thing you do.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">I don't have a following yet.</p>
+          <p class="a">Good. The tool you build becomes the thing that builds your audience. You don't need one to start.</p>
+        </div>
+        <div class="obj-item">
+          <p class="q">$7 feels too cheap to be real.</p>
+          <p class="a">It's the entry point. The goal is to get you building — not to charge you for information you won't use. Five days from now you'll have something that works. That's the proof.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-block" id="enroll">
+    <h2>Five days. One working tool.<br>Seven dollars.</h2>
+    <p class="cta-sub">You've been thinking about this long enough. Let's build the thing.</p>
+
+    <div class="price-display">
+      <span class="price-amount">$7</span>
+      <span class="price-label">one-time · instant access</span>
+    </div>
+
+    <ul class="what-included">
+      <li>5-day self-paced challenge</li>
+      <li>Find Your Spark — clarity phase</li>
+      <li>Discover Your Breakthrough — blueprint phase</li>
+      <li>Build It — working tool phase in your Creator Hub</li>
+      <li>Access to the ToolSpark platform</li>
+    </ul>
+
+    <a href="#" class="btn-primary">Start the Challenge — $7</a>
+    <p class="cta-note">No camera. No code. No complicated setup.</p>
+
+    <div class="upsell-note">
+      Want to go further? The <a href="toolspark-certification-sales.html">ToolSpark Certification</a> turns your tool into a credential, a portfolio, and a way to get clients — even without an audience.
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© ToolSpark · <a href="#">Marketplace</a> · <a href="#">Certification</a> · <a href="#">Privacy Policy</a></p>
+  </footer>
+
+</body>
+</html>

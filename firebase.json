@@ -41,6 +41,10 @@
         "destination": "/hub/roadmap.html"
       },
       {
+        "source": "/hub/*/sales",
+        "destination": "/hub/sales.html"
+      },
+      {
         "source": "/hub/*/community",
         "destination": "/hub/community.html"
       },

@@ -92,7 +92,7 @@
   .results-scroll::-webkit-scrollbar-thumb { background: var(--hub-border); border-radius: 2px; }
 
   .results-inner {
-    max-width: 720px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
@@ -109,35 +109,122 @@
     border: 1px solid rgba(201,168,76,0.3);
     border-radius: 20px;
     padding: 5px 14px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.1rem;
   }
 
-  .report-body { font-size: 15px; line-height: 1.85; color: var(--hub-text-primary); }
-  .report-body p { margin-bottom: 1rem; }
-  .report-body p:last-child { margin-bottom: 0; }
-  .report-body strong { color: var(--gold); font-weight: 700; }
-  .report-body em { color: var(--hub-text-muted); font-style: italic; }
-  .report-body h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 500;
+  .report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     color: var(--hub-text-primary);
-    margin: 2rem 0 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--hub-border);
   }
-  .report-body h2:first-child { margin-top: 0; }
-  .report-body h3 {
-    font-size: 15px;
+  .report-lede {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: var(--radius);
+    padding: 1.35rem 1.4rem;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+  }
+  .report-lede-label {
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--gold);
-    margin: 1.5rem 0 0.5rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.55rem;
   }
-  .report-body ul, .report-body ol { padding-left: 1.5rem; margin-bottom: 1rem; }
-  .report-body li { margin-bottom: 0.45rem; line-height: 1.7; }
-  .report-body hr { border: none; border-top: 1px solid var(--hub-border); margin: 1.5rem 0; }
+  .report-lede-copy {
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--hub-text-primary);
+  }
+  .report-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .report-section-card {
+    background: linear-gradient(180deg, rgba(20,18,16,0.98), rgba(17,15,13,0.98));
+    border: 1px solid var(--hub-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+  }
+  .report-section-head {
+    padding: 1rem 1.25rem 0.95rem;
+    border-bottom: 1px solid var(--hub-border);
+    background: rgba(201,168,76,0.05);
+  }
+  .report-section-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.35rem;
+  }
+  .report-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    line-height: 1.2;
+    color: var(--hub-text-primary);
+  }
+  .report-section-body {
+    padding: 1.2rem 1.25rem 1.25rem;
+    font-size: 15px;
+    line-height: 1.82;
+    color: var(--hub-text-primary);
+  }
+  .report-section-body > *:last-child { margin-bottom: 0; }
+  .report-section-body p { margin-bottom: 0.95rem; }
+  .report-section-body strong { color: var(--gold); font-weight: 700; }
+  .report-section-body em { color: var(--hub-text-muted); font-style: italic; }
+  .report-section-body h3 {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 999px;
+    padding: 5px 10px;
+    margin: 1rem 0 0.7rem;
+  }
+  .report-section-body h3:first-child { margin-top: 0; }
+  .report-section-body ul,
+  .report-section-body ol {
+    padding-left: 1.2rem;
+    margin: 0 0 1rem;
+  }
+  .report-section-body li {
+    margin-bottom: 0.55rem;
+    line-height: 1.75;
+  }
+  .report-section-body code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.92em;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 0.1rem 0.35rem;
+  }
+  .report-section-body hr {
+    border: none;
+    border-top: 1px solid var(--hub-border);
+    margin: 1rem 0;
+  }
+  .report-fallback-card {
+    background: linear-gradient(180deg, rgba(20,18,16,0.98), rgba(17,15,13,0.98));
+    border: 1px solid var(--hub-border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.25rem 1.25rem;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.18);
+    font-size: 15px;
+    line-height: 1.82;
+  }
 
   /* ACTIONS */
   .results-actions {
@@ -202,8 +289,10 @@
 
   @media (max-width: 600px) {
     .results-scroll { padding: 1.5rem 1rem 3rem; }
-    .report-body { font-size: 14px; }
-    .report-body h2 { font-size: 18px; }
+    .report-lede-copy,
+    .report-section-body,
+    .report-fallback-card { font-size: 14px; }
+    .report-section-title { font-size: 20px; }
     .results-actions { flex-direction: column; }
     .btn-start-new { text-align: center; }
   }
@@ -312,6 +401,72 @@
       .replace(/`(.+?)`/g, '<code>$1</code>');
   }
 
+  function stripHtml(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+    return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function buildReadableReport(text) {
+    var rendered = renderMarkdown(text);
+    var temp = document.createElement('div');
+    temp.innerHTML = rendered;
+
+    var introHtml = '';
+    var sections = [];
+    var currentSection = null;
+
+    Array.prototype.slice.call(temp.childNodes).forEach(function(node) {
+      if (node.nodeType === 1 && node.tagName === 'H2') {
+        currentSection = {
+          title: node.textContent.trim(),
+          content: ''
+        };
+        sections.push(currentSection);
+        return;
+      }
+
+      var nodeHtml = node.outerHTML || node.textContent || '';
+      if (!nodeHtml.trim()) return;
+
+      if (currentSection) {
+        currentSection.content += nodeHtml;
+      } else {
+        introHtml += nodeHtml;
+      }
+    });
+
+    if (!sections.length) {
+      return '<div class="report-fallback-card">' + rendered + '</div>';
+    }
+
+    var introText = stripHtml(introHtml);
+    var ledeHtml = introText
+      ? (
+          '<div class="report-lede">' +
+            '<div class="report-lede-label">Quick Read</div>' +
+            '<div class="report-lede-copy">' + introHtml + '</div>' +
+          '</div>'
+        )
+      : '';
+
+    var sectionsHtml = sections.map(function(section, index) {
+      var title = section.title || ('Section ' + (index + 1));
+      var body = section.content || '<p>No details were included in this section.</p>';
+      return (
+        '<section class="report-section-card">' +
+          '<div class="report-section-head">' +
+            '<div class="report-section-kicker">Section ' + (index + 1) + '</div>' +
+            '<div class="report-section-title">' + title + '</div>' +
+          '</div>' +
+          '<div class="report-section-body">' + body + '</div>' +
+        '</section>'
+      );
+    }).join('');
+
+    return ledeHtml + '<div class="report-sections">' + sectionsHtml + '</div>';
+  }
+
   var currentReportText = '';
 
   function downloadResults() {
@@ -334,7 +489,7 @@
   function showResult(reportText) {
     currentReportText = reportText;
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('report-body').innerHTML = renderMarkdown(reportText);
+    document.getElementById('report-body').innerHTML = buildReadableReport(reportText);
     document.getElementById('results-wrap').style.display = 'block';
   }
 

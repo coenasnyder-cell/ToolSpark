@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Page Builder - ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0c0b09;
+    --dark2: #141210;
+    --dark3: #1d1a16;
+    --border-dark: #2a2720;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --gold-dim: rgba(201, 168, 76, 0.12);
+    --bg: #f5f2ec;
+    --surface: #ffffff;
+    --surface-2: #fcfaf6;
+    --border: #e5dfd3;
+    --text: #1a1714;
+    --text2: #6c655d;
+    --text3: #9a9389;
+    --green: #2a5c45;
+    --green-soft: rgba(42, 92, 69, 0.08);
+    --rust: #c4622d;
+    --rust-soft: rgba(196, 98, 45, 0.08);
+    --blue: #1d7c90;
+    --blue-soft: rgba(29, 124, 144, 0.08);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 8px rgba(12, 11, 9, 0.05), 0 16px 34px rgba(12, 11, 9, 0.06);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(201,168,76,0.12), transparent 28%),
+      radial-gradient(circle at top right, rgba(196,98,45,0.08), transparent 24%),
+      var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #f0ede6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9a9488; font-size: 14px; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #f0ede6; }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #f0ede6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6b5f5f; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #e05555; }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9a9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+  .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; padding: 1.75rem 2rem 5rem; }
+  .page-stack { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .card-pad { padding: 1.5rem; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust); background: var(--rust-soft); }
+  .eyebrow::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 4vw, 52px); line-height: 1.05; margin-top: 1rem; max-width: 720px; }
+  .hero-copy { color: var(--text2); max-width: 720px; margin-top: 0.85rem; font-size: 16px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.35rem; }
+  .ghost-link { color: var(--text2); text-decoration: none; font-weight: 700; }
+  .ghost-link:hover { color: var(--rust); }
+
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); gap: 1.25rem; align-items: start; }
+  .left-col, .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  .sticky-col { position: sticky; top: calc(var(--header-height) + 1rem); }
+
+  .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 500; line-height: 1.1; }
+  .section-sub { color: var(--text2); font-size: 13px; max-width: 560px; }
+
+  .pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 0.75rem; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; border: 1px solid var(--border); background: var(--surface-2); color: var(--text2); }
+  .pill.found { border-color: rgba(42,92,69,0.18); background: rgba(42,92,69,0.08); color: var(--green); }
+  .pill.missing { color: var(--text3); }
+  .pill.optional { color: var(--blue); background: var(--blue-soft); border-color: rgba(29,124,144,0.15); }
+  .detail-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+  .detail-box { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+  .detail-label { font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+  .detail-value { color: var(--text2); font-size: 14px; }
+
+  .gate-wrap { display: none; }
+  .gate-box { border: 1px solid rgba(196,98,45,0.18); background: linear-gradient(180deg, rgba(196,98,45,0.08), rgba(196,98,45,0.03)); }
+  .gate-list { display: grid; gap: 10px; margin: 1rem 0 1.15rem; }
+  .gate-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.7); border: 1px solid rgba(196,98,45,0.12); }
+  .gate-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rust); margin-top: 6px; flex-shrink: 0; }
+  .gate-item strong { display: block; font-size: 14px; }
+  .gate-item span { color: var(--text2); font-size: 13px; }
+  .button-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.span-2 { grid-column: 1 / -1; }
+  .label { font-size: 12px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
+  .hint { font-size: 12px; color: var(--text3); }
+  .input, .select, .textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .textarea { min-height: 108px; resize: vertical; }
+  .input:focus, .select:focus, .textarea:focus { border-color: rgba(196,98,45,0.45); background: #fff; }
+
+  .mini-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--rust); color: #fff8f3; }
+  .btn-dark { background: var(--dark); color: var(--gold-light); }
+  .btn-light { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-outline { background: transparent; color: var(--rust); border: 1px solid rgba(196,98,45,0.25); }
+  .status-note { font-size: 13px; color: var(--text2); }
+  .status-note strong { color: var(--text); }
+
+  .status-card { overflow: hidden; }
+  .status-band { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(201,168,76,0.1), rgba(201,168,76,0.02)); }
+  .status-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; }
+  .status-chip.published { background: rgba(42,92,69,0.1); color: var(--green); }
+  .status-chip.draft { background: rgba(196,98,45,0.1); color: var(--rust); }
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 1.25rem 1.5rem; }
+
+  .variant-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .variant-tab { border: 1px solid var(--border); background: var(--surface-2); color: var(--text2); padding: 9px 12px; border-radius: 999px; font-size: 12px; font-weight: 900; cursor: pointer; }
+  .variant-tab.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
+
+  .sections-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
+  .section-editor { border: 1px solid var(--border); background: var(--surface-2); border-radius: 16px; overflow: hidden; }
+  .section-editor-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.7); }
+  .section-editor-title { font-size: 14px; font-weight: 900; }
+  .section-editor-meta { font-size: 12px; color: var(--text3); }
+  .section-editor-body { padding: 14px; display: grid; gap: 12px; }
+  .toggle-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; color: var(--text2); }
+  .toggle-chip input { accent-color: var(--rust); }
+  .move-row { display: flex; gap: 8px; }
+  .mini-btn { border: 1px solid var(--border); background: #fff; color: var(--text2); border-radius: 10px; padding: 8px 10px; font-size: 12px; font-weight: 900; cursor: pointer; }
+  .mini-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .preview-card { overflow: hidden; }
+  .preview-wrap { padding: 1rem; background: linear-gradient(180deg, rgba(12,11,9,0.03), transparent); }
+  .preview-shell {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(12,11,9,0.08);
+    box-shadow: 0 18px 48px rgba(12,11,9,0.12);
+    background: #12100d;
+  }
+  .preview-surface {
+    --page-accent: #c9a84c;
+    --page-bg: #12100d;
+    --page-card: rgba(255,255,255,0.04);
+    --page-text: #f4efe8;
+    --page-muted: rgba(244,239,232,0.72);
+    --page-border: rgba(255,255,255,0.1);
+    font-family: 'Lato', sans-serif;
+    color: var(--page-text);
+    background:
+      radial-gradient(circle at top, color-mix(in srgb, var(--page-accent) 16%, transparent), transparent 33%),
+      linear-gradient(180deg, #17130f 0%, #0f0c09 100%);
+  }
+  .preview-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--page-border);
+  }
+  .preview-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .preview-logo {
+    width: 42px; height: 42px; border-radius: 12px; object-fit: cover;
+    background: rgba(255,255,255,0.08); display: none;
+  }
+  .preview-logo.visible { display: block; }
+  .preview-brand-text { min-width: 0; }
+  .preview-brand-name { font-family: 'Playfair Display', serif; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .preview-brand-sub { color: var(--page-muted); font-size: 12px; }
+  .preview-nav-cta, .preview-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 20px; border-radius: 999px; text-decoration: none;
+    background: var(--page-accent); color: #130f0c; font-weight: 900; font-size: 14px;
+  }
+  .preview-inner { padding: 1.4rem; display: grid; gap: 1rem; }
+  .preview-hero {
+    border: 1px solid var(--page-border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border-radius: 24px;
+    padding: 1.5rem;
+  }
+  .preview-kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--page-accent); font-size: 11px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+  .preview-kicker::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .preview-headline { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 44px); line-height: 1.08; margin-top: 0.85rem; }
+  .preview-copy { color: var(--page-muted); font-size: 15px; margin-top: 0.8rem; }
+  .preview-meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
+  .preview-meta-pill { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--page-border); font-size: 12px; }
+  .preview-section {
+    border: 1px solid var(--page-border);
+    border-radius: 22px;
+    background: var(--page-card);
+    padding: 1.2rem;
+  }
+  .preview-section-title { font-size: 11px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: var(--page-accent); margin-bottom: 0.55rem; }
+  .preview-section-headline { font-family: 'Playfair Display', serif; font-size: 25px; line-height: 1.12; margin-bottom: 0.65rem; }
+  .preview-content p { color: var(--page-muted); margin-bottom: 0.7rem; }
+  .preview-content ul { padding-left: 1.1rem; color: var(--page-muted); display: grid; gap: 0.4rem; }
+  .preview-proof { border-style: dashed; }
+  .preview-final { background: linear-gradient(180deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04)); }
+  .preview-footer-note { color: var(--page-muted); font-size: 12px; margin-top: 0.75rem; }
+
+  .empty-state { padding: 1.2rem; border: 1px dashed var(--border); border-radius: 16px; background: var(--surface-2); color: var(--text2); }
+  .loading-state { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: 14px; padding: 2rem; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--rust); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; height: 58px; }
+  .mobile-nav-inner { display: flex; height: 100%; }
+  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7a7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  @media (max-width: 1080px) {
+    .layout-grid { grid-template-columns: 1fr; }
+    .sticky-col { position: static; }
+  }
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: none; }
+    .logout-btn span { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main-wrap { margin-left: 60px; }
+  }
+  @media (max-width: 720px) {
+    .form-grid, .status-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; }
+    .sidebar-overlay { display: block; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1.1rem 0.9rem 5.2rem; }
+    .mobile-bottom-nav { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      <span>Sign Out</span>
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header"></header>
+  <main class="page-content">
+    <div class="page-stack">
+      <div id="loading-state" class="card card-pad loading-state">
+        <div class="spinner"></div>
+        <div>Loading your roadmap, hub, and latest saved page...</div>
+      </div>
+
+      <div id="main-content" style="display:none;">
+        <div class="card card-pad">
+          <span class="eyebrow">Live Sales Page</span>
+          <h1 class="hero-title">Build one clean public sales page your students can actually use.</h1>
+          <p class="hero-copy">This builder pulls from your roadmap work, fills a structured draft, and lets you edit sections before publishing a live page at your hub route. No drag-and-drop clutter, no giant wall of text, just the parts that matter.</p>
+          <div class="hero-actions">
+            <a class="ghost-link" href="dashboard.html">Back to dashboard</a>
+            <a class="ghost-link" href="roadmap.html">Review roadmap context</a>
+            <a class="ghost-link" href="hub-setup.html">Creator Hub setup</a>
+          </div>
+        </div>
+
+        <div class="card card-pad gate-box gate-wrap" id="gate-wrap">
+          <div class="section-head" style="margin-bottom:0.6rem;">
+            <div>
+              <div class="section-title">Before we open the builder</div>
+              <div class="section-sub">This page is roadmap-driven and publishes to your Creator Hub, so it checks those two pieces first.</div>
+            </div>
+          </div>
+          <div class="gate-list" id="gate-list"></div>
+          <div class="button-row" id="gate-actions"></div>
+        </div>
+
+        <div class="layout-grid">
+          <div class="left-col">
+            <div class="card card-pad">
+              <div class="section-head">
+                <div>
+                  <div class="section-title">Source Context</div>
+                  <div class="section-sub">The builder uses your latest Spark, Audience, Breakthrough, and Prompt records. Prompt is optional, but the roadmap pieces are required.</div>
+                </div>
+              </div>
+              <div class="pill-row" id="source-pills"></div>
+              <div class="detail-stack" id="source-details"></div>
+            </div>
+
+            <div class="card card-pad" id="offer-card">
+              <div class="section-head">
+                <div>
+                  <div class="section-title">Offer Setup</div>
+                  <div class="section-sub">Short, plain-language inputs. We use these plus your roadmap to create the first draft.</div>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label class="label" for="offer-type">Offer Type</label>
+                  <select class="select" id="offer-type">
+                    <option value="program">Program</option>
+                    <option value="community">Community</option>
+                    <option value="tool">Tool</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label" for="page-mode">Page Mode</label>
+                  <select class="select" id="page-mode">
+                    <option value="sales_page">Sales Page</option>
+                    <option value="two_page_funnel">Two Page Funnel</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label" for="cta-type">CTA Type</label>
+                  <select class="select" id="cta-type">
+                    <option value="buy_now">Buy Now</option>
+                    <option value="apply_book_call">Apply / Book Call</option>
+                    <option value="join_waitlist">Join Waitlist</option>
+                    <option value="free_lead_magnet">Free Lead Magnet</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label" for="offer-name">Offer Name</label>
+                  <input class="input" id="offer-name" type="text" placeholder="Example: ToolSpark Launch Lab">
+                </div>
+                <div class="field span-2">
+                  <label class="label" for="what-you-get">What They Get</label>
+                  <textarea class="textarea" id="what-you-get" placeholder="List the key deliverables, experience, or access they receive."></textarea>
+                </div>
+                <div class="field">
+                  <label class="label" for="price-text">Price / Pricing Model</label>
+                  <input class="input" id="price-text" type="text" placeholder="Example: $297 one-time or $49/month">
+                </div>
+                <div class="field">
+                  <label class="label" for="cta-label">CTA Label</label>
+                  <input class="input" id="cta-label" type="text" placeholder="Example: Join Now">
+                </div>
+                <div class="field">
+                  <label class="label" for="cta-url">CTA URL</label>
+                  <input class="input" id="cta-url" type="url" placeholder="Defaults to your hub payment link">
+                  <div class="hint">We prefill this from your Creator Hub payment link when available.</div>
+                </div>
+                <div class="field span-2">
+                  <label class="label" for="proof-text">Proof</label>
+                  <textarea class="textarea" id="proof-text" placeholder="Only add real proof here: testimonials, outcomes, screenshots, or details you can stand behind."></textarea>
+                </div>
+                <div class="field span-2">
+                  <label class="label" for="objections-text">Objections</label>
+                  <textarea class="textarea" id="objections-text" placeholder="What objections do people usually have before they buy?"></textarea>
+                </div>
+                <div class="field span-2">
+                  <label class="label" for="urgency-text">Urgency / Bonus Notes</label>
+                  <textarea class="textarea" id="urgency-text" placeholder="Bonuses, deadline notes, limited seats, or what makes now the right time."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="card card-pad" id="generate-card">
+              <div class="section-head">
+                <div>
+                  <div class="section-title">Draft Generator</div>
+                  <div class="section-sub">Generate a structured section draft first, then refine the copy by editing each section directly.</div>
+                </div>
+              </div>
+              <div class="mini-actions">
+                <button class="btn btn-primary" id="generate-btn" onclick="generateDraft()">Generate Draft</button>
+                <span class="status-note" id="generate-status">The builder will create sections for your live page and keep proof honest if you have not added it yet.</span>
+              </div>
+            </div>
+
+            <div class="card card-pad" id="editor-card">
+              <div class="section-head">
+                <div>
+                  <div class="section-title">Section Editor</div>
+                  <div class="section-sub">Edit copy, hide sections, change order, and choose which draft variant is live.</div>
+                </div>
+              </div>
+              <div class="mini-actions" style="justify-content:space-between;align-items:flex-start;">
+                <div class="variant-tabs" id="variant-tabs"></div>
+                <div class="mini-actions" id="variant-actions"></div>
+              </div>
+              <div class="status-note" id="variant-note" style="margin-top:0.8rem;">Editing your live draft.</div>
+              <div class="sections-stack" id="sections-stack"></div>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="sticky-col">
+              <div class="card status-card">
+                <div class="status-band">
+                  <span class="status-chip draft" id="publish-chip">Draft</span>
+                </div>
+                <div class="status-grid">
+                  <div class="detail-box">
+                    <div class="detail-label">Live Route</div>
+                    <div class="detail-value" id="live-route">/hub/your-slug/sales</div>
+                  </div>
+                  <div class="detail-box">
+                    <div class="detail-label">Current CTA</div>
+                    <div class="detail-value" id="cta-summary">Not set yet</div>
+                  </div>
+                  <div class="detail-box">
+                    <div class="detail-label">Page Mode</div>
+                    <div class="detail-value" id="mode-summary">Sales Page</div>
+                  </div>
+                  <div class="detail-box">
+                    <div class="detail-label">Live Variant</div>
+                    <div class="detail-value" id="variant-summary">Main page</div>
+                  </div>
+                </div>
+                <div class="card-pad" style="padding-top:0;">
+                  <div class="button-row">
+                    <button class="btn btn-dark" id="save-btn" onclick="saveDraft(false)">Save Draft</button>
+                    <button class="btn btn-primary" id="publish-btn" onclick="saveDraft(true)">Publish Live Page</button>
+                    <button class="btn btn-light" id="unpublish-btn" onclick="unpublishPage()">Unpublish</button>
+                    <button class="btn btn-light" id="view-live-btn" onclick="openLivePage()">View Live Page</button>
+                    <button class="btn btn-outline" id="export-btn" onclick="exportHtml()">Export HTML</button>
+                  </div>
+                  <div class="status-note" style="margin-top:0.9rem;" id="save-status">Nothing saved yet.</div>
+                </div>
+              </div>
+
+              <div class="card preview-card">
+                <div class="card-pad" style="padding-bottom:0.9rem;">
+                  <div class="section-head" style="margin-bottom:0;">
+                    <div>
+                      <div class="section-title">Live Preview</div>
+                      <div class="section-sub">This preview reflects the current editor state, not an older generated draft.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-wrap">
+                  <div class="preview-shell">
+                    <div class="preview-surface" id="preview-surface"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="mobile-bottom-nav">
+  <div class="mobile-nav-inner">
+    <a href="community.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"></path></svg>
+      Community
+    </a>
+    <a href="courses.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"></path></svg>
+      Courses
+    </a>
+    <a href="dashboard.html" class="mobile-nav-item active">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+      Dashboard
+    </a>
+    <a href="roadmap.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"></path></svg>
+      Roadmap
+    </a>
+    <a href="tools.html" class="mobile-nav-item">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"></path></svg>
+      Tools
+    </a>
+  </div>
+</nav>
+
+<script>
+  const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  const MODEL = "claude-sonnet-4-6";
+  const DEFAULT_SECTION_ORDER = ["hero", "problem", "solution", "offer", "proof", "objections", "faq", "final_cta"];
+  const DEFAULT_SECTION_TITLES = {
+    hero: "Hero",
+    problem: "Problem",
+    solution: "Solution",
+    offer: "Offer",
+    proof: "Proof",
+    objections: "Objections",
+    faq: "FAQ",
+    final_cta: "Final CTA"
+  };
+  const CTA_LABELS = {
+    buy_now: "Get Access Now",
+    apply_book_call: "Apply or Book a Call",
+    join_waitlist: "Join the Waitlist",
+    free_lead_magnet: "Get the Free Resource"
+  };
+  const VARIANT_LABELS = {
+    main: "Main page",
+    page1: "Page 1",
+    page2: "Page 2"
+  };
+
+  let currentUser = null;
+  let currentHub = null;
+  let currentHubSlug = "";
+  let currentVariantKey = "main";
+  let pageState = createEmptyPageState();
+  let sourceState = { spark: null, audience: null, breakthrough: null, prompt: null };
+  let lastSavedSnapshot = null;
+
+  function createEmptyPageState() {
+    return {
+      isPublished: false,
+      offerType: "program",
+      pageMode: "sales_page",
+      ctaType: "buy_now",
+      ctaUrl: "",
+      ctaLabel: CTA_LABELS.buy_now,
+      offerName: "",
+      priceText: "",
+      whatYouGet: "",
+      proofText: "",
+      objectionsText: "",
+      urgencyNotes: "",
+      reportText: "",
+      htmlExport: "",
+      liveVariant: "main",
+      variants: { main: buildDefaultSections("program", "buy_now", "") },
+      sections: buildDefaultSections("program", "buy_now", ""),
+      sourceSnapshot: {}
+    };
+  }
+
+  function buildDefaultSections(offerType, ctaType, offerName) {
+    const label = offerName || "your offer";
+    const ctaLabel = CTA_LABELS[ctaType] || CTA_LABELS.buy_now;
+    const offerLine = offerType === "community"
+      ? "- Ongoing access and connection\n- Consistent support and cadence\n- A clear reason to stay engaged"
+      : offerType === "tool"
+        ? "- What it does in plain language\n- What someone inputs\n- What result they get back faster"
+        : "- What the program includes\n- What support is built in\n- What result it is designed to create";
+    return DEFAULT_SECTION_ORDER.map(function(id) {
+      const section = {
+        id: id,
+        title: DEFAULT_SECTION_TITLES[id],
+        enabled: true,
+        headline: "",
+        body: ""
+      };
+      if (id === "hero") {
+        section.headline = label ? "A clearer path to " + label : "A clearer way to package your offer";
+        section.body = "Say what this offer helps someone do, who it is for, and why it matters now.";
+      } else if (id === "problem") {
+        section.headline = "What your people are tired of trying";
+        section.body = "- The old way takes too long\n- They feel stuck or overwhelmed\n- They want a simpler path with real momentum";
+      } else if (id === "solution") {
+        section.headline = "What changes here";
+        section.body = "Explain the shift this offer creates and why your approach is different.";
+      } else if (id === "offer") {
+        section.headline = "What they get";
+        section.body = offerLine;
+      } else if (id === "proof") {
+        section.headline = "Add real proof before publishing";
+        section.body = "Add screenshots, outcomes, testimonials, or specifics you can actually back up.";
+      } else if (id === "objections") {
+        section.headline = "Questions they may be asking";
+        section.body = "- Is this right for me?\n- Will I actually use it?\n- Why this instead of trying to figure it out alone?";
+      } else if (id === "faq") {
+        section.headline = "A few things to make clear";
+        section.body = "- Who this is for\n- How they get access\n- How long they can expect it to take";
+      } else if (id === "final_cta") {
+        section.headline = "Ready when you are";
+        section.body = "Remind them what they are saying yes to, then make the next step obvious.";
+        section.ctaLabel = ctaLabel;
+      }
+      return section;
+    });
+  }
+
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : "";
+    let acToken = "";
+    try {
+      const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_, reject) => setTimeout(function() { reject(new Error("timeout")); }, 3000))]);
+      acToken = t && t.token ? t.token : "";
+    } catch (e) {}
+    return {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token,
+      "X-Firebase-AppCheck": acToken
+    };
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function mostRecent(snaps) {
+    const map = new Map();
+    snaps.forEach(function(snap) {
+      if (!snap || typeof snap.forEach !== "function") return;
+      snap.forEach(function(doc) {
+        if (!map.has(doc.id)) map.set(doc.id, doc);
+      });
+    });
+    return Array.from(map.values()).sort(function(a, b) {
+      return (b.data().createdAt && b.data().createdAt.toMillis ? b.data().createdAt.toMillis() : 0) -
+        (a.data().createdAt && a.data().createdAt.toMillis ? a.data().createdAt.toMillis() : 0);
+    });
+  }
+
+  function parseToolsFromActionPlan(actionPlan) {
+    if (!actionPlan) return [];
+    const fieldDefs = [
+      { key: "name", tag: "NAME" },
+      { key: "summary", tag: "SUMMARY" },
+      { key: "complexity", tag: "COMPLEXITY" },
+      { key: "priority", tag: "PRIORITY" },
+      { key: "why", tag: "WHY" },
+      { key: "how", tag: "HOW" },
+      { key: "audienceConnection", tag: "AUDIENCE_CONNECTION" }
+    ];
+    const tools = [];
+    for (let i = 1; i <= 3; i++) {
+      const tool = {};
+      fieldDefs.forEach(function(field, index) {
+        const nextBoundary = index < fieldDefs.length - 1
+          ? "TOOL_" + i + "_" + fieldDefs[index + 1].tag + ":"
+          : (i < 3 ? "TOOL_" + (i + 1) + "_NAME:" : "\\*\\*ACTION_PLAN_END");
+        const regex = new RegExp("TOOL_" + i + "_" + field.tag + ":([\\s\\S]+?)(?=" + nextBoundary + "|$)");
+        const match = actionPlan.match(regex);
+        tool[field.key] = match ? match[1].trim() : "";
+      });
+      tools.push(tool);
+    }
+    return tools;
+  }
+
+  function getBreakthroughFromSession(session) {
+    if (!session || !session.actionPlan) return null;
+    const tools = parseToolsFromActionPlan(session.actionPlan);
+    const chosenIndex = session.chosenTool ? session.chosenTool - 1 : 0;
+    const tool = tools[chosenIndex] || tools[0];
+    return tool && tool.name ? tool : null;
+  }
+
+  function safeRead(promise, label) {
+    return promise.catch(function(error) {
+      console.warn("Sales builder read warning:", label, error && error.message ? error.message : error);
+      return null;
+    });
+  }
+
+  function formValue(id) {
+    const el = document.getElementById(id);
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function readIntake() {
+    return {
+      offerType: formValue("offer-type") || "program",
+      pageMode: formValue("page-mode") || "sales_page",
+      ctaType: formValue("cta-type") || "buy_now",
+      offerName: formValue("offer-name"),
+      whatYouGet: formValue("what-you-get"),
+      priceText: formValue("price-text"),
+      ctaLabel: formValue("cta-label"),
+      ctaUrl: formValue("cta-url"),
+      proofText: formValue("proof-text"),
+      objectionsText: formValue("objections-text"),
+      urgencyNotes: formValue("urgency-text")
+    };
+  }
+
+  function hydrateFormFromState() {
+    document.getElementById("offer-type").value = pageState.offerType || "program";
+    document.getElementById("page-mode").value = pageState.pageMode || "sales_page";
+    document.getElementById("cta-type").value = pageState.ctaType || "buy_now";
+    document.getElementById("offer-name").value = pageState.offerName || "";
+    document.getElementById("what-you-get").value = pageState.whatYouGet || "";
+    document.getElementById("price-text").value = pageState.priceText || "";
+    document.getElementById("cta-label").value = pageState.ctaLabel || "";
+    document.getElementById("cta-url").value = pageState.ctaUrl || "";
+    document.getElementById("proof-text").value = pageState.proofText || "";
+    document.getElementById("objections-text").value = pageState.objectionsText || "";
+    document.getElementById("urgency-text").value = pageState.urgencyNotes || "";
+  }
+
+  function ensureDefaultCta() {
+    const ctaInput = document.getElementById("cta-url");
+    if (!ctaInput) return;
+    if (!ctaInput.value && currentHub && currentHub.paymentLink) {
+      ctaInput.value = currentHub.paymentLink;
+    }
+  }
+
+  function syncStateFromForm() {
+    const intake = readIntake();
+    pageState.offerType = intake.offerType;
+    pageState.pageMode = intake.pageMode;
+    pageState.ctaType = intake.ctaType;
+    pageState.offerName = intake.offerName;
+    pageState.whatYouGet = intake.whatYouGet;
+    pageState.priceText = intake.priceText;
+    pageState.ctaLabel = intake.ctaLabel || CTA_LABELS[intake.ctaType] || CTA_LABELS.buy_now;
+    pageState.ctaUrl = intake.ctaUrl || (currentHub && currentHub.paymentLink) || "";
+    pageState.proofText = intake.proofText;
+    pageState.objectionsText = intake.objectionsText;
+    pageState.urgencyNotes = intake.urgencyNotes;
+    if (pageState.pageMode !== "two_page_funnel") {
+      pageState.liveVariant = "main";
+      currentVariantKey = "main";
+      if (!pageState.variants.main) {
+        pageState.variants = { main: buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName) };
+      }
+    } else {
+      if (!pageState.variants.page1) pageState.variants.page1 = buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName);
+      if (!pageState.variants.page2) pageState.variants.page2 = buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName);
+      if (!pageState.liveVariant || pageState.liveVariant === "main") pageState.liveVariant = "page1";
+      if (currentVariantKey === "main") currentVariantKey = "page1";
+    }
+    pageState.sections = cloneSections(pageState.variants[pageState.liveVariant] || []);
+  }
+
+  function buildSourceSnapshot() {
+    return {
+      spark: sourceState.spark ? {
+        statement: sourceState.spark.statement || "",
+        whatYouKnow: sourceState.spark.whatYouKnow || "",
+        whoYouHelp: sourceState.spark.whoYouHelp || ""
+      } : null,
+      audience: sourceState.audience ? {
+        whoTheyAre: sourceState.audience.whoTheyAre || "",
+        dailyFrustration: sourceState.audience.dailyFrustration || "",
+        dreamOutcome: sourceState.audience.dreamOutcome || "",
+        theirWords: sourceState.audience.theirWords || ""
+      } : null,
+      breakthrough: sourceState.breakthrough ? {
+        name: sourceState.breakthrough.name || "",
+        summary: sourceState.breakthrough.summary || "",
+        why: sourceState.breakthrough.why || "",
+        how: sourceState.breakthrough.how || ""
+      } : null,
+      prompt: sourceState.prompt ? {
+        appName: sourceState.prompt.appName || "",
+        promptText: sourceState.prompt.promptText || ""
+      } : null
+    };
+  }
+
+  function getMissingRequirements() {
+    const missing = [];
+    if (!sourceState.spark || !sourceState.audience || !sourceState.breakthrough) {
+      missing.push({
+        title: "Roadmap context is incomplete",
+        text: "Finish your Spark, Audience, and Breakthrough work first so the builder can create a strong sales draft.",
+        href: "roadmap.html",
+        label: "Finish roadmap"
+      });
+    }
+    if (!currentHubSlug || !currentHub) {
+      missing.push({
+        title: "Creator Hub is not set up yet",
+        text: "This builder publishes to your hub route, uses your branding, and defaults the CTA from your hub payment link.",
+        href: "hub-setup.html",
+        label: "Set up Creator Hub"
+      });
+    }
+    return missing;
+  }
+
+  function renderGateState() {
+    const gateWrap = document.getElementById("gate-wrap");
+    const gateList = document.getElementById("gate-list");
+    const gateActions = document.getElementById("gate-actions");
+    const missing = getMissingRequirements();
+    if (!missing.length) {
+      gateWrap.style.display = "none";
+      return true;
+    }
+    gateWrap.style.display = "block";
+    gateList.innerHTML = missing.map(function(item) {
+      return '<div class="gate-item"><div class="gate-dot"></div><div><strong>' + escapeHtml(item.title) + '</strong><span>' + escapeHtml(item.text) + '</span></div></div>';
+    }).join("");
+    const uniqueActions = [];
+    missing.forEach(function(item) {
+      if (!uniqueActions.find(function(existing) { return existing.href === item.href; })) uniqueActions.push(item);
+    });
+    gateActions.innerHTML = uniqueActions.map(function(item) {
+      return '<a class="btn btn-outline" href="' + item.href + '">' + escapeHtml(item.label) + '</a>';
+    }).join("");
+    return false;
+  }
+
+  function renderSourceSummary() {
+    const pills = document.getElementById("source-pills");
+    const details = document.getElementById("source-details");
+    const items = [
+      { label: "Spark", found: !!sourceState.spark, type: "found" },
+      { label: "Audience", found: !!sourceState.audience, type: "found" },
+      { label: "Breakthrough", found: !!sourceState.breakthrough, type: "found" },
+      { label: "Prompt", found: !!sourceState.prompt, type: "optional" }
+    ];
+    pills.innerHTML = items.map(function(item) {
+      const cls = item.found ? (item.type === "optional" ? "pill optional" : "pill found") : "pill missing";
+      return '<span class="' + cls + '">' + escapeHtml(item.label) + (item.found ? " ready" : " missing") + '</span>';
+    }).join("");
+
+    const blocks = [];
+    if (sourceState.spark) {
+      blocks.push(detailHtml("Spark statement", sourceState.spark.statement || sourceState.spark.whatYouKnow || "Latest Spark result loaded."));
+    } else {
+      blocks.push(detailHtml("Spark statement", "No Spark result found yet."));
+    }
+    if (sourceState.audience) {
+      blocks.push(detailHtml("Audience insight", sourceState.audience.whoTheyAre || sourceState.audience.dreamOutcome || "Latest Audience result loaded."));
+    } else {
+      blocks.push(detailHtml("Audience insight", "No Audience result found yet."));
+    }
+    if (sourceState.breakthrough) {
+      blocks.push(detailHtml("Chosen offer direction", sourceState.breakthrough.name + (sourceState.breakthrough.summary ? " - " + sourceState.breakthrough.summary : "")));
+    } else {
+      blocks.push(detailHtml("Chosen offer direction", "No completed Breakthrough session found yet."));
+    }
+    if (sourceState.prompt) {
+      blocks.push(detailHtml("Build brief", sourceState.prompt.appName || "Prompt Generator draft loaded."));
+    } else {
+      blocks.push(detailHtml("Build brief", "Prompt Generator is optional here, but it helps tighten the offer angle."));
+    }
+    details.innerHTML = blocks.join("");
+  }
+
+  function detailHtml(label, value) {
+    return '<div class="detail-box"><div class="detail-label">' + escapeHtml(label) + '</div><div class="detail-value">' + escapeHtml(value) + '</div></div>';
+  }
+
+  function parseJsonFromText(text) {
+    const clean = String(text || "").trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/, "").trim();
+    try {
+      return JSON.parse(clean);
+    } catch (e) {
+      const start = clean.indexOf("{");
+      const end = clean.lastIndexOf("}");
+      if (start !== -1 && end !== -1 && end > start) {
+        return JSON.parse(clean.slice(start, end + 1));
+      }
+      throw e;
+    }
+  }
+
+  function cloneSections(sections) {
+    return (sections || []).map(function(section) {
+      return Object.assign({}, section);
+    });
+  }
+
+  function normalizeSection(section, fallbackId) {
+    const id = DEFAULT_SECTION_ORDER.indexOf(section && section.id) !== -1 ? section.id : fallbackId;
+    return Object.assign({}, section || {}, {
+      id: id,
+      title: String((section && section.title) || DEFAULT_SECTION_TITLES[id] || fallbackId),
+      enabled: section && typeof section.enabled === "boolean" ? section.enabled : true,
+      headline: String((section && section.headline) || ""),
+      body: String((section && section.body) || "")
+    });
+  }
+
+  function normalizeSectionArray(sections, offerType, ctaType, offerName) {
+    const defaults = buildDefaultSections(offerType, ctaType, offerName);
+    const byId = new Map();
+    (Array.isArray(sections) ? sections : []).forEach(function(section) {
+      if (section && DEFAULT_SECTION_ORDER.indexOf(section.id) !== -1) {
+        byId.set(section.id, normalizeSection(section, section.id));
+      }
+    });
+    return defaults.map(function(defaultSection) {
+      return byId.has(defaultSection.id)
+        ? Object.assign({}, defaultSection, byId.get(defaultSection.id))
+        : defaultSection;
+    });
+  }
+
+  function normalizeGeneratedDraft(raw, intake) {
+    const pageMode = intake.pageMode || "sales_page";
+    const liveVariant = pageMode === "two_page_funnel"
+      ? (raw.liveVariant === "page2" ? "page2" : "page1")
+      : "main";
+    const variants = {};
+    if (pageMode === "two_page_funnel") {
+      variants.page1 = normalizeSectionArray(raw.variants && raw.variants.page1, intake.offerType, intake.ctaType, intake.offerName);
+      variants.page2 = normalizeSectionArray(raw.variants && raw.variants.page2, intake.offerType, intake.ctaType, intake.offerName);
+    } else {
+      variants.main = normalizeSectionArray(raw.variants && raw.variants.main, intake.offerType, intake.ctaType, intake.offerName);
+    }
+    return {
+      offerType: intake.offerType,
+      pageMode: intake.pageMode,
+      ctaType: intake.ctaType,
+      ctaUrl: intake.ctaUrl || (currentHub && currentHub.paymentLink) || "",
+      ctaLabel: String(raw.ctaLabel || intake.ctaLabel || CTA_LABELS[intake.ctaType] || CTA_LABELS.buy_now),
+      offerName: intake.offerName,
+      priceText: intake.priceText,
+      whatYouGet: intake.whatYouGet,
+      proofText: intake.proofText,
+      objectionsText: intake.objectionsText,
+      urgencyNotes: intake.urgencyNotes,
+      reportText: String(raw.reportText || ""),
+      liveVariant: liveVariant,
+      variants: variants,
+      sections: cloneSections(variants[liveVariant] || [])
+    };
+  }
+
+  function buildFallbackDraft(intake) {
+    const variants = intake.pageMode === "two_page_funnel"
+      ? {
+          page1: buildDefaultSections(intake.offerType, intake.ctaType, intake.offerName),
+          page2: buildDefaultSections(intake.offerType, intake.ctaType, intake.offerName)
+        }
+      : {
+          main: buildDefaultSections(intake.offerType, intake.ctaType, intake.offerName)
+        };
+    return {
+      ctaLabel: CTA_LABELS[intake.ctaType] || CTA_LABELS.buy_now,
+      reportText: "Draft created from your intake. Add your exact proof, specifics, and final CTA details before publishing.",
+      liveVariant: intake.pageMode === "two_page_funnel" ? "page1" : "main",
+      variants: variants
+    };
+  }
+
+  function buildGenerationPrompt(intake) {
+    const lines = [];
+    lines.push("Offer type: " + intake.offerType);
+    lines.push("Page mode: " + intake.pageMode);
+    lines.push("CTA type: " + intake.ctaType);
+    lines.push("Offer name: " + (intake.offerName || "Not provided"));
+    lines.push("What they get: " + (intake.whatYouGet || "Not provided"));
+    lines.push("Price / pricing: " + (intake.priceText || "Not provided"));
+    lines.push("CTA label: " + (intake.ctaLabel || CTA_LABELS[intake.ctaType] || CTA_LABELS.buy_now));
+    lines.push("CTA URL: " + ((intake.ctaUrl || (currentHub && currentHub.paymentLink)) || "Not provided"));
+    lines.push("Proof provided by creator: " + (intake.proofText || "None provided"));
+    lines.push("Common objections: " + (intake.objectionsText || "None provided"));
+    lines.push("Urgency or bonus notes: " + (intake.urgencyNotes || "None provided"));
+
+    if (sourceState.spark) {
+      lines.push("\nSpark:");
+      lines.push("- Statement: " + (sourceState.spark.statement || ""));
+      lines.push("- What they know: " + (sourceState.spark.whatYouKnow || ""));
+      lines.push("- Who they help: " + (sourceState.spark.whoYouHelp || ""));
+    }
+    if (sourceState.audience) {
+      lines.push("\nAudience:");
+      lines.push("- Who they are: " + (sourceState.audience.whoTheyAre || ""));
+      lines.push("- Daily frustration: " + (sourceState.audience.dailyFrustration || ""));
+      lines.push("- Dream outcome: " + (sourceState.audience.dreamOutcome || ""));
+      lines.push("- Their words: " + (sourceState.audience.theirWords || ""));
+    }
+    if (sourceState.breakthrough) {
+      lines.push("\nBreakthrough tool:");
+      lines.push("- Name: " + (sourceState.breakthrough.name || ""));
+      lines.push("- Summary: " + (sourceState.breakthrough.summary || ""));
+      lines.push("- Why this tool: " + (sourceState.breakthrough.why || ""));
+      lines.push("- How it works: " + (sourceState.breakthrough.how || ""));
+    }
+    if (sourceState.prompt) {
+      lines.push("\nPrompt generator:");
+      lines.push("- App name: " + (sourceState.prompt.appName || ""));
+      lines.push("- Build brief: " + (sourceState.prompt.promptText || ""));
+    }
+    if (currentHub) {
+      lines.push("\nCreator Hub:");
+      lines.push("- Hub name: " + (currentHub.hubName || ""));
+      lines.push("- Hub tagline: " + (currentHub.hubTagline || ""));
+      lines.push("- Payment link exists: " + (currentHub.paymentLink ? "Yes" : "No"));
+    }
+
+    lines.push("\nReturn valid JSON only.");
+    lines.push("For body text, use short paragraphs and lines starting with '- ' when bullets help.");
+    lines.push("If proof is missing, make the proof section headline visibly tell the creator to add real proof.");
+
+    return lines.join("\n");
+  }
+
+  async function generateDraft() {
+    const canBuild = renderGateState();
+    if (!canBuild) return;
+    syncStateFromForm();
+    const intake = readIntake();
+    const btn = document.getElementById("generate-btn");
+    const status = document.getElementById("generate-status");
+    btn.disabled = true;
+    btn.textContent = "Generating...";
+    status.textContent = "Writing your structured sales page draft now...";
+    try {
+      const response = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 2800,
+          system: "Ignored server-side",
+          messages: [{ role: "user", content: buildGenerationPrompt(intake) }],
+          _meta: { tool: "sales-page-generator" }
+        })
+      });
+      if (!response.ok) throw new Error("API error " + response.status);
+      const data = await response.json();
+      const text = (data.content || []).map(function(block) { return block.type === "text" ? block.text : ""; }).join("");
+      const parsed = parseJsonFromText(text);
+      const normalized = normalizeGeneratedDraft(parsed, intake);
+      pageState = Object.assign({}, pageState, normalized);
+      currentVariantKey = pageState.liveVariant;
+      pageState.sourceSnapshot = buildSourceSnapshot();
+      pageState.htmlExport = buildStandaloneHtml(currentHub, pageState);
+      hydrateFormFromState();
+      renderAll();
+      status.innerHTML = '<strong>Draft ready.</strong> Edit sections, then save or publish when it feels right.';
+    } catch (error) {
+      console.error("Sales page generation error:", error);
+      const fallback = normalizeGeneratedDraft(buildFallbackDraft(intake), intake);
+      pageState = Object.assign({}, pageState, fallback);
+      currentVariantKey = pageState.liveVariant;
+      pageState.sourceSnapshot = buildSourceSnapshot();
+      pageState.htmlExport = buildStandaloneHtml(currentHub, pageState);
+      renderAll();
+      status.innerHTML = '<strong>Fallback draft loaded.</strong> The AI response was messy, so we opened a starter draft you can still edit.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Generate Draft";
+    }
+  }
+
+  function renderVariantTabs() {
+    const tabs = document.getElementById("variant-tabs");
+    const actions = document.getElementById("variant-actions");
+    const keys = pageState.pageMode === "two_page_funnel" ? ["page1", "page2"] : ["main"];
+    if (keys.indexOf(currentVariantKey) === -1) currentVariantKey = keys[0];
+    tabs.innerHTML = keys.map(function(key) {
+      return '<button class="variant-tab' + (key === currentVariantKey ? ' active' : '') + '" onclick="setCurrentVariant(\'' + key + '\')">' + escapeHtml(VARIANT_LABELS[key]) + '</button>';
+    }).join("");
+    actions.innerHTML = pageState.pageMode === "two_page_funnel"
+      ? '<button class="mini-btn" onclick="setLiveVariant(\'' + currentVariantKey + '\')">' + (pageState.liveVariant === currentVariantKey ? 'Currently live' : 'Make this live') + '</button>'
+      : "";
+    const note = document.getElementById("variant-note");
+    note.textContent = pageState.pageMode === "two_page_funnel"
+      ? "You can store both funnel drafts here, but only one version is live at /sales right now. Current live draft: " + (VARIANT_LABELS[pageState.liveVariant] || "Page 1") + "."
+      : "Editing the one live draft for this hub.";
+  }
+
+  function setCurrentVariant(key) {
+    currentVariantKey = key;
+    renderSectionsEditor();
+  }
+
+  function setLiveVariant(key) {
+    if (pageState.pageMode !== "two_page_funnel") return;
+    pageState.liveVariant = key;
+    pageState.sections = cloneSections(pageState.variants[key] || []);
+    renderSectionsEditor();
+  }
+
+  function renderSectionsEditor() {
+    renderVariantTabs();
+    const stack = document.getElementById("sections-stack");
+    const sections = pageState.variants[currentVariantKey] || [];
+    stack.innerHTML = sections.map(function(section, index) {
+      return [
+        '<div class="section-editor">',
+        '  <div class="section-editor-top">',
+        '    <div>',
+        '      <div class="section-editor-title">' + escapeHtml(section.title || DEFAULT_SECTION_TITLES[section.id]) + '</div>',
+        '      <div class="section-editor-meta">Section id: ' + escapeHtml(section.id) + '</div>',
+        '    </div>',
+        '    <div class="move-row">',
+        '      <button class="mini-btn" onclick="moveSection(' + index + ', -1)"' + (index === 0 ? ' disabled' : '') + '>Up</button>',
+        '      <button class="mini-btn" onclick="moveSection(' + index + ', 1)"' + (index === sections.length - 1 ? ' disabled' : '') + '>Down</button>',
+        '    </div>',
+        '  </div>',
+        '  <div class="section-editor-body">',
+        '    <label class="toggle-chip"><input type="checkbox" ' + (section.enabled ? 'checked' : '') + ' onchange="toggleSection(' + index + ', this.checked)"> Show this section</label>',
+        '    <div class="field">',
+        '      <label class="label">Section Label</label>',
+        '      <input class="input" type="text" value="' + escapeHtml(section.title || "") + '" oninput="updateSectionField(' + index + ', \'title\', this.value)">',
+        '    </div>',
+        '    <div class="field">',
+        '      <label class="label">Headline</label>',
+        '      <input class="input" type="text" value="' + escapeHtml(section.headline || "") + '" oninput="updateSectionField(' + index + ', \'headline\', this.value)">',
+        '    </div>',
+        '    <div class="field">',
+        '      <label class="label">Body</label>',
+        '      <textarea class="textarea" oninput="updateSectionField(' + index + ', \'body\', this.value)">' + escapeHtml(section.body || "") + '</textarea>',
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join("");
+    }).join("");
+    renderPreview();
+    renderStatusCard();
+  }
+
+  function moveSection(index, direction) {
+    const sections = cloneSections(pageState.variants[currentVariantKey] || []);
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= sections.length) return;
+    const temp = sections[index];
+    sections[index] = sections[nextIndex];
+    sections[nextIndex] = temp;
+    pageState.variants[currentVariantKey] = sections;
+    if (currentVariantKey === pageState.liveVariant) pageState.sections = cloneSections(sections);
+    renderSectionsEditor();
+  }
+
+  function toggleSection(index, checked) {
+    updateSectionField(index, "enabled", !!checked);
+  }
+
+  function updateSectionField(index, field, value) {
+    const sections = cloneSections(pageState.variants[currentVariantKey] || []);
+    const next = Object.assign({}, sections[index], { [field]: value });
+    sections[index] = next;
+    pageState.variants[currentVariantKey] = sections;
+    if (currentVariantKey === pageState.liveVariant) pageState.sections = cloneSections(sections);
+    renderPreview();
+    renderStatusCard();
+  }
+
+  function renderStatusCard() {
+    syncStateFromForm();
+    const liveRoute = currentHubSlug ? "/hub/" + currentHubSlug + "/sales" : "/hub/your-slug/sales";
+    const chip = document.getElementById("publish-chip");
+    chip.textContent = pageState.isPublished ? "Published" : "Draft";
+    chip.className = "status-chip " + (pageState.isPublished ? "published" : "draft");
+    document.getElementById("live-route").textContent = liveRoute;
+    document.getElementById("cta-summary").textContent = pageState.ctaLabel + (pageState.ctaUrl ? " -> " + pageState.ctaUrl : "");
+    document.getElementById("mode-summary").textContent = pageState.pageMode === "two_page_funnel" ? "Two page funnel" : "Sales page";
+    document.getElementById("variant-summary").textContent = VARIANT_LABELS[pageState.liveVariant] || "Main page";
+  }
+
+  function bodyTextToHtml(body) {
+    const lines = String(body || "").split(/\r?\n/);
+    const chunks = [];
+    let listItems = [];
+    function flushList() {
+      if (listItems.length) {
+        chunks.push("<ul>" + listItems.map(function(item) { return "<li>" + escapeHtml(item) + "</li>"; }).join("") + "</ul>");
+        listItems = [];
+      }
+    }
+    lines.forEach(function(line) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        flushList();
+        return;
+      }
+      if (/^[-*•]\s+/.test(trimmed)) {
+        listItems.push(trimmed.replace(/^[-*•]\s+/, ""));
+      } else {
+        flushList();
+        chunks.push("<p>" + escapeHtml(trimmed) + "</p>");
+      }
+    });
+    flushList();
+    return chunks.join("");
+  }
+
+  function getPreviewSections() {
+    const sections = pageState.variants[currentVariantKey] || [];
+    return sections.filter(function(section) { return section.enabled !== false; });
+  }
+
+  function renderPreview() {
+    syncStateFromForm();
+    const preview = document.getElementById("preview-surface");
+    const sections = getPreviewSections();
+    if (!sections.length) {
+      preview.innerHTML = '<div class="empty-state" style="margin:1rem;">Turn at least one section on to see the preview.</div>';
+      return;
+    }
+    const accent = (currentHub && currentHub.primaryColor) || "#c9a84c";
+    preview.style.setProperty("--page-accent", accent);
+    const hubName = currentHub && currentHub.hubName ? currentHub.hubName : "Creator Hub";
+    const logoUrl = currentHub && currentHub.logoUrl ? currentHub.logoUrl : "";
+    const hero = sections.find(function(section) { return section.id === "hero"; }) || sections[0];
+    const rest = sections.filter(function(section) { return section.id !== "hero"; });
+    const ctaUrl = pageState.ctaUrl || (currentHub && currentHub.paymentLink) || "#";
+    const ctaLabel = pageState.ctaLabel || CTA_LABELS[pageState.ctaType] || CTA_LABELS.buy_now;
+
+    preview.innerHTML = [
+      '<div class="preview-nav">',
+      '  <div class="preview-brand">',
+      '    <img class="preview-logo' + (logoUrl ? ' visible' : '') + '" src="' + escapeHtml(logoUrl) + '" alt="logo">',
+      '    <div class="preview-brand-text">',
+      '      <div class="preview-brand-name">' + escapeHtml(hubName) + '</div>',
+      '      <div class="preview-brand-sub">' + escapeHtml(pageState.offerName || "Sales page") + '</div>',
+      '    </div>',
+      '  </div>',
+      '  <a class="preview-nav-cta" href="' + escapeHtml(ctaUrl) + '" target="_blank" rel="noopener">' + escapeHtml(ctaLabel) + '</a>',
+      '</div>',
+      '<div class="preview-inner">',
+      renderHeroSection(hero, ctaLabel, ctaUrl),
+      rest.map(function(section) { return renderPreviewSection(section, ctaLabel, ctaUrl); }).join(""),
+      '</div>'
+    ].join("");
+  }
+
+  function renderHeroSection(section, ctaLabel, ctaUrl) {
+    const offerTypeLabel = pageState.offerType === "community" ? "Community offer" : pageState.offerType === "tool" ? "Tool offer" : "Program offer";
+    return [
+      '<section class="preview-hero">',
+      '  <div class="preview-kicker">' + escapeHtml(offerTypeLabel) + '</div>',
+      '  <div class="preview-headline">' + escapeHtml(section.headline || pageState.offerName || "Your live sales page") + '</div>',
+      '  <div class="preview-copy">' + bodyTextToHtml(section.body || "Add the short promise for this page here.") + '</div>',
+      '  <div class="preview-meta-row">',
+      pageState.priceText ? '<div class="preview-meta-pill">' + escapeHtml(pageState.priceText) + '</div>' : "",
+      pageState.pageMode === "two_page_funnel" ? '<div class="preview-meta-pill">Live variant: ' + escapeHtml(VARIANT_LABELS[pageState.liveVariant]) + '</div>' : "",
+      '  </div>',
+      '  <div style="margin-top:1rem;"><a class="preview-btn" href="' + escapeHtml(ctaUrl) + '" target="_blank" rel="noopener">' + escapeHtml(ctaLabel) + '</a></div>',
+      pageState.reportText ? '<div class="preview-footer-note">' + escapeHtml(pageState.reportText) + '</div>' : "",
+      '</section>'
+    ].join("");
+  }
+
+  function renderPreviewSection(section, ctaLabel, ctaUrl) {
+    const extraClass = section.id === "proof" && !pageState.proofText ? " preview-proof" : section.id === "final_cta" ? " preview-final" : "";
+    const cta = section.id === "final_cta"
+      ? '<div style="margin-top:1rem;"><a class="preview-btn" href="' + escapeHtml(ctaUrl) + '" target="_blank" rel="noopener">' + escapeHtml(ctaLabel) + '</a></div>'
+      : "";
+    return [
+      '<section class="preview-section' + extraClass + '">',
+      '  <div class="preview-section-title">' + escapeHtml(section.title || DEFAULT_SECTION_TITLES[section.id] || "Section") + '</div>',
+      '  <div class="preview-section-headline">' + escapeHtml(section.headline || "") + '</div>',
+      '  <div class="preview-content">' + bodyTextToHtml(section.body || "") + '</div>',
+      cta,
+      '</section>'
+    ].join("");
+  }
+
+  function getPreviewDocumentMarkup() {
+    const surface = document.getElementById("preview-surface");
+    return surface ? surface.innerHTML : "";
+  }
+
+  function buildStandaloneHtml(hub, state) {
+    const accent = (hub && hub.primaryColor) || "#c9a84c";
+    const hubName = (hub && hub.hubName) || "Creator Hub";
+    const logoUrl = (hub && hub.logoUrl) || "";
+    const liveSections = cloneSections((state.variants && state.variants[state.liveVariant]) || state.sections || []).filter(function(section) {
+      return section.enabled !== false;
+    });
+    const hero = liveSections.find(function(section) { return section.id === "hero"; }) || liveSections[0] || normalizeSection({}, "hero");
+    const rest = liveSections.filter(function(section) { return section.id !== "hero"; });
+    const ctaLabel = state.ctaLabel || CTA_LABELS[state.ctaType] || CTA_LABELS.buy_now;
+    const ctaUrl = state.ctaUrl || (hub && hub.paymentLink) || "#";
+    const sectionMarkup = [
+      '<div class="nav"><div class="brand">' +
+        (logoUrl ? '<img src="' + escapeHtml(logoUrl) + '" alt="logo">' : '') +
+        '<div><strong>' + escapeHtml(hubName) + '</strong><span>' + escapeHtml(state.offerName || "Sales page") + '</span></div></div>' +
+        '<a class="btn" href="' + escapeHtml(ctaUrl) + '">' + escapeHtml(ctaLabel) + '</a></div>',
+      '<main class="wrap">',
+      '<section class="hero"><div class="kicker">' + escapeHtml(state.offerType || "Offer") + '</div><h1>' + escapeHtml(hero.headline || state.offerName || "Sales page") + '</h1><div class="copy">' + bodyTextToHtml(hero.body || "") + '</div>' +
+        (state.priceText ? '<div class="price">' + escapeHtml(state.priceText) + '</div>' : '') +
+        '<a class="btn" href="' + escapeHtml(ctaUrl) + '">' + escapeHtml(ctaLabel) + '</a></section>',
+      rest.map(function(section) {
+        return '<section class="panel' + (section.id === "proof" && !state.proofText ? ' proof' : '') + '"><div class="label">' + escapeHtml(section.title || DEFAULT_SECTION_TITLES[section.id]) + '</div><h2>' + escapeHtml(section.headline || "") + '</h2><div class="copy">' + bodyTextToHtml(section.body || "") + '</div>' + (section.id === "final_cta" ? '<a class="btn" href="' + escapeHtml(ctaUrl) + '">' + escapeHtml(ctaLabel) + '</a>' : '') + '</section>';
+      }).join(""),
+      '</main>'
+    ].join("");
+
+    return [
+      '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">',
+      '<title>' + escapeHtml(state.offerName || hubName + " Sales Page") + '</title>',
+      '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">',
+      '<style>',
+      'body{margin:0;font-family:Lato,sans-serif;background:#100d0a;color:#f5eee7;background-image:radial-gradient(circle at top,' + accent + '22,transparent 30%),linear-gradient(180deg,#17120e,#0d0a07);}*{box-sizing:border-box;}a{text-decoration:none;}',
+      '.nav{max-width:1100px;margin:0 auto;padding:22px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;}',
+      '.brand{display:flex;align-items:center;gap:12px;color:#f5eee7;min-width:0;}.brand img{width:42px;height:42px;border-radius:12px;object-fit:cover;}.brand strong{display:block;font-family:"Playfair Display",serif;font-size:18px;}.brand span{display:block;color:rgba(245,238,231,0.7);font-size:12px;}',
+      '.btn{display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:999px;background:' + accent + ';color:#130f0c;font-weight:900;}',
+      '.wrap{max-width:1100px;margin:0 auto;padding:10px 20px 56px;display:grid;gap:18px;}',
+      '.hero,.panel{border:1px solid rgba(255,255,255,0.1);border-radius:28px;background:rgba(255,255,255,0.04);padding:28px;}',
+      '.hero h1,.panel h2{font-family:"Playfair Display",serif;line-height:1.08;margin:0 0 12px;}.hero h1{font-size:clamp(34px,6vw,60px);max-width:760px;}.panel h2{font-size:clamp(26px,4vw,36px);}',
+      '.kicker,.label{display:inline-flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:900;color:' + accent + ';margin-bottom:12px;}.kicker:before,.label:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;}',
+      '.copy p{color:rgba(245,238,231,0.76);line-height:1.72;margin:0 0 12px;}.copy ul{margin:0;padding-left:18px;color:rgba(245,238,231,0.76);display:grid;gap:8px;line-height:1.65;}',
+      '.price{display:inline-flex;padding:9px 13px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);margin:8px 0 18px;color:#f5eee7;background:rgba(255,255,255,0.04);} .proof{border-style:dashed;}',
+      '@media(max-width:680px){.nav{padding:18px 16px;flex-wrap:wrap;}.wrap{padding:8px 16px 44px;}.hero,.panel{padding:22px;}}',
+      '</style></head><body>',
+      sectionMarkup,
+      '</body></html>'
+    ].join("");
+  }
+
+  function buildPayload(isPublished) {
+    syncStateFromForm();
+    const liveKey = pageState.pageMode === "two_page_funnel" ? pageState.liveVariant : "main";
+    pageState.liveVariant = liveKey;
+    pageState.sections = cloneSections(pageState.variants[liveKey] || []);
+    pageState.sourceSnapshot = buildSourceSnapshot();
+    pageState.htmlExport = buildStandaloneHtml(currentHub, pageState);
+    return {
+      isPublished: !!isPublished,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: lastSavedSnapshot && lastSavedSnapshot.createdAt ? lastSavedSnapshot.createdAt : firebase.firestore.FieldValue.serverTimestamp(),
+      sourceSnapshot: pageState.sourceSnapshot,
+      offerType: pageState.offerType,
+      pageMode: pageState.pageMode,
+      ctaType: pageState.ctaType,
+      ctaUrl: pageState.ctaUrl,
+      ctaLabel: pageState.ctaLabel || CTA_LABELS[pageState.ctaType] || CTA_LABELS.buy_now,
+      offerName: pageState.offerName,
+      priceText: pageState.priceText,
+      whatYouGet: pageState.whatYouGet,
+      proofText: pageState.proofText,
+      objectionsText: pageState.objectionsText,
+      urgencyNotes: pageState.urgencyNotes,
+      reportText: pageState.reportText,
+      htmlExport: pageState.htmlExport,
+      liveVariant: pageState.liveVariant,
+      variants: pageState.variants,
+      sections: pageState.sections
+    };
+  }
+
+  async function saveDraft(publishValue) {
+    const canBuild = renderGateState();
+    if (!canBuild) return;
+    if (!currentHubSlug) return;
+    const saveBtn = document.getElementById(publishValue ? "publish-btn" : "save-btn");
+    const saveStatus = document.getElementById("save-status");
+    saveBtn.disabled = true;
+    saveStatus.textContent = publishValue ? "Publishing your live page..." : "Saving your draft...";
+    try {
+      const payload = buildPayload(publishValue);
+      await db.collection("hubs").doc(currentHubSlug).collection("pages").doc("sales").set(payload, { merge: true });
+      pageState.isPublished = !!publishValue;
+      lastSavedSnapshot = payload;
+      renderAll();
+      saveStatus.innerHTML = publishValue
+        ? '<strong>Published.</strong> Your live page is now available at /hub/' + escapeHtml(currentHubSlug) + '/sales.'
+        : '<strong>Draft saved.</strong> You can keep editing before publishing.';
+    } catch (error) {
+      console.error("Save error:", error);
+      saveStatus.textContent = "We could not save this page right now. Try again in a moment.";
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function unpublishPage() {
+    if (!currentHubSlug) return;
+    const saveStatus = document.getElementById("save-status");
+    const btn = document.getElementById("unpublish-btn");
+    btn.disabled = true;
+    saveStatus.textContent = "Unpublishing the live page...";
+    try {
+      await db.collection("hubs").doc(currentHubSlug).collection("pages").doc("sales").set({
+        isPublished: false,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      pageState.isPublished = false;
+      renderAll();
+      saveStatus.innerHTML = "<strong>Unpublished.</strong> The public route now shows a not-published state.";
+    } catch (error) {
+      console.error("Unpublish error:", error);
+      saveStatus.textContent = "We could not unpublish this page right now.";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function openLivePage() {
+    if (!currentHubSlug) return;
+    window.open("/hub/" + currentHubSlug + "/sales", "_blank", "noopener");
+  }
+
+  function exportHtml() {
+    const canBuild = renderGateState();
+    if (!canBuild) return;
+    syncStateFromForm();
+    const html = buildStandaloneHtml(currentHub, pageState);
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = (pageState.offerName || (currentHub && currentHub.hubName) || "sales-page").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + ".html";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+    document.getElementById("save-status").innerHTML = "<strong>HTML exported.</strong> This file matches the current editor state.";
+  }
+
+  function applyPageSnapshot(docData) {
+    if (!docData) return;
+    const offerType = docData.offerType || "program";
+    const pageMode = docData.pageMode || "sales_page";
+    const ctaType = docData.ctaType || "buy_now";
+    const liveVariant = pageMode === "two_page_funnel" ? (docData.liveVariant || "page1") : "main";
+    const variants = pageMode === "two_page_funnel"
+      ? {
+          page1: normalizeSectionArray(docData.variants && docData.variants.page1, offerType, ctaType, docData.offerName || ""),
+          page2: normalizeSectionArray(docData.variants && docData.variants.page2, offerType, ctaType, docData.offerName || "")
+        }
+      : {
+          main: normalizeSectionArray((docData.variants && docData.variants.main) || docData.sections, offerType, ctaType, docData.offerName || "")
+        };
+
+    pageState = {
+      isPublished: !!docData.isPublished,
+      offerType: offerType,
+      pageMode: pageMode,
+      ctaType: ctaType,
+      ctaUrl: docData.ctaUrl || (currentHub && currentHub.paymentLink) || "",
+      ctaLabel: docData.ctaLabel || CTA_LABELS[ctaType] || CTA_LABELS.buy_now,
+      offerName: docData.offerName || "",
+      priceText: docData.priceText || "",
+      whatYouGet: docData.whatYouGet || "",
+      proofText: docData.proofText || "",
+      objectionsText: docData.objectionsText || "",
+      urgencyNotes: docData.urgencyNotes || "",
+      reportText: docData.reportText || "",
+      htmlExport: docData.htmlExport || "",
+      liveVariant: liveVariant,
+      variants: variants,
+      sections: cloneSections(variants[liveVariant] || []),
+      sourceSnapshot: docData.sourceSnapshot || {}
+    };
+    currentVariantKey = liveVariant;
+    lastSavedSnapshot = docData;
+  }
+
+  function createPrefillState() {
+    const defaultOfferName = sourceState.breakthrough && sourceState.breakthrough.name ? sourceState.breakthrough.name : "";
+    const defaultGet = sourceState.breakthrough && sourceState.breakthrough.summary ? sourceState.breakthrough.summary : "";
+    const defaultState = createEmptyPageState();
+    defaultState.offerType = "program";
+    defaultState.pageMode = "sales_page";
+    defaultState.offerName = defaultOfferName;
+    defaultState.whatYouGet = defaultGet;
+    defaultState.ctaUrl = (currentHub && currentHub.paymentLink) || "";
+    defaultState.sourceSnapshot = buildSourceSnapshot();
+    defaultState.variants.main = buildDefaultSections(defaultState.offerType, defaultState.ctaType, defaultOfferName);
+    defaultState.sections = cloneSections(defaultState.variants.main);
+    pageState = defaultState;
+  }
+
+  function attachFieldListeners() {
+    ["offer-type", "page-mode", "cta-type", "offer-name", "what-you-get", "price-text", "cta-label", "cta-url", "proof-text", "objections-text", "urgency-text"].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", function() {
+        syncStateFromForm();
+        if (id === "cta-type" && !formValue("cta-label")) {
+          pageState.ctaLabel = CTA_LABELS[pageState.ctaType] || CTA_LABELS.buy_now;
+          document.getElementById("cta-label").value = pageState.ctaLabel;
+        }
+        renderStatusCard();
+        renderPreview();
+      });
+      el.addEventListener("change", function() {
+        syncStateFromForm();
+        if (id === "page-mode") {
+          if (pageState.pageMode === "two_page_funnel" && !pageState.variants.page1) {
+            pageState.variants.page1 = buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName);
+            pageState.variants.page2 = buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName);
+          }
+          if (pageState.pageMode !== "two_page_funnel") {
+            pageState.variants = { main: pageState.variants.main || buildDefaultSections(pageState.offerType, pageState.ctaType, pageState.offerName) };
+            currentVariantKey = "main";
+            pageState.liveVariant = "main";
+          }
+        }
+        if (id === "cta-type" && (!formValue("cta-label") || Object.values(CTA_LABELS).indexOf(pageState.ctaLabel) !== -1)) {
+          pageState.ctaLabel = CTA_LABELS[pageState.ctaType] || CTA_LABELS.buy_now;
+          document.getElementById("cta-label").value = pageState.ctaLabel;
+        }
+        renderAll();
+      });
+    });
+  }
+
+  function renderAll() {
+    hydrateFormFromState();
+    ensureDefaultCta();
+    renderSourceSummary();
+    renderGateState();
+    renderSectionsEditor();
+    renderStatusCard();
+    renderPreview();
+  }
+
+  async function loadBuilder() {
+    auth.onAuthStateChanged(async function(user) {
+      if (!user) {
+        window.location.href = "signon.html?redirect=sales-page-builder";
+        return;
+      }
+      currentUser = user;
+      document.getElementById("sidebar-name").textContent = user.displayName || user.email || "Builder";
+      const avatar = document.getElementById("sidebar-avatar");
+      if (user.photoURL) {
+        avatar.innerHTML = '<img src="' + escapeHtml(user.photoURL) + '" alt="avatar">';
+      } else {
+        avatar.textContent = (user.displayName || user.email || "B").charAt(0).toUpperCase();
+      }
+
+      try {
+        const userDoc = await safeRead(db.collection("users").doc(user.uid).get(), "users/" + user.uid);
+        const userData = userDoc && userDoc.exists ? (userDoc.data() || {}) : {};
+        currentHubSlug = userData.hubSlug || "";
+        if (userData.userRole === "admin") document.getElementById("sidebar-role").textContent = "Admin";
+
+        const emailLower = String(user.email || "").toLowerCase();
+        const queries = await Promise.all([
+          safeRead(db.collection("spark_results").where("userId", "==", user.uid).get(), "spark_results by user"),
+          safeRead(db.collection("spark_results").where("accountEmail", "==", user.email).get(), "spark_results by email"),
+          safeRead(db.collection("spark_results").where("accountEmail", "==", emailLower).get(), "spark_results by normalized email"),
+          safeRead(db.collection("audience_results").where("userId", "==", user.uid).get(), "audience_results by user"),
+          safeRead(db.collection("audience_results").where("accountEmail", "==", user.email).get(), "audience_results by email"),
+          safeRead(db.collection("audience_results").where("accountEmail", "==", emailLower).get(), "audience_results by normalized email"),
+          safeRead(db.collection("clarity_sessions").where("userId", "==", user.uid).get(), "clarity_sessions by user"),
+          safeRead(db.collection("clarity_sessions").where("clientEmail", "==", user.email).get(), "clarity_sessions by email"),
+          safeRead(db.collection("clarity_sessions").where("clientEmail", "==", emailLower).get(), "clarity_sessions by normalized email"),
+          safeRead(db.collection("clarity_sessions").where("clientEmailLower", "==", emailLower).get(), "clarity_sessions by lowered email"),
+          safeRead(db.collection("prompt_results").doc(user.uid).get(), "prompt_results/" + user.uid),
+          currentHubSlug ? safeRead(db.collection("hubs").doc(currentHubSlug).get(), "hubs/" + currentHubSlug) : Promise.resolve(null)
+        ]);
+
+        const sparkDocs = mostRecent([queries[0], queries[1], queries[2]]);
+        if (sparkDocs.length) sourceState.spark = sparkDocs[0].data();
+
+        const audienceDocs = mostRecent([queries[3], queries[4], queries[5]]);
+        if (audienceDocs.length) sourceState.audience = audienceDocs[0].data();
+
+        const clarityDocs = mostRecent([queries[6], queries[7], queries[8], queries[9]]).filter(function(doc) {
+          const data = doc.data() || {};
+          return data.status === "completed" && data.actionPlan;
+        });
+        if (clarityDocs.length) sourceState.breakthrough = getBreakthroughFromSession(clarityDocs[0].data());
+
+        if (queries[10] && queries[10].exists) sourceState.prompt = queries[10].data();
+
+        if (queries[11] && queries[11].exists) currentHub = queries[11].data();
+
+        if (currentHubSlug) {
+          const salesDoc = await safeRead(db.collection("hubs").doc(currentHubSlug).collection("pages").doc("sales").get(), "hubs/" + currentHubSlug + "/pages/sales");
+          if (salesDoc && salesDoc.exists) {
+            applyPageSnapshot(salesDoc.data());
+          } else {
+            createPrefillState();
+          }
+        } else {
+          createPrefillState();
+        }
+
+        attachFieldListeners();
+        renderAll();
+      } catch (error) {
+        console.error("Builder load error:", error);
+        document.getElementById("loading-state").innerHTML = '<div>We could not load the sales page builder right now.<br><span style="font-size:12px;color:#9a9389;">' + escapeHtml(error && error.message ? error.message : "Unknown error") + '</span></div>';
+        return;
+      }
+
+      document.getElementById("loading-state").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+    });
+  }
+
+  loadBuilder();
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('dashboard', 'Sales Page Builder');</script>
+</body>
+</html>
