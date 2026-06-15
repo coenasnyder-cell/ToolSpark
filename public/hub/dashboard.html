@@ -221,7 +221,21 @@
 <script>
   initHubPage('dashboard', function(hub, slug, studentAuth, studentDb) {
     // Branding
-    if (hub.hubName) document.getElementById('dash-headline').textContent = 'Welcome to ' + hub.hubName;
+    if (studentAuth && studentDb) {
+      studentAuth.onAuthStateChanged(function(user) {
+        if (!user) return;
+        studentDb.collection('members').doc(user.uid).get().then(function(snap) {
+          var name = snap.exists ? (snap.data().displayName || snap.data().name || '') : (user.displayName || '');
+          var firstName = name.split(' ')[0];
+          document.getElementById('dash-headline').textContent = firstName ? 'Welcome back, ' + firstName + '.' : (hub.hubName ? 'Welcome to ' + hub.hubName : 'Welcome back');
+        }).catch(function() {
+          var firstName = (user.displayName || '').split(' ')[0];
+          document.getElementById('dash-headline').textContent = firstName ? 'Welcome back, ' + firstName + '.' : (hub.hubName ? 'Welcome to ' + hub.hubName : 'Welcome back');
+        });
+      });
+    } else if (hub.hubName) {
+      document.getElementById('dash-headline').textContent = 'Welcome to ' + hub.hubName;
+    }
     if (hub.toolName) {
       document.getElementById('dash-sub').textContent = 'Launch ' + hub.toolName + ' or explore your hub.';
       document.getElementById('tool-card-name').textContent = hub.toolName;

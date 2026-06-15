@@ -682,9 +682,7 @@ service cloud.firestore {
       document.getElementById('main-wrap').style.display = 'none';
       return;
     }
-    hubSlug = data.hubSlug;
-    updateUrlDisplay();
-    loadSettings();
+    window.location.replace('/hub/admin-dashboard');
   }
 
   function updateUrlDisplay() {
@@ -1242,7 +1240,10 @@ service cloud.firestore {
         isLive: false,
         features: { courses: true, community: true, support: true }
       }).then(function() {
-        return db.collection('users').doc(currentUser.uid).update({ hubSlug: slug });
+        return db.collection('users').doc(currentUser.uid).update({
+          hubSlug: slug,
+          buildAgentCredits: firebase.firestore.FieldValue.increment(3)
+        });
       }).then(function() {
         hubSlug = slug;
         document.getElementById('setup-screen').style.display = 'none';
@@ -1276,11 +1277,21 @@ service cloud.firestore {
       try { studentApp = firebase.app(appName); } catch(e) {
         studentApp = firebase.initializeApp(hubData.studentFirebase, appName);
       }
-      await studentApp.auth().createUserWithEmailAndPassword(email, password);
-      await db.collection('hubs').doc(hubSlug).update({
-        hubAdminEmail: email,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      var adminCred = await studentApp.auth().createUserWithEmailAndPassword(email, password);
+      await Promise.all([
+        db.collection('hubs').doc(hubSlug).update({
+          hubAdminEmail: email,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }),
+        studentApp.firestore().collection('members').doc(adminCred.user.uid).set({
+          email: email,
+          displayName: currentUser.displayName || '',
+          hubSlug: hubSlug,
+          role: 'admin',
+          tsUserId: currentUser.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        })
+      ]);
       hubData.hubAdminEmail = email;
       showAdminAccountConnected(email);
       setTimeout(function() { goToStep(3); }, 600);

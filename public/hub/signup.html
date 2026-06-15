@@ -211,13 +211,12 @@
     studentAuth.createUserWithEmailAndPassword(email, password)
       .then(function(cred) {
         var user = cred.user;
-        var updates = { displayName: name };
         return Promise.all([
-          user.updateProfile(updates),
-          studentDb.collection('users').doc(user.uid).set({
-            name: name, email: email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            source: 'hub-signup'
+          user.updateProfile({ displayName: name }),
+          studentDb.collection('members').doc(user.uid).set({
+            name: name, displayName: name, email: email, hubSlug: slug,
+            role: 'member',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           })
         ]);
       })

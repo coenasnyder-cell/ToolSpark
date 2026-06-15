@@ -195,8 +195,8 @@
     </div>
 
     <div class="page-header">
-      <h2>Hub Admin</h2>
-      <p>Everything you need to manage your hub in one place.</p>
+      <h2>Admin Dashboard</h2>
+      <p id="admin-welcome">Everything you need to manage your hub in one place.</p>
     </div>
 
     <div class="admin-grid">
@@ -267,6 +267,9 @@
     var nameEl   = document.getElementById('sidebar-name');
     if (avatarEl) avatarEl.textContent = (user.email || 'H')[0].toUpperCase();
     if (nameEl)   nameEl.textContent   = user.displayName || user.email || 'Hub Owner';
+    var firstName = (user.displayName || '').split(' ')[0];
+    var welcomeEl = document.getElementById('admin-welcome');
+    if (welcomeEl && firstName) welcomeEl.textContent = 'Welcome back, ' + firstName + '.';
 
     db.collection('users').doc(user.uid).get().then(function(snap) {
       var data = snap.exists ? snap.data() : {};
