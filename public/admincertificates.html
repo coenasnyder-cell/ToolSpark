@@ -211,6 +211,25 @@
       </div>
     </div>
 
+    <!-- CERTIFICATION REVIEW REQUESTS -->
+    <div style="margin-top:0.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">Certification Review Requests</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;">Students who submitted their work for final certification review</div>
+        </div>
+        <span class="count-badge" id="reviews-count-badge">—</span>
+      </div>
+      <div class="admin-card">
+        <div class="loading-state" id="reviews-loading">Loading…</div>
+        <div class="empty-state" id="reviews-empty" style="display:none;">
+          <div class="empty-state-icon">🎓</div>
+          <div class="empty-state-text">No pending review requests.</div>
+        </div>
+        <div id="reviews-list"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -255,6 +274,7 @@
 
     loadCertificates();
     loadPendingTools();
+    loadReviewRequests();
   });
 
   async function loadCertificates() {
@@ -396,6 +416,119 @@
     } catch (e) {
       console.error(e);
       document.getElementById('tools-loading').textContent = 'Could not load. Try refreshing.';
+    }
+  }
+
+  // ── CERTIFICATION REVIEW REQUESTS ──
+  async function loadReviewRequests() {
+    try {
+      const snap = await db.collection('graduation_requests')
+        .where('status', '==', 'pending')
+        .get();
+
+      document.getElementById('reviews-loading').style.display = 'none';
+
+      const requests = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
+
+      document.getElementById('reviews-count-badge').textContent = requests.length + ' pending';
+
+      if (!requests.length) {
+        document.getElementById('reviews-empty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('reviews-list').innerHTML = requests.map(r => {
+        const submitted = r.submittedAt
+          ? r.submittedAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '—';
+        return `<div id="review-row-${r.id}" style="padding:1.25rem 0;border-bottom:1px solid var(--border);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+              <div style="font-weight:700;font-size:14px;color:var(--text);">${esc(r.userEmail || '—')}</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:3px;">Submitted ${submitted}</div>
+              <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:12px;">
+                ${r.toolUrl    ? `<a href="${esc(r.toolUrl)}"    target="_blank" style="font-size:12px;color:var(--gold);font-weight:700;text-decoration:none;">🔗 Tool →</a>` : ''}
+                ${r.landingUrl ? `<a href="${esc(r.landingUrl)}" target="_blank" style="font-size:12px;color:var(--gold);font-weight:700;text-decoration:none;">🔗 Landing Page →</a>` : ''}
+              </div>
+              ${r.caseStudy ? `<div style="margin-top:0.75rem;font-size:13px;color:var(--text2);line-height:1.6;background:var(--bg);padding:10px 12px;border-radius:var(--radius-sm);">${esc(r.caseStudy)}</div>` : ''}
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;padding-top:2px;">
+              <button class="mark-btn" style="color:var(--green-light);border-color:rgba(42,92,69,0.3);" onclick="approveReview('${r.id}','${r.userId || ''}',this)">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Approve &amp; Graduate
+              </button>
+              <button class="mark-btn" onclick="denyReview('${r.id}',this)">Deny</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      console.error(e);
+      document.getElementById('reviews-loading').textContent = 'Could not load. Try refreshing.';
+    }
+  }
+
+  async function approveReview(docId, userId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Approving…';
+    try {
+      await db.collection('graduation_requests').doc(docId).update({
+        status: 'approved',
+        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      if (userId) {
+        // Set all graduation conditions — triggers onGraduation Cloud Function
+        await db.collection('users').doc(userId).update({
+          course1Complete: true,
+          course2Complete: true,
+          toolBuilt:       true,
+          toolSubmitted:   true,
+          profileComplete: true
+        });
+        // Ensure feedbackCount >= 3 without lowering an existing higher value
+        const userSnap = await db.collection('users').doc(userId).get();
+        if ((userSnap.data().feedbackCount || 0) < 3) {
+          await db.collection('users').doc(userId).update({ feedbackCount: 3 });
+        }
+      }
+
+      const row = document.getElementById('review-row-' + docId);
+      if (row) row.style.opacity = '0.4';
+      btn.textContent = '✓ Graduated';
+      const badge = document.getElementById('reviews-count-badge');
+      const current = parseInt(badge.textContent) || 0;
+      badge.textContent = Math.max(0, current - 1) + ' pending';
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Approve & Graduate';
+      alert('Could not approve. Please try again.');
+    }
+  }
+
+  async function denyReview(docId, btn) {
+    if (!confirm('Deny this request? The student will need to resubmit.')) return;
+    btn.disabled = true;
+    btn.textContent = 'Denying…';
+    try {
+      await db.collection('graduation_requests').doc(docId).update({
+        status: 'denied',
+        deniedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const row = document.getElementById('review-row-' + docId);
+      if (row) row.style.opacity = '0.4';
+      btn.textContent = '✗ Denied';
+      const badge = document.getElementById('reviews-count-badge');
+      const current = parseInt(badge.textContent) || 0;
+      badge.textContent = Math.max(0, current - 1) + ' pending';
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Deny';
+      alert('Could not deny. Please try again.');
     }
   }
 
