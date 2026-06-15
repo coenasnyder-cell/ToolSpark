@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -265,58 +266,40 @@
 
       <div class="card">
         <div class="card-title">Funnel Generator</div>
-        <p class="card-sub">Answer 4 quick questions and Sparky will write your lead page, sales page, and thank you page — ready to download and publish.</p>
+        <p class="card-sub">Everything's pre-loaded from your roadmap. Choose your brand colors and generate your 3 pages.</p>
+
+        <div id="sales-copy-found" style="display:none;margin:1.25rem 0 0;padding:10px 14px;background:rgba(42,92,69,0.07);border:1px solid rgba(42,92,69,0.2);border-radius:8px;font-size:13px;color:#2A5C45;font-weight:700;">
+          ✓ Sales Copy found — proof and payment link pulled in automatically.
+        </div>
+        <div id="sales-copy-missing" style="display:none;margin:1.25rem 0 0;padding:10px 14px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:8px;font-size:13px;color:var(--text2);">
+          <strong style="color:var(--gold);">Sales Copy not found.</strong> <a href="sales-page-builder.html" style="color:var(--gold);font-weight:700;text-decoration:none;">Complete Sales Copy first →</a> or continue to generate with your roadmap data only.
+        </div>
+
         <div class="preview-strip" id="preview-strip"></div>
       </div>
 
       <div class="card">
-        <!-- Q1 -->
-        <div class="q-block">
-          <div class="section-label">Question 1</div>
-          <div class="q-text">What do people get for free when they opt in?</div>
-          <div class="option-btns" id="q1-btns"></div>
-          <input class="field-input custom-lm" id="q1-custom" type="text" placeholder="Describe it in one line...">
-        </div>
-
-        <!-- Q2 -->
-        <div class="q-block">
-          <div class="section-label">Question 2</div>
-          <div class="q-text">What are your two main brand colors?</div>
-          <div class="color-row">
-            <div class="color-field">
-              <div class="color-label">Primary</div>
-              <div class="color-wrap">
-                <input type="color" id="q2-primary" value="#0C0B09" oninput="updateColorHex('q2-primary','hex-primary')">
-                <span class="color-hex" id="hex-primary">#0C0B09</span>
-              </div>
+        <div class="section-label">Brand Colors</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;">Applied to all 3 pages.</p>
+        <div class="color-row">
+          <div class="color-field">
+            <div class="color-label">Primary</div>
+            <div class="color-wrap">
+              <input type="color" id="q2-primary" value="#0C0B09" oninput="updateColorHex('q2-primary','hex-primary')">
+              <span class="color-hex" id="hex-primary">#0C0B09</span>
             </div>
-            <div class="color-field">
-              <div class="color-label">Accent</div>
-              <div class="color-wrap">
-                <input type="color" id="q2-accent" value="#C9A84C" oninput="updateColorHex('q2-accent','hex-accent')">
-                <span class="color-hex" id="hex-accent">#C9A84C</span>
-              </div>
+          </div>
+          <div class="color-field">
+            <div class="color-label">Accent</div>
+            <div class="color-wrap">
+              <input type="color" id="q2-accent" value="#C9A84C" oninput="updateColorHex('q2-accent','hex-accent')">
+              <span class="color-hex" id="hex-accent">#C9A84C</span>
             </div>
           </div>
         </div>
 
-        <!-- Q3 -->
-        <div class="q-block">
-          <div class="section-label">Question 3</div>
-          <div class="q-text">What name should appear on these pages?</div>
-          <input class="field-input" id="q3-brand" type="text" placeholder="Your name or brand name" oninput="validateSetup()">
-        </div>
-
-        <!-- Q4 -->
-        <div class="q-block" style="margin-bottom:0;">
-          <div class="section-label">Question 4</div>
-          <div class="q-text">Do you have a result or testimonial? <span class="optional-tag">(optional)</span></div>
-          <div class="q-hint">Paste it here — even rough is fine. Leave blank to use a placeholder.</div>
-          <textarea class="field-input" id="q4-proof" rows="3" placeholder="e.g. 'I finally figured out my niche in one session. Wish I'd done this months ago.' — Sarah K."></textarea>
-        </div>
-
         <div class="gen-footer">
-          <button class="btn-generate" id="gen-btn" onclick="generate()" disabled>Generate my funnel pages →</button>
+          <button class="btn-generate" id="gen-btn" onclick="generate()">Generate My Funnel →</button>
           <span class="gen-note">Takes about 20 seconds</span>
         </div>
         <div id="error-msg" style="display:none;margin-top:1rem;font-size:13px;color:#C0392B;"></div>
@@ -440,11 +423,13 @@
     transformation: '', coreDelivery: '', obstacleRemover: '',
     keepNames: [],
     justification: '', format: '',
-    audiencePainPoints: '', audienceDesires: '', audienceLanguage: ''
+    audiencePainPoints: '', audienceDesires: '', audienceLanguage: '',
+    brandName: '',
+    salesProof: '', paymentLink: '', salesCopySections: null
   };
 
-  var q1Selection = null; // 0-3
   var generatedHtml = { lead: '', sales: '', thanks: '' };
+  var storageUrls   = { lead: '', sales: '', thanks: '' };
 
   // ── UTILS ──
   function esc(s) {
@@ -518,7 +503,9 @@
         db.collection('offer_sort_results').doc(user.uid).get(),
         db.collection('offer_results').doc(user.uid).get(),
         db.collection('funnel_generator_results').doc(user.uid).get(),
-        db.collection('audience_results').where('userId', '==', user.uid).limit(1).get()
+        db.collection('audience_results').where('userId', '==', user.uid).limit(1).get(),
+        db.collection('sales_page_results').doc(user.uid).get(),
+        db.collection('users').doc(user.uid).get()
       ]);
 
       var journeySnap      = results[0];
@@ -526,6 +513,8 @@
       var offerBuilderSnap = results[2];
       var funnelResultSnap = results[3];
       var audienceSnap     = results[4];
+      var salesCopySnap    = results[5];
+      var userSnap         = results[6];
 
       // Journey Map is required and must have a tool in Box 2
       if (journeySnap.status !== 'fulfilled' || !journeySnap.value.exists) {
@@ -574,9 +563,33 @@
         fData.audienceLanguage = ad.theirWords || '';
       }
 
-      buildQ1Buttons();
+      // Brand name from users doc
+      if (userSnap.status === 'fulfilled' && userSnap.value.exists) {
+        fData.brandName = userSnap.value.data().displayName || user.displayName || '';
+      } else {
+        fData.brandName = user.displayName || '';
+      }
+
+      // Sales Copy (soft — enriches copy quality)
+      var hasSalesCopy = false;
+      if (salesCopySnap.status === 'fulfilled' && salesCopySnap.value.exists) {
+        var sc = salesCopySnap.value.data();
+        fData.salesProof        = sc.proof || '';
+        fData.paymentLink       = sc.paymentLink || '';
+        fData.salesCopySections = sc.sections || null;
+        hasSalesCopy = !!(sc.savedAt || sc.generatedAt);
+      }
+
       buildPreviewStrip();
       document.getElementById('loading-card').style.display = 'none';
+
+      var foundEl   = document.getElementById('sales-copy-found');
+      var missingEl = document.getElementById('sales-copy-missing');
+      if (hasSalesCopy) {
+        if (foundEl) foundEl.style.display = 'block';
+      } else {
+        if (missingEl) missingEl.style.display = 'block';
+      }
 
       // If already completed, show the completed card instead of the setup form
       if (funnelResultSnap.status === 'fulfilled' && funnelResultSnap.value.exists) {
@@ -585,48 +598,15 @@
       }
 
       document.getElementById('setup-section').style.display = 'block';
-      validateSetup();
     } catch(e) {
       document.getElementById('loading-card').innerHTML = '<div style="font-size:14px;color:var(--text2);">Failed to load data. Please refresh and try again.</div>';
     }
   }
 
-  function buildQ1Buttons() {
-    var container = document.getElementById('q1-btns');
-    var opts = [
-      fData.toolName ? 'Free access to ' + fData.toolName : 'Free access to my entry tool',
-      'A free guide, checklist, or template',
-      'A free training or video',
-      'Something else'
-    ];
-    container.innerHTML = '';
-    opts.forEach(function(label, i) {
-      var btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.textContent = label;
-      btn.onclick = function() { selectQ1(i, label); };
-      container.appendChild(btn);
-    });
-  }
-
-  function selectQ1(index, label) {
-    q1Selection = index;
-    document.querySelectorAll('.option-btn').forEach(function(b, i) {
-      b.classList.toggle('selected', i === index);
-    });
-    var customInput = document.getElementById('q1-custom');
-    if (index === 3) {
-      customInput.classList.add('visible');
-      customInput.focus();
-    } else {
-      customInput.classList.remove('visible');
-    }
-    validateSetup();
-  }
-
   function buildPreviewStrip() {
     var chips = [];
-    if (fData.toolName) chips.push({ label: 'Entry Tool', value: fData.toolName });
+    if (fData.brandName) chips.push({ label: 'Creator', value: fData.brandName });
+    if (fData.toolName)  chips.push({ label: 'Entry Tool', value: fData.toolName });
     if (fData.toolPrice) chips.push({ label: 'Price', value: fData.toolPrice });
     if (fData.discovery) chips.push({ label: 'Discovery', value: fData.discovery });
     if (!fData.transformation) chips.push({ label: 'Offer Sort', value: 'Not completed — placeholders will be used' });
@@ -641,32 +621,13 @@
     document.getElementById(hexId).textContent = document.getElementById(inputId).value.toUpperCase();
   }
 
-  function validateSetup() {
-    var q1ok = q1Selection !== null && (q1Selection !== 3 || document.getElementById('q1-custom').value.trim());
-    var q3ok = document.getElementById('q3-brand').value.trim().length > 0;
-    document.getElementById('gen-btn').disabled = !(q1ok && q3ok);
-  }
-
-  document.getElementById('q1-custom').addEventListener('input', validateSetup);
-  document.getElementById('q3-brand').addEventListener('input', validateSetup);
-
   // ── GENERATE ──
   async function generate() {
-    var brandName   = document.getElementById('q3-brand').value.trim();
-    var primaryColor = document.getElementById('q2-primary').value;
-    var accentColor  = document.getElementById('q2-accent').value;
-    var proof        = document.getElementById('q4-proof').value.trim();
-
-    var leadMagnetLabel = '';
-    if (q1Selection === 0) {
-      leadMagnetLabel = fData.toolName ? 'free access to ' + fData.toolName : 'free access to the tool';
-    } else if (q1Selection === 1) {
-      leadMagnetLabel = document.getElementById('q1-btns').children[1].textContent;
-    } else if (q1Selection === 2) {
-      leadMagnetLabel = document.getElementById('q1-btns').children[2].textContent;
-    } else {
-      leadMagnetLabel = document.getElementById('q1-custom').value.trim();
-    }
+    var brandName      = fData.brandName || 'Your Brand';
+    var primaryColor   = document.getElementById('q2-primary').value;
+    var accentColor    = document.getElementById('q2-accent').value;
+    var proof          = fData.salesProof || '';
+    var leadMagnetLabel = fData.toolName ? 'free access to ' + fData.toolName : 'free access to the entry tool';
 
     document.getElementById('setup-section').style.display = 'none';
     document.getElementById('gen-card').style.display = 'block';
@@ -696,12 +657,20 @@
       keepSection + '\n' +
       justSection + '\n' +
       'Discovery Method: ' + (fData.discovery || 'not specified') + '\n' +
-      'Testimonial/Proof: ' + proofSection + '\n\n' +
+      'Testimonial/Proof: ' + proofSection + '\n' +
+      'Payment Link: ' + (fData.paymentLink || '#STRIPE-LINK') + '\n\n' +
       (fData.audiencePainPoints || fData.audienceDesires || fData.audienceLanguage
         ? 'AUDIENCE VOICE (use this language verbatim in copy):\n' +
           (fData.audiencePainPoints ? 'Pain points: ' + fData.audiencePainPoints + '\n' : '') +
           (fData.audienceDesires ? 'What they want: ' + fData.audienceDesires + '\n' : '') +
           (fData.audienceLanguage ? 'Phrases they use: ' + fData.audienceLanguage + '\n' : '') +
+          '\n'
+        : '') +
+      (fData.salesCopySections
+        ? 'APPROVED SALES COPY (student already wrote and approved this — match the tone, style, and specifics):\n' +
+          (fData.salesCopySections.PROBLEM ? 'Problem: ' + fData.salesCopySections.PROBLEM + '\n' : '') +
+          (fData.salesCopySections.SOLUTION ? 'Solution: ' + fData.salesCopySections.SOLUTION + '\n' : '') +
+          (fData.salesCopySections.HERO ? 'Hero: ' + fData.salesCopySections.HERO + '\n' : '') +
           '\n'
         : '') +
       'Write specific, real copy — no generic placeholders except where noted. Use the student\'s data throughout.\n\n' +
@@ -742,9 +711,29 @@
       if (!text) throw new Error('Empty response');
 
       var copy = parseCopy(text);
+      var paymentLink = fData.paymentLink || '#STRIPE-LINK';
       generatedHtml.lead   = buildLeadPage(copy, brandName, primaryColor, accentColor);
-      generatedHtml.sales  = buildSalesPage(copy, brandName, primaryColor, accentColor, proof, fData);
+      generatedHtml.sales  = buildSalesPage(copy, brandName, primaryColor, accentColor, proof, fData, paymentLink);
       generatedHtml.thanks = buildThankYouPage(copy, brandName, primaryColor, accentColor, fData);
+
+      // Upload all 3 pages to Firebase Storage in parallel (non-fatal — in-memory blobs still work)
+      if (currentUser) {
+        try {
+          var storageRef = firebase.storage().ref();
+          var uid = currentUser.uid;
+          var uploads = await Promise.all([
+            storageRef.child('funnel-pages/' + uid + '/lead-page.html').putString(generatedHtml.lead, 'raw', { contentType: 'text/html' }),
+            storageRef.child('funnel-pages/' + uid + '/sales-page.html').putString(generatedHtml.sales, 'raw', { contentType: 'text/html' }),
+            storageRef.child('funnel-pages/' + uid + '/thank-you-page.html').putString(generatedHtml.thanks, 'raw', { contentType: 'text/html' })
+          ]);
+          var resolvedUrls = await Promise.all(uploads.map(function(snap) { return snap.ref.getDownloadURL(); }));
+          storageUrls.lead   = resolvedUrls[0];
+          storageUrls.sales  = resolvedUrls[1];
+          storageUrls.thanks = resolvedUrls[2];
+        } catch(storageErr) {
+          // Non-fatal — downloads still work from in-memory blobs
+        }
+      }
 
       document.getElementById('gen-card').style.display = 'none';
       document.getElementById('results-section').style.display = 'block';
@@ -758,15 +747,33 @@
   }
 
   function parseCopy(text) {
-    // Strip ** bold markers from field keys so stop-pattern works
     var clean = text
       .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, '$1:')
-      .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:');
+      .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:')
+      .replace(/\r\n/g, '\n');
+
     function field(name) {
-      var re = new RegExp(name + ':([\\s\\S]+?)(?=\\n[A-Z_]+:|$)');
-      var m = clean.match(re);
-      return m ? stripMd(m[1].trim()) : '';
+      // Try exact name, then variant without underscore-before-digit (LEAD_BULLET_1 → LEAD_BULLET1),
+      // then variant with all underscores removed (LEAD_BULLET_1 → LEADBULLET1)
+      var alts = [name, name.replace(/_(\d)/g, '$1'), name.replace(/_/g, '')];
+      alts = alts.filter(function(v, i, a) { return a.indexOf(v) === i; });
+
+      for (var i = 0; i < alts.length; i++) {
+        // Stop pattern includes digits so LEAD_BULLET_1 and THANKSACTION1 both halt extraction
+        var re = new RegExp(alts[i] + ':([\\s\\S]+?)(?=\\n[A-Z][A-Z_0-9]+:|$)');
+        var m = clean.match(re);
+        if (m && m[1].trim()) {
+          // Strip any token labels that bled into the value (e.g. "...headline LEADBULLET1: text")
+          var val = m[1].trim()
+            .replace(/\s+[A-Z][A-Z_0-9]{2,}:\s*/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          return stripMd(val);
+        }
+      }
+      return '';
     }
+
     return {
       leadHeadline: field('LEAD_HEADLINE'),
       leadBullet1:  field('LEAD_BULLET_1'),
@@ -838,7 +845,8 @@
       '</div>\n</body>\n</html>';
   }
 
-  function buildSalesPage(copy, brandName, primary, accent, proof, fd) {
+  function buildSalesPage(copy, brandName, primary, accent, proof, fd, paymentLink) {
+    paymentLink = paymentLink || '#STRIPE-LINK';
     var onAccent = contrastText(accent);
     var onDark   = '#FFFFFF';
     var price    = fd.toolPrice || '';
@@ -903,7 +911,7 @@
       '  <h1>' + esc(copy.salesHeroH) + '</h1>\n' +
       '  <p>' + esc(copy.salesHeroSub) + '</p>\n' +
       '  <!-- Replace with your Stripe payment link -->\n' +
-      '  <a href="#STRIPE-LINK" class="cta-btn">' + esc(ctaLabel) + '</a>\n' +
+      '  <a href="' + esc(paymentLink) + '" class="cta-btn">' + esc(ctaLabel) + '</a>\n' +
       '</div>\n' +
       '<div class="section">\n' +
       '  <div class="section-label">The problem</div>\n' +
@@ -924,7 +932,7 @@
       '  <div class="price-amount">' + esc(price) + '</div>\n' +
       '  <div class="price-format">' + esc(format.trim() || 'one-time') + '</div>\n' +
       '  <!-- Replace with your Stripe payment link -->\n' +
-      '  <a href="#STRIPE-LINK" class="cta-btn">' + esc(ctaLabel) + '</a>\n' +
+      '  <a href="' + esc(paymentLink) + '" class="cta-btn">' + esc(ctaLabel) + '</a>\n' +
       '</div>\n' +
       '<footer>&copy; ' + new Date().getFullYear() + ' ' + esc(brandName) + '. All rights reserved.</footer>\n' +
       '</body>\n</html>';
@@ -985,12 +993,15 @@
   function downloadPage(key) {
     var names = { lead: 'lead-page.html', sales: 'sales-page.html', thanks: 'thank-you-page.html' };
     var html = generatedHtml[key];
-    if (!html) return;
-    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = names[key]; a.click();
-    setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+    if (html) {
+      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = names[key]; a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+    } else if (storageUrls[key]) {
+      window.open(storageUrls[key], '_blank');
+    }
   }
 
   function previewPage(key) {
@@ -1006,7 +1017,6 @@
     document.getElementById('completed-card').style.display = 'none';
     document.getElementById('setup-section').style.display = 'block';
     document.getElementById('setup-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    validateSetup();
   }
 
   function toggleHosting() {
@@ -1039,11 +1049,15 @@
     try {
       await db.collection('funnel_generator_results').doc(currentUser.uid).set({
         userId: currentUser.uid,
-        brandName: document.getElementById('q3-brand').value.trim(),
+        brandName: fData.brandName,
         primaryColor: document.getElementById('q2-primary').value,
         accentColor: document.getElementById('q2-accent').value,
+        leadPageUrl:    storageUrls.lead   || '',
+        salesPageUrl:   storageUrls.sales  || '',
+        thankYouPageUrl: storageUrls.thanks || '',
+        status: 'complete',
         completedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      }, { merge: true });
       btn.textContent = '✓ Saved';
       status.textContent = 'Your Launch Map has been updated.';
       status.className = 'save-status saved';

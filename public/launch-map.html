@@ -233,7 +233,7 @@
 
 <script src="js/nav.js"></script>
 <script>
-  var TOTAL_SECTIONS = 4;
+  var TOTAL_SECTIONS = 5;
 
   function esc(str) {
     if (!str) return '';
@@ -372,6 +372,24 @@
       ) : '');
   }
 
+  function renderSalesPageBuilder(data) {
+    var heroLine = (data.sections && data.sections.HERO)
+      ? data.sections.HERO.split('\n')[0].trim()
+      : (data.heroHeadline || '');
+    var problemPreview = (data.sections && data.sections.PROBLEM)
+      ? truncate(data.sections.PROBLEM, 200)
+      : '';
+    var html = '';
+    if (heroLine) {
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:17px;font-weight:400;color:var(--text);margin-bottom:0.75rem;line-height:1.4;">' + esc(heroLine) + '</div>';
+    }
+    if (problemPreview) {
+      html += '<p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:1rem;font-style:italic;">' + esc(problemPreview) + '</p>';
+    }
+    html += '<a class="btn-go" href="sales-page-builder.html">Edit or regenerate →</a>';
+    return html;
+  }
+
   function renderJourneyMap(data) {
     var boxes = [
       { cls: 'discovery', label: 'How they find you', name: data.discovery || '—', desc: '', price: null },
@@ -425,7 +443,7 @@
   }
 
   // ── MAIN RENDER ──
-  function renderPage(offerSort, offerBuilder, journeyMap, funnelGen) {
+  function renderPage(offerSort, offerBuilder, journeyMap, funnelGen, salesPage) {
     var completed = 0;
     var sections = '';
 
@@ -462,14 +480,42 @@
     // 4 — Funnel Generator
     if (funnelGen) {
       completed++;
-      sections += sectionCard('04', 'Funnel Generator', true, false,
-        '<p style="font-size:14px;color:var(--text2);margin-bottom:1rem;">Your lead page, sales page, and thank you page have been generated.</p>' +
-        '<a class="btn-go" href="funnel-generator.html">Re-generate or download →</a>',
-        null, funnelGen.completedAt);
+      var funnelBody;
+      if (funnelGen.leadPageUrl || funnelGen.salesPageUrl || funnelGen.thankYouPageUrl) {
+        funnelBody =
+          '<p style="font-size:13px;color:var(--text2);margin-bottom:1rem;">Your 3 funnel pages are ready to download and publish.</p>' +
+          '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;">' +
+          (funnelGen.leadPageUrl    ? '<a href="' + funnelGen.leadPageUrl    + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--green);font-weight:700;text-decoration:none;">📄 Lead Page — Download</a>' : '') +
+          (funnelGen.salesPageUrl   ? '<a href="' + funnelGen.salesPageUrl   + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--green);font-weight:700;text-decoration:none;">📄 Sales Page — Download</a>' : '') +
+          (funnelGen.thankYouPageUrl ? '<a href="' + funnelGen.thankYouPageUrl + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--green);font-weight:700;text-decoration:none;">📄 Thank You Page — Download</a>' : '') +
+          '</div>' +
+          '<a class="btn-go" style="font-size:13px;" href="funnel-generator.html">Re-generate →</a>';
+      } else {
+        funnelBody =
+          '<p style="font-size:14px;color:var(--text2);margin-bottom:1rem;">Your lead page, sales page, and thank you page have been generated.</p>' +
+          '<a class="btn-go" href="funnel-generator.html">Re-generate or download →</a>';
+      }
+      sections += sectionCard('04', 'Funnel Generator', true, false, funnelBody, null, funnelGen.completedAt);
     } else {
       sections += sectionCard('04', 'Funnel Generator', false, false,
         '<p class="incomplete-msg">Build your lead page, sales page, and thank you page — ready to download and publish.</p>' +
         '<a class="btn-go" href="funnel-generator.html">Build Your Funnel →</a>',
+        null);
+    }
+
+    // 5 — Sales Copy
+    if (salesPage && salesPage.savedAt) {
+      completed++;
+      sections += sectionCard('05', 'Sales Copy', true, false, renderSalesPageBuilder(salesPage), 'sales-page-builder.html', salesPage.savedAt);
+    } else if (salesPage && salesPage.generatedAt) {
+      sections += sectionCard('05', 'Sales Copy', false, false,
+        '<p class="incomplete-msg">Your copy was generated but not saved to your map. Head back to save it.</p>' +
+        '<a class="btn-go" href="sales-page-builder.html">Review & Save →</a>',
+        null);
+    } else {
+      sections += sectionCard('05', 'Sales Copy', false, false,
+        '<p class="incomplete-msg">Generate your sales page copy — built from everything you\'ve done so far.</p>' +
+        '<a class="btn-go" href="sales-page-builder.html">Generate Sales Copy →</a>',
         null);
     }
 
@@ -503,15 +549,17 @@
         db.collection('offer_sort_results').doc(user.uid).get(),
         db.collection('offer_results').doc(user.uid).get(),
         db.collection('journey_maps').doc(user.uid).get(),
-        db.collection('funnel_generator_results').doc(user.uid).get()
+        db.collection('funnel_generator_results').doc(user.uid).get(),
+        db.collection('sales_page_results').doc(user.uid).get()
       ]);
 
       var offerSort    = (results[0].status === 'fulfilled' && results[0].value.exists) ? results[0].value.data() : null;
       var offerBuilder = (results[1].status === 'fulfilled' && results[1].value.exists) ? results[1].value.data() : null;
       var journeyMap   = (results[2].status === 'fulfilled' && results[2].value.exists) ? results[2].value.data() : null;
       var funnelGen    = (results[3].status === 'fulfilled' && results[3].value.exists) ? results[3].value.data() : null;
+      var salesPage    = (results[4].status === 'fulfilled' && results[4].value.exists) ? results[4].value.data() : null;
 
-      renderPage(offerSort, offerBuilder, journeyMap, funnelGen);
+      renderPage(offerSort, offerBuilder, journeyMap, funnelGen, salesPage);
     } catch(e) {
       document.getElementById('page-content').innerHTML =
         '<div style="padding:2rem;font-size:14px;color:var(--text2);">Something went wrong loading your launch assets. Please refresh and try again.</div>';

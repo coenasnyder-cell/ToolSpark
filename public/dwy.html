@@ -423,6 +423,28 @@
       </div>
     </div>
 
+    <!-- Journey Builder -->
+    <div class="section-card" id="journey-builder-card">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(75,63,138,0.1);border:1px solid rgba(75,63,138,0.18);">
+          <svg width="16" height="16" fill="none" stroke="#9B8FD0" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3M9.5 7.5L10 10M14 10l.5-2.5"/></svg>
+        </div>
+        <div class="section-title">Journey Builder</div>
+        <span class="phase-status-badge badge-locked" id="journey-builder-badge">Locked</span>
+      </div>
+      <div class="section-body">
+        <p class="empty-prompt" id="journey-builder-desc">Map how your three tools work together to take a client from where they are to where they want to be. Finish your Clarity Session first to unlock this.</p>
+        <a href="journey-builder.html" class="action-link" id="journey-builder-link" style="pointer-events:none;opacity:0.4;">Map My Journey →</a>
+        <div class="milestone" id="journey-builder-milestone" style="background:rgba(75,63,138,0.07);border:1px solid rgba(75,63,138,0.2);display:none;">
+          <div class="milestone-emoji">🗺️</div>
+          <div>
+            <div class="milestone-label" style="color:#9B8FD0;">Milestone</div>
+            <div class="milestone-text">Your Customer Journey is Mapped</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Phase 2: Build -->
     <div class="phase-card" id="phase-card-1">
       <div class="phase-card-header">
@@ -815,6 +837,29 @@
       if (u.sparkStatement) {
         document.getElementById('hero-spark').textContent = '"' + u.sparkStatement + '"';
       }
+      // Journey Builder card state
+      var jbCard  = document.getElementById('journey-builder-card');
+      var jbBadge = document.getElementById('journey-builder-badge');
+      var jbLink  = document.getElementById('journey-builder-link');
+      var jbDesc  = document.getElementById('journey-builder-desc');
+      var jbMile  = document.getElementById('journey-builder-milestone');
+      if (u.journeyComplete) {
+        jbBadge.textContent = 'Complete';
+        jbBadge.className = 'phase-status-badge badge-complete';
+        jbDesc.textContent = 'Your customer journey is mapped. You can revisit and regenerate any time.';
+        jbLink.textContent = 'View My Journey →';
+        jbLink.style.pointerEvents = '';
+        jbLink.style.opacity = '';
+        if (jbMile) jbMile.style.display = 'flex';
+      } else if (u.breakthroughComplete) {
+        jbBadge.textContent = 'Ready';
+        jbBadge.className = 'phase-status-badge badge-active';
+        jbDesc.textContent = 'Your Clarity Session is complete. Map how your three tools work together into a customer journey.';
+        jbLink.textContent = 'Map My Journey →';
+        jbLink.style.pointerEvents = '';
+        jbLink.style.opacity = '';
+      }
+
       if (u.hubSlug) {
         document.getElementById('creator-hub-title').textContent = 'Go to My Hub';
         document.getElementById('creator-hub-desc').textContent = 'Your Creator Hub is live. Manage your tool, settings, and members.';

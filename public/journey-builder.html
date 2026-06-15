@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey Builder — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark:        #0C0B09;
+    --dark2:       #141210;
+    --dark3:       #1C1A17;
+    --border:      rgba(201,168,76,0.15);
+    --border-mid:  rgba(201,168,76,0.25);
+    --gold:        #C9A84C;
+    --gold-light:  #E8D5A3;
+    --gold-dim:    rgba(201,168,76,0.12);
+    --text3:       #9E9891;
+    --purple:      #9B8FD0;
+    --purple-dim:  rgba(75,63,138,0.12);
+    --green:       #3D8A65;
+    --green-dim:   rgba(42,92,69,0.15);
+    --coral:       #C4622D;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Lato',sans-serif; background:var(--dark); color:#E8E4DC; min-height:100vh; display:flex; flex-direction:column; -webkit-font-smoothing:antialiased; }
+
+  /* HEADER */
+  .hdr { height:56px; background:var(--dark); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 20px; flex-shrink:0; position:sticky; top:0; z-index:100; }
+  .hdr-back { display:flex; align-items:center; gap:7px; text-decoration:none; color:var(--text3); font-size:13px; font-weight:700; letter-spacing:0.03em; transition:color 0.18s; }
+  .hdr-back:hover { color:var(--gold-light); }
+  .hdr-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--gold-light); letter-spacing:0.02em; }
+  .hdr-right { width:80px; }
+
+  /* FULL-PAGE STATES */
+  .fullpage { flex:1; display:none; align-items:center; justify-content:center; padding:40px 20px; }
+  .state-card { max-width:500px; width:100%; background:var(--dark2); border:1px solid var(--border-mid); border-radius:20px; padding:36px 32px; text-align:center; }
+  .state-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+  .state-card h2 { font-family:'Playfair Display',serif; font-size:24px; font-weight:400; color:var(--gold-light); line-height:1.3; margin-bottom:10px; }
+  .state-card p { font-size:14px; color:var(--text3); line-height:1.7; margin-bottom:22px; }
+  .lock-icon { font-size:2.5rem; margin-bottom:16px; }
+  .btn-primary { display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:var(--dark); border:none; padding:13px 26px; border-radius:12px; font-family:'Lato',sans-serif; font-size:14px; font-weight:700; cursor:pointer; text-decoration:none; transition:all 0.2s; letter-spacing:0.02em; }
+  .btn-primary:hover { background:var(--gold-light); transform:translateY(-1px); }
+
+  /* LOADING */
+  .loading-wrap { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:40px; }
+  .loading-ring { width:44px; height:44px; border:3px solid rgba(201,168,76,0.15); border-top-color:var(--gold); border-radius:50%; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-label { font-size:14px; color:var(--text3); letter-spacing:0.02em; }
+  .loading-step { font-size:12px; color:rgba(201,168,76,0.55); min-height:18px; }
+
+  /* RESULTS */
+  .results-wrap { flex:1; display:none; max-width:820px; width:100%; margin:0 auto; padding:32px 20px 60px; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .results-eyebrow { font-size:11px; font-weight:800; letter-spacing:0.15em; text-transform:uppercase; color:var(--purple); margin-bottom:10px; }
+  .results-title { font-family:'Playfair Display',serif; font-size:clamp(22px,4vw,30px); color:var(--gold-light); line-height:1.25; margin-bottom:6px; }
+  .results-sub { font-size:14px; color:var(--text3); margin-bottom:2rem; line-height:1.6; }
+
+  /* TRANSFORMATION BAR */
+  .transform-bar { display:grid; grid-template-columns:1fr auto 1fr; margin-bottom:2rem; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .transform-side { padding:1.1rem 1.4rem; }
+  .transform-side.start { background:rgba(196,98,45,0.07); border-right:1px solid var(--border); }
+  .transform-side.end { background:rgba(42,92,69,0.08); }
+  .transform-arrow-cell { display:flex; align-items:center; justify-content:center; padding:0 14px; color:var(--gold); font-size:18px; background:rgba(255,255,255,0.02); }
+  .transform-label { font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); margin-bottom:5px; }
+  .transform-text { font-size:14px; line-height:1.65; color:#E8E4DC; }
+
+  /* JOURNEY FLOW */
+  .section-label { font-size:10px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
+  .journey-flow { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:stretch; margin-bottom:2rem; gap:0; }
+  .journey-arrow { display:flex; align-items:center; justify-content:center; color:var(--gold); opacity:0.55; font-size:20px; padding:0 8px; flex-shrink:0; }
+  .journey-card { background:var(--dark2); border:1px solid var(--border); border-radius:14px; padding:1.25rem; display:flex; flex-direction:column; gap:8px; animation:fadeUp 0.4s ease both; }
+  .journey-card:nth-child(1) { animation-delay:0.05s; }
+  .journey-card:nth-child(3) { animation-delay:0.15s; }
+  .journey-card:nth-child(5) { animation-delay:0.25s; }
+
+  .role-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; border-radius:20px; align-self:flex-start; }
+  .badge-lead  { background:var(--gold-dim); border:1px solid rgba(201,168,76,0.25); color:var(--gold); }
+  .badge-mvp   { background:rgba(42,92,69,0.15); border:1px solid rgba(42,92,69,0.3); color:var(--green); }
+  .badge-exp   { background:var(--purple-dim); border:1px solid rgba(75,63,138,0.25); color:var(--purple); }
+
+  .tool-name { font-family:'Playfair Display',serif; font-size:15px; color:var(--gold-light); line-height:1.35; }
+  .tool-why  { font-size:12px; color:var(--text3); line-height:1.55; }
+  .tool-how  { font-size:12px; color:#D4CFCA; line-height:1.55; border-top:1px solid var(--border); padding-top:8px; margin-top:2px; }
+
+  /* NARRATIVE */
+  .narrative-card { background:var(--dark2); border:1px solid var(--border-mid); border-left:3px solid var(--gold); border-radius:0 14px 14px 0; padding:1.25rem 1.5rem; margin-bottom:2rem; animation:fadeUp 0.4s 0.35s ease both; }
+  .narrative-label { font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+  .narrative-text { font-size:14px; line-height:1.85; color:#D4CFCA; }
+
+  /* ACTIONS */
+  .action-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; animation:fadeUp 0.4s 0.45s ease both; }
+  .btn-confirm { display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:var(--dark); border:none; padding:14px 28px; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; letter-spacing:0.03em; }
+  .btn-confirm:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .btn-confirm:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+  .btn-regen  { display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--text3); border:1px solid var(--border); padding:13px 20px; border-radius:12px; font-family:'Lato',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-regen:hover { border-color:var(--border-mid); color:var(--gold-light); }
+  .saved-badge { display:inline-flex; align-items:center; gap:6px; background:var(--green-dim); border:1px solid rgba(42,92,69,0.3); border-radius:8px; padding:6px 14px; font-size:12px; font-weight:700; color:var(--green); }
+
+  @media (max-width:680px) {
+    .transform-bar { grid-template-columns:1fr; }
+    .transform-side.start { border-right:none; border-bottom:1px solid var(--border); }
+    .transform-arrow-cell { padding:10px; transform:rotate(90deg); }
+    .journey-flow { grid-template-columns:1fr; }
+    .journey-arrow { transform:rotate(90deg); padding:4px 0; }
+    .state-card { padding:28px 20px; }
+    .results-wrap { padding:24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="dashboard.html" class="hdr-back">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Dashboard
+  </a>
+  <span class="hdr-title">Journey Builder</span>
+  <div class="hdr-right"></div>
+</header>
+
+<!-- LOCK -->
+<div class="fullpage" id="lock-screen">
+  <div class="state-card">
+    <div class="lock-icon">🔒</div>
+    <div class="state-eyebrow">Journey Builder</div>
+    <h2>Complete Your Breakthrough First</h2>
+    <p>Your customer journey is built from your Clarity Session results. Finish the Clarity Session to unlock this tool.</p>
+    <a href="clarity.html" class="btn-primary">Go to Clarity Session →</a>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-wrap" id="loading-screen">
+  <div class="loading-ring"></div>
+  <div class="loading-label" id="loading-label">Loading your profile…</div>
+  <div class="loading-step"  id="loading-step"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-wrap" id="results-screen">
+  <div class="results-eyebrow">ToolSpark · Journey Builder</div>
+  <h1 class="results-title">Your Customer Journey Map</h1>
+  <p class="results-sub">Here's how your tools work together to take someone from where they are to where they want to be.</p>
+
+  <div class="transform-bar">
+    <div class="transform-side start">
+      <div class="transform-label">Where They Start</div>
+      <div class="transform-text" id="jb-start"></div>
+    </div>
+    <div class="transform-arrow-cell">→</div>
+    <div class="transform-side end">
+      <div class="transform-label">Where They End Up</div>
+      <div class="transform-text" id="jb-end"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Their Journey With You</div>
+  <div class="journey-flow">
+
+    <div class="journey-card">
+      <span class="role-badge badge-lead">⚡ Lead Magnet</span>
+      <div class="tool-name" id="jb-lm-name">—</div>
+      <div class="tool-why"  id="jb-lm-why"></div>
+      <div class="tool-how"  id="jb-lm-how"></div>
+    </div>
+
+    <div class="journey-arrow">→</div>
+
+    <div class="journey-card">
+      <span class="role-badge badge-mvp">🚀 MVP Offer</span>
+      <div class="tool-name" id="jb-mvp-name">—</div>
+      <div class="tool-why"  id="jb-mvp-why"></div>
+      <div class="tool-how"  id="jb-mvp-how"></div>
+    </div>
+
+    <div class="journey-arrow">→</div>
+
+    <div class="journey-card">
+      <span class="role-badge badge-exp">✨ Expansion</span>
+      <div class="tool-name" id="jb-exp-name">—</div>
+      <div class="tool-why"  id="jb-exp-why"></div>
+      <div class="tool-how"  id="jb-exp-how"></div>
+    </div>
+
+  </div>
+
+  <div class="narrative-card">
+    <div class="narrative-label">Your Journey Story</div>
+    <div class="narrative-text" id="jb-narrative"></div>
+  </div>
+
+  <div class="action-row" id="action-row">
+    <button class="btn-confirm" id="confirm-btn" onclick="confirmJourney()">This is my journey ✓</button>
+    <button class="btn-regen"   id="regen-btn"   onclick="regenerate()">↺ Regenerate</button>
+  </div>
+</div>
+
+<script>
+var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+var MODEL = 'claude-sonnet-4-6';
+
+var currentUser  = null;
+var journeyData  = null;
+
+async function authHeaders() {
+  var user  = firebase.auth().currentUser;
+  var token = user ? await user.getIdToken() : '';
+  var ac = '';
+  try {
+    var t = await Promise.race([firebase.appCheck().getToken(false), new Promise(function(_,r){setTimeout(r,3000);})]);
+    ac = t && t.token ? t.token : '';
+  } catch(e) {}
+  return { 'Content-Type':'application/json', 'Authorization':'Bearer '+token, 'X-Firebase-AppCheck':ac };
+}
+
+function showEl(id, display) { document.getElementById(id).style.display = display || 'flex'; }
+function hideEl(id) { document.getElementById(id).style.display = 'none'; }
+function setStep(label, step) {
+  document.getElementById('loading-label').textContent = label || '';
+  document.getElementById('loading-step').textContent  = step  || '';
+}
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) { window.location.href = 'signon.html?redirect=journey-builder'; return; }
+  currentUser = user;
+  showEl('loading-screen', 'flex');
+  setStep('Checking your profile…');
+
+  try {
+    var userSnap = await db.collection('users').doc(user.uid).get();
+    var userData = userSnap.exists ? userSnap.data() : {};
+
+    if (!userData.breakthroughComplete) {
+      hideEl('loading-screen');
+      showEl('lock-screen', 'flex');
+      return;
+    }
+
+    var existingSnap = await db.collection('journey_maps').doc(user.uid).get();
+    if (existingSnap.exists) {
+      journeyData = existingSnap.data();
+      hideEl('loading-screen');
+      renderResults(journeyData, true);
+      return;
+    }
+
+    await generateJourney(user);
+  } catch(e) {
+    console.error(e);
+    hideEl('loading-screen');
+    showEl('lock-screen', 'flex');
+  }
+});
+
+async function generateJourney(user) {
+  showEl('loading-screen', 'flex');
+  hideEl('results-screen');
+  setStep('Reading your profile…', 'Pulling your Spark Statement and audience data');
+
+  var uid   = user.uid;
+  var email = (user.email || '').toLowerCase().trim();
+
+  var results = await Promise.allSettled([
+    db.collection('spark_profiles').doc(uid).get(),
+    db.collection('audience_results').doc(uid).get(),
+    db.collection('clarity_sessions')
+      .where('userId', '==', uid)
+      .where('status', '==', 'completed')
+      .limit(5)
+      .get()
+  ]);
+
+  var spark    = (results[0].status === 'fulfilled' && results[0].value.exists) ? results[0].value.data() : {};
+  var audience = (results[1].status === 'fulfilled' && results[1].value.exists) ? results[1].value.data() : {};
+
+  var tools = { idea1: null, idea2: null, idea3: null, chosen: null };
+  if (results[2].status === 'fulfilled' && !results[2].value.empty) {
+    var sessions = results[2].value.docs.slice().sort(function(a, b) {
+      return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) -
+             (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
+    });
+    var session = sessions[0].data();
+    var t = session.tools || {};
+    tools.idea1  = t.idea1 || null;
+    tools.idea2  = t.idea2 || null;
+    tools.idea3  = t.idea3 || null;
+    tools.chosen = session.chosenToolName || session.tool1Name || (t.idea1 && t.idea1.name) || null;
+  }
+
+  setStep('Mapping your journey…', 'Connecting your tools into a customer journey');
+
+  function toolLine(t) {
+    if (!t) return null;
+    if (typeof t === 'string') return t;
+    var line = t.name || '';
+    var desc = t.description || t.what_it_does || t.summary || '';
+    return desc ? line + ' — ' + desc : line;
+  }
+
+  var lines = [
+    'You are a strategic business journey mapper for online coaches and creators.',
+    '',
+    'Based on the user data below, generate a customer journey map.',
+    'Return ONLY valid JSON — no markdown, no explanation, no code fences.',
+    '',
+    '--- USER PROFILE ---',
+  ];
+
+  if (spark.sparkStatement)                  lines.push('Spark Statement: ' + spark.sparkStatement);
+  if (spark.expertise)                        lines.push('Expertise: ' + spark.expertise);
+  if (spark.targetAudience || spark.whoTheyHelp) lines.push('Who they help: ' + (spark.targetAudience || spark.whoTheyHelp));
+  if (spark.biggestProblem)                   lines.push('Problem they solve: ' + spark.biggestProblem);
+
+  lines.push('', '--- AUDIENCE ---');
+  if (audience.frustrations)  lines.push('Frustrations: ' + audience.frustrations);
+  if (audience.dreamOutcome)  lines.push('Dream outcome: ' + audience.dreamOutcome);
+  if (audience.profile)       lines.push('Audience profile: ' + audience.profile);
+  if (audience.awareness)     lines.push('Awareness level: ' + audience.awareness);
+
+  lines.push('', '--- BREAKTHROUGH TOOLS (from Clarity Session) ---');
+  var l1 = toolLine(tools.idea1); if (l1) lines.push('Tool 1: ' + l1);
+  var l2 = toolLine(tools.idea2); if (l2) lines.push('Tool 2: ' + l2);
+  var l3 = toolLine(tools.idea3); if (l3) lines.push('Tool 3: ' + l3);
+  if (tools.chosen) lines.push('Chosen primary build focus: "' + tools.chosen + '" — treat this as the lead magnet.');
+
+  lines.push(
+    '',
+    '--- JOURNEY MAPPING RULES ---',
+    'Tool 1 = lead magnet: free or low-cost entry, demonstrates expertise, gets them into their world',
+    'Tool 2 = MVP offer: solves the next problem after the lead magnet win, this is the core paid offer',
+    'Tool 3 = expansion: bigger transformation once trust is established, premium or ongoing',
+    'journeyNarrative: 2-3 plain sentences the creator could use in their marketing to describe how they take clients on this journey.',
+    '',
+    'Return this exact JSON (no extra keys):',
+    '{',
+    '  "customerStartingPoint": "one sentence on where their ideal client is right now — pain, struggle, or stuck point",',
+    '  "desiredTransformation": "one sentence on the end result after working with them",',
+    '  "leadMagnetTool": { "name": "...", "whyFirst": "why this is the right entry point", "howItHelps": "what quick win it delivers" },',
+    '  "mvpTool":        { "name": "...", "whySecond": "why this logically follows the lead magnet", "howItHelps": "what deeper result it delivers" },',
+    '  "expansionTool":  { "name": "...", "whyThird": "why this is the right premium/expansion offer", "howItHelps": "the bigger transformation it creates" },',
+    '  "journeyNarrative": "2-3 sentences"',
+    '}'
+  );
+
+  try {
+    var resp = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1000,
+        system: 'You are a strategic journey mapper. Respond ONLY with valid JSON. No markdown fences.',
+        messages: [{ role: 'user', content: lines.join('\n') }],
+        _meta: { tool: 'journey-builder', userId: uid }
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    var data = await resp.json();
+    var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('').trim();
+    text = text.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
+
+    journeyData = JSON.parse(text);
+    hideEl('loading-screen');
+    renderResults(journeyData, false);
+  } catch(e) {
+    console.error(e);
+    hideEl('loading-screen');
+    showEl('results-screen', 'block');
+    document.getElementById('results-screen').querySelector('.results-sub').textContent =
+      'Something went wrong generating your journey. Try refreshing the page.';
+    document.getElementById('action-row').innerHTML =
+      '<button class="btn-regen" onclick="location.reload()">↺ Try Again</button>';
+  }
+}
+
+function renderResults(data, isSaved) {
+  showEl('results-screen', 'block');
+
+  document.getElementById('jb-start').textContent = data.customerStartingPoint || '';
+  document.getElementById('jb-end').textContent   = data.desiredTransformation  || '';
+
+  var lm = data.leadMagnetTool || {};
+  document.getElementById('jb-lm-name').textContent = lm.name       || '—';
+  document.getElementById('jb-lm-why').textContent  = lm.whyFirst   || '';
+  document.getElementById('jb-lm-how').textContent  = lm.howItHelps || '';
+
+  var mvp = data.mvpTool || {};
+  document.getElementById('jb-mvp-name').textContent = mvp.name       || '—';
+  document.getElementById('jb-mvp-why').textContent  = mvp.whySecond  || '';
+  document.getElementById('jb-mvp-how').textContent  = mvp.howItHelps || '';
+
+  var exp = data.expansionTool || {};
+  document.getElementById('jb-exp-name').textContent = exp.name       || '—';
+  document.getElementById('jb-exp-why').textContent  = exp.whyThird   || '';
+  document.getElementById('jb-exp-how').textContent  = exp.howItHelps || '';
+
+  document.getElementById('jb-narrative').textContent = data.journeyNarrative || '';
+
+  if (isSaved) {
+    document.getElementById('action-row').innerHTML =
+      '<span class="saved-badge">✓ Journey Saved</span>' +
+      '<button class="btn-regen" onclick="regenerate()">↺ Regenerate</button>';
+  }
+}
+
+async function confirmJourney() {
+  if (!currentUser || !journeyData) return;
+  var btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    var payload = Object.assign({}, journeyData, {
+      userId:      currentUser.uid,
+      generatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('journey_maps').doc(currentUser.uid).set(payload);
+    await db.collection('users').doc(currentUser.uid).update({ journeyComplete: true });
+
+    document.getElementById('action-row').innerHTML =
+      '<span class="saved-badge">✓ Journey Saved</span>' +
+      '<button class="btn-regen" onclick="regenerate()">↺ Regenerate</button>' +
+      '<a href="dwy.html" style="font-size:13px;color:var(--text3);text-decoration:none;margin-left:4px;">← Back to Roadmap</a>';
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'This is my journey ✓';
+  }
+}
+
+async function regenerate() {
+  if (!currentUser) return;
+  journeyData = null;
+  hideEl('results-screen');
+  await generateJourney(currentUser);
+}
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('journey-builder', 'Journey Builder');</script>
+</body>
+</html>
