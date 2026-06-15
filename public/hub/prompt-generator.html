@@ -185,6 +185,42 @@
   }
   .btn-open-tool:hover { opacity: 0.85; }
 
+  /* BREAKTHROUGH SECTION */
+  .breakthrough-grid { display: flex; flex-direction: column; gap: 10px; }
+  .breakthrough-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.25rem;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .breakthrough-card-head { display: flex; align-items: center; gap: 10px; }
+  .breakthrough-badge {
+    font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 4px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
+  }
+  .breakthrough-tool-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .breakthrough-textarea {
+    width: 100%; height: 72px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text);
+    background: var(--bg); resize: none; outline: none; line-height: 1.5;
+  }
+  .breakthrough-textarea:focus { border-color: rgba(201,168,76,0.5); }
+  .breakthrough-footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-brief-copy {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: var(--radius-sm);
+    background: transparent; color: var(--text2);
+    border: 1px solid var(--border);
+    font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-brief-copy:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-brief-copy.copied { border-color: #2E7D32; color: #2E7D32; }
+
   /* MOBILE */
   @media (max-width: 767px) {
     .sidebar { transform: translateX(-100%); }
@@ -266,17 +302,14 @@
           </div>
         </div>
 
-        <div class="context-card">
-          <div class="context-card-head">
-            <div class="context-card-icon">📋</div>
-            <div class="context-card-title">Your Build Brief</div>
-          </div>
-          <div class="context-card-body" id="brief-body">
-            <div class="context-missing">Loading...</div>
-          </div>
-        </div>
-
       </div>
+    </div>
+
+    <!-- DISCOVER YOUR BREAKTHROUGH -->
+    <div class="divider"></div>
+    <div class="section-label">Discover Your Breakthrough</div>
+    <div class="breakthrough-grid" id="breakthrough-grid">
+      <div class="context-missing" style="padding:0.5rem 0;">Loading your tool ideas…</div>
     </div>
 
     <!-- TOOL 1 -->
@@ -428,21 +461,8 @@
     return '<div class="context-missing">No ' + label + ' data yet. <a href="' + href + '" class="context-link">Complete it →</a></div>';
   }
 
-  function extractBriefSections(brief) {
-    var sections = [];
-    var patterns = [
-      /##\s*What This Is[\s\S]*?(?=\n##|$)/i,
-      /##\s*Who It[''']?s For[\s\S]*?(?=\n##|$)/i,
-      /##\s*The Core AI Tool[\s\S]*?(?=\n##|$)/i
-    ];
-    patterns.forEach(function(p) {
-      var m = brief.match(p);
-      if (m) sections.push(m[0].trim());
-    });
-    return sections.join('\n\n');
-  }
 
-  var roadmapData = { spark: null, audience: null, brief: null };
+  var roadmapData = { spark: null, audience: null, breakthrough: null };
 
   async function loadRoadmapData(uid, email) {
     var emailLower = (email || '').toLowerCase();
@@ -451,7 +471,8 @@
       db.collection('spark_results').where('accountEmail', '==', emailLower).get(),
       db.collection('audience_results').where('userId', '==', uid).get(),
       db.collection('audience_results').where('accountEmail', '==', emailLower).get(),
-      db.collection('prompt_results').doc(uid).get()
+      db.collection('clarity_sessions').where('userId', '==', uid).where('status', '==', 'completed').get(),
+      db.collection('clarity_sessions').where('clientEmail', '==', emailLower).where('status', '==', 'completed').get()
     ]);
 
     var sparkDocs = [];
@@ -466,16 +487,25 @@
         r.value.docs.forEach(function(d) { audDocs.push(d.data()); });
       }
     });
-    var promptDoc = (results[4].status === 'fulfilled' && results[4].value.exists)
-      ? results[4].value.data() : null;
+    var clarityDocs = [];
+    [results[4], results[5]].forEach(function(r) {
+      if (r.status === 'fulfilled' && !r.value.empty) {
+        r.value.docs.forEach(function(d) { clarityDocs.push(d); });
+      }
+    });
+    var claritySession = clarityDocs.length
+      ? clarityDocs.sort(function(a, b) {
+          return (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0);
+        })[0].data()
+      : null;
 
-    roadmapData.spark    = sparkDocs.length ? sparkDocs[sparkDocs.length - 1] : null;
-    roadmapData.audience = audDocs.length   ? audDocs[audDocs.length - 1]     : null;
-    roadmapData.brief    = promptDoc;
+    roadmapData.spark       = sparkDocs.length ? sparkDocs[sparkDocs.length - 1] : null;
+    roadmapData.audience    = audDocs.length   ? audDocs[audDocs.length - 1]     : null;
+    roadmapData.breakthrough = claritySession;
 
     renderSparkCard(roadmapData.spark);
     renderAudienceCard(roadmapData.audience);
-    renderBriefCard(roadmapData.brief);
+    renderBreakthroughSection(roadmapData.breakthrough);
   }
 
   function renderSparkCard(spark) {
@@ -498,17 +528,63 @@
       '<div class="context-missing">Audience data found but fields are empty.</div>';
   }
 
-  function renderBriefCard(brief) {
-    var el = document.getElementById('brief-body');
-    if (!brief || !brief.promptText) { el.innerHTML = missingHtml('Build Brief', '/prompt-generator.html'); return; }
-    var appName = brief.appName || 'Your Tool';
-    var brief3 = extractBriefSections(brief.promptText);
-    var preview = brief3
-      ? brief3.replace(/##[^\n]*/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, 200)
-      : (brief.promptText || '').trim().slice(0, 200);
-    el.innerHTML =
-      '<div class="context-row"><div class="context-row-label">App Name</div><div class="context-row-value">' + esc(appName) + '</div></div>' +
-      '<div class="context-row"><div class="context-row-label">Brief Preview</div><div class="context-row-value" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;">' + esc(preview) + (brief.promptText.length > 200 ? '…' : '') + '</div></div>';
+  function renderBreakthroughSection(session) {
+    var el = document.getElementById('breakthrough-grid');
+    if (!session || !session.tools) {
+      el.innerHTML = '<div class="context-missing">No Breakthrough data yet. <a href="https://toolspark.co/clarity.html" class="context-link">Complete Discover Your Breakthrough →</a></div>';
+      return;
+    }
+    var tools = session.tools;
+    var chosen = session.chosenTool || 0;
+    var slots = [
+      { key: 'idea1', label: 'Tool 1', data: tools.idea1 },
+      { key: 'idea2', label: 'Tool 2', data: tools.idea2 },
+      { key: 'idea3', label: 'Tool 3', data: tools.idea3 }
+    ];
+    el.innerHTML = slots.map(function(s, i) {
+      var d = s.data || {};
+      var name = d.name || d.toolName || '';
+      var desc = d.description || d.summary || '';
+      var isChosen = (chosen === i + 1);
+      return '<div class="breakthrough-card">' +
+        '<div class="breakthrough-card-head">' +
+          '<span class="breakthrough-badge">' + s.label + (isChosen ? ' · Chosen' : '') + '</span>' +
+          '<div class="breakthrough-tool-name">' + esc(name || 'Unnamed tool') + '</div>' +
+        '</div>' +
+        '<textarea class="breakthrough-textarea" id="btx-' + i + '" placeholder="Describe what this tool does…">' + esc(desc) + '</textarea>' +
+        '<div class="breakthrough-footer">' +
+          '<button class="btn-brief-copy" id="btn-brief-' + i + '" onclick="copyBrief(' + i + ')">' +
+            '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>' +
+            'Copy Description' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function copyBrief(idx) {
+    var btn  = document.getElementById('btn-brief-' + idx);
+    var text = (document.getElementById('btx-' + idx).value || '').trim();
+    if (!text) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Description';
+      btn.classList.remove('copied');
+    }, 2000);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
   }
 
   function savePrompt(slot) {

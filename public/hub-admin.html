@@ -234,6 +234,16 @@
 <!-- Nav injected by nav.js -->
 
 <!-- NAME YOUR HUB — pre-screen for new creators -->
+<div id="gate-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;padding:2rem;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:440px;width:100%;box-shadow:var(--shadow-md);text-align:center;">
+    <div style="font-size:36px;margin-bottom:1rem;">🔒</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:0.75rem;color:var(--text);">Complete Your Breakthrough First</h2>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.6;">Your Creator Hub is built around your AI tool idea. Complete <strong>Discover Your Breakthrough</strong> first so you know exactly what you're building.</p>
+    <a href="https://toolspark.co/clarity.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--gold);color:#0C0B09;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;border-radius:var(--radius-sm);text-decoration:none;">Go to Discover Your Breakthrough →</a>
+    <div style="margin-top:1rem;"><a href="https://toolspark.co/dashboard.html" style="font-size:13px;color:var(--text3);text-decoration:none;">← Back to Dashboard</a></div>
+  </div>
+</div>
+
 <div id="setup-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;padding:2rem;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:480px;width:100%;box-shadow:var(--shadow-md);">
     <div style="font-size:36px;margin-bottom:1rem;">✨</div>
@@ -644,16 +654,38 @@ service cloud.firestore {
     currentUser = user;
     db.collection('users').doc(user.uid).get().then(function(snap) {
       var data = snap.exists ? snap.data() : {};
-      if (!data.hubSlug) {
-        document.getElementById('setup-screen').style.display = 'flex';
-        document.getElementById('main-wrap').style.display = 'none';
-        return;
+      if (!data.breakthroughComplete) {
+        // Fall back to querying clarity_sessions for users who completed before flag was on user doc
+        var email = (user.email || '').toLowerCase();
+        return Promise.all([
+          db.collection('clarity_sessions').where('userId', '==', user.uid).where('breakthroughComplete', '==', true).limit(1).get(),
+          db.collection('clarity_sessions').where('clientEmail', '==', email).where('breakthroughComplete', '==', true).limit(1).get()
+        ]).then(function(results) {
+          var found = results.some(function(r) { return !r.empty; });
+          if (!found) {
+            document.getElementById('gate-screen').style.display = 'flex';
+            document.getElementById('main-wrap').style.display = 'none';
+            return;
+          }
+          // Backfill the user doc so future loads skip this query
+          db.collection('users').doc(user.uid).update({ breakthroughComplete: true }).catch(function() {});
+          proceedToHub(data);
+        });
       }
-      hubSlug = data.hubSlug;
-      updateUrlDisplay();
-      loadSettings();
+      proceedToHub(data);
     });
   });
+
+  function proceedToHub(data) {
+    if (!data.hubSlug) {
+      document.getElementById('setup-screen').style.display = 'flex';
+      document.getElementById('main-wrap').style.display = 'none';
+      return;
+    }
+    hubSlug = data.hubSlug;
+    updateUrlDisplay();
+    loadSettings();
+  }
 
   function updateUrlDisplay() {
     var url = 'toolspark.co/hub/' + hubSlug;

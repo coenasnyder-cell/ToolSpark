@@ -890,6 +890,8 @@
           idea3: { name: ordered[2]?.name || '', description: ordered[2]?.summary || '' }
         }
       });
+      const u = firebase.auth().currentUser;
+      if (u) db.collection('users').doc(u.uid).update({ breakthroughComplete: true }).catch(() => {});
       currentSessionData = { ...currentSessionData, chosenTool: index };
       renderRoadmap(currentSessionData, currentSessionId);
     } catch(e) {

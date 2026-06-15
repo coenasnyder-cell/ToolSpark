@@ -163,8 +163,8 @@
   /* prompt saved banner */
   .prompt-saved-banner {
     display:flex; flex-direction:column; align-items:center; gap:14px;
-    padding:22px 28px; border-radius:14px;
-    background:var(--green-dim); border:1px solid rgba(61,138,101,0.3);
+    padding:22px 28px; border-radius:14px 14px 0 0;
+    background:var(--green-dim); border:1px solid rgba(61,138,101,0.3); border-bottom:none;
     text-align:center; animation:fadeUp 0.35s ease both;
   }
   .prompt-saved-title { font-size:15px; font-weight:700; color:#c8e6d6; }
@@ -176,6 +176,38 @@
     text-decoration:none; transition:all 0.2s;
   }
   .btn-lets-build:hover { background:var(--gold-light); }
+  .generated-prompt-wrap {
+    border:1px solid rgba(61,138,101,0.3); border-top:1px solid rgba(61,138,101,0.15);
+    border-radius:0 0 14px 14px;
+    background:var(--dark2);
+    padding:16px;
+    display:flex; flex-direction:column; gap:10px;
+    animation:fadeUp 0.35s ease both;
+  }
+  .generated-prompt-label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(240,237,230,0.4); }
+  .generated-prompt-ta {
+    width:100%; min-height:200px; max-height:380px;
+    padding:12px 14px; border:1px solid var(--border); border-radius:8px;
+    font-family:'Lato',sans-serif; font-size:13px; color:#F0EDE6;
+    background:var(--dark3); resize:vertical; outline:none; line-height:1.7;
+  }
+  .generated-prompt-ta:focus { border-color:rgba(201,168,76,0.4); }
+  .generated-prompt-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .btn-copy-prompt {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 18px; border-radius:8px;
+    background:transparent; color:rgba(240,237,230,0.7);
+    border:1px solid var(--border);
+    font-family:'Lato',sans-serif; font-size:12px; font-weight:700;
+    cursor:pointer; transition:all 0.15s;
+  }
+  .btn-copy-prompt:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-copy-prompt.copied { border-color:#3D8A65; color:#3D8A65; }
+  .btn-edit-builder {
+    font-size:12px; font-weight:700; color:rgba(201,168,76,0.8);
+    text-decoration:none; margin-left:auto;
+  }
+  .btn-edit-builder:hover { color:var(--gold); }
 
   /* thinking dots */
   .thinking { display:flex; gap:12px; align-items:flex-end; margin-bottom:22px; animation:fadeUp 0.3s ease both; }
@@ -646,14 +678,26 @@ async function generateToolPrompt() {
     slotUpdate.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
     await db.collection('hubs').doc(hubSlug).update(slotUpdate);
 
-    // Replace CTA with success banner
+    // Replace CTA with success banner + editable prompt
     const ctaEl = document.getElementById('gen-prompt-cta');
     if (ctaEl) {
       ctaEl.innerHTML = `
         <div class="prompt-saved-banner">
-          <div class="prompt-saved-title">Tool ${slot} is built.</div>
-          <a href="/hub/${hubSlug}/tool?slot=${slot}" class="btn-lets-build">View Your Tool →</a>
+          <div class="prompt-saved-title">✓ Tool ${slot} is built.</div>
+          <a href="/hub/${hubSlug}/tool?slot=${slot}" class="btn-lets-build">Test Your Tool →</a>
+        </div>
+        <div class="generated-prompt-wrap">
+          <div class="generated-prompt-label">Your generated system prompt — review and edit</div>
+          <textarea class="generated-prompt-ta" id="generated-prompt-ta"></textarea>
+          <div class="generated-prompt-actions">
+            <button class="btn-copy-prompt" id="btn-copy-prompt" onclick="copyGeneratedPrompt()">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy Prompt
+            </button>
+            <a href="/hub/prompt-generator" class="btn-edit-builder">Edit in Tool Builder →</a>
+          </div>
         </div>`;
+      document.getElementById('generated-prompt-ta').value = prompt;
     }
     document.getElementById('chatWrap').scrollTop = document.getElementById('chatWrap').scrollHeight;
 
@@ -664,6 +708,31 @@ async function generateToolPrompt() {
     addMsg('assistant', 'Something went wrong — give it another try.');
     console.error(e);
   }
+}
+
+function copyGeneratedPrompt() {
+  var ta  = document.getElementById('generated-prompt-ta');
+  var btn = document.getElementById('btn-copy-prompt');
+  if (!ta || !ta.value.trim()) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(ta.value).catch(function() { legacyCopy(ta.value); });
+  } else {
+    legacyCopy(ta.value);
+  }
+  btn.textContent = '✓ Copied!';
+  btn.classList.add('copied');
+  setTimeout(function() {
+    btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Prompt';
+    btn.classList.remove('copied');
+  }, 2000);
+}
+
+function legacyCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
 }
 
 // ── INPUT BEHAVIOUR ──

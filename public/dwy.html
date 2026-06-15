@@ -376,19 +376,26 @@
         <div class="quick-label">Community</div>
         <div class="quick-sub">Ask &amp; share</div>
       </a>
+      <a href="hub-admin.html" class="quick-card" id="quick-creator-hub">
+        <div class="quick-icon" style="background:rgba(29,124,144,0.1);border:1px solid rgba(29,124,144,0.18);">
+          <svg width="18" height="18" fill="none" stroke="#1D7C90" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div class="quick-label">Creator Hub</div>
+        <div class="quick-sub" id="quick-creator-hub-sub">Set up your hub</div>
+      </a>
     </div>
 
     <!-- Set Up Your Creator Hub -->
-    <div class="section-card">
+    <div class="section-card" id="creator-hub-card">
       <div class="section-header">
         <div class="section-icon" style="background:rgba(29,124,144,0.1);border:1px solid rgba(29,124,144,0.18);">
           <svg width="16" height="16" fill="none" stroke="#1D7C90" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         </div>
-        <div class="section-title">Set Up Your Creator Hub</div>
+        <div class="section-title" id="creator-hub-title">Set Up Your Creator Hub</div>
       </div>
       <div class="section-body">
-        <p class="empty-prompt">Your Creator Hub is where your AI tool lives. Set it up once and your clients will use it to get real results — right from your own branded page.</p>
-        <a href="hub-admin.html" class="action-link">Go to Creator Hub →</a>
+        <p class="empty-prompt" id="creator-hub-desc">Your Creator Hub is where your AI tool lives. Set it up once and your clients will use it to get real results — right from your own branded page.</p>
+        <a href="hub-admin.html" class="action-link" id="creator-hub-link">Go to Creator Hub →</a>
       </div>
     </div>
 
@@ -449,7 +456,7 @@
       </div>
       <div class="phase-card-body">
         <div class="phase-tools">
-          <a href="breakthrough.html" class="phase-tool-btn">🌟 Breakthrough Session</a>
+          <a href="clarity.html" class="phase-tool-btn">🌟 Breakthrough Session</a>
           <a href="sparky.html" class="phase-tool-btn">💬 Sparky</a>
           <a href="community.html" class="phase-tool-btn">👥 Community</a>
         </div>
@@ -807,6 +814,18 @@
       }
       if (u.sparkStatement) {
         document.getElementById('hero-spark').textContent = '"' + u.sparkStatement + '"';
+      }
+      if (u.hubSlug) {
+        document.getElementById('creator-hub-title').textContent = 'Go to My Hub';
+        document.getElementById('creator-hub-desc').textContent = 'Your Creator Hub is live. Manage your tool, settings, and members.';
+        var hubLink = document.getElementById('creator-hub-link');
+        hubLink.textContent = 'Go to My Hub →';
+        hubLink.href = '/hub/admin-dashboard';
+        var quickHub = document.getElementById('quick-creator-hub');
+        if (quickHub) {
+          quickHub.href = '/hub/admin-dashboard';
+          document.getElementById('quick-creator-hub-sub').textContent = 'Manage your hub';
+        }
       }
     }
 
