@@ -247,20 +247,22 @@ auth.onAuthStateChanged(async function(user) {
   setStep('Checking your profile…');
 
   try {
+    // Check for an existing journey map first — if it's there, show it regardless of gate
+    var existingSnap = await db.collection('journey_maps').doc(user.uid).get();
+    if (existingSnap.exists) {
+      journeyData = existingSnap.data();
+      hideEl('loading-screen');
+      renderResults(journeyData, true);
+      return;
+    }
+
+    // No existing map — check the breakthrough gate before generating a new one
     var userSnap = await db.collection('users').doc(user.uid).get();
     var userData = userSnap.exists ? userSnap.data() : {};
 
     if (!userData.breakthroughComplete) {
       hideEl('loading-screen');
       showEl('lock-screen', 'flex');
-      return;
-    }
-
-    var existingSnap = await db.collection('journey_maps').doc(user.uid).get();
-    if (existingSnap.exists) {
-      journeyData = existingSnap.data();
-      hideEl('loading-screen');
-      renderResults(journeyData, true);
       return;
     }
 
