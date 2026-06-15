@@ -470,10 +470,10 @@
     // 3 — Journey Map
     if (journeyMap) {
       completed++;
-      sections += sectionCard('03', 'Journey Map', true, false, renderJourneyMap(journeyMap), 'journey-map.html', journeyMap.completedAt);
+      sections += sectionCard('03', 'Journey Map', true, false, renderJourneyMap(journeyMap), 'journey-builder.html', journeyMap.completedAt);
     } else {
       sections += sectionCard('03', 'Journey Map', false, false,
-        '<p class="incomplete-msg">You haven\'t mapped your customer journey yet.</p><a class="btn-go" href="journey-map.html">Go to Journey Map →</a>',
+        '<p class="incomplete-msg">You haven\'t mapped your customer journey yet.</p><a class="btn-go" href="journey-builder.html">Go to Journey Map →</a>',
         null);
     }
 
