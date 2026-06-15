@@ -277,7 +277,7 @@ Your feedback helps them get to certification. 🙌`;
   async function loadAlerts() {
     try {
       const snap = await db.collection('admin_alerts')
-        .where('type', '==', 'just_sparked')
+        .where('type', 'in', ['just_sparked', 'graduation_request'])
         .get();
 
       allAlerts = snap.docs
@@ -303,9 +303,9 @@ Your feedback helps them get to certification. 🙌`;
     if (filtered.length === 0) {
       list.style.display = 'none';
       empty.style.display = 'block';
-      empty.textContent = currentFilter === 'pending' ? 'All caught up — no pending launches.' :
-                          currentFilter === 'done'    ? 'No completed launches yet.' :
-                          'No Just Sparked posts yet.';
+      empty.textContent = currentFilter === 'pending' ? 'All caught up — nothing pending.' :
+                          currentFilter === 'done'    ? 'No completed alerts yet.' :
+                          'No alerts yet.';
       return;
     }
 
@@ -322,10 +322,16 @@ Your feedback helps them get to certification. 🙌`;
             <div class="alert-meta">${escHtml(a.authorName || '')} · ${time}</div>
           </div>
           <div class="alert-actions">
-            <a class="btn-view" href="community.html#thread-${escHtml(a.threadId || '')}" target="_blank">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              View Thread
-            </a>
+            ${a.type === 'graduation_request'
+              ? `<a class="btn-view" href="${escHtml(a.toolUrl || '#')}" target="_blank">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  View Tool
+                </a>`
+              : `<a class="btn-view" href="community.html#thread-${escHtml(a.threadId || '')}" target="_blank">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  View Thread
+                </a>`
+            }
             ${isDone
               ? `<button class="btn-done is-done" disabled>✓ Done</button>`
               : `<button class="btn-done" onclick="markDone('${a.id}')">Mark Done</button>`

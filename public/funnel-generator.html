@@ -160,6 +160,18 @@
   .check-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .check-box.checked { background: var(--green); border-color: var(--green); color: white; font-size: 11px; }
 
+  .hosting-toggle { display: flex; align-items: center; gap: 8px; background: none; border: none; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--text2); cursor: pointer; padding: 0; margin-bottom: 0; transition: color 0.15s; }
+  .hosting-toggle:hover { color: var(--text); }
+  .hosting-toggle svg { transition: transform 0.2s; flex-shrink: 0; }
+  .hosting-toggle.open svg { transform: rotate(180deg); }
+  .hosting-panel { display: none; margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .hosting-panel.open { display: block; }
+  .hosting-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .hosting-option:last-child { border-bottom: none; }
+  .hosting-badge { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); border-radius: 4px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+  .hosting-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .hosting-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .hosting-wrap { margin-bottom: 1.25rem; }
   .save-strip { padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .btn-save-launch { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--gold); color: var(--dark); font-weight: 900; font-size: 14px; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; font-family: 'Lato', sans-serif; }
   .btn-save-launch:hover { opacity: 0.88; }
@@ -367,6 +379,36 @@
           </div>
         </div>
 
+        <div class="hosting-wrap">
+          <button class="hosting-toggle" id="hosting-toggle" onclick="toggleHosting()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            How do I publish these pages?
+          </button>
+          <div class="hosting-panel" id="hosting-panel">
+            <div class="hosting-option">
+              <span class="hosting-badge">Fastest</span>
+              <div>
+                <div class="hosting-name">Netlify Drop</div>
+                <div class="hosting-desc">Go to <strong>drop.netlify.com</strong>, drag your HTML file onto the page, and you'll have a live URL in seconds. Free, no account required.</div>
+              </div>
+            </div>
+            <div class="hosting-option">
+              <span class="hosting-badge">Easiest</span>
+              <div>
+                <div class="hosting-name">Carrd</div>
+                <div class="hosting-desc">Create a free account at <strong>carrd.co</strong>, start a new site, choose "Embed" → "Code", paste your HTML in, and publish. Paid plan (~$19/yr) needed for a custom domain.</div>
+              </div>
+            </div>
+            <div class="hosting-option">
+              <span class="hosting-badge">Already have a site?</span>
+              <div>
+                <div class="hosting-name">Squarespace / Webflow</div>
+                <div class="hosting-desc">In Squarespace, add a new page and use a Code Block to paste your HTML. In Webflow, use the Embed element. Both work — Webflow gives more control over layout.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="section-label">Before You Publish</div>
         <div class="checklist-block">
           <div class="check-item"><div class="check-box" onclick="toggleCheck(this)"></div><span>Connect your email provider to the lead page form</span></div>
@@ -397,7 +439,8 @@
     discovery: '',
     transformation: '', coreDelivery: '', obstacleRemover: '',
     keepNames: [],
-    justification: '', format: ''
+    justification: '', format: '',
+    audiencePainPoints: '', audienceDesires: '', audienceLanguage: ''
   };
 
   var q1Selection = null; // 0-3
@@ -474,13 +517,15 @@
         db.collection('journey_maps').doc(user.uid).get(),
         db.collection('offer_sort_results').doc(user.uid).get(),
         db.collection('offer_results').doc(user.uid).get(),
-        db.collection('funnel_generator_results').doc(user.uid).get()
+        db.collection('funnel_generator_results').doc(user.uid).get(),
+        db.collection('audience_results').where('userId', '==', user.uid).limit(1).get()
       ]);
 
       var journeySnap      = results[0];
       var offerSortSnap    = results[1];
       var offerBuilderSnap = results[2];
       var funnelResultSnap = results[3];
+      var audienceSnap     = results[4];
 
       // Journey Map is required and must have a tool in Box 2
       if (journeySnap.status !== 'fulfilled' || !journeySnap.value.exists) {
@@ -517,6 +562,16 @@
         fData.justification = ob.justification || '';
         fData.format        = ob.format || '';
         if (!fData.toolPrice && ob.accessiblePrice) fData.toolPrice = ob.accessiblePrice;
+      }
+
+      // Audience data (soft — not required, fails gracefully if missing)
+      if (audienceSnap && audienceSnap.status === 'fulfilled' && !audienceSnap.value.empty) {
+        var ad = audienceSnap.value.docs[0].data();
+        var painParts = [ad.dailyFrustration, ad.whatTheyHaveTried, ad.theirObjections].filter(Boolean);
+        fData.audiencePainPoints = painParts.join(' | ');
+        var desireParts = [ad.dreamOutcome, ad.howTheyWantToBeeSeen].filter(Boolean);
+        fData.audienceDesires = desireParts.join(' | ');
+        fData.audienceLanguage = ad.theirWords || '';
       }
 
       buildQ1Buttons();
@@ -642,6 +697,13 @@
       justSection + '\n' +
       'Discovery Method: ' + (fData.discovery || 'not specified') + '\n' +
       'Testimonial/Proof: ' + proofSection + '\n\n' +
+      (fData.audiencePainPoints || fData.audienceDesires || fData.audienceLanguage
+        ? 'AUDIENCE VOICE (use this language verbatim in copy):\n' +
+          (fData.audiencePainPoints ? 'Pain points: ' + fData.audiencePainPoints + '\n' : '') +
+          (fData.audienceDesires ? 'What they want: ' + fData.audienceDesires + '\n' : '') +
+          (fData.audienceLanguage ? 'Phrases they use: ' + fData.audienceLanguage + '\n' : '') +
+          '\n'
+        : '') +
       'Write specific, real copy — no generic placeholders except where noted. Use the student\'s data throughout.\n\n' +
       'Return ONLY these fields in this exact format:\n\n' +
       'LEAD_HEADLINE: [Use formula: "Get [leadMagnet] and finally [transformation] — without [biggest obstacle]"]\n' +
@@ -945,6 +1007,13 @@
     document.getElementById('setup-section').style.display = 'block';
     document.getElementById('setup-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     validateSetup();
+  }
+
+  function toggleHosting() {
+    var btn = document.getElementById('hosting-toggle');
+    var panel = document.getElementById('hosting-panel');
+    btn.classList.toggle('open');
+    panel.classList.toggle('open');
   }
 
   function toggleCheck(el) {

@@ -235,19 +235,24 @@
 
 <!-- NAME YOUR HUB — pre-screen for new creators -->
 <div id="setup-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;padding:2rem;">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:460px;width:100%;box-shadow:var(--shadow-md);">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:480px;width:100%;box-shadow:var(--shadow-md);">
     <div style="font-size:36px;margin-bottom:1rem;">✨</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;margin-bottom:0.5rem;color:var(--text);">Name your hub</h2>
-    <p style="font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.6;">This becomes your hub's URL. You can update the display name any time.</p>
-    <div class="field" style="margin-bottom:1rem;">
-      <label for="setup-hub-name">Hub Name</label>
-      <input type="text" id="setup-hub-name" placeholder="e.g. Sarah's Caption Studio" maxlength="50" oninput="previewSlug()">
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;margin-bottom:0.5rem;color:var(--text);">Set up your hub</h2>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:1.75rem;line-height:1.6;">Give your hub a name and pick your URL. The URL can't be changed after setup.</p>
+    <div class="field" style="margin-bottom:1.25rem;">
+      <label for="setup-hub-name">Hub Name <span style="font-weight:400;color:var(--text3);font-size:12px;">shown to your members</span></label>
+      <input type="text" id="setup-hub-name" placeholder="e.g. Sarah's Caption Studio" maxlength="50" oninput="autoSlugFromName()">
     </div>
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);">
-      Your URL: <span style="font-family:monospace;color:var(--gold);">toolspark.co/hub/<span id="slug-preview">...</span></span>
+    <div class="field" style="margin-bottom:0.5rem;">
+      <label for="setup-hub-slug">Hub URL <span style="font-weight:400;color:var(--text3);font-size:12px;">permanent — choose carefully</span></label>
+      <div id="slug-input-wrap" style="display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);overflow:hidden;transition:box-shadow 0.15s,border-color 0.15s;">
+        <span style="padding:10px 10px 10px 12px;font-size:13px;color:var(--text3);white-space:nowrap;border-right:1px solid var(--border);background:#eeebe5;flex-shrink:0;">toolspark.co/hub/</span>
+        <input type="text" id="setup-hub-slug" placeholder="your-hub" maxlength="40" oninput="onSlugInput()" onfocus="document.getElementById('slug-input-wrap').style.boxShadow='0 0 0 3px rgba(201,168,76,0.12)';document.getElementById('slug-input-wrap').style.borderColor='var(--gold)';" onblur="document.getElementById('slug-input-wrap').style.boxShadow='';document.getElementById('slug-input-wrap').style.borderColor='var(--border)';" style="border:none;border-radius:0;background:transparent;flex:1;min-width:0;padding:10px 12px;font-family:'Lato',sans-serif;font-size:14px;color:var(--text);outline:none;">
+      </div>
+      <div id="slug-status" style="font-size:12px;min-height:18px;margin-top:5px;color:var(--text3);"></div>
     </div>
     <div class="modal-error" id="setup-error" style="margin-bottom:0.75rem;"></div>
-    <button class="btn-save" id="setup-btn" onclick="createHub()" style="width:100%;justify-content:center;">Create My Hub →</button>
+    <button class="btn-save" id="setup-btn" onclick="createHub()" style="width:100%;justify-content:center;margin-top:1rem;">Create My Hub →</button>
   </div>
 </div>
 
@@ -260,7 +265,7 @@
       <p>Customize your hub — changes save to Firestore and go live instantly</p>
     </div>
     <div class="top-bar-right">
-      <a id="view-hub-btn" href="#" target="_blank" class="btn-view">
+      <a id="view-hub-btn" href="#" target="_blank" class="btn-view" style="display:none;">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         View Hub
       </a>
@@ -405,7 +410,8 @@ service cloud.firestore {
       </div>
       <div class="card-body">
         <div id="admin-acct-form">
-          <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1rem;">Create your admin credentials. You'll use this email and password to log in to your hub as the owner.</p>
+          <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:0.75rem;">Create your admin credentials. You'll use this email and password to log in to your hub as the owner.</p>
+          <div style="background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--text);font-weight:700;">⚠️ Please use the same email and password you use for ToolSpark.</div>
           <div class="field-row">
             <div class="field">
               <label for="admin-email">Email</label>
@@ -444,18 +450,12 @@ service cloud.firestore {
         <div><div class="card-title">Your Brand</div><div class="card-desc">Give your hub a name, tagline, and logo</div></div>
       </div>
       <div class="card-body">
-        <div class="field-row">
-          <div class="field">
-            <label for="hubName">Hub Name</label>
-            <input type="text" id="hubName" placeholder="e.g. Sarah's Caption Studio" maxlength="50">
-          </div>
-          <div class="field">
-            <label for="hubTagline">Tagline <span>optional</span></label>
-            <input type="text" id="hubTagline" placeholder="e.g. AI tools for real estate agents" maxlength="80">
-          </div>
+        <div class="field">
+          <label for="hubName">Hub Name</label>
+          <input type="text" id="hubName" placeholder="e.g. Sarah's Caption Studio" maxlength="50">
         </div>
         <div class="field">
-          <label>Logo <span>optional</span></label>
+          <label>Logo <span>optional — you can add this later in Hub Settings</span></label>
           <div class="logo-upload-wrap">
             <img id="logo-preview" class="logo-preview" src="" alt="Logo">
             <div style="flex:1;">
@@ -479,7 +479,7 @@ service cloud.firestore {
     <div class="settings-card">
       <div class="card-header">
         <div class="card-icon">🧩</div>
-        <div><div class="card-title">Hub Features</div><div class="card-desc">Choose which pages appear in your hub navigation</div></div>
+        <div><div class="card-title">Hub Features</div><div class="card-desc">Choose which pages appear in your hub navigation — all on by default, turn off anything you don't need yet</div></div>
       </div>
       <div class="card-body">
         <div class="toggle-row">
@@ -494,9 +494,13 @@ service cloud.firestore {
           <div><div class="toggle-label">Support</div><div class="toggle-sub">Contact form so members can reach you</div></div>
           <label class="toggle"><input type="checkbox" id="feature-support" checked><span class="toggle-slider"></span></label>
         </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Members Only</div><div class="toggle-sub" id="members-only-label">Open access — anyone can visit and use your tool</div></div>
+          <label class="toggle"><input type="checkbox" id="membersOnly" onchange="updateMembersLabel()"><span class="toggle-slider"></span></label>
+        </div>
       </div>
     </div>
-    <div class="settings-card" style="border-color: rgba(46,204,113,0.3); box-shadow: 0 0 0 3px rgba(46,204,113,0.06), var(--shadow);">
+    <div class="settings-card" style="border-color: rgba(46,204,113,0.3); box-shadow: 0 0 0 3px rgba(46,204,13,0.06), var(--shadow);">
       <div class="card-header" style="background: rgba(46,204,113,0.05);">
         <div class="card-icon">🚀</div>
         <div><div class="card-title">Publish Your Hub</div><div class="card-desc">Flip the switch and share your hub with the world</div></div>
@@ -506,12 +510,16 @@ service cloud.firestore {
           <div><div class="toggle-label">Hub Status</div><div class="toggle-sub" id="hub-status-label">Preview mode — only you can see it</div></div>
           <label class="toggle"><input type="checkbox" id="isLive" onchange="updateStatusLabel()"><span class="toggle-slider"></span></label>
         </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">Members Only</div><div class="toggle-sub" id="members-only-label">Tool is public — anyone can use it</div></div>
-          <label class="toggle"><input type="checkbox" id="membersOnly" onchange="updateMembersLabel()"><span class="toggle-slider"></span></label>
-        </div>
         <div class="domain-info">
-          <p>Your hub is live at <strong id="domain-info-url">toolspark.co/hub/...</strong>. At graduation you'll connect your own domain — we'll walk you through it step by step.</p>
+          <p>Your hub is live at <strong id="domain-info-url">toolspark.co/hub/...</strong>. You can update features, branding, and access settings from your dashboard any time.</p>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1.25rem;">
+          <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:6px;">Not ready to set up Firebase?</div>
+          <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:0.75rem;">You can export your hub files now and connect Firebase later. The video walkthrough covers this step by step.</p>
+          <button class="btn-export" onclick="showExportModal()" style="font-size:13px;padding:9px 16px;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Hub Files
+          </button>
         </div>
       </div>
     </div>
@@ -677,20 +685,15 @@ service cloud.firestore {
   function updateMembersLabel() {
     var on = document.getElementById('membersOnly').checked;
     document.getElementById('members-only-label').textContent = on
-      ? 'Members only — visitors must create an account to use the tool'
-      : 'Tool is public — anyone can use it';
+      ? 'Members only — visitors must create an account to access your tool'
+      : 'Open access — anyone can visit and use your tool';
   }
 
   function updateStatusLabel() {
     var live = document.getElementById('isLive').checked;
-    document.getElementById('hub-status-label').textContent = live ? 'Live — your hub is public' : 'Preview mode — only you can see it';
+    document.getElementById('hub-status-label').textContent = live ? 'Live — your hub is visible to visitors' : 'Preview mode — only you can see it';
     document.getElementById('live-badge').textContent = live ? 'Live' : 'Preview';
     document.getElementById('live-badge').className = 'hub-live-badge ' + (live ? 'live' : 'preview');
-    // Hub Status = Public means open access — auto-clear Members Only
-    if (live) {
-      document.getElementById('membersOnly').checked = false;
-      updateMembersLabel();
-    }
   }
 
   // ── LOGO UPLOAD ──
@@ -821,7 +824,7 @@ service cloud.firestore {
       btn.disabled = false;
       btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Save Settings';
       setTimeout(function() { status.textContent = ''; }, 3000);
-      if (firstPublish) showCelebrate();
+      if (firstPublish) { window.location.href = 'hub-launch.html?slug=' + encodeURIComponent(hubSlug); return; }
     }).catch(function(e) {
       status.textContent = 'Error: ' + e.message;
       status.className = 'save-status error';
@@ -1117,30 +1120,91 @@ service cloud.firestore {
   }
 
   // ── HUB NAME PRE-SCREEN ──
-  function previewSlug() {
+  var slugManuallyEdited = false;
+  var slugCheckTimer = null;
+  var slugAvailable = false;
+
+  function toSlug(s) {
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  function autoSlugFromName() {
+    if (slugManuallyEdited) return;
     var name = document.getElementById('setup-hub-name').value;
-    var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || '...';
-    document.getElementById('slug-preview').textContent = slug;
+    var slug = toSlug(name);
+    document.getElementById('setup-hub-slug').value = slug;
+    scheduleSlugCheck(slug);
+  }
+
+  function onSlugInput() {
+    var raw = document.getElementById('setup-hub-slug').value;
+    var normalized = raw.toLowerCase().replace(/[^a-z0-9-]+/g, '').replace(/^-+/, '');
+    if (normalized !== raw) {
+      document.getElementById('setup-hub-slug').value = normalized;
+    }
+    slugManuallyEdited = true;
+    scheduleSlugCheck(normalized);
+  }
+
+  function scheduleSlugCheck(slug) {
+    slugAvailable = false;
+    clearTimeout(slugCheckTimer);
+    var statusEl = document.getElementById('slug-status');
+    if (!slug) { statusEl.textContent = ''; return; }
+    statusEl.style.color = 'var(--text3)';
+    statusEl.textContent = 'Checking availability...';
+    slugCheckTimer = setTimeout(function() { checkSlugAvailability(slug); }, 450);
+  }
+
+  function checkSlugAvailability(slug) {
+    var statusEl = document.getElementById('slug-status');
+    if (!slug || slug.length < 2) {
+      statusEl.style.color = '#C0392B';
+      statusEl.textContent = 'URL must be at least 2 characters.';
+      slugAvailable = false;
+      return;
+    }
+    db.collection('hubs').doc(slug).get().then(function(snap) {
+      if (snap.exists) {
+        statusEl.style.color = '#C0392B';
+        statusEl.textContent = '✗ Already taken — try a different URL.';
+        slugAvailable = false;
+      } else {
+        statusEl.style.color = '#2E7D32';
+        statusEl.textContent = '✓ Available';
+        slugAvailable = true;
+      }
+    }).catch(function() {
+      statusEl.style.color = 'var(--text3)';
+      statusEl.textContent = 'Could not check — please try again.';
+      slugAvailable = false;
+    });
   }
 
   function createHub() {
     var name = document.getElementById('setup-hub-name').value.trim();
-    var slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    var slug = document.getElementById('setup-hub-slug').value.trim();
     var errEl = document.getElementById('setup-error');
     var btn = document.getElementById('setup-btn');
     errEl.textContent = '';
-    if (!name || !slug) { errEl.textContent = 'Please enter a hub name.'; return; }
+    if (!name) { errEl.textContent = 'Please enter a hub name.'; return; }
+    if (!slug || slug.length < 2) { errEl.textContent = 'Please enter a hub URL (at least 2 characters).'; return; }
+    if (!slugAvailable) { errEl.textContent = 'Please wait for availability check or pick a different URL.'; return; }
     btn.disabled = true;
     btn.textContent = 'Creating...';
     db.collection('hubs').doc(slug).get().then(function(snap) {
       if (snap.exists) {
-        errEl.textContent = 'That URL is already taken — try a different name.';
+        errEl.textContent = 'That URL was just taken — try a different one.';
+        document.getElementById('slug-status').style.color = '#C0392B';
+        document.getElementById('slug-status').textContent = '✗ Already taken — try a different URL.';
+        slugAvailable = false;
         btn.disabled = false;
         btn.textContent = 'Create My Hub →';
         return;
       }
       return db.collection('hubs').doc(slug).set({
         hubName: name,
+        owner: currentUser.uid,
         ownerEmail: currentUser.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         isLive: false,

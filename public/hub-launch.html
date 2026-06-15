@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Hub is Live — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --gold: #C9A84C; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45;
+    --radius: 16px; --radius-sm: 8px;
+    --shadow: 0 8px 40px rgba(0,0,0,0.1);
+  }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .emoji { font-size: 60px; margin-bottom: 1.25rem; display: block; }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  .sub {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .url-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .url-text {
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--gold);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
+  .btn-copy {
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'Lato', sans-serif;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-copy:hover { opacity: 0.85; }
+  .btn-copy.copied { background: var(--green); color: #fff; }
+
+  .actions { display: flex; gap: 10px; }
+  .btn-primary {
+    flex: 1;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 900;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary {
+    flex: 1;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* CONFETTI */
+  .confetti-wrap { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .confetti-piece {
+    position: absolute;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(420px) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 2rem 1.5rem; }
+    h1 { font-size: 26px; }
+    .actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="confetti-wrap" id="confetti-wrap"></div>
+
+  <span class="emoji">🎉</span>
+  <h1>Your hub is live!</h1>
+  <p class="sub">Share this link with your audience and start welcoming members.</p>
+
+  <div class="url-box">
+    <span class="url-text" id="url-display">toolspark.co/hub/...</span>
+    <button class="btn-copy" id="copy-btn" onclick="copyUrl()">Copy</button>
+  </div>
+
+  <div class="actions">
+    <a class="btn-primary" id="view-btn" href="#" target="_blank">View My Hub →</a>
+    <a class="btn-secondary" href="/hub/admin-dashboard">Go to Dashboard →</a>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+    db.collection('users').doc(user.uid).get().then(function(snap) {
+      var slug = snap.exists ? (snap.data().hubSlug || '') : '';
+      if (!slug) return;
+      var hubUrl = 'toolspark.co/hub/' + slug;
+      document.getElementById('url-display').textContent = hubUrl;
+      document.getElementById('view-btn').href = '/hub/' + slug + '/login';
+    });
+  });
+
+  function copyUrl() {
+    var fullUrl = 'https://' + hubUrl;
+    var btn = document.getElementById('copy-btn');
+    navigator.clipboard.writeText(fullUrl).then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2500);
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = fullUrl;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2500);
+    });
+  }
+
+  function spawnConfetti() {
+    var wrap = document.getElementById('confetti-wrap');
+    var colors = ['#C9A84C','#2A5C45','#E8D5A3','#3D8A65','#F4F2EE','#FFD700','#C9A84C','#2ECC71'];
+    for (var i = 0; i < 60; i++) {
+      var el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.top = '-10px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      var size = 6 + Math.random() * 8;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.animationDuration = (1.4 + Math.random() * 1.8) + 's';
+      el.style.animationDelay = (Math.random() * 0.8) + 's';
+      wrap.appendChild(el);
+    }
+  }
+
+  spawnConfetti();
+  // Second wave for extra joy
+  setTimeout(spawnConfetti, 900);
+</script>
+</body>
+</html>

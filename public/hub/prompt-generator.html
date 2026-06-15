@@ -326,6 +326,13 @@
           <button class="btn-save" id="tool1-save-btn" onclick="savePrompt(1)">Save Tool 1 Prompt</button>
         </div>
       </div>
+      <div style="border-top:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Publish to members</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="tool1-publish-status-text">Not published — members won't see this tool yet</div>
+        </div>
+        <button id="tool1-publish-btn" onclick="togglePublish(1)" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);background:var(--bg);color:var(--text2);">Publish Tool</button>
+      </div>
     </div>
 
     <!-- TOOL 2 -->
@@ -374,6 +381,13 @@
           <span class="save-status" id="tool2-save-status"></span>
           <button class="btn-save" id="tool2-save-btn" onclick="savePrompt(2)">Save Tool 2 Prompt</button>
         </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Publish to members</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="tool2-publish-status-text">Not published — members won't see this tool yet</div>
+        </div>
+        <button id="tool2-publish-btn" onclick="togglePublish(2)" style="padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);background:var(--bg);color:var(--text2);">Publish Tool</button>
       </div>
     </div>
 
@@ -549,6 +563,7 @@
           document.getElementById('tool1-built-name').textContent = t1.toolName || 'Tool 1';
           document.getElementById('tool1-built-link').href = '/hub/' + hubSlug + '/tool?slot=1';
           document.getElementById('tool1-built-row').classList.add('visible');
+          setPublishState(1, true);
         }
 
         // Tool 2
@@ -561,6 +576,7 @@
           document.getElementById('tool2-built-name').textContent = t2.toolName || 'Tool 2';
           document.getElementById('tool2-built-link').href = '/hub/' + hubSlug + '/tool?slot=2';
           document.getElementById('tool2-built-row').classList.add('visible');
+          setPublishState(2, true);
         }
       }).catch(function() {});
 
@@ -569,6 +585,63 @@
     });
   });
 
+  function setPublishState(slot, published) {
+    var btn = document.getElementById('tool' + slot + '-publish-btn');
+    var txt = document.getElementById('tool' + slot + '-publish-status-text');
+    if (!btn || !txt) return;
+    if (published) {
+      btn.textContent = 'Unpublish';
+      btn.style.borderColor = '#C0392B';
+      btn.style.color = '#C0392B';
+      btn.style.background = 'rgba(192,57,43,0.06)';
+      txt.textContent = 'Published — members can see and use this tool';
+      txt.style.color = '#2E7D32';
+    } else {
+      btn.textContent = 'Publish Tool';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--text2)';
+      btn.style.background = 'var(--bg)';
+      txt.textContent = 'Not published — members won\'t see this tool yet';
+      txt.style.color = 'var(--text3)';
+    }
+  }
+
+  function togglePublish(slot) {
+    if (!hubSlug || !hubData) return;
+    var btn = document.getElementById('tool' + slot + '-publish-btn');
+    var currentlyPublished = btn.textContent.trim() === 'Unpublish';
+    var newState = !currentlyPublished;
+
+    // Block publish if no system prompt exists
+    if (newState === true) {
+      var prompt = (document.getElementById('tool' + slot + '-prompt-textarea').value || '').trim();
+      if (!prompt) {
+        var txt = document.getElementById('tool' + slot + '-publish-status-text');
+        txt.textContent = 'Save a prompt first before publishing.';
+        txt.style.color = '#C0392B';
+        setTimeout(function() {
+          txt.textContent = 'Not published — members won\'t see this tool yet';
+          txt.style.color = 'var(--text3)';
+        }, 3000);
+        return;
+      }
+    }
+
+    btn.disabled = true;
+    var update = {};
+    update['tool' + slot + '.toolBuilt'] = newState;
+    update.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    db.collection('hubs').doc(hubSlug).update(update).then(function() {
+      hubData['tool' + slot] = hubData['tool' + slot] || {};
+      hubData['tool' + slot].toolBuilt = newState;
+      setPublishState(slot, newState);
+      btn.disabled = false;
+    }).catch(function(e) {
+      btn.disabled = false;
+      alert('Could not update: ' + e.message);
+    });
+  }
+
   // Build admin sidebar nav
   (function() {
     var nav = document.getElementById('sidebar-nav');
@@ -576,7 +649,7 @@
     var items = [
       { href: '/hub/admin-dashboard', label: '← Admin Dashboard' },
       { href: '/hub-settings',        label: 'Hub Settings' },
-      { href: '/hub/prompt-generator', label: 'Prompt Generator', active: true },
+      { href: '/hub/prompt-generator', label: 'Tool Builder', active: true },
       { href: '/hub/analytics',       label: 'Analytics' },
     ];
     nav.innerHTML = items.map(function(i) {

@@ -243,6 +243,13 @@
     document.getElementById('dash-community-card').href  = '/hub/' + slug + '/community';
     document.getElementById('dash-support-card').href    = '/hub/' + slug + '/support';
 
+    // Hide tool card until owner has published a tool
+    if (!hub.tool1 || !hub.tool1.toolBuilt) {
+      document.querySelector('.tool-card').style.display = 'none';
+    } else if (hub.tool1.toolName) {
+      document.getElementById('tool-card-name').textContent = hub.tool1.toolName;
+    }
+
     // Hide disabled feature cards
     var features = hub.features || {};
     if (features.courses   === false) document.getElementById('dash-courses-card').style.display   = 'none';

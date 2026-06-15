@@ -378,17 +378,17 @@
       </a>
     </div>
 
-    <!-- Your Build Prompt -->
+    <!-- Set Up Your Creator Hub -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-icon" style="background:rgba(29,124,144,0.1);border:1px solid rgba(29,124,144,0.18);">
-          <svg width="16" height="16" fill="none" stroke="#1D7C90" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <svg width="16" height="16" fill="none" stroke="#1D7C90" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         </div>
-        <div class="section-title">Your Build Prompt</div>
+        <div class="section-title">Set Up Your Creator Hub</div>
       </div>
-      <div class="section-body" id="prompt-section-body">
-        <p class="empty-prompt">Complete the Prompt Generator to get your personalised build brief — we'll use this as the foundation for your build.</p>
-        <a href="prompt-generator.html" class="action-link">Go to Prompt Generator →</a>
+      <div class="section-body">
+        <p class="empty-prompt">Your Creator Hub is where your AI tool lives. Set it up once and your clients will use it to get real results — right from your own branded page.</p>
+        <a href="hub-admin.html" class="action-link">Go to Creator Hub →</a>
       </div>
     </div>
 
@@ -475,6 +475,7 @@
       <div class="phase-card-body">
         <div class="phase-tools">
           <a href="content-generator.html" class="phase-tool-btn">✍️ Content Generator</a>
+          <a href="email-sequence.html" class="phase-tool-btn">✉️ Email Sequence</a>
           <a href="sparky.html" class="phase-tool-btn">💬 Sparky</a>
           <a href="marketplace.html" class="phase-tool-btn">🛒 Marketplace</a>
           <a href="community.html" class="phase-tool-btn">👥 Community</a>
@@ -678,7 +679,7 @@
     if (phase.optional) {
       badge.textContent = complete ? 'Complete' : 'Optional';
       badge.classList.add(complete ? 'badge-complete' : 'badge-optional');
-      card.classList.add(complete ? 'complete' : '');
+      if (complete) card.classList.add('complete');
     } else if (locked) {
       card.classList.add('locked');
       badge.textContent = 'Locked';
@@ -762,6 +763,17 @@
         submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'pending',
       });
+      try {
+        await db.collection('admin_alerts').add({
+          type:       'graduation_request',
+          authorId:   user.uid,
+          authorName: user.displayName || user.email,
+          threadTitle: '🎓 ' + (user.displayName || user.email) + ' submitted for certification review',
+          toolUrl,
+          read:       false,
+          createdAt:  firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch(e) {}
       document.getElementById('submit-form').style.display = 'none';
       document.getElementById('submit-success').classList.add('show');
     } catch (err) {
@@ -799,24 +811,11 @@
     }
 
     const email = (user.email || '').toLowerCase().trim();
-    const [promptDoc, techstackByUser, techstackByEmail, clarityByUser] = await Promise.all([
-      db.collection('prompt_results').doc(user.uid).get(),
+    const [techstackByUser, techstackByEmail, clarityByUser] = await Promise.all([
       db.collection('techstack_results').where('userId', '==', user.uid).get(),
       db.collection('techstack_results').where('accountEmail', '==', email).get(),
       db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
     ]);
-
-    const promptBody = document.getElementById('prompt-section-body');
-    if (promptDoc.exists) {
-      const pd = promptDoc.data();
-      const preview = pd.promptText ? pd.promptText.substring(0, 300) + (pd.promptText.length > 300 ? '…' : '') : '';
-      promptBody.innerHTML = [
-        pd.appName ? `<div class="field-row"><div class="field-label" style="color:#1D7C90;">Tool Name</div><div class="field-value" style="font-weight:700;">${escHtml(pd.appName)}</div></div>` : '',
-        preview ? `<div class="field-row"><div class="field-label" style="color:#1D7C90;">Build Brief Preview</div><div class="field-value" style="font-size:13px;">${escHtml(preview)}</div></div>` : '',
-        `<a href="prompt-generator.html" class="action-link">Open Full Prompt →</a>`,
-      ].filter(Boolean).join('');
-      if (pd.appName) document.getElementById('hero-tool-name').textContent = 'Building: ' + pd.appName;
-    }
 
     const tsMap = new Map();
     [techstackByUser, techstackByEmail].forEach(snap => snap.forEach(d => { if (!tsMap.has(d.id)) tsMap.set(d.id, d); }));
