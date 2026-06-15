@@ -108,6 +108,14 @@
     color: #E0875A; border-radius: 100px; padding: 4px 12px;
     font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
   }
+  .record-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(196,98,45,0.12); border: 1px solid rgba(196,98,45,0.3);
+    color: #E0875A; border-radius: 100px; padding: 6px 14px;
+    font-size: 12px; font-weight: 700; text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .record-btn:hover { background: rgba(196,98,45,0.22); border-color: rgba(196,98,45,0.5); }
 
   .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; }
 
@@ -404,9 +412,15 @@
       <div class="header-title">Admin Dashboard</div>
       <div class="header-subtitle">Manage community content and settings</div>
     </div>
-    <div class="admin-badge">
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Admin
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="quick-recorder.html" class="record-btn">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+        Record
+      </a>
+      <div class="admin-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Admin
+      </div>
     </div>
   </header>
 
