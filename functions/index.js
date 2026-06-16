@@ -2040,7 +2040,22 @@ exports.deleteAccount = onRequest({
     await deleteBatch(db.collection("threads").where("authorId", "==", uid));
     await deleteBatch(db.collection("agent_sessions").where("userId", "==", uid));
     await deleteBatch(db.collection("audience_tool").where("userId", "==", uid));
+    await deleteBatch(db.collection("audience_results").where("accountEmail", "==", email));
     await deleteBatch(db.collection("audits").where("userId", "==", uid));
+
+    // uid-keyed collections (single doc per user)
+    await Promise.all([
+      "certification_progress", "journey_maps", "offer_sort_results", "offer_results",
+      "funnel_generator_results", "sales_page_results", "optin_page_results",
+      "email_sequences", "prompt_results", "social_scheduler",
+    ].map(col => db.collection(col).doc(uid).delete()));
+
+    // sessionId-keyed collections with userId field
+    await Promise.all([
+      "breakthrough_sessions", "journey_sessions", "value_reports",
+      "spark_council_sessions", "breakthrough_public_results", "value_tool",
+      "lesson_projects", "member_lesson_packages", "techstack_results",
+    ].map(col => deleteBatch(db.collection(col).where("userId", "==", uid))));
 
     // userProgress docs are keyed uid_courseId — range query on doc ID
     const progressSnap = await db.collection("userProgress")
