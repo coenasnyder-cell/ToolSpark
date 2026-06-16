@@ -476,8 +476,10 @@ function toggleStep(id) {
 
 function saveSteps() {
   if (!currentUser) return;
+  var update = { phase2Steps: steps };
+  if (steps['s10']) update.marketplaceFreeListed = true;
   db.collection('certification_progress').doc(currentUser.uid).set(
-    { phase2Steps: steps },
+    update,
     { merge: true }
   ).catch(function(e){ console.error('saveSteps:', e); });
 }
