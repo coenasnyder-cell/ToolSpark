@@ -475,7 +475,7 @@ async function confirmJourney() {
     document.getElementById('action-row').innerHTML =
       '<span class="saved-badge">✓ Journey Saved</span>' +
       '<button class="btn-regen" onclick="regenerate()">↺ Regenerate</button>' +
-      '<a href="dwy.html" style="font-size:13px;color:var(--text3);text-decoration:none;margin-left:4px;">← Back to Roadmap</a>';
+      '<a href="roadmap.html" style="font-size:13px;color:var(--text3);text-decoration:none;margin-left:4px;">← Back to Roadmap</a>';
   } catch(e) {
     console.error(e);
     btn.disabled = false;
