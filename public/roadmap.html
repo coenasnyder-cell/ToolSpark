@@ -490,6 +490,16 @@
     </div>
 
     <div id="loading" class="loading-state">Loading your roadmap...</div>
+
+    <a href="journey-companion.html" style="display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.18);border-radius:12px;padding:14px 18px;text-decoration:none;margin-bottom:1.25rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(201,168,76,0.13)'" onmouseout="this.style.background='rgba(201,168,76,0.07)'">
+      <span style="font-size:22px;flex-shrink:0;">🧭</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">Journey Companion</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">Feeling stuck? Get unstuck with your AI accountability coach.</div>
+      </div>
+      <span style="margin-left:auto;color:var(--text3);font-size:13px;">→</span>
+    </a>
+
     <div id="spark-section">
       <div class="spark-section-card">
         <div class="spark-section-header">
@@ -501,7 +511,8 @@
             <div class="spark-section-desc">Your core business identity from your Spark session</div>
           </div>
           <div class="section-btn-group">
-            <a href="spark-results.html" class="section-results-btn">View Full Results</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=SEAOpa1ZLlb1ZkTvDqvL" class="section-results-btn">🎬 Watch Lesson</a>
+            <a href="spark-results.html" class="section-results-btn" id="spark-results-btn" style="display:none;">View Full Results</a>
             <a href="spark.html" class="section-tool-btn">Open tool →</a>
           </div>
         </div>
@@ -533,7 +544,8 @@
             <div class="spark-section-desc">Your client profile from your most recent session</div>
           </div>
           <div class="section-btn-group">
-            <a href="audienceresults.html" class="section-results-btn">View Full Results</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=YaNX7o8wNEQrZvHYVGly" class="section-results-btn">🎬 Watch Lesson</a>
+            <a href="audienceresults.html" class="section-results-btn" id="aud-results-btn" style="display:none;">View Full Results</a>
             <a href="audiencetool.html" class="section-tool-btn">Open tool →</a>
           </div>
         </div>
@@ -569,6 +581,7 @@
             <div class="spark-section-desc">Your three recommended tools and build prompts, newest session</div>
           </div>
           <div class="section-btn-group">
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=1JJvTC3jg2Qnl2Xjzpjp" class="section-results-btn">🎬 Watch Lesson</a>
             <a href="#" class="section-results-btn" id="breakthrough-results-btn" style="display:none;">View Results</a>
             <a href="clarity.html" class="section-tool-btn">Open tool →</a>
           </div>
@@ -602,6 +615,9 @@
           <div>
             <div class="spark-section-title">Choose Your Path</div>
             <div class="spark-section-desc">Pick how you want to bring your tool to life. We'll use this choice to guide what comes next.</div>
+          </div>
+          <div class="section-btn-group">
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=TnWmLdIMBlWXRgXriKf9" class="section-results-btn">🎬 Watch Lesson</a>
           </div>
         </div>
         <div class="spark-section-body">
@@ -1162,9 +1178,10 @@
         document.getElementById('spark-section').style.display = 'block';
 
         // Wire up View Full Results link with the session ID
-        const sparkResultsLink = document.querySelector('a[href="spark-results.html"].section-results-btn');
+        const sparkResultsLink = document.getElementById('spark-results-btn');
         if (sparkResultsLink) {
           sparkResultsLink.href = 'spark-results.html?session=' + sparkSessions[0].id;
+          sparkResultsLink.style.display = '';
         }
       }
 
@@ -1214,9 +1231,10 @@
         document.getElementById('audience-section').style.display = 'block';
 
         // Wire up View Full Results link with the session ID
-        const audResultsLink = document.querySelector('a[href="audienceresults.html"].section-results-btn');
+        const audResultsLink = document.getElementById('aud-results-btn');
         if (audResultsLink) {
           audResultsLink.href = 'audienceresults.html?session=' + audienceSessions[0].id;
+          audResultsLink.style.display = '';
         }
       }
 

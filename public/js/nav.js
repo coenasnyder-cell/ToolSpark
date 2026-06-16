@@ -65,6 +65,11 @@
     if (sidebar && nav) sidebar.insertBefore(banner, nav);
   }
 
+  function revealNav() {
+    var nav = document.getElementById('sidebar-nav');
+    if (nav) nav.style.visibility = 'visible';
+  }
+
   function lockNav() {
     injectOnboardingBanner();
     var nav = document.getElementById('sidebar-nav');
@@ -164,13 +169,15 @@
           var data = snap.exists ? snap.data() : {};
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
+            revealNav();
           } else if (!data.onboardingComplete) {
             lockNav();
+            revealNav();
           } else {
             firebase.firestore().collection('certification_progress').doc(user.uid).get().then(function(cpSnap) {
               if (!cpSnap.exists || !cpSnap.data().phase1Complete) {
                 var nav = document.getElementById('sidebar-nav');
-                if (!nav) return;
+                if (!nav) { revealNav(); return; }
                 var CHALLENGE_HREFS = ['courses.html', 'community.html', 'roadmap.html'];
                 var links = nav.querySelectorAll('a.nav-item');
                 for (var i = 0; i < links.length; i++) {
@@ -184,9 +191,10 @@
                   }
                 }
               }
-            }).catch(function() {});
+              revealNav();
+            }).catch(function() { revealNav(); });
           }
-        }).catch(function() {});
+        }).catch(function() { revealNav(); });
 
         // Notification dot
         firebase.firestore().collection('notifications')
@@ -201,6 +209,7 @@
         if (inboxBtn)   inboxBtn.style.display   = 'none';
         if (profileBtn) profileBtn.style.display = 'none';
         if (signinBtn)  signinBtn.style.display  = 'flex';
+        revealNav();
       }
     });
   }
@@ -210,6 +219,7 @@
 
     var nav = document.getElementById('sidebar-nav');
     if (nav) {
+      nav.style.visibility = 'hidden';
       nav.innerHTML = ITEMS.map(function(item) {
         var active = item.key === activeKey ? ' active' : '';
         return '<a href="' + item.href + '" class="nav-item' + active + '">' +
