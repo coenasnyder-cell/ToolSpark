@@ -166,6 +166,11 @@
   }
   @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   .fade-in { animation:fadeUp 0.35s ease both; }
+
+  /* MODE TOGGLE */
+  .mode-toggle { display:flex; gap:4px; background:var(--border); border-radius:10px; padding:4px; width:fit-content; margin-bottom:1.75rem; }
+  .mode-btn { padding:8px 22px; border:none; border-radius:7px; font-family:'Lato',sans-serif; font-size:14px; font-weight:700; cursor:pointer; background:transparent; color:var(--text3); transition:all 0.18s; }
+  .mode-btn.active { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
@@ -191,9 +196,14 @@
 <div class="main-wrap">
   <div class="page-content">
 
+    <div class="mode-toggle">
+      <button id="btn-optin" class="mode-btn" onclick="setMode('optin')">Opt-In Page</button>
+      <button id="btn-sales" class="mode-btn active" onclick="setMode('sales')">Sales Page</button>
+    </div>
+
     <div class="page-header">
-      <h1>Sales Copy</h1>
-      <p>Your offer data is already here. Confirm, answer two questions, and get complete sales page copy.</p>
+      <h1 id="page-title">Sales Copy</h1>
+      <p id="page-subtitle">Your offer data is already here. Confirm, answer two questions, and get complete sales page copy.</p>
     </div>
 
     <!-- STEP BAR -->
@@ -210,7 +220,7 @@
       <div class="step-line"></div>
       <div class="step-node">
         <div class="step-circle" id="step-circle-3">3</div>
-        <div class="step-label" id="step-label-3">Your Sales Page</div>
+        <div class="step-label" id="step-label-3">Your Copy</div>
       </div>
     </div>
 
@@ -254,7 +264,7 @@
 
           <div class="context-row">
             <div class="context-item">
-              <div class="context-label">Price (Confident)</div>
+              <div class="context-label" id="ctx-price-label">Price (Confident)</div>
               <div class="context-value gold" id="ctx-price">—</div>
               <div style="font-size:11px;color:var(--text3);margin-top:3px;" id="ctx-price-range"></div>
             </div>
@@ -295,8 +305,8 @@
             </div>
 
             <div class="field">
-              <label>What's your payment link?</label>
-              <div class="hint">Optional — leave blank to use a placeholder you can fill in later.</div>
+              <label id="q-payment-label">What's your payment link?</label>
+              <div class="hint" id="q-payment-hint">Optional — leave blank to use a placeholder you can fill in later.</div>
               <input type="url" id="q-payment" placeholder="https://buy.stripe.com/...">
             </div>
 
@@ -333,7 +343,7 @@
 
       <div id="save-bar" class="save-bar fade-in" style="display:none;">
         <div>
-          <div class="save-bar-title">Add this to your Launch Map</div>
+          <div class="save-bar-title" id="save-bar-title">Add this to your Launch Kit</div>
           <div class="save-bar-hint" id="save-bar-hint">Saves your current copy — any edits you've made are included.</div>
         </div>
         <div class="save-bar-actions">
@@ -352,18 +362,31 @@ var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
 var MODEL = 'claude-sonnet-4-6';
 
 var currentUser = null;
-var ctx = {};  // all pulled context data
+var ctx = {};
+var pageMode = 'sales';
+var activeSectionLabels;
 
 var SECTION_LABELS = {
-  HERO:     'Hero — Headline & Hook',
-  PROBLEM:  'Problem — Where They Are Now',
-  SOLUTION: 'Solution — Introducing Your Tool',
-  INCLUDES: "What's Included",
-  PROOF:    'Proof & Results',
-  PRICING:  'Pricing',
+  HERO:       'Hero — Headline & Hook',
+  PROBLEM:    'Problem — Where They Are Now',
+  SOLUTION:   'Solution — Introducing Your Tool',
+  INCLUDES:   "What's Included",
+  PROOF:      'Proof & Results',
+  PRICING:    'Pricing',
   OBJECTIONS: 'Objections & FAQ',
-  CTA:      'Final Call to Action'
+  CTA:        'Final Call to Action'
 };
+
+var OPTIN_SECTION_LABELS = {
+  HERO:     'Hero — Headline & Hook',
+  PROBLEM:  'Problem — What They\'re Struggling With',
+  SOLUTION: 'Solution — Your Free Tool',
+  INCLUDES: 'What They Get (Free)',
+  PROOF:    'Social Proof',
+  CTA:      'Call to Action — Get It Free'
+};
+
+activeSectionLabels = SECTION_LABELS;
 
 async function authHeaders() {
   var user  = firebase.auth().currentUser;
@@ -401,6 +424,57 @@ function goToStep2() {
   setStep(2);
   document.getElementById('step2').style.display = 'block';
   document.getElementById('step2').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function setMode(m) {
+  pageMode = m;
+  var isOptin = m === 'optin';
+
+  document.getElementById('btn-optin').classList.toggle('active', isOptin);
+  document.getElementById('btn-sales').classList.toggle('active', !isOptin);
+
+  document.getElementById('page-title').textContent    = isOptin ? 'Opt-In Page Copy' : 'Sales Copy';
+  document.getElementById('page-subtitle').textContent = isOptin
+    ? 'Build copy for your free lead magnet. Opt-in framing — no price needed.'
+    : 'Your offer data is already here. Confirm, answer two questions, and get complete sales page copy.';
+
+  // Context card price
+  var priceLabelEl = document.getElementById('ctx-price-label');
+  var priceEl      = document.getElementById('ctx-price');
+  var priceRangeEl = document.getElementById('ctx-price-range');
+  var justWrap     = document.getElementById('ctx-justification-wrap');
+  if (priceLabelEl) priceLabelEl.textContent        = isOptin ? 'Price' : 'Price (Confident)';
+  if (priceEl)      priceEl.textContent             = isOptin ? 'FREE' : (ctx.confidentPrice || '—');
+  if (priceRangeEl) priceRangeEl.style.display      = isOptin ? 'none' : '';
+  if (justWrap)     justWrap.style.display           = (isOptin || !ctx.justification) ? 'none' : 'block';
+
+  // Step 2 questions
+  var payLabelEl = document.getElementById('q-payment-label');
+  var payHintEl  = document.getElementById('q-payment-hint');
+  var payInput   = document.getElementById('q-payment');
+  var genBtn     = document.getElementById('generate-btn');
+  if (payLabelEl) payLabelEl.textContent = isOptin ? 'Where do they go after opting in? (optional)' : "What's your payment link?";
+  if (payHintEl)  payHintEl.textContent  = isOptin
+    ? 'Optional — thank you page or first step URL. Leave blank to add later.'
+    : 'Optional — leave blank to use a placeholder you can fill in later.';
+  if (payInput) payInput.placeholder = isOptin ? 'https://...' : 'https://buy.stripe.com/...';
+  if (genBtn)   genBtn.textContent   = isOptin ? 'Generate My Opt-In Page →' : 'Generate My Sales Page →';
+
+  // Save bar
+  var saveTitle = document.getElementById('save-bar-title');
+  var saveBtn   = document.getElementById('save-launch-btn');
+  if (saveTitle) saveTitle.textContent = isOptin ? 'Save your Opt-In Page Copy' : 'Add this to your Launch Kit';
+  if (saveBtn && !saveBtn.classList.contains('saved')) {
+    saveBtn.textContent = isOptin ? 'Save Opt-In Copy →' : 'Save to Launch Kit →';
+  }
+
+  // Reset output if visible (mode changed mid-session)
+  document.getElementById('step3-output').style.display  = 'none';
+  document.getElementById('step3-loading').style.display = 'none';
+  document.getElementById('save-bar').style.display = 'none';
+  if (document.getElementById('step1').style.display !== 'none' ||
+      document.getElementById('step2').style.display !== 'none') return;
+  goToStep1();
 }
 
 // ── DATA LOAD ─────────────────────────────────────────────────
@@ -538,6 +612,10 @@ auth.onAuthStateChanged(async function(user) {
 
   setStep(1);
   document.getElementById('step1').style.display = 'block';
+
+  // Apply mode from URL param (after data is loaded so price display is correct)
+  var modeParam = new URLSearchParams(window.location.search).get('mode');
+  setMode(modeParam === 'optin' ? 'optin' : 'sales');
 });
 
 // ── GENERATE ──────────────────────────────────────────────────
@@ -547,68 +625,112 @@ async function generatePage() {
 
   setStep(3);
   document.getElementById('step3-loading').style.display = 'block';
-  document.getElementById('loading-label').textContent = 'Writing your sales page…';
+  document.getElementById('loading-label').textContent = pageMode === 'optin' ? 'Writing your opt-in page…' : 'Writing your sales page…';
 
-  var lines = [
-    'You are a conversion copywriter for online tools and AI-powered coaching products.',
-    'Write a complete sales page for the tool described below.',
-    'Return ONLY the sections in the exact format: SECTION:KEY followed by the copy on a new line.',
-    'Keys: HERO, PROBLEM, SOLUTION, INCLUDES, PROOF, PRICING, OBJECTIONS, CTA',
-    'Write in second-person (you/your). Be specific, warm, and direct. No fluff.',
-    '',
-    '--- TOOL DATA ---',
-  ];
+  var lines;
 
-  if (ctx.toolName)       lines.push('Tool name: ' + ctx.toolName);
-  if (ctx.sparkStatement) lines.push('Creator spark statement: ' + ctx.sparkStatement);
-  if (ctx.audience)       lines.push('Who it is for: ' + ctx.audience);
-  if (ctx.pain)           lines.push('Their main pain: ' + ctx.pain);
-  if (ctx.dreamOutcome)   lines.push('Dream outcome: ' + ctx.dreamOutcome);
-  if (ctx.theirWords)     lines.push('Their own words about the problem: ' + ctx.theirWords);
-  if (ctx.transformation) lines.push('Transformation delivered: ' + ctx.transformation);
-  if (ctx.coreDelivery)   lines.push('Core delivery: ' + ctx.coreDelivery);
-  if (ctx.keepItems.length) lines.push("What's included (KEEP items): " + ctx.keepItems.join(', '));
-  if (ctx.objections)     lines.push('Their objections: ' + ctx.objections);
-  if (ctx.justification)  lines.push('Why the price is worth it: ' + ctx.justification);
-  if (ctx.journeyNarrative) lines.push('Journey context: ' + ctx.journeyNarrative);
-  if (ctx.journeyPosition) lines.push('Position in journey: ' + ctx.journeyPosition);
-
-  lines.push('', '--- PRICING ---');
-  if (ctx.accessPrice)    lines.push('Accessible tier: ' + ctx.accessPrice);
-  if (ctx.confidentPrice) lines.push('Confident tier (recommended): ' + ctx.confidentPrice);
-  if (ctx.premiumPrice)   lines.push('Premium tier: ' + ctx.premiumPrice);
-
-  lines.push('', '--- FROM THE CREATOR ---');
-  lines.push('Proof / testimonials: ' + (proof || 'None provided yet — use a placeholder like [ADD TESTIMONIAL].'));
-  lines.push('Payment link: ' + (payment || '[ADD PAYMENT LINK]'));
-
-  lines.push(
-    '',
-    '--- OUTPUT FORMAT (follow exactly) ---',
-    'SECTION:HERO',
-    '(Strong headline. One-sentence subheadline. Short paragraph hook. Keep it tight.)',
-    '',
-    'SECTION:PROBLEM',
-    '(2-3 sentences that describe the exact pain. Use their language. Make them feel seen.)',
-    '',
-    'SECTION:SOLUTION',
-    '(Introduce the tool. What it is, what it does, who it is for.)',
-    '',
-    'SECTION:INCLUDES',
-    "(Bullet list of what's in the offer. Lead with the transformation, not features.)",
-    '',
-    'SECTION:PROOF',
-    '(Testimonials if provided, or honest placeholder. Include a results line if available.)',
-    '',
-    'SECTION:PRICING',
-    '(Show all three tiers if available, highlight the recommended one. Include justification.)',
-    '',
-    'SECTION:OBJECTIONS',
-    '(3-4 common objections as Q&A. Address the real concerns, not surface ones.)',
-    '',
-    'SECTION:CTA',
-    '(Final close. One strong CTA paragraph + button text + payment link.)'
-  );
+  if (pageMode === 'optin') {
+    activeSectionLabels = OPTIN_SECTION_LABELS;
+    lines = [
+      'You are a conversion copywriter specializing in free lead magnet opt-in pages.',
+      'Write a complete opt-in page for the free AI tool described below.',
+      'This is a FREE offer — the goal is to get people to sign up, not to pay.',
+      'Return ONLY sections in exact format: SECTION:KEY followed by copy on a new line.',
+      'Keys: HERO, PROBLEM, SOLUTION, INCLUDES, PROOF, CTA',
+      'Write in second-person (you/your). Warm, clear, and compelling. No fluff.',
+      '',
+      '--- TOOL DATA ---',
+    ];
+    if (ctx.toolName)         lines.push('Tool name: ' + ctx.toolName);
+    if (ctx.sparkStatement)   lines.push('Creator spark statement: ' + ctx.sparkStatement);
+    if (ctx.audience)         lines.push('Who it is for: ' + ctx.audience);
+    if (ctx.pain)             lines.push('Their main pain: ' + ctx.pain);
+    if (ctx.dreamOutcome)     lines.push('Dream outcome: ' + ctx.dreamOutcome);
+    if (ctx.theirWords)       lines.push('Their own words: ' + ctx.theirWords);
+    if (ctx.transformation)   lines.push('Transformation delivered: ' + ctx.transformation);
+    if (ctx.keepItems.length) lines.push("What's included: " + ctx.keepItems.join(', '));
+    lines.push('Price: FREE — this is a lead magnet / free tool');
+    lines.push('', '--- FROM THE CREATOR ---');
+    lines.push('Social proof / early results: ' + (proof || 'None yet — use a placeholder like [ADD TESTIMONIAL].'));
+    lines.push('Opt-in / thank you page URL: ' + (payment || '[ADD OPT-IN LINK]'));
+    lines.push(
+      '', '--- OUTPUT FORMAT (follow exactly) ---',
+      'SECTION:HERO',
+      '(Strong free-offer headline. One-sentence subheadline. Short hook. Keep it tight.)',
+      '',
+      'SECTION:PROBLEM',
+      '(2-3 sentences describing the exact pain. Use their language. Make them feel seen.)',
+      '',
+      'SECTION:SOLUTION',
+      '(Introduce the free tool. What it does, who it is for, why it helps.)',
+      '',
+      'SECTION:INCLUDES',
+      '(What they get when they sign up. Lead with quick wins, not features.)',
+      '',
+      'SECTION:PROOF',
+      '(Social proof or honest placeholder. Early results if available.)',
+      '',
+      'SECTION:CTA',
+      '(Final close. Strong CTA paragraph. Button text like "Get Instant Access" or "Get It Free". Include opt-in link.)'
+    );
+  } else {
+    activeSectionLabels = SECTION_LABELS;
+    lines = [
+      'You are a conversion copywriter for online tools and AI-powered coaching products.',
+      'Write a complete sales page for the tool described below.',
+      'Return ONLY the sections in the exact format: SECTION:KEY followed by the copy on a new line.',
+      'Keys: HERO, PROBLEM, SOLUTION, INCLUDES, PROOF, PRICING, OBJECTIONS, CTA',
+      'Write in second-person (you/your). Be specific, warm, and direct. No fluff.',
+      '',
+      '--- TOOL DATA ---',
+    ];
+    if (ctx.toolName)         lines.push('Tool name: ' + ctx.toolName);
+    if (ctx.sparkStatement)   lines.push('Creator spark statement: ' + ctx.sparkStatement);
+    if (ctx.audience)         lines.push('Who it is for: ' + ctx.audience);
+    if (ctx.pain)             lines.push('Their main pain: ' + ctx.pain);
+    if (ctx.dreamOutcome)     lines.push('Dream outcome: ' + ctx.dreamOutcome);
+    if (ctx.theirWords)       lines.push('Their own words about the problem: ' + ctx.theirWords);
+    if (ctx.transformation)   lines.push('Transformation delivered: ' + ctx.transformation);
+    if (ctx.coreDelivery)     lines.push('Core delivery: ' + ctx.coreDelivery);
+    if (ctx.keepItems.length) lines.push("What's included (KEEP items): " + ctx.keepItems.join(', '));
+    if (ctx.objections)       lines.push('Their objections: ' + ctx.objections);
+    if (ctx.justification)    lines.push('Why the price is worth it: ' + ctx.justification);
+    if (ctx.journeyNarrative) lines.push('Journey context: ' + ctx.journeyNarrative);
+    if (ctx.journeyPosition)  lines.push('Position in journey: ' + ctx.journeyPosition);
+    lines.push('', '--- PRICING ---');
+    if (ctx.accessPrice)    lines.push('Accessible tier: ' + ctx.accessPrice);
+    if (ctx.confidentPrice) lines.push('Confident tier (recommended): ' + ctx.confidentPrice);
+    if (ctx.premiumPrice)   lines.push('Premium tier: ' + ctx.premiumPrice);
+    lines.push('', '--- FROM THE CREATOR ---');
+    lines.push('Proof / testimonials: ' + (proof || 'None provided yet — use a placeholder like [ADD TESTIMONIAL].'));
+    lines.push('Payment link: ' + (payment || '[ADD PAYMENT LINK]'));
+    lines.push(
+      '', '--- OUTPUT FORMAT (follow exactly) ---',
+      'SECTION:HERO',
+      '(Strong headline. One-sentence subheadline. Short paragraph hook. Keep it tight.)',
+      '',
+      'SECTION:PROBLEM',
+      '(2-3 sentences that describe the exact pain. Use their language. Make them feel seen.)',
+      '',
+      'SECTION:SOLUTION',
+      '(Introduce the tool. What it is, what it does, who it is for.)',
+      '',
+      'SECTION:INCLUDES',
+      "(Bullet list of what's in the offer. Lead with the transformation, not features.)",
+      '',
+      'SECTION:PROOF',
+      '(Testimonials if provided, or honest placeholder. Include a results line if available.)',
+      '',
+      'SECTION:PRICING',
+      '(Show all three tiers if available, highlight the recommended one. Include justification.)',
+      '',
+      'SECTION:OBJECTIONS',
+      '(3-4 common objections as Q&A. Address the real concerns, not surface ones.)',
+      '',
+      'SECTION:CTA',
+      '(Final close. One strong CTA paragraph + button text + payment link.)'
+    );
+  }
 
   try {
     var resp = await fetch(FUNCTION_URL, {
@@ -632,12 +754,14 @@ async function generatePage() {
     document.getElementById('save-bar').style.display = 'flex';
     renderSections(text);
 
-    // Background save — rawOutput only; sections saved when user clicks Save to Launch Map
+    // Background save — rawOutput only; sections saved when user clicks Save
+    var bgCollection = pageMode === 'optin' ? 'optin_page_results' : 'sales_page_results';
     try {
-      db.collection('sales_page_results').doc(currentUser.uid).set({
-        userId: currentUser.uid,
-        rawOutput: text,
-        toolName: ctx.toolName,
+      db.collection(bgCollection).doc(currentUser.uid).set({
+        userId:      currentUser.uid,
+        rawOutput:   text,
+        toolName:    ctx.toolName,
+        pageType:    pageMode,
         generatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     } catch(e) {}
@@ -650,7 +774,7 @@ async function generatePage() {
 
 function parseSections(text) {
   var sections = {};
-  var keys = Object.keys(SECTION_LABELS);
+  var keys = Object.keys(activeSectionLabels);
   keys.forEach(function(key, i) {
     var pattern = new RegExp('SECTION:' + key + '\\s*([\\s\\S]*?)(?=SECTION:[A-Z_]+|$)', 'i');
     var m = text.match(pattern);
@@ -664,9 +788,9 @@ function renderSections(text) {
   var wrap = document.getElementById('sections-wrap');
   wrap.innerHTML = '';
 
-  Object.keys(SECTION_LABELS).forEach(function(key) {
+  Object.keys(activeSectionLabels).forEach(function(key) {
     var content = sections[key] || '';
-    var label   = SECTION_LABELS[key];
+    var label   = activeSectionLabels[key];
     var block = document.createElement('div');
     block.className = 'section-block fade-in';
     block.innerHTML =
@@ -689,10 +813,10 @@ function copySection(btn) {
 
 function copyAll() {
   var parts = [];
-  Object.keys(SECTION_LABELS).forEach(function(key) {
+  Object.keys(activeSectionLabels).forEach(function(key) {
     var ta = document.getElementById('section-' + key);
     if (ta && ta.value.trim()) {
-      parts.push('--- ' + SECTION_LABELS[key].toUpperCase() + ' ---\n' + ta.value.trim());
+      parts.push('--- ' + activeSectionLabels[key].toUpperCase() + ' ---\n' + ta.value.trim());
     }
   });
   var full = parts.join('\n\n');
@@ -716,7 +840,7 @@ async function saveSections() {
   btn.textContent = 'Saving…';
 
   var sections = {};
-  Object.keys(SECTION_LABELS).forEach(function(key) {
+  Object.keys(activeSectionLabels).forEach(function(key) {
     var ta = document.getElementById('section-' + key);
     sections[key] = ta ? ta.value.trim() : '';
   });
@@ -724,24 +848,27 @@ async function saveSections() {
   var proofEl   = document.getElementById('q-proof');
   var paymentEl = document.getElementById('q-payment');
 
+  var collection = pageMode === 'optin' ? 'optin_page_results' : 'sales_page_results';
   try {
-    await db.collection('sales_page_results').doc(currentUser.uid).set({
-      userId: currentUser.uid,
-      sections: sections,
+    await db.collection(collection).doc(currentUser.uid).set({
+      userId:      currentUser.uid,
+      sections:    sections,
       heroHeadline: heroHeadline,
-      toolName: ctx.toolName,
-      proof: proofEl ? proofEl.value.trim() : '',
+      toolName:    ctx.toolName,
+      pageType:    pageMode,
+      proof:       proofEl ? proofEl.value.trim() : '',
       paymentLink: paymentEl ? paymentEl.value.trim() : '',
-      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+      savedAt:     firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
 
     btn.textContent = '✓ Saved!';
     btn.classList.add('saved');
-    document.getElementById('save-bar-hint').innerHTML =
-      'Saved! <a href="launch-kit.html" style="color:var(--green-light);font-weight:700;text-decoration:none;">View your Launch Kit →</a>';
+    document.getElementById('save-bar-hint').innerHTML = pageMode === 'optin'
+      ? 'Opt-in copy saved!'
+      : 'Saved! <a href="launch-kit.html" style="color:var(--green-light);font-weight:700;text-decoration:none;">View your Launch Kit →</a>';
   } catch(e) {
     btn.disabled = false;
-    btn.textContent = 'Save to Launch Map →';
+    btn.textContent = pageMode === 'optin' ? 'Save Opt-In Copy →' : 'Save to Launch Kit →';
   }
 }
 
