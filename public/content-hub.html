@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Hub — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513796:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65; --green-dim: rgba(42,92,69,0.08);
+    --coral: #C4622D; --coral-dim: rgba(196,98,45,0.08);
+    --purple-text: #9B8FD0; --purple-dim: rgba(75,63,138,0.08);
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+  }
+  body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width:var(--sidebar-width); background:var(--dark); min-height:100vh; display:flex; flex-direction:column; position:fixed; left:0; top:0; z-index:100; border-right:1px solid var(--border-dark); }
+  .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border-dark); }
+  .logo-text { font-family:'Playfair Display',serif; font-size:20px; color:#F0EDE6; }
+  .logo-text span { color:var(--gold); }
+  .logo-tag { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-top:3px; font-weight:700; }
+  .sidebar-nav { flex:1; padding:1rem 0.75rem; display:flex; flex-direction:column; gap:2px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); color:#9A9488; font-size:14px; text-decoration:none; transition:all 0.15s; }
+  .nav-item:hover { background:rgba(255,255,255,0.05); color:#F0EDE6; }
+  .nav-item.active { background:var(--gold-dim); color:var(--gold); font-weight:700; border:1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width:18px; height:18px; opacity:0.7; flex-shrink:0; }
+  .nav-item.active .nav-icon { opacity:1; }
+  .sidebar-footer { padding:1rem 0.75rem; border-top:1px solid var(--border-dark); }
+  .sidebar-user { display:flex; align-items:center; gap:10px; padding:8px 10px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gold); }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:13px; color:#F0EDE6; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role { font-size:11px; color:var(--text3); }
+  .logout-btn { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; margin-top:4px; background:none; border:none; border-radius:var(--radius-sm); color:#6B5F5F; font-size:13px; font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.15s; text-align:left; }
+  .logout-btn:hover { background:rgba(220,50,50,0.1); color:#E05555; }
+
+  /* MAIN */
+  .main-wrap { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-content { flex:1; padding:2rem 2.5rem 3rem; max-width:800px; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom:2rem; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:30px; font-weight:400; color:var(--text); margin-bottom:6px; }
+  .page-header p { font-size:14px; color:var(--text3); line-height:1.6; }
+
+  /* TOOL GRID */
+  .tool-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+
+  .tool-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.5rem; display:flex; flex-direction:column; gap:12px; text-decoration:none; color:inherit; transition:border-color 0.18s, transform 0.18s, box-shadow 0.18s; }
+  .tool-card:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 4px 20px rgba(0,0,0,0.09); }
+
+  .tool-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .tool-title { font-size:16px; font-weight:700; color:var(--text); }
+  .tool-desc { font-size:13px; color:var(--text3); line-height:1.6; flex:1; }
+  .tool-cta { font-size:12px; font-weight:700; color:var(--gold); margin-top:4px; }
+
+  /* TIP BOX */
+  .tip-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem 1.5rem; margin-top:1.75rem; display:flex; gap:14px; align-items:flex-start; }
+  .tip-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .tip-text { font-size:13px; color:var(--text3); line-height:1.6; }
+
+  @media (max-width:1023px) { .main-wrap { margin-left:60px; } }
+  @media (max-width:767px) {
+    .main-wrap { margin-left:0; }
+    .page-content { padding:1rem 1rem 2rem; }
+    .tool-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading…</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="page-content">
+
+    <div class="page-header">
+      <h1>Content Hub</h1>
+      <p>Tools to build your audience — write posts, plan your content, record walkthroughs, and create visuals.</p>
+    </div>
+
+    <div class="tool-grid">
+
+      <a href="content-generator.html" class="tool-card">
+        <div class="tool-icon" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);">✍️</div>
+        <div>
+          <div class="tool-title">Post Ideas</div>
+          <div class="tool-desc">Generate text-based post ideas for LinkedIn, Facebook, and email. Built for introverts — no camera required.</div>
+        </div>
+        <div class="tool-cta">Open Post Ideas →</div>
+      </a>
+
+      <a href="social-scheduler.html" class="tool-card">
+        <div class="tool-icon" style="background:rgba(75,63,138,0.1);border:1px solid rgba(75,63,138,0.2);">📅</div>
+        <div>
+          <div class="tool-title">31-Day Content Planner</div>
+          <div class="tool-desc">Plan a full month of posts in one session. Themes, hooks, and a daily schedule so you never stare at a blank screen.</div>
+        </div>
+        <div class="tool-cta">Open 31-Day Planner →</div>
+      </a>
+
+      <a href="quick-recorder.html" class="tool-card">
+        <div class="tool-icon" style="background:rgba(196,98,45,0.1);border:1px solid rgba(196,98,45,0.2);">⏺️</div>
+        <div>
+          <div class="tool-title">Quick Recorder</div>
+          <div class="tool-desc">Record a screen walkthrough or tool demo directly in your browser. No software to install.</div>
+        </div>
+        <div class="tool-cta">Open Quick Recorder →</div>
+      </a>
+
+      <a href="post-image-maker.html" class="tool-card">
+        <div class="tool-icon" style="background:rgba(42,92,69,0.1);border:1px solid rgba(42,92,69,0.2);">🖼️</div>
+        <div>
+          <div class="tool-title">Post Image Maker</div>
+          <div class="tool-desc">Create simple branded images for your posts — quote cards, announcement graphics, and more.</div>
+        </div>
+        <div class="tool-cta">Open Image Maker →</div>
+      </a>
+
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-icon">💡</div>
+      <div>
+        <div class="tip-title">ToolSpark content strategy</div>
+        <div class="tip-text">Text-based posts on LinkedIn and Facebook drive traffic to your tool better than video for most introverted builders. Start with Post Ideas, plan your month with the 31-Day Planner, then add visuals and recordings once you have a rhythm.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+auth.onAuthStateChanged(function(user) {
+  if (!user) { window.location.href = 'signon.html?redirect=content-hub'; return; }
+  var avatarEl = document.getElementById('sidebar-avatar');
+  var nameEl   = document.getElementById('sidebar-name');
+  db.collection('users').doc(user.uid).get().then(function(snap) {
+    var d = snap.exists ? snap.data() : {};
+    var name = d.displayName || d.name || user.email || 'Builder';
+    if (avatarEl) {
+      if (d.photoURL) {
+        avatarEl.innerHTML = '<img src="' + d.photoURL + '" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">';
+      } else {
+        avatarEl.textContent = name[0].toUpperCase();
+      }
+    }
+    if (nameEl) nameEl.textContent = name;
+    var roleEl = document.getElementById('sidebar-role');
+    if (roleEl) roleEl.textContent = d.userRole === 'admin' ? 'Admin' : 'Builder';
+  }).catch(function(){});
+});
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('content-hub', 'Content Hub');</script>
+</body>
+</html>

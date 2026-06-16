@@ -464,19 +464,19 @@
           <div class="hub-card-title" id="creator-hub-card-title">My Creator Hub</div>
           <div class="hub-card-sub" id="creator-hub-card-sub">Set up your certification deliverable</div>
         </a>
-        <a href="roadmap.html" class="hub-card">
+        <a href="cert-hub.html" class="hub-card">
           <div class="hub-card-icon" style="background:rgba(42,92,69,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#3D8A65" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
+            <svg width="20" height="20" fill="none" stroke="#3D8A65" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M8 14l-4 7h16l-4-7"/><path d="M9 17l3 3 3-3"/></svg>
           </div>
-          <div class="hub-card-title">Build Roadmap</div>
-          <div class="hub-card-sub">Your AI tool plan &amp; build prompts</div>
+          <div class="hub-card-title">Certification Hub</div>
+          <div class="hub-card-sub" id="cert-progress-sub">Track your certification phases</div>
         </a>
-        <a href="sales-page-builder.html" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(196,98,45,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#C4622D" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M7 9h10"/><path d="M7 13h6"/><path d="M7 17h8"/></svg>
+        <a href="content-hub.html" class="hub-card">
+          <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </div>
-          <div class="hub-card-title">Sales Page Builder</div>
-          <div class="hub-card-sub">Turn your roadmap into a live offer page</div>
+          <div class="hub-card-title">Content Hub</div>
+          <div class="hub-card-sub">Posts, planner, recorder &amp; visuals</div>
         </a>
          <a href="useragents.html" class="hub-card">
           <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
@@ -677,6 +677,18 @@
         checkNotifications(user.uid);
       }
     } catch(e) { console.error(e); }
+
+    // Cert progress on dashboard card
+    db.collection('certification_progress').doc(user.uid).get().then(function(csnap) {
+      var sub = document.getElementById('cert-progress-sub');
+      if (!sub) return;
+      if (!csnap.exists) { sub.textContent = 'Start Phase 1 →'; return; }
+      var cp = csnap.data();
+      if (cp.phase3Complete) { sub.textContent = '🎓 All phases complete!'; }
+      else if (cp.phase2Complete) { sub.textContent = 'Phase 2 ✓ · Phase 3 in progress'; }
+      else if (cp.phase1Complete) { sub.textContent = 'Phase 1 ✓ · Phase 2 in progress'; }
+      else { sub.textContent = 'Phase 1 in progress'; }
+    }).catch(function(){});
 
     loadStats(user.uid);
     loadUpcomingEvents();

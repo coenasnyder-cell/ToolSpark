@@ -16,8 +16,12 @@
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
     },
     {
-      key: 'roadmap', href: 'roadmap.html', label: 'My Roadmap',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>'
+      key: 'cert-hub', href: 'cert-hub.html', label: 'Certification Hub',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M8 14l-4 7h16l-4-7"/><path d="M9 17l3 3 3-3"/></svg>'
+    },
+    {
+      key: 'content-hub', href: 'content-hub.html', label: 'Content Hub',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
     },
     {
       key: 'courses', href: 'courses.html', label: 'Courses',
@@ -34,14 +38,6 @@
     {
       key: 'marketplace', href: 'marketplace.html', label: 'Marketplace',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
-    },
-    {
-      key: 'social-scheduler', href: 'social-scheduler.html', label: '31-Day Planner',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>'
-    },
-    {
-      key: 'journey-builder', href: 'journey-builder.html', label: 'Journey Builder',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3M9.5 7.5L10 10M14 10l.5-2.5"/></svg>'
     },
     {
       key: 'creator-hub', href: '/hub/admin-dashboard', label: 'Creator Hub',
