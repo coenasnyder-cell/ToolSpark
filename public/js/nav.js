@@ -178,6 +178,7 @@
                   if (CHALLENGE_HREFS.indexOf(href) === -1) {
                     links[i].style.display = 'none';
                   } else if (href === 'courses.html') {
+                    links[i].setAttribute('href', START_HERE_URL);
                     var span = links[i].querySelector('span');
                     if (span) span.textContent = 'Challenge';
                   }

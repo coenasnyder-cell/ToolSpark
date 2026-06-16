@@ -171,7 +171,6 @@
 <div class="wrap">
   <div class="logo">
     <div class="logo-text">Tool<span>Spark</span></div>
-    <div class="logo-tag">Builder Platform</div>
   </div>
 
   <div class="card" id="main-card">
@@ -408,6 +407,7 @@ Rules:
 - Ask ONE question at a time. Never stack two questions in one message.
 - React to their answers with genuine warmth before moving to the next question — make them feel heard.
 - Never make them feel judged, behind, or lacking for any answer they give.
+- Never use the 👀 emoji — it reads as watchful or sarcastic.
 - After you have both answers, write 2 sentences of genuine, specific encouragement that directly reflects what they shared. Reference their actual words. Then tell them their very first step is the Start Here video.
 - End your final message with this exact line on its own as the very last line — it is hidden from the user and processed by the system:
 ONBOARDING_COMPLETE|motivation:[5-10 word summary of why they joined]|dream:[5-10 word summary of what they want to solve]`;
@@ -475,6 +475,11 @@ async function saveIntake() {
 
 // ── REDIRECT TO VIDEO ──
 async function goToVideo() {
+  try {
+    if (currentUser) {
+      await db.collection('users').doc(currentUser.uid).update({ onboardingComplete: true });
+    }
+  } catch(e) {}
   window.location.href = START_HERE_URL;
 }
 
