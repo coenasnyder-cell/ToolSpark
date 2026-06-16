@@ -225,12 +225,20 @@ auth.onAuthStateChanged(async function(user) {
 async function loadListings() {
   try {
     var results = await Promise.all([
-      db.collection('marketplace_listings').where('status', '==', 'pending').orderBy('listedAt', 'desc').get(),
-      db.collection('marketplace_listings').where('status', '==', 'active').orderBy('listedAt', 'desc').get()
+      db.collection('marketplace_listings').where('status', '==', 'pending').get(),
+      db.collection('marketplace_listings').where('status', '==', 'active').get()
     ]);
 
-    renderSection('pending-list', 'pending-count', results[0].docs, 'pending');
-    renderSection('active-list', 'active-count', results[1].docs, 'active');
+    var sortByDate = function(docs) {
+      return docs.slice().sort(function(a, b) {
+        var aT = a.data().listedAt ? a.data().listedAt.toMillis() : 0;
+        var bT = b.data().listedAt ? b.data().listedAt.toMillis() : 0;
+        return bT - aT;
+      });
+    };
+
+    renderSection('pending-list', 'pending-count', sortByDate(results[0].docs), 'pending');
+    renderSection('active-list', 'active-count', sortByDate(results[1].docs), 'active');
   } catch(e) {
     document.getElementById('pending-list').innerHTML = '<div class="loading-state">Failed to load — ' + e.message + '</div>';
     document.getElementById('active-list').innerHTML  = '<div class="loading-state">Failed to load — ' + e.message + '</div>';
