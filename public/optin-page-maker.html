@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opt-In Page Maker — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --radius-sm: 8px; --header-height: 54px;
+  }
+  body { font-family:'Lato',sans-serif; background:var(--dark); color:#E8E4DC; height:100vh; display:flex; flex-direction:column; overflow:hidden; -webkit-font-smoothing:antialiased; }
+
+  /* HEADER */
+  .hdr { height:var(--header-height); background:var(--dark); border-bottom:1px solid rgba(201,168,76,0.15); display:flex; align-items:center; justify-content:space-between; padding:0 20px; flex-shrink:0; z-index:50; }
+  .hdr-back { display:flex; align-items:center; gap:7px; text-decoration:none; color:#9E9891; font-size:13px; font-weight:700; letter-spacing:0.03em; transition:color 0.18s; }
+  .hdr-back:hover { color:var(--gold-light); }
+  .hdr-title { font-family:'Playfair Display',serif; font-size:17px; color:var(--gold-light); }
+  .hdr-spacer { width:80px; }
+
+  /* MAIN SPLIT */
+  .main-layout { flex:1; display:grid; grid-template-columns:400px 1fr; overflow:hidden; }
+
+  /* CONFIG PANEL */
+  .config-panel { background:var(--dark2); border-right:1px solid var(--border-dark); overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; gap:1.1rem; }
+
+  .auto-banner { background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.22); border-radius:8px; padding:9px 13px; font-size:12px; color:var(--gold-light); line-height:1.5; display:none; }
+  .auto-banner strong { color:var(--gold); }
+
+  .field-group { display:flex; flex-direction:column; gap:5px; }
+  .field-label { font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--gold); }
+  .field-hint { font-size:11px; color:var(--text3); line-height:1.5; }
+  .field-hint a { color:var(--gold); font-weight:700; text-decoration:none; }
+  .field-input { background:var(--dark3); border:1px solid var(--border-dark); border-radius:var(--radius-sm); padding:9px 12px; font-size:13px; color:#E8E4DC; font-family:'Lato',sans-serif; outline:none; transition:border-color 0.15s; width:100%; resize:vertical; }
+  .field-input:focus { border-color:rgba(201,168,76,0.4); }
+
+  .section-divider { border:none; border-top:1px solid var(--border-dark); }
+
+  /* SWATCHES */
+  .swatch-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .swatch { width:30px; height:30px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.15s; flex-shrink:0; }
+  .swatch.active { border-color:#fff; transform:scale(1.12); box-shadow:0 0 0 2px rgba(255,255,255,0.2); }
+
+  /* IMAGE PREVIEW */
+  .img-preview { background:var(--dark3); border:1px solid var(--border-dark); border-radius:var(--radius-sm); height:110px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .img-preview img { max-height:100%; max-width:100%; object-fit:contain; }
+  .img-placeholder-text { font-size:11px; color:var(--text3); text-align:center; padding:12px; line-height:1.6; }
+
+  /* DOWNLOAD */
+  .download-btn { background:var(--gold); color:var(--dark); border:none; border-radius:10px; padding:12px 18px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.18s; width:100%; }
+  .download-btn:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .download-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
+  .download-note { font-size:11px; color:var(--text3); text-align:center; line-height:1.5; }
+
+  /* PREVIEW PANEL */
+  .preview-panel { background:#222120; display:flex; flex-direction:column; align-items:center; padding:1.75rem; overflow:auto; }
+  .preview-label { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
+  .browser-chrome { background:#1a1918; border-radius:10px; overflow:hidden; box-shadow:0 6px 40px rgba(0,0,0,0.45); width:100%; max-width:860px; flex-shrink:0; }
+  .browser-bar { height:34px; background:#111; display:flex; align-items:center; gap:6px; padding:0 14px; }
+  .browser-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .browser-url-bar { flex:1; background:#1c1c1c; border-radius:4px; height:20px; margin:0 8px; display:flex; align-items:center; padding:0 9px; overflow:hidden; }
+  .browser-url-text { font-size:10px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #live-preview { width:100%; border:none; display:block; height:400px; }
+  .preview-caption { font-size:11px; color:var(--text3); margin-top:10px; text-align:center; }
+
+  @media (max-width:860px) {
+    .main-layout { grid-template-columns:1fr; }
+    .preview-panel { display:none; }
+    body { overflow:auto; }
+    .main-layout { overflow:visible; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a href="cert-phase2.html" class="hdr-back">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back
+  </a>
+  <div class="hdr-title">Opt-In Page Maker</div>
+  <div class="hdr-spacer"></div>
+</div>
+
+<div class="main-layout">
+
+  <!-- ── CONFIG PANEL ── -->
+  <div class="config-panel">
+
+    <div class="auto-banner" id="auto-banner">
+      <strong>✓ Auto-filled</strong> from your saved opt-in copy.
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Headline</div>
+      <textarea class="field-input" id="f-headline" rows="3" placeholder="e.g. Get instant clarity on exactly who you help and what to offer them" oninput="schedulePreview()"></textarea>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Subheadline</div>
+      <textarea class="field-input" id="f-sub" rows="3" placeholder="e.g. This free AI-powered tool gives you a complete audience profile in under 10 minutes — no guessing required." oninput="schedulePreview()"></textarea>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Button Text</div>
+      <input class="field-input" id="f-cta" type="text" placeholder="e.g. Get Free Access →" oninput="schedulePreview()" />
+    </div>
+
+    <hr class="section-divider" />
+
+    <div class="field-group">
+      <div class="field-label">Tool Screenshot URL</div>
+      <div class="field-hint">Take a screenshot of your tool, upload free at <a href="https://imgbb.com" target="_blank" rel="noopener">imgbb.com</a>, then paste the Direct Link here.</div>
+      <input class="field-input" id="f-image" type="url" placeholder="https://i.ibb.co/…" oninput="updateImagePreview(); schedulePreview()" />
+      <div class="img-preview" id="img-preview">
+        <div class="img-placeholder-text">Paste a screenshot URL above<br>to see a preview</div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <div class="field-group">
+      <div class="field-label">Accent Color</div>
+      <div class="swatch-row">
+        <div class="swatch active" style="background:#C9A84C" data-color="#C9A84C" onclick="selectSwatch(this)" title="Gold"></div>
+        <div class="swatch" style="background:#3D8A65" data-color="#3D8A65" onclick="selectSwatch(this)" title="Green"></div>
+        <div class="swatch" style="background:#C4622D" data-color="#C4622D" onclick="selectSwatch(this)" title="Coral"></div>
+        <div class="swatch" style="background:#8B7FD4" data-color="#8B7FD4" onclick="selectSwatch(this)" title="Purple"></div>
+        <div class="swatch" style="background:#3B82F6" data-color="#3B82F6" onclick="selectSwatch(this)" title="Blue"></div>
+        <div class="swatch" style="background:#E84393" data-color="#E84393" onclick="selectSwatch(this)" title="Pink"></div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <div class="field-group">
+      <div class="field-label">Form Endpoint <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3);">(optional)</span></div>
+      <div class="field-hint">Leave blank to show a thank-you message on submit. To collect real leads, paste a free <a href="https://formspree.io" target="_blank" rel="noopener">Formspree</a> or <a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a> URL here.</div>
+      <input class="field-input" id="f-form-url" type="url" placeholder="https://formspree.io/f/…" />
+    </div>
+
+    <button class="download-btn" id="download-btn" onclick="downloadPage()" disabled>
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Opt-In Page
+    </button>
+    <div class="download-note">Downloads as a single HTML file. Host on Carrd, Netlify, or anywhere that accepts HTML.</div>
+
+  </div>
+
+  <!-- ── PREVIEW PANEL ── -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview</div>
+    <div class="browser-chrome">
+      <div class="browser-bar">
+        <div class="browser-dot" style="background:#FF5F57;"></div>
+        <div class="browser-dot" style="background:#FFBD2E;"></div>
+        <div class="browser-dot" style="background:#28C940;"></div>
+        <div class="browser-url-bar">
+          <div class="browser-url-text" id="browser-url-text">toolspark.co/hub/yourslug/optin</div>
+        </div>
+      </div>
+      <iframe id="live-preview" title="Opt-in page preview" sandbox="allow-same-origin"></iframe>
+    </div>
+    <div class="preview-caption">Preview updates as you type. The downloaded page looks great at full size.</div>
+  </div>
+
+</div>
+
+<script>
+var currentUser = null;
+var accentColor = '#C9A84C';
+var previewTimer = null;
+
+// ── AUTH ──
+auth.onAuthStateChanged(function(user) {
+  if (!user) { window.location.href = 'signon.html?redirect=optin-page-maker'; return; }
+  currentUser = user;
+  loadSavedData(user.uid);
+});
+
+async function loadSavedData(uid) {
+  var autoFilled = false;
+  try {
+    var results = await Promise.allSettled([
+      db.collection('optin_page_results').doc(uid).get(),
+      db.collection('value_tool').where('userId', '==', uid).limit(5).get()
+    ]);
+
+    // Optin copy → headline, subheadline, CTA
+    if (results[0].status === 'fulfilled' && results[0].value.exists) {
+      var d = results[0].value.data();
+      var sections = d.sections || {};
+      var hero = sections.HERO || '';
+      var heroLines = hero.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+      var cta  = (sections.CTA || '').split('\n')[0].trim();
+
+      if (heroLines[0]) {
+        document.getElementById('f-headline').value = heroLines[0];
+        autoFilled = true;
+      }
+      if (heroLines.length > 1) {
+        document.getElementById('f-sub').value = heroLines.slice(1).join(' ');
+      } else if (sections.SOLUTION) {
+        document.getElementById('f-sub').value = sections.SOLUTION.split('\n')[0].trim();
+      }
+      if (cta) document.getElementById('f-cta').value = cta;
+    }
+
+    // Value Mirror → tool name for URL bar
+    if (results[1].status === 'fulfilled' && !results[1].value.empty) {
+      var vtDocs = results[1].value.docs.slice().sort(function(a, b) {
+        return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) -
+               (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
+      });
+      var raw = vtDocs[0].data().rawReport || '';
+      var nameMatch = raw.match(/TOOL_NAME:([\s\S]*?)(?=\n[A-Z_]+:|VALUE_REPORT_END|$)/);
+      if (nameMatch) {
+        var slug = nameMatch[1].trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        document.getElementById('browser-url-text').textContent = 'toolspark.co/hub/' + slug + '/optin';
+      }
+    }
+  } catch(e) {}
+
+  if (autoFilled) document.getElementById('auto-banner').style.display = 'block';
+  updatePreview();
+  document.getElementById('download-btn').disabled = false;
+}
+
+// ── SWATCH ──
+function selectSwatch(el) {
+  document.querySelectorAll('.swatch').forEach(function(s){ s.classList.remove('active'); });
+  el.classList.add('active');
+  accentColor = el.dataset.color;
+  schedulePreview();
+}
+
+// ── IMAGE PREVIEW ──
+function updateImagePreview() {
+  var url = document.getElementById('f-image').value.trim();
+  var wrap = document.getElementById('img-preview');
+  if (url) {
+    wrap.innerHTML = '<img src="' + escAttr(url) + '" alt="preview" onerror="this.parentNode.innerHTML=\'<div class=&quot;img-placeholder-text&quot;>Could not load — check the URL</div>\'" />';
+  } else {
+    wrap.innerHTML = '<div class="img-placeholder-text">Paste a screenshot URL above<br>to see a preview</div>';
+  }
+}
+
+// ── PREVIEW (debounced) ──
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 200);
+}
+
+function updatePreview() {
+  var frame = document.getElementById('live-preview');
+  frame.srcdoc = buildPageHTML();
+}
+
+// ── BUILD PAGE HTML ──
+function buildPageHTML() {
+  var headline = val('f-headline') || 'Get instant clarity on exactly who you help and what to offer them';
+  var sub      = val('f-sub')      || 'This free AI-powered tool gives you a complete audience profile in under 10 minutes — no guessing required.';
+  var cta      = val('f-cta')      || 'Get Free Access →';
+  var imageUrl = document.getElementById('f-image').value.trim();
+  var formUrl  = document.getElementById('f-form-url').value.trim();
+  var color    = accentColor;
+
+  var imgHTML = imageUrl
+    ? '<img src="' + escAttr(imageUrl) + '" alt="Tool screenshot" style="max-width:100%;max-height:320px;object-fit:contain;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);" />'
+    : '<div style="width:200px;height:200px;background:rgba(255,255,255,0.05);border-radius:12px;border:2px dashed rgba(255,255,255,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;"><svg width="32" height="32" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div style="font-size:11px;color:rgba(255,255,255,0.25);text-align:center;line-height:1.5;">Add your<br>tool screenshot</div></div>';
+
+  var formAttr = formUrl
+    ? 'action="' + escAttr(formUrl) + '" method="POST"'
+    : 'onsubmit="handleSubmit(event)"';
+
+  var submitScript = formUrl ? '' :
+    '<script>' +
+    'function handleSubmit(e){' +
+    'e.preventDefault();' +
+    'document.getElementById("optin-form").style.display="none";' +
+    'document.getElementById("success-msg").style.display="flex";' +
+    '}' +
+    '<\/script>';
+
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>' + escHtml(headline) + '</title>',
+    '<style>',
+    '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }',
+    'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f5f4f1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }',
+    '.page { max-width: 860px; width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 4px 60px rgba(0,0,0,0.12); overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; }',
+    '.page-left { background: linear-gradient(145deg, #141210 0%, #1e1b17 100%); display: flex; align-items: center; justify-content: center; padding: 48px 36px; min-height: 460px; }',
+    '.page-right { padding: 52px 44px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }',
+    '.eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: ' + color + '; }',
+    'h1 { font-size: clamp(21px, 2.8vw, 30px); font-weight: 800; line-height: 1.22; color: #17140f; }',
+    '.sub { font-size: 15px; color: #6b6560; line-height: 1.72; }',
+    'form { display: flex; flex-direction: column; gap: 11px; }',
+    'input[type=text], input[type=email] { border: 1.5px solid #e0ddd5; border-radius: 8px; padding: 13px 14px; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.15s; width: 100%; color: #1a1714; background: #fff; }',
+    'input[type=text]:focus, input[type=email]:focus { border-color: ' + color + '; }',
+    '.cta { background: ' + color + '; color: #fff; border: none; border-radius: 9px; padding: 15px 22px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; width: 100%; letter-spacing: 0.01em; }',
+    '.cta:hover { opacity: 0.88; }',
+    '.privacy { font-size: 11px; color: #b0aba4; line-height: 1.55; display: flex; align-items: center; gap: 5px; }',
+    '.success-msg { display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 24px 0; text-align: center; }',
+    '.success-icon { font-size: 2rem; }',
+    '.success-text { font-size: 17px; font-weight: 700; color: ' + color + '; }',
+    '.success-sub { font-size: 14px; color: #9a9488; }',
+    '@media (max-width: 620px) {',
+    '  .page { grid-template-columns: 1fr; }',
+    '  .page-left { min-height: 200px; padding: 32px 24px; }',
+    '  .page-right { padding: 36px 24px; gap: 16px; }',
+    '}',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<div class="page">',
+    '  <div class="page-left">' + imgHTML + '</div>',
+    '  <div class="page-right">',
+    '    <div class="eyebrow">Free Access</div>',
+    '    <h1>' + escHtml(headline) + '</h1>',
+    '    <p class="sub">' + escHtml(sub) + '</p>',
+    '    <form id="optin-form" ' + formAttr + '>',
+    '      <input type="text" name="name" placeholder="First name" required />',
+    '      <input type="email" name="email" placeholder="Email address" required />',
+    '      <button type="submit" class="cta">' + escHtml(cta) + '</button>',
+    '    </form>',
+    '    <div class="success-msg" id="success-msg">',
+    '      <div class="success-icon">🎉</div>',
+    '      <div class="success-text">You\'re in! Check your inbox.</div>',
+    '      <div class="success-sub">Thanks for signing up — your free access is on its way.</div>',
+    '    </div>',
+    '    <p class="privacy">',
+    '      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+    '      No spam. We respect your privacy and will never share your info.',
+    '    </p>',
+    '  </div>',
+    '</div>',
+    submitScript,
+    '</body>',
+    '</html>'
+  ].join('\n');
+}
+
+// ── DOWNLOAD ──
+function downloadPage() {
+  var html = buildPageHTML();
+  var blob = new Blob([html], { type: 'text/html' });
+  var url  = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'optin-page.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+// ── UTILS ──
+function val(id) { return document.getElementById(id).value.trim(); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>
