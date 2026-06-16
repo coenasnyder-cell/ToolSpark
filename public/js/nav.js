@@ -22,10 +22,6 @@
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M8 14l-4 7h16l-4-7"/><path d="M9 17l3 3 3-3"/></svg>'
     },
     {
-      key: 'content-hub', href: 'content-hub.html', label: 'Content Hub',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
-    },
-    {
       key: 'roadmap', href: 'roadmap.html', label: 'My Roadmap',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="7" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="17" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="7" cy="18" r="2" fill="currentColor" stroke="none"/></svg>'
     },
@@ -175,12 +171,15 @@
               if (!cpSnap.exists || !cpSnap.data().phase1Complete) {
                 var nav = document.getElementById('sidebar-nav');
                 if (!nav) return;
+                var CHALLENGE_HREFS = ['courses.html', 'community.html', 'roadmap.html'];
                 var links = nav.querySelectorAll('a.nav-item');
                 for (var i = 0; i < links.length; i++) {
-                  if (links[i].getAttribute('href') === 'courses.html') {
+                  var href = links[i].getAttribute('href');
+                  if (CHALLENGE_HREFS.indexOf(href) === -1) {
+                    links[i].style.display = 'none';
+                  } else if (href === 'courses.html') {
                     var span = links[i].querySelector('span');
                     if (span) span.textContent = 'Challenge';
-                    break;
                   }
                 }
               }
