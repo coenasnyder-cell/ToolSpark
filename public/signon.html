@@ -327,10 +327,13 @@ async function getSmartRedirect(uid) {
   try {
     const snap = await db.collection('users').doc(uid).get();
     const data = snap.exists ? snap.data() : {};
-    if (data.userRole === 'admin' || data.onboardingComplete === true) return 'community.html';
-    return 'onboarding.html';
+    if (data.userRole === 'admin') return 'community.html';
+    if (!data.onboardingComplete) return 'onboarding.html';
+    const cpSnap = await db.collection('certification_progress').doc(uid).get();
+    const phase1Done = cpSnap.exists && !!cpSnap.data().phase1Complete;
+    return phase1Done ? 'dashboard.html' : 'courses.html';
   } catch(e) {}
-  return 'community.html';
+  return 'courses.html';
 }
 
 function showMsg(text, type) {

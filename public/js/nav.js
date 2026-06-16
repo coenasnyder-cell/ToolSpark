@@ -1,10 +1,12 @@
 // Shared sidebar nav + header — call initNav('pagekey', 'Page Title') on each member page.
 (function() {
   var HAMBURGER_SVG = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
-  var BELL_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>';
-  var SIGNOUT_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
-  var SIGNIN_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
-  var ADMIN_SVG = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+  var BELL_SVG      = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>';
+  var ENVELOPE_SVG  = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  var PERSON_SVG    = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  var SIGNOUT_SVG   = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  var SIGNIN_SVG    = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+  var ADMIN_SVG     = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 
   var ITEMS = [
     {
@@ -24,12 +26,12 @@
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
     },
     {
-      key: 'courses', href: 'courses.html', label: 'Courses',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>'
+      key: 'roadmap', href: 'roadmap.html', label: 'My Roadmap',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="7" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="17" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="7" cy="18" r="2" fill="currentColor" stroke="none"/></svg>'
     },
     {
-      key: 'inbox', href: 'inbox.html', label: 'Inbox',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'
+      key: 'courses', href: 'courses.html', label: 'Courses',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>'
     },
     {
       key: 'useragents', href: 'useragents.html', label: 'My Agents',
@@ -97,7 +99,7 @@
       '.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--gold);border-radius:50%;border:2px solid var(--dark2);}' +
       '.header-admin-btn{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);transition:all 0.15s;text-decoration:none;}' +
       '.header-admin-btn:hover{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.55);}' +
-      '.header-auth-btn{width:36px;height:36px;border-radius:50%;background:var(--dark3);border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9A9488;transition:all 0.15s;font-family:inherit;}' +
+      '.header-auth-btn{width:36px;height:36px;border-radius:50%;background:var(--dark3);border:1px solid var(--border-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9A9488;transition:all 0.15s;font-family:inherit;text-decoration:none;}' +
       '.header-auth-btn:hover{border-color:rgba(201,168,76,0.3);color:var(--gold);}' +
       '.mobile-bottom-nav{-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;}' +
       '@media(max-width:767px){' +
@@ -118,8 +120,10 @@
       '<div class="header-title">' + (pageTitle || '') + '</div>' +
       '<div class="header-actions">' +
         '<a href="admindashboard.html" class="header-admin-btn" id="header-admin-btn" style="display:none" title="Admin dashboard">' + ADMIN_SVG + '</a>' +
-        '<a href="notifications.html" class="notif-btn" id="header-notif-btn">' + BELL_SVG + '<div class="notif-dot" id="notif-dot" style="display:none"></div></a>' +
-        '<button class="header-auth-btn" id="header-auth-btn" title="Sign in">' + SIGNIN_SVG + '</button>' +
+        '<a href="inbox.html" class="notif-btn" id="header-inbox-btn" style="display:none" title="Inbox">' + ENVELOPE_SVG + '<div class="notif-dot" id="inbox-dot" style="display:none"></div></a>' +
+        '<a href="notifications.html" class="notif-btn" id="header-notif-btn" title="Notifications">' + BELL_SVG + '<div class="notif-dot" id="notif-dot" style="display:none"></div></a>' +
+        '<a href="profile.html" class="header-auth-btn" id="header-profile-btn" style="display:none" title="My Profile">' + PERSON_SVG + '</a>' +
+        '<a href="signon.html" class="header-auth-btn" id="header-signin-btn" title="Sign in">' + SIGNIN_SVG + '</a>' +
       '</div>';
 
     // Sidebar wiring
@@ -144,28 +148,46 @@
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
     window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
 
-    // Auth state
     if (!window.firebase || !firebase.auth) return;
-    var authBtn = document.getElementById('header-auth-btn');
-    var adminBtn = document.getElementById('header-admin-btn');
-    var notifDot = document.getElementById('notif-dot');
+    var adminBtn   = document.getElementById('header-admin-btn');
+    var inboxBtn   = document.getElementById('header-inbox-btn');
+    var profileBtn = document.getElementById('header-profile-btn');
+    var signinBtn  = document.getElementById('header-signin-btn');
+    var notifDot   = document.getElementById('notif-dot');
+    var inboxDot   = document.getElementById('inbox-dot');
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        authBtn.innerHTML = SIGNOUT_SVG;
-        authBtn.title = 'Sign out';
-        authBtn.onclick = function() {
-          firebase.auth().signOut().then(function() { window.location.href = 'signon.html'; });
-        };
+        // Show logged-in icons, hide sign-in
+        if (inboxBtn)   inboxBtn.style.display   = 'flex';
+        if (profileBtn) profileBtn.style.display = 'flex';
+        if (signinBtn)  signinBtn.style.display  = 'none';
+
         // Admin + onboarding check
         firebase.firestore().collection('users').doc(user.uid).get().then(function(snap) {
           var data = snap.exists ? snap.data() : {};
           if (data.userRole === 'admin') {
-            adminBtn.style.display = 'inline-flex';
+            if (adminBtn) adminBtn.style.display = 'inline-flex';
           } else if (!data.onboardingComplete) {
             lockNav();
+          } else {
+            firebase.firestore().collection('certification_progress').doc(user.uid).get().then(function(cpSnap) {
+              if (!cpSnap.exists || !cpSnap.data().phase1Complete) {
+                var nav = document.getElementById('sidebar-nav');
+                if (!nav) return;
+                var links = nav.querySelectorAll('a.nav-item');
+                for (var i = 0; i < links.length; i++) {
+                  if (links[i].getAttribute('href') === 'courses.html') {
+                    var span = links[i].querySelector('span');
+                    if (span) span.textContent = 'Challenge';
+                    break;
+                  }
+                }
+              }
+            }).catch(function() {});
           }
         }).catch(function() {});
+
         // Notification dot
         firebase.firestore().collection('notifications')
           .where('userId', '==', user.uid)
@@ -173,10 +195,12 @@
           .limit(1).get().then(function(snap) {
             if (notifDot && !snap.empty) notifDot.style.display = 'block';
           }).catch(function() {});
+
       } else {
-        authBtn.innerHTML = SIGNIN_SVG;
-        authBtn.title = 'Sign in';
-        authBtn.onclick = function() { window.location.href = 'signon.html'; };
+        // Logged out — only sign-in button
+        if (inboxBtn)   inboxBtn.style.display   = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
+        if (signinBtn)  signinBtn.style.display  = 'flex';
       }
     });
   }

@@ -170,7 +170,7 @@
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
         <div class="user-name" id="sidebar-name">Loading…</div>
-        <div class="user-role" id="sidebar-role">Builder</div>
+        <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
     <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
@@ -600,7 +600,7 @@ auth.onAuthStateChanged(async function(user) {
       }
     }
     if (nameEl) nameEl.textContent = displayName;
-    if (roleEl) roleEl.textContent = userData.userRole === 'admin' ? 'Admin' : 'Builder';
+    if (roleEl) roleEl.textContent = userData.userRole === 'admin' ? 'Admin' : 'Member';
 
     // Redirect if Phase 1 not done and no cert progress at all (graceful: let them in if they have steps saved)
     if (!prog.phase1Complete && !prog.phase2Steps) {

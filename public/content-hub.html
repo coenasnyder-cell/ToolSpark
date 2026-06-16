@@ -203,7 +203,7 @@ auth.onAuthStateChanged(function(user) {
     }
     if (nameEl) nameEl.textContent = name;
     var roleEl = document.getElementById('sidebar-role');
-    if (roleEl) roleEl.textContent = d.userRole === 'admin' ? 'Admin' : 'Builder';
+    if (roleEl) roleEl.textContent = d.userRole === 'admin' ? 'Admin' : 'Member';
   }).catch(function(){});
 });
 </script>

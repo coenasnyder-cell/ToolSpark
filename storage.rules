@@ -22,6 +22,15 @@ service firebase.storage {
         request.resource.contentType.matches('image/.*');
     }
 
+    // PROFILE BANNERS
+    match /profile-banners/{userId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // THREAD IMAGES
     // Any signed in member can upload
     match /thread-images/{fileName} {

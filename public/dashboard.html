@@ -364,7 +364,7 @@
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
         <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Builder</div>
+        <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
     <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
@@ -407,7 +407,7 @@
           </div>
         </div>
         <div class="mp-bio" id="mp-bio"></div>
-        <div class="mp-stats">
+        <div class="mp-stats" id="mp-stats-block">
           <div>
             <div class="mp-stat-num" id="stat-threads">0</div>
             <div class="mp-stat-label">Threads</div>
@@ -425,6 +425,7 @@
             <div class="mp-stat-label">Days Active</div>
           </div>
         </div>
+        <div id="stats-challenge-placeholder" style="display:none;font-size:12px;color:var(--text3);padding:0.75rem 0;border-top:1px solid var(--border);margin-top:0.25rem;">Stats unlock after the Challenge.</div>
 
     </div>
     <div id="email-verify-banner" style="display:none;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);border-radius:10px;padding:11px 16px;margin-top:1rem;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;">
@@ -454,7 +455,7 @@
       <div id="events-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
     </div>
     <!-- HUB CARDS -->
-    <div>
+    <div id="quick-access-section">
       <div class="section-header">
         <div class="section-title">Quick Access</div>
       </div>
@@ -511,7 +512,7 @@
       </div>
     </div>
     <!-- COMMUNITY TOOLS & RESOURCES -->
-    <div>
+    <div id="community-section">
       <div class="section-header">
         <div class="section-title">Community Tools &amp; Resources</div>
       </div>
@@ -682,16 +683,31 @@
       }
     } catch(e) { console.error(e); }
 
-    // Cert progress on dashboard card
+    // Cert progress — drives both card subtitle and challenge-phase UI hiding
     db.collection('certification_progress').doc(user.uid).get().then(function(csnap) {
+      var cp = (csnap.exists ? csnap.data() : {});
+      var phase1Done = !!cp.phase1Complete;
+
+      // Dashboard simplification during challenge
+      var qaSection   = document.getElementById('quick-access-section');
+      var commSection = document.getElementById('community-section');
+      var statsBlock  = document.getElementById('mp-stats-block');
+      var statsPlaceholder = document.getElementById('stats-challenge-placeholder');
+      if (!phase1Done) {
+        if (qaSection)   qaSection.style.display   = 'none';
+        if (commSection) commSection.style.display  = 'none';
+        if (statsBlock)  statsBlock.style.display   = 'none';
+        if (statsPlaceholder) statsPlaceholder.style.display = 'block';
+      }
+
+      // Cert progress card subtitle
       var sub = document.getElementById('cert-progress-sub');
-      if (!sub) return;
-      if (!csnap.exists) { sub.textContent = 'Start Phase 1 →'; return; }
-      var cp = csnap.data();
-      if (cp.phase3Complete) { sub.textContent = '🎓 All phases complete!'; }
-      else if (cp.phase2Complete) { sub.textContent = 'Phase 2 ✓ · Phase 3 in progress'; }
-      else if (cp.phase1Complete) { sub.textContent = 'Phase 1 ✓ · Phase 2 in progress'; }
-      else { sub.textContent = 'Phase 1 in progress'; }
+      if (sub) {
+        if (cp.phase3Complete)      sub.textContent = '🎓 All phases complete!';
+        else if (cp.phase2Complete) sub.textContent = 'Phase 2 ✓ · Phase 3 in progress';
+        else if (cp.phase1Complete) sub.textContent = 'Phase 1 ✓ · Phase 2 in progress';
+        else                        sub.textContent = 'Start Phase 1 →';
+      }
     }).catch(function(){});
 
     loadStats(user.uid);

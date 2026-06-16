@@ -171,15 +171,19 @@
   /* ── PAGE CONTENT ── */
   .page-content {
     flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
     padding: 1.75rem 2rem;
-    max-width: 1200px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
-    align-items: start;
+    align-items: stretch;
   }
+  .events-banner { display:flex; align-items:center; gap:14px; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.22); border-radius:10px; padding:11px 18px; font-size:13px; }
+  .events-banner-text { flex:1; color:var(--text); line-height:1.5; }
+  .events-banner-link { font-size:12px; font-weight:700; color:var(--gold); text-decoration:none; white-space:nowrap; flex-shrink:0; }
+  .events-banner-link:hover { opacity:0.8; }
 
   /* ── FIRST VISIT BANNER ── */
   .first-visit-banner {
@@ -1205,7 +1209,7 @@ img, video, iframe {
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
         <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Builder</div>
+        <div class="user-role" id="sidebar-role">Member</div>
 
       </div>
     </div>
@@ -1224,6 +1228,13 @@ img, video, iframe {
 
   <!-- PAGE CONTENT -->
   <div class="page-content">
+
+    <!-- EVENTS BANNER (conditional) -->
+    <div id="events-banner" style="display:none;" class="events-banner">
+      <span style="font-size:18px;">📅</span>
+      <div class="events-banner-text" id="events-banner-text"></div>
+      <a href="events.html" class="events-banner-link" id="events-banner-link">Register →</a>
+    </div>
 
     <!-- FEED COLUMN -->
     <div class="feed-col">
@@ -1369,54 +1380,6 @@ img, video, iframe {
 
     </div>
 
-    <!-- RIGHT SIDEBAR -->
-    <div class="right-col">
-
-      <!-- ACTIVE MEMBERS -->
-      <div class="card widget-card">
-        <div class="widget-title">Recently Active</div>
-        <div id="active-now-list">
-          <div style="font-size:12px;color:var(--text3);padding:4px 0;">Loading...</div>
-        </div>
-      </div>
-
-      <!-- CATEGORIES -->
-      <div class="card widget-card">
-        <div class="widget-title">Categories</div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#6B6560;"></div><span class="cat-name">General</span></div>
-          <span class="cat-count" id="cat-count-General">0</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#C9A84C;"></div><span class="cat-name">Questions</span></div>
-          <span class="cat-count" id="cat-count-Questions">0</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#3D8A65;"></div><span class="cat-name">Wins</span></div>
-          <span class="cat-count" id="cat-count-Wins">0</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#E0875A;"></div><span class="cat-name">Announcements</span></div>
-          <span class="cat-count" id="cat-count-Announcements">0</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#2D7AB5;"></div><span class="cat-name">Tool Ideas</span></div>
-          <span class="cat-count" id="cat-count-Tool Ideas">0</span>
-        </div>
-        <div class="cat-item">
-          <div class="cat-left"><div class="cat-dot" style="background:#9A9488;"></div><span class="cat-name">Feedback</span></div>
-          <span class="cat-count" id="cat-count-Feedback">0</span>
-        </div>
-      </div>
-
-      <!-- UPCOMING EVENTS -->
-      <div class="card widget-card">
-        <div class="widget-title">Upcoming Events</div>
-        <div id="events-widget-list"><div style="font-size:12px;color:var(--text3);padding:0.5rem 0;">Loading events...</div></div>
-        <a href="events.html" style="display:block;font-size:12px;color:var(--gold);font-weight:700;margin-top:0.75rem;text-decoration:none;">View all events →</a>
-      </div>
-
-    </div>
   </div>
 </div>
 
@@ -2080,7 +2043,7 @@ async function toggleLike(threadId) {
 
     // Sidebar
     document.getElementById('sidebar-name').textContent = name;
-    document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Builder';
+    document.getElementById('sidebar-role').textContent = currentUserRole === 'admin' ? 'Admin' : 'Member';
     if (currentUserRole === 'admin') {
       document.getElementById('admin-tools-bar').style.display = 'flex';
     }
@@ -2118,8 +2081,6 @@ if (user.photoURL) {
   });
 
   async function loadEventsWidget() {
-    const container = document.getElementById('events-widget-list');
-    if (!container) return;
     try {
       const now = new Date();
       const snap = await db.collection('Events')
@@ -2133,29 +2094,23 @@ if (user.photoURL) {
         return !s || s === 'upcoming';
       }).slice(0, 3);
 
-      if (!docs.length) {
-        container.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:0.5rem 0;">No upcoming events.</div>';
-        return;
-      }
+      if (!docs.length) return;
 
+      // Populate top banner with the next upcoming event
+      const next = docs[0].data();
+      const nextDate = next.eventDate.toDate();
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      container.innerHTML = docs.map(doc => {
-        const d = doc.data();
-        const date = d.eventDate.toDate();
-        const month = months[date.getMonth()];
-        const day = date.getDate();
-        const title = d.eventTitle || 'Event';
-        const loc = d.eventLocation ? d.eventLocation.charAt(0).toUpperCase() + d.eventLocation.slice(1) : '';
-        const sub = [d.description, loc].filter(Boolean).join(' · ');
-        const wrap = d.eventURL
-          ? `<a href="${d.eventURL}" target="_blank" rel="noopener" style="text-decoration:none;display:contents;">`
-          : '<div style="display:contents;">';
-        const wrapEnd = d.eventURL ? '</a>' : '</div>';
-        return `<div class="event-item">${wrap}<div class="event-date-block"><div class="event-month">${month}</div><div class="event-day">${day}</div></div><div><div class="event-title">${title}</div>${sub ? `<div class="event-sub">${sub}</div>` : ''}</div>${wrapEnd}</div>`;
-      }).join('');
-    } catch(e) {
-      container.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:0.5rem 0;">Could not load events.</div>';
-    }
+      const dateStr = months[nextDate.getMonth()] + ' ' + nextDate.getDate() + ', ' + nextDate.getFullYear();
+      const timeStr = nextDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+      const bannerText = document.getElementById('events-banner-text');
+      const bannerLink = document.getElementById('events-banner-link');
+      const banner = document.getElementById('events-banner');
+      if (banner && bannerText) {
+        bannerText.innerHTML = '<strong>' + (next.eventTitle || 'Live Event') + '</strong> &mdash; ' + dateStr + ', ' + timeStr;
+        if (bannerLink && next.eventURL) bannerLink.href = next.eventURL;
+        banner.style.display = 'flex';
+      }
+    } catch(e) {}
   }
 
   function showPostMsg(text, type) {

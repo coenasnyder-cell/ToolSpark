@@ -157,6 +157,11 @@
   .photo-upload-btn:hover { background:rgba(0,0,0,0.6); }
   .photo-upload-btn svg { pointer-events:none; }
   .edit-open .photo-upload-btn { display:flex; }
+  .banner-upload-btn { display:none; position:absolute; bottom:8px; right:12px; background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:100px; padding:5px 12px; font-size:11px; font-weight:700; font-family:'Lato',sans-serif; cursor:pointer; align-items:center; gap:6px; z-index:2; transition:background 0.15s; }
+  .banner-upload-btn:hover { background:rgba(0,0,0,0.75); }
+  .form-note { font-size:11px; color:var(--text3); margin-top:4px; }
+  .form-note a { color:var(--gold); font-weight:700; text-decoration:none; }
+  .form-input[readonly] { background:var(--bg); cursor:default; color:var(--text2); }
   .profile-photo-wrap { position:relative; display:inline-block; }
   .profile-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
   .profile-name-block { flex: 1; min-width: 0; }
@@ -424,7 +429,7 @@
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
         <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Builder</div>
+        <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
     <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
@@ -448,7 +453,13 @@
 
       <!-- PROFILE HERO CARD -->
       <div class="profile-hero">
-        <div class="profile-banner"></div>
+        <div class="profile-banner" id="profile-banner" style="background-size:cover;background-position:center;">
+          <button class="banner-upload-btn" id="banner-upload-btn" type="button" onclick="document.getElementById('banner-file-input').click()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Change Banner
+          </button>
+          <input type="file" id="banner-file-input" accept="image/*" style="display:none" onchange="handleBannerSelect(this)">
+        </div>
         <div class="profile-body">
 
           <div class="profile-photo-wrap" id="profile-photo-wrap">
@@ -481,13 +492,13 @@
 
           <!-- Social Links (read view) -->
           <div class="social-links-row hidden" id="profile-social-row">
-            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-youtube-link">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1C4.5 20.4 12 20.4 12 20.4s7.5 0 9.4-.5a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
-              YouTube
+            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-instagram-link">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+              Instagram
             </a>
-            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-facebook-link">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
-              Facebook
+            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-linkedin-link">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              LinkedIn
             </a>
           </div>
 
@@ -515,23 +526,26 @@
             </div>
             <div class="form-field">
               <label class="form-label" for="edit-spark">Spark Statement</label>
-              <input class="form-input" id="edit-spark" type="text" placeholder="I help [who] do [what]" maxlength="120">
+              <input class="form-input" id="edit-spark" type="text" placeholder="Complete the Challenge to set your spark" maxlength="120" readonly>
+              <div class="form-note">Set during the Challenge. <a href="roadmap.html">Update in My Roadmap →</a></div>
             </div>
             <div class="form-field">
-              <label class="form-label" for="edit-youtube">YouTube Channel URL</label>
-              <input class="form-input" id="edit-youtube" type="url" placeholder="https://youtube.com/@yourchannel">
+              <label class="form-label" for="edit-instagram">Instagram URL</label>
+              <input class="form-input" id="edit-instagram" type="url" placeholder="https://instagram.com/yourhandle">
             </div>
             <div class="form-field">
-              <label class="form-label" for="edit-facebook">Facebook Page URL</label>
-              <input class="form-input" id="edit-facebook" type="url" placeholder="https://facebook.com/yourpage">
+              <label class="form-label" for="edit-linkedin">LinkedIn URL</label>
+              <input class="form-input" id="edit-linkedin" type="url" placeholder="https://linkedin.com/in/yourprofile">
             </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-tool-name">My Tool Name</label>
-              <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-tool-url">My Tool URL</label>
-              <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
+            <div id="tool-fields" style="display:none;">
+              <div class="form-field">
+                <label class="form-label" for="edit-tool-name">My Tool Name</label>
+                <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="edit-tool-url">My Tool URL</label>
+                <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
+              </div>
             </div>
             <div class="form-actions">
               <button class="save-btn" id="save-btn" onclick="saveProfile()">Save Changes</button>
@@ -543,24 +557,29 @@
             </div>
           </div>
       <!-- STATS -->
-      <div class="stats-grid" style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
-      <div>
-      <div class="stat-num" id="stat-threads">—</div>
-      <div class="stat-label">Threads Posted</div>
+      <div id="profile-stats-block" style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div class="stats-grid">
+          <div>
+            <div class="stat-num" id="stat-threads">—</div>
+            <div class="stat-label">Threads Posted</div>
+          </div>
+          <div>
+            <div class="stat-num" id="stat-points">—</div>
+            <div class="stat-label">Points</div>
+          </div>
+          <div>
+            <div class="stat-num" id="stat-streak">—</div>
+            <div class="stat-label">Day Streak</div>
+          </div>
+          <div>
+            <div class="stat-num" id="stat-days">—</div>
+            <div class="stat-label">Days Active</div>
+          </div>
+        </div>
+      </div><!-- /profile-stats-block -->
+      <div id="profile-stats-placeholder" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);color:var(--text3);font-size:13px;">
+        Stats unlock after the Challenge.
       </div>
-    <div>
-    <div class="stat-num" id="stat-points">—</div>
-    <div class="stat-label">Points</div>
-  </div>
-  <div>
-     <div class="stat-num" id="stat-streak">—</div>
-    <div class="stat-label">Day Streak</div>
-  </div>
-  <div>
-    <div class="stat-num" id="stat-days">—</div>
-    <div class="stat-label">Days Active</div>
-  </div>
-        </div><!-- /stats-grid -->
       </div><!-- /profile-body -->
     </div><!-- /profile-hero -->    
 
@@ -661,12 +680,14 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     const btn = document.getElementById('edit-toggle-btn');
     const bioView = document.getElementById('profile-bio-view');
     const photoWrap = document.getElementById('profile-photo-wrap');
+    const bannerUploadBtn = document.getElementById('banner-upload-btn');
     if (editOpen) {
       form.classList.add('open');
       btn.textContent = 'Cancel';
       btn.classList.add('cancel');
       bioView.style.display = 'none';
       if (photoWrap) photoWrap.classList.add('edit-open');
+      if (bannerUploadBtn) bannerUploadBtn.style.display = 'flex';
       document.getElementById('success-msg').classList.remove('show');
     } else {
       form.classList.remove('open');
@@ -674,6 +695,7 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
       btn.classList.remove('cancel');
       bioView.style.display = '';
       if (photoWrap) photoWrap.classList.remove('edit-open');
+      if (bannerUploadBtn) bannerUploadBtn.style.display = 'none';
     }
   }
 
@@ -711,14 +733,35 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     }
   }
 
+  async function handleBannerSelect(input) {
+    const file = input.files[0];
+    if (!file || !currentUser) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); input.value = ''; return; }
+    const bannerBtn = document.getElementById('banner-upload-btn');
+    bannerBtn.textContent = 'Uploading…';
+    bannerBtn.disabled = true;
+    try {
+      const ref = firebase.storage().ref('profile-banners/' + currentUser.uid + '/banner');
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      await db.collection('users').doc(currentUser.uid).set({ bannerURL: url }, { merge: true });
+      document.getElementById('profile-banner').style.backgroundImage = 'url(' + url + ')';
+    } catch(e) {
+      alert('Upload failed. Try again.');
+    } finally {
+      bannerBtn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Change Banner';
+      bannerBtn.disabled = false;
+      input.value = '';
+    }
+  }
+
   /* ── Save profile ── */
   async function saveProfile() {
     if (!currentUser) return;
     const nameVal = document.getElementById('edit-name').value.trim();
     const bioVal = document.getElementById('edit-bio').value.trim();
-    const sparkVal = document.getElementById('edit-spark').value.trim();
-    const youtubeVal = document.getElementById('edit-youtube').value.trim();
-    const facebookVal = document.getElementById('edit-facebook').value.trim();
+    const instagramVal = document.getElementById('edit-instagram').value.trim();
+    const linkedinVal = document.getElementById('edit-linkedin').value.trim();
     const toolNameVal = document.getElementById('edit-tool-name').value.trim();
     const toolUrlVal = document.getElementById('edit-tool-url').value.trim();
     if (!nameVal) {
@@ -731,8 +774,8 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
     try {
       const update = {
         displayName: nameVal, bio: bioVal,
-        sparkStatement: sparkVal, youtubeUrl: youtubeVal,
-        facebookUrl: facebookVal, myToolName: toolNameVal, myToolUrl: toolUrlVal
+        instagramUrl: instagramVal, linkedinUrl: linkedinVal,
+        myToolName: toolNameVal, myToolUrl: toolUrlVal
       };
       if (pendingPhotoURL) update.photoURL = pendingPhotoURL;
       await currentUser.updateProfile({ displayName: nameVal, ...(pendingPhotoURL && { photoURL: pendingPhotoURL }) });
@@ -745,15 +788,12 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
       const bioView = document.getElementById('profile-bio-view');
       if (bioVal) { bioView.textContent = bioVal; bioView.classList.remove('empty'); }
       else { bioView.textContent = 'No bio yet — add one by clicking Edit Profile.'; bioView.classList.add('empty'); }
-      const sparkView = document.getElementById('profile-spark-view');
-      if (sparkVal) { sparkView.textContent = '"' + sparkVal + '"'; sparkView.classList.remove('hidden'); }
-      else { sparkView.classList.add('hidden'); }
-      const ytLink = document.getElementById('profile-youtube-link');
-      const fbLink = document.getElementById('profile-facebook-link');
+      const igLink = document.getElementById('profile-instagram-link');
+      const liLink = document.getElementById('profile-linkedin-link');
       const socialRow = document.getElementById('profile-social-row');
-      if (youtubeVal) { ytLink.href = youtubeVal; ytLink.classList.remove('hidden'); } else { ytLink.classList.add('hidden'); }
-      if (facebookVal) { fbLink.href = facebookVal; fbLink.classList.remove('hidden'); } else { fbLink.classList.add('hidden'); }
-      if (youtubeVal || facebookVal) socialRow.classList.remove('hidden'); else socialRow.classList.add('hidden');
+      if (instagramVal) { igLink.href = instagramVal; igLink.classList.remove('hidden'); } else { igLink.classList.add('hidden'); }
+      if (linkedinVal) { liLink.href = linkedinVal; liLink.classList.remove('hidden'); } else { liLink.classList.add('hidden'); }
+      if (instagramVal || linkedinVal) socialRow.classList.remove('hidden'); else socialRow.classList.add('hidden');
       const toolCard = document.getElementById('profile-tool-card');
       if (toolNameVal) {
         document.getElementById('profile-tool-name').textContent = toolNameVal;
@@ -853,16 +893,52 @@ function renderBadges(badges) {
       console.error('Failed to load user doc', err);
     }
 
-    const displayName = data.displayName || user.displayName || user.email || 'Builder';
+    const displayName = data.displayName || user.displayName || user.email || 'Member';
     const bio = data.bio || '';
-    const sparkStatement = data.sparkStatement || '';
-    const youtubeUrl = data.youtubeUrl || '';
-    const facebookUrl = data.facebookUrl || '';
+    let sparkStatement = data.sparkStatement || '';
+    const instagramUrl = data.instagramUrl || '';
+    const linkedinUrl = data.linkedinUrl || '';
     const myToolName = data.myToolName || '';
     const myToolUrl = data.myToolUrl || '';
     const role = data.userRole || 'member';
     const createdAt = data.createdAt || null;
     const photoURL = data.photoURL || user.photoURL || '';
+    const bannerURL = data.bannerURL || '';
+
+    // Load spark from spark_profiles if not in user doc
+    if (!sparkStatement) {
+      try {
+        const spSnap = await db.collection('spark_profiles').doc(targetUid).get();
+        if (spSnap.exists) sparkStatement = spSnap.data().spark || spSnap.data().sparkStatement || '';
+      } catch(e) {}
+    }
+
+    // Load certification_progress for phase gating
+    let phase1Done = false;
+    try {
+      const cpSnap = await db.collection('certification_progress').doc(targetUid).get();
+      if (cpSnap.exists) phase1Done = !!cpSnap.data().phase1Complete;
+    } catch(e) {}
+
+    // Apply banner
+    if (bannerURL) {
+      const bannerEl = document.getElementById('profile-banner');
+      if (bannerEl) bannerEl.style.backgroundImage = 'url(' + bannerURL + ')';
+    }
+
+    // Tool fields visibility
+    if (phase1Done) {
+      const toolFields = document.getElementById('tool-fields');
+      if (toolFields) toolFields.style.display = 'block';
+    }
+
+    // Stats gating
+    if (!phase1Done) {
+      const statsBlock = document.getElementById('profile-stats-block');
+      const statsPlaceholder = document.getElementById('profile-stats-placeholder');
+      if (statsBlock) statsBlock.style.display = 'none';
+      if (statsPlaceholder) statsPlaceholder.style.display = 'block';
+    }
 
     // Admin nav
     if (role === 'admin') {
@@ -913,12 +989,12 @@ function renderBadges(badges) {
     }
 
     // Social links view
-    const ytLink = document.getElementById('profile-youtube-link');
-    const fbLink = document.getElementById('profile-facebook-link');
+    const igLink = document.getElementById('profile-instagram-link');
+    const liLink = document.getElementById('profile-linkedin-link');
     const socialRow = document.getElementById('profile-social-row');
-    if (youtubeUrl) { ytLink.href = youtubeUrl; ytLink.classList.remove('hidden'); }
-    if (facebookUrl) { fbLink.href = facebookUrl; fbLink.classList.remove('hidden'); }
-    if (youtubeUrl || facebookUrl) socialRow.classList.remove('hidden');
+    if (instagramUrl) { igLink.href = instagramUrl; igLink.classList.remove('hidden'); }
+    if (linkedinUrl) { liLink.href = linkedinUrl; liLink.classList.remove('hidden'); }
+    if (instagramUrl || linkedinUrl) socialRow.classList.remove('hidden');
 
     // My Tool view
     if (myToolName) {
@@ -935,8 +1011,8 @@ function renderBadges(badges) {
     document.getElementById('edit-name').value = displayName;
     document.getElementById('edit-bio').value = bio;
     document.getElementById('edit-spark').value = sparkStatement;
-    document.getElementById('edit-youtube').value = youtubeUrl;
-    document.getElementById('edit-facebook').value = facebookUrl;
+    document.getElementById('edit-instagram').value = instagramUrl;
+    document.getElementById('edit-linkedin').value = linkedinUrl;
     document.getElementById('edit-tool-name').value = myToolName;
     document.getElementById('edit-tool-url').value = myToolUrl;
 

@@ -484,9 +484,8 @@
   <main class="page-content">
     <div class="welcome-card">
       <div>
-        <div class="welcome-eyebrow">Build Roadmap</div>
-        <h1>Your path to building.</h1>
-        <p>Start with Find Your Spark, then go deep on your audience, then run your Breakthrough session to get your three recommended tools and build prompts. Work through each step in order — every one builds on the last.</p>
+        <h1>Your roadmap starts here.</h1>
+        <p>Everything you discovered during the Challenge, in one place. Your spark, your audience, your breakthrough — use this as your reference as you build.</p>
       </div>
     </div>
 
@@ -616,7 +615,7 @@
               </div>
               <div class="path-option-title">Build It Yourself</div>
               <div class="path-option-copy">You have your prompt. You have your platform. The Build Agent and the community are beside you the whole way.</div>
-              <a href="diy.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'diy.html');">Go to Build Hub →</a>
+              <a href="diy.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'diy.html');">Start Building →</a>
             </div>
 
             <div class="path-option-card dwy" id="path-card-dwy">
@@ -628,7 +627,7 @@
               </div>
               <div class="path-option-title">Done With You</div>
               <div class="path-option-copy">We build it together. You stay involved, make the decisions, and walk away knowing exactly how your tool works.</div>
-              <a href="cert-hub.html" class="path-option-action" onclick="return handlePathSelection(event, 'done_with_you', 'cert-hub.html');">Go to Certification Hub →</a>
+              <a href="cert-hub.html" class="path-option-action" onclick="return handlePathSelection(event, 'done_with_you', 'cert-hub.html');">Start Certification →</a>
             </div>
 
             <div class="path-option-card dfy" id="path-card-dfy">
@@ -976,11 +975,11 @@
     if (!note) return;
 
     if (currentBuildPathChoice === 'build_it_yourself') {
-      note.textContent = 'Current choice: Build It Yourself. We can use this later to guide lessons, support, and build steps.';
+      note.textContent = 'We can use this later to guide lessons, support, and build steps.';
     } else if (currentBuildPathChoice === 'done_with_you') {
-      note.textContent = 'Current choice: Done With You. Your choice is saved. Add your booking link when that page is ready.';
+      note.textContent = 'We can use this later to guide lessons, support, and build steps.';
     } else if (currentBuildPathChoice === 'done_for_you') {
-      note.textContent = 'Current choice: Done For You. We can use this later to skip builder lessons and route you into the DFY flow.';
+      note.textContent = 'We can use this later to guide lessons, support, and build steps.';
     } else {
       note.textContent = 'No path selected yet. Your choice will be saved to guide your next steps later.';
     }
