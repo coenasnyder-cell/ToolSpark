@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 — Build Your Lead Magnet · ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65; --green-dim: rgba(42,92,69,0.06);
+    --purple: #4B3F8A; --purple-dim: rgba(75,63,138,0.08); --purple-text: #9B8FD0;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+  }
+  body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width:var(--sidebar-width); background:var(--dark); min-height:100vh; display:flex; flex-direction:column; position:fixed; left:0; top:0; z-index:100; border-right:1px solid var(--border-dark); }
+  .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border-dark); }
+  .logo-text { font-family:'Playfair Display',serif; font-size:20px; color:#F0EDE6; }
+  .logo-text span { color:var(--gold); }
+  .logo-tag { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-top:3px; font-weight:700; }
+  .sidebar-nav { flex:1; padding:1rem 0.75rem; display:flex; flex-direction:column; gap:2px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); color:#9A9488; font-size:14px; text-decoration:none; transition:all 0.15s; }
+  .nav-item:hover { background:rgba(255,255,255,0.05); color:#F0EDE6; }
+  .nav-item.active { background:var(--gold-dim); color:var(--gold); font-weight:700; border:1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width:18px; height:18px; opacity:0.7; flex-shrink:0; }
+  .nav-item.active .nav-icon { opacity:1; }
+  .sidebar-footer { padding:1rem 0.75rem; border-top:1px solid var(--border-dark); }
+  .sidebar-user { display:flex; align-items:center; gap:10px; padding:8px 10px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gold); }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:13px; color:#F0EDE6; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role { font-size:11px; color:var(--text3); }
+  .logout-btn { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; margin-top:4px; background:none; border:none; border-radius:var(--radius-sm); color:#6B5F5F; font-size:13px; font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.15s; text-align:left; }
+  .logout-btn:hover { background:rgba(220,50,50,0.1); color:#E05555; }
+
+  /* MAIN */
+  .main-wrap { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-content { flex:1; padding:2rem 2.5rem 4rem; max-width:760px; }
+
+  /* BACK LINK */
+  .back-link { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--text3); text-decoration:none; margin-bottom:1.5rem; transition:color 0.15s; }
+  .back-link:hover { color:var(--purple-text); }
+
+  /* PHASE HEADER */
+  .phase-header-block { margin-bottom:1.5rem; }
+  .phase-eyebrow { font-size:11px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:var(--purple-text); margin-bottom:6px; }
+  .phase-header-block h1 { font-family:'Playfair Display',serif; font-size:28px; font-weight:400; color:var(--text); margin-bottom:6px; }
+  .phase-header-block p { font-size:14px; color:var(--text3); line-height:1.6; }
+
+  /* PROGRESS BAR */
+  .progress-row { display:flex; align-items:center; gap:14px; margin-bottom:2rem; }
+  .prog-bar-bg { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .prog-bar-fill { height:100%; background:var(--purple-text); border-radius:3px; transition:width 0.4s ease; width:0%; }
+  .prog-bar-fill.done { background:var(--green-light); }
+  .prog-text { font-size:12px; font-weight:700; color:var(--text3); white-space:nowrap; }
+
+  /* STEP CARDS */
+  .step-card { display:flex; align-items:flex-start; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:8px; cursor:pointer; transition:background 0.12s, border-color 0.12s; user-select:none; position:relative; }
+  .step-card:hover { background:rgba(75,63,138,0.03); border-color:rgba(75,63,138,0.2); }
+  .step-card.done { background:var(--green-dim); border-color:rgba(42,92,69,0.25); }
+  .step-card.optional-step { border-style:dashed; }
+  .step-card.optional-step:hover { border-style:solid; }
+
+  .step-check { width:22px; height:22px; border-radius:6px; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; margin-top:1px; transition:all 0.15s; }
+  .step-card:hover .step-check { border-color:rgba(75,63,138,0.4); }
+  .step-card.done .step-check { background:var(--green-light); border-color:var(--green-light); }
+  .check-svg { opacity:0; transition:opacity 0.15s; }
+  .step-card.done .check-svg { opacity:1; }
+
+  .step-body { flex:1; min-width:0; }
+  .step-top { display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap; }
+  .step-num-badge { font-size:10px; font-weight:900; color:var(--text3); background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:1px 6px; flex-shrink:0; }
+  .step-card.done .step-num-badge { color:var(--green-light); border-color:rgba(42,92,69,0.2); background:rgba(42,92,69,0.06); }
+  .step-title { font-size:14px; font-weight:700; color:var(--text); }
+  .step-card.done .step-title { color:var(--text3); }
+  .optional-badge { font-size:10px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--gold); background:var(--gold-dim); border:1px solid rgba(201,168,76,0.2); border-radius:4px; padding:1px 6px; }
+  .step-desc { font-size:12px; color:var(--text3); line-height:1.5; margin-top:2px; }
+
+  .step-link { display:inline-flex; align-items:center; gap:5px; margin-top:8px; font-size:12px; font-weight:700; color:var(--purple-text); text-decoration:none; background:rgba(75,63,138,0.08); border:1px solid rgba(75,63,138,0.18); border-radius:6px; padding:5px 10px; transition:all 0.15s; }
+  .step-link:hover { background:rgba(75,63,138,0.14); }
+  .step-card.done .step-link { color:var(--text3); background:var(--bg); border-color:var(--border); }
+
+  /* VALUE MIRROR CARD */
+  .vm-card { background:rgba(75,63,138,0.05); border:1px solid rgba(75,63,138,0.18); border-radius:var(--radius-sm); padding:14px 16px; margin:-4px 0 8px 36px; }
+  .vm-eyebrow { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--purple-text); margin-bottom:10px; }
+  .vm-grid { display:flex; flex-direction:column; gap:8px; }
+  .vm-field-label { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px; }
+  .vm-field-value { font-size:13px; color:var(--text2); line-height:1.5; }
+  .vm-link { display:inline-flex; margin-top:10px; font-size:12px; font-weight:700; color:var(--purple-text); text-decoration:none; }
+  .vm-link:hover { text-decoration:underline; }
+
+  /* SUBMIT FORM (step 11) */
+  .submit-expand { display:none; background:var(--bg); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--radius-sm) var(--radius-sm); padding:16px; margin:-4px 0 8px 0; }
+  .submit-expand.open { display:block; }
+  .field { margin-bottom:1rem; }
+  .field label { display:block; font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+  .field .hint { font-size:12px; color:var(--text3); margin-bottom:6px; }
+  .field input, .field textarea { width:100%; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:14px; color:var(--text); outline:none; transition:border-color 0.15s; }
+  .field input:focus, .field textarea:focus { border-color:var(--purple-text); }
+  .field textarea { min-height:90px; resize:vertical; line-height:1.6; }
+  .btn-submit-review { display:inline-flex; align-items:center; gap:7px; background:var(--purple-text); color:#fff; border:none; padding:11px 22px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-submit-review:hover { background:var(--purple); }
+  .btn-submit-review:disabled { opacity:0.5; cursor:not-allowed; }
+  .submit-success { display:none; background:var(--green-dim); border:1px solid rgba(42,92,69,0.2); border-radius:var(--radius-sm); padding:14px 16px; font-size:14px; color:var(--green-light); font-weight:700; }
+  .submit-success.show { display:block; }
+
+  /* DIVIDER LABEL */
+  .divider-label { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin:1.25rem 0 0.75rem; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+  /* COMPLETE SECTION */
+  .complete-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-top:1.5rem; }
+  .complete-section-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:400; margin-bottom:6px; }
+  .complete-hint { font-size:13px; color:var(--text3); margin-bottom:1.25rem; line-height:1.5; }
+  .btn-complete { display:inline-flex; align-items:center; gap:8px; background:var(--purple-text); color:#fff; border:none; padding:13px 28px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-complete:hover:not(:disabled) { background:var(--purple); transform:translateY(-1px); }
+  .btn-complete:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* ALREADY COMPLETE BANNER */
+  .complete-banner { background:var(--green-dim); border:1px solid rgba(42,92,69,0.2); border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:12px; }
+  .complete-banner-text { font-size:14px; font-weight:700; color:var(--green-light); }
+  .complete-banner-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+
+  /* LOADING */
+  .loading-state { padding:3rem; text-align:center; color:var(--text3); font-size:14px; }
+
+  @media (max-width:1023px) { .main-wrap { margin-left:60px; } }
+  @media (max-width:767px) {
+    .main-wrap { margin-left:0; }
+    .page-content { padding:1rem 1rem 3rem; }
+    .vm-card { margin-left:0; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading…</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="page-content" id="page-content" style="display:none;">
+
+    <a href="cert-hub.html" class="back-link">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Certification Hub
+    </a>
+
+    <div id="complete-banner" class="complete-banner" style="display:none;">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      <div>
+        <div class="complete-banner-text">Phase 2 Complete!</div>
+        <div class="complete-banner-sub">You completed Phase 2. Phase 3 is now unlocked in your Certification Hub.</div>
+      </div>
+    </div>
+
+    <div class="phase-header-block">
+      <div class="phase-eyebrow">Phase 2 of 3</div>
+      <h1>Build Your Lead Magnet</h1>
+      <p>Complete each step, then check it off. Come back any time — your progress saves automatically.</p>
+    </div>
+
+    <div class="progress-row">
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+      <div class="prog-text" id="prog-text">Loading…</div>
+    </div>
+
+    <!-- REQUIRED STEPS -->
+    <div class="divider-label">Required Steps</div>
+
+    <!-- Step 1 -->
+    <div class="step-card" id="step-s1" onclick="handleStep('s1')">
+      <div class="step-check" id="check-s1"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s1">1</span>
+          <span class="step-title">Set Up Creator Hub</span>
+        </div>
+        <div class="step-desc">Build your branded AI tool platform — this is where your clients will access your tool.</div>
+        <a href="hub-admin.html" class="step-link" onclick="event.stopPropagation()">Open Creator Hub →</a>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card" id="step-s2" onclick="handleStep('s2')">
+      <div class="step-check" id="check-s2"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s2">2</span>
+          <span class="step-title">Build Your AI Tool</span>
+        </div>
+        <div class="step-desc">Use the Build Agent to create your lead magnet tool. This is the free tool you'll give away.</div>
+        <a href="build-agent.html" class="step-link" onclick="event.stopPropagation()">Open Build Agent →</a>
+      </div>
+    </div>
+
+    <!-- Step 4: Value Mirror (required, shown before optional steps) -->
+    <div class="step-card" id="step-s4" onclick="handleStep('s4')">
+      <div class="step-check" id="check-s4"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s4">3</span>
+          <span class="step-title">Value Mirror</span>
+        </div>
+        <div class="step-desc">Validate your tool's real value before building the offer. Confidence builder — do this before writing copy.</div>
+        <a href="value-tool.html" class="step-link" onclick="event.stopPropagation()">Open Value Mirror →</a>
+      </div>
+    </div>
+
+    <!-- Value Mirror Summary Card -->
+    <div id="vm-card" class="vm-card" style="display:none;">
+      <div class="vm-eyebrow">✅ Value Mirror Complete</div>
+      <div class="vm-grid">
+        <div><div class="vm-field-label">Your Tool</div><div class="vm-field-value" id="vm-tool-name"></div></div>
+        <div><div class="vm-field-label">Who It Transforms</div><div class="vm-field-value" id="vm-who"></div></div>
+        <div><div class="vm-field-label">What You Actually Built</div><div class="vm-field-value" id="vm-what"></div></div>
+      </div>
+      <a href="value-tool.html" class="vm-link">View Full Report →</a>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step-card" id="step-s8" onclick="handleStep('s8')">
+      <div class="step-check" id="check-s8"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s8">4</span>
+          <span class="step-title">Build Sales Copy (Opt-In)</span>
+        </div>
+        <div class="step-desc">Write the copy for your free tool's opt-in page. Use the Opt-In Page mode.</div>
+        <a href="sales-page-builder.html?mode=optin" class="step-link" onclick="event.stopPropagation()">Open Sales Copy Builder →</a>
+      </div>
+    </div>
+
+    <!-- Step 9 -->
+    <div class="step-card" id="step-s9" onclick="handleStep('s9')">
+      <div class="step-check" id="check-s9"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s9">5</span>
+          <span class="step-title">Generate Opt-In Funnel</span>
+        </div>
+        <div class="step-desc">Create your lead page, sales page, and thank you page for your free tool.</div>
+        <a href="funnel-generator.html" class="step-link" onclick="event.stopPropagation()">Open Funnel Generator →</a>
+      </div>
+    </div>
+
+    <!-- Step 10 -->
+    <div class="step-card" id="step-s10" onclick="handleStep('s10')">
+      <div class="step-check" id="check-s10"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s10">6</span>
+          <span class="step-title">List in Marketplace (Free)</span>
+        </div>
+        <div class="step-desc">List your lead magnet tool in the ToolSpark Marketplace so people can find and use it.</div>
+        <a href="marketplace.html" class="step-link" onclick="event.stopPropagation()">Open Marketplace →</a>
+      </div>
+    </div>
+
+    <!-- Step 3: Generate Prompts -->
+    <div class="divider-label" style="margin-top:1.5rem;">Recommended Steps</div>
+
+    <div class="step-card optional-step" id="step-s3" onclick="handleStep('s3')">
+      <div class="step-check" id="check-s3"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s3">+</span>
+          <span class="step-title">Generate Prompts</span>
+          <span class="optional-badge">Recommended</span>
+        </div>
+        <div class="step-desc">Refine your tool's key prompts using the Prompt Generator for better, more consistent results.</div>
+        <a href="prompt-generator.html" class="step-link" onclick="event.stopPropagation()">Open Prompt Generator →</a>
+      </div>
+    </div>
+
+    <div class="step-card optional-step" id="step-s5" onclick="handleStep('s5')">
+      <div class="step-check" id="check-s5"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s5">+</span>
+          <span class="step-title">Create Content Plan</span>
+          <span class="optional-badge">Recommended</span>
+        </div>
+        <div class="step-desc">Build your audience while you're building your tool. Start your 31-day content plan now.</div>
+        <a href="social-scheduler.html" class="step-link" onclick="event.stopPropagation()">Open 31-Day Planner →</a>
+      </div>
+    </div>
+
+    <div class="step-card optional-step" id="step-s6" onclick="handleStep('s6')">
+      <div class="step-check" id="check-s6"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s6">+</span>
+          <span class="step-title">Post Ideas</span>
+          <span class="optional-badge">Recommended</span>
+        </div>
+        <div class="step-desc">Generate text-based post ideas to promote your tool on social media and email.</div>
+        <a href="content-generator.html" class="step-link" onclick="event.stopPropagation()">Open Post Ideas →</a>
+      </div>
+    </div>
+
+    <div class="step-card optional-step" id="step-s7" onclick="handleStep('s7')">
+      <div class="step-check" id="check-s7"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s7">+</span>
+          <span class="step-title">Record a Video</span>
+          <span class="optional-badge">Recommended</span>
+        </div>
+        <div class="step-desc">Record a walkthrough or intro video showing your tool in action.</div>
+        <a href="quick-recorder.html" class="step-link" onclick="event.stopPropagation()">Open Quick Recorder →</a>
+      </div>
+    </div>
+
+    <!-- SUBMIT FOR REVIEW -->
+    <div class="divider-label" style="margin-top:1.5rem;">Final Step</div>
+
+    <div class="step-card" id="step-s11" onclick="handleStep('s11')" style="border-color:rgba(75,63,138,0.25);">
+      <div class="step-check" id="check-s11"><svg class="check-svg" width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="step-body">
+        <div class="step-top">
+          <span class="step-num-badge" id="num-s11">7</span>
+          <span class="step-title">Submit for Review</span>
+        </div>
+        <div class="step-desc">Submit your tool URL, landing page, and a short write-up for Coena's certification review.</div>
+      </div>
+    </div>
+
+    <div class="submit-expand" id="submit-expand">
+      <div id="submit-form">
+        <div class="field">
+          <label>Your Tool URL</label>
+          <div class="hint">The live link where people can access your AI tool.</div>
+          <input type="url" id="sub-tool-url" placeholder="https://...">
+        </div>
+        <div class="field">
+          <label>Landing Page URL <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <div class="hint">Your opt-in page or anywhere you send people to get the tool.</div>
+          <input type="url" id="sub-landing-url" placeholder="https://...">
+        </div>
+        <div class="field">
+          <label>Your Write-Up</label>
+          <div class="hint">2–4 sentences: what your tool does, who it's for, and one result you've seen.</div>
+          <textarea id="sub-case-study" placeholder="My tool helps [who] do [what]. I built it because... One person who tested it said..."></textarea>
+        </div>
+        <button class="btn-submit-review" id="submit-btn" onclick="submitForReview()">Submit for Review →</button>
+      </div>
+      <div class="submit-success" id="submit-success">
+        🎉 Submitted! Coena will review your work and you'll hear back soon.
+      </div>
+    </div>
+
+    <!-- PHASE 2 COMPLETE -->
+    <div class="complete-section" id="complete-section">
+      <div class="complete-section-title">Ready to complete Phase 2?</div>
+      <div class="complete-hint" id="complete-hint">Complete the 7 required steps to unlock Phase 3.</div>
+      <button class="btn-complete" id="complete-btn" disabled onclick="completePhase2()">Mark Phase 2 Complete →</button>
+    </div>
+
+  </div>
+  <div class="loading-state" id="loading-state">Loading your progress…</div>
+</div>
+
+<script>
+var currentUser = null;
+var steps = {};
+var phase2AlreadyDone = false;
+
+var REQUIRED = ['s1','s2','s4','s8','s9','s10','s11'];
+var ALL_STEPS = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderSteps() {
+  var totalDone = 0;
+  ALL_STEPS.forEach(function(id) {
+    var card  = document.getElementById('step-' + id);
+    var check = document.getElementById('check-' + id);
+    var done  = !!steps[id];
+    if (done) {
+      card.classList.add('done');
+      totalDone++;
+    } else {
+      card.classList.remove('done');
+    }
+  });
+
+  // Progress bar
+  var pct = Math.round((totalDone / ALL_STEPS.length) * 100);
+  var fill = document.getElementById('prog-fill');
+  fill.style.width = pct + '%';
+  fill.className = 'prog-bar-fill' + (totalDone === ALL_STEPS.length ? ' done' : '');
+  document.getElementById('prog-text').textContent = totalDone + ' of ' + ALL_STEPS.length + ' steps complete';
+
+  updateCompleteButton();
+}
+
+function updateCompleteButton() {
+  var reqDone = REQUIRED.filter(function(id){ return !!steps[id]; }).length;
+  var allReq  = reqDone === REQUIRED.length;
+  var btn     = document.getElementById('complete-btn');
+  var hint    = document.getElementById('complete-hint');
+
+  btn.disabled = !allReq || phase2AlreadyDone;
+
+  if (phase2AlreadyDone) {
+    hint.textContent = 'Phase 2 is already complete. Head to Phase 3 when ready.';
+  } else if (allReq) {
+    hint.textContent = 'All required steps done — mark Phase 2 complete to unlock Phase 3!';
+  } else {
+    var remaining = REQUIRED.length - reqDone;
+    hint.textContent = remaining + ' required step' + (remaining === 1 ? '' : 's') + ' left before you can complete Phase 2.';
+  }
+}
+
+function handleStep(id) {
+  if (phase2AlreadyDone) return;
+
+  // Step 11 — toggle submit form instead of direct check
+  if (id === 's11' && !steps['s11']) {
+    var expand = document.getElementById('submit-expand');
+    expand.classList.toggle('open');
+    return;
+  }
+
+  toggleStep(id);
+}
+
+function toggleStep(id) {
+  if (phase2AlreadyDone) return;
+  steps[id] = !steps[id];
+  renderSteps();
+  saveSteps();
+}
+
+function saveSteps() {
+  if (!currentUser) return;
+  db.collection('certification_progress').doc(currentUser.uid).set(
+    { phase2Steps: steps },
+    { merge: true }
+  ).catch(function(e){ console.error('saveSteps:', e); });
+}
+
+async function submitForReview() {
+  var toolUrl    = document.getElementById('sub-tool-url').value.trim();
+  var landingUrl = document.getElementById('sub-landing-url').value.trim();
+  var caseStudy  = document.getElementById('sub-case-study').value.trim();
+  if (!toolUrl || !caseStudy) {
+    alert('Please fill in your tool URL and write-up before submitting.');
+    return;
+  }
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  try {
+    await db.collection('graduation_requests').add({
+      userId:     currentUser.uid,
+      userEmail:  currentUser.email,
+      toolUrl:    toolUrl,
+      landingUrl: landingUrl,
+      caseStudy:  caseStudy,
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status:     'pending',
+    });
+    try {
+      await db.collection('admin_alerts').add({
+        type:       'graduation_request',
+        authorId:   currentUser.uid,
+        authorName: currentUser.displayName || currentUser.email,
+        threadTitle: '🎓 ' + (currentUser.displayName || currentUser.email) + ' submitted for certification review',
+        toolUrl:    toolUrl,
+        read:       false,
+        createdAt:  firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e) {}
+    document.getElementById('submit-form').style.display = 'none';
+    document.getElementById('submit-success').classList.add('show');
+    // Mark step 11 done
+    steps['s11'] = true;
+    renderSteps();
+    saveSteps();
+  } catch(err) {
+    console.error(err);
+    alert('Something went wrong — please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Submit for Review →';
+  }
+}
+
+async function completePhase2() {
+  var btn = document.getElementById('complete-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    await db.collection('certification_progress').doc(currentUser.uid).set({
+      phase2Complete: true,
+      phase2CompletedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    window.location.href = 'cert-hub.html';
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'Mark Phase 2 Complete →';
+    alert('Something went wrong — please try again.');
+  }
+}
+
+async function loadValueMirror(uid) {
+  try {
+    var snap = await db.collection('value_tool').where('userId','==',uid).limit(5).get();
+    if (snap.empty) return;
+    var docs = snap.docs.sort(function(a,b){
+      return (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0);
+    });
+    var data = docs[0].data();
+    var raw  = data.rawReport || '';
+    var get  = function(key) {
+      var m = raw.match(new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z_]+:|VALUE_REPORT_END|$)'));
+      return m ? m[1].trim() : '';
+    };
+    var whatBuilt     = get('WHAT_YOU_BUILT');
+    var whoTransforms = get('WHO_THIS_TRANSFORMS');
+    if (!whatBuilt && !whoTransforms) return;
+    document.getElementById('vm-tool-name').textContent = data.toolName || '';
+    document.getElementById('vm-who').textContent       = whoTransforms || '—';
+    document.getElementById('vm-what').textContent      = whatBuilt     || '—';
+    document.getElementById('vm-card').style.display    = 'block';
+  } catch(e) {}
+}
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) { window.location.href = 'signon.html?redirect=cert-phase2'; return; }
+  currentUser = user;
+
+  var avatarEl = document.getElementById('sidebar-avatar');
+  var nameEl   = document.getElementById('sidebar-name');
+  var roleEl   = document.getElementById('sidebar-role');
+
+  try {
+    var [userSnap, progSnap] = await Promise.all([
+      db.collection('users').doc(user.uid).get(),
+      db.collection('certification_progress').doc(user.uid).get()
+    ]);
+
+    var userData = userSnap.exists ? userSnap.data() : {};
+    var prog     = progSnap.exists ? progSnap.data() : {};
+
+    var displayName = userData.displayName || userData.name || user.email || 'Builder';
+    if (avatarEl) {
+      if (userData.photoURL) {
+        avatarEl.innerHTML = '<img src="' + escHtml(userData.photoURL) + '" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">';
+      } else {
+        avatarEl.textContent = displayName[0].toUpperCase();
+      }
+    }
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = userData.userRole === 'admin' ? 'Admin' : 'Builder';
+
+    // Redirect if Phase 1 not done and no cert progress at all (graceful: let them in if they have steps saved)
+    if (!prog.phase1Complete && !prog.phase2Steps) {
+      window.location.href = 'cert-hub.html';
+      return;
+    }
+
+    steps = prog.phase2Steps || {};
+    phase2AlreadyDone = prog.phase2Complete === true;
+
+    if (phase2AlreadyDone) {
+      document.getElementById('complete-banner').style.display = 'flex';
+      document.getElementById('complete-section').style.display = 'none';
+    }
+
+    renderSteps();
+    loadValueMirror(user.uid);
+
+  } catch(e) {
+    console.error(e);
+    renderSteps();
+  }
+
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('page-content').style.display  = 'block';
+});
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('cert-hub', 'Certification Hub');</script>
+</body>
+</html>
