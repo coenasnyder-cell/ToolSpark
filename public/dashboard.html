@@ -442,8 +442,60 @@
     <!-- hidden stat targets kept for JS compatibility -->
     <span id="stat-sessions" style="display:none;"></span>
 
-    <!-- ONBOARDING -->
-   <!-- UPCOMING EVENTS -->
+    <!-- GETTING STARTED CHECKLIST (challenge phase only) -->
+    <div id="getting-started-card" style="display:none;">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Getting Started</div>
+          <div class="section-sub" id="gs-count"></div>
+        </div>
+      </div>
+      <div class="oc-card">
+        <div class="oc-bar"><div class="oc-fill" id="gs-bar" style="width:0%"></div></div>
+        <a href="#" onclick="sendVerifyEmail(event);return false;" class="oc-step" id="gs-step-email">
+          <div class="oc-check" id="gs-check-email">1</div>
+          <div class="oc-body">
+            <div class="oc-label" id="gs-label-email">Verify your email</div>
+            <div class="oc-desc">Check your inbox for the verification link</div>
+          </div>
+          <div class="oc-arrow">→</div>
+        </a>
+        <a href="profile.html" class="oc-step" id="gs-step-profile">
+          <div class="oc-check" id="gs-check-profile">2</div>
+          <div class="oc-body">
+            <div class="oc-label" id="gs-label-profile">Update your profile</div>
+            <div class="oc-desc">Add a photo and bio so the community knows you</div>
+          </div>
+          <div class="oc-arrow">→</div>
+        </a>
+        <a href="community.html" class="oc-step" id="gs-step-intro">
+          <div class="oc-check" id="gs-check-intro">3</div>
+          <div class="oc-body">
+            <div class="oc-label" id="gs-label-intro">Introduce yourself</div>
+            <div class="oc-desc">Post in the community and say hello</div>
+          </div>
+          <div class="oc-arrow">→</div>
+        </a>
+        <a href="courses.html" class="oc-step" id="gs-step-lesson">
+          <div class="oc-check" id="gs-check-lesson">4</div>
+          <div class="oc-body">
+            <div class="oc-label" id="gs-label-lesson">Watch your first lesson</div>
+            <div class="oc-desc">Start the ToolSpark Challenge course</div>
+          </div>
+          <div class="oc-arrow">→</div>
+        </a>
+        <a href="cert-hub.html" class="oc-step" id="gs-step-cert">
+          <div class="oc-check" id="gs-check-cert">5</div>
+          <div class="oc-body">
+            <div class="oc-label" id="gs-label-cert">Visit Certification Hub</div>
+            <div class="oc-desc">See your certification path and what's ahead</div>
+          </div>
+          <div class="oc-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- UPCOMING EVENTS -->
     <div id="events-section" style="display:none;">
       <div class="section-header">
         <div>
@@ -609,6 +661,7 @@
 
   let currentUser = null;
   let isAdmin = false;
+  let currentUserData = {};
   const WELCOME_COURSE_ID = 'JQYsP0RQUPWZOtwQtiQg';
 
   auth.onAuthStateChanged(async function(user) {
@@ -635,6 +688,7 @@
       const snap = await db.collection('users').doc(user.uid).get();
       if (snap.exists) {
         const data = snap.data();
+        currentUserData = data;
 
         // Role
         if (data.userRole === 'admin') {
@@ -688,19 +742,19 @@
       var cp = (csnap.exists ? csnap.data() : {});
       var phase1Done = !!cp.phase1Complete;
 
-      // Dashboard simplification during challenge
-      var qaSection   = document.getElementById('quick-access-section');
-      var commSection = document.getElementById('community-section');
-      var statsBlock  = document.getElementById('mp-stats-block');
-      var statsPlaceholder = document.getElementById('stats-challenge-placeholder');
       if (!phase1Done) {
-        if (qaSection)   qaSection.style.display   = 'none';
-        if (commSection) commSection.style.display  = 'none';
-        if (statsBlock)  statsBlock.style.display   = 'none';
+        ['quick-access-section', 'community-section', 'events-section'].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.style.display = 'none';
+        });
+        var statsBlock = document.getElementById('mp-stats-block');
+        var statsPlaceholder = document.getElementById('stats-challenge-placeholder');
+        var emailBanner = document.getElementById('email-verify-banner');
+        if (statsBlock) statsBlock.style.display = 'none';
         if (statsPlaceholder) statsPlaceholder.style.display = 'block';
+        if (emailBanner) emailBanner.style.display = 'none';
+        updateGettingStarted(user, currentUserData, csnap.exists);
       }
 
-      // Cert progress card subtitle
       var sub = document.getElementById('cert-progress-sub');
       if (sub) {
         if (cp.phase3Complete)      sub.textContent = '🎓 All phases complete!';
@@ -789,6 +843,43 @@
         alert('Could not send verification email. Please try again.');
       }
     }
+  }
+
+  function updateGettingStarted(user, data, cpExists) {
+    var card = document.getElementById('getting-started-card');
+    if (!card) return;
+    card.style.display = 'block';
+
+    var CHECK_SVG = '<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    var completed = 0;
+
+    function markDone(key) {
+      var check = document.getElementById('gs-check-' + key);
+      var label = document.getElementById('gs-label-' + key);
+      var step  = document.getElementById('gs-step-'  + key);
+      if (check) { check.className = 'oc-check done'; check.innerHTML = CHECK_SVG; }
+      if (label) label.className = 'oc-label done';
+      if (step) { step.classList.add('oc-done'); step.style.pointerEvents = 'none'; }
+    }
+
+    function refreshBar() {
+      var bar = document.getElementById('gs-bar');
+      var countEl = document.getElementById('gs-count');
+      if (bar) bar.style.width = Math.round((completed / 5) * 100) + '%';
+      if (countEl) countEl.textContent = completed + ' of 5 complete';
+    }
+
+    if (user.emailVerified || data.isVerified) { markDone('email'); completed++; }
+    if (data.bio) { markDone('profile'); completed++; }
+    if ((data.badges || []).indexOf('first_post') !== -1) { markDone('intro'); completed++; }
+    if (cpExists) { markDone('cert'); completed++; }
+    refreshBar();
+
+    db.collection('userProgress').doc(user.uid + '_' + WELCOME_COURSE_ID).get().then(function(snap) {
+      if (snap.exists && (snap.data().percentComplete || 0) > 0) {
+        markDone('lesson'); completed++; refreshBar();
+      }
+    }).catch(function() {});
   }
 
   async function loadStats(uid) {
