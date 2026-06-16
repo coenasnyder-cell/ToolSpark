@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketplace Admin — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65; --green-dim: rgba(42,92,69,0.08);
+    --red: #C0392B; --red-dim: rgba(192,57,43,0.08);
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width:var(--sidebar-width); background:var(--dark); min-height:100vh; display:flex; flex-direction:column; position:fixed; left:0; top:0; z-index:100; border-right:1px solid var(--border-dark); }
+  .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border-dark); }
+  .logo-text { font-family:'Playfair Display',serif; font-size:20px; color:#F0EDE6; }
+  .logo-text span { color:var(--gold); }
+  .logo-tag { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-top:3px; font-weight:700; }
+  .sidebar-nav { flex:1; padding:1rem 0.75rem; display:flex; flex-direction:column; gap:2px; overflow-y:auto; }
+  .nav-section-label { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); padding:6px 12px 4px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); color:#9A9488; font-size:13px; text-decoration:none; transition:all 0.15s; }
+  .nav-item:hover { background:rgba(255,255,255,0.05); color:#F0EDE6; }
+  .nav-item.active { background:var(--gold-dim); color:var(--gold); font-weight:700; border:1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width:16px; height:16px; opacity:0.7; flex-shrink:0; }
+  .nav-item.active .nav-icon { opacity:1; }
+  .sidebar-footer { padding:1rem 0.75rem; border-top:1px solid var(--border-dark); }
+  .sidebar-user { display:flex; align-items:center; gap:10px; padding:8px 10px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gold); flex-shrink:0; }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:13px; color:#F0EDE6; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role { font-size:11px; color:var(--text3); }
+  .logout-btn { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; margin-top:4px; background:none; border:none; border-radius:var(--radius-sm); color:#6B5F5F; font-size:13px; font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.15s; }
+  .logout-btn:hover { background:rgba(220,50,50,0.1); color:#E05555; }
+
+  /* MAIN */
+  .main-wrap { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; }
+  .top-header { background:var(--surface); border-bottom:1px solid var(--border); padding:1.25rem 2rem; display:flex; align-items:center; justify-content:space-between; }
+  .header-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:400; color:var(--text); }
+  .header-subtitle { font-size:13px; color:var(--text3); margin-top:2px; }
+  .page-content { padding:2rem; display:flex; flex-direction:column; gap:2rem; max-width:1000px; }
+
+  /* SECTION */
+  .section-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .section-header { padding:1.1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .section-title { font-size:15px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .count-badge { font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; }
+  .badge-pending { background:rgba(201,168,76,0.12); color:#9A7B2E; border:1px solid rgba(201,168,76,0.25); }
+  .badge-active  { background:var(--green-dim); color:var(--green-light); border:1px solid rgba(42,92,69,0.2); }
+  .section-empty { padding:2rem; text-align:center; color:var(--text3); font-size:13px; }
+
+  /* LISTING ROW */
+  .listing-row { display:flex; align-items:flex-start; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid var(--border); }
+  .listing-row:last-child { border-bottom:none; }
+  .listing-info { flex:1; min-width:0; }
+  .listing-name { font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .listing-meta { font-size:12px; color:var(--text3); line-height:1.6; }
+  .listing-meta a { color:var(--gold); text-decoration:none; font-weight:700; }
+  .listing-meta a:hover { opacity:0.8; }
+  .listing-tags { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; padding:2px 7px; border-radius:20px; }
+  .tag-type { background:rgba(75,63,138,0.1); color:#8B7FD4; border:1px solid rgba(75,63,138,0.2); }
+  .tag-cat  { background:rgba(56,132,158,0.1); color:#38849E; border:1px solid rgba(56,132,158,0.2); }
+  .tag-free { background:var(--green-dim); color:var(--green-light); border:1px solid rgba(42,92,69,0.2); }
+  .tag-paid { background:var(--gold-dim); color:#9A7B2E; border:1px solid rgba(201,168,76,0.25); }
+  .listing-actions { display:flex; gap:8px; flex-shrink:0; align-items:center; }
+  .btn-approve { background:var(--green-dim); color:var(--green-light); border:1px solid rgba(42,92,69,0.25); border-radius:7px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; transition:all 0.15s; white-space:nowrap; }
+  .btn-approve:hover { background:rgba(42,92,69,0.15); }
+  .btn-approve:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-delete { background:var(--red-dim); color:var(--red); border:1px solid rgba(192,57,43,0.2); border-radius:7px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Lato',sans-serif; transition:all 0.15s; white-space:nowrap; }
+  .btn-delete:hover { background:rgba(192,57,43,0.14); }
+  .btn-delete:disabled { opacity:0.5; cursor:not-allowed; }
+  .listing-date { font-size:11px; color:var(--text3); white-space:nowrap; margin-top:2px; }
+
+  /* LOADING */
+  .loading-state { padding:2rem; text-align:center; color:var(--text3); font-size:13px; }
+
+  @media (max-width:767px) { .main-wrap { margin-left:0; } .page-content { padding:1rem; } }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="admindashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Admin Home
+    </a>
+    <a href="adminmarketplace.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Marketplace
+    </a>
+    <a href="admincertificates.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M8 14l-4 7h16l-4-7"/><path d="M9 17l3 3 3-3"/></svg>
+      Certificates
+    </a>
+    <a href="adminapiusage.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      API Usage
+    </a>
+    <a href="admin-content-hub.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Content Tools
+    </a>
+    <a href="admin-courses-hub.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      Courses Admin
+    </a>
+    <a href="admin-community-hub.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Community Admin
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Admin</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(()=>window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="top-header">
+    <div>
+      <div class="header-title">Marketplace Admin</div>
+      <div class="header-subtitle">Review submissions and manage live listings</div>
+    </div>
+    <a href="marketplace.html" style="font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;">View Public Marketplace →</a>
+  </div>
+
+  <div class="page-content">
+
+    <!-- PENDING -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Pending Review
+          <span class="count-badge badge-pending" id="pending-count">—</span>
+        </div>
+        <div style="font-size:12px;color:var(--text3);">Approve to publish, reject to remove</div>
+      </div>
+      <div id="pending-list"><div class="loading-state">Loading…</div></div>
+    </div>
+
+    <!-- ACTIVE -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Live Listings
+          <span class="count-badge badge-active" id="active-count">—</span>
+        </div>
+        <div style="font-size:12px;color:var(--text3);">Currently visible on the public marketplace</div>
+      </div>
+      <div id="active-list"><div class="loading-state">Loading…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) { window.location.href = 'signon.html'; return; }
+  currentUser = user;
+
+  var snap = await db.collection('users').doc(user.uid).get();
+  var data = snap.exists ? snap.data() : {};
+  if (data.userRole !== 'admin') { window.location.href = 'dashboard.html'; return; }
+
+  var name = data.displayName || user.displayName || user.email || 'Admin';
+  document.getElementById('sidebar-name').textContent = name;
+  document.getElementById('sidebar-avatar').textContent = name[0].toUpperCase();
+
+  loadListings();
+});
+
+async function loadListings() {
+  try {
+    var results = await Promise.all([
+      db.collection('marketplace_listings').where('status', '==', 'pending').orderBy('listedAt', 'desc').get(),
+      db.collection('marketplace_listings').where('status', '==', 'active').orderBy('listedAt', 'desc').get()
+    ]);
+
+    renderSection('pending-list', 'pending-count', results[0].docs, 'pending');
+    renderSection('active-list', 'active-count', results[1].docs, 'active');
+  } catch(e) {
+    document.getElementById('pending-list').innerHTML = '<div class="loading-state">Failed to load — ' + e.message + '</div>';
+    document.getElementById('active-list').innerHTML  = '<div class="loading-state">Failed to load — ' + e.message + '</div>';
+  }
+}
+
+function renderSection(listId, countId, docs, mode) {
+  document.getElementById(countId).textContent = docs.length;
+  if (!docs.length) {
+    document.getElementById(listId).innerHTML = '<div class="section-empty">' +
+      (mode === 'pending' ? 'No pending submissions.' : 'No active listings yet.') + '</div>';
+    return;
+  }
+  document.getElementById(listId).innerHTML = docs.map(function(doc) {
+    var d = doc.data();
+    var id = doc.id;
+    var date = d.listedAt ? fmtDate(d.listedAt.toDate()) : '—';
+    var typeBadge  = d.listingType === 'paid' ? '<span class="tag tag-paid">Paid</span>' : '<span class="tag tag-free">Free</span>';
+    var toolType   = d.toolType   ? '<span class="tag tag-type">' + esc(d.toolType) + '</span>' : '';
+    var category   = d.category   ? '<span class="tag tag-cat">'  + esc(d.category) + '</span>' : '';
+    var approveBtn = mode === 'pending'
+      ? '<button class="btn-approve" onclick="approveListing(\'' + id + '\', this)">Approve →</button>'
+      : '';
+    return '<div class="listing-row" id="row-' + id + '">' +
+      '<div class="listing-info">' +
+        '<div class="listing-name">' + esc(d.toolName || '—') + '</div>' +
+        '<div class="listing-meta">' +
+          'By <strong>' + esc(d.builderName || '—') + '</strong> · ' +
+          (d.toolUrl ? '<a href="' + esc(d.toolUrl) + '" target="_blank" rel="noopener">View Tool ↗</a>' : 'No URL') + '<br>' +
+          esc(d.description || '') +
+        '</div>' +
+        '<div class="listing-tags">' + typeBadge + toolType + category + '</div>' +
+        '<div class="listing-date">Submitted ' + date + '</div>' +
+      '</div>' +
+      '<div class="listing-actions">' +
+        approveBtn +
+        '<button class="btn-delete" onclick="deleteListing(\'' + id + '\', this)">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function approveListing(id, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Approving…';
+  try {
+    await db.collection('marketplace_listings').doc(id).update({ status: 'active' });
+    var row = document.getElementById('row-' + id);
+    if (row) {
+      row.style.background = 'rgba(42,92,69,0.06)';
+      row.querySelector('.listing-actions').innerHTML = '<span style="font-size:12px;font-weight:700;color:var(--green-light);">✓ Approved</span>';
+    }
+    // Update counts
+    var pendingCount = document.getElementById('pending-count');
+    pendingCount.textContent = Math.max(0, parseInt(pendingCount.textContent) - 1);
+    var activeCount = document.getElementById('active-count');
+    activeCount.textContent = parseInt(activeCount.textContent) + 1;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Approve →';
+    alert('Error: ' + e.message);
+  }
+}
+
+async function deleteListing(id, btn) {
+  if (!confirm('Delete this listing? This cannot be undone.')) return;
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    await db.collection('marketplace_listings').doc(id).delete();
+    var row = document.getElementById('row-' + id);
+    if (row) row.remove();
+    // Update count
+    var section = btn.closest('[id$="-list"]');
+    if (section) {
+      var countId = section.id.replace('-list', '-count');
+      var countEl = document.getElementById(countId);
+      if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+    alert('Error: ' + e.message);
+  }
+}
+
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
