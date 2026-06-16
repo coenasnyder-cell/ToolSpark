@@ -337,8 +337,8 @@
           <div class="save-bar-hint" id="save-bar-hint">Saves your current copy — any edits you've made are included.</div>
         </div>
         <div class="save-bar-actions">
-          <button class="btn-save-launch" id="save-launch-btn" onclick="saveSections()">Save to Launch Map →</button>
-          <a class="btn-view-launch" href="launch-map.html">View Launch Map</a>
+          <button class="btn-save-launch" id="save-launch-btn" onclick="saveSections()">Save to Launch Kit →</button>
+          <a class="btn-view-launch" href="launch-kit.html">View Launch Kit</a>
         </div>
       </div>
 
@@ -738,7 +738,7 @@ async function saveSections() {
     btn.textContent = '✓ Saved!';
     btn.classList.add('saved');
     document.getElementById('save-bar-hint').innerHTML =
-      'Saved! <a href="launch-map.html" style="color:var(--green-light);font-weight:700;text-decoration:none;">View your Launch Map →</a>';
+      'Saved! <a href="launch-kit.html" style="color:var(--green-light);font-weight:700;text-decoration:none;">View your Launch Kit →</a>';
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Save to Launch Map →';

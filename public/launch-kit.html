@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Launch Map — ToolSpark</title>
+<title>Launch Kit — ToolSpark</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -148,7 +148,6 @@
   .btn-copy-just.copied { background: var(--green); color: #fff; }
 
   /* JOURNEY MAP — completed */
-  .journey-map { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr; align-items: stretch; gap: 0; }
   .map-arrow { display: flex; align-items: center; justify-content: center; color: rgba(201,168,76,0.45); font-size: 22px; flex-shrink: 0; }
   .map-box { border-radius: var(--radius-sm); padding: 1.1rem; min-height: 140px; display: flex; flex-direction: column; gap: 5px; }
   .map-box.discovery { background: var(--bg); border: 1px solid var(--border); }
@@ -185,7 +184,6 @@
     .sidebar-overlay { display: block; }
     .main-wrap { margin-left: 0; }
     .page-content { padding: 1.25rem 1rem 5rem; }
-    .journey-map { grid-template-columns: 1fr; gap: 4px; }
     .map-arrow { transform: rotate(90deg); height: 24px; min-height: unset; }
     .map-box { min-height: auto; }
     .price-badges { flex-direction: column; }
@@ -523,7 +521,7 @@
 
     var html =
       '<div class="page-header">' +
-        '<div class="page-title">Your Launch Map</div>' +
+        '<div class="page-title">Your Launch Kit</div>' +
         '<div class="page-sub">Everything you\'ve built, in one place. Use this to launch, share, and grow.</div>' +
         '<div class="completion-bar-wrap">' +
           '<div class="completion-track"><div class="completion-fill" style="width:' + fillPct + '%"></div></div>' +
@@ -537,7 +535,7 @@
 
   // ── AUTH + LOAD ──
   auth.onAuthStateChanged(async function(user) {
-    if (!user) { window.location.href = 'signon.html?redirect=launch-map'; return; }
+    if (!user) { window.location.href = 'signon.html?redirect=launch-kit'; return; }
 
     var avatarEl = document.getElementById('sidebar-avatar');
     var nameEl = document.getElementById('sidebar-name');
@@ -566,7 +564,7 @@
     }
   });
 
-  initNav('launch-map', 'Launch Map');
+  initNav('launch-map', 'Launch Kit');
 </script>
 </body>
 </html>
