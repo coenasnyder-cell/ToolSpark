@@ -938,10 +938,19 @@
     if (user) {
       await loadUserData(user);
       loadValueMirror(user.uid);
+      // Mark Phase 1 complete when user reaches the certification path
+      db.collection('certification_progress').doc(user.uid).get().then(function(snap) {
+        if (!snap.exists || !snap.data().phase1Complete) {
+          db.collection('certification_progress').doc(user.uid).set({
+            phase1Complete: true,
+            phase1CompletedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+      }).catch(function(){});
     }
   });
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('courses', 'Certification Roadmap');</script>
+<script>initNav('cert-hub', 'Certification Roadmap');</script>
 </body>
 </html>
