@@ -401,8 +401,8 @@
         </div>
 
         <div class="save-strip">
-          <button class="btn-save-launch" id="save-btn" onclick="saveToLaunchMap()">Save to Launch Map →</button>
-          <a href="launch-kit.html" class="btn-redo" style="text-decoration:none;">← Launch Map</a>
+          <button class="btn-save-launch" id="save-btn" onclick="saveToLaunchMap()">Save to Launch Kit →</button>
+          <a href="launch-kit.html" class="btn-redo" style="text-decoration:none;">← Launch Kit</a>
           <span class="save-status" id="save-status"></span>
         </div>
       </div>
@@ -1060,11 +1060,11 @@
         completedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       btn.textContent = '✓ Saved';
-      status.textContent = 'Your Launch Map has been updated.';
+      status.textContent = 'Your Launch Kit has been updated.';
       status.className = 'save-status saved';
     } catch(e) {
       btn.disabled = false;
-      btn.textContent = 'Save to Launch Map →';
+      btn.textContent = 'Save to Launch Kit →';
       status.textContent = 'Save failed — try again.';
     }
   }
