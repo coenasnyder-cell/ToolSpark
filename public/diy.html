@@ -191,7 +191,6 @@
     .page-content { padding: 1rem 1rem 80px; }
     .quick-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .platform-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .platform-grid .platform-card:last-child { grid-column: span 2; }
     .mobile-bottom-nav { display: flex; }
   }
   @media (max-width: 480px) {
@@ -260,14 +259,14 @@
         <div class="quick-label">Community</div>
         <div class="quick-sub">Ask &amp; share</div>
       </a>
-      <a href="resources.html" class="quick-card">
-        <div class="quick-icon" style="background:rgba(196,98,45,0.08);border:1px solid rgba(196,98,45,0.18);">
-          <svg width="18" height="18" fill="none" stroke="#C4622D" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <a href="community.html" class="quick-card">
+        <div class="quick-icon" style="background:rgba(75,63,138,0.1);border:1px solid rgba(75,63,138,0.2);">
+          <svg width="18" height="18" fill="none" stroke="#9B8FD0" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         </div>
-        <div class="quick-label">Tools &amp; Resources</div>
-        <div class="quick-sub">All your tools</div>
+        <div class="quick-label">ToolSpark Pro</div>
+        <div class="quick-sub">Upgrade to ToolSaprk Pro</div>
       </a>
-      <a href="cert-hub.html" class="quick-card upgrade">
+    <a href="cert-hub.html" class="quick-card upgrade">
         <div class="quick-icon" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.35);">
           <svg width="18" height="18" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
         </div>
@@ -285,24 +284,10 @@
         <div class="section-title">Your Build Prompt</div>
       </div>
       <div class="section-body" id="prompt-section-body">
-        <p class="empty-prompt">Complete the Prompt Generator to get your personalised build brief — the exact instructions for your AI platform.</p>
+        <p class="empty-prompt">Complete the Prompt Generator to get your personalized build brief — the exact instructions for your AI platform.</p>
         <a href="prompt-generator.html" class="action-link">Go to Prompt Generator →</a>
       </div>
     </div>
-
-    <!-- Your Recommended Platform -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon" style="background:rgba(196,98,45,0.08);border:1px solid rgba(196,98,45,0.18);">
-          <svg width="16" height="16" fill="none" stroke="#C4622D" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        </div>
-        <div class="section-title">Your Recommended Platform</div>
-      </div>
-      <div class="section-body" id="techstack-section-body">
-        <p class="empty-prompt">Complete the Tech Stack tool to get your platform recommendation.</p>
-      </div>
-    </div>
-
     <!-- Build Platforms -->
     <div class="section-card">
       <div class="section-header">
@@ -326,6 +311,12 @@
             <a href="https://lovable.dev" target="_blank" rel="noopener" class="platform-link">Open Lovable →</a>
           </div>
           <div class="platform-card">
+            <div class="platform-name">Creator Hub</div>
+            <div class="platform-best" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.2);color:var(--gold);">Built into ToolSpark</div>
+            <div class="platform-tagline">Your own branded AI tool platform — host and share the tools you build, right inside ToolSpark. No extra setup needed.</div>
+            <a href="/hub/admin-dashboard" class="platform-link">Open Creator Hub →</a>
+          </div>
+          <div class="platform-card">
             <div class="platform-name">VS Code + Claude</div>
             <div class="platform-best" style="background:rgba(75,63,138,0.08);border-color:rgba(75,63,138,0.2);color:#7B6FC0;">Best for full customisation</div>
             <div class="platform-tagline">Build directly in your code editor using Claude Code or GitHub Copilot. Full control over every file and detail — great once you're comfortable with the basics.</div>
@@ -347,36 +338,7 @@
         <div class="checklist" id="checklist"></div>
       </div>
     </div>
-
-    <!-- Launch Tools -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon" style="background:rgba(29,124,144,0.1);border:1px solid rgba(29,124,144,0.18);">
-          <svg width="16" height="16" fill="none" stroke="#1D7C90" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <div class="section-title">Launch Tools</div>
-      </div>
-      <div class="section-body" style="display:flex;flex-direction:column;gap:8px;">
-        <a href="email-sequence.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:var(--text);transition:border-color 0.15s;" onmouseover="this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-          <span style="font-size:20px;">✉️</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;">Email Sequence Generator</div>
-            <div style="font-size:12px;color:var(--text2);">5-email nurture sequence written from your offer data</div>
-          </div>
-          <svg style="margin-left:auto;opacity:0.4;" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
-        <a href="content-generator.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:var(--text);transition:border-color 0.15s;" onmouseover="this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-          <span style="font-size:20px;">✍️</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;">Content Generator</div>
-            <div style="font-size:12px;color:var(--text2);">Create marketing content from your spark + offer</div>
-          </div>
-          <svg style="margin-left:auto;opacity:0.4;" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- Tips -->
+       <!-- Tips -->
     <div class="section-card">
       <div class="section-header">
         <div class="section-icon" style="background:rgba(75,63,138,0.1);border:1px solid rgba(75,63,138,0.2);">
@@ -445,51 +407,18 @@
         { id: 'p3', text: 'Complete Discover Your Breakthrough' },
         { id: 'p4', text: 'Generate your build-ready prompt' },
       ],
-      milestone: { emoji: '💡', text: 'Clear AI Tool Opportunity' },
-    },
+      },
     {
-      label: 'Step 2: Build Your Tool',
+      label: 'Your Launch Checklist',
       steps: [
-        { id: 'b1', text: 'Choose Your Path' },
-        { id: 'b2', text: 'Create your first version (MVP)' },
-        { id: 'b3', text: 'Build your core features' },
-        { id: 'b4', text: 'Test your tool' },
-        { id: 'b5', text: 'Fix any major issues' },
+        { id: 'b1', text: 'Complete the ToolSpark Challengeh' },
+        { id: 'b2', text: 'Generate your Build Prompt' },
+        { id: 'b3', text: 'Set up a simple way for people to access it' },
+        { id: 'b4', text: 'Share it with 5 people and collect feedback' },
+        { id: 'b5', text: ' Make one improvement based on what you heard' },
       ],
-      milestone: { emoji: '🚀', text: 'Working AI-Powered Tool' },
     },
-    {
-      label: 'Step 3: Validate Your Tool',
-      steps: [
-        { id: 'v1', text: 'Share your tool with at least 3 people' },
-        { id: 'v2', text: 'Collect feedback' },
-        { id: 'v3', text: 'Make improvements' },
-        { id: 'v4', text: 'Confirm your tool solves the intended problem' },
-      ],
-      milestone: { emoji: '✅', text: 'Validated AI-Powered Tool' },
-    },
-    {
-      label: 'Step 4: Launch Your Tool',
-      steps: [
-        { id: 'l1', text: 'Create a simple landing page' },
-        { id: 'l2', text: 'Create a way for people to access your tool' },
-        { id: 'l3', text: 'Collect your first user' },
-        { id: 'l4', text: 'Collect your first piece of feedback' },
-      ],
-      milestone: { emoji: '🌟', text: 'Launched AI-Powered Tool' },
-    },
-    {
-      label: 'Bonus Goals',
-      steps: [
-        { id: 'x1', text: 'Get your first testimonial' },
-        { id: 'x2', text: 'Get your first lead' },
-        { id: 'x3', text: 'Get your first customer' },
-        { id: 'x4', text: 'Build version 2' },
-        { id: 'x5', text: 'Build your next AI-powered tool' },
-      ],
-      milestone: null,
-    },
-  ];
+   ];
 
   const MILESTONE_COLORS = {
     'Step 1: Prepare Your Idea': { bg: 'rgba(201,168,76,0.08)',  border: 'rgba(201,168,76,0.22)', label: '#C9A84C' },
