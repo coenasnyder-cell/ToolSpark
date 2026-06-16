@@ -390,7 +390,9 @@
         db.collection('spark_results').where('userId', '==', uid).get(),
         db.collection('audience_results').where('userId', '==', uid).get(),
         db.collection('prompt_results').doc(uid).get(),
-        db.collection('offer_sort_results').doc(uid).get()
+        db.collection('offer_sort_results').doc(uid).get(),
+        db.collection('value_tool').where('userId', '==', uid).limit(5).get(),
+        db.collection('clarity_sessions').where('userId', '==', uid).where('status', '==', 'completed').limit(5).get()
       ]);
 
       // Gate: Offer Sort must be completed first
@@ -414,6 +416,23 @@
       if (promptResult && promptResult.appName) roadmapData.toolName = promptResult.appName;
       if (spark && spark.whoYouHelp) roadmapData.audience = spark.whoYouHelp;
       if (audience && audience.whoTheyAre) roadmapData.audience = audience.whoTheyAre;
+      // Fallback: value_tool TOOL_NAME
+      if (!roadmapData.toolName && results[4].status === 'fulfilled' && !results[4].value.empty) {
+        var vtDocs = results[4].value.docs.slice().sort(function(a, b) {
+          return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) - (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
+        });
+        var vtRaw = vtDocs[0].data().rawReport || '';
+        var vtName = (vtRaw.match(/TOOL_NAME:([\s\S]*?)(?=\n[A-Z_]+:|VALUE_REPORT_END|$)/) || [])[1];
+        if (vtName) roadmapData.toolName = vtName.trim();
+      }
+      // Fallback: clarity session chosenToolName
+      if (!roadmapData.toolName && results[5].status === 'fulfilled' && !results[5].value.empty) {
+        var csDocs = results[5].value.docs.slice().sort(function(a, b) {
+          return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) - (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
+        });
+        var csName = csDocs[0].data().chosenToolName || csDocs[0].data().tool1Name || '';
+        if (csName) roadmapData.toolName = csName;
+      }
 
       if (roadmapData.toolName || roadmapData.audience) {
         document.getElementById('intro-prefill').style.display = 'flex';

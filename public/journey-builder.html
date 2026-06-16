@@ -247,13 +247,17 @@ auth.onAuthStateChanged(async function(user) {
   setStep('Checking your profile…');
 
   try {
-    // Check for an existing journey map first — if it's there, show it regardless of gate
+    // Check for an existing journey map first — only show if it has real content
     var existingSnap = await db.collection('journey_maps').doc(user.uid).get();
     if (existingSnap.exists) {
-      journeyData = existingSnap.data();
-      hideEl('loading-screen');
-      renderResults(journeyData, true);
-      return;
+      var saved = existingSnap.data();
+      if (saved && saved.customerStartingPoint && saved.leadMagnetTool && saved.leadMagnetTool.name) {
+        journeyData = saved;
+        hideEl('loading-screen');
+        renderResults(journeyData, true);
+        return;
+      }
+      // Doc exists but empty/incomplete — fall through to regenerate
     }
 
     // No existing map — check the breakthrough gate before generating a new one

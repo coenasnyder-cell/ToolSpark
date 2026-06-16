@@ -187,6 +187,10 @@ auth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'signon.html?redirect=content-hub'; return; }
   var avatarEl = document.getElementById('sidebar-avatar');
   var nameEl   = document.getElementById('sidebar-name');
+  // Populate immediately from auth as fallback so it never shows "Loading..."
+  var authName = user.displayName || user.email || 'Builder';
+  if (nameEl) nameEl.textContent = authName;
+  if (avatarEl) avatarEl.textContent = authName[0].toUpperCase();
   db.collection('users').doc(user.uid).get().then(function(snap) {
     var d = snap.exists ? snap.data() : {};
     var name = d.displayName || d.name || user.email || 'Builder';

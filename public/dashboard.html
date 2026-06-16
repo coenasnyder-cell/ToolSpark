@@ -383,7 +383,7 @@
     <!-- WELCOME -->
     <div class="welcome-card">
       <div>
-        <div class="welcome-eyebrow">? Members Area</div>
+        <div class="welcome-eyebrow">Members Area</div>
         <h1 id="welcome-heading">Welcome back</h1>
         <p>You're building something real. Everything you need to create, launch, and grow your AI-powered tools is right here.</p>
       </div>
@@ -427,13 +427,15 @@
         </div>
 
     </div>
-    <div class="oc-card" id="oc-card" style="display:none;">
-        <div class="oc-header">
-          <div class="oc-title">Getting Started</div>
-          <div class="oc-count" id="oc-count"></div>
+    <div id="email-verify-banner" style="display:none;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);border-radius:10px;padding:11px 16px;margin-top:1rem;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="16" height="16" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Verify your email</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:1px;">Check your inbox and click the link to fully activate your account.</div>
         </div>
-        <div class="oc-bar"><div class="oc-fill" id="oc-fill"></div></div>
-        <div id="oc-steps"></div>
+      </div>
+      <a href="#" onclick="sendVerifyEmail(event)" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;white-space:nowrap;flex-shrink:0;">Resend email →</a>
     </div>
 
     <!-- hidden stat targets kept for JS compatibility -->
@@ -499,7 +501,7 @@
           <div class="hub-card-title">My Sessions</div>
           <div class="hub-card-sub">View all your past sessions</div>
         </a>
-        <a href="lesson-projects.html" class="hub-card">
+        <a href="lesson-projects.html" class="hub-card" id="lesson-gen-card" style="display:none;">
           <div class="hub-card-icon" style="background:rgba(196,98,45,0.12);">
             <svg width="20" height="20" fill="none" stroke="#C4622D" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           </div>
@@ -640,6 +642,8 @@
 
           const lessonSection = document.getElementById('admin-lesson-section');
           if (lessonSection) lessonSection.style.display = 'block';
+          const lessonCard = document.getElementById('lesson-gen-card');
+          if (lessonCard) lessonCard.style.display = 'flex';
         }
 
         // Stats
@@ -748,60 +752,10 @@
   }
 
   function renderChecklist(uid, data) {
-    const steps = data.onboarding?.steps || {};
-    const profileDone = steps.profileComplete || data.profileComplete ||
-      !!(data.bio && (data.photoURL || (data.displayName && data.displayName !== data.email)));
     const emailVerified = !!(auth.currentUser?.emailVerified || data.isVerified);
-
-    const allSteps = [
-      { key: 'emailVerified',  label: 'Verify your email',              desc: 'Check your inbox and click the verification link', special: 'verifyEmail', done: emailVerified },
-      { key: 'profileComplete', label: 'Update your profile',           desc: 'Add your photo, bio, and what you build', href: 'profile.html', featured: true, done: profileDone },
-      { key: 'welcomePost',     label: 'Introduce yourself',            desc: 'Post in the welcome thread',              href: 'community.html',                           done: !!steps.welcomePost },
-      { key: 'welcomeCourse',   label: 'Welcome to ToolSpark! Lesson',  desc: 'Start here before anything else',         href: 'courses.html',                             done: !!steps.welcomeCourse },
-      { key: 'visitRoadmap',    label: 'Visit your Certification Hub',   desc: 'See your full certification path',        href: 'cert-hub.html',                            done: !!steps.visitRoadmap },
-    ];
-
-    const completed = allSteps.filter(function(s) { return s.done; }).length;
-    if (completed === allSteps.length) return;
-
-    document.getElementById('oc-card').style.display = 'block';
-    document.getElementById('oc-count').textContent = completed + ' of ' + allSteps.length + ' complete';
-    document.getElementById('oc-fill').style.width = Math.round((completed / allSteps.length) * 100) + '%';
-
-    document.getElementById('oc-steps').innerHTML = allSteps.map(function(s, i) {
-      const checkClass = s.done ? 'done' : s.featured ? 'featured' : '';
-      const checkInner = s.done
-        ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
-        : (i + 1);
-      const onclickAttr = s.done ? '' :
-        s.special === 'verifyEmail'
-          ? ' onclick="sendVerifyEmail(event)"'
-          : ' onclick="ocMarkStep(event,\'' + uid + '\',\'' + s.key + '\',\'' + s.href + '\')"';
-      const hrefAttr = s.done ? '#' : (s.href || '#');
-      const extraContent = (!s.done && s.special === 'verifyEmail')
-        ? '<div style="margin-top:5px;"><a href="#" onclick="sendVerifyEmail(event)" style="font-size:11px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:0.03em;">Resend verification email →</a></div>'
-        : '';
-      return '<a class="oc-step' + (s.done ? ' oc-done' : '') + (s.featured ? ' oc-featured' : '') + '"' +
-        ' href="' + hrefAttr + '"' + onclickAttr + '>' +
-        '<div class="oc-check ' + checkClass + '">' + checkInner + '</div>' +
-        '<div class="oc-body">' +
-        '<div class="oc-label' + (s.done ? ' done' : '') + '">' + s.label + '</div>' +
-        '<div class="oc-desc">' + s.desc + '</div>' +
-        extraContent +
-        '</div>' +
-        (s.done ? '' : '<svg class="oc-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>') +
-        '</a>';
-    }).join('');
-  }
-
-  async function ocMarkStep(e, uid, key, href) {
-    e.preventDefault();
-    try {
-      const update = {};
-      update['onboarding.steps.' + key] = true;
-      await db.collection('users').doc(uid).update(update);
-    } catch(err) {}
-    window.location.href = href;
+    if (!emailVerified) {
+      document.getElementById('email-verify-banner').style.display = 'flex';
+    }
   }
 
   async function sendVerifyEmail(e) {
