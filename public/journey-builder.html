@@ -289,6 +289,10 @@ async function generateJourney(user) {
       .where('userId', '==', uid)
       .where('status', '==', 'completed')
       .limit(5)
+      .get(),
+    db.collection('value_tool')
+      .where('userId', '==', uid)
+      .limit(5)
       .get()
   ]);
 
@@ -307,6 +311,22 @@ async function generateJourney(user) {
     tools.idea2  = t.idea2 || null;
     tools.idea3  = t.idea3 || null;
     tools.chosen = session.chosenToolName || session.tool1Name || (t.idea1 && t.idea1.name) || null;
+  }
+
+  var builtTool = { name: '', tagline: '', who: '' };
+  if (results[3].status === 'fulfilled' && !results[3].value.empty) {
+    var vtDocs = results[3].value.docs.slice().sort(function(a, b) {
+      return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) -
+             (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
+    });
+    var vtRaw = (vtDocs[0].data().rawReport || '');
+    var vtGet = function(key) {
+      var m = vtRaw.match(new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z_]+:|VALUE_REPORT_END|$)'));
+      return m ? m[1].trim() : '';
+    };
+    builtTool.name    = vtGet('TOOL_NAME');
+    builtTool.tagline = vtGet('TOOL_TAGLINE');
+    builtTool.who     = vtGet('WHO_IT_HELPS');
   }
 
   setStep('Mapping your journey…', 'Connecting your tools into a customer journey');
@@ -344,6 +364,14 @@ async function generateJourney(user) {
   var l2 = toolLine(tools.idea2); if (l2) lines.push('Tool 2: ' + l2);
   var l3 = toolLine(tools.idea3); if (l3) lines.push('Tool 3: ' + l3);
   if (tools.chosen) lines.push('Chosen primary build focus: "' + tools.chosen + '" — treat this as the lead magnet.');
+
+  if (builtTool.name) {
+    lines.push('', '--- BUILT LEAD MAGNET (already completed in Phase 2) ---');
+    lines.push('This creator has already built and launched their lead magnet tool: "' + builtTool.name + '"');
+    if (builtTool.tagline) lines.push('Tagline: ' + builtTool.tagline);
+    if (builtTool.who)     lines.push('Who it helps: ' + builtTool.who);
+    lines.push('IMPORTANT: Set leadMagnetTool.name to exactly "' + builtTool.name + '". The mvpTool and expansionTool should be what logically comes next after this lead magnet.');
+  }
 
   lines.push(
     '',
