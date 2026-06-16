@@ -366,6 +366,22 @@ match /graduation_requests/{requestId} {
       allow delete: if isAdmin();
     }
 
+    // OPT-IN PAGE RESULTS (keyed by uid)
+    match /optin_page_results/{userId} {
+      allow read: if isActive() && (isOwner(userId) || isAdmin());
+      allow create: if isActive() && isOwner(userId);
+      allow update: if isActive() && isOwner(userId);
+      allow delete: if isAdmin();
+    }
+
+    // CERTIFICATION PROGRESS (keyed by uid)
+    match /certification_progress/{userId} {
+      allow read: if isActive() && (isOwner(userId) || isAdmin());
+      allow create: if isActive() && isOwner(userId);
+      allow update: if isActive() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
     // EMAIL SEQUENCES (keyed by uid)
     match /email_sequences/{userId} {
       allow read: if isActive() && (isOwner(userId) || isAdmin());

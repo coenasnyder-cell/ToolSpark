@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certification Hub — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --green-light: #3D8A65; --green-dim: rgba(42,92,69,0.08);
+    --coral: #C4622D; --coral-dim: rgba(196,98,45,0.08);
+    --purple: #4B3F8A; --purple-dim: rgba(75,63,138,0.08); --purple-text: #9B8FD0;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+  }
+  body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+
+  /* SIDEBAR */
+  .sidebar { width:var(--sidebar-width); background:var(--dark); min-height:100vh; display:flex; flex-direction:column; position:fixed; left:0; top:0; z-index:100; border-right:1px solid var(--border-dark); }
+  .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border-dark); }
+  .logo-text { font-family:'Playfair Display',serif; font-size:20px; color:#F0EDE6; }
+  .logo-text span { color:var(--gold); }
+  .logo-tag { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-top:3px; font-weight:700; }
+  .sidebar-nav { flex:1; padding:1rem 0.75rem; display:flex; flex-direction:column; gap:2px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); color:#9A9488; font-size:14px; text-decoration:none; transition:all 0.15s; }
+  .nav-item:hover { background:rgba(255,255,255,0.05); color:#F0EDE6; }
+  .nav-item.active { background:var(--gold-dim); color:var(--gold); font-weight:700; border:1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width:18px; height:18px; opacity:0.7; flex-shrink:0; }
+  .nav-item.active .nav-icon { opacity:1; }
+  .sidebar-footer { padding:1rem 0.75rem; border-top:1px solid var(--border-dark); }
+  .sidebar-user { display:flex; align-items:center; gap:10px; padding:8px 10px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(201,168,76,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gold); }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:13px; color:#F0EDE6; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role { font-size:11px; color:var(--text3); }
+  .logout-btn { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; margin-top:4px; background:none; border:none; border-radius:var(--radius-sm); color:#6B5F5F; font-size:13px; font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.15s; text-align:left; }
+  .logout-btn:hover { background:rgba(220,50,50,0.1); color:#E05555; }
+
+  /* MAIN */
+  .main-wrap { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-content { flex:1; padding:2rem 2.5rem 3rem; max-width:760px; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom:0.5rem; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:30px; font-weight:400; color:var(--text); margin-bottom:5px; }
+  .page-header p { font-size:14px; color:var(--text3); }
+
+  /* OVERALL PROGRESS */
+  .overall-progress { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem 1.5rem; margin:1.5rem 0 1.75rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
+  .progress-phases { display:flex; align-items:center; gap:8px; flex:1; }
+  .prog-dot { width:10px; height:10px; border-radius:50%; background:var(--border); flex-shrink:0; transition:background 0.3s; }
+  .prog-dot.done { background:var(--green-light); }
+  .prog-dot.active { background:var(--gold); }
+  .prog-line { flex:1; height:2px; background:var(--border); max-width:60px; }
+  .prog-line.done { background:var(--green-light); }
+  .progress-label { font-size:13px; color:var(--text3); white-space:nowrap; }
+  .progress-label strong { color:var(--text); }
+
+  /* PHASE CARDS */
+  .phase-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:1.25rem; overflow:hidden; transition:border-color 0.2s, opacity 0.2s; }
+  .phase-card.locked { opacity:0.55; pointer-events:none; }
+  .phase-card.p1-active, .phase-card.p1-done { border-color:rgba(42,92,69,0.3); }
+  .phase-card.p2-active { border-color:rgba(75,63,138,0.3); }
+  .phase-card.p2-done { border-color:rgba(42,92,69,0.3); }
+  .phase-card.p3-active { border-color:rgba(196,98,45,0.3); }
+  .phase-card.p3-done { border-color:rgba(42,92,69,0.3); }
+
+  .phase-header { padding:1.1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; }
+  .phase-card.p1-done .phase-header, .phase-card.p2-done .phase-header, .phase-card.p3-done .phase-header { background:rgba(42,92,69,0.04); }
+  .phase-card.p2-active .phase-header { background:rgba(75,63,138,0.04); }
+  .phase-card.p3-active .phase-header { background:rgba(196,98,45,0.04); }
+
+  .phase-num { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; flex-shrink:0; background:var(--border); color:var(--text3); transition:all 0.3s; }
+  .phase-card.p1-active .phase-num, .phase-card.p1-done .phase-num { background:rgba(42,92,69,0.12); border:1px solid rgba(42,92,69,0.3); color:var(--green-light); }
+  .phase-card.p2-active .phase-num { background:rgba(75,63,138,0.12); border:1px solid rgba(75,63,138,0.3); color:var(--purple-text); }
+  .phase-card.p2-done .phase-num { background:rgba(42,92,69,0.12); border:1px solid rgba(42,92,69,0.3); color:var(--green-light); }
+  .phase-card.p3-active .phase-num { background:rgba(196,98,45,0.12); border:1px solid rgba(196,98,45,0.3); color:var(--coral); }
+  .phase-card.p3-done .phase-num { background:rgba(42,92,69,0.12); border:1px solid rgba(42,92,69,0.3); color:var(--green-light); }
+
+  .phase-title-wrap { flex:1; min-width:0; }
+  .phase-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--text); margin-bottom:2px; }
+  .phase-subtitle { font-size:12px; color:var(--text3); }
+
+  .phase-badge { font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; padding:4px 10px; border-radius:20px; white-space:nowrap; }
+  .badge-locked   { background:rgba(0,0,0,0.04); border:1px solid var(--border); color:var(--text3); }
+  .badge-progress { background:var(--gold-dim); border:1px solid rgba(201,168,76,0.25); color:var(--gold); }
+  .badge-complete { background:var(--green-dim); border:1px solid rgba(42,92,69,0.2); color:var(--green-light); }
+
+  .phase-body { padding:1.25rem 1.5rem; }
+
+  /* STEP LIST */
+  .step-list { display:flex; flex-direction:column; gap:6px; margin-bottom:1.25rem; }
+  .step-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text2); }
+  .step-icon { width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0; background:var(--border); color:var(--text3); }
+  .step-icon.done { background:var(--green-dim); color:var(--green-light); font-size:11px; }
+  .step-icon.locked { background:var(--border); color:var(--text3); }
+
+  /* CTA */
+  .phase-cta { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:14px; font-weight:700; text-decoration:none; transition:all 0.18s; cursor:pointer; }
+  .cta-green  { background:var(--green-light); color:#fff; }
+  .cta-green:hover  { background:var(--green); }
+  .cta-purple { background:rgba(75,63,138,0.12); border:1px solid rgba(75,63,138,0.25); color:var(--purple-text); }
+  .cta-purple:hover { background:rgba(75,63,138,0.2); }
+  .cta-coral  { background:rgba(196,98,45,0.1); border:1px solid rgba(196,98,45,0.25); color:var(--coral); }
+  .cta-coral:hover  { background:rgba(196,98,45,0.18); }
+  .cta-outline { background:transparent; border:1px solid var(--border); color:var(--text2); }
+  .cta-outline:hover { border-color:var(--gold); color:var(--gold); }
+
+  /* COMPLETED DATE */
+  .completed-at { font-size:12px; color:var(--text3); margin-top:8px; }
+
+  /* LOCK MESSAGE */
+  .lock-message { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text3); padding:10px 0; }
+
+  /* LOADING */
+  .loading-state { padding:3rem 2.5rem; text-align:center; color:var(--text3); font-size:14px; }
+
+  @media (max-width:1023px) { .main-wrap { margin-left:60px; } }
+  @media (max-width:767px) {
+    .main-wrap { margin-left:0; }
+    .page-content { padding:1rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Builder Platform</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading…</div>
+        <div class="user-role" id="sidebar-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="page-content" id="page-content" style="display:none;">
+
+    <div class="page-header">
+      <h1>Certification Hub</h1>
+      <p>Your path from idea to launched AI business — three phases, one credential.</p>
+    </div>
+
+    <!-- OVERALL PROGRESS -->
+    <div class="overall-progress">
+      <div class="progress-phases">
+        <div class="prog-dot" id="pdot-1"></div>
+        <div class="prog-line" id="pline-1"></div>
+        <div class="prog-dot" id="pdot-2"></div>
+        <div class="prog-line" id="pline-2"></div>
+        <div class="prog-dot" id="pdot-3"></div>
+      </div>
+      <div class="progress-label" id="progress-label">Loading…</div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-card" id="phase1-card">
+      <div class="phase-header">
+        <div class="phase-num" id="phase1-num">1</div>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Phase 1 — The Challenge</div>
+          <div class="phase-subtitle">Spark · Audience · Breakthrough · Choose Your Path</div>
+        </div>
+        <span class="phase-badge badge-progress" id="phase1-badge">In Progress</span>
+      </div>
+      <div class="phase-body">
+        <div class="step-list">
+          <div class="step-row"><div class="step-icon done">✓</div>Find Your Spark</div>
+          <div class="step-row"><div class="step-icon done">✓</div>Audience Deep Dive</div>
+          <div class="step-row"><div class="step-icon done">✓</div>Discover Your Breakthrough</div>
+          <div class="step-row" id="phase1-step4"><div class="step-icon" id="phase1-step4-icon">4</div>Choose Your Path → Certification</div>
+        </div>
+        <div id="phase1-spark-wrap" style="display:none; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:1.25rem; font-size:13px; color:var(--text2); line-height:1.6; font-style:italic;">
+          "<span id="phase1-spark"></span>"
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <a href="dwy.html" class="phase-cta cta-outline" id="phase1-cta">View Phase 1 →</a>
+        </div>
+        <div class="completed-at" id="phase1-date" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-card locked" id="phase2-card">
+      <div class="phase-header">
+        <div class="phase-num" id="phase2-num">2</div>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Phase 2 — Build Your Lead Magnet</div>
+          <div class="phase-subtitle">Creator Hub · Build · Value Mirror · Content · Sales Copy · Marketplace</div>
+        </div>
+        <span class="phase-badge badge-locked" id="phase2-badge">Locked</span>
+      </div>
+      <div class="phase-body">
+        <div id="phase2-locked-msg" class="lock-message">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Unlocks when Phase 1 is complete
+        </div>
+        <div id="phase2-content" style="display:none;">
+          <div class="step-list">
+            <div class="step-row"><div class="step-icon" id="p2s1">1</div>Set Up Creator Hub</div>
+            <div class="step-row"><div class="step-icon" id="p2s2">2</div>Build Your AI Tool</div>
+            <div class="step-row"><div class="step-icon" id="p2s3">3</div>Generate Prompts</div>
+            <div class="step-row"><div class="step-icon" id="p2s4">4</div>Value Mirror</div>
+            <div class="step-row"><div class="step-icon" id="p2s5">5</div>Create Content Plan</div>
+            <div class="step-row"><div class="step-icon" id="p2s6">6</div>Post Ideas</div>
+            <div class="step-row"><div class="step-icon" id="p2s7">7</div>Record a Video</div>
+            <div class="step-row"><div class="step-icon" id="p2s8">8</div>Build Sales Copy (Opt-In)</div>
+            <div class="step-row"><div class="step-icon" id="p2s9">9</div>Generate Opt-In Funnel</div>
+            <div class="step-row"><div class="step-icon" id="p2s10">10</div>List in Marketplace (Free)</div>
+            <div class="step-row"><div class="step-icon" id="p2s11">11</div>Submit for Review</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <a href="cert-phase2.html" class="phase-cta cta-purple" id="phase2-cta">Enter Phase 2 →</a>
+          </div>
+          <div class="completed-at" id="phase2-date" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-card locked" id="phase3-card">
+      <div class="phase-header">
+        <div class="phase-num" id="phase3-num">3</div>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Phase 3 — Launch &amp; Monetize</div>
+          <div class="phase-subtitle">Journey · Offers · Sales Copy · Funnel · Email · Marketplace · Graduate</div>
+        </div>
+        <span class="phase-badge badge-locked" id="phase3-badge">Locked</span>
+      </div>
+      <div class="phase-body">
+        <div id="phase3-locked-msg" class="lock-message">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Unlocks when Phase 2 is complete
+        </div>
+        <div id="phase3-content" style="display:none;">
+          <div class="step-list">
+            <div class="step-row"><div class="step-icon" id="p3s1">1</div>Map Your Customer Journey</div>
+            <div class="step-row"><div class="step-icon" id="p3s2">2</div>Sort Your Offers</div>
+            <div class="step-row"><div class="step-icon" id="p3s3">3</div>Build Your Offer</div>
+            <div class="step-row"><div class="step-icon" id="p3s4">4</div>Build Your AI Tool (MVP)</div>
+            <div class="step-row"><div class="step-icon" id="p3s5">5</div>Build Sales Copy (Paid)</div>
+            <div class="step-row"><div class="step-icon" id="p3s6">6</div>Generate Sales Funnel</div>
+            <div class="step-row"><div class="step-icon" id="p3s7">7</div>Build Email Sequence</div>
+            <div class="step-row"><div class="step-icon" id="p3s8">8</div>List MVP in Marketplace</div>
+            <div class="step-row"><div class="step-icon" id="p3s9">9</div>Graduate 🎓</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <a href="launch-kit.html" class="phase-cta cta-coral" id="phase3-cta">Enter Phase 3 →</a>
+          </div>
+          <div class="completed-at" id="phase3-date" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="loading-state" id="loading-state">Loading your progress…</div>
+</div>
+
+<script>
+function fmtDate(ts) {
+  if (!ts) return '';
+  var d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+}
+
+function applyPhase1(prog, userData) {
+  var done = prog && prog.phase1Complete === true;
+  var card  = document.getElementById('phase1-card');
+  var badge = document.getElementById('phase1-badge');
+  var num   = document.getElementById('phase1-num');
+  var step4Icon = document.getElementById('phase1-step4-icon');
+  var cta   = document.getElementById('phase1-cta');
+  var dateEl = document.getElementById('phase1-date');
+
+  if (done) {
+    card.classList.add('p1-done');
+    badge.textContent = 'Complete';
+    badge.className = 'phase-badge badge-complete';
+    num.textContent = '✓';
+    step4Icon.className = 'step-icon done';
+    step4Icon.textContent = '✓';
+    cta.textContent = 'Review Phase 1 →';
+    if (prog.phase1CompletedAt) {
+      dateEl.textContent = 'Completed ' + fmtDate(prog.phase1CompletedAt);
+      dateEl.style.display = 'block';
+    }
+  } else {
+    card.classList.add('p1-active');
+    badge.textContent = 'In Progress';
+    badge.className = 'phase-badge badge-progress';
+    cta.textContent = 'Continue Phase 1 →';
+    cta.href = 'dwy.html';
+  }
+
+  // Show spark statement if available
+  var spark = userData && (userData.sparkStatement || userData.statement);
+  if (spark) {
+    document.getElementById('phase1-spark').textContent = spark;
+    document.getElementById('phase1-spark-wrap').style.display = 'block';
+  }
+
+  // Progress dots
+  document.getElementById('pdot-1').classList.add(done ? 'done' : 'active');
+}
+
+function applyPhase2(prog) {
+  var p1done = prog && prog.phase1Complete === true;
+  var done   = prog && prog.phase2Complete === true;
+  var card   = document.getElementById('phase2-card');
+  var badge  = document.getElementById('phase2-badge');
+  var num    = document.getElementById('phase2-num');
+  var lockedMsg = document.getElementById('phase2-locked-msg');
+  var content   = document.getElementById('phase2-content');
+  var cta       = document.getElementById('phase2-cta');
+  var dateEl    = document.getElementById('phase2-date');
+
+  if (!p1done) return; // stays locked
+
+  card.classList.remove('locked');
+  lockedMsg.style.display = 'none';
+  content.style.display = 'block';
+
+  if (done) {
+    card.classList.add('p2-done');
+    badge.textContent = 'Complete';
+    badge.className = 'phase-badge badge-complete';
+    num.textContent = '✓';
+    cta.textContent = 'Review Phase 2 →';
+    // Mark all steps done
+    for (var i = 1; i <= 11; i++) {
+      var el = document.getElementById('p2s' + i);
+      if (el) { el.className = 'step-icon done'; el.textContent = '✓'; }
+    }
+    if (prog.phase2CompletedAt) {
+      dateEl.textContent = 'Completed ' + fmtDate(prog.phase2CompletedAt);
+      dateEl.style.display = 'block';
+    }
+    document.getElementById('pdot-2').classList.add('done');
+    document.getElementById('pline-1').classList.add('done');
+  } else {
+    card.classList.add('p2-active');
+    badge.textContent = 'In Progress';
+    badge.className = 'phase-badge badge-progress';
+    document.getElementById('pdot-2').classList.add('active');
+    document.getElementById('pline-1').classList.add('done');
+  }
+}
+
+function applyPhase3(prog) {
+  var p2done = prog && prog.phase2Complete === true;
+  var done   = prog && prog.phase3Complete === true;
+  var card   = document.getElementById('phase3-card');
+  var badge  = document.getElementById('phase3-badge');
+  var num    = document.getElementById('phase3-num');
+  var lockedMsg = document.getElementById('phase3-locked-msg');
+  var content   = document.getElementById('phase3-content');
+  var cta       = document.getElementById('phase3-cta');
+  var dateEl    = document.getElementById('phase3-date');
+
+  if (!p2done) return; // stays locked
+
+  card.classList.remove('locked');
+  lockedMsg.style.display = 'none';
+  content.style.display = 'block';
+
+  if (done) {
+    card.classList.add('p3-done');
+    badge.textContent = 'Complete';
+    badge.className = 'phase-badge badge-complete';
+    num.textContent = '✓';
+    cta.textContent = 'View Certificate →';
+    cta.href = 'certificate.html';
+    for (var i = 1; i <= 9; i++) {
+      var el = document.getElementById('p3s' + i);
+      if (el) { el.className = 'step-icon done'; el.textContent = '✓'; }
+    }
+    if (prog.phase3CompletedAt) {
+      dateEl.textContent = 'Completed ' + fmtDate(prog.phase3CompletedAt);
+      dateEl.style.display = 'block';
+    }
+    document.getElementById('pdot-3').classList.add('done');
+    document.getElementById('pline-2').classList.add('done');
+  } else {
+    card.classList.add('p3-active');
+    badge.textContent = 'In Progress';
+    badge.className = 'phase-badge badge-progress';
+    document.getElementById('pdot-3').classList.add('active');
+    document.getElementById('pline-2').classList.add('done');
+  }
+}
+
+function updateProgressLabel(prog) {
+  var label = document.getElementById('progress-label');
+  if (!prog || !prog.phase1Complete) {
+    label.innerHTML = '<strong>Phase 1</strong> in progress';
+  } else if (!prog.phase2Complete) {
+    label.innerHTML = '<strong>Phase 2</strong> in progress';
+  } else if (!prog.phase3Complete) {
+    label.innerHTML = '<strong>Phase 3</strong> in progress';
+  } else {
+    label.innerHTML = '<strong>All phases complete</strong> — certified! 🎓';
+  }
+}
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) { window.location.href = 'signon.html?redirect=cert-hub'; return; }
+
+  var avatarEl = document.getElementById('sidebar-avatar');
+  var nameEl   = document.getElementById('sidebar-name');
+  var roleEl   = document.getElementById('sidebar-role');
+
+  try {
+    var [userSnap, progSnap] = await Promise.all([
+      db.collection('users').doc(user.uid).get(),
+      db.collection('certification_progress').doc(user.uid).get()
+    ]);
+
+    var userData = userSnap.exists ? userSnap.data() : {};
+    var prog     = progSnap.exists ? progSnap.data() : null;
+
+    var displayName = userData.displayName || userData.name || user.email || 'Builder';
+    if (avatarEl) {
+      if (userData.photoURL) {
+        avatarEl.innerHTML = '<img src="' + userData.photoURL + '" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">';
+      } else {
+        avatarEl.textContent = displayName[0].toUpperCase();
+      }
+    }
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = userData.userRole === 'admin' ? 'Admin' : 'Builder';
+
+    applyPhase1(prog, userData);
+    applyPhase2(prog);
+    applyPhase3(prog);
+    updateProgressLabel(prog);
+
+  } catch(e) {
+    console.error(e);
+    // Show page anyway with default (in-progress) state
+    applyPhase1(null, {});
+    applyPhase2(null);
+    applyPhase3(null);
+    updateProgressLabel(null);
+  }
+
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('page-content').style.display  = 'block';
+});
+</script>
+<script src="js/nav.js"></script>
+<script>initNav('cert-hub', 'Certification Hub');</script>
+</body>
+</html>
