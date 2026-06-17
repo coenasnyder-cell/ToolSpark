@@ -201,6 +201,8 @@
     <button class="pill format" data-group="format" data-value="story" onclick="select(this, 'format')">✨ Story / Character</button>
     <button class="pill format" data-group="format" data-value="bts" onclick="select(this, 'format')">🎬 Behind the Scenes</button>
     <button class="pill format" data-group="format" data-value="question" onclick="select(this, 'format')">💬 Open Question</button>
+    <button class="pill format" data-group="format" data-value="painpoint" onclick="select(this, 'format')">😤 Pain Point</button>
+    <button class="pill format" data-group="format" data-value="cta" onclick="select(this, 'format')">📣 CTA</button>
     <button class="pill format" data-group="format" data-value="any" onclick="select(this, 'format')">🎲 Surprise me</button>
   </div>
 </div>
@@ -243,6 +245,17 @@ const topics = {
       { topic: "What's the idea you keep coming back to but haven't acted on yet?", hook: "No judgment. I'm just curious what's living in your notes app right now." },
       { topic: "What made you think 'someone should build an AI tool for that' recently?", hook: "That thought is more valuable than you think." },
     ],
+    painpoint: [
+      { topic: "Still trying to figure out which idea to build first?", hook: "Most people spend months going in circles between 3–5 ideas that all sound good. The Clarity phase inside ToolSpark is built specifically for this — it's not a brainstorm, it's a filter. You leave with one idea and a reason to commit to it." },
+      { topic: "The most common thing I hear: 'I have an idea but I don't know if it's good enough.'", hook: "That feeling isn't a sign that the idea is bad. It's a sign that it hasn't been validated yet. There's a difference. ToolSpark's Clarity phase tells you which is which — before you build a single thing." },
+      { topic: "What if you've been overthinking the idea and it's already right there?", hook: "Most people already know their idea. They just don't trust it yet. The Clarity phase doesn't find your idea for you — it confirms the one you're already sitting on." },
+      { topic: "If you've ever thought 'I don't even know what kind of AI tool I'd build' — this is for you.", hook: "You don't need to arrive at ToolSpark with a finished idea. The Clarity phase starts from scratch with you. By the end of it, you'll have one specific, buildable idea — not a list of maybes." },
+    ],
+    cta: [
+      { topic: "If you've had an idea sitting in your notes app for more than a month — the waitlist is open.", hook: "ToolSpark takes you from 'I have an idea' to 'I have a working AI tool' — no coding, no developers, no waiting on someone else to build it for you.\n\nWaitlist link in the comments. ⚡" },
+      { topic: "The Clarity phase is where ToolSpark starts — and it's where most people finally stop going in circles.", hook: "You pick the idea. We validate it. You build it. That's the whole first phase.\n\nEarly access is open. Link in the comments if you're ready to stop sitting on it. ⚡" },
+      { topic: "ToolSpark is almost open. Here's what's waiting for you on Day 1.", hook: "Phase 1: Clarity — pick the right idea and validate it before you build a single thing.\nPhase 2: Build — create your AI tool without writing one line of code.\nPhase 3: Monetize — price it, launch it, list it in the Marketplace.\n\nWaitlist is open. Link in comments. ⚡" },
+    ],
   },
   build: {
     poll: [
@@ -264,6 +277,16 @@ const topics = {
       { topic: "What would make you feel confident enough to call your tool 'done enough to launch'?", hook: "There's no right answer — I genuinely want to know where the bar is for you." },
       { topic: "Have you ever abandoned a build halfway through? What stopped you?", hook: "Not asking to pry — asking because the answer usually reveals the actual problem." },
       { topic: "What's one thing you'd want your AI tool to do that you're not sure is possible?", hook: "Drop it below. I might have good news." },
+    ],
+    painpoint: [
+      { topic: "'I can't code' is the reason most AI tool ideas never get built.", hook: "Not because coding is required — but because nobody told them it isn't. ToolSpark's Build phase doesn't ask you to write a single line of code. If you can describe the problem your tool solves, Sparky can help you build it." },
+      { topic: "The hardest part of building an AI tool isn't the AI. It's knowing when it's done enough to launch.", hook: "Most people either overbuild (adding features nobody asked for) or underbuild (abandoning it before it's ready). The Build phase inside ToolSpark has a clear finish line — so you stop second-guessing and start shipping." },
+      { topic: "Have you ever started building something and just... stopped?", hook: "Not because you lost interest. Because you didn't know what the next step was. That's a process problem, not a motivation problem. The Build phase is step-by-step on purpose — so there's always a clear next move." },
+    ],
+    cta: [
+      { topic: "No coding. No developers. No waiting on someone else to build the thing you've been describing for months.", hook: "That's what the Build phase is for.\n\nToolSpark's waitlist is open. If you've been sitting on an idea — link in the comments. ⚡" },
+      { topic: "What does 'build an AI tool without coding' actually look like?", hook: "It looks like: describe the problem → set up the logic → test it → done.\n\nNo terminal. No frameworks. No Stack Overflow at midnight.\n\nWant to see it from the inside? Join the waitlist — link in comments. ⚡" },
+      { topic: "ToolSpark Certified means you built a real AI tool and launched it. Here's what that gets you.", hook: "✓ A working tool your clients can actually use\n✓ A Marketplace listing so buyers can find you\n✓ A Certified badge that backs up everything you say about AI\n\nWaitlist is open. Link in comments. ⚡" },
     ],
   },
   monetize: {
@@ -288,6 +311,17 @@ const topics = {
       { topic: "Would you rather sell your AI tool to strangers or to your existing clients first?", hook: "Both are valid. I'm curious which feels safer — and why." },
       { topic: "What would it mean for your business if your AI tool brought in $500/month passively?", hook: "I'm asking because most people have never let themselves do that math." },
     ],
+    painpoint: [
+      { topic: "Pricing an AI tool is where most people freeze — and it costs them more than they realize.", hook: "Starting too low because you're scared nobody will pay. Then feeling stuck there forever. Then either burning out or giving up. ToolSpark makes pricing the first conversation, not the last — because what you charge shapes everything else." },
+      { topic: "'But I don't have an audience' is the objection that kills more good ideas than anything else.", hook: "The ToolSpark Marketplace exists specifically for this. You don't need 10,000 followers to sell an AI tool. You need a tool that solves a real problem and a place where the right people can find it. That's what we built." },
+      { topic: "The gap between 'I built a tool' and 'I make money from a tool' is not as big as it looks.", hook: "It's usually just: a clear offer, a price that reflects the value, and somewhere to send people. ToolSpark's Monetize phase handles all three — so you're not figuring it out alone after you've already done the hard part." },
+      { topic: "Most coaches and consultants are sitting on $500/month in passive income they haven't built yet.", hook: "Not because the idea doesn't exist. Because nobody showed them how to turn it into a product. That's the whole point of ToolSpark." },
+    ],
+    cta: [
+      { topic: "The Marketplace is the answer to 'but I have no following.'", hook: "When you complete the ToolSpark Certification, your tool gets listed in the Marketplace — where buyers are already looking for tools like yours.\n\nYou build it. We help people find it.\n\nWaitlist link in the comments. ⚡" },
+      { topic: "What would $500/month in passive income from an AI tool change for your business?", hook: "Most people have never let themselves do that math.\n\nToolSpark's Monetize phase is where you price it, launch it, and list it — so that number stops being hypothetical.\n\nWaitlist is open. Link in comments. ⚡" },
+      { topic: "Founding member pricing closes when we open the doors.", hook: "If you've been thinking about it — this is the window.\n\nToolSpark: build your AI tool, get certified, list it in the Marketplace.\n\nWaitlist link in comments. ⚡" },
+    ],
   },
 };
 
@@ -308,14 +342,14 @@ function generate() {
     ? ['clarity', 'build', 'monetize'][Math.floor(Math.random() * 3)]
     : state.stage;
   const formatKey = state.format === 'any'
-    ? ['poll', 'story', 'bts', 'question'][Math.floor(Math.random() * 4)]
+    ? ['poll', 'story', 'bts', 'question', 'painpoint', 'cta'][Math.floor(Math.random() * 6)]
     : state.format;
 
   const pool = topics[stageKey]?.[formatKey] || [];
   const picked = pickRandom(pool, Math.min(3, pool.length));
 
   const stageLabels = { clarity: '💡 Clarity', build: '🔧 Build', monetize: '💰 Monetize' };
-  const formatLabels = { poll: 'Poll / Vote', story: 'Story / Character', bts: 'Behind the Scenes', question: 'Open Question' };
+  const formatLabels = { poll: 'Poll / Vote', story: 'Story / Character', bts: 'Behind the Scenes', question: 'Open Question', painpoint: 'Pain Point', cta: 'CTA' };
 
   document.getElementById('results-label').textContent =
     `${stageLabels[stageKey]} · ${formatLabels[formatKey]}`;
