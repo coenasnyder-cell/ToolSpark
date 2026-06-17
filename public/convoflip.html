@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ConvoFlip — ToolSpark</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --spark: #E85D26;
+    --spark-light: #FDF0EB;
+    --spark-dark: #B34218;
+    --surface: #FFFFFF;
+    --surface-2: #F7F6F3;
+    --surface-3: #EEECEA;
+    --border: #E2DFD9;
+    --text: #1A1917;
+    --text-2: #6B6760;
+    --text-3: #9B9893;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--surface-2);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--spark);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-2);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--spark); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 0.75rem;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--spark);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    resize: vertical;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  textarea:focus, input[type="text"]:focus {
+    border-color: var(--spark);
+    background: var(--surface);
+  }
+
+  textarea { min-height: 160px; line-height: 1.6; }
+  input[type="text"] { height: 40px; }
+
+  .style-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .style-option {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+    background: var(--surface-2);
+  }
+
+  .style-option:hover { border-color: var(--spark); background: var(--spark-light); }
+  .style-option.selected { border-color: var(--spark); background: var(--spark-light); }
+  .style-option input { display: none; }
+
+  .style-preview { font-size: 22px; margin-bottom: 6px; }
+  .style-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .style-desc { font-size: 11px; color: var(--text-2); margin-top: 3px; }
+
+  .lines-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .line-row {
+    display: grid;
+    grid-template-columns: 1fr 160px 32px;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .line-text {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    min-height: 38px;
+    word-break: break-word;
+    border-left-width: 3px;
+    outline: none;
+    cursor: text;
+  }
+
+  .line-text:focus {
+    border-color: var(--spark);
+    background: var(--surface);
+  }
+
+  .line-text:empty::before {
+    content: 'Type a line…';
+    color: var(--text-3);
+    pointer-events: none;
+  }
+
+  select {
+    font-family: var(--font);
+    font-size: 12px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 10px;
+    height: 38px;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  select:focus { border-color: var(--spark); }
+
+  .line-delete {
+    width: 32px;
+    height: 38px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+
+  .line-delete:hover { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0 1.25rem;
+    height: 40px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-primary { background: var(--spark); color: white; }
+  .btn-primary:hover:not(:disabled) { background: var(--spark-dark); }
+
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { background: var(--surface-3); }
+
+  .btn-ghost { background: transparent; color: var(--spark); border: 1px solid var(--spark); }
+  .btn-ghost:hover:not(:disabled) { background: var(--spark-light); }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 1rem;
+  }
+
+  .status-bar.show { display: flex; }
+  .status-bar.info { background: #E6F1FB; color: #185FA5; }
+  .status-bar.success { background: #EAF3DE; color: #3B6D11; }
+  .status-bar.error { background: #FCEBEB; color: #A32D2D; }
+
+  .empty-lines {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-3);
+    font-size: 13px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  .spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--spark); }
+  .spinning .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .warn-badge {
+    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    background: #FAEEDA;
+    color: #854F0B;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+  .warn-badge.show { display: inline-block; }
+
+  #auth-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    font-size: 14px;
+    color: var(--text-3);
+  }
+
+  #page-wrap { display: none; }
+</style>
+</head>
+<body>
+
+<div id="auth-loading">Checking access…</div>
+
+<div class="page" id="page-wrap">
+
+  <a href="admindashboard.html" class="back-link">← Admin Dashboard</a>
+
+  <div class="page-header">
+    <div class="logo-mark">⚡</div>
+    <div>
+      <h1>ConvoFlip</h1>
+      <p>Turn a ToolSpark convo into a video script</p>
+    </div>
+  </div>
+
+  <!-- Step 1: Title -->
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <span class="step-title">Name this video</span>
+    </div>
+    <input type="text" id="videoTitle" placeholder="e.g. Buttongate Day 1" maxlength="80" />
+  </div>
+
+  <!-- Step 2: Style -->
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <span class="step-title">Choose a style</span>
+    </div>
+    <div class="style-picker">
+      <label class="style-option" id="style-bubble">
+        <input type="radio" name="videoStyle" value="bubble" />
+        <div class="style-preview">💬</div>
+        <div class="style-name">Chat bubble</div>
+        <div class="style-desc">Looks like iMessage — great for back-and-forth drama</div>
+      </label>
+      <label class="style-option" id="style-caption">
+        <input type="radio" name="videoStyle" value="caption" />
+        <div class="style-preview">📝</div>
+        <div class="style-name">Caption</div>
+        <div class="style-desc">Text appears on screen — great for narrated moments</div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Step 3: Paste convo -->
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <span class="step-title">Paste the convo</span>
+    </div>
+    <textarea id="rawConvo" placeholder="Paste your convo here — copy it straight from Claude, ChatGPT, wherever. Format: Name: message, one per line.&#10;&#10;Example:&#10;Skippy: The user asked for it to go away.&#10;COO: Until the results were ready.&#10;Nemo: Wait. What button?"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="parseConvo()">Parse lines</button>
+      <button class="btn btn-ghost" id="cleanBtn" onclick="cleanWithClaude()">
+        <span class="spinner dark" id="cleanSpinner"></span>
+        ✨ Clean up with Claude
+      </button>
+    </div>
+    <div id="cleanStatus" class="status-bar"></div>
+  </div>
+
+  <!-- Step 4: Assign characters -->
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <span class="step-title">Assign characters</span>
+      <span class="warn-badge" id="unassignedWarn">⚠ unassigned lines</span>
+    </div>
+    <div class="lines-list" id="linesList">
+      <div class="empty-lines">Parse a convo above to see lines here</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="addBlankLine()">+ Add line</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Save -->
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <span class="step-title">Save script</span>
+    </div>
+    <p style="font-size:13px; color:var(--text-2); margin-bottom:1rem;">
+      Saves to Firestore as a draft — ready for the video renderer when it's built.
+    </p>
+    <button class="btn btn-primary" id="saveBtn" onclick="saveScript()">
+      <span class="spinner" id="saveSpinner"></span>
+      Save script →
+    </button>
+    <div id="saveStatus" class="status-bar"></div>
+    <a id="preview-link" href="#" target="_blank" style="display:none;margin-top:10px;font-size:13px;font-weight:700;color:var(--spark);text-decoration:none;">
+      Open in Preview → export images
+    </a>
+  </div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+  authDomain: "toolspark-2d62d.firebaseapp.com",
+  projectId: "toolspark-2d62d",
+  storageBucket: "toolspark-2d62d.firebasestorage.app",
+  messagingSenderId: "82966513396",
+  appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+};
+
+firebase.initializeApp(firebaseConfig);
+try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+
+let characters = [];
+let lines = [];
+let currentUser = null;
+
+// ── Auth gate ──
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href = 'signon.html'; return; }
+
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    const role = snap.exists ? snap.data().userRole : 'member';
+    if (role !== 'admin') { window.location.href = 'dashboard.html'; return; }
+  } catch(e) {
+    window.location.href = 'signon.html';
+    return;
+  }
+
+  currentUser = user;
+  document.getElementById('auth-loading').style.display = 'none';
+  document.getElementById('page-wrap').style.display = 'block';
+  loadCharacters();
+});
+
+// ── Auth headers for the analyze function ──
+async function authHeaders() {
+  const token = currentUser ? await currentUser.getIdToken() : "";
+  let acToken = "";
+  try {
+    const t = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise((_, r) => setTimeout(() => r(), 3000))
+    ]);
+    acToken = t?.token || "";
+  } catch(e) {}
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+    "X-Firebase-AppCheck": acToken
+  };
+}
+
+// ── Load characters from Firestore ──
+async function loadCharacters() {
+  try {
+    const snap = await db.collection("characters").where("active", "==", true).get();
+    characters = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) {
+    console.error("Could not load characters:", e);
+  }
+}
+
+// ── Style picker ──
+document.querySelectorAll('input[name="videoStyle"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    document.querySelectorAll(".style-option").forEach(el => el.classList.remove("selected"));
+    radio.closest(".style-option").classList.add("selected");
+  });
+});
+
+// ── Parse raw convo into lines ──
+function parseConvo() {
+  const raw = document.getElementById("rawConvo").value.trim();
+  if (!raw) return;
+
+  const parsed = [];
+  raw.split("\n").forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    const match = trimmed.match(/^([^:]+):\s*(.+)$/);
+    if (match) {
+      const speakerRaw = match[1].trim().toLowerCase();
+      const text = match[2].trim();
+      const char = characters.find(c =>
+        c.name.toLowerCase() === speakerRaw ||
+        c.id.toLowerCase() === speakerRaw ||
+        speakerRaw.includes(c.name.toLowerCase())
+      );
+      parsed.push({ text, characterId: char ? char.id : "" });
+    } else {
+      parsed.push({ text: trimmed, characterId: "" });
+    }
+  });
+
+  lines = parsed;
+  renderLines();
+}
+
+// ── Render lines list ──
+function renderLines() {
+  const container = document.getElementById("linesList");
+  if (lines.length === 0) {
+    container.innerHTML = '<div class="empty-lines">Parse a convo above to see lines here</div>';
+    updateUnassignedWarning();
+    return;
+  }
+
+  container.innerHTML = lines.map((line, i) => {
+    const char = characters.find(c => c.id === line.characterId);
+    const borderColor = char ? char.color : "#E2DFD9";
+    const charOptions = characters.map(c =>
+      `<option value="${c.id}" ${line.characterId === c.id ? "selected" : ""}>${c.name}</option>`
+    ).join("");
+
+    return `
+      <div class="line-row" id="line-row-${i}">
+        <div class="line-text"
+             contenteditable="true"
+             style="border-left-color: ${borderColor}"
+             onblur="updateLineText(${i}, this.textContent.trim())"
+        >${escapeHtml(line.text)}</div>
+        <select onchange="assignCharacter(${i}, this.value)">
+          <option value="">— who said this? —</option>
+          ${charOptions}
+        </select>
+        <button class="line-delete" onclick="deleteLine(${i})" title="Remove line">×</button>
+      </div>
+    `;
+  }).join("");
+
+  updateUnassignedWarning();
+}
+
+// ── Update line text from contenteditable ──
+function updateLineText(index, text) {
+  if (lines[index]) lines[index].text = text;
+}
+
+// ── Assign character to line ──
+function assignCharacter(index, characterId) {
+  lines[index].characterId = characterId;
+  const char = characters.find(c => c.id === characterId);
+  const lineText = document.querySelector(`#line-row-${index} .line-text`);
+  if (lineText) lineText.style.borderLeftColor = char ? char.color : "#E2DFD9";
+  updateUnassignedWarning();
+}
+
+// ── Delete line ──
+function deleteLine(index) {
+  lines.splice(index, 1);
+  renderLines();
+}
+
+// ── Add blank line ──
+function addBlankLine() {
+  lines.push({ text: "", characterId: "" });
+  renderLines();
+  // Focus the new line
+  const allRows = document.querySelectorAll('.line-text');
+  if (allRows.length) allRows[allRows.length - 1].focus();
+}
+
+// ── Unassigned warning ──
+function updateUnassignedWarning() {
+  const unassigned = lines.filter(l => !l.characterId).length;
+  const badge = document.getElementById("unassignedWarn");
+  if (unassigned > 0) {
+    badge.textContent = `⚠ ${unassigned} unassigned`;
+    badge.classList.add("show");
+  } else {
+    badge.classList.remove("show");
+  }
+}
+
+// ── Clean up with Claude (via analyze Cloud Function) ──
+async function cleanWithClaude() {
+  const raw = document.getElementById("rawConvo").value.trim();
+  if (!raw) {
+    showStatus("cleanStatus", "Paste a convo first, then clean it.", "error");
+    return;
+  }
+
+  const btn = document.getElementById("cleanBtn");
+  btn.disabled = true;
+  btn.classList.add("spinning");
+  showStatus("cleanStatus", "Claude is cleaning up the convo…", "info");
+
+  const characterList = characters.map(c => `${c.name} (id: ${c.id})`).join(", ");
+
+  try {
+    const response = await fetch(FUNCTION_URL, {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `You are helping clean up a conversation for a short social media video (target: 30-60 seconds of dialogue, roughly 6-12 lines max).
+
+The ToolSpark team characters are: ${characterList}
+
+Raw convo to clean up:
+${raw}
+
+Instructions:
+- Trim to the funniest or most compelling 6-12 lines
+- Fix any typos or formatting issues
+- Keep the natural voice of each speaker — do NOT make it formal
+- Map any name variations to the correct character (e.g. "CEO GPT" → COO, "Claude" → Nemo or Skippy depending on context, "Me" or "I" → coena)
+- Return ONLY the cleaned convo in this exact format, one line per row, nothing else:
+CharacterName: message text
+
+Do not add any explanation, preamble, or commentary. Just the lines.`
+        }],
+        _meta: { tool: "convoflip" }
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const cleaned = data.content.map(b => b.text || "").join("").trim();
+    document.getElementById("rawConvo").value = cleaned;
+    showStatus("cleanStatus", "Cleaned! Parse the lines now to assign characters.", "success");
+
+  } catch(e) {
+    showStatus("cleanStatus", "Claude couldn't connect. Check your connection.", "error");
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("spinning");
+  }
+}
+
+// ── Save script to Firestore ──
+async function saveScript() {
+  // Flush any active contenteditable edits
+  document.querySelectorAll('.line-text').forEach((el, i) => {
+    if (lines[i]) lines[i].text = el.textContent.trim();
+  });
+
+  const title = document.getElementById("videoTitle").value.trim();
+  const style = document.querySelector('input[name="videoStyle"]:checked')?.value;
+
+  if (!title) { showStatus("saveStatus", "Add a title before saving.", "error"); return; }
+  if (!style) { showStatus("saveStatus", "Pick a video style before saving.", "error"); return; }
+  if (lines.length === 0) { showStatus("saveStatus", "Parse some lines before saving.", "error"); return; }
+
+  const unassigned = lines.filter(l => !l.characterId).length;
+  if (unassigned > 0) {
+    showStatus("saveStatus", `${unassigned} line(s) still need a character assigned.`, "error");
+    return;
+  }
+
+  const emptyLines = lines.filter(l => !l.text.trim()).length;
+  if (emptyLines > 0) {
+    showStatus("saveStatus", `${emptyLines} line(s) have no text — fill them in or delete them.`, "error");
+    return;
+  }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.classList.add("spinning");
+  showStatus("saveStatus", "Saving…", "info");
+
+  try {
+    const docRef = await db.collection("scripts").add({
+      title,
+      style,
+      lines,
+      status: "draft",
+      createdBy: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    showStatus("saveStatus", `✅ Saved as draft.`, "success");
+    const pl = document.getElementById('preview-link');
+    pl.href = `convo-preview.html?id=${docRef.id}`;
+    pl.style.display = 'inline-block';
+
+    setTimeout(() => {
+      document.getElementById("videoTitle").value = "";
+      document.querySelectorAll('input[name="videoStyle"]').forEach(r => r.checked = false);
+      document.querySelectorAll(".style-option").forEach(el => el.classList.remove("selected"));
+      document.getElementById("rawConvo").value = "";
+      lines = [];
+      renderLines();
+      showStatus("saveStatus", "", "");
+      document.getElementById('preview-link').style.display = 'none';
+    }, 3000);
+
+  } catch(e) {
+    showStatus("saveStatus", "Save failed — check Firestore connection.", "error");
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("spinning");
+  }
+}
+
+// ── Helpers ──
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "status-bar" + (msg ? ` show ${type}` : "");
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+</script>
+</body>
+</html>

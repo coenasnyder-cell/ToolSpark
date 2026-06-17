@@ -552,6 +552,17 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // CONVOFLIP — characters + scripts (admin content tool)
+    match /characters/{charId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /scripts/{scriptId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
     // SOCIAL SCHEDULER (31-day post planner — one doc per user, keyed by uid)
     match /social_scheduler/{userId} {
       allow read, write: if isActive() && isOwner(userId);

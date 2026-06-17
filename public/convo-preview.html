@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConvoFlip Preview — ToolSpark</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface-2: #1E1E1E;
+    --border: #2C2C2C;
+    --text: #F0EDE6;
+    --text-2: #8A8780;
+    --text-3: #4E4C49;
+    --spark: #E85D26;
+    --radius: 10px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
+
+  /* ── Full-screen layout ── */
+  .app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* ── Header ── */
+  .header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 54px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--text-2);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--spark); }
+
+  .divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+
+  .script-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .style-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+  }
+
+  .header-right { flex-shrink: 0; }
+
+  /* ── Card viewport ── */
+  .card-viewport {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  /* The outer wrapper takes up exactly the scaled size */
+  #card-outer {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* The inner div is the actual 1080×1920 card, scaled via transform */
+  #card-inner {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1080px;
+    height: 1920px;
+    transform-origin: top left;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.9);
+  }
+
+  /* ── Controls ── */
+  .controls {
+    flex-shrink: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 14px;
+    height: 34px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover:not(:disabled) { color: var(--text); border-color: #4A4A4A; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-2);
+    min-width: 52px;
+    text-align: center;
+  }
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0 18px;
+    height: 38px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-outline { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+  .btn-outline:hover:not(:disabled) { color: var(--spark); border-color: var(--spark); }
+  .btn-spark { background: var(--spark); color: white; }
+  .btn-spark:hover:not(:disabled) { background: #B34218; }
+
+  .key-hint { text-align: center; font-size: 11px; color: var(--text-3); padding: 0 0 8px; }
+  kbd { display: inline-block; padding: 1px 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 10px; font-family: monospace; color: var(--text-3); }
+
+  /* ── Export overlay ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    z-index: 999;
+  }
+  .overlay.show { display: flex; }
+  .overlay-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .overlay-sub { font-size: 13px; color: var(--text-2); min-height: 18px; }
+  .progress-track { width: 260px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--spark); border-radius: 2px; transition: width 0.2s; width: 0%; }
+
+  /* ── Loading / Error ── */
+  .fullscreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .fullscreen h2 { font-size: 18px; color: var(--text); }
+  .fullscreen p { font-size: 13px; color: var(--text-2); text-align: center; max-width: 320px; }
+  .fullscreen a { font-size: 13px; font-weight: 600; color: var(--spark); text-decoration: none; margin-top: 4px; }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--spark);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #app-main { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="fullscreen" id="loading-screen">
+  <div class="spinner"></div>
+  <p>Loading script…</p>
+</div>
+
+<!-- Error -->
+<div class="fullscreen" id="error-screen" style="display:none;">
+  <div style="font-size:2rem;">⚠️</div>
+  <h2 id="error-title">Something went wrong</h2>
+  <p id="error-msg"></p>
+  <a href="admindashboard.html">← Back to Dashboard</a>
+</div>
+
+<!-- App -->
+<div class="app" id="app-main">
+
+  <header class="header">
+    <div class="header-left">
+      <a href="convoflip.html" class="back-link">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        ConvoFlip
+      </a>
+      <div class="divider"></div>
+      <div class="script-title" id="script-title"></div>
+      <div class="style-badge" id="style-badge"></div>
+    </div>
+    <div class="header-right">
+      <a href="admindashboard.html" class="back-link">Dashboard →</a>
+    </div>
+  </header>
+
+  <div class="card-viewport">
+    <div id="card-outer">
+      <div id="card-inner"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="nav-row">
+      <button class="nav-btn" id="prev-btn" onclick="goPrev()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        Prev
+      </button>
+      <span class="counter" id="counter">— / —</span>
+      <button class="nav-btn" id="next-btn" onclick="goNext()">
+        Next
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-outline" id="btn-one" onclick="exportCurrent()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Save this card
+      </button>
+      <button class="btn btn-spark" id="btn-all" onclick="exportAll()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export all as ZIP
+      </button>
+    </div>
+    <div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
+  </div>
+
+</div>
+
+<!-- Export progress overlay -->
+<div class="overlay" id="export-overlay">
+  <div class="spinner" style="border-top-color:white;"></div>
+  <div class="overlay-title">Generating images…</div>
+  <div class="overlay-sub" id="overlay-sub"></div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- Off-screen export canvas — must stay in DOM (not display:none), canvas.toBlob() reads internal buffer -->
+<canvas id="export-canvas" width="1080" height="1920"
+  style="position:fixed;left:-1200px;top:0;pointer-events:none;"></canvas>
+
+<script>
+// ── Firebase ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+  authDomain: "toolspark-2d62d.firebaseapp.com",
+  projectId: "toolspark-2d62d",
+  storageBucket: "toolspark-2d62d.firebasestorage.app",
+  messagingSenderId: "82966513396",
+  appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+};
+firebase.initializeApp(firebaseConfig);
+try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ── State ──
+let scriptDoc = null;
+let charMap   = {};
+let lines     = [];
+let idx       = 0;
+const scriptId = new URLSearchParams(location.search).get('id');
+
+// ── Auth gate ──
+auth.onAuthStateChanged(async user => {
+  if (!user) { location.href = 'signon.html'; return; }
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    if ((snap.exists ? snap.data().userRole : '') !== 'admin') {
+      location.href = 'dashboard.html'; return;
+    }
+  } catch(e) { location.href = 'signon.html'; return; }
+
+  if (!scriptId) { showError('No script ID', 'Open this page with ?id=YOUR_SCRIPT_ID in the URL.'); return; }
+  loadData();
+});
+
+// ── Load script + characters ──
+async function loadData() {
+  try {
+    const [sSnap, cSnap] = await Promise.all([
+      db.collection('scripts').doc(scriptId).get(),
+      db.collection('characters').where('active', '==', true).get()
+    ]);
+
+    if (!sSnap.exists) { showError('Script not found', `No script with ID "${scriptId}" exists.`); return; }
+
+    scriptDoc = { id: sSnap.id, ...sSnap.data() };
+    lines     = scriptDoc.lines || [];
+    cSnap.docs.forEach(d => { charMap[d.id] = { id: d.id, ...d.data() }; });
+
+    document.getElementById('script-title').textContent = scriptDoc.title || 'Untitled';
+    document.getElementById('style-badge').textContent  = scriptDoc.style === 'caption' ? '📝 Caption' : '💬 Bubble';
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('app-main').style.display = 'flex';
+
+    updateCounter();
+    renderCard();
+    updateScale();
+  } catch(e) {
+    showError('Load failed', e.message);
+  }
+}
+
+// ── Character lookup with fallback ──
+function getChar(cid) {
+  return charMap[cid] || { name: 'Unknown', color: '#666666', bubblePosition: 'left', avatar: '' };
+}
+
+// ── HTML preview card ──
+function renderCard() {
+  const line = lines[idx];
+  if (!line) return;
+  document.getElementById('card-inner').innerHTML = buildCardHtml(line, getChar(line.characterId), scriptDoc.style);
+}
+
+function buildCardHtml(line, char, style) {
+  const BASE = `width:1080px;height:1920px;background:#000;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;padding:100px 80px;`;
+  if (style === 'caption') {
+    return `<div style="${BASE}align-items:center;justify-content:center;text-align:center;">
+      <div style="width:120px;height:4px;background:${char.color};border-radius:2px;margin-bottom:36px;"></div>
+      <div style="color:${char.color};font-size:32px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:32px;">${char.name}</div>
+      <div style="color:#fff;font-size:52px;font-weight:800;line-height:1.35;max-width:920px;">${esc(line.text)}</div>
+    </div>`;
+  }
+  const right = char.bubblePosition === 'right';
+  return `<div style="${BASE}align-items:${right ? 'flex-end' : 'flex-start'};justify-content:center;">
+    <div style="color:${char.color};font-size:30px;font-weight:700;margin-bottom:18px;">${right ? `${esc(char.name)} ${char.avatar||''}` : `${char.avatar||''} ${esc(char.name)}`}</div>
+    <div style="background:${char.color};color:#fff;padding:44px 52px;border-radius:${right ? '40px 40px 10px 40px' : '40px 40px 40px 10px'};font-size:52px;font-weight:700;line-height:1.35;max-width:900px;word-break:break-word;text-align:${right ? 'right' : 'left'};">${esc(line.text)}</div>
+  </div>`;
+}
+
+// ── Navigation ──
+function goPrev() { if (idx > 0) { idx--; renderCard(); updateCounter(); } }
+function goNext() { if (idx < lines.length - 1) { idx++; renderCard(); updateCounter(); } }
+
+function updateCounter() {
+  document.getElementById('counter').textContent = `${idx + 1} / ${lines.length}`;
+  document.getElementById('prev-btn').disabled = idx === 0;
+  document.getElementById('next-btn').disabled = idx === lines.length - 1;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  goPrev();
+  if (e.key === 'ArrowRight') goNext();
+});
+
+// ── Scale preview to fit viewport ──
+function updateScale() {
+  const vp    = document.querySelector('.card-viewport');
+  const outer = document.getElementById('card-outer');
+  const inner = document.getElementById('card-inner');
+  if (!vp || !outer || !inner) return;
+  const pad   = 40;
+  const scale = Math.min((vp.offsetWidth - pad) / 1080, (vp.offsetHeight - pad) / 1920);
+  outer.style.width  = Math.round(1080 * scale) + 'px';
+  outer.style.height = Math.round(1920 * scale) + 'px';
+  inner.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', updateScale);
+
+// ─────────────────────────────────────────────
+// CANVAS EXPORT — draws direct to Canvas 2D API
+// No html2canvas: more reliable, no DOM quirks.
+// Canvas.toBlob() reads the internal pixel buffer
+// regardless of whether the canvas is on-screen.
+// ─────────────────────────────────────────────
+const FONT = `'Inter', Arial, sans-serif`;
+
+function drawCard(canvas, line, char, style) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 1080, 1920);
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, 1080, 1920);
+  if (style === 'caption') drawCaption(ctx, line, char);
+  else drawBubble(ctx, line, char);
+}
+
+function drawBubble(ctx, line, char) {
+  const W = 1080, H = 1920;
+  const PADX = 80;
+  const isRight = char.bubblePosition === 'right';
+  const MAX_CONTENT_W = 796; // 900 - 2*52
+  const FS = 52, NFS = 30;
+  const BPX = 52, BPY = 44;
+  const LH = FS * 1.35;
+  const NAME_GAP = 18;
+
+  ctx.font = `700 ${FS}px ${FONT}`;
+  const wrapped = wrapText(ctx, line.text, MAX_CONTENT_W);
+  const textH   = wrapped.length * LH;
+  const widest  = Math.max(...wrapped.map(l => ctx.measureText(l).width));
+  const bubbleW = Math.min(900, widest + BPX * 2 + 8);
+  const bubbleH = textH + BPY * 2;
+  const totalH  = NFS + NAME_GAP + bubbleH;
+  const sy      = (H - totalH) / 2;
+
+  // Name label
+  const nameStr = isRight ? `${char.name} ${char.avatar || ''}`.trim() : `${char.avatar || ''} ${char.name}`.trim();
+  ctx.font      = `700 ${NFS}px ${FONT}`;
+  ctx.fillStyle = char.color;
+  ctx.textAlign = isRight ? 'right' : 'left';
+  ctx.fillText(nameStr, isRight ? W - PADX : PADX, sy + NFS);
+
+  // Bubble
+  const bx = isRight ? W - PADX - bubbleW : PADX;
+  const by = sy + NFS + NAME_GAP;
+  ctx.fillStyle = char.color;
+  rrPath(ctx, bx, by, bubbleW, bubbleH, isRight ? [36,36,10,36] : [36,36,36,10]);
+  ctx.fill();
+
+  // Bubble text
+  ctx.font      = `700 ${FS}px ${FONT}`;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = isRight ? 'right' : 'left';
+  const tx = isRight ? bx + bubbleW - BPX : bx + BPX;
+  wrapped.forEach((wl, i) => ctx.fillText(wl, tx, by + BPY + FS + i * LH));
+}
+
+function drawCaption(ctx, line, char) {
+  const W = 1080, H = 1920;
+  const PADX = 80;
+  const FS = 52, NFS = 32;
+  const LW = 120, LH_PX = 4;
+  const G1 = 36, G2 = 32;
+  const TLH = FS * 1.35;
+
+  ctx.font = `800 ${FS}px ${FONT}`;
+  const wrapped  = wrapText(ctx, line.text, W - PADX * 2);
+  const textBlockH = wrapped.length * TLH;
+  const totalH   = LH_PX + G1 + NFS + G2 + textBlockH;
+  const sy       = (H - totalH) / 2;
+
+  // Accent line
+  ctx.fillStyle = char.color;
+  rrPath(ctx, (W - LW) / 2, sy, LW, LH_PX, [2,2,2,2]);
+  ctx.fill();
+
+  // Name
+  ctx.font      = `700 ${NFS}px ${FONT}`;
+  ctx.fillStyle = char.color;
+  ctx.textAlign = 'center';
+  ctx.fillText(char.name.toUpperCase(), W / 2, sy + LH_PX + G1 + NFS);
+
+  // Dialogue
+  ctx.font      = `800 ${FS}px ${FONT}`;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  wrapped.forEach((wl, i) => ctx.fillText(wl, W / 2, sy + LH_PX + G1 + NFS + G2 + FS + i * TLH));
+}
+
+// Wrap text to fit maxWidth using the current ctx.font
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const out   = [];
+  let cur     = '';
+  for (const w of words) {
+    const test = cur ? `${cur} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && cur) { out.push(cur); cur = w; }
+    else cur = test;
+  }
+  if (cur) out.push(cur);
+  return out.length ? out : [''];
+}
+
+// Rounded rect path helper: radii = [tl, tr, br, bl]
+function rrPath(ctx, x, y, w, h, [tl, tr, br, bl]) {
+  ctx.beginPath();
+  ctx.moveTo(x + tl, y);
+  ctx.lineTo(x + w - tr, y);
+  ctx.quadraticCurveTo(x + w, y,     x + w, y + tr);
+  ctx.lineTo(x + w, y + h - br);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+  ctx.lineTo(x + bl, y + h);
+  ctx.quadraticCurveTo(x, y + h,     x, y + h - bl);
+  ctx.lineTo(x, y + tl);
+  ctx.quadraticCurveTo(x, y,         x + tl, y);
+  ctx.closePath();
+}
+
+// ── Export single card ──
+async function exportCurrent() {
+  await document.fonts.ready;
+  const line = lines[idx];
+  const char = getChar(line.characterId);
+  const canvas = document.getElementById('export-canvas');
+  drawCard(canvas, line, char, scriptDoc.style);
+  canvas.toBlob(blob => {
+    const name = `${pad2(idx + 1)}-${char.name.toLowerCase().replace(/\s+/g,'-')}.png`;
+    saveAs(blob, name);
+  }, 'image/png');
+}
+
+// ── Export all as ZIP ──
+async function exportAll() {
+  await document.fonts.ready;
+
+  const overlay = document.getElementById('export-overlay');
+  const sub     = document.getElementById('overlay-sub');
+  const fill    = document.getElementById('progress-fill');
+  const btnAll  = document.getElementById('btn-all');
+  const btnOne  = document.getElementById('btn-one');
+
+  overlay.classList.add('show');
+  btnAll.disabled = btnOne.disabled = true;
+
+  const zip    = new JSZip();
+  const canvas = document.getElementById('export-canvas');
+  const total  = lines.length;
+
+  for (let i = 0; i < total; i++) {
+    const line = lines[i];
+    const char = getChar(line.characterId);
+
+    sub.textContent      = `Card ${i + 1} of ${total} — ${char.name}`;
+    fill.style.width     = `${(i / total) * 100}%`;
+
+    drawCard(canvas, line, char, scriptDoc.style);
+    await tick(60); // let canvas internal buffer settle
+
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const name = `${pad2(i + 1)}-${char.name.toLowerCase().replace(/\s+/g,'-')}.png`;
+    zip.file(name, blob);
+  }
+
+  fill.style.width = '100%';
+  sub.textContent  = 'Packing zip…';
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const slug    = (scriptDoc.title || 'script').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  saveAs(content, `${slug}.zip`);
+
+  overlay.classList.remove('show');
+  btnAll.disabled = btnOne.disabled = false;
+}
+
+// ── Helpers ──
+const esc     = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pad2    = n => String(n).padStart(2, '0');
+const tick    = ms => new Promise(r => setTimeout(r, ms));
+
+function showError(title, msg) {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('error-title').textContent = title;
+  document.getElementById('error-msg').textContent   = msg || '';
+  document.getElementById('error-screen').style.display = 'flex';
+}
+</script>
+</body>
+</html>
