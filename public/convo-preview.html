@@ -351,6 +351,11 @@
         Export all as ZIP
       </button>
     </div>
+    <div style="display:flex;justify-content:center;padding:0 20px 8px;">
+      <a class="btn btn-outline" id="btn-animate" href="#" style="text-decoration:none;">
+        ▶ Animate
+      </a>
+    </div>
     <div class="key-hint"><kbd>←</kbd> <kbd>→</kbd> to navigate</div>
   </div>
 
@@ -419,7 +424,10 @@ async function loadData() {
     cSnap.docs.forEach(d => { charMap[d.id] = { id: d.id, ...d.data() }; });
 
     document.getElementById('script-title').textContent = scriptDoc.title || 'Untitled';
-    document.getElementById('style-badge').textContent  = scriptDoc.style === 'caption' ? '📝 Caption' : '💬 Bubble';
+    document.getElementById('btn-animate').href = `convo-animate.html?id=${scriptId}`;
+    document.getElementById('style-badge').textContent  =
+      scriptDoc.style === 'caption'   ? '📝 Caption'  :
+      scriptDoc.style === 'claude-ui' ? '🤖 Claude UI' : '💬 Bubble';
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app-main').style.display = 'flex';
@@ -445,7 +453,26 @@ function renderCard() {
   document.getElementById('card-inner').innerHTML = buildCardHtml(line, getChar(line.characterId), scriptDoc.style);
 }
 
+function buildClaudeUiHtml(line, char) {
+  const isHuman = char.bubblePosition === 'right';
+  const BG = '#1A1A1A';
+  const BASE = `width:1080px;height:1920px;background:${BG};box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;padding:80px 80px 260px;`;
+  if (isHuman) {
+    return `<div style="${BASE}align-items:flex-end;justify-content:center;">
+      <div style="color:${char.color};font-size:24px;font-weight:700;letter-spacing:0.12em;margin-bottom:14px;">${char.name.toUpperCase()}</div>
+      <div style="background:#2D2D2D;color:#fff;padding:44px 52px;border-radius:24px 24px 8px 24px;font-size:48px;font-weight:400;line-height:1.45;max-width:864px;word-break:break-word;">${esc(line.text)}</div>
+    </div>`;
+  }
+  return `<div style="${BASE}align-items:flex-start;justify-content:center;">
+    <div style="border-left:5px solid ${char.color};padding-left:32px;max-width:864px;">
+      <div style="color:${char.color};font-size:24px;font-weight:700;letter-spacing:0.12em;margin-bottom:20px;">${char.name.toUpperCase()}</div>
+      <div style="color:#fff;font-size:48px;font-weight:400;line-height:1.45;word-break:break-word;">${esc(line.text)}</div>
+    </div>
+  </div>`;
+}
+
 function buildCardHtml(line, char, style) {
+  if (style === 'claude-ui') return buildClaudeUiHtml(line, char);
   // padding: top=80 bottom=260 shifts content to sit at ~45% from top (optical center for 9:16)
   const BASE = `width:1080px;height:1920px;background:#000;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;padding:80px 80px 260px;`;
   if (style === 'caption') {
@@ -540,7 +567,8 @@ function drawCard(canvas, line, char, style) {
   ctx.clearRect(0, 0, 1080, 1920);
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, 1080, 1920);
-  if (style === 'caption') drawCaption(ctx, line, char);
+  if (style === 'caption')   drawCaption(ctx, line, char);
+  else if (style === 'claude-ui') drawClaudeUi(ctx, line, char);
   else drawBubble(ctx, line, char);
 }
 
@@ -617,6 +645,81 @@ function drawCaption(ctx, line, char) {
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   wrapped.forEach((wl, i) => ctx.fillText(wl, W / 2, sy + LH_PX + G1 + NFS + G2 + FS + i * TLH));
+}
+
+function drawClaudeUi(ctx, line, char) {
+  const W = 1080, H = 1920;
+  const PADX = 80;
+  const isHuman = char.bubblePosition === 'right';
+  const FS = 48, NFS = 24;
+  const LH = FS * 1.45;
+  const NAME_GAP = 20;
+
+  // Dark background (overrides the black fill in drawCard)
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(0, 0, W, H);
+
+  if (isHuman) {
+    const BPX = 52, BPY = 44;
+    const MAX_BUBBLE_W = 864;
+    const MAX_TEXT_W = MAX_BUBBLE_W - BPX * 2;
+
+    ctx.font = `400 ${FS}px ${FONT}`;
+    const wrapped = wrapText(ctx, line.text, MAX_TEXT_W);
+    const textH   = wrapped.length * LH;
+    const widest  = Math.max(...wrapped.map(l => ctx.measureText(l).width));
+    const bubbleW = Math.min(MAX_BUBBLE_W, widest + BPX * 2 + 8);
+    const bubbleH = textH + BPY * 2;
+    const totalH  = NFS + NAME_GAP + bubbleH;
+    const sy      = Math.max(80, (H - totalH) / 2 - 120);
+
+    // Name (right-aligned)
+    ctx.font      = `700 ${NFS}px ${FONT}`;
+    ctx.fillStyle = char.color;
+    ctx.textAlign = 'right';
+    ctx.fillText(char.name.toUpperCase(), W - PADX, sy + NFS);
+
+    // Bubble
+    const bx = W - PADX - bubbleW;
+    const by = sy + NFS + NAME_GAP;
+    ctx.fillStyle = '#2D2D2D';
+    rrPath(ctx, bx, by, bubbleW, bubbleH, [24, 24, 8, 24]);
+    ctx.fill();
+
+    // Text (left-aligned inside bubble for readability)
+    ctx.font      = `400 ${FS}px ${FONT}`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'left';
+    wrapped.forEach((wl, i) => ctx.fillText(wl, bx + BPX, by + BPY + FS + i * LH));
+
+  } else {
+    const BORDER_W = 5;
+    const BORDER_GAP = 32;
+    const MAX_TEXT_W = W - PADX - BORDER_W - BORDER_GAP - PADX;
+
+    ctx.font = `400 ${FS}px ${FONT}`;
+    const wrapped = wrapText(ctx, line.text, MAX_TEXT_W);
+    const textH  = wrapped.length * LH;
+    const totalH = NFS + NAME_GAP + textH;
+    const sy     = Math.max(80, (H - totalH) / 2 - 120);
+
+    // Left border
+    ctx.fillStyle = char.color;
+    ctx.fillRect(PADX, sy, BORDER_W, NFS + NAME_GAP + textH + 12);
+
+    const textX = PADX + BORDER_W + BORDER_GAP;
+
+    // Name
+    ctx.font      = `700 ${NFS}px ${FONT}`;
+    ctx.fillStyle = char.color;
+    ctx.textAlign = 'left';
+    ctx.fillText(char.name.toUpperCase(), textX, sy + NFS);
+
+    // Text
+    ctx.font      = `400 ${FS}px ${FONT}`;
+    ctx.fillStyle = '#FFFFFF';
+    wrapped.forEach((wl, i) => ctx.fillText(wl, textX, sy + NFS + NAME_GAP + FS + i * LH));
+  }
 }
 
 // Wrap text to fit maxWidth using the current ctx.font

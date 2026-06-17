@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConvoFlip — Animate</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111;
+    color: #e8e8e8;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Loading ── */
+  #loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 15px;
+    color: #555;
+  }
+
+  /* ── Controls bar ── */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #191919;
+    border-bottom: 1px solid #242424;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .back-link {
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .15s;
+  }
+  .back-link:hover { color: #aaa; }
+
+  .divider-v {
+    width: 1px;
+    height: 20px;
+    background: #2a2a2a;
+    flex-shrink: 0;
+  }
+
+  .script-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ccc;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ctrl-btn {
+    background: #E85D26;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s;
+    flex-shrink: 0;
+  }
+  .ctrl-btn:hover { opacity: .85; }
+  .ctrl-btn:disabled { opacity: .4; cursor: default; }
+  .ctrl-btn.ghost {
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+  }
+  .ctrl-btn.ghost:hover { border-color: #555; color: #ddd; }
+
+  .speed-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .speed-row label {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+  }
+  input[type=range] {
+    width: 90px;
+    accent-color: #E85D26;
+    cursor: pointer;
+  }
+  #speed-val {
+    font-size: 12px;
+    color: #777;
+    min-width: 28px;
+  }
+
+  /* ── Chat container ── */
+  #app {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 48px 20px 120px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-col {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ── Message animation ── */
+  .msg {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .msg.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Claude UI layout ── */
+  .claude-assistant {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 560px;
+  }
+  .claude-assistant .msg-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin-bottom: 10px;
+  }
+  .claude-assistant .msg-body {
+    border-left: 3px solid currentColor;
+    padding-left: 18px;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #dedede;
+  }
+
+  .claude-human {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-self: flex-end;
+    max-width: 560px;
+  }
+  .claude-human .msg-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin-bottom: 10px;
+  }
+  .claude-human .msg-body {
+    background: #252525;
+    color: #dedede;
+    padding: 14px 18px;
+    border-radius: 18px 18px 4px 18px;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  /* ── Bubble layout ── */
+  .bubble-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 560px;
+  }
+  .bubble-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-self: flex-end;
+    max-width: 560px;
+  }
+  .bubble-left .msg-name,
+  .bubble-right .msg-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .bubble-left .msg-body,
+  .bubble-right .msg-body {
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .bubble-left .msg-body {
+    border-radius: 18px 18px 18px 4px;
+  }
+  .bubble-right .msg-body {
+    border-radius: 18px 18px 4px 18px;
+  }
+
+  /* ── Empty scroll anchor ── */
+  #scroll-anchor { height: 1px; }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">Loading…</div>
+
+<div id="app">
+  <div class="controls">
+    <a class="back-link" id="back-link" href="#">← Back</a>
+    <div class="divider-v"></div>
+    <div class="script-title" id="script-title"></div>
+    <button class="ctrl-btn ghost" id="restart-btn" onclick="restart()">⟳ Restart</button>
+    <button class="ctrl-btn" id="play-btn" onclick="play()">▶ Play</button>
+    <div class="speed-row">
+      <label for="speed-slider">Speed</label>
+      <input type="range" id="speed-slider" min="0.5" max="3" step="0.25" value="1.5"
+             oninput="document.getElementById('speed-val').textContent=this.value+'s'">
+      <span id="speed-val">1.5s</span>
+    </div>
+  </div>
+
+  <div class="chat-scroll" id="chat-scroll">
+    <div class="chat-col" id="chat-col"></div>
+    <div id="scroll-anchor"></div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+  authDomain: "toolspark-2d62d.firebaseapp.com",
+  projectId: "toolspark-2d62d",
+  storageBucket: "toolspark-2d62d.firebasestorage.app",
+  messagingSenderId: "82966513396",
+  appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+};
+firebase.initializeApp(firebaseConfig);
+try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+const scriptId = new URLSearchParams(location.search).get('id');
+let scriptDoc  = null;
+let charMap    = {};
+let lines      = [];
+let playing    = false;
+let timer      = null;
+
+// ── Auth gate ──
+auth.onAuthStateChanged(async user => {
+  if (!user) { location.href = 'signon.html'; return; }
+  try {
+    const snap = await db.collection('users').doc(user.uid).get();
+    if ((snap.exists ? snap.data().userRole : '') !== 'admin') {
+      location.href = 'dashboard.html'; return;
+    }
+  } catch(e) { location.href = 'signon.html'; return; }
+
+  if (!scriptId) {
+    document.getElementById('loading-screen').textContent = 'No script ID in URL.';
+    return;
+  }
+  loadData();
+});
+
+// ── Load ──
+async function loadData() {
+  const [sSnap, cSnap] = await Promise.all([
+    db.collection('scripts').doc(scriptId).get(),
+    db.collection('characters').where('active', '==', true).get()
+  ]);
+
+  if (!sSnap.exists) {
+    document.getElementById('loading-screen').textContent = 'Script not found.';
+    return;
+  }
+
+  scriptDoc = { id: sSnap.id, ...sSnap.data() };
+  lines     = scriptDoc.lines || [];
+  cSnap.docs.forEach(d => { charMap[d.id] = { id: d.id, ...d.data() }; });
+
+  document.getElementById('script-title').textContent = scriptDoc.title || 'Untitled';
+  document.getElementById('back-link').href = `convo-preview.html?id=${scriptId}`;
+
+  buildMessages();
+
+  document.getElementById('loading-screen').style.display = 'none';
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  app.style.flexDirection = 'column';
+}
+
+// ── Build all message elements (hidden) ──
+function buildMessages() {
+  const col = document.getElementById('chat-col');
+  col.innerHTML = '';
+
+  const style = scriptDoc.style || 'bubble';
+
+  lines.forEach((line, i) => {
+    const char = charMap[line.characterId] || {};
+    const isHuman = char.bubblePosition === 'right';
+
+    const el = document.createElement('div');
+    el.className = 'msg';
+    el.dataset.idx = i;
+
+    if (style === 'claude-ui' || style === 'caption') {
+      buildClaudeMsg(el, line, char, isHuman);
+    } else {
+      buildBubbleMsg(el, line, char, isHuman);
+    }
+
+    col.appendChild(el);
+  });
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function buildClaudeMsg(el, line, char, isHuman) {
+  const name  = (char.name || 'Unknown').toUpperCase();
+  const color = char.color || '#888';
+  const text  = esc(line.text || '');
+
+  if (isHuman) {
+    el.innerHTML = `
+      <div class="claude-human">
+        <div class="msg-name" style="color:${color};">${name}</div>
+        <div class="msg-body">${text}</div>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="claude-assistant" style="color:${color};">
+        <div class="msg-name">${name}</div>
+        <div class="msg-body">${text}</div>
+      </div>`;
+  }
+}
+
+function buildBubbleMsg(el, line, char, isHuman) {
+  const name  = char.name || 'Unknown';
+  const color = char.color || '#888';
+  const text  = esc(line.text || '');
+  const cls   = isHuman ? 'bubble-right' : 'bubble-left';
+
+  el.innerHTML = `
+    <div class="${cls}">
+      <div class="msg-name" style="color:${color};">${name}</div>
+      <div class="msg-body" style="background:${color};">${text}</div>
+    </div>`;
+}
+
+// ── Playback ──
+function play() {
+  if (playing) {
+    pause();
+    return;
+  }
+
+  const msgs    = [...document.querySelectorAll('.msg')];
+  const visible = msgs.filter(m => m.classList.contains('visible'));
+
+  // If all messages are already visible, restart from beginning
+  if (visible.length === msgs.length) { restart(); return; }
+
+  // Resume from first hidden message
+  const startIdx = visible.length;
+  runFrom(startIdx, msgs);
+}
+
+function runFrom(startIdx, msgs) {
+  if (startIdx >= msgs.length) {
+    setPlayBtn('▶ Play');
+    playing = false;
+    return;
+  }
+
+  playing = true;
+  setPlayBtn('⏸ Pause');
+
+  let i = startIdx;
+  function step() {
+    if (i >= msgs.length) {
+      playing = false;
+      setPlayBtn('▶ Play');
+      return;
+    }
+    msgs[i].classList.add('visible');
+    msgs[i].scrollIntoView({ behavior: 'smooth', block: 'end' });
+    i++;
+
+    const delay = parseFloat(document.getElementById('speed-slider').value) * 1000;
+    timer = setTimeout(step, delay);
+  }
+  step();
+}
+
+function pause() {
+  clearTimeout(timer);
+  playing = false;
+  setPlayBtn('▶ Play');
+}
+
+function restart() {
+  clearTimeout(timer);
+  playing = false;
+  setPlayBtn('▶ Play');
+  document.querySelectorAll('.msg').forEach(m => m.classList.remove('visible'));
+  document.getElementById('chat-scroll').scrollTop = 0;
+}
+
+function setPlayBtn(label) {
+  document.getElementById('play-btn').textContent = label;
+}
+</script>
+</body>
+</html>
