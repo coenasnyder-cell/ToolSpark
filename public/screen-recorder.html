@@ -260,7 +260,7 @@
       <div class="tips">
         <div class="tip"><span>✦</span><span>Open your tool in a separate tab first — select that tab when the screen picker appears.</span></div>
         <div class="tip"><span>✦</span><span>Click Mark Step each time a new screen or action appears.</span></div>
-        <div class="tip"><span>✦</span><span>Chrome saves as MP4 if supported, otherwise WebM. Both work in CapCut.</span></div>
+        <div class="tip"><span>✦</span><span>Records as MP4 when your browser supports it, WebM otherwise — both work in most editors.</span></div>
       </div>
 
     </div>
@@ -958,13 +958,10 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
     previewVideo.muted = true;
     await previewVideo.play();
 
-    // Prefer webm/vp9 — more stable for long recordings than mp4/avc1 in Chrome
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9'
-      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-        ? 'video/webm;codecs=vp8'
-        : 'video/webm';
-    const fileExt = 'webm';
+    const mp4Types  = ['video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
+    const webmTypes = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+    const mimeType  = [...mp4Types, ...webmTypes].find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+    const fileExt   = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
 
     mediaRecorder = new MediaRecorder(recordingStream, {
       mimeType,

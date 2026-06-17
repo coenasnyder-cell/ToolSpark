@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TikTok Script Generator — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --tiktok: #E8415A;
+    --tiktok-dim: rgba(232,65,90,0.1);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+  /* ── MAIN ── */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; }
+  .back-link { display: flex; align-items: center; gap: 6px; color: #9A9488; font-size: 13px; font-weight: 700; text-decoration: none; transition: color 0.15s; letter-spacing: 0.03em; }
+  .back-link:hover { color: var(--gold-light); }
+  .header-divider { width: 1px; height: 20px; background: var(--border-dark); }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #F0EDE6; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .notif-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; text-decoration: none; position: relative; }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
+
+  .page-content { flex: 1; padding: 2rem 2.5rem 4rem; max-width: 780px; width: 100%; }
+
+  /* ── HERO ── */
+  .hero { background: linear-gradient(135deg, #1a0a0f 0%, #0f0c0a 100%); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.5rem; border: 1px solid rgba(232,65,90,0.2); position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(232,65,90,0.12), transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--tiktok); margin-bottom: 8px; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3.5vw, 28px); color: #F2EEE6; line-height: 1.2; margin-bottom: 6px; }
+  .hero-sub { font-size: 13px; color: rgba(240,237,230,0.55); line-height: 1.7; max-width: 480px; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 1.25rem; }
+
+  /* ── FORM FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .field-textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; resize: vertical; min-height: 72px; line-height: 1.6; }
+  .field-textarea:focus { border-color: var(--gold); }
+  .field-textarea::placeholder { color: var(--text3); }
+
+  /* ── CHIP SELECTORS ── */
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 7px 16px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--bg); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .chip:hover { border-color: var(--gold); color: var(--gold); }
+  .chip.selected { background: var(--gold); border-color: var(--gold); color: #0C0B09; }
+
+  /* ── GENERATE BUTTON ── */
+  .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.5rem; }
+  .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+  .generate-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-spinner { width: 16px; height: 16px; border: 2.5px solid rgba(12,11,9,0.25); border-top-color: #0C0B09; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .btn-spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── OUTPUT ── */
+  .output-section { display: none; }
+  .output-section.visible { display: block; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
+  .output-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .output-actions { display: flex; align-items: center; gap: 8px; }
+  .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .action-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .action-btn.copied { border-color: var(--green-light); color: var(--green-light); }
+
+  /* ── SCRIPT LINES ── */
+  .script-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1rem; }
+  .script-line { display: flex; align-items: flex-start; gap: 14px; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  .script-line:last-child { border-bottom: none; }
+  .script-line:hover { background: rgba(201,168,76,0.03); }
+  .line-num { font-size: 11px; font-weight: 900; color: var(--text3); min-width: 20px; margin-top: 3px; letter-spacing: 0.04em; }
+  .line-badge { font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; white-space: nowrap; margin-top: 3px; }
+  .badge-hook { background: var(--tiktok-dim); border: 1px solid rgba(232,65,90,0.25); color: var(--tiktok); }
+  .badge-cta { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .line-text { flex: 1; font-size: 14px; color: var(--text2); line-height: 1.7; }
+  .line-copy { flex-shrink: 0; padding: 4px 12px; border: 1px solid var(--border); border-radius: 100px; background: none; font-family: 'Lato', sans-serif; font-size: 10px; font-weight: 700; color: var(--text3); cursor: pointer; transition: all 0.15s; margin-top: 2px; }
+  .line-copy:hover { border-color: var(--gold); color: var(--gold); }
+  .line-copy.copied { border-color: var(--green-light); color: var(--green-light); }
+
+  /* ── LOADING ── */
+  .loading-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; margin-bottom: 1rem; }
+  .loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 1rem; }
+  .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: bounce 1.2s infinite; }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+  .loading-text { font-size: 13px; color: var(--text3); }
+
+  /* ── TIP BOX ── */
+  .tip-box { background: var(--tiktok-dim); border: 1px solid rgba(232,65,90,0.2); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; margin-top: 1.25rem; }
+  .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .tip-text strong { color: var(--tiktok); }
+
+  /* ── MOBILE NAV ── */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 90; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); justify-content: space-around; }
+  .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: #6B6560; text-decoration: none; padding: 4px 12px; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.15s; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .logo-tag, .nav-item span, .user-info, .sidebar-footer { display: none; }
+    .sidebar-logo { justify-content: center; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main-wrap { margin-left: 60px; }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .logo-tag, .nav-item span, .user-info { display: block; }
+    .sidebar-footer { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; height: 54px; }
+    .page-content { padding: 1rem 1rem 80px; }
+    .mobile-bottom-nav { display: flex; }
+    .hero { padding: 1.25rem; }
+    .chip-row { gap: 6px; }
+    .chip { padding: 6px 12px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="events.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="tools.html" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Tools
+      </a>
+      <div class="header-divider"></div>
+      <div class="header-title">TikTok Script Generator</div>
+    </div>
+    <div class="header-right">
+      <a href="notifications.html" class="notif-btn">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">TikTok · Reels · Shorts</div>
+      <div class="hero-title">Write your script in seconds.</div>
+      <div class="hero-sub">Pick your topic and vibe, and get a punchy, scroll-stopping script — hook included — ready to record.</div>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card">
+      <div class="card-title">Your Video</div>
+
+      <div class="field">
+        <div class="field-label">Topic or idea</div>
+        <textarea class="field-textarea" id="topic" placeholder="e.g. why introverts make great online coaches, 3 signs you need to raise your prices, how I went from zero to 100 clients..."></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Vibe</div>
+        <div class="chip-row" id="vibe-row">
+          <div class="chip selected" data-vibe="general" onclick="selectChip('vibe-row', this)">General</div>
+          <div class="chip" data-vibe="motivational" onclick="selectChip('vibe-row', this)">Motivational</div>
+          <div class="chip" data-vibe="educational" onclick="selectChip('vibe-row', this)">Educational</div>
+          <div class="chip" data-vibe="aesthetic" onclick="selectChip('vibe-row', this)">Aesthetic</div>
+          <div class="chip" data-vibe="lofi" onclick="selectChip('vibe-row', this)">LoFi / Chill</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Script Length</div>
+        <div class="chip-row" id="length-row">
+          <div class="chip selected" data-length="5" onclick="selectChip('length-row', this)">Short (5 lines)</div>
+          <div class="chip" data-length="8" onclick="selectChip('length-row', this)">Medium (8 lines)</div>
+          <div class="chip" data-length="10" onclick="selectChip('length-row', this)">Long (10 lines)</div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generate-btn" onclick="generateScript()">
+        <div class="btn-spinner" id="btn-spinner"></div>
+        <span id="btn-text">Generate Script</span>
+      </button>
+
+      <div class="tip-box">
+        <div class="tip-icon">💡</div>
+        <div class="tip-text"><strong>Hook tip:</strong> Your first line is the most important — it needs to stop the scroll in under 3 seconds. The generator puts your strongest line first.</div>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-section" id="output-section">
+      <div class="output-header">
+        <div class="output-title">Your Script</div>
+        <div class="output-actions">
+          <button class="action-btn" id="copy-all-btn" onclick="copyAll()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy All
+          </button>
+          <button class="action-btn" onclick="generateScript()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            Regenerate
+          </button>
+        </div>
+      </div>
+      <div class="script-card" id="script-card"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item active">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="inbox.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Inbox
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<script>
+  const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  const MODEL = "claude-sonnet-4-6";
+
+  const vibeInstructions = {
+    general:      "engaging and viral — direct, punchy, and relatable to a broad audience",
+    motivational: "inspiring and fast-paced — high energy that fires people up and makes them feel capable",
+    educational:  "educational and informative — teaches something genuinely useful in a simple, digestible way",
+    aesthetic:    "poetic and cinematic — beautiful, emotional, and visually evocative language",
+    lofi:         "slow, reflective, and chill — healing, quiet, inner-peace vibes that feel like a late-night journal entry"
+  };
+
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+
+    const name = user.displayName || user.email || 'Builder';
+    document.getElementById('sidebar-name').textContent = name;
+
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+    } else {
+      av.textContent = (name.charAt(0) || '?').toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists && snap.data().userRole === 'admin') {
+        document.getElementById('admin-nav-link').style.display = 'flex';
+      }
+    } catch(e) {}
+
+    try {
+      const notifSnap = await db.collection('notifications')
+        .where('userId', '==', user.uid).where('read', '==', false).limit(1).get();
+      if (!notifSnap.empty) document.getElementById('notif-dot').style.display = 'block';
+    } catch(e) {}
+  });
+
+  function selectChip(rowId, el) {
+    document.getElementById(rowId).querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function getSelected(rowId, attr) {
+    const el = document.querySelector('#' + rowId + ' .chip.selected');
+    return el ? el.dataset[attr] : null;
+  }
+
+  function buildPrompt(topic, vibe, lines) {
+    const vibeInstr = vibeInstructions[vibe] || vibeInstructions.general;
+    return `Act as a professional viral script writer for TikTok, Instagram Reels, and YouTube Shorts.
+
+Write a complete, high-retention video script about: "${topic}"
+
+The vibe should be: ${vibeInstr}
+
+Rules:
+- Write exactly ${lines} sentences.
+- Put each sentence on its own line — nothing else.
+- Do NOT include scene directions, speaker names, hashtags, or numbering.
+- The very first sentence is the HOOK — it must stop the scroll within 3 seconds. Make it bold, direct, and intriguing.
+- Every sentence should flow naturally when spoken aloud.
+- The final sentence should be a strong call-to-action or memorable closer.
+- No filler phrases like "In this video..." or "Today we're going to..."
+
+Return ONLY the sentences, one per line. No labels, no extra text.`;
+  }
+
+  async function generateScript() {
+    const topic = document.getElementById('topic').value.trim();
+    if (!topic) { document.getElementById('topic').focus(); return; }
+
+    const vibe = getSelected('vibe-row', 'vibe') || 'general';
+    const lines = getSelected('length-row', 'length') || '5';
+
+    const btn = document.getElementById('generate-btn');
+    const spinner = document.getElementById('btn-spinner');
+    const btnText = document.getElementById('btn-text');
+    btn.disabled = true;
+    spinner.classList.add('show');
+    btnText.textContent = 'Writing your script…';
+
+    const outputSection = document.getElementById('output-section');
+    const scriptCard = document.getElementById('script-card');
+    outputSection.classList.add('visible');
+    scriptCard.innerHTML = '<div class="loading-card"><div class="loading-dots"><span></span><span></span><span></span></div><div class="loading-text">Writing your script — this takes about 10 seconds…</div></div>';
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+      const user = auth.currentUser;
+      const token = user ? await user.getIdToken() : '';
+
+      const resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: buildPrompt(topic, vibe, lines) }],
+          _meta: { tool: 'tiktok-script' }
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      const data = await resp.json();
+      const text = data.content.map(function(b) { return b.type === 'text' ? b.text : ''; }).join('');
+
+      const sentences = text.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+
+      if (sentences.length === 0) throw new Error('No script returned');
+
+      renderScript(sentences, parseInt(lines));
+
+    } catch(err) {
+      scriptCard.innerHTML = '<div class="loading-card"><div class="loading-text" style="color:#C4622D;">Something went wrong. Please try again.</div></div>';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('show');
+      btnText.textContent = 'Generate Script';
+    }
+  }
+
+  function renderScript(sentences, totalLines) {
+    const scriptCard = document.getElementById('script-card');
+    scriptCard.innerHTML = sentences.map(function(sentence, i) {
+      const isHook = i === 0;
+      const isCta = i === sentences.length - 1 && sentences.length > 1;
+      const badgeHtml = isHook
+        ? '<span class="line-badge badge-hook">Hook</span>'
+        : (isCta ? '<span class="line-badge badge-cta">CTA</span>' : '');
+
+      return '<div class="script-line">' +
+        '<div class="line-num">' + (i + 1) + '</div>' +
+        (badgeHtml || '') +
+        '<div class="line-text">' + escHtml(sentence) + '</div>' +
+        '<button class="line-copy" onclick="copyLine(this, ' + JSON.stringify(sentence) + ')">Copy</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  function copyLine(btn, text) {
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyAll() {
+    const lines = document.querySelectorAll('.line-text');
+    if (!lines.length) return;
+    const fullScript = Array.from(lines).map(function(el) { return el.textContent; }).join('\n');
+    navigator.clipboard.writeText(fullScript).then(function() {
+      const btn = document.getElementById('copy-all-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy All';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Mobile sidebar
+  document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+  });
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
+</script>
+
+</body>
+</html>

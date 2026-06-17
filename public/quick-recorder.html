@@ -206,7 +206,7 @@
   <div class="tips">
     <div class="tip"><span class="tip-dot">✦</span><span>Open the tool you're recording in a separate tab before clicking Start.</span></div>
     <div class="tip"><span class="tip-dot">✦</span><span>Select that tab when the screen picker appears.</span></div>
-    <div class="tip"><span class="tip-dot">✦</span><span>Recording saves as WebM — works in CapCut and most editors.</span></div>
+    <div class="tip"><span class="tip-dot">✦</span><span>Records as MP4 when your browser supports it, WebM otherwise — both work in most editors.</span></div>
   </div>
 </div>
 
@@ -252,11 +252,10 @@
     secondsElapsed = 0;
     if (downloadUrl) { URL.revokeObjectURL(downloadUrl); downloadUrl = null; }
 
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9'
-      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-        ? 'video/webm;codecs=vp8'
-        : 'video/webm';
+    const mp4Types  = ['video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
+    const webmTypes = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+    const mimeType  = [...mp4Types, ...webmTypes].find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+    const fileExt   = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
 
     mediaRecorder = new MediaRecorder(recordingStream, { mimeType, videoBitsPerSecond: 5_000_000 });
 
@@ -267,13 +266,13 @@
       const blob     = new Blob(recordedChunks, { type: mimeType });
       downloadUrl    = URL.createObjectURL(blob);
       const name     = (document.getElementById('fileName').value.trim() || 'walkthrough').toLowerCase().replace(/\s+/g, '-');
-      const fullName = name + '.webm';
+      const fullName = name + '.' + fileExt;
 
       const dlBtn    = document.getElementById('btnDownload');
       dlBtn.href     = downloadUrl;
       dlBtn.download = fullName;
       dlBtn.classList.add('visible');
-      document.getElementById('mp4-note').style.display = 'block';
+      if (fileExt === 'webm') document.getElementById('mp4-note').style.display = 'block';
 
       document.getElementById('fileInfo').textContent = fullName + ' · ' + fmt(secondsElapsed);
       document.getElementById('fileInfo').classList.add('visible');

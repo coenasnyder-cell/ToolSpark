@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caption + Hashtag Pack — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --purple: #6450C8;
+    --purple-dim: rgba(100,80,200,0.1);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+  /* ── MAIN ── */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .hamburger-btn { display: none; background: none; border: none; color: #F0EDE6; cursor: pointer; padding: 6px; border-radius: 6px; }
+  .back-link { display: flex; align-items: center; gap: 6px; color: #9A9488; font-size: 13px; font-weight: 700; text-decoration: none; transition: color 0.15s; letter-spacing: 0.03em; }
+  .back-link:hover { color: var(--gold-light); }
+  .header-divider { width: 1px; height: 20px; background: var(--border-dark); }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #F0EDE6; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .notif-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--dark3); border: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9A9488; transition: all 0.15s; text-decoration: none; position: relative; }
+  .notif-btn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; border: 1px solid var(--dark2); display: none; }
+
+  .page-content { flex: 1; padding: 2rem 2.5rem 4rem; max-width: 780px; width: 100%; }
+
+  /* ── HERO ── */
+  .hero { background: linear-gradient(135deg, #0e0b1a 0%, #0f0c0a 100%); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.5rem; border: 1px solid rgba(100,80,200,0.2); position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(100,80,200,0.15), transparent 70%); pointer-events: none; }
+  .hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #9B8FD0; margin-bottom: 8px; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3.5vw, 28px); color: #F2EEE6; line-height: 1.2; margin-bottom: 6px; }
+  .hero-sub { font-size: 13px; color: rgba(240,237,230,0.55); line-height: 1.7; max-width: 480px; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 11px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 1.25rem; }
+
+  /* ── FORM ── */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .field-sub { font-size: 12px; color: var(--text3); margin-top: -2px; }
+  .field-textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; resize: vertical; min-height: 120px; line-height: 1.6; }
+  .field-textarea:focus { border-color: var(--gold); }
+  .field-textarea::placeholder { color: var(--text3); }
+
+  /* ── CHIPS ── */
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 7px 16px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--bg); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .chip:hover { border-color: var(--gold); color: var(--gold); }
+  .chip.selected { background: var(--gold); border-color: var(--gold); color: #0C0B09; }
+
+  /* ── GENERATE BUTTON ── */
+  .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1.5rem; }
+  .generate-btn:hover:not(:disabled) { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+  .generate-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-spinner { width: 16px; height: 16px; border: 2.5px solid rgba(12,11,9,0.25); border-top-color: #0C0B09; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .btn-spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── OUTPUT ── */
+  .output-section { display: none; }
+  .output-section.visible { display: block; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
+  .output-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .action-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── OUTPUT BLOCKS ── */
+  .output-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1rem; overflow: hidden; }
+  .block-header { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); gap: 10px; }
+  .block-label { display: flex; align-items: center; gap: 8px; }
+  .block-badge { font-size: 9px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; }
+  .badge-title  { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); }
+  .badge-cap    { background: var(--purple-dim); border: 1px solid rgba(100,80,200,0.25); color: var(--purple); }
+  .badge-tags   { background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); color: var(--green-light); }
+  .badge-thumb  { background: rgba(196,98,45,0.1); border: 1px solid rgba(196,98,45,0.2); color: #C4622D; }
+  .block-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .copy-btn { flex-shrink: 0; padding: 5px 14px; border: 1px solid var(--border); border-radius: 100px; background: none; font-family: 'Lato', sans-serif; font-size: 11px; font-weight: 700; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.copied { border-color: var(--green-light); color: var(--green-light); }
+  .block-body { padding: 1.25rem; font-size: 14px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; }
+  .block-body.hook-body { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.6; }
+
+  /* ── HASHTAG PILLS ── */
+  .hashtag-body { padding: 1.25rem; display: flex; flex-wrap: wrap; gap: 8px; }
+  .hashtag-pill { background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 5px 12px; font-size: 12px; font-weight: 700; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .hashtag-pill:hover { border-color: var(--green-light); color: var(--green-light); background: rgba(42,92,69,0.06); }
+  .hashtag-pill.copied { border-color: var(--green-light); color: var(--green-light); background: rgba(42,92,69,0.06); }
+
+  /* ── THUMBNAIL NOTE ── */
+  .thumb-note { padding: 0 1.25rem 1.25rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+
+  /* ── LOADING ── */
+  .loading-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; margin-bottom: 1rem; }
+  .loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 1rem; }
+  .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: bounce 1.2s infinite; }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.7); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+  .loading-text { font-size: 13px; color: var(--text3); }
+
+  /* ── TIP BOX ── */
+  .tip-box { background: var(--purple-dim); border: 1px solid rgba(100,80,200,0.2); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; margin-top: 1.25rem; }
+  .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .tip-text strong { color: var(--purple); }
+
+  /* ── MOBILE NAV ── */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 90; padding: 6px 0 max(6px, env(safe-area-inset-bottom)); justify-content: space-around; }
+  .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; color: #6B6560; text-decoration: none; padding: 4px 12px; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.15s; }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1023px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo > div:first-child, .logo-tag, .nav-item span, .user-info, .sidebar-footer { display: none; }
+    .sidebar-logo { justify-content: center; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main-wrap { margin-left: 60px; }
+  }
+  @media (max-width: 767px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo > div:first-child, .logo-tag, .nav-item span, .user-info { display: block; }
+    .sidebar-footer { display: block; }
+    .nav-item { justify-content: flex-start; padding: 9px 12px; }
+    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+    .sidebar-overlay { display: block; }
+    .hamburger-btn { display: flex; }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; height: 54px; }
+    .page-content { padding: 1rem 1rem 80px; }
+    .mobile-bottom-nav { display: flex; }
+    .hero { padding: 1.25rem; }
+    .chip-row { gap: 6px; }
+    .chip { padding: 6px 12px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div>
+      <div class="logo-text">Tool<span>Spark</span></div>
+      <div class="logo-tag">Builder Platform</div>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="community.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+      <span>Community</span>
+    </a>
+    <a href="courses.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+      <span>Courses</span>
+    </a>
+    <a href="tools.html" class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span>Tools</span>
+    </a>
+    <a href="events.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Events</span>
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="admindashboard.html" class="nav-item" id="admin-nav-link" style="display:none;">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Admin</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-name">Loading...</div>
+        <div class="user-role">Builder</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburger-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="tools.html" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Tools
+      </a>
+      <div class="header-divider"></div>
+      <div class="header-title">Caption + Hashtag Pack</div>
+    </div>
+    <div class="header-right">
+      <a href="notifications.html" class="notif-btn">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </a>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">Caption · Hashtags · Thumbnail Prompt</div>
+      <div class="hero-title">Everything you need to post.</div>
+      <div class="hero-sub">Paste your script or describe your video — get a viral caption hook, full caption, 15 hashtags, and a thumbnail prompt in one click.</div>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card">
+      <div class="card-title">Your Video</div>
+
+      <div class="field">
+        <div class="field-label">Script or video description</div>
+        <div class="field-sub">Paste your full script, bullet points, or just describe what the video is about.</div>
+        <textarea class="field-textarea" id="script-input" rows="6" placeholder="e.g. This video is about why introverts are actually better at online marketing than extroverts. I talk about how text-based content outperforms video for introverts, how deep thinking creates better posts, and end with a call to action to follow for more..."></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Platform</div>
+        <div class="chip-row" id="platform-row">
+          <div class="chip selected" data-platform="tiktok" onclick="selectChip('platform-row', this)">TikTok</div>
+          <div class="chip" data-platform="reels" onclick="selectChip('platform-row', this)">Instagram Reels</div>
+          <div class="chip" data-platform="shorts" onclick="selectChip('platform-row', this)">YouTube Shorts</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Niche / audience</div>
+        <div class="field-sub">Helps the hashtags hit the right community.</div>
+        <textarea class="field-textarea" id="niche-input" rows="2" style="min-height:56px;" placeholder="e.g. introverts building an online business, coaches who hate being on camera..."></textarea>
+      </div>
+
+      <button class="generate-btn" id="generate-btn" onclick="generatePack()">
+        <div class="btn-spinner" id="btn-spinner"></div>
+        <span id="btn-text">Generate Caption Pack</span>
+      </button>
+
+      <div class="tip-box">
+        <div class="tip-icon">✍️</div>
+        <div class="tip-text"><strong>Pro tip:</strong> If you used the TikTok Script Generator, paste your script here for a perfectly matched caption and hashtag set.</div>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-section" id="output-section">
+      <div class="output-header">
+        <div class="output-title">Your Caption Pack</div>
+        <button class="action-btn" onclick="generatePack()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Regenerate
+        </button>
+      </div>
+      <div id="output-blocks"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="community.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
+    Community
+  </a>
+  <a href="courses.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
+    Courses
+  </a>
+  <a href="tools.html" class="mobile-nav-item active">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Tools
+  </a>
+  <a href="inbox.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Inbox
+  </a>
+  <a href="dashboard.html" class="mobile-nav-item">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </a>
+</nav>
+
+<script>
+  const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+  const MODEL = "claude-sonnet-4-6";
+
+  const platformLabels = {
+    tiktok: "TikTok",
+    reels:  "Instagram Reels",
+    shorts: "YouTube Shorts"
+  };
+
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = 'signon.html'; return; }
+
+    const name = user.displayName || user.email || 'Builder';
+    document.getElementById('sidebar-name').textContent = name;
+
+    const av = document.getElementById('sidebar-avatar');
+    if (user.photoURL) {
+      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
+    } else {
+      av.textContent = (name.charAt(0) || '?').toUpperCase();
+    }
+
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists && snap.data().userRole === 'admin') {
+        document.getElementById('admin-nav-link').style.display = 'flex';
+      }
+    } catch(e) {}
+
+    try {
+      const notifSnap = await db.collection('notifications')
+        .where('userId', '==', user.uid).where('read', '==', false).limit(1).get();
+      if (!notifSnap.empty) document.getElementById('notif-dot').style.display = 'block';
+    } catch(e) {}
+  });
+
+  function selectChip(rowId, el) {
+    document.getElementById(rowId).querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+  }
+
+  function getSelected(rowId, attr) {
+    var el = document.querySelector('#' + rowId + ' .chip.selected');
+    return el ? el.dataset[attr] : null;
+  }
+
+  function buildPrompt(script, platform, niche) {
+    var platformLabel = platformLabels[platform] || 'TikTok';
+    var nicheContext = niche ? '\nNiche / target audience: ' + niche : '';
+    return 'You are a viral social media strategist specialising in short-form video content for ' + platformLabel + '.\n\nAnalyze the following video script or description and generate a complete caption pack for the creator to post alongside their video.\n\nScript / description:\n"""\n' + script + '\n"""' + nicheContext + '\n\nGenerate the following four sections. Use the exact delimiters shown — no extra commentary.\n\nHOOK_START\n[Write a 1–2 sentence caption hook. This appears before the "more" cut-off. It must stop the scroll, create curiosity or emotion, and make people want to keep reading. Do NOT start with "I" or a generic opener. Be bold, direct, and specific.]\nHOOK_END\n\nCAPTION_START\n[Write the full caption body that comes after the hook. 3–5 sentences. Tell the story, back up the hook, and deliver value or emotion. End with a question or call-to-action that invites comments. No hashtags here — they go in the hashtags section.]\nCAPTION_END\n\nHASHTAGS_START\n[Write exactly 15 hashtags relevant to this content and niche. Mix broad reach tags (5), mid-size community tags (5), and niche-specific tags (5). Each on its own line, starting with #. No commas.]\nHASHTAGS_END\n\nTHUMBNAIL_START\n[Write a detailed AI image generation prompt for a high-CTR video thumbnail or cover image. Describe a lifestyle or conceptual photo — no text in the image, no faces unless essential. Describe the mood, lighting, composition, and style. Keep it under 40 words.]\nTHUMBNAIL_END';
+  }
+
+  async function generatePack() {
+    var script = document.getElementById('script-input').value.trim();
+    if (!script) { document.getElementById('script-input').focus(); return; }
+
+    var platform = getSelected('platform-row', 'platform') || 'tiktok';
+    var niche = document.getElementById('niche-input').value.trim();
+
+    var btn = document.getElementById('generate-btn');
+    var spinner = document.getElementById('btn-spinner');
+    var btnText = document.getElementById('btn-text');
+    btn.disabled = true;
+    spinner.classList.add('show');
+    btnText.textContent = 'Writing your pack…';
+
+    var outputSection = document.getElementById('output-section');
+    var outputBlocks = document.getElementById('output-blocks');
+    outputSection.classList.add('visible');
+    outputBlocks.innerHTML = '<div class="loading-card"><div class="loading-dots"><span></span><span></span><span></span></div><div class="loading-text">Crafting your caption pack — about 15 seconds…</div></div>';
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+      var user = auth.currentUser;
+      var token = user ? await user.getIdToken() : '';
+
+      var resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: buildPrompt(script, platform, niche) }],
+          _meta: { tool: 'caption-pack' }
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      var data = await resp.json();
+      var text = data.content.map(function(b) { return b.type === 'text' ? b.text : ''; }).join('');
+
+      var hook      = extract(text, 'HOOK_START', 'HOOK_END');
+      var caption   = extract(text, 'CAPTION_START', 'CAPTION_END');
+      var hashtags  = extract(text, 'HASHTAGS_START', 'HASHTAGS_END');
+      var thumbnail = extract(text, 'THUMBNAIL_START', 'THUMBNAIL_END');
+
+      renderOutput(hook, caption, hashtags, thumbnail);
+
+    } catch(err) {
+      outputBlocks.innerHTML = '<div class="loading-card"><div class="loading-text" style="color:#C4622D;">Something went wrong. Please try again.</div></div>';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('show');
+      btnText.textContent = 'Generate Caption Pack';
+    }
+  }
+
+  function extract(text, startTag, endTag) {
+    var start = text.indexOf(startTag);
+    var end = text.indexOf(endTag);
+    if (start === -1 || end === -1) return '';
+    return text.slice(start + startTag.length, end).trim();
+  }
+
+  function renderOutput(hook, caption, hashtags, thumbnail) {
+    var blocks = document.getElementById('output-blocks');
+    var hashtagLines = hashtags.split('\n').map(function(h) { return h.trim(); }).filter(function(h) { return h.startsWith('#'); });
+    var allHashtags = hashtagLines.join(' ');
+
+    blocks.innerHTML =
+
+      /* ── HOOK ── */
+      '<div class="output-block">' +
+        '<div class="block-header">' +
+          '<div class="block-label"><span class="block-badge badge-title">Hook</span><span class="block-name">Caption Hook</span></div>' +
+          '<button class="copy-btn" onclick="copyBlock(this, ' + JSON.stringify(hook) + ')">Copy</button>' +
+        '</div>' +
+        '<div class="block-body hook-body">' + escHtml(hook) + '</div>' +
+      '</div>' +
+
+      /* ── FULL CAPTION ── */
+      '<div class="output-block">' +
+        '<div class="block-header">' +
+          '<div class="block-label"><span class="block-badge badge-cap">Caption</span><span class="block-name">Full Caption</span></div>' +
+          '<button class="copy-btn" onclick="copyBlock(this, ' + JSON.stringify(hook + '\n\n' + caption) + ')">Copy Hook + Caption</button>' +
+        '</div>' +
+        '<div class="block-body">' + escHtml(caption) + '</div>' +
+      '</div>' +
+
+      /* ── HASHTAGS ── */
+      '<div class="output-block">' +
+        '<div class="block-header">' +
+          '<div class="block-label"><span class="block-badge badge-tags">Hashtags</span><span class="block-name">' + hashtagLines.length + ' Hashtags</span></div>' +
+          '<button class="copy-btn" onclick="copyBlock(this, ' + JSON.stringify(allHashtags) + ')">Copy All</button>' +
+        '</div>' +
+        '<div class="hashtag-body">' +
+          hashtagLines.map(function(tag) {
+            return '<span class="hashtag-pill" onclick="copyHashtag(this, ' + JSON.stringify(tag) + ')">' + escHtml(tag) + '</span>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+      /* ── THUMBNAIL ── */
+      '<div class="output-block">' +
+        '<div class="block-header">' +
+          '<div class="block-label"><span class="block-badge badge-thumb">Thumbnail</span><span class="block-name">AI Image Prompt</span></div>' +
+          '<button class="copy-btn" onclick="copyBlock(this, ' + JSON.stringify(thumbnail) + ')">Copy</button>' +
+        '</div>' +
+        '<div class="block-body">' + escHtml(thumbnail) + '</div>' +
+        '<div class="thumb-note">Paste this into Midjourney, DALL-E, or Canva AI to generate your cover image.</div>' +
+      '</div>';
+  }
+
+  function copyBlock(btn, text) {
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyHashtag(pill, tag) {
+    navigator.clipboard.writeText(tag).then(function() {
+      pill.classList.add('copied');
+      setTimeout(function() { pill.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Mobile sidebar
+  document.getElementById('hamburger-btn').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+  });
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+  document.getElementById('sidebar-close-btn').addEventListener('click', closeSidebar);
+  document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+  window.addEventListener('resize', function() { if (window.innerWidth > 767) closeSidebar(); });
+</script>
+
+</body>
+</html>
