@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolSpark Topic Generator ⚡</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, -apple-system, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding: 24px 16px;
+    color: #111;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #6B2FB3;
+  }
+  header h1 span { color: #FFC820; }
+  header p {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .card h2 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B2FB3;
+    margin-bottom: 14px;
+  }
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pill {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #333;
+  }
+  .pill:hover { border-color: #6B2FB3; color: #6B2FB3; }
+  .pill.selected {
+    background: #6B2FB3;
+    border-color: #6B2FB3;
+    color: white;
+  }
+  .pill.selected.format { background: #FFC820; border-color: #FFC820; color: #111; }
+  .generate-btn {
+    display: block;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto 24px;
+    padding: 16px;
+    background: #FFC820;
+    color: #111;
+    font-size: 1.05rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 4px 12px rgba(255,200,32,0.4);
+  }
+  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,200,32,0.5); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .results {
+    max-width: 680px;
+    margin: 0 auto;
+    display: none;
+  }
+  .results.visible { display: block; }
+  .topic-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-left: 4px solid #FFC820;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+    position: relative;
+  }
+  .topic-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .topic-card .label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #6B2FB3;
+    margin-bottom: 6px;
+  }
+  .topic-card .topic-text {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111;
+    margin-bottom: 8px;
+  }
+  .topic-card .hook {
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
+  }
+  .topic-card .copy-hint {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 0.72rem;
+    color: #bbb;
+  }
+  .topic-card:active .copy-hint { color: #6B2FB3; }
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .results-header h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .regenerate {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #6B2FB3;
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+  }
+  .copied-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .copied-toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ ToolSpark <span>Topic Generator</span></h1>
+  <p>Pick a transformation stage + content format → get post ideas instantly.</p>
+</header>
+
+<div class="card">
+  <h2>1. Transformation Stage</h2>
+  <div class="pill-group" id="stage-group">
+    <button class="pill" data-group="stage" data-value="clarity" onclick="select(this, 'stage')">💡 Clarity — Finding the Idea</button>
+    <button class="pill" data-group="stage" data-value="build" onclick="select(this, 'stage')">🔧 Build — Creating the Tool</button>
+    <button class="pill" data-group="stage" data-value="monetize" onclick="select(this, 'stage')">💰 Monetize — Launching & Selling</button>
+    <button class="pill" data-group="stage" data-value="any" onclick="select(this, 'stage')">🎲 Surprise me</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>2. Content Format</h2>
+  <div class="pill-group" id="format-group">
+    <button class="pill format" data-group="format" data-value="poll" onclick="select(this, 'format')">📊 Poll / Vote</button>
+    <button class="pill format" data-group="format" data-value="story" onclick="select(this, 'format')">✨ Story / Character</button>
+    <button class="pill format" data-group="format" data-value="bts" onclick="select(this, 'format')">🎬 Behind the Scenes</button>
+    <button class="pill format" data-group="format" data-value="question" onclick="select(this, 'format')">💬 Open Question</button>
+    <button class="pill format" data-group="format" data-value="any" onclick="select(this, 'format')">🎲 Surprise me</button>
+  </div>
+</div>
+
+<button class="generate-btn" id="gen-btn" onclick="generate()" disabled>⚡ Generate Topics</button>
+
+<div class="results" id="results">
+  <div class="results-header">
+    <h3 id="results-label">Topics</h3>
+    <button class="regenerate" onclick="generate()">↻ Regenerate</button>
+  </div>
+  <div id="topic-list"></div>
+</div>
+
+<div class="copied-toast" id="toast">Copied to clipboard ✓</div>
+
+<script>
+const state = { stage: null, format: null };
+
+const topics = {
+  clarity: {
+    poll: [
+      { topic: "What's your #1 block when it comes to your AI tool idea?", hook: "A) I can't code  B) I don't know if people would pay  C) I don't know where to start  D) I'm not sure my idea is good enough\n\n(Comment yours if none of these fit.)" },
+      { topic: "How long has your AI tool idea been sitting in your notes app?", hook: "A) Less than a week  B) A month  C) Over a year  D) I have 47 ideas and no idea which to build first" },
+      { topic: "Which of these sounds most like you right now?", hook: "A) I have a clear idea, I just don't know how to build it  B) I have too many ideas and can't pick one  C) I'm still figuring out what my idea even IS  D) I have an idea but I'm scared to start" },
+      { topic: "What do you wish existed as an AI tool that doesn't yet?", hook: "Drop it below. Genuine question — I read every answer. ⚡" },
+    ],
+    story: [
+      { topic: "Sparky discovers a sticky note that just says 'IDEA???' with 12 sub-notes attached.", hook: "He reads all 12. He has opinions. He's ready to build. The person who wrote it hasn't opened the note in 4 months." },
+      { topic: "Ashley (print-on-demand seller) finally describes her tool idea out loud for the first time.", hook: "Sparky is already building it before she finishes the sentence. She hasn't even said what it's supposed to do yet." },
+      { topic: "The Spark Council debates the age-old question: is your idea 'too niche' or 'finally specific enough'?", hook: "They argue for 45 minutes. The answer surprises everyone." },
+    ],
+    bts: [
+      { topic: "Here's how I figure out if an AI tool idea is actually worth building (the 3 questions I ask first).", hook: "No complicated framework. Just three honest questions that save a lot of wasted effort." },
+      { topic: "The difference between a vague idea and a buildable tool — and how close most people actually are.", hook: "Most people are one sentence of specificity away from something real." },
+      { topic: "What the Clarity phase inside ToolSpark actually looks like in practice.", hook: "It's not a brainstorm. It's a filter. Here's what we're actually doing." },
+    ],
+    question: [
+      { topic: "If you could build ONE AI tool that solved ONE problem for your clients, what would it do?", hook: "Don't overthink it. First answer wins. Drop it below. ⚡" },
+      { topic: "What's the idea you keep coming back to but haven't acted on yet?", hook: "No judgment. I'm just curious what's living in your notes app right now." },
+      { topic: "What made you think 'someone should build an AI tool for that' recently?", hook: "That thought is more valuable than you think." },
+    ],
+  },
+  build: {
+    poll: [
+      { topic: "What feels scariest about actually building your AI tool?", hook: "A) Getting the AI to do what I want  B) Making it look professional  C) Testing it without breaking it  D) Showing it to real people for the first time" },
+      { topic: "How do you feel about the words 'no coding required'?", hook: "A) I believe it — I've seen it  B) I want to believe it  C) I'm skeptical  D) I've been burned by this promise before" },
+      { topic: "Which part of 'build' sounds most overwhelming?", hook: "A) Writing the AI prompt  B) Designing the tool  C) Making it work for someone else  D) Knowing when it's done enough to launch" },
+    ],
+    story: [
+      { topic: "VS Code Buddy tries to explain what 'no coding required' means to someone who has never coded.", hook: "He uses three analogies. Two of them make no sense. The third one is actually perfect." },
+      { topic: "Sparky walks Ashley through building her first tool. She keeps saying 'wait, that's it?'", hook: "He confirms. That is, in fact, it." },
+      { topic: "The Spark Council reviews Ashley's first tool build. One member has notes. Too many notes.", hook: "The tool is fine. The notes are not about the tool." },
+    ],
+    bts: [
+      { topic: "What 'building an AI tool' actually looks like inside ToolSpark — no jargon, no code.", hook: "I'll walk you through it in plain English. It's faster than you think." },
+      { topic: "The #1 mistake people make when writing the prompt for their AI tool.", hook: "It's not a technical mistake. It's a specificity mistake. Here's the fix." },
+      { topic: "How I know when a tool is ready to test vs. ready to launch.", hook: "These are two different moments and most people skip the first one." },
+    ],
+    question: [
+      { topic: "What would make you feel confident enough to call your tool 'done enough to launch'?", hook: "There's no right answer — I genuinely want to know where the bar is for you." },
+      { topic: "Have you ever abandoned a build halfway through? What stopped you?", hook: "Not asking to pry — asking because the answer usually reveals the actual problem." },
+      { topic: "What's one thing you'd want your AI tool to do that you're not sure is possible?", hook: "Drop it below. I might have good news." },
+    ],
+  },
+  monetize: {
+    poll: [
+      { topic: "What feels hardest about pricing your AI tool?", hook: "A) I have no idea what to charge  B) I'm scared people won't pay  C) I don't want to underprice it  D) I don't know how to even structure the offer" },
+      { topic: "Which of these pricing fears hits closest to home?", hook: "A) 'What if no one buys it?'  B) 'What if I charge too much?'  C) 'What if I charge too little and can't raise it?'  D) 'What if they think it's not worth it?'" },
+      { topic: "How would you rather sell your AI tool?", hook: "A) One-time purchase  B) Monthly subscription  C) Inside an existing offer  D) I have no idea yet, help" },
+      { topic: "What's stopping you from launching your tool right now?", hook: "A) It's not ready yet  B) I don't have an audience  C) I'm scared of the response  D) I don't know how to actually sell it" },
+    ],
+    story: [
+      { topic: "Sparky watches someone price their tool at $7 'just to test it.' He has thoughts. He keeps them to himself. Mostly.", hook: "Reader, he did not keep them to himself." },
+      { topic: "Ashley prices her first tool. The Spark Council loses their minds (in a good way).", hook: "She charged more than she planned to. It worked. Sparky smirked." },
+      { topic: "The Spark Council holds an emergency summit on the phrase 'I'll just start low and raise it later.'", hook: "The meeting runs long. Nobody is happy. Everyone learns something." },
+    ],
+    bts: [
+      { topic: "Why the Marketplace inside ToolSpark exists — and what it actually solves for people with no following.", hook: "The 'but I have no audience' objection is real. Here's the answer we built." },
+      { topic: "What ToolSpark Certified actually means — and what it unlocks beyond the badge.", hook: "The certification isn't just a credential. It's a sales page that works while you sleep." },
+      { topic: "The pricing conversation we have inside ToolSpark before anyone builds anything.", hook: "Most people build first and price later. We flip that. Here's why it matters." },
+    ],
+    question: [
+      { topic: "What's your gut number for what a genuinely useful AI tool should cost per month?", hook: "No wrong answers. I'm doing research and I want your honest instinct." },
+      { topic: "Would you rather sell your AI tool to strangers or to your existing clients first?", hook: "Both are valid. I'm curious which feels safer — and why." },
+      { topic: "What would it mean for your business if your AI tool brought in $500/month passively?", hook: "I'm asking because most people have never let themselves do that math." },
+    ],
+  },
+};
+
+function select(el, group) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  state[group] = el.dataset.value;
+  document.getElementById('gen-btn').disabled = !(state.stage && state.format);
+}
+
+function pickRandom(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+function generate() {
+  const stageKey = state.stage === 'any'
+    ? ['clarity', 'build', 'monetize'][Math.floor(Math.random() * 3)]
+    : state.stage;
+  const formatKey = state.format === 'any'
+    ? ['poll', 'story', 'bts', 'question'][Math.floor(Math.random() * 4)]
+    : state.format;
+
+  const pool = topics[stageKey]?.[formatKey] || [];
+  const picked = pickRandom(pool, Math.min(3, pool.length));
+
+  const stageLabels = { clarity: '💡 Clarity', build: '🔧 Build', monetize: '💰 Monetize' };
+  const formatLabels = { poll: 'Poll / Vote', story: 'Story / Character', bts: 'Behind the Scenes', question: 'Open Question' };
+
+  document.getElementById('results-label').textContent =
+    `${stageLabels[stageKey]} · ${formatLabels[formatKey]}`;
+
+  const list = document.getElementById('topic-list');
+  list.innerHTML = picked.map((t, i) => `
+    <div class="topic-card" onclick="copyTopic(this, '${escapeForAttr(t.topic + '\n\n' + t.hook)}')">
+      <div class="label">Topic Idea ${i + 1}</div>
+      <div class="topic-text">${t.topic}</div>
+      <div class="hook">${t.hook.replace(/\n/g, '<br>')}</div>
+      <div class="copy-hint">tap to copy</div>
+    </div>
+  `).join('');
+
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function escapeForAttr(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+}
+
+function copyTopic(el, text) {
+  const decoded = text.replace(/\\n/g, '\n');
+  navigator.clipboard.writeText(decoded).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+</script>
+</body>
+</html>
