@@ -728,17 +728,8 @@ async function saveScript() {
     const pl = document.getElementById('preview-link');
     pl.href = `convo-preview.html?id=${docRef.id}`;
     pl.style.display = 'inline-block';
-
-    setTimeout(() => {
-      document.getElementById("videoTitle").value = "";
-      document.querySelectorAll('input[name="videoStyle"]').forEach(r => r.checked = false);
-      document.querySelectorAll(".style-option").forEach(el => el.classList.remove("selected"));
-      document.getElementById("rawConvo").value = "";
-      lines = [];
-      renderLines();
-      showStatus("saveStatus", "", "");
-      document.getElementById('preview-link').style.display = 'none';
-    }, 3000);
+    btn.innerHTML = 'Save another script';
+    btn.onclick = resetForm;
 
   } catch(e) {
     showStatus("saveStatus", "Save failed — check Firestore connection.", "error");
@@ -747,6 +738,21 @@ async function saveScript() {
     btn.disabled = false;
     btn.classList.remove("spinning");
   }
+}
+
+// ── Reset form for a new script ──
+function resetForm() {
+  document.getElementById("videoTitle").value = "";
+  document.querySelectorAll('input[name="videoStyle"]').forEach(r => r.checked = false);
+  document.querySelectorAll(".style-option").forEach(el => el.classList.remove("selected"));
+  document.getElementById("rawConvo").value = "";
+  lines = [];
+  renderLines();
+  showStatus("saveStatus", "", "");
+  document.getElementById('preview-link').style.display = 'none';
+  const btn = document.getElementById("saveBtn");
+  btn.innerHTML = '<span class="spinner" id="saveSpinner"></span>Save script →';
+  btn.onclick = saveScript;
 }
 
 // ── Helpers ──

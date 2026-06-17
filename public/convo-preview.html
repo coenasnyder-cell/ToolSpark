@@ -189,6 +189,57 @@
   .key-hint { text-align: center; font-size: 11px; color: var(--text-3); padding: 0 0 8px; }
   kbd { display: inline-block; padding: 1px 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 10px; font-family: monospace; color: var(--text-3); }
 
+  /* ── Character color swatches ── */
+  .swatch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .swatch-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .swatch-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 3px 8px 3px 4px;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .swatch-item:hover { background: var(--surface-2); }
+  .swatch-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.15);
+    transition: transform 0.15s;
+  }
+  .swatch-item:hover .swatch-dot { transform: scale(1.15); }
+  .swatch-name { font-size: 12px; font-weight: 600; color: var(--text-2); }
+  /* hide the native color input but keep it clickable via the swatch */
+  .swatch-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+
   /* ── Export overlay ── */
   .overlay {
     position: fixed;
@@ -287,6 +338,9 @@
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
+    <div class="swatch-row" id="swatch-row">
+      <span class="swatch-label">Colors</span>
+    </div>
     <div class="action-row">
       <button class="btn btn-outline" id="btn-one" onclick="exportCurrent()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -373,6 +427,7 @@ async function loadData() {
     updateCounter();
     renderCard();
     updateScale();
+    renderSwatches();
   } catch(e) {
     showError('Load failed', e.message);
   }
@@ -391,18 +446,19 @@ function renderCard() {
 }
 
 function buildCardHtml(line, char, style) {
-  const BASE = `width:1080px;height:1920px;background:#000;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;padding:100px 80px;`;
+  // padding: top=80 bottom=260 shifts content to sit at ~45% from top (optical center for 9:16)
+  const BASE = `width:1080px;height:1920px;background:#000;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;padding:80px 80px 260px;`;
   if (style === 'caption') {
     return `<div style="${BASE}align-items:center;justify-content:center;text-align:center;">
       <div style="width:120px;height:4px;background:${char.color};border-radius:2px;margin-bottom:36px;"></div>
       <div style="color:${char.color};font-size:32px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:32px;">${char.name}</div>
-      <div style="color:#fff;font-size:52px;font-weight:800;line-height:1.35;max-width:920px;">${esc(line.text)}</div>
+      <div style="color:#fff;font-size:52px;font-weight:800;line-height:1.35;max-width:864px;">${esc(line.text)}</div>
     </div>`;
   }
   const right = char.bubblePosition === 'right';
   return `<div style="${BASE}align-items:${right ? 'flex-end' : 'flex-start'};justify-content:center;">
     <div style="color:${char.color};font-size:30px;font-weight:700;margin-bottom:18px;">${right ? `${esc(char.name)} ${char.avatar||''}` : `${char.avatar||''} ${esc(char.name)}`}</div>
-    <div style="background:${char.color};color:#fff;padding:44px 52px;border-radius:${right ? '40px 40px 10px 40px' : '40px 40px 40px 10px'};font-size:52px;font-weight:700;line-height:1.35;max-width:900px;word-break:break-word;text-align:${right ? 'right' : 'left'};">${esc(line.text)}</div>
+    <div style="background:${char.color};color:#fff;padding:44px 52px;border-radius:${right ? '40px 40px 10px 40px' : '40px 40px 40px 10px'};font-size:52px;font-weight:700;line-height:1.35;max-width:864px;word-break:break-word;text-align:${right ? 'right' : 'left'};">${esc(line.text)}</div>
   </div>`;
 }
 
@@ -435,6 +491,42 @@ function updateScale() {
 }
 window.addEventListener('resize', updateScale);
 
+// ── Character color swatches ──
+function renderSwatches() {
+  // Only show characters that actually appear in this script
+  const usedIds = [...new Set(lines.map(l => l.characterId).filter(Boolean))];
+  const row = document.getElementById('swatch-row');
+
+  // Remove any existing swatches (keep the label)
+  row.querySelectorAll('.swatch-item').forEach(el => el.remove());
+
+  usedIds.forEach(cid => {
+    const char = charMap[cid];
+    if (!char) return;
+
+    const item = document.createElement('label');
+    item.className = 'swatch-item';
+    item.title = `Change ${char.name}'s color`;
+    item.innerHTML = `
+      <div class="swatch-dot" id="dot-${cid}" style="background:${char.color};"></div>
+      <span class="swatch-name">${char.name}</span>
+      <input class="swatch-input" type="color" value="${char.color}" data-cid="${cid}">
+    `;
+    row.appendChild(item);
+  });
+
+  // Single delegated listener on the row
+  row.addEventListener('input', e => {
+    if (e.target.type !== 'color') return;
+    const cid = e.target.dataset.cid;
+    const newColor = e.target.value;
+    charMap[cid].color = newColor;
+    const dot = document.getElementById(`dot-${cid}`);
+    if (dot) dot.style.background = newColor;
+    renderCard(); // live preview update
+  });
+}
+
 // ─────────────────────────────────────────────
 // CANVAS EXPORT — draws direct to Canvas 2D API
 // No html2canvas: more reliable, no DOM quirks.
@@ -456,7 +548,8 @@ function drawBubble(ctx, line, char) {
   const W = 1080, H = 1920;
   const PADX = 80;
   const isRight = char.bubblePosition === 'right';
-  const MAX_CONTENT_W = 796; // 900 - 2*52
+  const MAX_BUBBLE_W = 864;          // 80% of 1080
+  const MAX_CONTENT_W = 864 - 52*2; // text area inside bubble padding
   const FS = 52, NFS = 30;
   const BPX = 52, BPY = 44;
   const LH = FS * 1.35;
@@ -466,10 +559,11 @@ function drawBubble(ctx, line, char) {
   const wrapped = wrapText(ctx, line.text, MAX_CONTENT_W);
   const textH   = wrapped.length * LH;
   const widest  = Math.max(...wrapped.map(l => ctx.measureText(l).width));
-  const bubbleW = Math.min(900, widest + BPX * 2 + 8);
+  const bubbleW = Math.min(MAX_BUBBLE_W, widest + BPX * 2 + 8);
   const bubbleH = textH + BPY * 2;
   const totalH  = NFS + NAME_GAP + bubbleH;
-  const sy      = (H - totalH) / 2;
+  // shift above mathematical center — content at ~45% from top looks right on 9:16
+  const sy      = Math.max(80, (H - totalH) / 2 - 120);
 
   // Name label
   const nameStr = isRight ? `${char.name} ${char.avatar || ''}`.trim() : `${char.avatar || ''} ${char.name}`.trim();
@@ -502,10 +596,10 @@ function drawCaption(ctx, line, char) {
   const TLH = FS * 1.35;
 
   ctx.font = `800 ${FS}px ${FONT}`;
-  const wrapped  = wrapText(ctx, line.text, W - PADX * 2);
+  const wrapped  = wrapText(ctx, line.text, 864); // 80% of card width
   const textBlockH = wrapped.length * TLH;
   const totalH   = LH_PX + G1 + NFS + G2 + textBlockH;
-  const sy       = (H - totalH) / 2;
+  const sy       = Math.max(80, (H - totalH) / 2 - 120);
 
   // Accent line
   ctx.fillStyle = char.color;
