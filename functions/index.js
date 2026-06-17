@@ -2230,3 +2230,135 @@ exports.onWaitlistSignup = onDocumentCreated({
 exports.crmAdmin = crm.crmAdmin;
 exports.crmPublicUnsubscribe = crm.crmPublicUnsubscribe;
 exports.runCrmSequenceQueue = crm.runCrmSequenceQueue;
+
+// ── IDEA VALIDATOR ────────────────────────────────────────────────────────────
+exports.ideaValidator = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ANTHROPIC_KEY"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const { idea, audience, problem } = req.body || {};
+
+  if (!idea || !idea.trim()) {
+    res.status(400).json({ error: "Idea description is required." });
+    return;
+  }
+  if (!audience || !audience.trim()) {
+    res.status(400).json({ error: "Target audience is required." });
+    return;
+  }
+  if (!problem || !problem.trim()) {
+    res.status(400).json({ error: "Problem solved is required." });
+    return;
+  }
+
+  const systemPrompt = `You are an AI Idea Validation Engine.
+Your job is to evaluate AI tool ideas and generate a structured, objective validation report.
+You must score the idea across five categories, provide a verdict, and give actionable recommendations.
+You must follow the output format exactly.`;
+
+  const userMessage = `Idea Description: ${idea.trim()}
+Target Audience: ${audience.trim()}
+Problem Solved: ${problem.trim()}
+
+Evaluate this idea using the following criteria and scoring weights:
+
+1. Market Demand — 25 points
+   - Are people actively searching for this?
+   - Is the audience large enough?
+   - Is the problem common?
+
+2. Problem Severity — 20 points
+   - How painful is the problem?
+   - Does it cost time, money, or emotional stress?
+   - Is the audience motivated to fix it?
+
+3. AI Fit — 20 points
+   - Does AI meaningfully improve the solution?
+   - Is AI the right tool?
+   - Can AI automate or enhance the workflow?
+
+4. Competition Gap — 20 points
+   - Are there existing tools?
+   - Is there a niche or underserved angle?
+   - Can this idea differentiate?
+
+5. Monetization Potential — 15 points
+   - Would people pay for this?
+   - Are there clear pricing models?
+   - Does the idea support recurring revenue?
+
+Verdict rules:
+- GO (80–100): Strong idea with clear demand and good differentiation.
+- IMPROVE (60–79): Promising idea but needs refinement or niche focus.
+- PIVOT (0–59): Weak demand, unclear problem, or poor AI fit.
+
+Return ONLY the following JSON structure with no chain-of-thought, no extra text:
+
+{
+  "overall_score": number,
+  "verdict": "GO" | "IMPROVE" | "PIVOT",
+  "summary": "string",
+  "scores": {
+    "market_demand": number,
+    "problem_severity": number,
+    "ai_fit": number,
+    "competition_gap": number,
+    "monetization_potential": number
+  },
+  "score_explanations": {
+    "market_demand": "string",
+    "problem_severity": "string",
+    "ai_fit": "string",
+    "competition_gap": "string",
+    "monetization_potential": "string"
+  },
+  "strengths": ["string"],
+  "weaknesses": ["string"],
+  "recommended_niches": ["string"],
+  "suggested_improvements": ["string"],
+  "action_steps": ["string"]
+}`;
+
+  try {
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_KEY });
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMessage }],
+    });
+
+    const raw = response.content[0]?.text || "";
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch {
+      console.error(JSON.stringify({ event: "idea_validator_parse_error", raw }));
+      res.status(500).json({ error: "The AI returned an unexpected response. Please try again." });
+      return;
+    }
+
+    if (process.env.ENABLE_LOGGING === "true") {
+      try {
+        await admin.firestore().collection("idea_validations").add({
+          idea: idea.trim(),
+          audience: audience.trim(),
+          problem: problem.trim(),
+          result,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      } catch (logErr) {
+        console.error(JSON.stringify({ event: "idea_validator_log_error", message: logErr.message }));
+      }
+    }
+
+    console.log(JSON.stringify({ event: "idea_validated", verdict: result.verdict, score: result.overall_score }));
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(JSON.stringify({ event: "idea_validator_error", message: err.message }));
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});

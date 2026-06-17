@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idea Validator — ToolSpark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --yellow:  #FFC820;
+  --purple:  #6B2FB3;
+  --black:   #000000;
+  --bg:      #F5F5F5;
+  --card:    #FFFFFF;
+  --text:    #111111;
+  --text2:   #555555;
+  --text3:   #999999;
+  --border:  #E5E7EB;
+  --green:   #16A34A;
+  --red:     #DC2626;
+  --radius:  14px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-center { text-align: center; flex: 1; }
+.header-center h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.header-center p  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.hamburger {
+  width: 32px; height: 32px;
+  display: flex; flex-direction: column; justify-content: center; gap: 5px;
+  cursor: pointer; border: none; background: none; padding: 0;
+}
+.hamburger span { width: 22px; height: 2px; background: var(--black); border-radius: 2px; display: block; }
+
+/* ── LAYOUT ── */
+.main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 32px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  margin-bottom: 16px;
+}
+
+/* ── INPUT FORM ── */
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.form-label + * { margin-top: 0; }
+
+.form-group { margin-bottom: 18px; }
+.form-group:last-of-type { margin-bottom: 0; }
+
+textarea, input[type="text"] {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  background: #FAFAFA;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+
+textarea:focus, input[type="text"]:focus {
+  border-color: var(--purple);
+  background: #fff;
+}
+
+textarea { resize: none; min-height: 100px; }
+
+.field-error {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 5px;
+  display: none;
+}
+.field-error.show { display: block; }
+.has-error { border-color: var(--red) !important; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%;
+  background: var(--yellow);
+  color: var(--black);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity .15s, transform .1s;
+}
+.btn-primary:hover  { opacity: .9; }
+.btn-primary:active { transform: scale(.99); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--purple);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 10px 0 0;
+  font-family: 'Inter', sans-serif;
+}
+.btn-ghost:hover { text-decoration: underline; }
+
+.btn-outline {
+  width: 100%;
+  background: transparent;
+  color: var(--purple);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px solid var(--purple);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-outline:hover { background: var(--purple); color: #fff; }
+
+/* ── STICKY CTA (mobile input screen) ── */
+.sticky-cta {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px 24px;
+  z-index: 40;
+  display: none;
+}
+
+/* ── LOADING ── */
+.loading-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.loading-wrap.show { display: flex; }
+
+.bolt { font-size: 52px; animation: bolt-pulse 1s ease-in-out infinite; }
+@keyframes bolt-pulse {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(-5deg); }
+  50%       { opacity: .5; transform: scale(.85) rotate(5deg); }
+}
+
+.loading-wrap p {
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text2);
+}
+
+/* ── RESULTS ── */
+#results-section { display: none; }
+#results-section.show { display: block; }
+
+/* Score ring */
+.score-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 20px;
+}
+
+.ring-container { position: relative; width: 140px; height: 140px; }
+
+.ring-container svg { transform: rotate(-90deg); }
+
+.ring-bg   { fill: none; stroke: #F0F0F0; stroke-width: 10; }
+.ring-fill {
+  fill: none;
+  stroke: var(--purple);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 339.29;
+  stroke-dashoffset: 339.29;
+  transition: stroke-dashoffset 1.2s ease;
+}
+
+.score-num {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -1px;
+}
+
+.verdict-badge {
+  margin-top: 16px;
+  padding: 6px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+.verdict-GO      { background: #DCFCE7; color: #16A34A; }
+.verdict-IMPROVE { background: #FEF9C3; color: #A16207; }
+.verdict-PIVOT   { background: #FEE2E2; color: #DC2626; }
+
+.score-summary {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--text2);
+  text-align: center;
+  line-height: 1.65;
+  max-width: 480px;
+}
+
+/* Section title */
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 14px;
+}
+
+/* Carousel */
+.carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.carousel::-webkit-scrollbar { display: none; }
+
+.cat-card {
+  flex: 0 0 210px;
+  scroll-snap-align: start;
+  border: 1.5px solid #F0F0F0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cat-label  { font-size: 11px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: .6px; }
+.cat-score  { font-size: 28px; font-weight: 800; color: var(--black); letter-spacing: -.5px; margin: 6px 0 1px; display: inline; }
+.cat-max    { font-size: 13px; color: var(--text3); font-weight: 500; }
+
+.progress-bar { width: 100%; height: 6px; background: #F0F0F0; border-radius: 3px; margin: 10px 0 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--yellow); border-radius: 3px; width: 0%; transition: width 1s ease .2s; }
+
+.cat-explain { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+@media (min-width: 768px) {
+  .carousel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow-x: visible;
+  }
+  .cat-card { flex: unset; }
+}
+
+/* Accordion */
+.acc-item {
+  border: 1.5px solid #F0F0F0;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.acc-header {
+  width: 100%;
+  background: #fff;
+  border: none;
+  padding: 15px 18px;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.acc-chevron { font-size: 11px; color: var(--text3); transition: transform .2s; }
+.acc-item.open .acc-chevron { transform: rotate(180deg); }
+
+.acc-body { display: none; padding: 0 18px 16px; background: #fff; }
+.acc-item.open .acc-body { display: block; }
+
+.acc-body ul { list-style: none; }
+.acc-body li {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+  padding: 7px 0;
+  border-bottom: 1px solid #F5F5F5;
+  display: flex;
+  gap: 8px;
+}
+.acc-body li:last-child { border-bottom: none; }
+.acc-body li::before { content: '•'; color: var(--yellow); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* Action steps */
+.steps-list { list-style: none; margin-bottom: 20px; }
+.steps-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F5F5F5;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+.steps-list li:last-child { border-bottom: none; }
+
+.checkbox-mock {
+  width: 18px; height: 18px;
+  border: 2px solid #D1D5DB;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Error toast */
+.api-error {
+  background: #FEE2E2;
+  color: var(--red);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+}
+.api-error.show { display: block; }
+
+/* ── BOTTOM NAV (mobile, results only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  z-index: 50;
+}
+.bottom-nav.show { display: flex; }
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 18px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  gap: 4px;
+  text-decoration: none;
+}
+.nav-tab.active { color: var(--purple); }
+.nav-tab svg { width: 22px; height: 22px; }
+
+/* ── RESPONSIVE PADDING ADJUSTMENTS ── */
+@media (max-width: 767px) {
+  /* Input screen: pad above sticky CTA */
+  #input-section.show  { padding-bottom: 90px; }
+  /* Results screen: pad above bottom nav */
+  #results-section.show { padding-bottom: 90px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div style="width:32px"></div>
+  <div class="header-center">
+    <h1>ToolSpark Idea Validator</h1>
+    <p>Validate your AI tool idea in seconds</p>
+  </div>
+  <button class="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- INPUT SECTION -->
+<section id="input-section" class="main show">
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label" for="idea">Your AI Tool Idea</label>
+      <textarea id="idea" placeholder="Describe your AI tool idea…" rows="4"></textarea>
+      <p class="field-error" id="err-idea">Please describe your AI tool idea.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="audience">Target Audience</label>
+      <input type="text" id="audience" placeholder="e.g. freelance designers, coaches, small businesses">
+      <p class="field-error" id="err-audience">Please enter your target audience.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="problem">Problem Solved</label>
+      <input type="text" id="problem" placeholder="e.g. They spend hours writing content from scratch">
+      <p class="field-error" id="err-problem">Please describe the problem your idea solves.</p>
+    </div>
+
+    <!-- Desktop CTA (hidden on mobile) -->
+    <div id="inline-cta-wrap">
+      <button class="btn-primary" id="btn-inline" onclick="handleValidate()">
+        ⚡ Validate My Idea
+      </button>
+      <button class="btn-ghost" onclick="fillExample()">See Example Ideas</button>
+    </div>
+  </div>
+
+  <div class="api-error" id="api-error"></div>
+</section>
+
+<!-- STICKY MOBILE CTA -->
+<div class="sticky-cta" id="sticky-cta">
+  <button class="btn-primary" onclick="handleValidate()">⚡ Validate My Idea</button>
+  <button class="btn-ghost" onclick="fillExample()" style="margin-top:6px">See Example Ideas</button>
+</div>
+
+<!-- LOADING -->
+<div class="loading-wrap" id="loading">
+  <div class="bolt">⚡</div>
+  <p>Analyzing your idea…</p>
+</div>
+
+<!-- RESULTS SECTION -->
+<section id="results-section" class="main">
+
+  <!-- Score card -->
+  <div class="card">
+    <div class="score-wrap">
+      <div class="ring-container">
+        <svg viewBox="0 0 120 120" width="140" height="140">
+          <circle class="ring-bg"   cx="60" cy="60" r="54"/>
+          <circle class="ring-fill" cx="60" cy="60" r="54" id="ring-fill"/>
+        </svg>
+        <div class="score-num" id="score-num">—</div>
+      </div>
+      <div class="verdict-badge" id="verdict-badge">—</div>
+      <p class="score-summary" id="score-summary"></p>
+    </div>
+  </div>
+
+  <!-- Score breakdown -->
+  <div class="card">
+    <div class="section-title">Score Breakdown</div>
+    <div class="carousel" id="carousel"></div>
+  </div>
+
+  <!-- Insights -->
+  <div class="card">
+    <div class="section-title">Insights</div>
+    <div id="accordion"></div>
+  </div>
+
+  <!-- Action steps -->
+  <div class="card">
+    <div class="section-title">Your Next Steps</div>
+    <ul class="steps-list" id="steps-list"></ul>
+    <button class="btn-outline" onclick="alert('Coming soon!')">Generate MVP Plan</button>
+  </div>
+
+  <!-- Validate another -->
+  <button class="btn-primary" onclick="resetToInput()">⚡ Validate Another Idea</button>
+
+</section>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-tab" onclick="resetToInput()">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+    </svg>
+    Home
+  </button>
+  <button class="nav-tab active">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V11h6v6M3 21h18M12 3l9 7H3l9-7z"/>
+    </svg>
+    Results
+  </button>
+  <button class="nav-tab">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    Settings
+  </button>
+</nav>
+
+<script>
+const FUNCTION_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ideaValidator";
+
+const CATEGORIES = [
+  { key: "market_demand",           label: "Market Demand",           max: 25 },
+  { key: "problem_severity",        label: "Problem Severity",        max: 20 },
+  { key: "ai_fit",                  label: "AI Fit",                  max: 20 },
+  { key: "competition_gap",         label: "Competition Gap",         max: 20 },
+  { key: "monetization_potential",  label: "Monetization Potential",  max: 15 },
+];
+
+const INSIGHTS = [
+  { key: "strengths",              label: "Strengths" },
+  { key: "weaknesses",             label: "Weaknesses" },
+  { key: "recommended_niches",     label: "Recommended Niches" },
+  { key: "suggested_improvements", label: "Suggested Improvements" },
+];
+
+// ── State helpers ──────────────────────────────────────────────────────────────
+const isMobile = () => window.innerWidth < 768;
+
+function showInputScreen() {
+  document.getElementById("input-section").classList.add("show");
+  document.getElementById("results-section").classList.remove("show");
+  document.getElementById("loading").classList.remove("show");
+  document.getElementById("bottom-nav").classList.remove("show");
+  if (isMobile()) document.getElementById("sticky-cta").style.display = "block";
+}
+
+function showLoading() {
+  document.getElementById("input-section").classList.remove("show");
+  document.getElementById("results-section").classList.remove("show");
+  document.getElementById("bottom-nav").classList.remove("show");
+  document.getElementById("sticky-cta").style.display = "none";
+  document.getElementById("loading").classList.add("show");
+}
+
+function showResultsScreen() {
+  document.getElementById("input-section").classList.remove("show");
+  document.getElementById("loading").classList.remove("show");
+  document.getElementById("results-section").classList.add("show");
+  document.getElementById("sticky-cta").style.display = "none";
+  if (isMobile()) document.getElementById("bottom-nav").classList.add("show");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Sticky CTA / bottom nav visibility ────────────────────────────────────────
+function initResponsive() {
+  const stickyEl = document.getElementById("sticky-cta");
+  const inlineCta = document.getElementById("inline-cta-wrap");
+
+  function apply() {
+    const mobile = isMobile();
+    stickyEl.style.display  = mobile ? "block" : "none";
+    inlineCta.style.display = mobile ? "none"  : "block";
+  }
+
+  apply();
+  window.addEventListener("resize", apply);
+}
+
+// ── Example fill ───────────────────────────────────────────────────────────────
+function fillExample() {
+  document.getElementById("idea").value     = "An AI-powered content repurposing tool that automatically turns one long-form blog post into social media captions, email newsletters, and short video scripts.";
+  document.getElementById("audience").value = "Online coaches and course creators";
+  document.getElementById("problem").value  = "They spend hours manually reformatting the same content for every platform they post on.";
+  clearErrors();
+}
+
+// ── Validation ─────────────────────────────────────────────────────────────────
+function clearErrors() {
+  ["idea", "audience", "problem"].forEach(id => {
+    document.getElementById(id).classList.remove("has-error");
+    document.getElementById("err-" + id).classList.remove("show");
+  });
+  const apiErr = document.getElementById("api-error");
+  apiErr.textContent = "";
+  apiErr.classList.remove("show");
+}
+
+function getFields() {
+  clearErrors();
+  const idea     = document.getElementById("idea").value.trim();
+  const audience = document.getElementById("audience").value.trim();
+  const problem  = document.getElementById("problem").value.trim();
+  let ok = true;
+
+  if (!idea)     { markError("idea");     ok = false; }
+  if (!audience) { markError("audience"); ok = false; }
+  if (!problem)  { markError("problem");  ok = false; }
+
+  return ok ? { idea, audience, problem } : null;
+}
+
+function markError(id) {
+  document.getElementById(id).classList.add("has-error");
+  document.getElementById("err-" + id).classList.add("show");
+}
+
+// ── Main action ────────────────────────────────────────────────────────────────
+async function handleValidate() {
+  const fields = getFields();
+  if (!fields) return;
+
+  showLoading();
+
+  try {
+    const resp = await fetch(FUNCTION_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fields),
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+
+    renderResults(data);
+    showResultsScreen();
+  } catch (err) {
+    showInputScreen();
+    const apiErr = document.getElementById("api-error");
+    apiErr.textContent = err.message;
+    apiErr.classList.add("show");
+    apiErr.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function resetToInput() {
+  showInputScreen();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function renderResults(data) {
+  // Score ring
+  const circumference = 2 * Math.PI * 54; // ≈ 339.29
+  const offset = circumference - (Math.min(data.overall_score, 100) / 100) * circumference;
+  document.getElementById("score-num").textContent = data.overall_score;
+  setTimeout(() => {
+    document.getElementById("ring-fill").style.strokeDashoffset = offset;
+  }, 80);
+
+  // Verdict badge
+  const badge = document.getElementById("verdict-badge");
+  badge.textContent = data.verdict;
+  badge.className   = "verdict-badge verdict-" + data.verdict;
+
+  // Summary
+  document.getElementById("score-summary").textContent = data.summary || "";
+
+  // Category carousel
+  document.getElementById("carousel").innerHTML = CATEGORIES.map(cat => {
+    const score   = (data.scores || {})[cat.key] || 0;
+    const pct     = Math.round((score / cat.max) * 100);
+    const explain = (data.score_explanations || {})[cat.key] || "";
+    return `<div class="cat-card">
+      <div class="cat-label">${cat.label}</div>
+      <div style="margin:6px 0 1px">
+        <span class="cat-score">${score}</span><span class="cat-max"> / ${cat.max}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%" data-pct="${pct}"></div></div>
+      <div class="cat-explain">${explain}</div>
+    </div>`;
+  }).join("");
+
+  setTimeout(() => {
+    document.querySelectorAll(".progress-fill").forEach(el => {
+      el.style.width = el.dataset.pct + "%";
+    });
+  }, 150);
+
+  // Accordion
+  document.getElementById("accordion").innerHTML = INSIGHTS.map((sec, i) => {
+    const items = (data[sec.key] || []).map(t => `<li>${t}</li>`).join("");
+    return `<div class="acc-item${i === 0 ? " open" : ""}">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        ${sec.label}<span class="acc-chevron">▼</span>
+      </button>
+      <div class="acc-body"><ul>${items}</ul></div>
+    </div>`;
+  }).join("");
+
+  // Action steps
+  document.getElementById("steps-list").innerHTML = (data.action_steps || []).map(step =>
+    `<li><div class="checkbox-mock"></div><span>${step}</span></li>`
+  ).join("");
+}
+
+function toggleAcc(btn) {
+  btn.closest(".acc-item").classList.toggle("open");
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+initResponsive();
+</script>
+</body>
+</html>
