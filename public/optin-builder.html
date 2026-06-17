@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
@@ -19,8 +20,9 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
+  const auth    = firebase.auth();
+  const db      = firebase.firestore();
+  const storage = firebase.storage();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -38,6 +40,7 @@
   }
   body { font-family:'Lato',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
 
+  /* SIDEBAR */
   .sidebar { width:var(--sidebar-width); background:var(--dark); min-height:100vh; display:flex; flex-direction:column; position:fixed; left:0; top:0; z-index:100; border-right:1px solid var(--border-dark); }
   .sidebar-logo { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border-dark); }
   .logo-text { font-family:'Playfair Display',serif; font-size:20px; color:#F0EDE6; }
@@ -57,6 +60,7 @@
   .logout-btn { display:flex; align-items:center; gap:10px; width:100%; padding:8px 12px; margin-top:4px; background:none; border:none; border-radius:var(--radius-sm); color:#6B5F5F; font-size:13px; font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.15s; text-align:left; }
   .logout-btn:hover { background:rgba(220,50,50,0.1); color:#E05555; }
 
+  /* MAIN */
   .main-wrap { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-height:100vh; }
   .page-content { flex:1; padding:2rem 2.5rem 3rem; max-width:960px; }
 
@@ -65,7 +69,7 @@
   .page-header p { font-size:14px; color:var(--text3); }
 
   /* STEP BAR */
-  .step-bar { display:flex; align-items:center; gap:0; margin-bottom:2rem; }
+  .step-bar { display:flex; align-items:center; margin-bottom:2rem; }
   .step-node { display:flex; align-items:center; gap:8px; }
   .step-circle { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0; background:var(--border); color:var(--text3); transition:all 0.3s; }
   .step-circle.active { background:var(--gold); color:var(--dark); }
@@ -101,11 +105,16 @@
   .prefilled { border-color:rgba(201,168,76,0.35) !important; background:rgba(201,168,76,0.04) !important; }
 
   /* BUTTONS */
-  .btn-primary { display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:var(--dark); border:none; padding:13px 28px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; letter-spacing:0.02em; }
+  .btn-primary { display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:var(--dark); border:none; padding:13px 28px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.2s; }
   .btn-primary:hover { background:var(--gold-light); transform:translateY(-1px); }
   .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
   .btn-secondary { display:inline-flex; align-items:center; gap:7px; background:transparent; color:var(--text2); border:1px solid var(--border); padding:10px 18px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s; }
   .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-icon { display:inline-flex; align-items:center; gap:7px; background:transparent; color:var(--text2); border:1px solid var(--border); padding:9px 16px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-icon:hover { border-color:var(--gold); color:var(--gold); }
+  .btn-save { display:inline-flex; align-items:center; gap:8px; background:var(--green-light); color:#fff; border:none; padding:11px 22px; border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-save:hover { background:#2e7a57; }
+  .btn-save:disabled { opacity:0.5; cursor:not-allowed; }
 
   /* LOADING */
   .loading-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:3rem; text-align:center; }
@@ -122,8 +131,6 @@
   .option-tag { padding:10px 14px; background:var(--bg); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:3px; }
   .option-style { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); }
   .option-best { font-size:12px; color:var(--text3); line-height:1.4; }
-
-  /* MINI PAGE PREVIEW */
   .page-preview { padding:1.25rem; flex:1; display:flex; flex-direction:column; gap:10px; }
   .preview-headline { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:var(--text); line-height:1.35; }
   .preview-sub { font-size:12px; color:var(--text2); line-height:1.55; }
@@ -135,20 +142,97 @@
   .btn-use { width:100%; padding:10px; border:none; border-radius:var(--radius-sm); background:var(--dark); color:#F0EDE6; font-family:'Lato',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s; }
   .btn-use:hover { background:var(--gold); color:var(--dark); }
 
+  /* STEP 3: CUSTOMISE & EXPORT */
+  .editor-wrap { display:grid; grid-template-columns:340px 1fr; gap:1.5rem; align-items:start; }
+  .editor-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; position:sticky; top:1.5rem; }
+  .editor-panel-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); background:var(--bg); display:flex; align-items:center; justify-content:space-between; }
+  .editor-panel-title { font-size:13px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); }
+  .editor-body { padding:1.25rem; display:flex; flex-direction:column; gap:1.1rem; max-height:calc(100vh - 160px); overflow-y:auto; }
+  .editor-section { display:flex; flex-direction:column; gap:8px; }
+  .editor-label { font-size:11px; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--text3); }
+  .editor-input { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:13px; color:var(--text); outline:none; transition:border-color 0.15s; }
+  .editor-input:focus { border-color:var(--gold); background:#fff; }
+  .editor-textarea { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:13px; color:var(--text); outline:none; resize:vertical; min-height:70px; line-height:1.55; transition:border-color 0.15s; }
+  .editor-textarea:focus { border-color:var(--gold); background:#fff; }
+
+  /* HEADLINE SWITCHER */
+  .headline-tabs { display:flex; flex-direction:column; gap:6px; }
+  .headline-tab { padding:8px 11px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; color:var(--text2); cursor:pointer; transition:all 0.15s; line-height:1.45; background:var(--bg); }
+  .headline-tab.active { border-color:var(--gold); background:rgba(201,168,76,0.07); color:var(--text); font-weight:700; }
+
+  /* LAYOUT TOGGLE */
+  .layout-row { display:flex; gap:6px; }
+  .layout-btn { flex:1; padding:8px 6px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-weight:700; color:var(--text3); background:var(--bg); cursor:pointer; text-align:center; transition:all 0.15s; font-family:'Lato',sans-serif; }
+  .layout-btn.active { border-color:var(--gold); background:rgba(201,168,76,0.07); color:var(--gold); }
+
+  /* BG TOGGLE */
+  .bg-row { display:flex; gap:6px; }
+  .bg-btn { flex:1; padding:8px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; font-weight:700; color:var(--text3); background:var(--bg); cursor:pointer; text-align:center; transition:all 0.15s; font-family:'Lato',sans-serif; }
+  .bg-btn.active { border-color:var(--gold); background:rgba(201,168,76,0.07); color:var(--gold); }
+
+  /* COLOR SWATCHES */
+  .swatch-row { display:flex; gap:8px; }
+  .swatch { width:28px; height:28px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.15s; flex-shrink:0; }
+  .swatch.active { border-color:var(--text); transform:scale(1.15); }
+
+  /* BULLET EDITORS */
+  .bullet-list { display:flex; flex-direction:column; gap:6px; }
+  .bullet-row { display:flex; align-items:center; gap:6px; }
+  .bullet-dot { color:var(--gold); font-size:11px; flex-shrink:0; }
+  .bullet-input { flex:1; padding:7px 10px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'Lato',sans-serif; font-size:12px; color:var(--text); outline:none; transition:border-color 0.15s; }
+  .bullet-input:focus { border-color:var(--gold); background:#fff; }
+
+  /* TOGGLE ROW */
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; }
+  .toggle-label-text { font-size:13px; color:var(--text2); font-weight:700; }
+  .toggle { position:relative; display:inline-block; width:38px; height:22px; }
+  .toggle input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:11px; cursor:pointer; transition:background 0.2s; }
+  .toggle-slider:before { content:''; position:absolute; width:16px; height:16px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:transform 0.2s; }
+  .toggle input:checked + .toggle-slider { background:var(--gold); }
+  .toggle input:checked + .toggle-slider:before { transform:translateX(16px); }
+
+  /* PHOTO UPLOAD */
+  .photo-upload-area { border:1px dashed var(--border); border-radius:var(--radius-sm); padding:1rem; text-align:center; cursor:pointer; transition:border-color 0.15s; background:var(--bg); }
+  .photo-upload-area:hover { border-color:var(--gold); }
+  .photo-preview { width:100%; max-height:120px; object-fit:cover; border-radius:var(--radius-sm); margin-top:8px; }
+
+  /* LIVE PREVIEW PANEL */
+  .preview-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .preview-topbar { padding:10px 14px; background:var(--bg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .preview-topbar-label { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); }
+  .preview-page { padding:0; min-height:500px; }
+
+  /* EXPORT BAR */
+  .export-bar { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:1.5rem; flex-wrap:wrap; }
+  .export-bar-left { display:flex; flex-direction:column; gap:3px; }
+  .export-bar-title { font-size:15px; font-weight:700; color:var(--text); }
+  .export-bar-hint { font-size:12px; color:var(--text3); }
+  .export-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .save-confirm { font-size:12px; color:var(--green-light); display:none; }
+
+  /* LOCKED STATE */
+  .locked-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:3rem; text-align:center; }
+  .locked-icon { font-size:36px; margin-bottom:1rem; }
+  .locked-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--text); margin-bottom:8px; }
+  .locked-desc { font-size:14px; color:var(--text3); line-height:1.7; max-width:400px; margin:0 auto 1.5rem; }
+
   @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
   .fade-in { animation:fadeUp 0.35s ease both; }
 
-  @media (max-width:1023px) { .main-wrap { margin-left:60px; } .options-grid { grid-template-columns:1fr; } }
+  .sidebar-close-btn { display:none; background:none; border:none; color:#9A9488; cursor:pointer; padding:8px; }
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
+
+  @media (max-width:1023px) {
+    .main-wrap { margin-left:60px; }
+    .options-grid { grid-template-columns:1fr; }
+    .editor-wrap { grid-template-columns:1fr; }
+    .editor-panel { position:static; }
+  }
   @media (max-width:767px) {
     .main-wrap { margin-left:0; }
     .page-content { padding:1rem 1rem 2rem; }
     .options-grid { grid-template-columns:1fr; }
-  }
-
-  /* MOBILE NAV */
-  .sidebar-close-btn { display:none; background:none; border:none; color:#9A9488; cursor:pointer; padding:8px; }
-  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; }
-  @media (max-width:767px) {
     .sidebar { transform:translateX(-100%); transition:transform 0.25s ease; }
     .sidebar.open { transform:translateX(0); }
     .sidebar-close-btn { display:flex; }
@@ -188,7 +272,7 @@
 
     <div class="page-header">
       <h1>Opt-In Page Builder</h1>
-      <p>Generate 3 complete opt-in page variations from your lead magnet details — then pick the one that fits your voice.</p>
+      <p>Generate 3 complete opt-in page variations — then customise and export.</p>
     </div>
 
     <!-- STEP BAR -->
@@ -209,13 +293,21 @@
       </div>
     </div>
 
-    <!-- STEP 1: INPUT FORM -->
-    <div id="step1">
+    <!-- LOCKED (no access) -->
+    <div id="locked-view" style="display:none;">
+      <div class="locked-card">
+        <div class="locked-icon">🔒</div>
+        <div class="locked-title">Available in the Certification Program</div>
+        <div class="locked-desc">The Opt-In Page Builder is included in the ToolSpark Certification Program. Complete the challenge to unlock your full member tools.</div>
+        <a href="cert-hub.html" class="btn-primary" style="text-decoration:none;margin:0 auto;">View Certification →</a>
+      </div>
+    </div>
 
+    <!-- STEP 1 -->
+    <div id="step1" style="display:none;">
       <div id="prefill-banner" class="prefill-banner">
         <strong>We pre-filled some fields</strong> from your Spark and Audience sessions — edit anything that doesn't fit.
       </div>
-
       <div class="card">
         <div class="card-header">
           <div class="card-icon" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);">📋</div>
@@ -223,44 +315,36 @@
         </div>
         <div class="card-body">
           <div class="field-group">
-
             <div class="field">
               <label>What's your free tool or resource called?</label>
               <input type="text" id="f-name" placeholder="e.g. The 5-Minute Pricing Formula" />
             </div>
-
             <div class="field">
               <label>Who is it for?</label>
               <div class="hint">Your ideal customer — be specific.</div>
               <input type="text" id="f-audience" placeholder="e.g. Freelance designers who struggle to charge what they're worth" />
             </div>
-
             <div class="field">
               <label>What problem does it solve for them?</label>
               <div class="hint">The main frustration or pain it addresses.</div>
               <textarea id="f-problem" placeholder="e.g. They don't know how to price their services without underselling or scaring clients away"></textarea>
             </div>
-
             <div class="field">
               <label>What will they be able to do after using it?</label>
               <div class="hint">The transformation — what becomes possible?</div>
               <textarea id="f-transformation" placeholder="e.g. Confidently quote their rate and win clients who respect their pricing"></textarea>
             </div>
-
             <div class="field">
               <label>What do you want them to do?</label>
               <div class="hint">The CTA action on the button.</div>
               <input type="text" id="f-cta" value="Get Instant Access" />
             </div>
-
           </div>
-
           <div style="margin-top:1.75rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
             <button class="btn-primary" id="generate-btn" onclick="generate()">Generate My 3 Options →</button>
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- STEP 2: LOADING -->
@@ -275,29 +359,147 @@
     <div id="step2-output" style="display:none;">
       <div class="options-header">
         <h2>Choose your style</h2>
-        <button class="btn-secondary" onclick="goBack()">← Edit Details</button>
+        <button class="btn-secondary" onclick="goToStep1()">← Edit Details</button>
       </div>
       <div class="options-grid" id="options-grid"></div>
     </div>
 
-    <!-- STEP 3: PLACEHOLDER (Phase 2) -->
+    <!-- STEP 3: CUSTOMISE & EXPORT -->
     <div id="step3" style="display:none;">
-      <div class="card fade-in">
-        <div class="card-header">
-          <div class="card-icon" style="background:rgba(42,92,69,0.1);border:1px solid rgba(42,92,69,0.2);">🎨</div>
-          <div class="card-title" id="step3-title">Customise Your Page</div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--text);">Customise Your Page</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:2px;">Style: <strong id="chosen-style-label" style="color:var(--text2);"></strong></div>
         </div>
-        <div class="card-body">
-          <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1.5rem;">
-            You selected the <strong id="chosen-style-label"></strong> style. Customisation and export options are coming in the next update — for now, your copy is ready to use below.
-          </p>
-          <div id="chosen-copy-box" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;"></div>
-          <div style="margin-top:1.25rem;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn-primary" onclick="copyCopy()">Copy All Copy</button>
-            <button class="btn-secondary" onclick="goBack()">← Choose Different Style</button>
+        <button class="btn-secondary" onclick="goToStep2()">← Choose Different Style</button>
+      </div>
+
+      <div class="editor-wrap fade-in">
+
+        <!-- LEFT: CONTROLS -->
+        <div class="editor-panel">
+          <div class="editor-panel-header">
+            <span class="editor-panel-title">Page Options</span>
           </div>
-          <div id="copy-confirm" style="margin-top:8px;font-size:12px;color:var(--green-light);display:none;">✓ Copied to clipboard</div>
+          <div class="editor-body">
+
+            <!-- HEADLINE SWITCHER -->
+            <div class="editor-section">
+              <div class="editor-label">Headline</div>
+              <div class="headline-tabs" id="headline-tabs"></div>
+            </div>
+
+            <!-- LAYOUT -->
+            <div class="editor-section">
+              <div class="editor-label">Layout</div>
+              <div class="layout-row">
+                <button class="layout-btn active" id="layout-centered" onclick="setLayout('centered')">Centered</button>
+                <button class="layout-btn" id="layout-left" onclick="setLayout('left')">Left-Aligned</button>
+                <button class="layout-btn" id="layout-split" onclick="setLayout('split')">Split</button>
+              </div>
+            </div>
+
+            <!-- PHOTO UPLOAD (split only) -->
+            <div class="editor-section" id="photo-section" style="display:none;">
+              <div class="editor-label">Photo / Image</div>
+              <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
+                <div style="font-size:12px;color:var(--text3);">Click to upload a photo</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:3px;">JPG or PNG, up to 5MB</div>
+              </div>
+              <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
+              <img id="photo-preview" class="photo-preview" style="display:none;" alt="Preview">
+            </div>
+
+            <!-- BACKGROUND -->
+            <div class="editor-section">
+              <div class="editor-label">Background</div>
+              <div class="bg-row">
+                <button class="bg-btn active" id="bg-light" onclick="setBg('light')">☀️ Light</button>
+                <button class="bg-btn" id="bg-dark" onclick="setBg('dark')">🌙 Dark</button>
+              </div>
+            </div>
+
+            <!-- COLOR THEME -->
+            <div class="editor-section">
+              <div class="editor-label">Accent Color</div>
+              <div class="swatch-row">
+                <div class="swatch active" id="swatch-gold" style="background:#C9A84C;" onclick="setColor('gold')" title="Gold"></div>
+                <div class="swatch" id="swatch-purple" style="background:#4B3F8A;" onclick="setColor('purple')" title="Purple"></div>
+                <div class="swatch" id="swatch-green" style="background:#3D8A65;" onclick="setColor('green')" title="Green"></div>
+                <div class="swatch" id="swatch-red" style="background:#C0392B;" onclick="setColor('red')" title="Red"></div>
+                <div class="swatch" id="swatch-blue" style="background:#2980B9;" onclick="setColor('blue')" title="Blue"></div>
+              </div>
+            </div>
+
+            <!-- CTA TEXT -->
+            <div class="editor-section">
+              <div class="editor-label">Button Text</div>
+              <input class="editor-input" id="e-cta" type="text" oninput="updatePreview()" />
+            </div>
+
+            <!-- BULLETS -->
+            <div class="editor-section">
+              <div class="editor-label">Bullet Points</div>
+              <div class="bullet-list" id="bullet-list"></div>
+            </div>
+
+            <!-- BONUS BLOCK -->
+            <div class="editor-section">
+              <div class="toggle-row">
+                <span class="toggle-label-text">Bonus Block</span>
+                <label class="toggle">
+                  <input type="checkbox" id="bonus-toggle" onchange="toggleBonus()">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div id="bonus-fields" style="display:none;margin-top:8px;">
+                <textarea class="editor-textarea" id="e-bonus" placeholder="You'll also get: [describe bonus]" oninput="updatePreview()"></textarea>
+              </div>
+            </div>
+
+            <!-- SOCIAL PROOF -->
+            <div class="editor-section">
+              <div class="toggle-row">
+                <span class="toggle-label-text">Social Proof</span>
+                <label class="toggle">
+                  <input type="checkbox" id="social-toggle" onchange="toggleSocial()">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div id="social-fields" style="display:none;margin-top:8px;">
+                <textarea class="editor-textarea" id="e-social" placeholder="e.g. "This changed how I price everything." — Sarah M." oninput="updatePreview()"></textarea>
+              </div>
+            </div>
+
+          </div>
         </div>
+
+        <!-- RIGHT: LIVE PREVIEW -->
+        <div>
+          <div class="preview-wrap">
+            <div class="preview-topbar">
+              <span class="preview-topbar-label">Live Preview</span>
+            </div>
+            <div class="preview-page" id="preview-page"></div>
+          </div>
+
+          <!-- EXPORT BAR -->
+          <div class="export-bar">
+            <div class="export-bar-left">
+              <div class="export-bar-title">Ready to use your page?</div>
+              <div class="export-bar-hint">Save your work or export the HTML to host it anywhere.</div>
+            </div>
+            <div class="export-actions">
+              <button class="btn-save" id="save-btn" onclick="savePage()">Save Draft</button>
+              <button class="btn-icon" onclick="downloadHTML()">⬇ Download HTML</button>
+              <button class="btn-icon" onclick="copyEmbed()">📋 Copy Embed Code</button>
+            </div>
+          </div>
+          <div class="save-confirm" id="save-confirm">✓ Saved to your account</div>
+          <div class="save-confirm" id="embed-confirm" style="display:none;">✓ Embed code copied</div>
+        </div>
+
       </div>
     </div>
 
@@ -313,6 +515,28 @@ var MODEL = 'claude-sonnet-4-6';
 var currentUser = null;
 var parsedOptions = [];
 var chosenIndex = 0;
+var photoUrl = '';
+
+var custom = {
+  headlineIndex: 0,
+  layout: 'centered',
+  bg: 'light',
+  color: 'gold',
+  ctaText: '',
+  bullets: [],
+  bonusOn: false,
+  bonusText: '',
+  socialOn: false,
+  socialText: ''
+};
+
+var COLOR_MAP = {
+  gold:   '#C9A84C',
+  purple: '#4B3F8A',
+  green:  '#3D8A65',
+  red:    '#C0392B',
+  blue:   '#2980B9'
+};
 
 async function authHeaders() {
   var token = currentUser ? await currentUser.getIdToken() : '';
@@ -334,16 +558,20 @@ function setStep(n) {
   });
 }
 
-function goBack() {
-  document.getElementById('step1').style.display = 'block';
-  document.getElementById('step2-output').style.display = 'none';
-  document.getElementById('step3').style.display = 'none';
+function showOnly(id) {
+  ['step1','step2-loading','step2-output','step3'].forEach(function(s) {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function goToStep1() {
+  showOnly('step1');
   setStep(1);
 }
 
-function markPrefilled(id) {
-  var el = document.getElementById(id);
-  if (el && el.value) el.classList.add('prefilled');
+function goToStep2() {
+  showOnly('step2-output');
+  setStep(2);
 }
 
 function prefill(fields) {
@@ -359,6 +587,7 @@ function prefill(fields) {
   if (any) document.getElementById('prefill-banner').style.display = 'block';
 }
 
+/* ── GENERATE ─────────────────────────────── */
 async function generate() {
   var name           = document.getElementById('f-name').value.trim();
   var audience       = document.getElementById('f-audience').value.trim();
@@ -371,11 +600,8 @@ async function generate() {
     return;
   }
 
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2-loading').style.display = 'block';
+  showOnly('step2-loading');
   setStep(2);
-
-  var systemPrompt = 'You are a professional conversion copywriter specializing in opt-in pages for coaches, consultants, and online business owners.';
 
   var userPrompt = 'The user has provided:\n' +
     '- Lead magnet name: ' + name + '\n' +
@@ -386,71 +612,47 @@ async function generate() {
     'Generate 3 complete opt-in page variations. Each must be specific to what the user shared — no generic filler phrases.\n\n' +
     'OUTPUT FORMAT (repeat for each of the 3 options):\n\n' +
     'OPTION [1/2/3] — [Style Name]\n' +
-    'Best for: [one sentence describing who this style works best for]\n\n' +
-    'HEADLINE: [headline text]\n' +
-    'SUBHEADLINE: [subheadline text]\n' +
-    'BULLETS:\n' +
-    '- [bullet 1]\n' +
-    '- [bullet 2]\n' +
-    '- [bullet 3]\n' +
-    '- [bullet 4] (optional)\n' +
-    'CTA BUTTON: [button text]\n\n' +
-    '---\n\n' +
-    'Style guidelines:\n\n' +
-    'Option 1 — Bold & Direct\n' +
-    'Short, punchy, no fluff. Leads with the outcome. Works best for audiences who are results-focused and skeptical of hype.\n\n' +
-    'Option 2 — Story-Driven\n' +
-    'Opens with a relatable pain point. Warmer, more conversational tone. Works best for audiences who need to feel understood before they opt in.\n\n' +
-    'Option 3 — Curiosity-Led\n' +
-    'Headline creates intrigue — hints at the result without giving it away. Works best for cold audiences who don\'t yet know they need this.';
+    'Best for: [one sentence]\n\n' +
+    'HEADLINE: [headline]\n' +
+    'SUBHEADLINE: [subheadline]\n' +
+    'BULLETS:\n- [bullet 1]\n- [bullet 2]\n- [bullet 3]\n- [bullet 4] (optional)\n' +
+    'CTA BUTTON: [button text]\n\n---\n\n' +
+    'Option 1 — Bold & Direct: short, punchy, leads with the outcome.\n' +
+    'Option 2 — Story-Driven: opens with relatable pain, warmer tone.\n' +
+    'Option 3 — Curiosity-Led: headline hints at the result without giving it away.';
 
   try {
     var headers = await authHeaders();
     var res = await fetch(FUNCTION_URL, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        model: MODEL,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-        max_tokens: 2000
-      })
+      method: 'POST', headers: headers,
+      body: JSON.stringify({ model: MODEL, system: 'You are a professional conversion copywriter specializing in opt-in pages.', messages: [{ role: 'user', content: userPrompt }], max_tokens: 2000 })
     });
-
-    if (!res.ok) throw new Error('Generation failed');
+    if (!res.ok) throw new Error('failed');
     var data = await res.json();
     var raw = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : (data.text || '');
-
     parsedOptions = parseOptions(raw, cta);
-
-    document.getElementById('step2-loading').style.display = 'none';
-    renderOptions(parsedOptions);
-    document.getElementById('step2-output').style.display = 'block';
-
+    showOnly('step2-output');
+    renderOptionCards(parsedOptions);
   } catch(e) {
-    document.getElementById('step2-loading').style.display = 'none';
-    document.getElementById('step1').style.display = 'block';
+    showOnly('step1');
     setStep(1);
-    alert('Something went wrong generating your options. Please try again.');
+    alert('Something went wrong. Please try again.');
   }
 }
 
 function parseOptions(raw, defaultCta) {
   var options = [];
-  var blocks = raw.split(/OPTION\s+\d+\s*[—–-]+\s*/i).filter(function(b) { return b.trim(); });
+  var blocks = raw.split(/OPTION\s+\d+\s*[—–-]+\s*/i).filter(function(b){ return b.trim(); });
   blocks.forEach(function(block) {
-    var styleMatch   = block.match(/^(.+?)[\n\r]/);
-    var bestMatch    = block.match(/Best for:\s*(.+?)[\n\r]/i);
+    var styleMatch    = block.match(/^(.+?)[\n\r]/);
+    var bestMatch     = block.match(/Best for:\s*(.+?)[\n\r]/i);
     var headlineMatch = block.match(/HEADLINE:\s*(.+?)[\n\r]/i);
-    var subMatch     = block.match(/SUBHEADLINE:\s*(.+?)[\n\r]/i);
-    var ctaMatch     = block.match(/CTA BUTTON:\s*(.+?)[\n\r$]/i);
-    var bulletsRaw   = block.match(/BULLETS:([\s\S]*?)(?:CTA BUTTON:|$)/i);
+    var subMatch      = block.match(/SUBHEADLINE:\s*(.+?)[\n\r]/i);
+    var ctaMatch      = block.match(/CTA BUTTON:\s*(.+?)(?:[\n\r]|$)/i);
+    var bulletsRaw    = block.match(/BULLETS:([\s\S]*?)(?:CTA BUTTON:|$)/i);
     var bullets = [];
     if (bulletsRaw) {
-      bullets = bulletsRaw[1].split('\n')
-        .map(function(l) { return l.replace(/^[-•*]+\s*/, '').trim(); })
-        .filter(function(l) { return l.length > 0; })
-        .slice(0, 4);
+      bullets = bulletsRaw[1].split('\n').map(function(l){ return l.replace(/^[-•*]+\s*/, '').trim(); }).filter(Boolean).slice(0,4);
     }
     options.push({
       style:    (styleMatch ? styleMatch[1] : 'Option').trim(),
@@ -465,58 +667,318 @@ function parseOptions(raw, defaultCta) {
   return options;
 }
 
-function renderOptions(options) {
+function renderOptionCards(options) {
   var grid = document.getElementById('options-grid');
   grid.innerHTML = '';
   options.forEach(function(opt, i) {
-    var bullets = opt.bullets.map(function(b) {
-      return '<div class="preview-bullet">' + esc(b) + '</div>';
-    }).join('');
-
+    var bullets = opt.bullets.map(function(b){ return '<div class="preview-bullet">' + esc(b) + '</div>'; }).join('');
     var card = document.createElement('div');
     card.className = 'option-card fade-in';
     card.innerHTML =
-      '<div class="option-tag">' +
-        '<div class="option-style">' + esc(opt.style) + '</div>' +
-        (opt.bestFor ? '<div class="option-best">Best for: ' + esc(opt.bestFor) + '</div>' : '') +
-      '</div>' +
+      '<div class="option-tag"><div class="option-style">' + esc(opt.style) + '</div>' +
+      (opt.bestFor ? '<div class="option-best">Best for: ' + esc(opt.bestFor) + '</div>' : '') + '</div>' +
       '<div class="page-preview">' +
         '<div class="preview-headline">' + esc(opt.headline) + '</div>' +
         (opt.sub ? '<div class="preview-sub">' + esc(opt.sub) + '</div>' : '') +
         (bullets ? '<div class="preview-bullets">' + bullets + '</div>' : '') +
         '<div class="preview-cta">' + esc(opt.cta) + '</div>' +
       '</div>' +
-      '<div class="option-footer">' +
-        '<button class="btn-use" onclick="selectOption(' + i + ')">Use This One →</button>' +
-      '</div>';
+      '<div class="option-footer"><button class="btn-use" onclick="selectOption(' + i + ')">Use This One →</button></div>';
     grid.appendChild(card);
   });
 }
 
+/* ── SELECT + CUSTOMISE ────────────────────── */
 function selectOption(i) {
   chosenIndex = i;
   var opt = parsedOptions[i];
-  document.getElementById('step2-output').style.display = 'none';
-  document.getElementById('step3').style.display = 'block';
   document.getElementById('chosen-style-label').textContent = opt.style;
-  var copyText = 'HEADLINE:\n' + opt.headline +
-    '\n\nSUBHEADLINE:\n' + (opt.sub || '') +
-    '\n\nBULLETS:\n' + opt.bullets.map(function(b){ return '• ' + b; }).join('\n') +
-    '\n\nCTA BUTTON:\n' + opt.cta;
-  document.getElementById('chosen-copy-box').textContent = copyText;
+
+  custom.headlineIndex = 0;
+  custom.layout = 'centered';
+  custom.bg = 'light';
+  custom.color = 'gold';
+  custom.ctaText = opt.cta;
+  custom.bullets = opt.bullets.slice();
+  custom.bonusOn = false;
+  custom.bonusText = '';
+  custom.socialOn = false;
+  custom.socialText = '';
+  photoUrl = '';
+
+  // Populate headline switcher with all 3 headlines
+  var tabs = document.getElementById('headline-tabs');
+  tabs.innerHTML = '';
+  parsedOptions.forEach(function(o, idx) {
+    var tab = document.createElement('div');
+    tab.className = 'headline-tab' + (idx === 0 ? ' active' : '');
+    tab.textContent = o.headline;
+    tab.onclick = (function(n){ return function(){ setHeadline(n); }; })(idx);
+    tabs.appendChild(tab);
+  });
+
+  // CTA
+  document.getElementById('e-cta').value = opt.cta;
+
+  // Bullets
+  renderBulletEditors(opt.bullets);
+
+  // Bonus / social
+  document.getElementById('bonus-toggle').checked = false;
+  document.getElementById('bonus-fields').style.display = 'none';
+  document.getElementById('social-toggle').checked = false;
+  document.getElementById('social-fields').style.display = 'none';
+
+  // Reset layout/bg/color UI
+  ['centered','left','split'].forEach(function(l){ document.getElementById('layout-'+l).classList.toggle('active', l === 'centered'); });
+  ['light','dark'].forEach(function(b){ document.getElementById('bg-'+b).classList.toggle('active', b === 'light'); });
+  Object.keys(COLOR_MAP).forEach(function(c){ document.getElementById('swatch-'+c).classList.toggle('active', c === 'gold'); });
+  document.getElementById('photo-section').style.display = 'none';
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-preview').src = '';
+
+  document.getElementById('save-confirm').style.display = 'none';
+  document.getElementById('embed-confirm').style.display = 'none';
+  document.getElementById('save-btn').textContent = 'Save Draft';
+
+  showOnly('step3');
   setStep(3);
+  updatePreview();
 }
 
-function copyCopy() {
-  var text = document.getElementById('chosen-copy-box').textContent;
-  navigator.clipboard.writeText(text).then(function() {
-    document.getElementById('copy-confirm').style.display = 'block';
-    setTimeout(function(){ document.getElementById('copy-confirm').style.display = 'none'; }, 2500);
+function renderBulletEditors(bullets) {
+  var list = document.getElementById('bullet-list');
+  list.innerHTML = '';
+  bullets.forEach(function(b, i) {
+    var row = document.createElement('div');
+    row.className = 'bullet-row';
+    row.innerHTML = '<span class="bullet-dot">✦</span>' +
+      '<input class="bullet-input" type="text" value="' + esc(b) + '" oninput="custom.bullets[' + i + ']=this.value;updatePreview();" />';
+    list.appendChild(row);
   });
+}
+
+function setHeadline(n) {
+  custom.headlineIndex = n;
+  document.querySelectorAll('.headline-tab').forEach(function(t, i){ t.classList.toggle('active', i === n); });
+  updatePreview();
+}
+
+function setLayout(l) {
+  custom.layout = l;
+  ['centered','left','split'].forEach(function(x){ document.getElementById('layout-'+x).classList.toggle('active', x === l); });
+  document.getElementById('photo-section').style.display = l === 'split' ? 'block' : 'none';
+  updatePreview();
+}
+
+function setBg(b) {
+  custom.bg = b;
+  ['light','dark'].forEach(function(x){ document.getElementById('bg-'+x).classList.toggle('active', x === b); });
+  updatePreview();
+}
+
+function setColor(c) {
+  custom.color = c;
+  Object.keys(COLOR_MAP).forEach(function(x){ document.getElementById('swatch-'+x).classList.toggle('active', x === c); });
+  updatePreview();
+}
+
+function toggleBonus() {
+  custom.bonusOn = document.getElementById('bonus-toggle').checked;
+  document.getElementById('bonus-fields').style.display = custom.bonusOn ? 'block' : 'none';
+  updatePreview();
+}
+
+function toggleSocial() {
+  custom.socialOn = document.getElementById('social-toggle').checked;
+  document.getElementById('social-fields').style.display = custom.socialOn ? 'block' : 'none';
+  updatePreview();
+}
+
+function handlePhoto(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    photoUrl = ev.target.result;
+    var img = document.getElementById('photo-preview');
+    img.src = photoUrl;
+    img.style.display = 'block';
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── LIVE PREVIEW ──────────────────────────── */
+function updatePreview() {
+  custom.ctaText   = document.getElementById('e-cta').value || parsedOptions[chosenIndex].cta;
+  custom.bonusText = (document.getElementById('e-bonus') || {}).value || '';
+  custom.socialText= (document.getElementById('e-social') || {}).value || '';
+
+  var opt       = parsedOptions[chosenIndex];
+  var headline  = parsedOptions[custom.headlineIndex] ? parsedOptions[custom.headlineIndex].headline : opt.headline;
+  var sub       = opt.sub;
+  var accent    = COLOR_MAP[custom.color] || COLOR_MAP.gold;
+  var isDark    = custom.bg === 'dark';
+  var bgColor   = isDark ? '#0C0B09' : '#F8F6F2';
+  var textColor = isDark ? '#F0EDE6' : '#1A1714';
+  var textMuted = isDark ? '#9A9488' : '#6B6560';
+  var cardBg    = isDark ? '#1C1A17' : '#FFFFFF';
+  var cardBorder= isDark ? '#2A2720' : '#E4E0D8';
+  var align     = custom.layout === 'left' ? 'left' : 'center';
+  var isSplit   = custom.layout === 'split';
+
+  var bullets = custom.bullets.map(function(b){
+    return '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">' +
+      '<span style="color:' + accent + ';font-size:11px;flex-shrink:0;margin-top:3px;">✦</span>' +
+      '<span style="font-size:14px;color:' + textMuted + ';line-height:1.5;">' + esc(b) + '</span></div>';
+  }).join('');
+
+  var bonusHtml = custom.bonusOn && custom.bonusText ?
+    '<div style="background:' + (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') + ';border:1px solid ' + cardBorder + ';border-radius:10px;padding:16px 20px;margin-top:20px;text-align:left;">' +
+    '<div style="font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:' + accent + ';margin-bottom:8px;">You\'ll Also Get</div>' +
+    '<div style="font-size:14px;color:' + textMuted + ';line-height:1.6;">' + esc(custom.bonusText) + '</div></div>' : '';
+
+  var socialHtml = custom.socialOn && custom.socialText ?
+    '<div style="border-left:3px solid ' + accent + ';padding:10px 16px;margin-top:20px;text-align:left;">' +
+    '<div style="font-size:14px;color:' + textMuted + ';line-height:1.6;font-style:italic;">' + esc(custom.socialText) + '</div></div>' : '';
+
+  var contentHtml;
+  if (isSplit) {
+    var imgHtml = photoUrl
+      ? '<img src="' + photoUrl + '" style="width:100%;height:260px;object-fit:cover;border-radius:12px;" alt="">'
+      : '<div style="width:100%;height:260px;background:' + cardBorder + ';border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;color:' + textMuted + ';">Your photo here</div>';
+    contentHtml =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;">' +
+        '<div>' + imgHtml + '</div>' +
+        '<div style="text-align:left;">' +
+          '<h1 style="font-size:26px;font-weight:700;line-height:1.25;color:' + textColor + ';margin-bottom:14px;">' + esc(headline) + '</h1>' +
+          (sub ? '<p style="font-size:15px;color:' + textMuted + ';line-height:1.65;margin-bottom:20px;">' + esc(sub) + '</p>' : '') +
+          '<div style="margin-bottom:20px;">' + bullets + '</div>' +
+          '<div style="background:' + accent + ';color:#fff;text-align:center;font-weight:700;font-size:15px;padding:14px 24px;border-radius:8px;cursor:pointer;">' + esc(custom.ctaText) + '</div>' +
+          '<div style="font-size:11px;color:' + textMuted + ';text-align:center;margin-top:8px;">No spam. Unsubscribe anytime.</div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    contentHtml =
+      '<div style="max-width:520px;margin:0 auto;text-align:' + align + ';">' +
+        '<h1 style="font-size:28px;font-weight:700;line-height:1.25;color:' + textColor + ';margin-bottom:14px;">' + esc(headline) + '</h1>' +
+        (sub ? '<p style="font-size:15px;color:' + textMuted + ';line-height:1.65;margin-bottom:20px;">' + esc(sub) + '</p>' : '') +
+        '<div style="margin-bottom:20px;text-align:left;">' + bullets + '</div>' +
+        '<div style="background:' + accent + ';color:#fff;text-align:center;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;cursor:pointer;max-width:320px;margin:0 auto;">' + esc(custom.ctaText) + '</div>' +
+        '<div style="font-size:11px;color:' + textMuted + ';text-align:center;margin-top:8px;">No spam. Unsubscribe anytime.</div>' +
+      '</div>';
+  }
+
+  document.getElementById('preview-page').innerHTML =
+    '<div style="background:' + bgColor + ';padding:40px 32px;min-height:500px;">' +
+      contentHtml +
+      bonusHtml +
+      socialHtml +
+    '</div>';
+}
+
+/* ── EXPORT ────────────────────────────────── */
+function buildStandaloneHTML() {
+  var opt      = parsedOptions[chosenIndex];
+  var headline = parsedOptions[custom.headlineIndex] ? parsedOptions[custom.headlineIndex].headline : opt.headline;
+  var accent   = COLOR_MAP[custom.color] || COLOR_MAP.gold;
+  var isDark   = custom.bg === 'dark';
+  var bgColor  = isDark ? '#0C0B09' : '#F8F6F2';
+  var textColor= isDark ? '#F0EDE6' : '#1A1714';
+  var textMuted= isDark ? '#9A9488' : '#6B6560';
+  var align    = custom.layout === 'left' ? 'left' : 'center';
+
+  var bullets = custom.bullets.map(function(b){
+    return '<li style="margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;list-style:none;">' +
+      '<span style="color:' + accent + ';flex-shrink:0;">✦</span>' +
+      '<span>' + esc(b) + '</span></li>';
+  }).join('');
+
+  var bonusHtml = custom.bonusOn && custom.bonusText ?
+    '<div style="background:rgba(0,0,0,0.05);border-radius:10px;padding:20px;margin-top:28px;text-align:left;">' +
+    '<div style="font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:' + accent + ';margin-bottom:10px;">You\'ll Also Get</div>' +
+    '<p>' + esc(custom.bonusText) + '</p></div>' : '';
+
+  var socialHtml = custom.socialOn && custom.socialText ?
+    '<div style="border-left:3px solid ' + accent + ';padding:12px 18px;margin-top:28px;text-align:left;">' +
+    '<p style="font-style:italic;">' + esc(custom.socialText) + '</p></div>' : '';
+
+  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
+    '<title>' + esc(opt.style) + ' — Opt-In Page</title>\n' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:' + bgColor + ';color:' + textColor + ';min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}' +
+    '.page{max-width:600px;width:100%;text-align:' + align + '}h1{font-size:2rem;line-height:1.25;margin-bottom:14px}p.sub{font-size:1rem;color:' + textMuted + ';line-height:1.65;margin-bottom:24px}' +
+    'ul{padding:0;margin-bottom:24px;text-align:left}.cta-btn{display:block;background:' + accent + ';color:#fff;text-align:center;font-weight:700;font-size:1rem;padding:14px 32px;border-radius:8px;cursor:pointer;border:none;width:100%;max-width:320px;margin:0 auto;text-decoration:none}' +
+    '.small{font-size:12px;color:' + textMuted + ';text-align:center;margin-top:8px}</style>\n</head>\n<body>\n<div class="page">\n' +
+    '<h1>' + esc(headline) + '</h1>\n' +
+    (opt.sub ? '<p class="sub">' + esc(opt.sub) + '</p>\n' : '') +
+    '<ul>' + bullets + '</ul>\n' +
+    '<a href="#" class="cta-btn">' + esc(custom.ctaText) + '</a>\n' +
+    '<p class="small">No spam. Unsubscribe anytime.</p>\n' +
+    bonusHtml + socialHtml +
+    '</div>\n</body>\n</html>';
+}
+
+function downloadHTML() {
+  var html = buildStandaloneHTML();
+  var blob = new Blob([html], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'optin-page.html';
+  a.click();
+}
+
+function copyEmbed() {
+  var text = '<!-- Paste your hosted page URL below -->\n<iframe src="YOUR_HOSTED_URL_HERE" width="100%" height="700" frameborder="0" scrolling="no" style="border:none;"></iframe>';
+  navigator.clipboard.writeText(text).then(function(){
+    var el = document.getElementById('embed-confirm');
+    el.style.display = 'block';
+    setTimeout(function(){ el.style.display = 'none'; }, 2500);
+  });
+}
+
+async function savePage() {
+  if (!currentUser) return;
+  var btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    var opt = parsedOptions[chosenIndex];
+    var headline = parsedOptions[custom.headlineIndex] ? parsedOptions[custom.headlineIndex].headline : opt.headline;
+    await db.collection('optin_pages').add({
+      userId:      currentUser.uid,
+      createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+      style:       opt.style,
+      headline:    headline,
+      sub:         opt.sub,
+      bullets:     custom.bullets,
+      ctaText:     custom.ctaText,
+      layout:      custom.layout,
+      bgMode:      custom.bg,
+      colorTheme:  custom.color,
+      bonusOn:     custom.bonusOn,
+      bonusText:   custom.bonusText,
+      socialOn:    custom.socialOn,
+      socialText:  custom.socialText,
+      photoUrl:    photoUrl,
+      status:      'draft'
+    });
+    await db.collection('certification_progress').doc(currentUser.uid).set(
+      { optinPageBuilt: true }, { merge: true }
+    );
+    btn.textContent = '✓ Saved';
+    document.getElementById('save-confirm').style.display = 'block';
+    setTimeout(function(){ document.getElementById('save-confirm').style.display = 'none'; }, 3000);
+  } catch(e) {
+    btn.textContent = 'Save Draft';
+    alert('Save failed. Please try again.');
+  }
+  btn.disabled = false;
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* ── AUTH + PREFILL ────────────────────────── */
 auth.onAuthStateChanged(async function(user) {
   if (!user) { window.location.href = 'signon.html'; return; }
   currentUser = user;
@@ -526,35 +988,33 @@ auth.onAuthStateChanged(async function(user) {
   if (av) av.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
   if (nm) nm.textContent = user.displayName || user.email || '';
 
-  var uid   = user.uid;
-  var email = (user.email || '').toLowerCase().trim();
+  try {
+    var userSnap = await db.collection('users').doc(user.uid).get();
+    var userData = userSnap.exists ? userSnap.data() : {};
+    var cpSnap   = await db.collection('certification_progress').doc(user.uid).get();
+    var cpData   = cpSnap.exists ? cpSnap.data() : {};
+
+    var isAdmin      = userData.userRole === 'admin';
+    var hasCert      = cpData.phase1Complete === true;
+
+    if (!isAdmin && !hasCert) {
+      document.getElementById('locked-view').style.display = 'block';
+      return;
+    }
+  } catch(e) {}
+
+  document.getElementById('step1').style.display = 'block';
 
   try {
     var results = await Promise.allSettled([
-      db.collection('audience_results').where('userId','==',uid).limit(1).get(),
-      db.collection('clarity_sessions').where('userId','==',uid).where('status','==','completed').limit(5).get(),
-      db.collection('offer_results').doc(uid).get()
+      db.collection('audience_results').where('userId','==',user.uid).limit(1).get(),
+      db.collection('clarity_sessions').where('userId','==',user.uid).where('status','==','completed').limit(5).get(),
+      db.collection('offer_results').doc(user.uid).get()
     ]);
-
-    var audData = {};
-    if (results[0].status === 'fulfilled' && !results[0].value.empty) {
-      audData = results[0].value.docs[0].data();
-    }
-
-    var clarityData = {};
-    if (results[1].status === 'fulfilled' && !results[1].value.empty) {
-      var sorted = results[1].value.docs.sort(function(a,b){
-        return (b.data().createdAt ? b.data().createdAt.toMillis() : 0) -
-               (a.data().createdAt ? a.data().createdAt.toMillis() : 0);
-      });
-      clarityData = sorted[0].data();
-    }
-
-    var offerData = {};
-    if (results[2].status === 'fulfilled' && results[2].value.exists) {
-      offerData = results[2].value.data();
-    }
-
+    var audData     = (!results[0].value || results[0].value.empty) ? {} : results[0].value.docs[0].data();
+    var clarityDocs = (results[1].status === 'fulfilled' && !results[1].value.empty) ? results[1].value.docs.sort(function(a,b){ return (b.data().createdAt ? b.data().createdAt.toMillis():0)-(a.data().createdAt ? a.data().createdAt.toMillis():0); }) : [];
+    var clarityData = clarityDocs.length ? clarityDocs[0].data() : {};
+    var offerData   = (results[2].status === 'fulfilled' && results[2].value.exists) ? results[2].value.data() : {};
     prefill({
       'f-name':           offerData.toolName || clarityData.chosenToolName || '',
       'f-audience':       offerData.audience || audData.whoTheyAre || '',

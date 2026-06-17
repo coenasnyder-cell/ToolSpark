@@ -267,10 +267,21 @@
         </div>
         <div class="step-desc">Write the copy for your free tool's opt-in page, then build the actual page.</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="sales-page-builder.html?mode=optin" class="step-link" onclick="event.stopPropagation()">Write Copy →</a>
-          <a href="optin-page-maker.html" class="step-link" onclick="event.stopPropagation()" style="background:rgba(75,63,138,0.12);border-color:rgba(75,63,138,0.3);color:#9B8FD0;">Build Page →</a>
+          <a href="optin-builder.html" class="step-link" onclick="event.stopPropagation()">Build Opt-In Page →</a>
+          <a href="sales-page-builder.html?mode=optin" class="step-link" onclick="event.stopPropagation()" style="background:rgba(75,63,138,0.12);border-color:rgba(75,63,138,0.3);color:#9B8FD0;">Copy Only →</a>
         </div>
       </div>
+    </div>
+
+    <!-- Opt-In Page Summary Card -->
+    <div id="optin-card" class="vm-card" style="display:none;margin-bottom:8px;">
+      <div class="vm-eyebrow">✅ Opt-In Page Built</div>
+      <div class="vm-grid">
+        <div><div class="vm-field-label">Style</div><div class="vm-field-value" id="optin-style"></div></div>
+        <div><div class="vm-field-label">Headline</div><div class="vm-field-value" id="optin-headline"></div></div>
+        <div><div class="vm-field-label">Status</div><div class="vm-field-value" id="optin-status"></div></div>
+      </div>
+      <a href="optin-builder.html" class="vm-link">Edit →</a>
     </div>
 
     <!-- Step 9 -->
@@ -551,6 +562,21 @@ async function completePhase2() {
   }
 }
 
+async function loadOptinSummary(uid) {
+  try {
+    var snap = await db.collection('optin_pages').where('userId','==',uid).limit(10).get();
+    if (snap.empty) return;
+    var docs = snap.docs.sort(function(a,b){
+      return (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0);
+    });
+    var data = docs[0].data();
+    document.getElementById('optin-style').textContent    = data.style || '—';
+    document.getElementById('optin-headline').textContent = data.headline || '—';
+    document.getElementById('optin-status').textContent   = data.status === 'published' ? 'Published' : data.status === 'downloaded' ? 'Downloaded' : 'Draft';
+    document.getElementById('optin-card').style.display   = 'block';
+  } catch(e) {}
+}
+
 async function loadValueMirror(uid) {
   try {
     var snap = await db.collection('value_tool').where('userId','==',uid).limit(5).get();
@@ -618,6 +644,7 @@ auth.onAuthStateChanged(async function(user) {
 
     renderSteps();
     loadValueMirror(user.uid);
+    loadOptinSummary(user.uid);
 
   } catch(e) {
     console.error(e);
