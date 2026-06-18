@@ -2328,7 +2328,7 @@ Return ONLY the following JSON structure with no chain-of-thought, no extra text
       messages: [{ role: "user", content: userMessage }],
     });
 
-    const raw = response.content[0]?.text || "";
+    const raw = (response.content[0]?.text || "").replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
     let result;
     try {
       result = JSON.parse(raw);
