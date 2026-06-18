@@ -667,10 +667,16 @@ const sparkContextPromise = (async () => {
       try {
         const snap = await db.collection('spark_results')
           .where('userId', '==', user.uid)
-          .orderBy('createdAt', 'desc')
-          .limit(1)
+          .limit(5)
           .get();
-        if (!snap.empty) sparkProfile = snap.docs[0].data();
+        if (!snap.empty) {
+          const sorted = snap.docs.sort((a, b) => {
+            const at = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+            const bt = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+            return bt - at;
+          });
+          sparkProfile = sorted[0].data();
+        }
       } catch(e) {}
     }
 
@@ -701,8 +707,7 @@ const sparkContextPromise = (async () => {
 // ─────────────────────────────────────
 const CHIPS = {
   1: ["A lot like me", "Someone I've helped"],
-  2: ["Overwhelming, too many things pulling at me", "Stuck, I know what I want but can't move", "Frustrated, I keep starting over"],
-  4: ["Something broke down and I couldn't ignore it", "I watched someone else succeed and felt left behind", "I hit the same wall one too many times"],
+  3: ["Something broke down and I couldn't ignore it", "I watched someone else succeed and felt left behind", "I hit the same wall one too many times"],
 };
 
 // ─────────────────────────────────────
