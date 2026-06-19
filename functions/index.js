@@ -2229,28 +2229,30 @@ exports.crmPublicUnsubscribe = crm.crmPublicUnsubscribe;
 exports.runCrmSequenceQueue = crm.runCrmSequenceQueue;
 
 // ── IDEA VALIDATOR ────────────────────────────────────────────────────────────
-exports.ideaValidator = onRequest({
-  cors: true,
-  invoker: "public",
-  secrets: ["ANTHROPIC_KEY"],
-}, async (req, res) => {
-  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
 
-  const { idea, audience, problem } = req.body || {};
+const SPARKY_VALIDATOR_SYSTEM = `You are Sparky ⚡ — the ToolSpark AI assistant. Your job: have a friendly 5-question conversation to collect what you need to validate someone's AI tool idea.
 
-  if (!idea || !idea.trim()) {
-    res.status(400).json({ error: "Idea description is required." });
-    return;
-  }
-  if (!audience || !audience.trim()) {
-    res.status(400).json({ error: "Target audience is required." });
-    return;
-  }
-  if (!problem || !problem.trim()) {
-    res.status(400).json({ error: "Problem solved is required." });
-    return;
-  }
+COLLECT THESE IN ORDER — one at a time, never more than one question per message:
+1. idea — their AI tool concept (what it does)
+2. audience — who it's for
+3. problem — the specific pain or frustration it solves
+4. advantage — their unfair advantage (existing audience, niche expertise, tools they've built, or industry authority)
+5. email — the email address to send their results to
 
+RULES:
+- ONE question per message. Never bundle two questions. Ever.
+- Keep messages to 1-2 sentences. Short and punchy.
+- Acknowledge what they said in a few words, then move straight to the next question.
+- Use ⚡ sparingly — only when something genuinely excites you.
+- For the advantage question, give a hint: "Think existing audience, niche expertise, or something you've already built."
+- Never ask for email until you have all 4 other fields.
+- When you have all 5 AND the email looks valid, end your message with this tag on its own line:
+[COMPLETE:{"idea":"...","audience":"...","problem":"...","advantage":"...","email":"..."}]
+- Escape any quotes inside the JSON values with \\"
+- Do not emit [COMPLETE] until all 5 are collected and email is valid.
+- Your message before [COMPLETE] should say something like: "Perfect — analyzing your idea now ⚡"`;
+
+async function validateIdeaInternal(idea, audience, problem, advantage) {
   const systemPrompt = `You are an AI Idea Validation Engine.
 Your job is to evaluate AI tool ideas and generate a structured, objective validation report.
 You must score the idea across five categories, provide a verdict, and give actionable recommendations.
@@ -2259,6 +2261,7 @@ You must follow the output format exactly.`;
   const userMessage = `Idea Description: ${idea.trim()}
 Target Audience: ${audience.trim()}
 Problem Solved: ${problem.trim()}
+Creator Advantage: ${(advantage || "Not provided").trim()}
 
 Evaluate this idea using the following criteria and scoring weights:
 
@@ -2266,6 +2269,7 @@ Evaluate this idea using the following criteria and scoring weights:
    - Are people actively searching for this?
    - Is the audience large enough?
    - Is the problem common?
+   - Does the creator have an existing audience that validates demand?
 
 2. Problem Severity — 20 points
    - How painful is the problem?
@@ -2281,11 +2285,13 @@ Evaluate this idea using the following criteria and scoring weights:
    - Are there existing tools?
    - Is there a niche or underserved angle?
    - Can this idea differentiate?
+   - Does the creator have an unfair advantage (existing tools, expertise, niche authority)?
 
 5. Monetization Potential — 15 points
    - Would people pay for this?
    - Are there clear pricing models?
    - Does the idea support recurring revenue?
+   - Does the creator have existing relationships or audience that accelerates monetization?
 
 Verdict rules:
 - GO (80–100): Strong idea with clear demand and good differentiation.
@@ -2319,32 +2325,47 @@ Return ONLY the following JSON structure with no chain-of-thought, no extra text
   "action_steps": ["string"]
 }`;
 
-  try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_KEY });
-    const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userMessage }],
-    });
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_KEY });
+  const response = await anthropic.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 2048,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userMessage }],
+  });
 
-    const raw = (response.content[0]?.text || "").replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
-    let result;
-    try {
-      result = JSON.parse(raw);
-    } catch {
-      console.error(JSON.stringify({ event: "idea_validator_parse_error", raw }));
-      res.status(500).json({ error: "The AI returned an unexpected response. Please try again." });
-      return;
-    }
+  if (response.stop_reason !== "end_turn") {
+    throw new Error(`truncated:${response.stop_reason}`);
+  }
+
+  const raw = (response.content[0]?.text || "")
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/, "")
+    .trim();
+
+  return JSON.parse(raw);
+}
+
+exports.ideaValidator = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ANTHROPIC_KEY"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const { idea, audience, problem, advantage } = req.body || {};
+
+  if (!idea || !idea.trim()) { res.status(400).json({ error: "Idea description is required." }); return; }
+  if (!audience || !audience.trim()) { res.status(400).json({ error: "Target audience is required." }); return; }
+  if (!problem || !problem.trim()) { res.status(400).json({ error: "Problem solved is required." }); return; }
+
+  try {
+    const result = await validateIdeaInternal(idea, audience, problem, advantage);
 
     if (process.env.ENABLE_LOGGING === "true") {
       try {
         await admin.firestore().collection("idea_validations").add({
-          idea: idea.trim(),
-          audience: audience.trim(),
-          problem: problem.trim(),
-          result,
+          idea: idea.trim(), audience: audience.trim(), problem: problem.trim(),
+          advantage: (advantage || "").trim(), result,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
       } catch (logErr) {
@@ -2356,6 +2377,85 @@ Return ONLY the following JSON structure with no chain-of-thought, no extra text
     res.status(200).json(result);
   } catch (err) {
     console.error(JSON.stringify({ event: "idea_validator_error", message: err.message }));
+    const msg = err instanceof SyntaxError || err.message?.startsWith("truncated")
+      ? "The AI returned an unexpected response. Please try again."
+      : "Something went wrong. Please try again.";
+    res.status(500).json({ error: msg });
+  }
+});
+
+exports.sparkyChat = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["ANTHROPIC_KEY"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const { messages } = req.body || {};
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({ error: "Messages array is required." });
+    return;
+  }
+
+  try {
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_KEY });
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
+      system: SPARKY_VALIDATOR_SYSTEM,
+      messages,
+    });
+
+    if (response.stop_reason !== "end_turn") {
+      res.status(500).json({ error: "Something went wrong. Please try again." });
+      return;
+    }
+
+    const text = (response.content[0]?.text || "").trim();
+    const completeMatch = text.match(/\[COMPLETE:(\{[\s\S]*?\})\]/);
+
+    if (completeMatch) {
+      let collected;
+      try {
+        collected = JSON.parse(completeMatch[1]);
+      } catch {
+        console.error(JSON.stringify({ event: "sparky_complete_parse_error", raw: completeMatch[1] }));
+        res.status(200).json({ done: false, message: "Almost there — can you confirm your email address?" });
+        return;
+      }
+
+      try {
+        const result = await validateIdeaInternal(
+          collected.idea, collected.audience, collected.problem, collected.advantage
+        );
+
+        // TODO: Send results email via Resend when template is ready
+        // await sendEmail({
+        //   to: collected.email,
+        //   subject: `Your AI Tool Idea: ${result.verdict} (${result.overall_score}/100) ⚡`,
+        //   html: buildValidatorEmail(result),
+        // });
+
+        console.log(JSON.stringify({ event: "sparky_validated", verdict: result.verdict, score: result.overall_score, email: collected.email }));
+
+        const displayText = text.replace(/\[COMPLETE:[\s\S]*?\]/, "").trim();
+        res.status(200).json({
+          done: true,
+          message: displayText || "⚡ Your results are ready!",
+          result,
+          email: collected.email,
+        });
+      } catch (err) {
+        console.error(JSON.stringify({ event: "sparky_validation_error", message: err.message }));
+        res.status(500).json({ error: "Something went wrong scoring your idea. Please try again." });
+      }
+      return;
+    }
+
+    res.status(200).json({ done: false, message: text });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "sparky_chat_error", message: err.message }));
     res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
