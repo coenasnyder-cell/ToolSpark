@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members — Hub Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <script src="/js/hub-admin-shell.js"></script>
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* Admin sidebar — shared structure */
+    .admin-sidebar {
+      width: 220px; flex-shrink: 0; background: #111;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
+    }
+    .admin-sidebar-top { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .admin-hub-logo {
+      width: 40px; height: 40px; border-radius: 10px; background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #000; margin-bottom: 10px;
+    }
+    .admin-hub-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 2px; }
+    .admin-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--yellow); opacity: .7; }
+    .admin-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .admin-nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .admin-nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+    .admin-nav-item.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 700; }
+    .admin-nav-item svg { opacity: .6; flex-shrink: 0; }
+    .admin-nav-item.active svg { opacity: 1; }
+    .admin-nav-divider { height: 1px; background: rgba(255,255,255,.07); margin: 8px 12px; }
+    .view-hub-link {
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.4); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .view-hub-link:hover { background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); }
+    .admin-sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.07); }
+    .admin-signout-btn {
+      background: none; border: none; color: rgba(255,255,255,.35); font-family: var(--font);
+      font-size: 12px; font-weight: 500; cursor: pointer; padding: 6px 8px;
+      border-radius: 6px; width: 100%; text-align: left; transition: color .15s, background .15s;
+    }
+    .admin-signout-btn:hover { background: rgba(220,50,50,.15); color: #e05555; }
+
+    /* Main */
+    .admin-main { margin-left: 220px; flex: 1; padding: 40px 36px 80px; }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .admin-page-title { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.4px; }
+
+    .member-count-tag {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text3);
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    /* Table */
+    .table-wrap {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text3);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-alt);
+    }
+    tbody td {
+      padding: 14px 20px;
+      font-size: 14px;
+      color: var(--text);
+      border-bottom: 1px solid var(--divider);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--card-alt); }
+
+    .member-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      flex-shrink: 0;
+    }
+    .member-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .member-name { font-weight: 600; }
+    .member-email { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .status-badge.active { background: var(--green-bg); color: var(--green); }
+    .status-badge.suspended { background: var(--red-bg); color: var(--red); }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .active .status-dot { background: var(--green); }
+    .suspended .status-dot { background: var(--red); }
+
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .action-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .empty-state {
+      padding: 60px 32px;
+      text-align: center;
+      color: var(--text3);
+    }
+    .empty-state-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state-sub { font-size: 13px; }
+
+    /* Confirm modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(0,0,0,.2);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-body  { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    #admin-loading {
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text3);
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { margin-left: 0; padding: 24px 16px 60px; }
+      .table-wrap { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="admin-loading">Loading...</div>
+
+  <aside class="admin-sidebar" id="admin-sidebar" style="display:none;">
+    <div class="admin-sidebar-top">
+      <div class="admin-hub-logo" id="admin-hub-logo"></div>
+      <div class="admin-hub-name" id="admin-hub-name"></div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <nav class="admin-nav" id="admin-nav"></nav>
+    <div class="admin-sidebar-footer">
+      <button class="admin-signout-btn" onclick="adminSignOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main" id="admin-main" style="display:none;">
+    <div class="page-header">
+      <div class="admin-page-title">Members</div>
+      <div class="member-count-tag" id="member-count">— members</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Joined</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="members-tbody">
+          <tr><td colspan="5"><div class="empty-state">Loading members...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Remove member confirm modal -->
+  <div class="modal-backdrop" id="remove-modal">
+    <div class="modal">
+      <div class="modal-title">Remove member?</div>
+      <div class="modal-body" id="remove-modal-body">This will remove the member from your hub. They can rejoin using the join link.</div>
+      <div class="modal-actions">
+        <button class="btn-outline" onclick="closeRemoveModal()">Cancel</button>
+        <button class="btn-secondary" id="confirm-remove-btn" style="background:var(--red);border-color:var(--red);">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NAV = [
+      { label: 'Overview',  href: '/hub/admin',          key: 'admin',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
+      { label: 'Members',   href: '/hub/admin-members',  key: 'members',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+      { label: 'Courses',   href: '/hub/admin-courses',  key: 'courses',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
+      { label: 'Settings',  href: '/hub/admin-settings', key: 'settings',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+    ];
+
+    function buildAdminNav(activeKey, hubSlug) {
+      return NAV.map(item => {
+        const cls = 'admin-nav-item' + (item.key === activeKey ? ' active' : '');
+        return `<a class="${cls}" href="${item.href}">${item.icon}<span>${item.label}</span></a>`;
+      }).join('') +
+      '<div class="admin-nav-divider"></div>' +
+      `<a class="view-hub-link" href="/hub/dashboard?hub=${hubSlug}">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>View Hub</a>`;
+    }
+
+    function adminSignOut() {
+      auth.signOut().then(() => { window.location.href = '/signon.html'; });
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '—';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    let pendingRemoveId = null;
+    let creatorIdGlobal = null;
+
+    function openRemoveModal(uid, name) {
+      pendingRemoveId = uid;
+      document.getElementById('remove-modal-body').textContent =
+        'This will remove ' + (name || 'this member') + ' from your hub. They can rejoin using the join link.';
+      document.getElementById('remove-modal').classList.add('open');
+    }
+    function closeRemoveModal() {
+      document.getElementById('remove-modal').classList.remove('open');
+      pendingRemoveId = null;
+    }
+
+    document.getElementById('confirm-remove-btn').addEventListener('click', function() {
+      if (!pendingRemoveId || !creatorIdGlobal) return;
+      const btn = this;
+      btn.disabled    = true;
+      btn.textContent = 'Removing...';
+
+      db.collection('creators').doc(creatorIdGlobal)
+        .collection('members').doc(pendingRemoveId)
+        .update({ status: 'suspended' })
+        .then(() => {
+          closeRemoveModal();
+          // Update row in table
+          const row = document.querySelector(`tr[data-uid="${pendingRemoveId}"]`);
+          if (row) {
+            const badge = row.querySelector('.status-badge');
+            if (badge) {
+              badge.className = 'status-badge suspended';
+              badge.innerHTML = '<div class="status-dot"></div>Suspended';
+            }
+            const actionBtn = row.querySelector('.action-btn');
+            if (actionBtn) actionBtn.style.display = 'none';
+          }
+          btn.disabled    = false;
+          btn.textContent = 'Remove';
+        })
+        .catch(err => {
+          alert('Error: ' + err.message);
+          btn.disabled    = false;
+          btn.textContent = 'Remove';
+        });
+    });
+
+    function loadMembers(creatorId) {
+      db.collection('creators').doc(creatorId)
+        .collection('members')
+        .orderBy('joinedAt', 'desc')
+        .get()
+        .then(snap => {
+          document.getElementById('member-count').textContent =
+            snap.size + (snap.size === 1 ? ' member' : ' members');
+
+          const tbody = document.getElementById('members-tbody');
+          if (snap.empty) {
+            tbody.innerHTML = `<tr><td colspan="5">
+              <div class="empty-state">
+                <div class="empty-state-title">No members yet</div>
+                <div class="empty-state-sub">Share your hub join link to get your first member.</div>
+              </div></td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = snap.docs.map(doc => {
+            const m       = doc.data();
+            const uid     = doc.id;
+            const name    = m.displayName || m.email || uid;
+            const initial = name.charAt(0).toUpperCase();
+            const status  = m.status || 'active';
+            const source  = m.source || '—';
+            const isActive = status === 'active';
+
+            return `<tr data-uid="${uid}">
+              <td>
+                <div class="member-name-cell">
+                  <div class="member-avatar">${initial}</div>
+                  <div>
+                    <div class="member-name">${name}</div>
+                    ${m.email && m.displayName ? `<div class="member-email">${m.email}</div>` : ''}
+                  </div>
+                </div>
+              </td>
+              <td>${formatDate(m.joinedAt)}</td>
+              <td style="color:var(--text3);font-size:13px;">${source}</td>
+              <td>
+                <div class="status-badge ${status}">
+                  <div class="status-dot"></div>
+                  ${status.charAt(0).toUpperCase() + status.slice(1)}
+                </div>
+              </td>
+              <td>
+                ${isActive
+                  ? `<button class="action-btn" onclick="openRemoveModal('${uid}','${name.replace(/'/g,"\\'")}')">Remove</button>`
+                  : ''}
+              </td>
+            </tr>`;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('members-tbody').innerHTML =
+            `<tr><td colspan="5"><div class="empty-state">Could not load members: ${err.message}</div></td></tr>`;
+        });
+    }
+
+    initAdminPage(function(hub, creatorId) {
+      creatorIdGlobal = creatorId;
+      const name = hub.displayName || 'Your Hub';
+      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('admin-hub-name').textContent = name;
+      document.getElementById('admin-nav').innerHTML = buildAdminNav('members', hub.slug || '');
+      document.title = 'Members — ' + name;
+
+      loadMembers(creatorId);
+
+      document.getElementById('admin-loading').style.display = 'none';
+      document.getElementById('admin-sidebar').style.display = 'flex';
+      document.getElementById('admin-main').style.display    = 'block';
+    });
+  </script>
+</body>
+</html>

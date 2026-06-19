@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <script src="/js/hub-shell.js"></script>
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Left panel: hub nav + lesson list */
+    .lesson-sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 50;
+    }
+
+    .sidebar-top {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .hub-identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      text-decoration: none;
+    }
+    .hub-logo-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #000;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .hub-logo-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .hub-name-sm {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      text-decoration: none;
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin: 0 -8px;
+      transition: background .15s, color .15s;
+    }
+    .back-link:hover { background: var(--card-alt); color: var(--text); }
+
+    .course-title-panel {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .course-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .course-title-sm {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* Lesson list */
+    .lesson-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
+    }
+    .lesson-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background .12s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--font);
+    }
+    .lesson-list-item:hover { background: var(--card-alt); }
+    .lesson-list-item.active { background: rgba(107,47,179,.08); }
+
+    .lesson-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .lesson-list-item.active .lesson-num {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+    }
+    .lesson-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      line-height: 1.4;
+    }
+    .lesson-list-item.active .lesson-item-title {
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sign-out-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 6px;
+      width: 100%;
+      text-align: left;
+      transition: color .15s, background .15s;
+    }
+    .sign-out-btn:hover { background: var(--red-bg); color: var(--red); }
+
+    /* Mobile top bar */
+    .mobile-bar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      z-index: 50;
+    }
+    .mobile-back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+    }
+    .mobile-bar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mobile-lessons-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      gap: 4px;
+    }
+
+    /* Mobile lesson drawer */
+    .mobile-lesson-drawer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+    }
+    .mobile-lesson-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+    }
+    .mobile-lesson-panel {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 300px;
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .mobile-lesson-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mobile-lesson-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .mobile-close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text2);
+    }
+
+    /* Main content area */
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .lesson-content {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      padding: 40px 40px 80px;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .breadcrumb a {
+      color: var(--text3);
+      text-decoration: none;
+    }
+    .breadcrumb a:hover { color: var(--purple); }
+    .breadcrumb-sep { color: var(--border); }
+
+    /* Lesson header */
+    .lesson-header {
+      margin-bottom: 28px;
+    }
+    .lesson-number-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--purple);
+      margin-bottom: 6px;
+    }
+    .lesson-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+
+    /* Video embed */
+    .video-wrap {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    .video-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .no-video {
+      display: none;
+    }
+
+    /* Lesson body / notes */
+    .lesson-body {
+      font-size: 16px;
+      color: var(--text);
+      line-height: 1.75;
+    }
+    .lesson-body h1, .lesson-body h2, .lesson-body h3 {
+      font-weight: 700;
+      color: var(--text);
+      margin: 24px 0 10px;
+      line-height: 1.3;
+    }
+    .lesson-body h1 { font-size: 22px; }
+    .lesson-body h2 { font-size: 19px; }
+    .lesson-body h3 { font-size: 16px; }
+    .lesson-body p  { margin-bottom: 16px; }
+    .lesson-body strong { font-weight: 700; }
+    .lesson-body em { font-style: italic; }
+    .lesson-body ul, .lesson-body ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    .lesson-body li { margin-bottom: 6px; }
+    .lesson-body a  { color: var(--purple); }
+    .lesson-body hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* Prev/Next nav */
+    .lesson-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      gap: 12px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      transition: border-color .15s, background .15s;
+      text-decoration: none;
+    }
+    .nav-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .nav-btn.primary {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: #000;
+    }
+    .nav-btn.primary:hover { opacity: .9; color: #000; }
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: default;
+      pointer-events: none;
+    }
+    .nav-label {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+    .nav-label-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text3);
+      margin-bottom: 2px;
+    }
+    .nav-btn.primary .nav-label-sub { color: rgba(0,0,0,.5); }
+
+    /* Loading */
+    #hub-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text3);
+    }
+
+    .lesson-error {
+      padding: 48px 40px;
+      text-align: center;
+      color: var(--text2);
+    }
+
+    @media (max-width: 768px) {
+      .lesson-sidebar { display: none; }
+      .mobile-bar { display: flex; }
+      .main { margin-left: 0; }
+      .lesson-content { padding: 80px 16px 48px; }
+      .lesson-title { font-size: 22px; }
+      .lesson-nav { flex-direction: column; }
+      .nav-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hub-loading">Loading...</div>
+
+  <!-- Mobile bar -->
+  <div class="mobile-bar" id="mobile-bar" style="display:none;">
+    <a class="mobile-back-btn" id="mobile-back-link" href="#">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </a>
+    <div class="mobile-bar-title" id="mobile-lesson-title-bar">Lesson</div>
+    <button class="mobile-lessons-btn" onclick="openLessonDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      Lessons
+    </button>
+  </div>
+
+  <!-- Mobile lesson drawer -->
+  <div class="mobile-lesson-drawer" id="mobile-lesson-drawer">
+    <div class="mobile-lesson-backdrop" onclick="closeLessonDrawer()"></div>
+    <div class="mobile-lesson-panel">
+      <div class="mobile-lesson-header">
+        <div class="mobile-lesson-title" id="mobile-course-title-drawer"></div>
+        <button class="mobile-close-btn" onclick="closeLessonDrawer()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="lesson-list" id="mobile-lesson-list"></div>
+    </div>
+  </div>
+
+  <!-- Desktop sidebar -->
+  <aside class="lesson-sidebar" id="lesson-sidebar" style="display:none;">
+    <div class="sidebar-top">
+      <a class="hub-identity" id="hub-identity-link" href="#">
+        <div class="hub-logo-sm" id="sidebar-logo">
+          <span id="sidebar-initial">H</span>
+          <img id="sidebar-logo-img" src="" alt="" style="display:none;" />
+        </div>
+        <div class="hub-name-sm" id="sidebar-hub-name"></div>
+      </a>
+      <a class="back-link" id="back-to-courses" href="#">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back to Courses
+      </a>
+    </div>
+
+    <div class="course-title-panel">
+      <div class="course-label">Course</div>
+      <div class="course-title-sm" id="sidebar-course-title"></div>
+    </div>
+
+    <div class="lesson-list" id="desktop-lesson-list"></div>
+
+    <div class="sidebar-footer">
+      <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main" id="main-content" style="display:none;">
+    <div class="lesson-content">
+
+      <div class="breadcrumb" id="breadcrumb"></div>
+
+      <div class="lesson-header">
+        <div class="lesson-number-tag" id="lesson-number-tag"></div>
+        <div class="lesson-title" id="lesson-title">Loading lesson...</div>
+      </div>
+
+      <!-- Video embed -->
+      <div class="video-wrap" id="video-wrap" style="display:none;">
+        <iframe id="lesson-video" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+      </div>
+
+      <!-- Lesson notes / body -->
+      <div class="lesson-body" id="lesson-body"></div>
+
+      <!-- Prev / Next -->
+      <div class="lesson-nav" id="lesson-nav">
+        <button class="nav-btn" id="btn-prev" onclick="navigateLesson(-1)" disabled>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <div class="nav-label">
+            <span class="nav-label-sub">Previous</span>
+            <span id="prev-label">—</span>
+          </div>
+        </button>
+
+        <button class="nav-btn primary" id="btn-next" onclick="navigateLesson(1)" disabled>
+          <div class="nav-label" style="text-align:right;">
+            <span class="nav-label-sub">Next</span>
+            <span id="next-label">—</span>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const urlParams  = new URLSearchParams(window.location.search);
+    const courseId   = urlParams.get('course') || '';
+    const initLesson = urlParams.get('lesson') || '';
+
+    let hubSlug    = '';
+    let creatorId  = '';
+    let lessons    = [];   // ordered array of {id, data}
+    let activeIdx  = 0;
+
+    function openLessonDrawer()  { document.getElementById('mobile-lesson-drawer').style.display = 'block'; }
+    function closeLessonDrawer() { document.getElementById('mobile-lesson-drawer').style.display = 'none'; }
+
+    function signOut() {
+      auth.signOut().then(() => { window.location.href = '/hub/join?hub=' + hubSlug; });
+    }
+
+    // Convert any video URL to an embed URL
+    function toEmbedUrl(url) {
+      if (!url) return null;
+      // Already an embed URL
+      if (url.includes('/embed/') || url.includes('player.vimeo')) return url;
+
+      // YouTube
+      let yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      if (yt) return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0';
+
+      // Vimeo
+      let vi = url.match(/vimeo\.com\/(\d+)/);
+      if (vi) return 'https://player.vimeo.com/video/' + vi[1];
+
+      // Loom
+      let lo = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+      if (lo) return 'https://www.loom.com/embed/' + lo[1];
+
+      return null;
+    }
+
+    // Minimal markdown renderer
+    function renderMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/^### (.+)$/gm,   '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm,    '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm,     '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+        .replace(/^---$/gm,        '<hr>')
+        .replace(/^- (.+)$/gm,     '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        .replace(/\n\n/g,          '</p><p>')
+        .replace(/\n/g,            '<br>')
+        .replace(/^(.+)$/gm, (line) => {
+          if (/^<(h[1-3]|ul|li|hr)/.test(line)) return line;
+          return line;
+        });
+    }
+
+    // Render the active lesson
+    function renderLesson(idx) {
+      if (idx < 0 || idx >= lessons.length) return;
+      activeIdx = idx;
+
+      const { id, data } = lessons[idx];
+      const total = lessons.length;
+      const num   = idx + 1;
+
+      // Update URL without reload
+      const newUrl = `/hub/course?hub=${hubSlug}&course=${courseId}&lesson=${id}`;
+      history.replaceState(null, '', newUrl);
+
+      // Titles
+      const title = data.title || 'Untitled Lesson';
+      document.getElementById('lesson-number-tag').textContent    = `Lesson ${num} of ${total}`;
+      document.getElementById('lesson-title').textContent         = title;
+      document.getElementById('mobile-lesson-title-bar').textContent = title;
+      document.title = title;
+
+      // Breadcrumb
+      const courseTitle = document.getElementById('sidebar-course-title').textContent;
+      document.getElementById('breadcrumb').innerHTML = `
+        <a href="/hub/dashboard?hub=${hubSlug}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="/hub/courses?hub=${hubSlug}">Courses</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="/hub/course?hub=${hubSlug}&course=${courseId}">${courseTitle}</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>${title}</span>`;
+
+      // Video
+      const embed = toEmbedUrl(data.videoUrl || '');
+      const videoWrap = document.getElementById('video-wrap');
+      if (embed) {
+        document.getElementById('lesson-video').src = embed;
+        videoWrap.style.display = 'block';
+      } else {
+        document.getElementById('lesson-video').src = '';
+        videoWrap.style.display = 'none';
+      }
+
+      // Body content
+      document.getElementById('lesson-body').innerHTML = data.content
+        ? renderMarkdown(data.content)
+        : '';
+
+      // Prev / Next buttons
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      btnPrev.disabled = idx === 0;
+      document.getElementById('prev-label').textContent = idx > 0
+        ? lessons[idx - 1].data.title || 'Previous'
+        : '—';
+
+      btnNext.disabled = idx === total - 1;
+      document.getElementById('next-label').textContent = idx < total - 1
+        ? lessons[idx + 1].data.title || 'Next'
+        : 'Last Lesson';
+
+      // Sidebar — update active lesson
+      document.querySelectorAll('.lesson-list-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+
+      // Scroll main to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function navigateLesson(dir) {
+      const target = activeIdx + dir;
+      if (target >= 0 && target < lessons.length) renderLesson(target);
+    }
+
+    // Build the lesson list HTML (shared by desktop and mobile)
+    function buildLessonList(onClickFn) {
+      return lessons.map(({ data }, i) => `
+        <button class="lesson-list-item${i === activeIdx ? ' active' : ''}"
+                onclick="${onClickFn}(${i})">
+          <div class="lesson-num">${i + 1}</div>
+          <div class="lesson-item-title">${data.title || 'Untitled Lesson'}</div>
+        </button>`).join('');
+    }
+
+    function jumpToLesson(idx) {
+      renderLesson(idx);
+      closeLessonDrawer();
+    }
+
+    // Load course + lessons
+    function loadCourse(cId, slug) {
+      creatorId = cId;
+      hubSlug   = slug;
+
+      if (!courseId) {
+        document.getElementById('hub-loading').innerHTML =
+          '<div style="text-align:center;padding:60px 0;color:#999;">No course specified.</div>';
+        return;
+      }
+
+      const courseRef = db.collection('creators').doc(cId).collection('courses').doc(courseId);
+
+      courseRef.get().then(courseDoc => {
+        if (!courseDoc.exists) {
+          document.getElementById('hub-loading').innerHTML =
+            '<div style="text-align:center;padding:60px 0;color:#999;">Course not found.</div>';
+          return;
+        }
+
+        const course = courseDoc.data();
+        const title  = course.title || 'Course';
+
+        document.getElementById('sidebar-course-title').textContent    = title;
+        document.getElementById('mobile-course-title-drawer').textContent = title;
+
+        // Load lessons ordered by `order`
+        return courseRef.collection('lessons').orderBy('order').get();
+      })
+      .then(snap => {
+        if (!snap || snap.empty) {
+          document.getElementById('hub-loading').style.display = 'none';
+          document.getElementById('lesson-sidebar').style.display = 'flex';
+          document.getElementById('main-content').style.display  = 'flex';
+          document.getElementById('lesson-body').textContent = 'No lessons have been added to this course yet.';
+          document.getElementById('lesson-title').textContent = 'Coming Soon';
+          document.getElementById('hub-loading').style.display = 'none';
+          return;
+        }
+
+        lessons = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+
+        // Build lesson lists
+        document.getElementById('desktop-lesson-list').innerHTML = buildLessonList('jumpToLesson');
+        document.getElementById('mobile-lesson-list').innerHTML  = buildLessonList('jumpToLesson');
+
+        // Determine starting lesson
+        let startIdx = 0;
+        if (initLesson) {
+          const found = lessons.findIndex(l => l.id === initLesson);
+          if (found > -1) startIdx = found;
+        }
+
+        // Show UI
+        document.getElementById('hub-loading').style.display    = 'none';
+        document.getElementById('lesson-sidebar').style.display = 'flex';
+        document.getElementById('main-content').style.display   = 'flex';
+        if (window.innerWidth <= 768) {
+          document.getElementById('mobile-bar').style.display = 'flex';
+        }
+
+        renderLesson(startIdx);
+      })
+      .catch(err => {
+        document.getElementById('hub-loading').innerHTML =
+          `<div style="text-align:center;padding:60px 0;color:#999;">Could not load course: ${err.message}</div>`;
+      });
+    }
+
+    initHubPage(function(hub, slug, cId, user) {
+      hubSlug   = slug;
+      creatorId = cId;
+
+      const name    = hub.displayName || 'Your Hub';
+      const initial = name.charAt(0).toUpperCase();
+
+      document.getElementById('sidebar-hub-name').textContent = name;
+      document.getElementById('sidebar-initial').textContent  = initial;
+
+      if (hub.branding && hub.branding.logoUrl) {
+        const img = document.getElementById('sidebar-logo-img');
+        img.src           = hub.branding.logoUrl;
+        img.style.display = 'block';
+        document.getElementById('sidebar-initial').style.display = 'none';
+      }
+
+      // Nav links
+      const coursesUrl = `/hub/courses?hub=${slug}`;
+      document.getElementById('hub-identity-link').href = `/hub/dashboard?hub=${slug}`;
+      document.getElementById('back-to-courses').href   = coursesUrl;
+      document.getElementById('mobile-back-link').href  = coursesUrl;
+
+      loadCourse(cId, slug);
+    });
+  </script>
+</body>
+</html>

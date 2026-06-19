@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join — Creator Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .join-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .hub-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .hub-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #000;
+      margin: 0 auto 16px;
+      overflow: hidden;
+    }
+    .hub-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hub-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+    .hub-tagline {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .tab-row {
+      display: flex;
+      background: var(--card-alt);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text2);
+      transition: background .15s, color .15s;
+    }
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .auth-btn {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .form-footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 16px;
+    }
+    .form-footer a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-footer a:hover { text-decoration: underline; }
+
+    .auth-error {
+      display: none;
+      color: var(--red);
+      font-size: 13px;
+      padding: 10px 14px;
+      background: var(--red-bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--text3);
+      font-size: 14px;
+    }
+
+    .not-found {
+      display: none;
+      text-align: center;
+      padding: 48px 0;
+    }
+    .not-found-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .not-found-sub {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .ts-credit {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 32px;
+    }
+    .ts-credit a {
+      color: var(--text3);
+      text-decoration: none;
+    }
+    .ts-credit a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="join-wrap">
+
+    <!-- Loading -->
+    <div class="loading-state" id="loading-state">Loading hub...</div>
+
+    <!-- Hub not found -->
+    <div class="not-found" id="not-found">
+      <div class="not-found-title">Hub not found</div>
+      <div class="not-found-sub">This link may be expired or incorrect. Contact the creator for a new invite.</div>
+    </div>
+
+    <!-- Main content (hidden until hub loads) -->
+    <div id="main-content" style="display:none;">
+
+      <div class="hub-header">
+        <div class="hub-logo" id="hub-logo">
+          <span id="hub-initial">H</span>
+          <img id="hub-logo-img" src="" alt="" style="display:none;" />
+        </div>
+        <div class="hub-name" id="hub-name">Loading...</div>
+        <div class="hub-tagline">Sign up or log in to access your hub.</div>
+      </div>
+
+      <div class="card">
+        <div class="tab-row">
+          <button class="tab-btn active" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+          <button class="tab-btn" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        </div>
+
+        <!-- Signup form -->
+        <div class="form-panel active" id="panel-signup">
+          <div class="auth-error" id="signup-error"></div>
+          <div class="form-name-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" id="signup-first" placeholder="Sarah" autocomplete="given-name" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" id="signup-last" placeholder="Jones" autocomplete="family-name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signup-email" placeholder="you@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" placeholder="8+ characters" autocomplete="new-password" />
+          </div>
+          <button class="btn-primary auth-btn" id="btn-signup">Create Account</button>
+          <div class="form-footer">
+            Already have an account? <a href="#" onclick="switchTab('login');return false;">Sign in</a>
+          </div>
+        </div>
+
+        <!-- Login form -->
+        <div class="form-panel" id="panel-login">
+          <div class="auth-error" id="login-error"></div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="you@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password" />
+          </div>
+          <button class="btn-primary auth-btn" id="btn-login">Sign In</button>
+          <div class="form-footer">
+            New here? <a href="#" onclick="switchTab('signup');return false;">Create an account</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ts-credit">Powered by <a href="/">ToolSpark</a></div>
+
+    </div>
+  </div>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const hubSlug  = params.get('hub') || '';
+    let   creatorId = null;
+    let   hubData   = null;
+
+    // Load hub by slug
+    function loadHub() {
+      if (!hubSlug) {
+        showNotFound();
+        return;
+      }
+
+      db.collection('creators').where('slug', '==', hubSlug).limit(1).get()
+        .then(snap => {
+          if (snap.empty) {
+            showNotFound();
+            return;
+          }
+          const doc = snap.docs[0];
+          creatorId = doc.id;
+          hubData   = doc.data();
+          renderHub();
+        })
+        .catch(() => showNotFound());
+    }
+
+    function renderHub() {
+      // Inject branding
+      const b = hubData.branding || {};
+      if (b.primaryColor || b.accentColor || b.bgColor) {
+        const style = document.createElement('style');
+        style.textContent = `:root {
+          ${b.primaryColor ? `--yellow: ${b.primaryColor};` : ''}
+          ${b.accentColor  ? `--purple: ${b.accentColor};`  : ''}
+          ${b.bgColor      ? `--bg: ${b.bgColor};`          : ''}
+        }`;
+        document.head.appendChild(style);
+        document.body.style.background = b.bgColor || '';
+      }
+
+      // Hub name + logo
+      const name = hubData.displayName || 'Your Hub';
+      document.title = name + ' — Join';
+      document.getElementById('hub-name').textContent    = name;
+      document.getElementById('hub-initial').textContent = name.charAt(0).toUpperCase();
+
+      if (b.logoUrl) {
+        const img = document.getElementById('hub-logo-img');
+        img.src           = b.logoUrl;
+        img.style.display = 'block';
+        document.getElementById('hub-initial').style.display = 'none';
+      }
+
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('main-content').style.display  = 'block';
+
+      // If already signed in, enroll and redirect
+      auth.onAuthStateChanged(user => {
+        if (user) enrollAndRedirect(user);
+      });
+    }
+
+    function showNotFound() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('not-found').style.display     = 'block';
+    }
+
+    // Tab switch
+    function switchTab(tab) {
+      const isSignup = tab === 'signup';
+      document.getElementById('tab-signup').classList.toggle('active', isSignup);
+      document.getElementById('tab-login').classList.toggle('active', !isSignup);
+      document.getElementById('panel-signup').classList.toggle('active', isSignup);
+      document.getElementById('panel-login').classList.toggle('active', !isSignup);
+    }
+
+    // Enroll user as hub member and redirect
+    function enrollAndRedirect(user) {
+      const batch = db.batch();
+
+      // Tag user with this creatorId
+      batch.set(db.collection('users').doc(user.uid), {
+        creatorId: creatorId
+      }, { merge: true });
+
+      // Write member record under creator's collection
+      batch.set(
+        db.collection('creators').doc(creatorId).collection('members').doc(user.uid),
+        {
+          joinedAt:    firebase.firestore.FieldValue.serverTimestamp(),
+          role:        'member',
+          status:      'active',
+          source:      'hub-join',
+          displayName: user.displayName || '',
+          email:       user.email || ''
+        },
+        { merge: true }
+      );
+
+      batch.commit()
+        .then(() => {
+          window.location.href = '/hub/dashboard?hub=' + hubSlug;
+        })
+        .catch(err => {
+          // If batch fails, still redirect — member doc can be backfilled
+          console.error('Enroll error:', err);
+          window.location.href = '/hub/dashboard?hub=' + hubSlug;
+        });
+    }
+
+    function setFormLoading(btnId, loading, label) {
+      const btn    = document.getElementById(btnId);
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Please wait...' : label;
+    }
+
+    function showError(elId, msg) {
+      const el = document.getElementById(elId);
+      el.textContent    = msg;
+      el.style.display  = 'block';
+    }
+
+    function clearError(elId) {
+      document.getElementById(elId).style.display = 'none';
+    }
+
+    function friendlyError(err) {
+      switch (err.code) {
+        case 'auth/email-already-in-use':   return 'An account with this email already exists. Sign in instead.';
+        case 'auth/invalid-email':           return 'Please enter a valid email address.';
+        case 'auth/weak-password':           return 'Password must be at least 6 characters.';
+        case 'auth/user-not-found':          return 'No account found with that email.';
+        case 'auth/wrong-password':          return 'Incorrect password. Try again.';
+        case 'auth/invalid-credential':      return 'Email or password is incorrect.';
+        case 'auth/too-many-requests':       return 'Too many attempts. Please wait a moment and try again.';
+        default:                             return err.message || 'Something went wrong. Please try again.';
+      }
+    }
+
+    // Signup
+    document.getElementById('btn-signup').addEventListener('click', () => {
+      clearError('signup-error');
+      const first    = document.getElementById('signup-first').value.trim();
+      const last     = document.getElementById('signup-last').value.trim();
+      const email    = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+
+      if (!first || !email || !password) {
+        showError('signup-error', 'Please fill in all required fields.');
+        return;
+      }
+      if (password.length < 8) {
+        showError('signup-error', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      setFormLoading('btn-signup', true, 'Create Account');
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(cred => {
+          const user = cred.user;
+          // Update display name
+          return user.updateProfile({ displayName: first + ' ' + last })
+            .then(() => {
+              // Write base user doc
+              return db.collection('users').doc(user.uid).set({
+                email:       email,
+                displayName: first + ' ' + last,
+                firstName:   first,
+                lastName:    last,
+                createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+                creatorId:   creatorId,
+                role:        'member'
+              });
+            })
+            .then(() => enrollAndRedirect(user));
+        })
+        .catch(err => {
+          setFormLoading('btn-signup', false, 'Create Account');
+          showError('signup-error', friendlyError(err));
+        });
+    });
+
+    // Login
+    document.getElementById('btn-login').addEventListener('click', () => {
+      clearError('login-error');
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        showError('login-error', 'Please enter your email and password.');
+        return;
+      }
+
+      setFormLoading('btn-login', true, 'Sign In');
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(cred => enrollAndRedirect(cred.user))
+        .catch(err => {
+          setFormLoading('btn-login', false, 'Sign In');
+          showError('login-error', friendlyError(err));
+        });
+    });
+
+    // Kick off hub load
+    loadHub();
+  </script>
+</body>
+</html>

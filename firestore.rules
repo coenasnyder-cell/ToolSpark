@@ -531,6 +531,96 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // ─── CREATOR HUBS ──────────────────────────────────────────────────────────
+    // All creator-specific data lives under /creators/{creatorId}/...
+    // The path IS the tag — no field tagging needed.
+    // Export = everything under /creators/{creatorId}/ in one operation.
+    // Security: isMemberOf checks the user's creatorId field matches the path.
+    // Cross-hub access is structurally impossible — wrong path = denied.
+
+    function isMemberOf(creatorId) {
+      return isSignedIn() && userExists() &&
+        currentUserData().get('creatorId', '') == creatorId;
+    }
+
+    function isCreatorOwner(creatorId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/creators/$(creatorId)).data.ownerId == request.auth.uid;
+    }
+
+    // Root creator doc — hub profile, branding, settings
+    match /creators/{creatorId} {
+      allow read:   if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
+      // Creator registers their own hub — ownerId in the doc must match the caller
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isCreatorOwner(creatorId) || isAdmin();
+      allow delete: if isAdmin();
+
+      // Courses — published ones visible to members, unpublished to owner only
+      match /courses/{courseId} {
+        allow read: if (isMemberOf(creatorId) && resource.data.get('isPublished', false) == true)
+                     || isCreatorOwner(creatorId)
+                     || isAdmin();
+        allow write: if isCreatorOwner(creatorId) || isAdmin();
+
+        // Lessons inherit course-level access — course isPublished is the gate
+        match /lessons/{lessonId} {
+          allow read:  if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
+          allow write: if isCreatorOwner(creatorId) || isAdmin();
+        }
+      }
+
+      // Members — members see only their own record; owner sees all
+      match /members/{memberId} {
+        allow read: if (isSignedIn() && request.auth.uid == memberId)
+                     || isCreatorOwner(creatorId)
+                     || isAdmin();
+        // Self-enroll (join.html writes this doc on signup/login)
+        allow create: if isSignedIn() && request.auth.uid == memberId;
+        allow update: if isCreatorOwner(creatorId) || isAdmin();
+        allow delete: if isCreatorOwner(creatorId) || isAdmin();
+      }
+
+      // Tools — system prompts, AI configs. Creator-only, never exposed to members.
+      match /tools/{toolId} {
+        allow read, write: if isCreatorOwner(creatorId) || isAdmin();
+      }
+
+      // Roadmap — learning path visible to members
+      match /roadmap/{phaseId} {
+        allow read:  if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
+        allow write: if isCreatorOwner(creatorId) || isAdmin();
+      }
+
+      // Funnels — creator's marketing pages, not visible to members
+      match /funnels/{funnelId} {
+        allow read, write: if isCreatorOwner(creatorId) || isAdmin();
+      }
+
+      // Emails — creator's email drafts/sequences, not visible to members
+      match /emails/{emailId} {
+        allow read, write: if isCreatorOwner(creatorId) || isAdmin();
+      }
+
+      // Community — members can post; creator can moderate
+      match /community/{postId} {
+        allow read: if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
+        allow create: if isMemberOf(creatorId) &&
+                         request.resource.data.authorId == request.auth.uid;
+        allow update: if (isMemberOf(creatorId) &&
+                          resource.data.authorId == request.auth.uid &&
+                          request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['body', 'editedAt']))
+                       || isCreatorOwner(creatorId)
+                       || isAdmin();
+        allow delete: if (isMemberOf(creatorId) && resource.data.authorId == request.auth.uid)
+                       || isCreatorOwner(creatorId)
+                       || isAdmin();
+      }
+    }
+
+    // ─── END CREATOR HUBS ──────────────────────────────────────────────────────
+
     // CONVOFLIP — characters + scripts (admin content tool)
     match /characters/{charId} {
       allow read: if isAdmin();

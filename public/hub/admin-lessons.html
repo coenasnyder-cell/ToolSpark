@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lessons — Hub Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <script src="/js/hub-admin-shell.js"></script>
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    .admin-sidebar {
+      width: 220px; flex-shrink: 0; background: #111;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
+    }
+    .admin-sidebar-top { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .admin-hub-logo {
+      width: 40px; height: 40px; border-radius: 10px; background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #000; margin-bottom: 10px;
+    }
+    .admin-hub-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 2px; }
+    .admin-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--yellow); opacity: .7; }
+    .admin-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .admin-nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .admin-nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+    .admin-nav-item.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 700; }
+    .admin-nav-item svg { opacity: .6; flex-shrink: 0; }
+    .admin-nav-item.active svg { opacity: 1; }
+    .admin-nav-divider { height: 1px; background: rgba(255,255,255,.07); margin: 8px 12px; }
+    .view-hub-link {
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.4); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .view-hub-link:hover { background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); }
+    .admin-sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.07); }
+    .admin-signout-btn {
+      background: none; border: none; color: rgba(255,255,255,.35); font-family: var(--font);
+      font-size: 12px; font-weight: 500; cursor: pointer; padding: 6px 8px;
+      border-radius: 6px; width: 100%; text-align: left; transition: color .15s, background .15s;
+    }
+    .admin-signout-btn:hover { background: rgba(220,50,50,.15); color: #e05555; }
+
+    .admin-main { margin-left: 220px; flex: 1; padding: 40px 36px 80px; max-width: 960px; }
+
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text3); margin-bottom: 12px;
+    }
+    .breadcrumb a { color: var(--text3); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--purple); }
+    .breadcrumb-sep { color: var(--border); }
+
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header-left {}
+    .admin-page-title { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.4px; }
+    .admin-page-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+    /* Lesson list */
+    .lessons-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .lesson-row {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1.5px solid transparent;
+      transition: border-color .15s;
+    }
+    .lesson-row:hover { border-color: var(--border); }
+
+    .lesson-order-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .order-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text3);
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: border-color .15s, color .15s;
+    }
+    .order-btn:hover:not(:disabled) { border-color: var(--purple); color: var(--purple); }
+    .order-btn:disabled { opacity: .3; cursor: default; }
+
+    .lesson-num-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text3);
+      flex-shrink: 0;
+    }
+
+    .lesson-info { flex: 1; min-width: 0; }
+    .lesson-row-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .lesson-row-meta  { font-size: 12px; color: var(--text3); display: flex; gap: 10px; }
+
+    .pub-toggle {
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .toggle-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+    .toggle-switch { position: relative; width: 32px; height: 18px; cursor: pointer; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0; background: var(--border); border-radius: 20px; transition: background .2s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--green); }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      background: #fff; border-radius: 50%; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(14px); }
+
+    .lesson-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .icon-btn {
+      background: none; border: 1px solid var(--border); color: var(--text2);
+      padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: var(--font);
+      font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px;
+      transition: border-color .15s, color .15s;
+    }
+    .icon-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+    .empty-state {
+      background: var(--card); border-radius: var(--radius); padding: 60px 32px;
+      text-align: center; box-shadow: var(--shadow);
+    }
+    .empty-state-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .empty-state-sub { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+
+    /* Drawer */
+    .drawer-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150;
+    }
+    .drawer-backdrop.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 520px; max-width: 100vw;
+      background: var(--card); z-index: 200; display: flex; flex-direction: column;
+      box-shadow: -4px 0 32px rgba(0,0,0,.15);
+      transform: translateX(100%); transition: transform .25s ease;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 24px 28px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .drawer-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .drawer-close {
+      background: none; border: none; cursor: pointer; color: var(--text3);
+      padding: 4px; border-radius: 6px;
+    }
+    .drawer-close:hover { color: var(--text); background: var(--card-alt); }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 28px; }
+    .drawer-footer {
+      padding: 20px 28px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-note { font-size: 12px; color: var(--text3); margin-top: 5px; }
+    .form-error {
+      display: none; color: var(--red); font-size: 13px;
+      padding: 10px 14px; background: var(--red-bg); border-radius: var(--radius-sm); margin-bottom: 16px;
+    }
+
+    /* Delete modal */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 300; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--card); border-radius: var(--radius); padding: 28px;
+      max-width: 400px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,.2);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-body  { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    #admin-loading {
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 14px; color: var(--text3);
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { margin-left: 0; padding: 24px 16px 60px; }
+      .drawer { width: 100vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="admin-loading">Loading...</div>
+
+  <aside class="admin-sidebar" id="admin-sidebar" style="display:none;">
+    <div class="admin-sidebar-top">
+      <div class="admin-hub-logo" id="admin-hub-logo"></div>
+      <div class="admin-hub-name" id="admin-hub-name"></div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <nav class="admin-nav" id="admin-nav"></nav>
+    <div class="admin-sidebar-footer">
+      <button class="admin-signout-btn" onclick="adminSignOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main" id="admin-main" style="display:none;">
+    <div class="breadcrumb">
+      <a href="/hub/admin">Admin</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="/hub/admin-courses">Courses</a>
+      <span class="breadcrumb-sep">/</span>
+      <span id="breadcrumb-course">Lessons</span>
+    </div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="admin-page-title">Lessons</div>
+        <div class="admin-page-sub" id="course-subtitle"></div>
+      </div>
+      <button class="btn-primary" onclick="openDrawer()">+ Add Lesson</button>
+    </div>
+    <div class="lessons-list" id="lessons-list">
+      <div class="empty-state"><div class="empty-state-title">Loading...</div></div>
+    </div>
+  </main>
+
+  <!-- Lesson drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer" id="lesson-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawer-title">New Lesson</div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-error" id="drawer-error"></div>
+
+      <div class="form-group">
+        <label>Lesson Title <span style="color:var(--red);">*</span></label>
+        <input type="text" id="f-title" placeholder="e.g. Why Text Posts Work for Introverts" maxlength="120" />
+      </div>
+
+      <div class="form-group">
+        <label>Video URL <span style="color:var(--text3);font-weight:400;">(optional)</span></label>
+        <input type="url" id="f-video" placeholder="YouTube, Vimeo, or Loom link" />
+        <div class="form-note">Paste any YouTube, Vimeo, or Loom URL. It's auto-embedded for members.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Content / Notes <span style="color:var(--text3);font-weight:400;">(optional)</span></label>
+        <textarea id="f-content" rows="10"
+          placeholder="Lesson notes, resources, or transcript. Supports **bold**, *italic*, ## headings, and - lists."
+          style="resize:vertical;font-family:monospace;font-size:13px;line-height:1.6;"></textarea>
+        <div class="form-note">Markdown is supported.</div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="f-published" />
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          Publish this lesson
+        </label>
+        <div class="form-note">Unpublished lessons are only visible to you.</div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-outline" onclick="closeDrawer()">Cancel</button>
+      <button class="btn-primary" id="drawer-save-btn" onclick="saveLesson()">Save Lesson</button>
+    </div>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="modal-backdrop" id="delete-modal">
+    <div class="modal">
+      <div class="modal-title">Delete lesson?</div>
+      <div class="modal-body">This permanently deletes the lesson and cannot be undone.</div>
+      <div class="modal-actions">
+        <button class="btn-outline" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-secondary" id="confirm-delete-btn"
+          style="background:var(--red);border-color:var(--red);">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NAV = [
+      { label: 'Overview',  href: '/hub/admin',          key: 'admin',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
+      { label: 'Members',   href: '/hub/admin-members',  key: 'members',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+      { label: 'Courses',   href: '/hub/admin-courses',  key: 'courses',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
+      { label: 'Settings',  href: '/hub/admin-settings', key: 'settings',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+    ];
+
+    function buildAdminNav(activeKey, hubSlug) {
+      return NAV.map(item => {
+        const cls = 'admin-nav-item' + (item.key === activeKey ? ' active' : '');
+        return `<a class="${cls}" href="${item.href}">${item.icon}<span>${item.label}</span></a>`;
+      }).join('') +
+      '<div class="admin-nav-divider"></div>' +
+      `<a class="view-hub-link" href="/hub/dashboard?hub=${hubSlug}">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>View Hub</a>`;
+    }
+
+    function adminSignOut() {
+      auth.signOut().then(() => { window.location.href = '/signon.html'; });
+    }
+
+    const urlParams   = new URLSearchParams(window.location.search);
+    const courseId    = urlParams.get('course') || '';
+    let creatorIdGlobal = '';
+    let editingLessonId = null;
+    let pendingDeleteId = null;
+    let lessonCache     = [];
+
+    // ── Drawer ───────────────────────────────────────────────────────────────────
+
+    function openDrawer(lessonId) {
+      editingLessonId = lessonId || null;
+      document.getElementById('drawer-error').style.display = 'none';
+
+      if (lessonId) {
+        const l = lessonCache.find(x => x.id === lessonId);
+        if (l) {
+          document.getElementById('drawer-title').textContent  = 'Edit Lesson';
+          document.getElementById('f-title').value    = l.data.title || '';
+          document.getElementById('f-video').value    = l.data.videoUrl || '';
+          document.getElementById('f-content').value  = l.data.content || '';
+          document.getElementById('f-published').checked = l.data.isPublished || false;
+        }
+      } else {
+        document.getElementById('drawer-title').textContent  = 'New Lesson';
+        document.getElementById('f-title').value    = '';
+        document.getElementById('f-video').value    = '';
+        document.getElementById('f-content').value  = '';
+        document.getElementById('f-published').checked = false;
+      }
+
+      document.getElementById('drawer-backdrop').classList.add('open');
+      document.getElementById('lesson-drawer').classList.add('open');
+      document.getElementById('f-title').focus();
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer-backdrop').classList.remove('open');
+      document.getElementById('lesson-drawer').classList.remove('open');
+      editingLessonId = null;
+    }
+
+    function saveLesson() {
+      const title = document.getElementById('f-title').value.trim();
+      if (!title) {
+        const err = document.getElementById('drawer-error');
+        err.textContent   = 'Lesson title is required.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('drawer-save-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Saving...';
+
+      const data = {
+        title:       title,
+        videoUrl:    document.getElementById('f-video').value.trim(),
+        content:     document.getElementById('f-content').value,
+        isPublished: document.getElementById('f-published').checked,
+        updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      const lessonsRef = db.collection('creators').doc(creatorIdGlobal)
+        .collection('courses').doc(courseId).collection('lessons');
+      let promise;
+
+      if (editingLessonId) {
+        promise = lessonsRef.doc(editingLessonId).update(data);
+      } else {
+        data.order     = lessonCache.length + 1;
+        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        promise = lessonsRef.add(data);
+      }
+
+      promise
+        .then(() => { closeDrawer(); loadLessons(); })
+        .catch(err => {
+          const errEl = document.getElementById('drawer-error');
+          errEl.textContent   = 'Error: ' + err.message;
+          errEl.style.display = 'block';
+        })
+        .finally(() => {
+          btn.disabled    = false;
+          btn.textContent = 'Save Lesson';
+        });
+    }
+
+    // ── Reorder ──────────────────────────────────────────────────────────────────
+
+    function moveLesson(lessonId, dir) {
+      const idx = lessonCache.findIndex(x => x.id === lessonId);
+      if (idx < 0) return;
+      const swapIdx = idx + dir;
+      if (swapIdx < 0 || swapIdx >= lessonCache.length) return;
+
+      const batch  = db.batch();
+      const ref    = db.collection('creators').doc(creatorIdGlobal)
+                       .collection('courses').doc(courseId).collection('lessons');
+      const newOrder  = lessonCache[swapIdx].data.order;
+      const currOrder = lessonCache[idx].data.order;
+
+      batch.update(ref.doc(lessonId),                  { order: newOrder });
+      batch.update(ref.doc(lessonCache[swapIdx].id),   { order: currOrder });
+
+      batch.commit().then(() => loadLessons()).catch(err => alert('Error: ' + err.message));
+    }
+
+    // ── Publish toggle ───────────────────────────────────────────────────────────
+
+    function togglePublish(lessonId, current) {
+      db.collection('creators').doc(creatorIdGlobal)
+        .collection('courses').doc(courseId).collection('lessons').doc(lessonId)
+        .update({ isPublished: !current, updatedAt: firebase.firestore.FieldValue.serverTimestamp() })
+        .then(() => loadLessons())
+        .catch(err => alert('Error: ' + err.message));
+    }
+
+    // ── Delete ───────────────────────────────────────────────────────────────────
+
+    function openDeleteModal(id) {
+      pendingDeleteId = id;
+      document.getElementById('delete-modal').classList.add('open');
+    }
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('open');
+      pendingDeleteId = null;
+    }
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+      if (!pendingDeleteId) return;
+      const btn = this;
+      btn.disabled    = true;
+      btn.textContent = 'Deleting...';
+
+      db.collection('creators').doc(creatorIdGlobal)
+        .collection('courses').doc(courseId).collection('lessons').doc(pendingDeleteId).delete()
+        .then(() => { closeDeleteModal(); loadLessons(); })
+        .catch(err => alert('Error: ' + err.message))
+        .finally(() => { btn.disabled = false; btn.textContent = 'Delete'; });
+    });
+
+    // ── Load lessons ─────────────────────────────────────────────────────────────
+
+    function loadLessons() {
+      if (!courseId) {
+        document.getElementById('lessons-list').innerHTML =
+          '<div class="empty-state"><div class="empty-state-title">No course specified.</div></div>';
+        return;
+      }
+
+      db.collection('creators').doc(creatorIdGlobal)
+        .collection('courses').doc(courseId).collection('lessons')
+        .orderBy('order').get()
+        .then(snap => {
+          lessonCache = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+          const listEl = document.getElementById('lessons-list');
+
+          if (snap.empty) {
+            listEl.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-title">No lessons yet</div>
+                <div class="empty-state-sub">Add your first lesson to this course.</div>
+                <button class="btn-primary" onclick="openDrawer()">+ Add Lesson</button>
+              </div>`;
+            return;
+          }
+
+          const total = lessonCache.length;
+          listEl.innerHTML = lessonCache.map(({ id, data: l }, idx) => {
+            const pub  = !!l.isPublished;
+            const meta = [
+              pub ? 'Published' : 'Draft',
+              l.videoUrl ? 'Video' : 'Text only'
+            ].join(' · ');
+
+            return `
+              <div class="lesson-row">
+                <div class="lesson-order-btns">
+                  <button class="order-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveLesson('${id}', -1)"
+                    title="Move up">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                  </button>
+                  <button class="order-btn" ${idx === total - 1 ? 'disabled' : ''} onclick="moveLesson('${id}', 1)"
+                    title="Move down">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="lesson-num-badge">${idx + 1}</div>
+                <div class="lesson-info">
+                  <div class="lesson-row-title">${l.title || 'Untitled Lesson'}</div>
+                  <div class="lesson-row-meta"><span>${meta}</span></div>
+                </div>
+                <div class="pub-toggle">
+                  <span class="toggle-label">${pub ? 'Live' : 'Draft'}</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" ${pub ? 'checked' : ''} onchange="togglePublish('${id}', ${pub})" />
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                </div>
+                <div class="lesson-actions">
+                  <button class="icon-btn" onclick="openDrawer('${id}')">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Edit
+                  </button>
+                  <button class="icon-btn danger" onclick="openDeleteModal('${id}')">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                    </svg>
+                    Delete
+                  </button>
+                </div>
+              </div>`;
+          }).join('');
+        })
+        .catch(err => {
+          document.getElementById('lessons-list').innerHTML =
+            `<div class="empty-state"><div class="empty-state-title">Could not load lessons: ${err.message}</div></div>`;
+        });
+    }
+
+    initAdminPage(function(hub, creatorId) {
+      creatorIdGlobal = creatorId;
+      const name = hub.displayName || 'Your Hub';
+      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('admin-hub-name').textContent = name;
+      document.getElementById('admin-nav').innerHTML = buildAdminNav('courses', hub.slug || '');
+      document.title = 'Lessons — ' + name;
+
+      if (!courseId) {
+        document.getElementById('admin-loading').style.display = 'none';
+        document.getElementById('admin-sidebar').style.display = 'flex';
+        document.getElementById('admin-main').style.display    = 'block';
+        document.getElementById('lessons-list').innerHTML =
+          '<div class="empty-state"><div class="empty-state-title">No course selected.</div></div>';
+        return;
+      }
+
+      // Load course title for breadcrumb
+      db.collection('creators').doc(creatorId).collection('courses').doc(courseId).get()
+        .then(doc => {
+          const courseTitle = doc.exists ? (doc.data().title || 'Course') : 'Course';
+          document.getElementById('breadcrumb-course').textContent = courseTitle;
+          document.getElementById('course-subtitle').textContent   = courseTitle;
+          document.title = 'Lessons — ' + courseTitle;
+        });
+
+      loadLessons();
+
+      document.getElementById('admin-loading').style.display = 'none';
+      document.getElementById('admin-sidebar').style.display = 'flex';
+      document.getElementById('admin-main').style.display    = 'block';
+    });
+  </script>
+</body>
+</html>
