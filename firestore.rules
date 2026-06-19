@@ -617,6 +617,12 @@ match /conversations/{conversationId} {
                        || isCreatorOwner(creatorId)
                        || isAdmin();
       }
+
+      // Private — API keys and sensitive config. Owner only, never visible to members.
+      // Cloud Functions read this via Admin SDK (bypasses rules entirely).
+      match /private/{docId} {
+        allow read, write: if isCreatorOwner(creatorId) || isAdmin();
+      }
     }
 
     // ─── END CREATOR HUBS ──────────────────────────────────────────────────────

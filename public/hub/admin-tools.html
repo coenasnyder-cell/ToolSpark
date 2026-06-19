@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Tools — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <script src="/js/hub-admin-shell.js"></script>
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    .admin-sidebar {
+      width: 220px; flex-shrink: 0; background: #111;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
+    }
+    .admin-sidebar-top { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .admin-hub-logo {
+      width: 40px; height: 40px; border-radius: 10px; background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #000; margin-bottom: 10px;
+    }
+    .admin-hub-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 2px; }
+    .admin-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--yellow); opacity: .7; }
+    .admin-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .admin-nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .admin-nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+    .admin-nav-item.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 700; }
+    .admin-nav-item svg { opacity: .6; flex-shrink: 0; }
+    .admin-nav-item.active svg { opacity: 1; }
+    .admin-nav-divider { height: 1px; background: rgba(255,255,255,.07); margin: 8px 12px; }
+    .view-hub-link {
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+      border-radius: 8px; color: rgba(255,255,255,.4); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s;
+    }
+    .view-hub-link:hover { background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); }
+    .admin-sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.07); }
+    .admin-signout-btn {
+      background: none; border: none; color: rgba(255,255,255,.35); font-family: var(--font);
+      font-size: 12px; font-weight: 500; cursor: pointer; padding: 6px 8px;
+      border-radius: 6px; width: 100%; text-align: left; transition: color .15s, background .15s;
+    }
+    .admin-signout-btn:hover { background: rgba(220,50,50,.15); color: #e05555; }
+
+    .admin-main { margin-left: 220px; flex: 1; padding: 40px 36px 80px; max-width: 960px; }
+    .admin-page-title { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.4px; margin-bottom: 6px; }
+    .admin-page-sub { font-size: 14px; color: var(--text2); margin-bottom: 32px; }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    /* Tools grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .tool-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .tool-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .tool-category-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 3px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .cat-attract   { background: rgba(234,88,12,.1);  color: #EA580C; }
+    .cat-qualify   { background: rgba(107,47,179,.1); color: #6B2FB3; }
+    .cat-transform { background: rgba(22,163,74,.1);  color: #16A34A; }
+    .cat-create    { background: rgba(59,130,246,.1); color: #3B82F6; }
+
+    .tool-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .tool-template {
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .tool-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .status-published { background: rgba(22,163,74,.1);  color: #16A34A; }
+    .status-draft     { background: rgba(180,180,180,.12); color: var(--text3); }
+
+    .tool-card-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+    .tool-action-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .tool-action-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .tool-action-btn.primary {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: #000;
+    }
+    .tool-action-btn.primary:hover { opacity: .85; }
+    .tool-action-btn.danger:hover  { border-color: #e05555; color: #e05555; }
+
+    /* Publish toggle */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 500;
+    }
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--purple); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--text3);
+    }
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+    }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+    .empty-sub   { font-size: 14px; color: var(--text3); margin-bottom: 24px; line-height: 1.5; }
+
+    /* Confirm modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .modal-body  { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* Edit drawer */
+    .drawer-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 100;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: 480px;
+      height: 100vh;
+      background: var(--card);
+      box-shadow: -4px 0 30px rgba(0,0,0,.12);
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      z-index: 101;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .drawer-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .drawer-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text3); padding: 4px; border-radius: 6px;
+      transition: color .15s;
+    }
+    .drawer-close:hover { color: var(--text); }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
+    .drawer-body .form-group { margin-bottom: 18px; }
+    .drawer-foot {
+      padding: 16px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    #admin-loading {
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 14px; color: var(--text3);
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { margin-left: 0; padding: 24px 16px 60px; }
+      .drawer { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="admin-loading">Loading...</div>
+
+  <aside class="admin-sidebar" id="admin-sidebar" style="display:none;">
+    <div class="admin-sidebar-top">
+      <div class="admin-hub-logo" id="admin-hub-logo"></div>
+      <div class="admin-hub-name" id="admin-hub-name"></div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <nav class="admin-nav" id="admin-nav"></nav>
+    <div class="admin-sidebar-footer">
+      <button class="admin-signout-btn" onclick="adminSignOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main" id="admin-main" style="display:none;">
+    <div class="top-bar">
+      <div>
+        <div class="admin-page-title">AI Tools</div>
+        <div class="admin-page-sub">Build AI tools your members can use right inside the hub.</div>
+      </div>
+      <button class="btn-primary" onclick="openBuilder()">+ Build New Tool</button>
+    </div>
+
+    <div class="tools-grid" id="tools-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--text3);font-size:14px;">Loading tools...</div>
+    </div>
+  </main>
+
+  <!-- Confirm delete modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal-box">
+      <div class="modal-title">Delete this tool?</div>
+      <div class="modal-body">This will permanently remove the tool and its system prompt. Members will lose access immediately.</div>
+      <div class="modal-actions">
+        <button class="btn-outline" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-primary" id="confirm-delete-btn" style="background:#e05555;border-color:#e05555;" onclick="confirmDelete()">Delete Tool</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit drawer -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="edit-drawer">
+    <div class="drawer-head">
+      <div class="drawer-title">Edit Tool</div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <input type="hidden" id="edit-tool-id" />
+      <div class="form-group">
+        <label>Tool Name</label>
+        <input type="text" id="edit-tool-name" maxlength="60" placeholder="e.g. Business Clarity Quiz" />
+      </div>
+      <div class="form-group">
+        <label>Audience</label>
+        <input type="text" id="edit-audience" maxlength="100" placeholder="Who is this tool for?" />
+      </div>
+      <div class="form-group">
+        <label>Outcome</label>
+        <input type="text" id="edit-outcome" maxlength="140" placeholder="What result do they get?" />
+      </div>
+      <div class="form-group">
+        <label>Tone</label>
+        <select id="edit-tone">
+          <option value="friendly">Friendly</option>
+          <option value="professional">Professional</option>
+          <option value="motivational">Motivational</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Questions to Ask</label>
+        <select id="edit-question-count">
+          <option value="3">3 questions</option>
+          <option value="5">5 questions</option>
+          <option value="7">7 questions</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Custom Questions <span style="font-size:11px;font-weight:400;color:var(--text3);">(optional)</span></label>
+        <textarea id="edit-custom-questions" rows="3" placeholder="Any specific questions you want included..."></textarea>
+      </div>
+      <div class="form-note" style="margin-top:0;">Saving will regenerate the system prompt using your API key.</div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn-outline" onclick="closeDrawer()">Cancel</button>
+      <button class="btn-primary" id="edit-save-btn" onclick="saveEdit()">Save &amp; Regenerate</button>
+    </div>
+  </div>
+
+  <script>
+    const NAV = [
+      { label: 'Overview',  href: '/hub/admin',          key: 'admin',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
+      { label: 'Members',   href: '/hub/admin-members',  key: 'members',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+      { label: 'Courses',   href: '/hub/admin-courses',  key: 'courses',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
+      { label: 'Tools',     href: '/hub/admin-tools',    key: 'tools',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+      { label: 'Settings',  href: '/hub/admin-settings', key: 'settings',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+    ];
+
+    function buildAdminNav(activeKey, hubSlug) {
+      return NAV.map(item => {
+        const cls = 'admin-nav-item' + (item.key === activeKey ? ' active' : '');
+        return `<a class="${cls}" href="${item.href}">${item.icon}<span>${item.label}</span></a>`;
+      }).join('') +
+      '<div class="admin-nav-divider"></div>' +
+      `<a class="view-hub-link" href="/hub/dashboard?hub=${hubSlug}">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>View Hub</a>`;
+    }
+
+    function adminSignOut() {
+      auth.signOut().then(() => { window.location.href = '/signon.html'; });
+    }
+
+    const CATEGORY_LABELS = { attract: 'Attract', qualify: 'Qualify', transform: 'Transform', create: 'Create' };
+    const CATEGORY_CLASS  = { attract: 'cat-attract', qualify: 'cat-qualify', transform: 'cat-transform', create: 'cat-create' };
+
+    let creatorIdGlobal = '';
+    let hubSlugGlobal   = '';
+    let toolCache       = [];
+    let pendingDeleteId = null;
+
+    function openBuilder() {
+      window.location.href = '/hub/tool-builder';
+    }
+
+    function renderTools() {
+      const grid = document.getElementById('tools-grid');
+      if (!toolCache.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚡</div>
+            <div class="empty-title">No tools yet</div>
+            <div class="empty-sub">Build your first AI tool and give your members something powerful to use.</div>
+            <button class="btn-primary" onclick="openBuilder()">Build Your First Tool</button>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = toolCache.map(tool => {
+        const catLabel = CATEGORY_LABELS[tool.category] || tool.category || '';
+        const catClass = CATEGORY_CLASS[tool.category]  || '';
+        const status   = tool.isPublished
+          ? '<span class="tool-status status-published">● Published</span>'
+          : '<span class="tool-status status-draft">○ Draft</span>';
+        return `
+          <div class="tool-card" id="tool-${tool.id}">
+            <div class="tool-card-top">
+              <div>
+                <span class="tool-category-badge ${catClass}">${catLabel}</span>
+                <div class="tool-name" style="margin-top:8px;">${tool.toolName}</div>
+                <div class="tool-template">${tool.template || ''}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              ${status}
+              <label class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" ${tool.isPublished ? 'checked' : ''}
+                    onchange="togglePublish('${tool.id}', this.checked)" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span>Published</span>
+              </label>
+            </div>
+            <div class="tool-card-actions">
+              <button class="tool-action-btn" onclick="openEdit('${tool.id}')">Edit</button>
+              <a class="tool-action-btn primary" href="/hub/tool-preview?toolId=${tool.id}&creatorId=${creatorIdGlobal}&draft=true" target="_blank">Try It</a>
+              <button class="tool-action-btn danger" onclick="openDeleteModal('${tool.id}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function loadTools() {
+      db.collection('creators').doc(creatorIdGlobal).collection('tools')
+        .orderBy('createdAt', 'desc').get()
+        .then(snap => {
+          toolCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderTools();
+        })
+        .catch(err => {
+          document.getElementById('tools-grid').innerHTML =
+            `<div style="text-align:center;padding:60px 0;color:var(--text3);font-size:14px;">Could not load tools: ${err.message}</div>`;
+        });
+    }
+
+    function togglePublish(toolId, published) {
+      db.collection('creators').doc(creatorIdGlobal).collection('tools').doc(toolId)
+        .update({ isPublished: published, lastEditedAt: firebase.firestore.FieldValue.serverTimestamp() })
+        .then(() => {
+          const tool = toolCache.find(t => t.id === toolId);
+          if (tool) tool.isPublished = published;
+        })
+        .catch(err => {
+          alert('Could not update: ' + err.message);
+          loadTools();
+        });
+    }
+
+    // ── Delete ─────────────────────────────────────────────────────────────────
+    function openDeleteModal(toolId) {
+      pendingDeleteId = toolId;
+      document.getElementById('delete-modal').classList.add('open');
+    }
+    function closeDeleteModal() {
+      pendingDeleteId = null;
+      document.getElementById('delete-modal').classList.remove('open');
+    }
+    function confirmDelete() {
+      if (!pendingDeleteId) return;
+      const btn = document.getElementById('confirm-delete-btn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      db.collection('creators').doc(creatorIdGlobal).collection('tools').doc(pendingDeleteId).delete()
+        .then(() => {
+          toolCache = toolCache.filter(t => t.id !== pendingDeleteId);
+          closeDeleteModal();
+          renderTools();
+        })
+        .catch(err => alert('Delete failed: ' + err.message))
+        .finally(() => { btn.disabled = false; btn.textContent = 'Delete Tool'; });
+    }
+
+    // ── Edit drawer ────────────────────────────────────────────────────────────
+    function openEdit(toolId) {
+      const tool = toolCache.find(t => t.id === toolId);
+      if (!tool) return;
+      document.getElementById('edit-tool-id').value           = toolId;
+      document.getElementById('edit-tool-name').value         = tool.toolName || '';
+      document.getElementById('edit-audience').value          = tool.config?.audience || '';
+      document.getElementById('edit-outcome').value           = tool.config?.outcome  || '';
+      document.getElementById('edit-tone').value              = tool.config?.tone     || 'friendly';
+      document.getElementById('edit-question-count').value    = String(tool.config?.questionCount || 5);
+      document.getElementById('edit-custom-questions').value  = tool.config?.customQuestions || '';
+      document.getElementById('drawer-overlay').classList.add('open');
+      document.getElementById('edit-drawer').classList.add('open');
+    }
+    function closeDrawer() {
+      document.getElementById('drawer-overlay').classList.remove('open');
+      document.getElementById('edit-drawer').classList.remove('open');
+    }
+
+    function saveEdit() {
+      const toolId  = document.getElementById('edit-tool-id').value;
+      const name    = document.getElementById('edit-tool-name').value.trim();
+      const audience = document.getElementById('edit-audience').value.trim();
+      const outcome  = document.getElementById('edit-outcome').value.trim();
+      const tone     = document.getElementById('edit-tone').value;
+      const count    = parseInt(document.getElementById('edit-question-count').value);
+      const custom   = document.getElementById('edit-custom-questions').value.trim();
+
+      if (!name || !audience || !outcome) { alert('Name, audience, and outcome are required.'); return; }
+
+      const tool = toolCache.find(t => t.id === toolId);
+      const btn  = document.getElementById('edit-save-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Regenerating...';
+
+      const fn = firebase.functions().httpsCallable('generateToolPrompt');
+      fn({
+        category:        tool?.category || '',
+        template:        tool?.template || '',
+        toolName:        name,
+        audience,
+        outcome,
+        tone,
+        questionCount:   count,
+        customQuestions: custom
+      }).then(result => {
+        const systemPrompt = result.data.systemPrompt;
+        return db.collection('creators').doc(creatorIdGlobal).collection('tools').doc(toolId).update({
+          toolName:      name,
+          systemPrompt,
+          config: { audience, outcome, tone, questionCount: count, customQuestions: custom },
+          lastEditedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }).then(() => {
+        const tool = toolCache.find(t => t.id === toolId);
+        if (tool) {
+          tool.toolName = name;
+          tool.config   = { audience, outcome, tone, questionCount: count, customQuestions: custom };
+        }
+        closeDrawer();
+        renderTools();
+      }).catch(err => alert('Error: ' + err.message))
+        .finally(() => { btn.disabled = false; btn.textContent = 'Save & Regenerate'; });
+    }
+
+    initAdminPage(function(hub, creatorId) {
+      creatorIdGlobal = creatorId;
+      hubSlugGlobal   = hub.slug || '';
+
+      const name = hub.displayName || 'Your Hub';
+      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('admin-hub-name').textContent = name;
+      document.getElementById('admin-nav').innerHTML = buildAdminNav('tools', hubSlugGlobal);
+      document.title = 'AI Tools — ' + name;
+
+      document.getElementById('admin-loading').style.display = 'none';
+      document.getElementById('admin-sidebar').style.display = 'flex';
+      document.getElementById('admin-main').style.display    = 'block';
+
+      loadTools();
+    });
+  </script>
+</body>
+</html>

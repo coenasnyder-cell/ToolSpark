@@ -283,6 +283,10 @@
         <div class="stat-num" id="stat-courses-all">—</div>
         <div class="stat-label">Total Courses</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-tools">—</div>
+        <div class="stat-label">Tools</div>
+      </div>
     </div>
 
     <div class="section-label">Manage</div>
@@ -309,6 +313,16 @@
         <div class="action-sub">Create courses, add lessons, and control what members see.</div>
       </a>
 
+      <a class="action-card" href="/hub/admin-tools">
+        <div class="action-icon" style="background:rgba(234,88,12,.1);">
+          <svg width="22" height="22" fill="none" stroke="#EA580C" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div class="action-title">AI Tools</div>
+        <div class="action-sub">Build and publish AI tools your members can use.</div>
+      </a>
+
       <a class="action-card" href="/hub/admin-settings">
         <div class="action-icon" style="background:rgba(22,163,74,.1);">
           <svg width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24">
@@ -330,6 +344,8 @@
         icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
       { label: 'Courses',   href: '/hub/admin-courses',  key: 'courses',
         icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
+      { label: 'Tools',     href: '/hub/admin-tools',    key: 'tools',
+        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
       { label: 'Settings',  href: '/hub/admin-settings', key: 'settings',
         icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
     ];
@@ -372,11 +388,13 @@
       Promise.all([
         creatorRef.collection('members').get(),
         creatorRef.collection('courses').get(),
-        creatorRef.collection('courses').where('isPublished', '==', true).get()
-      ]).then(([members, courses, published]) => {
+        creatorRef.collection('courses').where('isPublished', '==', true).get(),
+        creatorRef.collection('tools').get()
+      ]).then(([members, courses, published, tools]) => {
         document.getElementById('stat-members').textContent     = members.size;
         document.getElementById('stat-courses-all').textContent = courses.size;
         document.getElementById('stat-courses-pub').textContent = published.size;
+        document.getElementById('stat-tools').textContent       = tools.size;
       });
 
       document.getElementById('admin-loading').style.display = 'none';

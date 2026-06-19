@@ -1,4 +1,4 @@
-const {onRequest} = require("firebase-functions/v2/https");
+const {onRequest, onCall, HttpsError} = require("firebase-functions/v2/https");
 const {onDocumentCreated, onDocumentUpdated} = require("firebase-functions/v2/firestore");
 const crypto = require("crypto");
 const fs = require("fs");
@@ -2377,4 +2377,128 @@ exports.sparkyChat = onRequest({
     console.error(JSON.stringify({ event: "sparky_chat_error", message: err.message }));
     res.status(500).json({ error: "Something went wrong. Please try again." });
   }
+});
+
+// ── CREATOR HUB: TOOL BUILDER ─────────────────────────────────────────────────
+
+// Shared: get API key doc for a creator (Admin SDK bypasses rules)
+async function getCreatorKeys(creatorId) {
+  const snap = await admin.firestore()
+    .collection("creators").doc(creatorId)
+    .collection("private").doc("keys").get();
+  if (!snap.exists) return null;
+  return snap.data();
+}
+
+// Shared: call AI with a system prompt + messages array
+// Returns the assistant's reply as a string.
+async function callAI(keys, systemPrompt, messages) {
+  if (keys.claudeKey) {
+    const anthropic = new Anthropic({ apiKey: keys.claudeKey });
+    const resp = await anthropic.messages.create({
+      model:      "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      system:     systemPrompt,
+      messages,
+    });
+    return resp.content[0].text;
+  }
+
+  if (keys.openaiKey) {
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+      method:  "POST",
+      headers: {
+        "Authorization": `Bearer ${keys.openaiKey}`,
+        "Content-Type":  "application/json",
+      },
+      body: JSON.stringify({
+        model:    "gpt-4o-mini",
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || "OpenAI error");
+    return data.choices[0].message.content;
+  }
+
+  throw new HttpsError("failed-precondition", "No API key configured.");
+}
+
+// generateToolPrompt — called by creator in tool builder to build their system prompt.
+// Uses the creator's own API key (stored in /creators/{uid}/private/keys).
+exports.generateToolPrompt = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const { category, template, toolName, audience, outcome, tone, questionCount, customQuestions } = request.data;
+  if (!template || !toolName || !audience || !outcome || !tone || !questionCount) {
+    throw new HttpsError("invalid-argument", "Missing required fields.");
+  }
+
+  const keys = await getCreatorKeys(uid);
+  if (!keys) throw new HttpsError("failed-precondition", "Add your API key in Settings before building a tool.");
+
+  const metaPrompt = `Generate a system prompt for an AI tool with these specs:
+- Type: ${template}
+- Category: ${category}
+- Name: ${toolName}
+- Audience: ${audience}
+- Outcome: ${outcome}
+- Tone: ${tone}
+- Number of questions to ask the user: ${questionCount}${customQuestions ? `\n- Specific questions to include: ${customQuestions}` : ""}
+
+The tool should ask questions one at a time and deliver a personalized result at the end.
+Return only the system prompt text, nothing else. No explanation, no preamble.`;
+
+  const systemPrompt = await callAI(keys, "You are an expert AI tool designer.", [
+    { role: "user", content: metaPrompt },
+  ]);
+
+  return { systemPrompt: systemPrompt.trim() };
+});
+
+// callCreatorTool — powers the live tool for hub members.
+// Reads system prompt and API key server-side; members never see the key.
+exports.callCreatorTool = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const { creatorId, toolId, messages, draft } = request.data;
+  if (!creatorId || !toolId || !Array.isArray(messages)) {
+    throw new HttpsError("invalid-argument", "Missing required fields.");
+  }
+
+  const db = admin.firestore();
+
+  // Check access: creator (draft mode) OR active member
+  const creatorDoc = await db.collection("creators").doc(creatorId).get();
+  if (!creatorDoc.exists) throw new HttpsError("not-found", "Hub not found.");
+  const isOwner = creatorDoc.data().ownerId === uid;
+
+  if (!isOwner) {
+    const memberDoc = await db.collection("creators").doc(creatorId)
+      .collection("members").doc(uid).get();
+    if (!memberDoc.exists || memberDoc.data().status !== "active") {
+      throw new HttpsError("permission-denied", "Not a member of this hub.");
+    }
+  }
+
+  // Load tool
+  const toolDoc = await db.collection("creators").doc(creatorId)
+    .collection("tools").doc(toolId).get();
+  if (!toolDoc.exists) throw new HttpsError("not-found", "Tool not found.");
+
+  const tool = toolDoc.data();
+  if (!draft && !tool.isPublished && !isOwner) {
+    throw new HttpsError("permission-denied", "This tool is not published.");
+  }
+
+  if (!tool.systemPrompt) throw new HttpsError("failed-precondition", "Tool has no system prompt yet.");
+
+  // Get API key
+  const keys = await getCreatorKeys(creatorId);
+  if (!keys) throw new HttpsError("failed-precondition", "Creator has not configured an API key.");
+
+  const text = await callAI(keys, tool.systemPrompt, messages);
+  return { text };
 });

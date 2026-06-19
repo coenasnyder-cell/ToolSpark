@@ -554,6 +554,20 @@
           <div class="hub-card-title">Lesson Generator</div>
           <div class="hub-card-sub">Build lessons from script to export</div>
         </a>
+        <a href="/hub/admin" class="hub-card">
+          <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="hub-card-title">Creator Hub</div>
+          <div class="hub-card-sub">Build and manage your AI tool hub</div>
+        </a>
+        <a href="#" class="hub-card" id="my-hub-card" style="display:none;">
+          <div class="hub-card-icon" style="background:rgba(107,47,179,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#6B2FB3" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="hub-card-title">My Hub</div>
+          <div class="hub-card-sub" id="my-hub-sub">Go to your hub</div>
+        </a>
       </div>
     </div>
     <!-- COMMUNITY TOOLS & RESOURCES -->
@@ -682,6 +696,22 @@
       if (snap.exists) {
         const data = snap.data();
         currentUserData = data;
+
+        // My Hub card — show if user is a member of a creator's hub
+        if (data.creatorId) {
+          db.collection('creators').doc(data.creatorId).get().then(function(creatorDoc) {
+            if (creatorDoc.exists && creatorDoc.data().slug) {
+              var slug = creatorDoc.data().slug;
+              var card = document.getElementById('my-hub-card');
+              var sub  = document.getElementById('my-hub-sub');
+              if (card) {
+                card.href         = '/hub/dashboard?hub=' + slug;
+                card.style.display = 'block';
+              }
+              if (sub) sub.textContent = creatorDoc.data().displayName || 'Go to your hub';
+            }
+          }).catch(function(){});
+        }
 
         // Role
         if (data.userRole === 'admin') {
