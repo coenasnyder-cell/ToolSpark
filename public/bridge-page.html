@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're In — ToolSpark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #FFC820;
+      --purple: #6B2FB3;
+      --black: #0C0B09;
+      --white: #FFFFFF;
+      --gray-bg: #F7F6F2;
+      --gray-text: #6B6B6B;
+    }
+
+    html { font-size: 16px; }
+    body { font-family: 'Inter', sans-serif; background: var(--black); color: var(--white); line-height: 1.65; }
+
+    /* ── CONFIRMATION BANNER ── */
+    .confirm-bar {
+      background: var(--yellow);
+      padding: 14px 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--black);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 64px 24px 56px;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .check-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255,200,32,0.12);
+      border: 1.5px solid rgba(255,200,32,0.3);
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 7vw, 46px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span { color: var(--yellow); }
+
+    .hero-inbox {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 48px;
+      text-align: left;
+    }
+
+    .hero-inbox strong { color: var(--white); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 0 24px 48px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── BODY COPY ── */
+    .body-section {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .body-section p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 20px;
+      line-height: 1.75;
+    }
+
+    .body-section p strong { color: var(--white); font-weight: 700; }
+
+    /* ── HUB CALLOUT ── */
+    .hub-callout {
+      background: rgba(107,47,179,0.15);
+      border: 1px solid rgba(107,47,179,0.35);
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 32px 0;
+    }
+
+    .hub-callout .eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .hub-callout h2 {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .hub-callout p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 6px;
+      line-height: 1.65;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0 24px;
+    }
+
+    .pill {
+      background: rgba(255,200,32,0.1);
+      border: 1px solid rgba(255,200,32,0.25);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--yellow);
+    }
+
+    .founding-badge {
+      background: rgba(255,200,32,0.08);
+      border: 1px solid rgba(255,200,32,0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .founding-badge strong { color: var(--yellow); }
+
+    /* ── BUTTON ── */
+    .btn-primary {
+      display: inline-block;
+      width: 100%;
+      padding: 17px 28px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(255,200,32,0.35);
+    }
+
+    .btn-ghost {
+      display: inline-block;
+      width: 100%;
+      padding: 15px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: var(--white); }
+
+    .btn-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    @media (min-width: 640px) {
+      .btn-primary, .btn-ghost { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── CONFIRMATION BANNER ── -->
+<div class="confirm-bar">⚡ You're confirmed — check your inbox for Validator access</div>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="check-badge">✓</div>
+  <h1>You're in. Here's what<br><span>happens next.</span></h1>
+
+  <div class="hero-inbox">
+    <strong>📬 Check your inbox</strong> — your AI Validator access is on its way. If you don't see it in the next two minutes, check your spam folder and mark it safe.
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ── BODY COPY ── -->
+<div class="body-section">
+  <p>While you wait, here's something worth knowing.</p>
+  <p>The Validator is designed to answer one question: <strong>is this idea worth building?</strong></p>
+  <p>If your idea comes back as a <strong>GO</strong> or an <strong>IMPROVE</strong>, the next question is: where do you actually build it?</p>
+
+  <!-- ── HUB CALLOUT ── -->
+  <div class="hub-callout">
+    <span class="eyebrow">⚡ What's next</span>
+    <h2>That's what the ToolSpark Creator Hub is for.</h2>
+    <p>It's a fully branded platform — your name, your domain, your tools, your community — where you build the AI tool your Validator just told you is viable, launch it, and list it in the ToolSpark Marketplace so people can actually find it.</p>
+
+    <div class="pill-row">
+      <span class="pill">No coding</span>
+      <span class="pill">No big audience required</span>
+      <span class="pill">Your data, always</span>
+    </div>
+
+    <div class="founding-badge">
+      <strong>Right now, the first 100 founding members get lifetime access at $27/month</strong> — before the price goes up to $47.
+    </div>
+
+    <p style="margin-bottom:24px; font-size:15px;">You don't have to decide anything today. Go validate your idea first. But if you come back with a GO verdict and you're ready to build it — the door is open.</p>
+
+    <a href="creator-hub-sales.html" class="btn-primary">See What's Inside the Creator Hub →</a>
+    <a href="idea-validator" class="btn-ghost">Go Validate My Idea First →</a>
+    <p class="btn-note">No pressure. The founding rate will be here when you're ready.</p>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>Questions? Reply to your confirmation email. A real human reads every one.</p>
+</footer>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prompt Generator — Creator Hub</title>
+<title>Tool Builder — Creator Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -268,7 +268,7 @@
     <button class="hamburger-btn" id="hamburger-btn">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <div class="header-title">Prompt Generator</div>
+    <div class="header-title">Tool Builder</div>
     <a onclick="history.back()" class="btn-back-header" style="cursor:pointer;">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       Dashboard
@@ -452,9 +452,22 @@
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  function stripMarkdown(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^---+$/gm, '')
+      .replace(/^-\s+/gm, '• ')
+      .replace(/`(.+?)`/g, '$1')
+      .replace(/\n{2,}/g, ' ')
+      .trim();
+  }
+
   function renderContextRow(label, value) {
     if (!value) return '';
-    return '<div class="context-row"><div class="context-row-label">' + esc(label) + '</div><div class="context-row-value">' + esc(value) + '</div></div>';
+    return '<div class="context-row"><div class="context-row-label">' + esc(label) + '</div><div class="context-row-value">' + esc(stripMarkdown(value)) + '</div></div>';
   }
 
   function missingHtml(label, href) {
@@ -723,14 +736,17 @@
     var nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     var items = [
-      { href: '/hub/admin-dashboard', label: '← Admin Dashboard' },
-      { href: '/hub-settings',        label: 'Hub Settings' },
+      { href: '/hub-settings',         label: 'Hub Settings' },
       { href: '/hub/prompt-generator', label: 'Tool Builder', active: true },
-      { href: '/hub/analytics',       label: 'Analytics' },
+      { href: '/hub/courses-editor',   label: 'Courses' },
+      { href: '/hub/analytics',        label: 'Analytics' },
     ];
-    nav.innerHTML = items.map(function(i) {
-      return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';
-    }).join('');
+    nav.innerHTML =
+      '<a href="/hub/admin-dashboard" class="nav-item" style="color:var(--text3);font-size:13px;margin-bottom:4px;">← Admin Dashboard</a>' +
+      '<div style="border-top:1px solid rgba(255,255,255,0.06);margin:2px 0 6px;"></div>' +
+      items.map(function(i) {
+        return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';
+      }).join('');
   })();
 </script>
 </body>

@@ -198,7 +198,7 @@
       <div class="card-body">
         <div id="stats-content">
           <div class="notice">
-            Connect your Firebase database in <a href="/hub-settings">Hub Settings</a> to see member activity stats.
+            No member activity yet. Stats will appear here once members start joining your hub.
           </div>
         </div>
       </div>
@@ -329,10 +329,11 @@
     var nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     var items = [
-      { href: '/hub/admin-dashboard', label: 'Admin Dashboard' },
-      { href: '/hub-settings',        label: 'Hub Settings' },
-      { href: '/hub/prompt-generator', label: 'Prompt Generator' },
-      { href: '/hub/analytics',       label: 'Analytics', active: true },
+      { href: '/hub/admin-dashboard',  label: 'Admin Dashboard' },
+      { href: '/hub-settings',         label: 'Hub Settings' },
+      { href: '/hub/prompt-generator', label: 'Tool Builder' },
+      { href: '/hub/courses-editor',   label: 'Courses' },
+      { href: '/hub/analytics',        label: 'Analytics', active: true },
     ];
     nav.innerHTML = items.map(function(i) {
       return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';

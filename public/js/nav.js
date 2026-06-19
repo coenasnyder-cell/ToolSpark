@@ -37,10 +37,6 @@
       key: 'marketplace', href: 'marketplace.html', label: 'Marketplace',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
     },
-    {
-      key: 'creator-hub', href: '/hub/admin-dashboard', label: 'Creator Hub',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
-    },
   ];
 
   var START_HERE_URL = 'course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=XQW5SV09fR0fuvkaHT50';
@@ -169,6 +165,14 @@
           var data = snap.exists ? snap.data() : {};
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
+            var navEl = document.getElementById('sidebar-nav');
+            if (navEl) {
+              var adminLink = document.createElement('a');
+              adminLink.href = '/hub/admin-dashboard';
+              adminLink.className = 'nav-item';
+              adminLink.innerHTML = '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Creator Hub</span>';
+              navEl.appendChild(adminLink);
+            }
             revealNav();
           } else if (!data.onboardingComplete) {
             lockNav();

@@ -219,6 +219,19 @@
 </div>
 
 <script>
+  function cleanPreviewSummary(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/^-{2,}\s*$/gm, '')
+      .replace(/^\*{1,2}[^*\n]+\*{0,2}:\s*/gm, '')
+      .replace(/^[A-Z][A-Za-z ]{2,}:\s*/gm, '')
+      .replace(/\*\*/g, '')
+      .replace(/\n+/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .slice(0, 120);
+  }
+
   initHubPage('dashboard', function(hub, slug, studentAuth, studentDb) {
     // Branding
     if (studentAuth && studentDb) {
@@ -286,7 +299,7 @@
             var rmContent = document.getElementById('dash-rm-content');
             rmContent.innerHTML =
               '<div class="rm-preview-title">' + (r.resultTitle || 'Latest Result') + '</div>' +
-              '<div class="rm-preview-summary">' + (r.resultSummary || '') + '</div>';
+              '<div class="rm-preview-summary">' + cleanPreviewSummary(r.resultSummary || '') + '</div>';
           }
         }).catch(function() {});
     }

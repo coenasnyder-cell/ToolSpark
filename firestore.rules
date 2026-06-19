@@ -24,6 +24,11 @@ service cloud.firestore {
         currentUserData().get('userRole', '') == 'admin';
     }
 
+    function isHubOwner(hubSlug) {
+      return isActive() &&
+        get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid;
+    }
+
     function isBanned() {
       return isSignedIn() && userExists() &&
         currentUserData().get('banned', false) == true;
@@ -521,6 +526,23 @@ match /conversations/{conversationId} {
       // Secrets sub-collection — API keys; readable only by Cloud Functions via Admin SDK
       match /secrets/{docId} {
         allow read, write: if false;
+      }
+    }
+
+    // HUB COURSES — creator-managed course content, scoped by hub slug
+    // Stored in main ToolSpark Firebase so no per-creator Firebase needed
+    match /hub_courses/{hubSlug} {
+      allow read: if true;
+      allow write: if isHubOwner(hubSlug) || isAdmin();
+
+      match /courses/{courseId} {
+        allow read: if true;
+        allow write: if isHubOwner(hubSlug) || isAdmin();
+
+        match /lessons/{lessonId} {
+          allow read: if true;
+          allow write: if isHubOwner(hubSlug) || isAdmin();
+        }
       }
     }
 

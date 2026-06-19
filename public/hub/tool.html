@@ -568,12 +568,12 @@
         } catch(e) { console.warn('Student Firebase init failed:', e); }
       }
 
+      document.getElementById('nav-dashboard-link').href = '/hub/' + slug + '/dashboard';
+      document.getElementById('nav-user').classList.add('visible');
+
       if (HUB.membersOnly && studentAuth) {
         studentAuth.onAuthStateChanged(function(user) {
           if (!user) { window.location.href = '/hub/' + slug + '/login'; return; }
-          var userEl = document.getElementById('nav-user');
-          if (userEl) { userEl.classList.add('visible'); }
-          document.getElementById('nav-dashboard-link').href = '/hub/' + slug + '/dashboard';
           renderTool(HUB);
         });
       } else {

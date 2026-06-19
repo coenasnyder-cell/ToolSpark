@@ -53,6 +53,10 @@
         "destination": "/hub/courses.html"
       },
       {
+        "source": "/hub/*/course",
+        "destination": "/hub/course.html"
+      },
+      {
         "source": "/hub/*/support",
         "destination": "/hub/support.html"
       },

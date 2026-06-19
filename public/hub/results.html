@@ -306,6 +306,7 @@
     <span class="hub-name-text" id="nav-name"></span>
   </div>
   <div class="nav-right">
+    <a id="back-to-hub-btn" href="#" class="btn-new-session-nav" style="margin-right:6px;">← Hub</a>
     <a id="new-session-btn" href="#" class="btn-new-session-nav">New Session</a>
   </div>
 </nav>
@@ -351,6 +352,7 @@
   document.getElementById('new-session-btn').href = toolUrl();
   document.getElementById('back-link').href = toolUrl();
   document.getElementById('new-session-link').href = toolUrl();
+  document.getElementById('back-to-hub-btn').href = '/hub/' + slug + '/dashboard';
 
   function renderMarkdown(text) {
     if (!text) return '';
@@ -396,6 +398,7 @@
 
   function formatInline(text) {
     return text
+      .replace(/\*\*\s*$/, '')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>');
@@ -514,7 +517,7 @@
     Object.keys(colorMap).forEach(function(prop) {
       if (colorMap[prop]) document.documentElement.style.setProperty(prop, colorMap[prop]);
     });
-    document.title = (hub.toolName || 'Your Results') + ' — ' + (hub.hubName || '');
+    document.title = (hub.toolName || 'Your Results') + (hub.hubName ? ' — ' + hub.hubName : '');
     if (hub.gaTrackingId) injectGA(hub.gaTrackingId);
     if (hub.logoUrl) {
       var lg = document.getElementById('nav-logo');

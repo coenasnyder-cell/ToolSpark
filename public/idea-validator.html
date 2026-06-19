@@ -19,8 +19,6 @@
   --text2:   #555555;
   --text3:   #999999;
   --border:  #E5E7EB;
-  --green:   #16A34A;
-  --red:     #DC2626;
   --radius:  14px;
 }
 
@@ -55,64 +53,125 @@ body {
 }
 .hamburger span { width: 22px; height: 2px; background: var(--black); border-radius: 2px; display: block; }
 
-/* ── LAYOUT ── */
-.main {
+/* ── CHAT SCREEN ── */
+#chat-screen {
   max-width: 680px;
   margin: 0 auto;
-  padding: 24px 16px 32px;
+  padding: 20px 16px 90px;
 }
 
-/* ── CARD ── */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
-  margin-bottom: 16px;
+.bubble-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.bubble-wrap.sparky { justify-content: flex-start; }
+.bubble-wrap.user   { justify-content: flex-end; }
+
+.bubble {
+  max-width: 78%;
+  border-radius: 18px;
+  padding: 11px 15px;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-/* ── INPUT FORM ── */
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
+.bubble.sparky {
+  background: rgba(107, 47, 179, 0.07);
+  border: 1px solid rgba(107, 47, 179, 0.14);
   color: var(--text);
-  margin-bottom: 6px;
+  border-bottom-left-radius: 4px;
 }
 
-.form-label + * { margin-top: 0; }
+.bubble.user {
+  background: rgba(255, 200, 32, 0.15);
+  border: 1px solid rgba(255, 200, 32, 0.28);
+  color: var(--text);
+  border-bottom-right-radius: 4px;
+}
 
-.form-group { margin-bottom: 18px; }
-.form-group:last-of-type { margin-bottom: 0; }
+.sparky-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
 
-textarea, input[type="text"] {
-  width: 100%;
+/* Typing indicator */
+.typing-dots {
+  display: flex;
+  gap: 5px;
+  padding: 4px 2px;
+  align-items: center;
+}
+.typing-dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0.5;
+  animation: dot-bounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+  30%           { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── CHAT INPUT BAR ── */
+.chat-input-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  padding: 10px 16px 20px;
+  z-index: 40;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.chat-input-bar textarea {
+  flex: 1;
   border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-family: 'Inter', sans-serif;
   font-size: 15px;
   color: var(--text);
   background: #FAFAFA;
   outline: none;
-  transition: border-color .15s, background .15s;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+  overflow-y: auto;
+  transition: border-color .15s;
+  line-height: 1.5;
 }
+.chat-input-bar textarea:focus    { border-color: var(--purple); background: #fff; }
+.chat-input-bar textarea::placeholder { color: var(--text3); }
 
-textarea:focus, input[type="text"]:focus {
-  border-color: var(--purple);
-  background: #fff;
+.send-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--yellow);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .15s, transform .1s;
 }
-
-textarea { resize: none; min-height: 100px; }
-
-.field-error {
-  font-size: 12px;
-  color: var(--red);
-  margin-top: 5px;
-  display: none;
-}
-.field-error.show { display: block; }
-.has-error { border-color: var(--red) !important; }
+.send-btn:hover  { opacity: .9; }
+.send-btn:active { transform: scale(.95); }
+.send-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.send-btn svg { width: 20px; height: 20px; }
 
 /* ── BUTTONS ── */
 .btn-primary {
@@ -131,25 +190,10 @@ textarea { resize: none; min-height: 100px; }
   justify-content: center;
   gap: 8px;
   transition: opacity .15s, transform .1s;
+  text-decoration: none;
 }
 .btn-primary:hover  { opacity: .9; }
 .btn-primary:active { transform: scale(.99); }
-.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-
-.btn-ghost {
-  display: block;
-  width: 100%;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--purple);
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 10px 0 0;
-  font-family: 'Inter', sans-serif;
-}
-.btn-ghost:hover { text-decoration: underline; }
 
 .btn-outline {
   width: 100%;
@@ -166,37 +210,27 @@ textarea { resize: none; min-height: 100px; }
 }
 .btn-outline:hover { background: var(--purple); color: #fff; }
 
-/* ── STICKY CTA (mobile input screen) ── */
-.sticky-cta {
+/* ── LOADING OVERLAY ── */
+.loading-overlay {
+  display: none;
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: #fff;
-  border-top: 1px solid var(--border);
-  padding: 12px 20px 24px;
-  z-index: 40;
-  display: none;
-}
-
-/* ── LOADING ── */
-.loading-wrap {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 80px 20px;
-  display: none;
+  inset: 0;
+  background: var(--bg);
+  z-index: 100;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 20px;
   text-align: center;
 }
-.loading-wrap.show { display: flex; }
+.loading-overlay.show { display: flex; }
 
 .bolt { font-size: 52px; animation: bolt-pulse 1s ease-in-out infinite; }
 @keyframes bolt-pulse {
   0%, 100% { opacity: 1; transform: scale(1) rotate(-5deg); }
   50%       { opacity: .5; transform: scale(.85) rotate(5deg); }
 }
-
-.loading-wrap p {
-  margin-top: 20px;
+.loading-overlay p {
   font-size: 15px;
   font-weight: 500;
   color: var(--text2);
@@ -205,6 +239,20 @@ textarea { resize: none; min-height: 100px; }
 /* ── RESULTS ── */
 #results-section { display: none; }
 #results-section.show { display: block; }
+
+.main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 32px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  margin-bottom: 16px;
+}
 
 /* Score ring */
 .score-wrap {
@@ -215,7 +263,6 @@ textarea { resize: none; min-height: 100px; }
 }
 
 .ring-container { position: relative; width: 140px; height: 140px; }
-
 .ring-container svg { transform: rotate(-90deg); }
 
 .ring-bg   { fill: none; stroke: #F0F0F0; stroke-width: 10; }
@@ -260,7 +307,6 @@ textarea { resize: none; min-height: 100px; }
   max-width: 480px;
 }
 
-/* Section title */
 .section-title {
   font-size: 15px;
   font-weight: 700;
@@ -371,57 +417,44 @@ textarea { resize: none; min-height: 100px; }
   margin-top: 1px;
 }
 
-/* Error toast */
-.api-error {
-  background: #FEE2E2;
-  color: var(--red);
-  border-radius: 10px;
-  padding: 13px 16px;
-  font-size: 14px;
-  font-weight: 500;
+/* Results CTA block */
+.results-cta {
+  background: var(--purple);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
   margin-bottom: 16px;
-  display: none;
 }
-.api-error.show { display: block; }
-
-/* ── BOTTOM NAV (mobile, results only) ── */
-.bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: #fff;
-  border-top: 1px solid var(--border);
-  z-index: 50;
+.results-cta h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.25;
 }
-.bottom-nav.show { display: flex; }
-
-.nav-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0 18px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text3);
-  cursor: pointer;
-  border: none;
-  background: none;
+.results-cta p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 20px;
+  line-height: 1.55;
+}
+.btn-cta {
+  display: block;
+  width: 100%;
+  background: var(--yellow);
+  color: var(--black);
   font-family: 'Inter', sans-serif;
-  gap: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
   text-decoration: none;
+  transition: opacity .15s, transform .1s;
+  text-align: center;
 }
-.nav-tab.active { color: var(--purple); }
-.nav-tab svg { width: 22px; height: 22px; }
-
-/* ── RESPONSIVE PADDING ADJUSTMENTS ── */
-@media (max-width: 767px) {
-  /* Input screen: pad above sticky CTA */
-  #input-section.show  { padding-bottom: 90px; }
-  /* Results screen: pad above bottom nav */
-  #results-section.show { padding-bottom: 90px; }
-}
+.btn-cta:hover { opacity: .9; }
 </style>
 </head>
 <body>
@@ -438,47 +471,23 @@ textarea { resize: none; min-height: 100px; }
   </button>
 </header>
 
-<!-- INPUT SECTION -->
-<section id="input-section" class="main show">
-  <div class="card">
-    <div class="form-group">
-      <label class="form-label" for="idea">Your AI Tool Idea</label>
-      <textarea id="idea" placeholder="Describe your AI tool idea…" rows="4"></textarea>
-      <p class="field-error" id="err-idea">Please describe your AI tool idea.</p>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="audience">Target Audience</label>
-      <input type="text" id="audience" placeholder="e.g. freelance designers, coaches, small businesses">
-      <p class="field-error" id="err-audience">Please enter your target audience.</p>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="problem">Problem Solved</label>
-      <input type="text" id="problem" placeholder="e.g. They spend hours writing content from scratch">
-      <p class="field-error" id="err-problem">Please describe the problem your idea solves.</p>
-    </div>
-
-    <!-- Desktop CTA (hidden on mobile) -->
-    <div id="inline-cta-wrap">
-      <button class="btn-primary" id="btn-inline" onclick="handleValidate()">
-        ⚡ Validate My Idea
-      </button>
-      <button class="btn-ghost" onclick="fillExample()">See Example Ideas</button>
-    </div>
-  </div>
-
-  <div class="api-error" id="api-error"></div>
+<!-- CHAT SCREEN -->
+<section id="chat-screen">
+  <div id="chat-messages"></div>
 </section>
 
-<!-- STICKY MOBILE CTA -->
-<div class="sticky-cta" id="sticky-cta">
-  <button class="btn-primary" onclick="handleValidate()">⚡ Validate My Idea</button>
-  <button class="btn-ghost" onclick="fillExample()" style="margin-top:6px">See Example Ideas</button>
+<!-- CHAT INPUT BAR -->
+<div class="chat-input-bar" id="chat-input-bar">
+  <textarea id="chat-input" rows="1" placeholder="Type a message…" onkeydown="handleKey(event)"></textarea>
+  <button class="send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send">
+    <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-7 7m7-7l7 7"/>
+    </svg>
+  </button>
 </div>
 
-<!-- LOADING -->
-<div class="loading-wrap" id="loading">
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loading">
   <div class="bolt">⚡</div>
   <p>Analyzing your idea…</p>
 </div>
@@ -520,35 +529,20 @@ textarea { resize: none; min-height: 100px; }
     <button class="btn-outline" onclick="alert('Coming soon!')">Generate MVP Plan</button>
   </div>
 
+  <!-- Build CTA -->
+  <div class="results-cta">
+    <h3>Ready to Build and Monetize Your Tool?</h3>
+    <p>Your idea is validated. The Creator Hub is where you build it, launch it, and get paid for it — no coding required.</p>
+    <a href="/signup" class="btn-cta">Join the Creator Hub →</a>
+  </div>
+
   <!-- Validate another -->
-  <button class="btn-primary" onclick="resetToInput()">⚡ Validate Another Idea</button>
+  <button class="btn-primary" onclick="resetToChat()">⚡ Validate Another Idea</button>
 
 </section>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav" id="bottom-nav">
-  <button class="nav-tab" onclick="resetToInput()">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
-    </svg>
-    Home
-  </button>
-  <button class="nav-tab active">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V11h6v6M3 21h18M12 3l9 7H3l9-7z"/>
-    </svg>
-    Results
-  </button>
-  <button class="nav-tab">
-    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-    </svg>
-    Settings
-  </button>
-</nav>
-
 <script>
-const FUNCTION_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/ideaValidator";
+const SPARKY_CHAT_URL = "https://sparkychat-e6qya4oddq-uc.a.run.app";
 
 const CATEGORIES = [
   { key: "market_demand",           label: "Market Demand",           max: 25 },
@@ -565,139 +559,150 @@ const INSIGHTS = [
   { key: "suggested_improvements", label: "Suggested Improvements" },
 ];
 
-// ── State helpers ──────────────────────────────────────────────────────────────
-const isMobile = () => window.innerWidth < 768;
+const OPENING_MESSAGE = "Hey! I'm Sparky ⚡ Let's validate your AI tool idea. What's the idea? Give me 1-2 sentences.";
 
-function showInputScreen() {
-  document.getElementById("input-section").classList.add("show");
-  document.getElementById("results-section").classList.remove("show");
-  document.getElementById("loading").classList.remove("show");
-  document.getElementById("bottom-nav").classList.remove("show");
-  if (isMobile()) document.getElementById("sticky-cta").style.display = "block";
+let chatMessages = [];
+let isWaiting = false;
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
-function showLoading() {
-  document.getElementById("input-section").classList.remove("show");
-  document.getElementById("results-section").classList.remove("show");
-  document.getElementById("bottom-nav").classList.remove("show");
-  document.getElementById("sticky-cta").style.display = "none";
-  document.getElementById("loading").classList.add("show");
+function appendSparkyBubble(text) {
+  const wrap = document.createElement("div");
+  wrap.className = "bubble-wrap sparky";
+  wrap.innerHTML =
+    `<div class="sparky-avatar">⚡</div>` +
+    `<div class="bubble sparky">${escHtml(text)}</div>`;
+  document.getElementById("chat-messages").appendChild(wrap);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
-function showResultsScreen() {
-  document.getElementById("input-section").classList.remove("show");
-  document.getElementById("loading").classList.remove("show");
-  document.getElementById("results-section").classList.add("show");
-  document.getElementById("sticky-cta").style.display = "none";
-  if (isMobile()) document.getElementById("bottom-nav").classList.add("show");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+function appendUserBubble(text) {
+  const wrap = document.createElement("div");
+  wrap.className = "bubble-wrap user";
+  wrap.innerHTML = `<div class="bubble user">${escHtml(text)}</div>`;
+  document.getElementById("chat-messages").appendChild(wrap);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
-// ── Sticky CTA / bottom nav visibility ────────────────────────────────────────
-function initResponsive() {
-  const stickyEl = document.getElementById("sticky-cta");
-  const inlineCta = document.getElementById("inline-cta-wrap");
-
-  function apply() {
-    const mobile = isMobile();
-    stickyEl.style.display  = mobile ? "block" : "none";
-    inlineCta.style.display = mobile ? "none"  : "block";
-  }
-
-  apply();
-  window.addEventListener("resize", apply);
+function showTyping() {
+  const wrap = document.createElement("div");
+  wrap.className = "bubble-wrap sparky";
+  wrap.id = "typing-indicator";
+  wrap.innerHTML =
+    `<div class="sparky-avatar">⚡</div>` +
+    `<div class="bubble sparky"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  document.getElementById("chat-messages").appendChild(wrap);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
-// ── Example fill ───────────────────────────────────────────────────────────────
-function fillExample() {
-  document.getElementById("idea").value     = "An AI-powered content repurposing tool that automatically turns one long-form blog post into social media captions, email newsletters, and short video scripts.";
-  document.getElementById("audience").value = "Online coaches and course creators";
-  document.getElementById("problem").value  = "They spend hours manually reformatting the same content for every platform they post on.";
-  clearErrors();
+function hideTyping() {
+  const el = document.getElementById("typing-indicator");
+  if (el) el.remove();
 }
 
-// ── Validation ─────────────────────────────────────────────────────────────────
-function clearErrors() {
-  ["idea", "audience", "problem"].forEach(id => {
-    document.getElementById(id).classList.remove("has-error");
-    document.getElementById("err-" + id).classList.remove("show");
-  });
-  const apiErr = document.getElementById("api-error");
-  apiErr.textContent = "";
-  apiErr.classList.remove("show");
-}
+// ── Send ───────────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (isWaiting) return;
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
 
-function getFields() {
-  clearErrors();
-  const idea     = document.getElementById("idea").value.trim();
-  const audience = document.getElementById("audience").value.trim();
-  const problem  = document.getElementById("problem").value.trim();
-  let ok = true;
+  appendUserBubble(text);
+  chatMessages.push({ role: "user", content: text });
+  input.value = "";
+  input.style.height = "44px";
 
-  if (!idea)     { markError("idea");     ok = false; }
-  if (!audience) { markError("audience"); ok = false; }
-  if (!problem)  { markError("problem");  ok = false; }
-
-  return ok ? { idea, audience, problem } : null;
-}
-
-function markError(id) {
-  document.getElementById(id).classList.add("has-error");
-  document.getElementById("err-" + id).classList.add("show");
-}
-
-// ── Main action ────────────────────────────────────────────────────────────────
-async function handleValidate() {
-  const fields = getFields();
-  if (!fields) return;
-
-  showLoading();
+  isWaiting = true;
+  document.getElementById("send-btn").disabled = true;
+  showTyping();
 
   try {
-    const resp = await fetch(FUNCTION_URL, {
+    const resp = await fetch(SPARKY_CHAT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fields),
+      body: JSON.stringify({ messages: chatMessages }),
     });
 
     const data = await resp.json();
+    hideTyping();
 
-    if (!resp.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+    if (!resp.ok) throw new Error(data.error || "Something went wrong.");
 
-    renderResults(data);
-    showResultsScreen();
+    if (data.done) {
+      if (data.message) {
+        appendSparkyBubble(data.message);
+        chatMessages.push({ role: "assistant", content: data.message });
+      }
+      setTimeout(() => {
+        document.getElementById("chat-screen").style.display = "none";
+        document.getElementById("chat-input-bar").style.display = "none";
+        document.getElementById("loading").classList.add("show");
+        setTimeout(() => {
+          renderResults(data.result);
+          document.getElementById("loading").classList.remove("show");
+          document.getElementById("results-section").classList.add("show");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 1500);
+      }, 900);
+    } else {
+      appendSparkyBubble(data.message);
+      chatMessages.push({ role: "assistant", content: data.message });
+    }
   } catch (err) {
-    showInputScreen();
-    const apiErr = document.getElementById("api-error");
-    apiErr.textContent = err.message;
-    apiErr.classList.add("show");
-    apiErr.scrollIntoView({ behavior: "smooth", block: "center" });
+    hideTyping();
+    appendSparkyBubble("Hmm, something went wrong on my end. Try sending that again.");
+  } finally {
+    isWaiting = false;
+    document.getElementById("send-btn").disabled = false;
   }
 }
 
-function resetToInput() {
-  showInputScreen();
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────────
+document.getElementById("chat-input").addEventListener("input", function() {
+  this.style.height = "44px";
+  this.style.height = Math.min(this.scrollHeight, 120) + "px";
+});
+
+// ── Reset ──────────────────────────────────────────────────────────────────────
+function resetToChat() {
+  document.getElementById("results-section").classList.remove("show");
+  document.getElementById("chat-messages").innerHTML = "";
+  document.getElementById("chat-screen").style.display = "";
+  document.getElementById("chat-input-bar").style.display = "flex";
+  chatMessages = [];
+  isWaiting = false;
+  document.getElementById("send-btn").disabled = false;
+  initChat();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Render results ─────────────────────────────────────────────────────────────
 function renderResults(data) {
-  // Score ring
-  const circumference = 2 * Math.PI * 54; // ≈ 339.29
+  const circumference = 2 * Math.PI * 54;
   const offset = circumference - (Math.min(data.overall_score, 100) / 100) * circumference;
   document.getElementById("score-num").textContent = data.overall_score;
   setTimeout(() => {
     document.getElementById("ring-fill").style.strokeDashoffset = offset;
   }, 80);
 
-  // Verdict badge
   const badge = document.getElementById("verdict-badge");
   badge.textContent = data.verdict;
   badge.className   = "verdict-badge verdict-" + data.verdict;
 
-  // Summary
   document.getElementById("score-summary").textContent = data.summary || "";
 
-  // Category carousel
   document.getElementById("carousel").innerHTML = CATEGORIES.map(cat => {
     const score   = (data.scores || {})[cat.key] || 0;
     const pct     = Math.round((score / cat.max) * 100);
@@ -718,7 +723,6 @@ function renderResults(data) {
     });
   }, 150);
 
-  // Accordion
   document.getElementById("accordion").innerHTML = INSIGHTS.map((sec, i) => {
     const items = (data[sec.key] || []).map(t => `<li>${t}</li>`).join("");
     return `<div class="acc-item${i === 0 ? " open" : ""}">
@@ -729,7 +733,6 @@ function renderResults(data) {
     </div>`;
   }).join("");
 
-  // Action steps
   document.getElementById("steps-list").innerHTML = (data.action_steps || []).map(step =>
     `<li><div class="checkbox-mock"></div><span>${step}</span></li>`
   ).join("");
@@ -740,7 +743,12 @@ function toggleAcc(btn) {
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────────
-initResponsive();
+function initChat() {
+  appendSparkyBubble(OPENING_MESSAGE);
+  chatMessages.push({ role: "assistant", content: OPENING_MESSAGE });
+}
+
+initChat();
 </script>
 </body>
 </html>

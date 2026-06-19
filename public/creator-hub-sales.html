@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Hub — ToolSpark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #FFC820;
+      --purple: #6B2FB3;
+      --black: #0C0B09;
+      --white: #FFFFFF;
+      --gray-bg: #F7F6F2;
+      --gray-text: #555;
+      --dark2: #141210;
+    }
+
+    html { font-size: 16px; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); line-height: 1.6; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--black);
+      padding: 72px 24px 80px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 8vw, 58px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span { color: var(--yellow); }
+
+    .hero-sub {
+      font-size: clamp(15px, 2.5vw, 18px);
+      color: rgba(255,255,255,0.6);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 18px 36px;
+      font-size: 17px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,200,32,0.4);
+    }
+
+    .hero-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 14px;
+    }
+
+    /* ── SECTIONS ── */
+    .section-light { background: var(--white); padding: 72px 24px; }
+    .section-gray  { background: var(--gray-bg); padding: 72px 24px; }
+    .section-dark  { background: var(--black); padding: 72px 24px; text-align: center; }
+    .section-dark2 { background: var(--dark2); padding: 72px 24px; }
+
+    .container { max-width: 800px; margin: 0 auto; }
+
+    .section-eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-eyebrow-yellow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 900;
+      color: var(--purple);
+      line-height: 1.15;
+      margin-bottom: 32px;
+    }
+
+    .section-title-white {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 32px;
+    }
+
+    /* ── WHO IT'S FOR ── */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 16px;
+      color: var(--black);
+      line-height: 1.55;
+    }
+
+    .check-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(107,47,179,0.1);
+      border: 1.5px solid rgba(107,47,179,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--purple);
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border: 1px solid rgba(107,47,179,0.1);
+      border-radius: 14px;
+      padding: 24px 22px;
+    }
+
+    .feature-icon { font-size: 26px; margin-bottom: 12px; display: block; }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    /* ── PRICING ── */
+    .pricing-box {
+      background: rgba(107,47,179,0.12);
+      border: 1.5px solid rgba(107,47,179,0.3);
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .price-eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 16px;
+    }
+
+    .price-amount {
+      font-size: 64px;
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .price-period {
+      font-size: 20px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      vertical-align: super;
+      font-size: 18px;
+    }
+
+    .price-label {
+      font-size: 15px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 28px;
+    }
+
+    .seats-bar {
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+    }
+
+    .seats-bar strong { color: var(--yellow); }
+
+    /* Stripe button placeholder */
+    .btn-stripe {
+      display: block;
+      width: 100%;
+      padding: 18px 28px;
+      font-size: 17px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: -0.01em;
+      /* TODO: replace href/onclick with your Stripe payment link */
+    }
+
+    .btn-stripe:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,200,32,0.4);
+    }
+
+    .stripe-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 14px;
+    }
+
+    .price-going-up {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 12px;
+    }
+
+    /* ── SOCIAL PROOF ── */
+    .quote-wrap {
+      text-align: center;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .quote-mark {
+      font-size: 56px;
+      line-height: 1;
+      color: var(--yellow);
+      font-family: Georgia, serif;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    blockquote {
+      font-size: clamp(16px, 2.5vw, 20px);
+      font-style: italic;
+      color: var(--black);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .quote-attr {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-text);
+    }
+
+    /* ── RISK REVERSAL ── */
+    .risk-items {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .risk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .risk-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255,200,32,0.1);
+      border: 1px solid rgba(255,200,32,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .risk-item h4 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .risk-item p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.55;
+    }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      background: var(--black);
+      border-top: 1px solid rgba(255,200,32,0.15);
+      padding: 72px 24px;
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: clamp(24px, 6vw, 42px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .final-cta h2 span { color: var(--yellow); }
+
+    .final-cta p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 32px;
+    }
+
+    .final-cta-wrap {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 6px;
+    }
+
+    footer a { color: var(--yellow); text-decoration: none; }
+
+    /* ── DESKTOP ── */
+    @media (min-width: 640px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <span class="eyebrow">⚡ ToolSpark Creator Hub</span>
+  <h1>Your Idea Is Validated.<br><span>Now Build It.</span></h1>
+  <p class="hero-sub">The ToolSpark Creator Hub gives you everything you need to go from validated idea to launched AI tool — under your own brand, on your own domain, with your data always in your hands.</p>
+  <a href="#pricing" class="btn-primary">Become a Founding Member — $27/mo →</a>
+  <p class="hero-note">First 100 members only. No coding required.</p>
+</section>
+
+<!-- ── WHO IT'S FOR ── -->
+<section class="section-light">
+  <div class="container">
+    <span class="section-eyebrow">⚡ Who this is for</span>
+    <h2 class="section-title">This is for you if:</h2>
+    <ul class="checklist">
+      <li>
+        <span class="check-icon">✓</span>
+        You have a business idea (or just validated one) and you're ready to actually build it
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        You want to launch an AI-powered tool without hiring a developer
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        You've lost data or brand equity to platforms before and you're done with that
+      </li>
+      <li>
+        <span class="check-icon">✓</span>
+        You don't have a big following yet — and you need a way to get found anyway
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── WHAT'S INCLUDED ── -->
+<section class="section-gray">
+  <div class="container">
+    <span class="section-eyebrow">⚡ What's included</span>
+    <h2 class="section-title">Everything in one place.</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🛠️</span>
+        <h3>Your branded AI tools</h3>
+        <p>Build the tools your clients use, under your name and your branding. No "Powered by [someone else]" dominating your product.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👥</span>
+        <h3>Community area</h3>
+        <p>Your clients stay engaged — and keep paying — because there's a community attached to your tools, not just a link.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎓</span>
+        <h3>Course area</h3>
+        <p>Add your training, frameworks, and curriculum directly inside your hub. Everything in one place.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>Admin dashboard</h3>
+        <p>See who's using your tools, who's in your community, and how everything is performing.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🌐</span>
+        <h3>Custom domain</h3>
+        <p>It looks like you. Not us.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3>ToolSpark Marketplace listing</h3>
+        <p>Your tools get listed where people are already searching for AI tools in your niche. The "I have no audience" problem has a built-in answer.</p>
+      </div>
+      <div class="feature-card" style="grid-column: 1 / -1;">
+        <span class="feature-icon">🔒</span>
+        <h3>Full data ownership — always</h3>
+        <p>Cancel anytime. Export everything anytime. This is your business, not ours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SOCIAL PROOF ── -->
+<section class="section-light" style="display:none;">
+  <div class="container">
+    <div class="quote-wrap">
+      <span class="quote-mark">"</span>
+      <blockquote>[Quote from beta tester about what it felt like to set up their hub or use the Validator]</blockquote>
+      <p class="quote-attr">— [First name], [what they do]</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="section-dark" id="pricing">
+  <div class="container">
+    <span class="section-eyebrow-yellow">⚡ Founding member pricing</span>
+    <h2 class="section-title-white" style="margin-bottom:40px;">Lock in the founding rate before it's gone.</h2>
+
+    <div class="pricing-box">
+      <p class="price-eyebrow">Founding Member Rate</p>
+      <div class="price-amount">$27<span class="price-period">/mo</span></div>
+      <p class="price-label">First 100 members only</p>
+      <div class="seats-bar">⚡ After the first 100 members, price goes to <strong>$47/month</strong></div>
+
+      <!-- Stripe checkout button placeholder — replace href with your Stripe payment link -->
+      <a href="#" class="btn-stripe" onclick="alert('Connect your Stripe payment link here'); return false;">
+        Become a Founding Member →
+      </a>
+      <p class="stripe-note">Powered by Stripe · Secure checkout</p>
+      <p class="price-going-up">Cancel anytime. Your data is always yours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── RISK REVERSAL ── -->
+<section class="section-dark2">
+  <div class="container">
+    <span class="section-eyebrow-yellow">⚡ No risk</span>
+    <h2 class="section-title-white" style="margin-bottom:36px;">You've got nothing to lose.</h2>
+    <div class="risk-items">
+      <div class="risk-item">
+        <div class="risk-icon">✓</div>
+        <div>
+          <h4>Cancel anytime.</h4>
+          <p>No contracts, no lock-ins. If it's not working for you, cancel in two clicks.</p>
+        </div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-icon">🔒</div>
+        <div>
+          <h4>Your data is always yours.</h4>
+          <p>Export it whenever you want, no questions asked. This is your business, not ours.</p>
+        </div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-icon">⚡</div>
+        <div>
+          <h4>Built by someone who gets it.</h4>
+          <p>ToolSpark was built by an introvert, for people who'd rather let their tools do the talking than be on camera 24/7.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="final-cta">
+  <h2><span>$27/month.</span><br>Founding member rate.</h2>
+  <p>First 100 members only. Price increases to $47/month after that.</p>
+  <div class="final-cta-wrap">
+    <!-- Stripe checkout button placeholder — replace href with your Stripe payment link -->
+    <a href="#" class="btn-primary" style="display:block; text-align:center;" onclick="alert('Connect your Stripe payment link here'); return false;">
+      Claim Your Founding Member Spot →
+    </a>
+    <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:12px;">Cancel anytime · Your data is always yours</p>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>ToolSpark — Powered by Sparky ⚡</p>
+  <p>Questions before you join? <a href="mailto:hello@toolspark.co">hello@toolspark.co</a></p>
+</footer>
+
+</body>
+</html>

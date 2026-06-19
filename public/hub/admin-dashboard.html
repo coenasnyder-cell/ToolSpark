@@ -215,7 +215,14 @@
         <span class="admin-card-arrow">→</span>
       </a>
 
-      <a id="card-inbox" href="#" class="admin-card">
+      <a id="card-courses" href="/hub/courses-editor" class="admin-card">
+        <div class="admin-card-icon">🎓</div>
+        <div class="admin-card-title">Courses</div>
+        <div class="admin-card-desc">Create and publish courses for your members</div>
+        <span class="admin-card-arrow">→</span>
+      </a>
+
+      <a id="card-inbox" href="#" class="admin-card" style="display:none;">
         <div class="admin-card-icon">📬</div>
         <div class="admin-card-title">Inbox</div>
         <div class="admin-card-desc">Support messages and requests from your members</div>
@@ -308,6 +315,10 @@
       if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
       hubSlug = data.hubSlug;
 
+      // Update View Hub sidebar link
+      var viewHubNav = document.getElementById('nav-view-hub');
+      if (viewHubNav) viewHubNav.href = '/hub/' + hubSlug;
+
       // URL bar
       var urlEl = document.getElementById('hub-url-display');
       urlEl.textContent = 'toolspark.co/hub/' + hubSlug;
@@ -330,13 +341,16 @@
     var nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     var items = [
-      { href: '/hub/admin-dashboard', label: 'Admin Dashboard', active: true },
-      { href: '/hub-settings',        label: 'Hub Settings' },
+      { href: '/hub/admin-dashboard',  label: 'Admin Dashboard', active: true },
+      { href: '/hub-settings',         label: 'Hub Settings' },
       { href: '/hub/prompt-generator', label: 'Tool Builder' },
-      { href: '/hub/analytics',       label: 'Analytics' },
+      { href: '/hub/courses-editor',   label: 'Courses' },
+      { href: '/hub/analytics',        label: 'Analytics' },
+      { href: '#',                     label: 'View Hub', id: 'nav-view-hub', target: '_blank' },
     ];
     nav.innerHTML = items.map(function(i) {
-      return '<a href="' + i.href + '" class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';
+      var attrs = 'href="' + i.href + '"' + (i.id ? ' id="' + i.id + '"' : '') + (i.target ? ' target="' + i.target + '"' : '');
+      return '<a ' + attrs + ' class="nav-item' + (i.active ? ' active' : '') + '">' + i.label + '</a>';
     }).join('');
   })();
 </script>

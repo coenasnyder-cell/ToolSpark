@@ -201,13 +201,14 @@
   .theme-option input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
   .theme-swatch { border: 2px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: border-color 0.15s; }
   .theme-option input:checked + .theme-swatch { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
-  .theme-swatch-preview { height: 64px; display: flex; flex-direction: column; overflow: hidden; }
-  .theme-swatch-nav { height: 18px; display: flex; align-items: center; padding: 0 8px; gap: 5px; flex-shrink: 0; }
-  .theme-swatch-nav-dot { width: 20px; height: 5px; border-radius: 3px; opacity: 0.6; }
-  .theme-swatch-body { flex: 1; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
-  .theme-swatch-bubble { height: 10px; border-radius: 3px; width: 70%; }
-  .theme-swatch-bubble.user { width: 50%; align-self: flex-end; }
-  .theme-swatch-label { padding: 6px 8px; font-size: 12px; font-weight: 700; color: var(--text); }
+  .theme-swatch-preview { height: 90px; display: flex; flex-direction: column; overflow: hidden; }
+  .theme-swatch-nav { height: 20px; display: flex; align-items: center; padding: 0 8px; gap: 5px; flex-shrink: 0; }
+  .theme-swatch-nav-dot { width: 24px; height: 5px; border-radius: 3px; opacity: 0.6; }
+  .theme-swatch-body { flex: 1; padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; }
+  .theme-swatch-bubble { height: 12px; border-radius: 4px; width: 72%; }
+  .theme-swatch-bubble.user { width: 52%; align-self: flex-end; }
+  .theme-swatch-label { padding: 5px 8px 2px; font-size: 12px; font-weight: 700; color: var(--text); }
+  .theme-swatch-desc { padding: 0 8px 6px; font-size: 10px; color: var(--text3); }
 
   @media (max-width: 768px) {
     .page-wrap { margin-left: 0; padding: 1rem; }
@@ -443,6 +444,7 @@ service cloud.firestore {
               </div>
             </div>
             <div class="theme-swatch-label">Dark (Default)</div>
+            <div class="theme-swatch-desc">Dark background · gold accents</div>
           </div>
         </label>
 
@@ -459,6 +461,7 @@ service cloud.firestore {
               </div>
             </div>
             <div class="theme-swatch-label">Light</div>
+            <div class="theme-swatch-desc">White background · clean &amp; minimal</div>
           </div>
         </label>
 
@@ -475,6 +478,7 @@ service cloud.firestore {
               </div>
             </div>
             <div class="theme-swatch-label">Navy</div>
+            <div class="theme-swatch-desc">Deep blue · professional look</div>
           </div>
         </label>
 
@@ -492,7 +496,7 @@ service cloud.firestore {
       <div class="toggle-row">
         <div>
           <div class="toggle-label">Hub Status</div>
-          <div class="toggle-sub" id="hub-status-label">Preview mode — only you can see it</div>
+          <div class="toggle-sub" id="hub-status-label">Preview mode — visitors see a "Coming soon" page</div>
         </div>
         <label class="toggle">
           <input type="checkbox" id="isLive" onchange="updateStatusLabel()">
@@ -646,7 +650,7 @@ service cloud.firestore {
 
   function updateStatusLabel() {
     var live = document.getElementById('isLive').checked;
-    document.getElementById('hub-status-label').textContent = live ? 'Live — your hub is public' : 'Preview mode — only you can see it';
+    document.getElementById('hub-status-label').textContent = live ? 'Live — your hub is public' : 'Preview mode — visitors see a "Coming soon" page';
     document.getElementById('live-badge').textContent = live ? 'Live' : 'Preview';
     document.getElementById('live-badge').className = 'hub-live-badge ' + (live ? 'live' : 'preview');
     // Hub Status = Public means open access — auto-clear Members Only

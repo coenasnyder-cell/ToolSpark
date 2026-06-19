@@ -164,7 +164,7 @@
 
     var logoHtml = hub.logoUrl
       ? '<img class="hs-logo-img" src="' + hub.logoUrl + '" alt="">'
-      : '<div class="hs-logo-icon">⚡</div>';
+      : '';
 
     var features = hub.features || {};
     var visibleItems = NAV_ITEMS.filter(function(item) {

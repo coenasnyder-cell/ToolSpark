@@ -92,6 +92,17 @@ service firebase.storage {
         request.resource.contentType.matches('image/.*');
     }
 
+    // HUB COURSE COVERS — uploaded by hub owners, publicly readable
+    match /hub-course-covers/{hubSlug}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() &&
+        firestore.get(
+          /databases/(default)/documents/hubs/$(hubSlug)
+        ).data.owner == request.auth.uid &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // SOCIAL SCHEDULER IMAGES — owner only, 10MB max
     match /social-scheduler/{userId}/{fileName} {
       allow read: if isSignedIn() && request.auth.uid == userId;

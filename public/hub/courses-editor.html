@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses — Creator Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); }
+  .sidebar-logo { padding: 1.25rem; border-bottom: 1px solid var(--border-dark); }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 6px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem 3rem; max-width: 1000px; width: 100%; }
+  .back-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--text3); text-decoration: none; transition: color 0.15s; }
+  .back-link:hover { color: var(--gold); }
+
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .admin-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .admin-card-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .admin-card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .course-form { display: flex; flex-direction: column; gap: 1.125rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .form-label span { color: #C0392B; margin-left: 2px; }
+  .form-input, .form-textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 13px; font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+  .form-help { font-size: 11px; color: var(--text3); }
+
+  .toggle-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .toggle-group { display: inline-flex; align-items: center; gap: 10px; }
+  .toggle-text { font-size: 13px; color: var(--text2); font-weight: 700; }
+  .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; cursor: pointer; background: var(--border); border-radius: 100px; transition: background 0.2s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+  .toggle-switch input:checked + .toggle-slider { background: var(--gold); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  .form-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 0.25rem; border-top: 1px solid var(--border); }
+
+  .image-upload-area { border: 2px dashed var(--border); border-radius: var(--radius-sm); aspect-ratio: 16/9; width: 240px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; cursor: pointer; overflow: hidden; position: relative; transition: border-color 0.15s; }
+  .image-upload-area:hover { border-color: var(--gold); }
+  .image-upload-area img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .image-upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text3); font-size: 12px; pointer-events: none; text-align: center; padding: 8px; }
+
+  .btn-primary, .btn-secondary, .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border-radius: var(--radius-sm); padding: 10px 18px;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; border: none;
+  }
+  .btn-primary { background: var(--gold); color: #1A1714; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-secondary { background: none; border: 1px solid var(--border); color: var(--text2); }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger { background: rgba(220,50,50,0.06); border: 1px solid rgba(220,50,50,0.2); color: #C0392B; }
+  .btn-danger:hover { background: rgba(220,50,50,0.12); }
+  .btn-spinner { width: 14px; height: 14px; border: 2px solid rgba(26,23,20,0.2); border-top-color: #1A1714; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .save-msg { font-size: 13px; padding: 9px 14px; border-radius: var(--radius-sm); display: none; }
+  .save-msg.success { background: #EBF7F2; color: #2A7A55; border: 1px solid #A8D9C4; }
+  .save-msg.error { background: #FEF0ED; color: #C0392B; border: 1px solid #F5C6C0; }
+
+  .section-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .count-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); color: var(--gold); border-radius: 100px; padding: 3px 12px; font-size: 12px; font-weight: 700; }
+
+  .course-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .course-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
+  .course-thumb { width: 72px; height: 48px; border-radius: 6px; background: var(--border); object-fit: cover; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .course-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .course-thumb-icon { font-size: 20px; }
+  .course-body { flex: 1; min-width: 0; }
+  .course-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .course-meta-row { display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+  .course-badge { display: inline-flex; align-items: center; border-radius: 100px; padding: 2px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--border); color: var(--text2); background: #fff; }
+  .course-badge.live { background: rgba(42,122,85,0.08); border-color: rgba(42,122,85,0.2); color: #2A7A55; }
+  .course-badge.draft { background: rgba(192,57,43,0.06); border-color: rgba(192,57,43,0.18); color: #C0392B; }
+  .course-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+  #course-empty { display: none; text-align: center; padding: 2rem; color: var(--text3); font-size: 13px; border: 1px dashed var(--border); border-radius: var(--radius-sm); }
+
+  .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; flex-direction: column; gap: 5px; align-items: center; }
+  .hamburger-btn span { display: block; width: 20px; height: 2px; background: #F0EDE6; border-radius: 2px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 99; }
+  .sidebar-overlay.active { display: block; }
+
+  @media (max-width: 768px) {
+    .hamburger-btn { display: flex; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.22s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .main-wrap { margin-left: 0; }
+    .top-header { padding: 0 1rem; gap: 10px; }
+    .page-content { padding: 1.25rem 1rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .course-card { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Tool<span>Spark</span></div>
+    <div class="logo-tag">Creator Hub</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav">
+    <a href="/hub/admin-dashboard" class="nav-item" style="color:var(--text3);font-size:13px;margin-bottom:4px;">← Admin Dashboard</a>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:2px 0 6px;"></div>
+    <a href="/hub-settings" class="nav-item">Hub Settings</a>
+    <a href="/hub/prompt-generator" class="nav-item">Tool Builder</a>
+    <a href="/hub/courses-editor" class="nav-item active">Courses</a>
+    <a href="/hub/analytics" class="nav-item">Analytics</a>
+    <a href="#" id="nav-view-hub" class="nav-item" target="_blank">View Hub</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;">
+      <div class="user-avatar" id="sidebar-avatar">?</div>
+      <div class="user-name" id="sidebar-name">Loading...</div>
+    </div>
+    <button class="logout-btn" id="logout-btn">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div>
+      <div class="header-title">Courses</div>
+      <div class="header-subtitle" id="header-subtitle">Manage your hub's course library</div>
+    </div>
+  </header>
+
+  <main class="page-content" id="main-content" style="display:none;">
+    <div>
+      <a href="/hub/admin-dashboard" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Admin Dashboard
+      </a>
+    </div>
+
+    <!-- CREATE COURSE -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">＋</div>
+        <div>
+          <div class="admin-card-title">Create New Course</div>
+          <div class="admin-card-desc">Give your course a title and description, then add lessons after it's created.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div id="course-msg" class="save-msg"></div>
+        <form class="course-form" id="course-form" onsubmit="createCourse(event)">
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label" for="course-title">Course Title <span>*</span></label>
+              <input class="form-input" id="course-title" type="text" maxlength="120" placeholder="e.g. Getting Started with Your AI Tool" required>
+            </div>
+          </div>
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label" for="course-description">Description</label>
+              <textarea class="form-textarea" id="course-description" placeholder="Short description shown on the courses page."></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="course-order">Display Order</label>
+              <input class="form-input" id="course-order" type="number" min="0" step="1" placeholder="0">
+              <div class="form-help">Lower numbers appear first.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cover Image</label>
+              <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('course-image-input').click()" style="width:180px;height:110px;">
+                <img id="course-image-preview" style="display:none;">
+                <div class="image-upload-placeholder" id="image-upload-placeholder">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                  <span>Click to upload</span>
+                </div>
+              </div>
+              <input type="file" id="course-image-input" accept="image/*" style="display:none" onchange="previewCourseImage(this)">
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="course-published">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text" id="course-published-label">Save as draft</span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit" id="course-save-btn">
+              <span class="btn-spinner" id="course-spinner"></span>
+              Create Course
+            </button>
+            <button class="btn-secondary" type="button" onclick="resetCourseForm()">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- COURSE LIBRARY -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">🎓</div>
+        <div>
+          <div class="admin-card-title">Course Library</div>
+          <div class="admin-card-desc">Manage visibility and add lessons to each course.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div class="section-toolbar">
+          <span class="count-badge" id="course-count-badge">Loading...</span>
+        </div>
+        <input type="file" id="library-image-input" accept="image/*" style="display:none" onchange="uploadLibraryCourseImage(this)">
+        <div class="course-list" id="course-list">
+          <div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:13px;">Loading courses...</div>
+        </div>
+        <div id="course-empty">No courses yet. Create your first one above.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  var hubSlug = null;
+  var allCourses = [];
+  var libraryUploadCourseId = null;
+  var studentApp, studentDb, studentStorage;
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', function() {
+    auth.signOut().then(function() { window.location.href = '/signon.html'; });
+  });
+
+  auth.onAuthStateChanged(function(user) {
+    if (!user) { window.location.href = '/signon.html'; return; }
+
+    var av = document.getElementById('sidebar-avatar');
+    var nm = document.getElementById('sidebar-name');
+    av.textContent = (user.displayName || user.email || 'H')[0].toUpperCase();
+    if (nm) nm.textContent = user.displayName || user.email || 'Hub Owner';
+
+    db.collection('users').doc(user.uid).get().then(function(snap) {
+      if (!snap.exists) { window.location.href = '/signon.html'; return; }
+      var data = snap.data();
+      if (!data.hubSlug) { window.location.href = '/hub-setup.html'; return; }
+      hubSlug = data.hubSlug;
+
+      var viewHubLink = document.getElementById('nav-view-hub');
+      if (viewHubLink) viewHubLink.href = '/hub/' + hubSlug;
+
+      return db.collection('hubs').doc(hubSlug).get();
+    }).then(function(hubSnap) {
+      if (!hubSnap) return;
+      var hub = hubSnap.exists ? hubSnap.data() : {};
+      if (!hub.studentFirebase || !hub.studentFirebase.projectId) {
+        document.getElementById('main-content').style.display = 'flex';
+        document.getElementById('course-count-badge').textContent = '—';
+        document.getElementById('course-list').innerHTML =
+          '<div style="text-align:center;padding:1.5rem;color:#C0392B;font-size:13px;">Connect your Firebase project in Hub Settings before creating courses.</div>';
+        return;
+      }
+      try {
+        try { studentApp = firebase.app('student-admin'); }
+        catch(e) { studentApp = firebase.initializeApp(hub.studentFirebase, 'student-admin'); }
+        studentDb = studentApp.firestore();
+        studentStorage = studentApp.storage();
+      } catch(e) {
+        console.error('Could not connect to your Firebase project:', e);
+        return;
+      }
+      document.getElementById('main-content').style.display = 'flex';
+      bindFormToggles();
+      loadCourses();
+      resetCourseForm();
+    }).catch(function(e) { console.error(e); });
+  });
+
+  function bindFormToggles() {
+    document.getElementById('course-published').addEventListener('change', function() {
+      document.getElementById('course-published-label').textContent = this.checked ? 'Publish now' : 'Save as draft';
+    });
+  }
+
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function showMsg(text, type) {
+    var el = document.getElementById('course-msg');
+    el.textContent = text;
+    el.className = 'save-msg ' + type;
+    el.style.display = 'block';
+  }
+  function hideMsg() { document.getElementById('course-msg').style.display = 'none'; }
+
+  function nextOrder() {
+    if (!allCourses.length) return 0;
+    var max = -1;
+    allCourses.forEach(function(c) {
+      var n = parseInt(c.data.order, 10);
+      if (!isNaN(n) && n > max) max = n;
+    });
+    return max + 1;
+  }
+
+  function resetCourseForm() {
+    document.getElementById('course-form').reset();
+    document.getElementById('course-published').checked = false;
+    document.getElementById('course-published-label').textContent = 'Save as draft';
+    document.getElementById('course-order').value = nextOrder();
+    document.getElementById('course-image-preview').style.display = 'none';
+    document.getElementById('image-upload-placeholder').style.display = 'flex';
+    hideMsg();
+  }
+
+  function loadCourses() {
+    studentDb.collection('courses').get().then(function(snap) {
+      allCourses = snap.docs.map(function(doc) {
+        return { id: doc.id, data: doc.data() };
+      }).sort(function(a, b) {
+        var ao = isNaN(parseInt(a.data.order, 10)) ? 999 : parseInt(a.data.order, 10);
+        var bo = isNaN(parseInt(b.data.order, 10)) ? 999 : parseInt(b.data.order, 10);
+        return ao - bo;
+      });
+      renderCourses();
+    }).catch(function(e) {
+      console.error(e);
+      document.getElementById('course-list').innerHTML =
+        '<div style="text-align:center;padding:1.5rem;color:#C0392B;font-size:13px;">Could not load courses.</div>';
+      document.getElementById('course-count-badge').textContent = 'Error';
+    });
+  }
+
+  function renderCourses() {
+    var list = document.getElementById('course-list');
+    var empty = document.getElementById('course-empty');
+    var badge = document.getElementById('course-count-badge');
+    badge.textContent = allCourses.length + (allCourses.length === 1 ? ' course' : ' courses');
+
+    if (!allCourses.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    list.innerHTML = allCourses.map(function(entry) {
+      var c = entry.data;
+      var published = !!c.isPublished;
+      var thumb = c.thumbnail
+        ? '<img src="' + escHtml(c.thumbnail) + '" alt="">'
+        : '<span class="course-thumb-icon">🎓</span>';
+      var lessonCount = typeof c.lessonCount === 'number' ? c.lessonCount : 0;
+
+      return '<div class="course-card">' +
+        '<div class="course-thumb">' + thumb + '</div>' +
+        '<div class="course-body">' +
+          '<div class="course-title">' + escHtml(c.title || 'Untitled Course') + '</div>' +
+          '<div class="course-meta-row">' +
+            '<span class="course-badge ' + (published ? 'live' : 'draft') + '">' + (published ? 'Published' : 'Draft') + '</span>' +
+            '<span style="font-size:12px;color:var(--text3);">' + lessonCount + ' lesson' + (lessonCount === 1 ? '' : 's') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="course-actions">' +
+          '<a class="btn-primary" href="/hub/lesson-editor?hubSlug=' + escHtml(hubSlug) + '&courseId=' + escHtml(entry.id) + '">Edit Lessons</a>' +
+          '<button class="btn-secondary" type="button" onclick="togglePublish(\'' + entry.id + '\',' + (!published) + ',this)">' + (published ? 'Unpublish' : 'Publish') + '</button>' +
+          '<button class="btn-secondary" type="button" onclick="triggerLibraryImageUpload(\'' + escHtml(entry.id) + '\')">' + (c.thumbnail ? 'Change Image' : 'Add Image') + '</button>' +
+          '<button class="btn-danger" type="button" onclick="deleteCourse(\'' + escHtml(entry.id) + '\',\'' + escHtml(c.title || '') + '\')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function createCourse(event) {
+    event.preventDefault();
+    if (!hubSlug) return;
+
+    var title = document.getElementById('course-title').value.trim();
+    var description = document.getElementById('course-description').value.trim();
+    var orderVal = document.getElementById('course-order').value;
+    var isPublished = document.getElementById('course-published').checked;
+    var order = orderVal === '' ? nextOrder() : parseInt(orderVal, 10);
+
+    if (!title) { showMsg('Please enter a course title.', 'error'); return; }
+    if (isNaN(order)) { showMsg('Display order must be a number.', 'error'); return; }
+
+    var saveBtn = document.getElementById('course-save-btn');
+    var spinner = document.getElementById('course-spinner');
+    saveBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    var ts = firebase.firestore.FieldValue.serverTimestamp;
+    studentDb.collection('courses').add({
+      title: title,
+      description: description,
+      isPublished: isPublished,
+      order: order,
+      thumbnail: '',
+      lessonCount: 0,
+      createdAt: ts()
+    }).then(function(courseRef) {
+      var imageFile = document.getElementById('course-image-input').files[0];
+      if (imageFile) {
+        var ref = studentStorage.ref('course-covers/' + courseRef.id);
+        return ref.put(imageFile).then(function() {
+          return ref.getDownloadURL();
+        }).then(function(url) {
+          return studentDb.collection('courses').doc(courseRef.id).update({ thumbnail: url });
+        });
+      }
+    }).then(function() {
+      return loadCourses();
+    }).then(function() {
+      resetCourseForm();
+      showMsg('Course created. Click "Edit Lessons" to add content.', 'success');
+    }).catch(function(e) {
+      console.error(e);
+      showMsg('Failed to create course. Please try again.', 'error');
+    }).finally(function() {
+      saveBtn.disabled = false;
+      spinner.style.display = 'none';
+    });
+  }
+
+  function previewCourseImage(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var preview = document.getElementById('course-image-preview');
+    var placeholder = document.getElementById('image-upload-placeholder');
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+  }
+
+  function triggerLibraryImageUpload(courseId) {
+    libraryUploadCourseId = courseId;
+    var input = document.getElementById('library-image-input');
+    input.value = '';
+    input.click();
+  }
+
+  function uploadLibraryCourseImage(input) {
+    var file = input.files[0];
+    if (!file || !libraryUploadCourseId) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); return; }
+    var ref = studentStorage.ref('course-covers/' + libraryUploadCourseId);
+    ref.put(file).then(function() {
+      return ref.getDownloadURL();
+    }).then(function(url) {
+      return studentDb.collection('courses').doc(libraryUploadCourseId).update({ thumbnail: url });
+    }).then(function() {
+      loadCourses();
+    }).catch(function(e) {
+      console.error(e);
+      alert('Could not upload image. Please try again.');
+    });
+  }
+
+  function togglePublish(courseId, nextState, btn) {
+    if (btn) btn.disabled = true;
+    studentDb.collection('courses').doc(courseId)
+      .update({ isPublished: nextState })
+      .then(function() { loadCourses(); })
+      .catch(function(e) { console.error(e); alert('Could not update status.'); })
+      .finally(function() { if (btn) btn.disabled = false; });
+  }
+
+  function deleteCourse(courseId, title) {
+    if (!confirm('Delete "' + title + '"? This will also delete all its lessons and cannot be undone.')) return;
+    studentDb.collection('courses').doc(courseId)
+      .collection('lessons').get().then(function(snap) {
+        var batch = studentDb.batch();
+        snap.docs.forEach(function(doc) { batch.delete(doc.ref); });
+        batch.delete(studentDb.collection('courses').doc(courseId));
+        return batch.commit();
+      }).then(function() { loadCourses(); })
+      .catch(function(e) { console.error(e); alert('Could not delete course.'); });
+  }
+</script>
+</body>
+</html>
