@@ -165,14 +165,6 @@
           var data = snap.exists ? snap.data() : {};
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
-            var navEl = document.getElementById('sidebar-nav');
-            if (navEl) {
-              var adminLink = document.createElement('a');
-              adminLink.href = '/hub/admin-dashboard';
-              adminLink.className = 'nav-item';
-              adminLink.innerHTML = '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Creator Hub</span>';
-              navEl.appendChild(adminLink);
-            }
             revealNav();
           } else if (!data.onboardingComplete) {
             lockNav();

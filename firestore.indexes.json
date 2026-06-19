@@ -1,14 +1,6 @@
 ﻿{
   "indexes": [
     {
-      "collectionGroup": "courses",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "isPublished", "order": "ASCENDING" },
-        { "fieldPath": "order", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "lesson_packages",
       "queryScope": "COLLECTION",
       "fields": [

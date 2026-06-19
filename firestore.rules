@@ -24,11 +24,6 @@ service cloud.firestore {
         currentUserData().get('userRole', '') == 'admin';
     }
 
-    function isHubOwner(hubSlug) {
-      return isActive() &&
-        get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid;
-    }
-
     function isBanned() {
       return isSignedIn() && userExists() &&
         currentUserData().get('banned', false) == true;
@@ -506,44 +501,6 @@ match /conversations/{conversationId} {
       allow create: if isActive() && request.resource.data.userId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isAdmin();
-    }
-
-    // HUBS (creator hub configs — read publicly for hub pages, write by owner)
-    match /hubs/{hubSlug} {
-      allow read: if true;
-      allow create: if isActive() && request.resource.data.owner == request.auth.uid;
-      allow update: if isActive() && (resource.data.owner == request.auth.uid || isAdmin());
-      allow delete: if isAdmin();
-
-      match /pages/{pageId} {
-        allow read: if pageId == "sales";
-        allow create, update: if isActive() &&
-          (get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid || isAdmin());
-        allow delete: if isAdmin() ||
-          (isActive() && get(/databases/$(database)/documents/hubs/$(hubSlug)).data.owner == request.auth.uid);
-      }
-
-      // Secrets sub-collection — API keys; readable only by Cloud Functions via Admin SDK
-      match /secrets/{docId} {
-        allow read, write: if false;
-      }
-    }
-
-    // HUB COURSES — creator-managed course content, scoped by hub slug
-    // Stored in main ToolSpark Firebase so no per-creator Firebase needed
-    match /hub_courses/{hubSlug} {
-      allow read: if true;
-      allow write: if isHubOwner(hubSlug) || isAdmin();
-
-      match /courses/{courseId} {
-        allow read: if true;
-        allow write: if isHubOwner(hubSlug) || isAdmin();
-
-        match /lessons/{lessonId} {
-          allow read: if true;
-          allow write: if isHubOwner(hubSlug) || isAdmin();
-        }
-      }
     }
 
     // WAITLIST (public signups — no auth required)

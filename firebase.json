@@ -16,54 +16,6 @@
         "source": "/auth-action",
         "destination": "/auth-action.html"
       },
-      {
-        "source": "/hub/*/tool",
-        "destination": "/hub/tool.html"
-      },
-      {
-        "source": "/hub/*/signup",
-        "destination": "/hub/signup.html"
-      },
-      {
-        "source": "/hub/*/login",
-        "destination": "/hub/login.html"
-      },
-      {
-        "source": "/hub/*/results",
-        "destination": "/hub/results.html"
-      },
-      {
-        "source": "/hub/*/dashboard",
-        "destination": "/hub/dashboard.html"
-      },
-      {
-        "source": "/hub/*/roadmap",
-        "destination": "/hub/roadmap.html"
-      },
-      {
-        "source": "/hub/*/sales",
-        "destination": "/hub/sales.html"
-      },
-      {
-        "source": "/hub/*/community",
-        "destination": "/hub/community.html"
-      },
-      {
-        "source": "/hub/*/courses",
-        "destination": "/hub/courses.html"
-      },
-      {
-        "source": "/hub/*/course",
-        "destination": "/hub/course.html"
-      },
-      {
-        "source": "/hub/*/support",
-        "destination": "/hub/support.html"
-      },
-      {
-        "source": "/hub/*",
-        "destination": "/hub/login.html"
-      }
     ]
   },
   "firestore": {
