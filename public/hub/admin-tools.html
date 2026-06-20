@@ -434,7 +434,7 @@
     let pendingDeleteId = null;
 
     function openBuilder() {
-      window.location.href = '/hub/tool-builder';
+      window.location.href = '/build-agent';
     }
 
     function renderTools() {
@@ -540,6 +540,11 @@
     function openEdit(toolId) {
       const tool = toolCache.find(t => t.id === toolId);
       if (!tool) return;
+      // New-shape tools are refined in the Stage 2 tool-builder, not the legacy drawer
+      if (tool.shape) {
+        window.location.href = '/hub/tool-builder?toolId=' + toolId;
+        return;
+      }
       document.getElementById('edit-tool-id').value           = toolId;
       document.getElementById('edit-tool-name').value         = tool.toolName || '';
       document.getElementById('edit-audience').value          = tool.config?.audience || '';
