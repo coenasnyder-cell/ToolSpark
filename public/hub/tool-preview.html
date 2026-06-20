@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tool Preview</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/creatorhub.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -90,7 +90,7 @@
     }
     .tool-nav-logo span { color: #FFC820; }
 
-    /* Tool UI */
+    /* ── Diagnostic (chat) tool UI ── */
     .tool-wrap {
       display: none;
       flex: 1;
@@ -102,9 +102,7 @@
     }
     .tool-wrap.active { display: flex; }
 
-    .tool-header {
-      margin-bottom: 28px;
-    }
+    .tool-header { margin-bottom: 28px; }
     .tool-name {
       font-size: 24px;
       font-weight: 800;
@@ -112,17 +110,10 @@
       letter-spacing: -0.4px;
       margin-bottom: 6px;
     }
-    .tool-powered {
-      font-size: 12px;
-      color: var(--text3);
-    }
-    .tool-powered a {
-      color: var(--text3);
-      text-decoration: none;
-    }
+    .tool-powered { font-size: 12px; color: var(--text3); }
+    .tool-powered a { color: var(--text3); text-decoration: none; }
     .tool-powered a:hover { text-decoration: underline; }
 
-    /* Progress bar */
     .progress-bar-wrap {
       height: 3px;
       background: var(--border);
@@ -137,7 +128,6 @@
       transition: width .4s ease;
     }
 
-    /* Messages */
     .messages {
       flex: 1;
       display: flex;
@@ -167,12 +157,10 @@
     }
     .bubble.ai   { background: var(--card); box-shadow: var(--shadow); border-radius: 4px 16px 16px 16px; }
     .bubble.user { background: var(--purple); color: #fff; border-radius: 16px 4px 16px 16px; }
-
     .bubble ul, .bubble ol { margin: 8px 0 0 16px; padding: 0; }
     .bubble li   { margin-bottom: 4px; }
     .bubble strong { font-weight: 700; }
 
-    /* Typing indicator */
     .typing-indicator {
       display: none;
       gap: 4px;
@@ -196,12 +184,7 @@
       30%            { transform: translateY(-5px); }
     }
 
-    /* Input bar */
-    .input-wrap {
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-    }
+    .input-wrap { display: flex; gap: 8px; align-items: flex-end; }
     .tool-input {
       flex: 1;
       resize: none;
@@ -232,158 +215,189 @@
       flex-shrink: 0;
       transition: opacity .15s;
     }
-    .send-btn:hover   { opacity: .85; }
+    .send-btn:hover    { opacity: .85; }
     .send-btn:disabled { opacity: .4; cursor: default; }
 
-    /* Restart */
-    .restart-wrap {
-      display: none;
-      justify-content: center;
-      margin-top: 12px;
-    }
+    .restart-wrap { display: none; justify-content: center; margin-top: 12px; }
     .restart-wrap.show { display: flex; }
     .restart-btn {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text3);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font);
-      padding: 6px 10px;
-      border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text3);
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font); padding: 6px 10px; border-radius: 8px;
       transition: color .15s, background .15s;
     }
     .restart-btn:hover { color: var(--purple); background: rgba(107,47,179,.07); }
 
-    /* ── Generator shape ── */
+    /* ── Generator shape — spec-compliant light theme ── */
     .generator-wrap {
       display: none;
       flex: 1;
       flex-direction: column;
-      max-width: 620px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 32px 24px 80px;
-      gap: 24px;
+      overflow-y: auto;
     }
     .generator-wrap.active { display: flex; }
 
-    .gen-form {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
+    .gen-shell {
+      flex: 1;
+      background: #F7F4FB;
+      padding: 32px 16px 60px;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .gen-header { text-align: center; margin-bottom: 24px; }
+    .gen-header-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px; font-weight: 700; color: #0D0D0D;
+      margin: 0 0 4px;
+    }
+    .gen-powered { font-size: 12px; color: #999; margin: 0 0 14px; }
+    .gen-progress-wrap {
+      max-width: 460px; margin: 0 auto;
+      height: 3px; background: #E8E1F0; border-radius: 2px;
+    }
+    .gen-progress-bar {
+      height: 100%; background: #6B2FB3; border-radius: 2px;
+      width: 33%; transition: width 0.5s ease;
+    }
+    .gen-card {
+      background: white; border: 1.5px solid #E8E1F0;
+      border-radius: 12px; padding: 32px;
+      max-width: 600px; margin: 0 auto;
+    }
+
+    /* Form state */
+    .gen-eyebrow {
+      font-size: 11px; font-weight: 700; color: #6B2FB3;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin: 0 0 6px; font-family: 'Sora', sans-serif;
     }
     .gen-form-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 6px;
+      font-family: 'Sora', sans-serif; font-size: 19px;
+      font-weight: 700; color: #0D0D0D; margin: 0 0 6px;
     }
-    .gen-form-sub {
-      font-size: 13px;
-      color: var(--text2);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-    .gen-fields { display: flex; flex-direction: column; gap: 16px; }
+    .gen-form-sub { font-size: 13px; color: #6B6B6B; margin: 0 0 24px; line-height: 1.6; }
+    .gen-fields { display: flex; flex-direction: column; gap: 18px; }
     .gen-field label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
+      display: block; font-weight: 500; font-size: 13px;
+      color: #0D0D0D; margin-bottom: 6px;
     }
     .gen-field textarea,
     .gen-field input {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-family: var(--font);
-      font-size: 14px;
-      line-height: 1.5;
-      background: var(--bg);
-      color: var(--text);
-      outline: none;
-      resize: vertical;
-      transition: border-color .15s;
+      width: 100%; border: 1.5px solid #E8E1F0; border-radius: 8px;
+      padding: 10px 14px; font-size: 14px;
+      font-family: 'Inter', system-ui, sans-serif;
+      outline: none; color: #0D0D0D; background: white;
+      resize: none; transition: border-color 0.2s;
     }
-    .gen-field textarea:focus,
-    .gen-field input:focus { border-color: var(--purple); }
     .gen-submit {
-      width: 100%;
-      margin-top: 20px;
-      padding: 14px;
-      border-radius: 12px;
-      background: var(--purple);
-      color: #fff;
-      font-family: var(--font);
-      font-size: 15px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: opacity .15s;
+      width: 100%; margin-top: 24px;
+      background: #6B2FB3; color: white; border: none;
+      border-radius: 8px; padding: 14px 24px;
+      font-size: 15px; font-weight: 700;
+      font-family: 'Sora', sans-serif;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 8px; transition: background 0.15s;
     }
-    .gen-submit:hover   { opacity: .88; }
-    .gen-submit:disabled { opacity: .45; cursor: default; }
+    .gen-submit:hover:not(:disabled) { background: #5A2598; }
+    .gen-submit:disabled { opacity: 0.45; cursor: default; }
 
-    .gen-output {
-      display: none;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
+    /* Loading state */
+    .gen-loading-center { text-align: center; padding: 32px 0; }
+    .gen-spinner {
+      width: 44px; height: 44px;
+      border: 3px solid #E8E1F0; border-top-color: #6B2FB3;
+      border-radius: 50%; margin: 0 auto 20px;
+      animation: gen-spin 0.75s linear infinite;
     }
-    .gen-output.show { display: block; }
-    .gen-output-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--text3);
-      margin-bottom: 16px;
+    @keyframes gen-spin { to { transform: rotate(360deg); } }
+    .gen-loading-msg {
+      font-family: 'Sora', sans-serif; font-size: 16px;
+      font-weight: 700; color: #0D0D0D; margin: 0 0 4px;
     }
-    .gen-output-content {
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--text);
-      white-space: pre-wrap;
-    }
-    .gen-restart {
-      display: flex;
-      justify-content: center;
-      margin-top: 16px;
-    }
-    .gen-restart-btn {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text3);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font);
-      padding: 6px 10px;
-      border-radius: 8px;
-      transition: color .15s, background .15s;
-    }
-    .gen-restart-btn:hover { color: var(--purple); background: rgba(107,47,179,.07); }
+    .gen-loading-sub { font-size: 13px; color: #999; margin: 0; }
 
-    .gen-typing {
-      display: none;
-      gap: 5px;
-      padding: 16px 24px;
+    /* Results state */
+    .gen-result-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 20px; flex-wrap: wrap;
     }
-    .gen-typing.show { display: flex; }
-    .gen-typing-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--text3);
-      animation: bounce .8s ease infinite;
+    .gen-result-eyebrow {
+      font-size: 11px; font-weight: 700; color: #6B2FB3;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin: 0 0 3px; font-family: 'Sora', sans-serif;
     }
-    .gen-typing-dot:nth-child(2) { animation-delay: .15s; }
-    .gen-typing-dot:nth-child(3) { animation-delay: .3s; }
+    .gen-result-headline {
+      font-family: 'Sora', sans-serif; font-size: 18px;
+      font-weight: 700; color: #0D0D0D; margin: 0;
+    }
+    .gen-result-subtitle { font-size: 13px; color: #888; margin: 4px 0 0; }
+    .gen-status-chip {
+      background: #FFC820; color: #5A3A00;
+      font-size: 11px; font-weight: 700;
+      padding: 4px 11px; border-radius: 20px;
+      white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+    }
+
+    /* Result item cards */
+    .gen-item-card {
+      border: 1.5px solid #E8E1F0; border-radius: 12px;
+      padding: 20px 22px; margin-bottom: 12px;
+    }
+    .gen-item-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 8px; margin-bottom: 6px;
+    }
+    .gen-item-label {
+      font-size: 11px; font-weight: 700; color: #6B2FB3;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin: 0; font-family: 'Sora', sans-serif;
+    }
+    .gen-item-tag {
+      background: #F3EDF9; color: #4A1B8A;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 12px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .gen-item-title {
+      font-family: 'Sora', sans-serif; font-size: 15px;
+      font-weight: 700; color: #0D0D0D; margin: 0 0 6px;
+    }
+    .gen-item-subtitle { font-size: 13px; font-weight: 500; color: #3D1A7A; margin: 0 0 10px; }
+    .gen-item-bullets { margin: 0; padding: 0; list-style: none; }
+    .gen-item-bullet {
+      font-size: 13px; color: #444; line-height: 1.6;
+      padding: 3px 0 3px 16px; position: relative;
+    }
+    .gen-item-bullet::before {
+      content: '→'; position: absolute; left: 0;
+      color: #6B2FB3; font-size: 12px;
+    }
+
+    /* Tips card */
+    .gen-tips-card {
+      background: #F3EDF9; border: 1.5px solid #D4B8F0;
+      border-radius: 12px; padding: 20px 22px; margin-bottom: 16px;
+    }
+    .gen-tips-title {
+      font-size: 11px; font-weight: 700; color: #6B2FB3;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin: 0 0 12px; font-family: 'Sora', sans-serif;
+    }
+    .gen-tip-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 8px; font-size: 13px; color: #3D1A7A; line-height: 1.5;
+    }
+    .gen-tip-check { color: #6B2FB3; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Reset button */
+    .gen-reset-btn {
+      width: 100%; background: white; color: #6B2FB3;
+      border: 1.5px solid #6B2FB3; border-radius: 8px;
+      padding: 12px 24px; font-size: 14px; font-weight: 600;
+      font-family: 'Sora', sans-serif; cursor: pointer;
+      margin-top: 8px; transition: background 0.15s; display: block;
+    }
+    .gen-reset-btn:hover { background: #F7F4FB; }
   </style>
 </head>
 <body>
@@ -425,7 +439,7 @@
     <div class="screen-sub" id="error-msg">Please try again later.</div>
   </div>
 
-  <!-- Tool UI -->
+  <!-- Diagnostic (chat) tool UI -->
   <div class="tool-wrap" id="tool-wrap">
     <div class="tool-header">
       <div class="tool-name" id="tool-name">AI Tool</div>
@@ -458,33 +472,53 @@
     </div>
   </div>
 
-  <!-- Generator shape — structured form + output panel -->
+  <!-- Generator shape — structured form → loading → cards output -->
   <div class="generator-wrap" id="generator-wrap">
-    <div class="tool-header">
-      <div class="tool-name" id="gen-tool-name">AI Tool</div>
-      <div class="tool-powered">Powered by <a href="/">ToolSpark</a></div>
-    </div>
+    <div class="gen-shell">
 
-    <div class="gen-form" id="gen-form">
-      <div class="gen-form-title" id="gen-form-title">Tell us about yourself</div>
-      <div class="gen-form-sub" id="gen-form-sub">Answer a few quick questions and we'll generate your personalized result.</div>
-      <div class="gen-fields" id="gen-fields">
-        <!-- Populated dynamically by initGenerator() after first AI call -->
+      <div class="gen-header">
+        <h1 class="gen-header-title" id="gen-tool-name">AI Tool</h1>
+        <p class="gen-powered">Powered by ToolSpark ⚡</p>
+        <div class="gen-progress-wrap">
+          <div class="gen-progress-bar" id="gen-progress-bar"></div>
+        </div>
       </div>
-      <div class="gen-typing" id="gen-typing">
-        <div class="gen-typing-dot"></div>
-        <div class="gen-typing-dot"></div>
-        <div class="gen-typing-dot"></div>
-      </div>
-      <button class="gen-submit" id="gen-submit" onclick="submitGenerator()" disabled>Generate My Result →</button>
-    </div>
 
-    <div class="gen-output" id="gen-output">
-      <div class="gen-output-label" id="gen-output-label">Your Result</div>
-      <div class="gen-output-content" id="gen-output-content"></div>
-    </div>
-    <div class="gen-restart" id="gen-restart" style="display:none">
-      <button class="gen-restart-btn" onclick="restartGenerator()">↺ Start over</button>
+      <div class="gen-card" id="gen-card">
+
+        <!-- State: form -->
+        <div id="gen-state-form">
+          <p class="gen-eyebrow">Step 1 of 2</p>
+          <h2 class="gen-form-title" id="gen-form-title">Tell us about yourself</h2>
+          <p class="gen-form-sub" id="gen-form-sub">Answer a few quick questions and we'll generate your personalized result.</p>
+          <div class="gen-fields" id="gen-fields"></div>
+          <button class="gen-submit" id="gen-submit" onclick="submitGenerator()" disabled>Generate My Result →</button>
+        </div>
+
+        <!-- State: loading -->
+        <div id="gen-state-loading" style="display:none;">
+          <div class="gen-loading-center">
+            <div class="gen-spinner"></div>
+            <p class="gen-loading-msg" id="gen-loading-msg">Building your result…</p>
+            <p class="gen-loading-sub">Personalizing based on your answers</p>
+          </div>
+        </div>
+
+        <!-- State: results -->
+        <div id="gen-state-results" style="display:none;">
+          <div class="gen-result-header">
+            <div>
+              <p class="gen-result-eyebrow">Your Result</p>
+              <h2 class="gen-result-headline" id="gen-result-headline">Your Personalized Result</h2>
+              <p class="gen-result-subtitle" id="gen-result-subtitle"></p>
+            </div>
+            <span class="gen-status-chip" id="gen-status-chip">✦ Ready</span>
+          </div>
+          <div id="gen-cards-container"></div>
+          <button class="gen-reset-btn" onclick="restartGenerator()">↺ Generate Another Result</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -497,7 +531,7 @@
     let conversationHistory = [];
     let isComplete          = false;
     let currentToolName     = 'AI Tool';
-    let toolShape           = 'diagnostic'; // set once tool loads
+    let toolShape           = 'diagnostic';
 
     function showScreen(id) {
       ['screen-loading','screen-denied','screen-notfound','screen-error','tool-wrap','generator-wrap']
@@ -513,7 +547,6 @@
 
     auth.onAuthStateChanged(user => {
       if (!user) {
-        // Not logged in — for member tools redirect to join; for draft show denied
         if (isDraft) {
           showScreen('screen-denied');
         } else {
@@ -525,12 +558,8 @@
     });
 
     function checkAccessAndLoad(user) {
-      if (!toolId || !creatorId) {
-        showScreen('screen-notfound');
-        return;
-      }
+      if (!toolId || !creatorId) { showScreen('screen-notfound'); return; }
 
-      // Check: owner (draft mode) OR active member
       const creatorRef = db.collection('creators').doc(creatorId);
 
       creatorRef.get().then(creatorDoc => {
@@ -540,18 +569,15 @@
         const hubSlug = creatorDoc.data().slug || '';
 
         if (isOwner) {
-          // Owner in draft mode — no nav bar (they're in the tool builder iframe)
           loadTool(creatorDoc.data().branding);
           return;
         }
 
-        // Non-owner must be an active member
         creatorRef.collection('members').doc(user.uid).get().then(memberDoc => {
           if (!memberDoc.exists || memberDoc.data().status !== 'active') {
             showScreen('screen-denied');
             return;
           }
-          // Show nav bar for members with link back to hub dashboard
           const nav = document.getElementById('tool-nav');
           const backLink = document.getElementById('tool-nav-back');
           backLink.href = '/hub/dashboard?hub=' + hubSlug;
@@ -601,7 +627,7 @@
       document.head.appendChild(style);
     }
 
-    // ── Conversation ─────────────────────────────────────────────────────────────
+    // ── Diagnostic conversation ──────────────────────────────────────────────────
 
     function startConversation() {
       conversationHistory = [];
@@ -616,7 +642,6 @@
       document.getElementById('restart-wrap').classList.remove('show');
       setInputEnabled(false);
 
-      // Send empty first message to get Sparky's opening question
       callTool('').then(text => {
         removeTyping();
         addBubble('ai', formatMarkdown(text));
@@ -644,7 +669,6 @@
         addBubble('ai', formatMarkdown(reply));
         updateProgress();
 
-        // Detect completion (AI wraps up)
         if (looksComplete(reply)) {
           isComplete = true;
           setInputEnabled(false);
@@ -669,16 +693,13 @@
 
     function handleCallError(err) {
       removeTyping();
-      let msg = err.message || 'Something went wrong.';
-      if (msg.includes('permission-denied') || msg.includes('unauthenticated')) {
+      if ((err.message || '').includes('permission-denied') || (err.message || '').includes('unauthenticated')) {
         showScreen('screen-denied');
         return;
       }
       addBubble('ai', 'Oops — something went wrong. Please try again.');
       setInputEnabled(true);
     }
-
-    // ── UI helpers ────────────────────────────────────────────────────────────────
 
     function addBubble(role, html) {
       const msgs  = document.getElementById('messages');
@@ -722,16 +743,12 @@
     }
 
     function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     }
 
     function updateProgress() {
       const turns = conversationHistory.filter(m => m.role === 'assistant').length;
-      const pct   = Math.min(10 + turns * 18, 90);
-      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-bar').style.width = Math.min(10 + turns * 18, 90) + '%';
     }
 
     function looksComplete(text) {
@@ -744,59 +761,59 @@
              (conversationHistory.filter(m => m.role === 'assistant').length >= 8);
     }
 
-    function restartTool() {
-      startConversation();
-    }
+    function restartTool() { startConversation(); }
 
     function escHtml(s) {
-      return String(s)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;');
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
     function formatMarkdown(text) {
       return text
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/^-{3,}$/gm, '')                          // strip --- rules
-        .replace(/^#{1,6}\s*/gm, '')                       // strip # headers, keep text
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // **bold**
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')             // *italic*
-        .replace(/^[-*]\s+/gm, '• ')                      // list items
+        .replace(/^-{3,}$/gm, '')
+        .replace(/^#{1,6}\s*/gm, '')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^[-*]\s+/gm, '• ')
         .replace(/\n{2,}/g, '<br><br>')
         .replace(/\n/g, '<br>');
     }
 
     // ── Generator shape ───────────────────────────────────────────────────────────
-    // The generator calls the tool with a prompt asking it to output the questions
-    // as a JSON field list, then renders them as a structured form. On submit,
-    // it sends all answers in a single call and streams the deliverable.
 
-    let genQuestions = []; // [{ id, label, placeholder, type }]
+    let genQuestions      = [];
+    let genLoadingInterval = null;
+
+    const GEN_LOADING_MSGS = [
+      'Building your result…',
+      'Analyzing your answers…',
+      'Adding the finishing touches…',
+    ];
+
+    function showGenState(id) {
+      ['gen-state-form', 'gen-state-loading', 'gen-state-results'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
 
     function initGenerator() {
       document.getElementById('gen-tool-name').textContent = currentToolName;
       document.title = currentToolName;
+      document.getElementById('gen-progress-bar').style.width = '33%';
+      showGenState('gen-state-form');
 
-      // Ask the AI to give us the questions as a structured list
       const fn = functions.httpsCallable('callCreatorTool');
       fn({
-        creatorId,
-        toolId,
+        creatorId, toolId,
         messages: [{ role: 'user', content: '__GEN_INIT__' }],
         draft: isDraft,
         generatorInit: true,
       }).then(r => {
-        const raw = r.data.text || '';
-        parseGeneratorQuestions(raw);
-      }).catch(err => {
-        // Fallback: single freetext input
-        renderFallbackForm();
-      });
+        parseGeneratorQuestions(r.data.text || '');
+      }).catch(() => renderFallbackForm());
     }
 
     function parseGeneratorQuestions(raw) {
-      // Try to extract JSON question list from the response
       let questions = null;
       try {
         const match = raw.match(/\[\s*\{[\s\S]*?\}\s*\]/);
@@ -811,15 +828,14 @@
           type:        q.type === 'textarea' ? 'textarea' : 'text',
         }));
       } else {
-        // AI returned plain text instructions — use them as form labels
-        // Extract lines that look like questions
-        const lines = raw.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').trim()).filter(l => l.length > 8 && l.length < 200);
+        const lines = raw.split('\n')
+          .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
+          .filter(l => l.length > 8 && l.length < 200);
         genQuestions = lines.slice(0, 6).map((l, i) => ({
           id: 'gq_' + i, label: l, placeholder: '', type: 'textarea',
         }));
         if (!genQuestions.length) { renderFallbackForm(); return; }
       }
-
       renderGeneratorForm();
     }
 
@@ -829,7 +845,6 @@
     }
 
     function renderGeneratorForm() {
-      document.getElementById('gen-typing').classList.remove('show');
       const container = document.getElementById('gen-fields');
       container.innerHTML = '';
       genQuestions.forEach(q => {
@@ -837,10 +852,12 @@
         wrap.className = 'gen-field';
         if (q.type === 'textarea') {
           wrap.innerHTML = `<label for="${escHtml(q.id)}">${escHtml(q.label)}</label>
-            <textarea id="${escHtml(q.id)}" rows="3" placeholder="${escHtml(q.placeholder)}"></textarea>`;
+            <textarea id="${escHtml(q.id)}" rows="3" placeholder="${escHtml(q.placeholder)}"
+              onfocus="this.style.borderColor='#6B2FB3'" onblur="this.style.borderColor='#E8E1F0'"></textarea>`;
         } else {
           wrap.innerHTML = `<label for="${escHtml(q.id)}">${escHtml(q.label)}</label>
-            <input type="text" id="${escHtml(q.id)}" placeholder="${escHtml(q.placeholder)}" />`;
+            <input type="text" id="${escHtml(q.id)}" placeholder="${escHtml(q.placeholder)}"
+              onfocus="this.style.borderColor='#6B2FB3'" onblur="this.style.borderColor='#E8E1F0'" />`;
         }
         container.appendChild(wrap);
       });
@@ -848,7 +865,6 @@
     }
 
     function submitGenerator() {
-      // Collect answers
       const answers = genQuestions.map(q => {
         const el  = document.getElementById(q.id);
         const val = el ? el.value.trim() : '';
@@ -858,40 +874,137 @@
       if (!answers.trim()) return;
 
       document.getElementById('gen-submit').disabled = true;
-      document.getElementById('gen-typing').classList.add('show');
-      document.getElementById('gen-output').classList.remove('show');
-      document.getElementById('gen-restart').style.display = 'none';
+      document.getElementById('gen-progress-bar').style.width = '66%';
+      showGenState('gen-state-loading');
+
+      let msgIdx = 0;
+      genLoadingInterval = setInterval(() => {
+        msgIdx = (msgIdx + 1) % GEN_LOADING_MSGS.length;
+        document.getElementById('gen-loading-msg').textContent = GEN_LOADING_MSGS[msgIdx];
+      }, 950);
+
+      // Tell the AI to return structured JSON so we can render cards
+      const jsonInstruction = '\n\n---\nReturn your response as valid JSON only — no markdown, no prose outside the JSON. Use this exact structure:\n{"headline":"string","subtitle":"string","status_chip":"string","items":[{"label":"string","tag":"string","title":"string","subtitle":"string","bullets":["string"]}],"tips":{"title":"string","items":["string"],"footer_label":"string","footer_value":"string"}}';
 
       const fn = functions.httpsCallable('callCreatorTool');
       fn({
-        creatorId,
-        toolId,
-        messages: [{ role: 'user', content: answers }],
+        creatorId, toolId,
+        messages: [{ role: 'user', content: answers + jsonInstruction }],
         draft: isDraft,
       }).then(r => {
-        document.getElementById('gen-typing').classList.remove('show');
-        const output = document.getElementById('gen-output');
-        document.getElementById('gen-output-content').innerHTML = formatMarkdown(r.data.text || '');
-        output.classList.add('show');
-        document.getElementById('gen-restart').style.display = 'flex';
-        output.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }).catch(err => {
-        document.getElementById('gen-typing').classList.remove('show');
+        clearInterval(genLoadingInterval);
+        document.getElementById('gen-progress-bar').style.width = '100%';
+        const parsed = tryParseGenJSON(r.data.text || '');
+        if (parsed) {
+          renderResults(parsed);
+        } else {
+          renderResultsFallback(r.data.text || '');
+        }
+        showGenState('gen-state-results');
+        document.getElementById('gen-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }).catch(() => {
+        clearInterval(genLoadingInterval);
+        showGenState('gen-state-form');
         document.getElementById('gen-submit').disabled = false;
-        document.getElementById('gen-output-content').textContent = 'Something went wrong. Please try again.';
-        document.getElementById('gen-output').classList.add('show');
+        document.getElementById('gen-progress-bar').style.width = '33%';
       });
     }
 
+    function tryParseGenJSON(raw) {
+      try {
+        let cleaned = raw
+          .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '')
+          .trim();
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (match) cleaned = match[0];
+        return JSON.parse(cleaned);
+      } catch (e) { return null; }
+    }
+
+    function renderResults(data) {
+      document.getElementById('gen-result-headline').textContent = data.headline    || 'Your Result';
+      document.getElementById('gen-result-subtitle').textContent = data.subtitle    || '';
+      document.getElementById('gen-status-chip').textContent     = '✦ ' + (data.status_chip || 'Ready');
+
+      const container = document.getElementById('gen-cards-container');
+      container.innerHTML = '';
+
+      (data.items || []).forEach(item => {
+        const bullets = (item.bullets || []).map(b =>
+          `<li class="gen-item-bullet">${escHtml(b)}</li>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = 'gen-item-card';
+        card.innerHTML = `
+          <div class="gen-item-row">
+            <p class="gen-item-label">${escHtml(item.label || '')}</p>
+            ${item.tag ? `<span class="gen-item-tag">${escHtml(item.tag)}</span>` : ''}
+          </div>
+          <h3 class="gen-item-title">${escHtml(item.title || '')}</h3>
+          ${item.subtitle ? `<p class="gen-item-subtitle">${escHtml(item.subtitle)}</p>` : ''}
+          <ul class="gen-item-bullets">${bullets}</ul>`;
+        container.appendChild(card);
+      });
+
+      if (data.tips && (data.tips.items || []).length) {
+        const tipRows = data.tips.items.map(t =>
+          `<div class="gen-tip-row"><span class="gen-tip-check">✓</span><span>${escHtml(t)}</span></div>`
+        ).join('');
+        const footer = data.tips.footer_label
+          ? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid #D4B8F0;font-size:13px;color:#555;"><strong style="color:#0D0D0D;">${escHtml(data.tips.footer_label)}:</strong> ${escHtml(data.tips.footer_value || '')}</div>`
+          : '';
+        const tipsEl = document.createElement('div');
+        tipsEl.className = 'gen-tips-card';
+        tipsEl.innerHTML = `<p class="gen-tips-title">${escHtml(data.tips.title || 'Tips')}</p>${tipRows}${footer}`;
+        container.appendChild(tipsEl);
+      }
+    }
+
+    function renderResultsFallback(text) {
+      document.getElementById('gen-result-headline').textContent = currentToolName + ' Results';
+      document.getElementById('gen-result-subtitle').textContent = '';
+      document.getElementById('gen-status-chip').textContent     = '✦ Ready';
+
+      const container = document.getElementById('gen-cards-container');
+      container.innerHTML = '';
+
+      const sections = text.split(/\n(?=\d+[\.\)]|\*\*[A-Z]|##\s)/);
+      const items    = sections.filter(s => s.trim()).slice(0, 10);
+
+      if (items.length > 1) {
+        items.forEach((section, i) => {
+          const lines = section.trim().split('\n')
+            .map(l => l.replace(/^[-*#•\d.\)]+\s*/, '').trim())
+            .filter(Boolean);
+          if (!lines.length) return;
+          const card = document.createElement('div');
+          card.className = 'gen-item-card';
+          const bullets = lines.slice(1).map(b => `<li class="gen-item-bullet">${escHtml(b)}</li>`).join('');
+          card.innerHTML = `
+            <div class="gen-item-row"><p class="gen-item-label">Item ${i + 1}</p></div>
+            <h3 class="gen-item-title">${escHtml(lines[0])}</h3>
+            ${bullets ? `<ul class="gen-item-bullets">${bullets}</ul>` : ''}`;
+          container.appendChild(card);
+        });
+      } else {
+        // Single-blob fallback — wrap it in one card
+        const card = document.createElement('div');
+        card.className = 'gen-item-card';
+        card.innerHTML = `<div style="font-size:14px;color:#444;line-height:1.7;">${formatMarkdown(text)}</div>`;
+        container.appendChild(card);
+      }
+    }
+
     function restartGenerator() {
-      document.getElementById('gen-output').classList.remove('show');
-      document.getElementById('gen-restart').style.display = 'none';
+      clearInterval(genLoadingInterval);
+      showGenState('gen-state-form');
+      document.getElementById('gen-progress-bar').style.width = '33%';
       document.getElementById('gen-submit').disabled = false;
       genQuestions.forEach(q => {
         const el = document.getElementById(q.id);
         if (el) el.value = '';
       });
-      document.getElementById('gen-fields').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   </script>
 </body>
