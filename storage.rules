@@ -107,6 +107,16 @@ service firebase.storage {
       allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // CREATOR HUB LOGOS — publicly readable, owner can upload
+    match /creators/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;

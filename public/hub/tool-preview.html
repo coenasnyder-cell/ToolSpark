@@ -57,6 +57,39 @@
     .screen-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
     .screen-sub   { font-size: 14px; color: var(--text2); line-height: 1.5; max-width: 340px; }
 
+    /* Top nav */
+    .tool-nav {
+      display: none;
+      height: 48px;
+      background: #000;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .tool-nav.show { display: flex; }
+    .tool-nav-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,.6);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .tool-nav-back:hover { color: #fff; }
+    .tool-nav-back svg { flex-shrink: 0; }
+    .tool-nav-spacer { flex: 1; }
+    .tool-nav-logo {
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+    }
+    .tool-nav-logo span { color: #FFC820; }
+
     /* Tool UI */
     .tool-wrap {
       display: none;
@@ -355,6 +388,16 @@
 </head>
 <body>
 
+  <!-- Top nav — hidden in draft/iframe mode, shown for members -->
+  <nav class="tool-nav" id="tool-nav">
+    <a class="tool-nav-back" id="tool-nav-back" href="#">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Hub
+    </a>
+    <div class="tool-nav-spacer"></div>
+    <a class="tool-nav-logo" href="/">Tool<span>Spark</span></a>
+  </nav>
+
   <!-- Loading -->
   <div class="screen active" id="screen-loading">
     <div class="screen-icon">⚡</div>
@@ -457,14 +500,13 @@
     let toolShape           = 'diagnostic'; // set once tool loads
 
     function showScreen(id) {
-      ['screen-loading','screen-denied','screen-notfound','screen-error','tool-wrap']
+      ['screen-loading','screen-denied','screen-notfound','screen-error','tool-wrap','generator-wrap']
         .forEach(s => {
           const el = document.getElementById(s);
-          el.classList.remove('active');
-          if (el.classList.contains('screen') && s !== 'tool-wrap') el.classList.remove('active');
+          if (el) el.classList.remove('active');
         });
       const target = document.getElementById(id);
-      target.classList.add('active');
+      if (target) target.classList.add('active');
     }
 
     // ── Auth + access check ──────────────────────────────────────────────────────
@@ -495,9 +537,10 @@
         if (!creatorDoc.exists) { showScreen('screen-notfound'); return; }
 
         const isOwner = creatorDoc.data().ownerId === user.uid;
+        const hubSlug = creatorDoc.data().slug || '';
 
         if (isOwner) {
-          // Owner can always see draft or published tools
+          // Owner in draft mode — no nav bar (they're in the tool builder iframe)
           loadTool(creatorDoc.data().branding);
           return;
         }
@@ -508,7 +551,11 @@
             showScreen('screen-denied');
             return;
           }
-          // Inject hub branding for members too
+          // Show nav bar for members with link back to hub dashboard
+          const nav = document.getElementById('tool-nav');
+          const backLink = document.getElementById('tool-nav-back');
+          backLink.href = '/hub/dashboard?hub=' + hubSlug;
+          nav.classList.add('show');
           loadTool(creatorDoc.data().branding);
         });
       }).catch(() => showScreen('screen-error'));
@@ -528,10 +575,11 @@
           document.getElementById('tool-name').textContent = currentToolName;
           document.title = currentToolName;
 
-          showScreen('tool-wrap');
           if (toolShape === 'generator') {
+            showScreen('generator-wrap');
             initGenerator();
           } else {
+            showScreen('tool-wrap');
             startConversation();
           }
         })

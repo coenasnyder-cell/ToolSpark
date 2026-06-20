@@ -39,6 +39,7 @@ function initAdminPage(callback) {
         }
 
         _injectAdminBranding(hub.branding);
+        _injectAdminLogo(hub.branding, hub.displayName);
         callback(hub, user.uid);
       })
       .catch(function(err) {
@@ -59,6 +60,17 @@ function _injectAdminBranding(branding) {
   style.id    = 'hub-branding';
   style.textContent = ':root { ' + overrides.join(' ') + ' }';
   document.head.appendChild(style);
+}
+
+function _injectAdminLogo(branding, displayName) {
+  const el = document.getElementById('admin-hub-logo');
+  if (!el) return;
+  if (branding && branding.logoUrl) {
+    el.style.background = 'transparent';
+    el.innerHTML = '<img src="' + branding.logoUrl + '" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />';
+  } else {
+    el.textContent = (displayName || 'H').charAt(0).toUpperCase();
+  }
 }
 
 function _adminShellError(msg) {

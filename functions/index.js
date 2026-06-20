@@ -2531,10 +2531,18 @@ When the creator has confirmed the shape and you have everything needed:
 
   let parsed;
   try {
-    const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+    let cleaned = raw
+      .replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "")
+      .replace(/<\/?message>/gi, "")
+      .trim();
+    // Extract the JSON object in case Claude wrapped it in extra text
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) cleaned = jsonMatch[0];
     parsed = JSON.parse(cleaned);
   } catch (e) {
-    return { message: raw, done: false };
+    // Last-resort fallback — strip any JSON-looking content and return plain text
+    const textOnly = raw.replace(/\{[\s\S]*\}/, "").replace(/<\/?[^>]+>/g, "").trim();
+    return { message: textOnly || raw, done: false };
   }
 
   if (parsed.done) {
@@ -2636,9 +2644,22 @@ CURRENT TOOL SYSTEM PROMPT:
 ${currentSystemPrompt}
 ---
 
+WHAT YOU CAN CHANGE (via the system prompt):
+- Questions the tool asks, their order, their format (multiple choice, open text, etc.)
+- The tone and personality of the tool
+- The output/deliverable — what the user receives at the end
+- How many questions are asked before delivering results
+- Any specific instructions or rules the tool follows
+
+WHAT YOU CANNOT CHANGE (be honest and specific — never invent settings that don't exist):
+- The chat interface vs. form interface — this is set by the tool's shape (diagnostic = chat, generator = form) which was chosen at build time. There is NO interface style setting in Hub Settings or anywhere else. If they want a different interface, they would need to build a new tool.
+- Colors, fonts, or visual design — Hub Settings controls hub-wide brand colors only (primary color, accent color, background). There are no per-tool visual settings.
+- Never reference or suggest features, settings, or options that don't exist in ToolSpark.
+
 ROUTING (invisible to the creator — never mention this logic):
-- BEHAVIOR request (what questions it asks, the output it delivers, tone, flow, instructions, question format) → action "update_prompt" with fully revised system prompt
-- STYLE or VISUAL request (colors, fonts, look, feel, layout, branding) → action "none", explain warmly that visual style is set in Hub Settings
+- BEHAVIOR request (questions, output, tone, flow, format, content) → action "update_prompt" with fully revised system prompt
+- VISUAL/COLOR request (fonts, colors, branding) → action "none", explain Hub Settings controls brand colors hub-wide, but there are no per-tool design options
+- INTERFACE/SHAPE request (form vs chat, layout style) → action "none", explain honestly that the interface style was set when the tool was built and cannot be changed here — if they want a different style they'd need to create a new tool
 - APPROVAL ("looks good", "perfect", "love it", "done", "ship it", "publish it", "happy with it") → action "approved"
 - UNCLEAR → action "none", ask one short clarifying question
 
@@ -2650,9 +2671,8 @@ RULES FOR UPDATED SYSTEM PROMPTS:
 
 ALWAYS return valid JSON, no markdown fences:
 For behavior changes: {"message":"...","action":"update_prompt","updatedSystemPrompt":"full revised system prompt here"}
-For style requests:   {"message":"...","action":"none"}
-For approval:         {"message":"...","action":"approved"}
-For unclear:          {"message":"...","action":"none"}`;
+For other requests:   {"message":"...","action":"none"}
+For approval:         {"message":"...","action":"approved"}`;
 
   const raw = await callAI(keys, systemPrompt, messages);
 

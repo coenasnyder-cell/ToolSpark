@@ -305,16 +305,6 @@ function publishTool() {
         btn.textContent = 'Published';
       }, 2000);
       addSparkyMsg('Your tool is live! 🎉 Members can find it in your hub now.');
-
-      // Q1 soft nudge — surfaces after tool is built, never before
-      const userDoc = db.collection('users').doc(state.creatorId);
-      userDoc.get().then(doc => {
-        if (doc.exists && !doc.data().course1Complete) {
-          setTimeout(() => {
-            addSparkyMsg('Your tool would be even more targeted once you finish Course 1. <a href="/course1" style="color:var(--purple);font-weight:700;">Continue →</a>');
-          }, 3000);
-        }
-      }).catch(() => {});
     })
     .catch(err => {
       alert('Error: ' + err.message);

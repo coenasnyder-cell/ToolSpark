@@ -513,7 +513,15 @@
     }
 
     function addSparkyBubble(text) {
-      addBubble('sparky', escHtml(text));
+      addBubble('sparky', formatText(text));
+    }
+
+    function formatText(text) {
+      return escHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
     }
 
     function showTyping() {

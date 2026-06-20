@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
   <script>
     const firebaseConfig = {
@@ -197,6 +198,49 @@
       margin-top: 16px;
     }
 
+    /* Logo upload */
+    .logo-upload-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-preview {
+      width: 64px; height: 64px;
+      border-radius: 14px;
+      background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 800; color: #000;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+    .logo-preview img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+    .logo-upload-actions { display: flex; flex-direction: column; gap: 8px; }
+    .logo-upload-btn {
+      display: inline-block;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--card-alt);
+      color: var(--text2);
+      font-family: var(--font);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      white-space: nowrap;
+    }
+    .logo-upload-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .logo-remove-btn {
+      background: none; border: none;
+      color: var(--text3); font-family: var(--font);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; padding: 0; text-align: left;
+      transition: color .15s;
+    }
+    .logo-remove-btn:hover { color: #e05555; }
+    .logo-upload-note { font-size: 12px; color: var(--text3); margin-top: 4px; }
+    #logo-file-input { display: none; }
+
     /* Join link section */
     .join-link-wrap {
       display: flex;
@@ -299,6 +343,21 @@
       <!-- Hub identity -->
       <div class="settings-section">
         <div class="section-title">Identity</div>
+        <div class="form-group">
+          <label>Hub Logo</label>
+          <div class="logo-upload-wrap">
+            <div class="logo-preview" id="logo-preview-box">
+              <span id="logo-letter">T</span>
+            </div>
+            <div class="logo-upload-actions">
+              <label class="logo-upload-btn" for="logo-file-input">Upload Image</label>
+              <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
+              <button class="logo-remove-btn" id="logo-remove-btn" onclick="removeLogo()" style="display:none;">Remove logo</button>
+              <div class="logo-upload-note">PNG, JPG or WebP. Recommended 200×200px.</div>
+            </div>
+          </div>
+          <div id="logo-upload-status" style="font-size:12px;color:var(--text3);margin-top:8px;display:none;"></div>
+        </div>
         <div class="form-group">
           <label>Hub Name</label>
           <input type="text" id="s-name" maxlength="60" placeholder="Your hub name" />
@@ -518,6 +577,7 @@
       document.getElementById('s-slug').value    = hub.slug || '';
       document.getElementById('s-join-link').value =
         window.location.origin + '/hub/join?hub=' + (hub.slug || '');
+      setLogoPreview(b.logoUrl || null, hub.displayName);
 
       const primary = b.primaryColor || '#FFC820';
       const accent  = b.accentColor  || '#6B2FB3';
@@ -546,7 +606,7 @@
         primaryColor: document.getElementById('cp-primary').value,
         accentColor:  document.getElementById('cp-accent').value,
         bgColor:      document.getElementById('cp-bg').value,
-        logoUrl:      originalData.branding ? (originalData.branding.logoUrl || '') : ''
+        logoUrl:      pendingLogoUrl !== null ? pendingLogoUrl : (originalData.branding?.logoUrl || '')
       };
 
       db.collection('creators').doc(creatorIdGlobal).update({
@@ -556,7 +616,17 @@
       })
       .then(() => {
         originalData = { ...originalData, displayName: name, branding };
+        pendingLogoUrl = null;
         document.getElementById('admin-hub-name').textContent = name;
+        // Update sidebar logo
+        const sidebarLogo = document.getElementById('admin-hub-logo');
+        if (branding.logoUrl) {
+          sidebarLogo.style.background = 'transparent';
+          sidebarLogo.innerHTML = `<img src="${branding.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />`;
+        } else {
+          sidebarLogo.textContent = name.charAt(0).toUpperCase();
+        }
+        document.getElementById('logo-upload-status').style.display = 'none';
         markClean();
         showToast('Settings saved.');
       })
@@ -632,6 +702,69 @@
           btn.disabled    = false;
           btn.textContent = 'Save API Key';
         });
+    }
+
+    // ── Logo upload ────────────────────────────────────────────────────────────
+    let pendingLogoUrl = null; // set after a successful upload, cleared on save
+
+    function setLogoPreview(url, letter) {
+      const box       = document.getElementById('logo-preview-box');
+      const ltr       = document.getElementById('logo-letter');
+      const removeBtn = document.getElementById('logo-remove-btn');
+      if (url) {
+        box.style.background = 'transparent';
+        ltr.style.display = 'none';
+        let img = box.querySelector('img');
+        if (!img) { img = document.createElement('img'); img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:10px;'; box.appendChild(img); }
+        img.src = url;
+        removeBtn.style.display = 'block';
+      } else {
+        box.style.background = '';
+        ltr.style.display = '';
+        ltr.textContent = (letter || 'H').charAt(0).toUpperCase();
+        const img = box.querySelector('img');
+        if (img) img.remove();
+        removeBtn.style.display = 'none';
+      }
+    }
+
+    document.getElementById('logo-file-input').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Image must be under 2MB.');
+        this.value = '';
+        return;
+      }
+
+      const status = document.getElementById('logo-upload-status');
+      status.textContent = 'Uploading...';
+      status.style.display = 'block';
+
+      const ext     = file.name.split('.').pop();
+      const ref     = firebase.storage().ref(`creators/${creatorIdGlobal}/logo.${ext}`);
+      const upload  = ref.put(file);
+
+      upload.on('state_changed', null,
+        err => {
+          status.textContent = 'Upload failed. Please try again or use a smaller image.';
+          console.error('Logo upload error:', err.message);
+        },
+        () => {
+          upload.snapshot.ref.getDownloadURL().then(url => {
+            pendingLogoUrl = url;
+            setLogoPreview(url);
+            status.textContent = 'Logo uploaded — save your settings to apply.';
+            markDirty();
+          });
+        }
+      );
+    });
+
+    function removeLogo() {
+      pendingLogoUrl = '';
+      setLogoPreview(null, document.getElementById('s-name').value);
+      markDirty();
     }
 
     initAdminPage(function(hub, creatorId) {
