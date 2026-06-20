@@ -72,6 +72,9 @@ node_modules/
 .agents/
 skills-lock.json
 
+# Video files
+videos/
+
 # Local only
 chat-prompts.txt
 test-email.js
