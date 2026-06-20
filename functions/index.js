@@ -2424,37 +2424,259 @@ async function callAI(keys, systemPrompt, messages) {
   throw new HttpsError("failed-precondition", "No API key configured.");
 }
 
+// ── HELPER: Load creator's prior clarity work for Build Agent context ──────────
+
+async function loadCreatorAudienceContext(db, uid) {
+  const parts = [];
+
+  try {
+    const snap = await db.collection("audience_tool")
+      .where("userId", "==", uid).orderBy("createdAt", "desc").limit(1).get();
+    if (!snap.empty) {
+      const d = snap.docs[0].data();
+      const fields = [
+        ["Who they help",           d.whoYouHelp],
+        ["Their expertise",         d.whatYouKnow],
+        ["Result they create",      d.resultYouCreate],
+        ["Their edge",              d.yourEdge],
+        ["Spark Statement",         d.statement],
+        ["Niche",                   d.niche],
+      ].filter(([, v]) => typeof v === "string" && v.trim().length > 2);
+      if (fields.length) {
+        parts.push("Audience & Spark Profile (from Find Your Spark / Audience Deep Dive):");
+        fields.forEach(([k, v]) => parts.push(`  ${k}: ${v.trim()}`));
+      }
+    }
+  } catch (e) { /* context is optional — ignore errors */ }
+
+  try {
+    const snap = await db.collection("breakthrough_sessions")
+      .where("userId", "==", uid).orderBy("createdAt", "desc").limit(1).get();
+    if (!snap.empty) {
+      const d = snap.docs[0].data();
+      const recs = d.recommendations || d.toolRecommendations || d.toolRecommendation;
+      if (Array.isArray(recs) && recs.length) {
+        parts.push("\nBreakthrough Discovery — Tool Recommendations:");
+        recs.slice(0, 3).forEach((r, i) => {
+          const title = typeof r === "string" ? r : (r.title || r.name || "");
+          if (title) parts.push(`  ${i + 1}. ${title}`);
+        });
+      } else if (typeof recs === "string" && recs.trim()) {
+        parts.push("\nBreakthrough Discovery:");
+        parts.push(`  ${recs.trim()}`);
+      }
+    }
+  } catch (e) { /* context is optional */ }
+
+  return parts.length ? parts.join("\n") : null;
+}
+
+// buildAgentChat — powers the Stage 1 Build Agent conversational intake.
+// Sparky runs the 5-step framework silently, infers shape, confirms in plain
+// language, then returns a toolSpec ready for generateToolPrompt.
+exports.buildAgentChat = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const { messages } = request.data;
+  if (!Array.isArray(messages) || messages.length === 0) {
+    throw new HttpsError("invalid-argument", "messages array required.");
+  }
+
+  const db = admin.firestore();
+
+  const keys = await getCreatorKeys(uid);
+  if (!keys) throw new HttpsError("failed-precondition", "Add your API key in Settings before building a tool.");
+
+  const audienceContext = await loadCreatorAudienceContext(db, uid);
+  const contextSection = audienceContext
+    ? `\n\nCREATOR CONTEXT (already loaded from Firestore — never re-ask anything covered here):\n${audienceContext}`
+    : "";
+
+  const systemPrompt = `You are Sparky, ToolSpark's Build Agent. You help creators design AI tools for their audience.
+
+A ToolSpark tool is NOT a quiz or survey. It creates a transformation — the user walks away with a specific usable asset they didn't have before (a content calendar, a DM script, a positioning statement, a personalized action plan), not a score or label.
+
+You follow the 5-step framework silently — never label these steps or mention them to the creator:
+1. Problem — What is the creator's audience struggling with?
+2. Transformation — What does their life/business look like after the tool helps them?
+3. Asset — What specific deliverable do they walk away with? (This determines shape.)
+4. Minimum input — What's the least you need to know to generate that asset?
+5. Questions — Only now: what will the tool ask?
+
+RULES:
+- Ask no more than 2–3 follow-up questions across the entire conversation
+- Ask only what changes the output — never ask for more topic detail
+- Never ask about colors, branding, style, or how many questions the tool should have
+- Never show shape names (diagnostic, generator) to the creator
+- Infer shape from Step 3:
+  - Predictable same-type deliverable for everyone, personalized to their inputs = generator
+  - Uniquely different result per person based on their situation = diagnostic
+- After gathering enough context (2–3 follow-ups max), confirm the inferred shape in plain language before wrapping up:
+  - Generator: "Sounds like this creates the same type of thing for everyone — a [specific deliverable] built around their situation. Does that match what you're picturing?"
+  - Diagnostic: "Sounds like this gives everyone a different result based on their answers — not a template, something personal to them. Is that right?"
+- If the creator disagrees, ask one clarifying question and re-infer the shape
+- If wrong twice, ask exactly: "Which feels closer — something that gives everyone the same result, or something that's different based on their answers?" Default to diagnostic if still unclear
+- Once shape is confirmed, wrap up immediately — do not ask more questions
+- Infer category (attract/qualify/transform/create) from context — never ask
+- Keep responses conversational and brief — no bullet lists, no headers${contextSection}
+
+ALWAYS return valid JSON — no markdown, no code fences, raw JSON only:
+{"message":"your response to creator","done":false}
+
+When the creator has confirmed the shape and you have everything needed:
+{"message":"Great — I have everything I need. Building your tool now!","done":true,"toolName":"inferred tool name","category":"attract|qualify|transform|create","shape":"diagnostic|generator","problem":"one sentence","transformation":"one sentence","asset":"specific deliverable description","minimumInput":"what the questions need to collect"}`;
+
+  const raw = await callAI(keys, systemPrompt, messages);
+
+  let parsed;
+  try {
+    const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    return { message: raw, done: false };
+  }
+
+  if (parsed.done) {
+    return {
+      message: parsed.message || "",
+      done: true,
+      toolSpec: {
+        toolName:       parsed.toolName       || "My AI Tool",
+        category:       parsed.category       || "attract",
+        shape:          parsed.shape          || "diagnostic",
+        problem:        parsed.problem        || "",
+        transformation: parsed.transformation || "",
+        asset:          parsed.asset          || "",
+        minimumInput:   parsed.minimumInput   || "",
+      },
+    };
+  }
+
+  return { message: parsed.message || "", done: false };
+});
+
 // generateToolPrompt — called by creator in tool builder to build their system prompt.
 // Uses the creator's own API key (stored in /creators/{uid}/private/keys).
 exports.generateToolPrompt = onCall(async (request) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Login required.");
 
-  const { category, template, toolName, audience, outcome, tone, questionCount, customQuestions } = request.data;
-  if (!template || !toolName || !audience || !outcome || !tone || !questionCount) {
+  const { toolName, category, shape, problem, transformation, asset, minimumInput } = request.data;
+
+  if (!toolName || !category || !shape || !problem || !asset) {
     throw new HttpsError("invalid-argument", "Missing required fields.");
   }
 
   const keys = await getCreatorKeys(uid);
   if (!keys) throw new HttpsError("failed-precondition", "Add your API key in Settings before building a tool.");
 
-  const metaPrompt = `Generate a system prompt for an AI tool with these specs:
-- Type: ${template}
-- Category: ${category}
-- Name: ${toolName}
-- Audience: ${audience}
-- Outcome: ${outcome}
-- Tone: ${tone}
-- Number of questions to ask the user: ${questionCount}${customQuestions ? `\n- Specific questions to include: ${customQuestions}` : ""}
+  const metaPrompt = `You are an expert AI tool designer. Generate a system prompt for a ToolSpark tool.
 
-The tool should ask questions one at a time and deliver a personalized result at the end.
-Return only the system prompt text, nothing else. No explanation, no preamble.`;
+A ToolSpark tool is NOT a quiz or survey. It creates a TRANSFORMATION — the user walks away with a specific usable asset, not a score or label.
+
+TOOL SPEC:
+- Name: ${toolName}
+- Category: ${category}
+- Shape: ${shape === "generator"
+    ? "Generator — produces the same type of deliverable for everyone, personalized to their inputs"
+    : "Diagnostic — gives each person a genuinely different result based on their unique situation and answers"}
+- Problem it solves: ${problem}
+- Transformation: ${transformation || "not specified"}
+- Asset the user walks away with: ${asset}
+- Minimum input needed to generate the asset: ${minimumInput || "infer from the asset"}
+
+THE SYSTEM PROMPT MUST:
+- Open with exactly one warm, friendly welcome sentence — no headers, no bold, no preamble
+- Ask only the minimum questions needed to generate the asset (typically 2–4, never more than 5)
+- Ask exactly ONE question per message — never list multiple questions together
+- Wait for the user's answer before asking the next question
+- When enough information is gathered, deliver the specific asset described above — not a score, not a label, a usable result the user can act on today
+- Never use markdown headers or bullet formatting during the question phase
+${shape === "generator"
+    ? "- The output should be a structured deliverable — consistent in type each time but fully personalized to this user's inputs"
+    : "- The output should feel genuinely unique to this person — shaped entirely by what they told you, not a template with their name filled in"}
+Return only the system prompt text, nothing else.`;
 
   const systemPrompt = await callAI(keys, "You are an expert AI tool designer.", [
     { role: "user", content: metaPrompt },
   ]);
 
   return { systemPrompt: systemPrompt.trim() };
+});
+
+// refineToolPrompt — Stage 2 conversational refinement. Every creator message
+// is a live Claude call that classifies the request and routes it:
+//   behavior change  → updates system prompt in Firestore, returns updatedSystemPrompt
+//   style/visual     → explains it lives in Hub Settings, no prompt change
+//   approval         → confirms, signals client to surface Publish
+exports.refineToolPrompt = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const { creatorId, toolId, messages, currentSystemPrompt } = request.data;
+  if (!creatorId || !toolId || !Array.isArray(messages) || !currentSystemPrompt) {
+    throw new HttpsError("invalid-argument", "Missing required fields.");
+  }
+
+  const db = admin.firestore();
+
+  const creatorDoc = await db.collection("creators").doc(creatorId).get();
+  if (!creatorDoc.exists || creatorDoc.data().ownerId !== uid) {
+    throw new HttpsError("permission-denied", "Not authorized.");
+  }
+
+  const keys = await getCreatorKeys(creatorId);
+  if (!keys) throw new HttpsError("failed-precondition", "No API key configured.");
+
+  const systemPrompt = `You are Sparky, a helpful guide inside ToolSpark's Tool Builder. The creator has just built an AI tool and is reviewing it in the preview. Your job is to help them refine it.
+
+CURRENT TOOL SYSTEM PROMPT:
+---
+${currentSystemPrompt}
+---
+
+ROUTING (invisible to the creator — never mention this logic):
+- BEHAVIOR request (what questions it asks, the output it delivers, tone, flow, instructions, question format) → action "update_prompt" with fully revised system prompt
+- STYLE or VISUAL request (colors, fonts, look, feel, layout, branding) → action "none", explain warmly that visual style is set in Hub Settings
+- APPROVAL ("looks good", "perfect", "love it", "done", "ship it", "publish it", "happy with it") → action "approved"
+- UNCLEAR → action "none", ask one short clarifying question
+
+RULES FOR UPDATED SYSTEM PROMPTS:
+- Return the FULL system prompt — not a delta, not a summary, the entire revised text
+- CRITICAL: Preserve question format exactly — if original used multiple choice options, every question in the revised prompt must also use multiple choice. Never convert multiple choice to free-text.
+- Preserve all structural rules (one question per message, no markdown in conversation, deliver asset at end) unless the creator explicitly asked to change them
+- Keep the output as a specific usable asset — not a score or label
+
+ALWAYS return valid JSON, no markdown fences:
+For behavior changes: {"message":"...","action":"update_prompt","updatedSystemPrompt":"full revised system prompt here"}
+For style requests:   {"message":"...","action":"none"}
+For approval:         {"message":"...","action":"approved"}
+For unclear:          {"message":"...","action":"none"}`;
+
+  const raw = await callAI(keys, systemPrompt, messages);
+
+  let parsed;
+  try {
+    const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    return { message: raw, action: "none" };
+  }
+
+  if (parsed.action === "update_prompt" && parsed.updatedSystemPrompt) {
+    await db.collection("creators").doc(creatorId)
+      .collection("tools").doc(toolId)
+      .update({
+        systemPrompt: parsed.updatedSystemPrompt,
+        lastEditedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+  }
+
+  return {
+    message: parsed.message || "",
+    action:  parsed.action  || "none",
+  };
 });
 
 // callCreatorTool — powers the live tool for hub members.
@@ -2499,6 +2721,60 @@ exports.callCreatorTool = onCall(async (request) => {
   const keys = await getCreatorKeys(creatorId);
   if (!keys) throw new HttpsError("failed-precondition", "Creator has not configured an API key.");
 
-  const text = await callAI(keys, tool.systemPrompt, messages);
+  const { generatorInit } = request.data;
+  const toolShape = tool.shape || null;
+
+  // ── Generator: init — return question list as structured JSON ─────────────
+  if (generatorInit && toolShape === "generator") {
+    const initPrompt = `${tool.systemPrompt}
+
+IMPORTANT — GENERATOR INIT MODE:
+The user has opened this tool. Output ONLY a JSON array of question objects with no other text or explanation.
+Format: [{"label":"Question text","placeholder":"Example answer hint","type":"textarea"},...]
+Use type "text" for short answers, "textarea" for longer ones.
+Include only the questions needed to generate the result. Maximum 5 questions.`;
+
+    const text = await callAI(keys, initPrompt, [
+      { role: "user", content: "What do you need to know to generate my result?" },
+    ]);
+    return { text };
+  }
+
+  // ── Generator: delivery — answers submitted as a single message ───────────
+  if (toolShape === "generator") {
+    const deliverPrompt = `${tool.systemPrompt}
+
+CRITICAL: The user has submitted all their answers below. Do NOT ask any more questions.
+Generate their complete, specific, usable result right now. Format it clearly.`;
+
+    const text = await callAI(keys, deliverPrompt, messages);
+    return { text };
+  }
+
+  // ── Diagnostic: conversational — system prompt drives wrap-up ────────────
+  // New tools (shape field present): no questionCount enforcement — system prompt owns delivery.
+  // Legacy tools (no shape): keep old enforcement for backward compat.
+  let enforcedPrompt;
+  if (toolShape) {
+    enforcedPrompt = `CRITICAL RULES:
+1. Ask exactly ONE question per message. Never list multiple questions together.
+2. Never use markdown syntax — no # headers, no **asterisks**, no --- lines. Plain conversational text only.
+3. Wait for the user's reply before asking anything else.
+4. When you have enough information, deliver the complete personalized result.
+
+${tool.systemPrompt}`;
+  } else {
+    // Legacy path — keep old questionCount enforcement
+    const answeredCount  = messages.filter(m => m.role === "user").length;
+    const questionCount  = tool.config?.questionCount || 5;
+    const questionsAsked = messages.filter(m => m.role === "assistant").length;
+    const deliverNow     = answeredCount >= questionCount || questionsAsked > questionCount;
+    const deliveryRule   = deliverNow
+      ? `\nRULE FOR THIS RESPONSE: The user has now answered ${answeredCount} questions. Do NOT ask any more questions. Deliver their complete personalized result right now.`
+      : `\nYou have ${questionCount - questionsAsked} question(s) left to ask before delivering results.`;
+    enforcedPrompt = `CRITICAL RULES:\n1. Ask exactly ONE question per message. Never list multiple questions together.\n2. Never use markdown syntax — no # headers, no **asterisks**, no --- lines. Plain conversational text only.\n3. Wait for the user's reply before asking anything else.\n4. You must ask exactly ${questionCount} questions total, then stop and deliver the personalized result.${deliveryRule}\n\n${tool.systemPrompt}`;
+  }
+
+  const text = await callAI(keys, enforcedPrompt, messages);
   return { text };
 });

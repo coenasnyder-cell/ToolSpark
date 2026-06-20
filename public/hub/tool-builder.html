@@ -156,85 +156,10 @@
     .msg.sparky .msg-bubble { background: rgba(107,47,179,.08); color: var(--text); border-radius: 4px 16px 16px 16px; }
     .msg.user   .msg-bubble { background: var(--yellow); color: #000; border-radius: 16px 4px 16px 16px; }
 
-    /* Choice tiles */
-    .choice-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 0 0 0 38px;
+    /* Publish nudge */
+    .publish-nudge {
+      padding: 4px 0 0 38px;
     }
-    .choice-tiles {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .choice-tile {
-      background: var(--card-alt);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 12px;
-      cursor: pointer;
-      transition: border-color .15s, background .15s;
-      text-align: left;
-    }
-    .choice-tile:hover { border-color: var(--purple); background: rgba(107,47,179,.05); }
-    .choice-tile.selected { border-color: var(--purple); background: rgba(107,47,179,.08); }
-    .choice-tile-icon { font-size: 20px; margin-bottom: 6px; }
-    .choice-tile-name { font-size: 13px; font-weight: 700; color: var(--text); }
-    .choice-tile-desc { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
-
-    .template-tiles { display: flex; flex-direction: column; gap: 8px; }
-    .template-tile {
-      background: var(--card-alt);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      cursor: pointer;
-      transition: border-color .15s, background .15s;
-    }
-    .template-tile:hover { border-color: var(--purple); background: rgba(107,47,179,.05); }
-    .template-tile.selected { border-color: var(--purple); background: rgba(107,47,179,.08); }
-    .template-tile-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .template-tile-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
-
-    .tone-tiles {
-      display: flex;
-      gap: 8px;
-    }
-    .tone-tile {
-      flex: 1;
-      background: var(--card-alt);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 8px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      transition: border-color .15s, background .15s;
-    }
-    .tone-tile:hover { border-color: var(--purple); }
-    .tone-tile.selected { border-color: var(--purple); background: rgba(107,47,179,.08); }
-
-    .count-tiles {
-      display: flex;
-      gap: 8px;
-    }
-    .count-tile {
-      flex: 1;
-      background: var(--card-alt);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .15s;
-    }
-    .count-tile:hover { border-color: var(--purple); }
-    .count-tile.selected { border-color: var(--purple); background: rgba(107,47,179,.08); }
-    .count-num  { font-size: 20px; font-weight: 800; color: var(--text); }
-    .count-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
     /* Text input area */
     .chat-input-wrap {
@@ -511,7 +436,7 @@
         <div class="sparky-avatar">⚡</div>
         <div>
           <div class="chat-header-text">Sparky</div>
-          <div class="chat-header-sub">Your tool-building guide</div>
+          <div class="chat-header-sub">Refine your tool</div>
         </div>
       </div>
 
@@ -527,7 +452,7 @@
           placeholder="Type your answer..."
           onkeydown="handleInputKey(event)"
           oninput="autoGrow(this)"></textarea>
-        <button class="chat-send-btn" id="send-btn" onclick="sendAnswer()">
+        <button class="chat-send-btn" id="send-btn" onclick="sendRefinement()">
           <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>

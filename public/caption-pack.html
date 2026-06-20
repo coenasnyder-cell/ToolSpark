@@ -419,7 +419,105 @@
   function buildPrompt(script, platform, niche) {
     var platformLabel = platformLabels[platform] || 'TikTok';
     var nicheContext = niche ? '\nNiche / target audience: ' + niche : '';
-    return 'You are a viral social media strategist specialising in short-form video content for ' + platformLabel + '.\n\nAnalyze the following video script or description and generate a complete caption pack for the creator to post alongside their video.\n\nScript / description:\n"""\n' + script + '\n"""' + nicheContext + '\n\nGenerate the following four sections. Use the exact delimiters shown — no extra commentary.\n\nHOOK_START\n[Write a 1–2 sentence caption hook. This appears before the "more" cut-off. It must stop the scroll, create curiosity or emotion, and make people want to keep reading. Do NOT start with "I" or a generic opener. Be bold, direct, and specific.]\nHOOK_END\n\nCAPTION_START\n[Write the full caption body that comes after the hook. 3–5 sentences. Tell the story, back up the hook, and deliver value or emotion. End with a question or call-to-action that invites comments. No hashtags here — they go in the hashtags section.]\nCAPTION_END\n\nHASHTAGS_START\n[Write exactly 15 hashtags relevant to this content and niche. Mix broad reach tags (5), mid-size community tags (5), and niche-specific tags (5). Each on its own line, starting with #. No commas.]\nHASHTAGS_END\n\nTHUMBNAIL_START\n[Write a detailed AI image generation prompt for a high-CTR video thumbnail or cover image. Describe a lifestyle or conceptual photo — no text in the image, no faces unless essential. Describe the mood, lighting, composition, and style. Keep it under 40 words.]\nTHUMBNAIL_END';
+    return `You are a viral social media strategist specialising in short-form video content for ${platformLabel}.
+
+Analyze the following video script or description and generate a complete caption pack.
+
+Script / description:
+"""
+${script}
+"""${nicheContext}
+
+## HOOK WRITING INSTRUCTIONS
+
+The hook is the first 1–2 sentences — the only thing visible before the "more" cut-off. It decides whether anyone reads the rest.
+
+**Step 1: Identify the angle**
+Read the script and find the strongest element. Is there a real number or result? A strong opinion? A mistake the audience makes? A tactic copied from someone? An open question?
+
+**Step 2: Match the angle to the highest-ceiling category**
+
+| Angle | Category | Virality ceiling |
+|---|---|---|
+| A result, number, or experiment | The Receipt | Highest |
+| A strong opinion or counterintuitive take | Contrarian | Highest |
+| A mistake the audience makes | Negative Frame | High |
+| A tactic copied from someone else | Stolen Lessons | High |
+| An unanswered question or open loop | Curiosity Gap | High |
+| A how-to with a specific count | Listicle / Number | Medium |
+| Insider knowledge the audience lacks | Secret / Insider | Medium |
+| Speaking to one specific group | Audience Callout | Medium |
+| A change over time or story arc | Transformation | Medium |
+| Fast win or low-effort result | Speed / Effortless | Medium |
+| A reason to act now | Urgency / FOMO | Use sparingly |
+| A raw personal admission | Confession | High trust |
+
+**Step 3: Write 3 hook variations using these templates**
+
+THE RECEIPT (if there's a number or result):
+- "I tested [N] [things]. Only [smaller N] worked."
+- "I [did specific thing] for [time]. Here's what happened."
+- "How I [achieved result] in [time] — with no [common requirement]."
+
+CONTRARIAN (if there's a strong opinion):
+- "Most people think [common belief]. Here's why they're wrong."
+- "Unpopular opinion: [bold take]."
+- "[Common practice] is killing your [outcome]. Stop doing it."
+
+NEGATIVE FRAME (if there's a mistake):
+- "[N] mistakes you're making with [task]."
+- "Stop doing [common action] right now."
+- "Here's why you've been doing [task] wrong all along."
+
+STOLEN LESSONS (if there's a borrowed tactic):
+- "I copied [person/brand]'s [specific thing]. Here's what happened."
+- "[Famous brand] does [specific thing]. I tried it. Result: [outcome]."
+
+CURIOSITY GAP (if there's an open loop or revelation):
+- "Here's what nobody tells you about [topic]."
+- "I can't believe more people aren't talking about this."
+- "Here's what I wish I knew before I started [thing]."
+
+AUDIENCE CALLOUT (if there's a clear target group):
+- "[Specific group], stop scrolling."
+- "99% of [audience] don't understand this."
+
+**Step 4: Run the first-3-words test on each variation**
+Read the first 3 words alone. Do they create curiosity, surprise, or pull?
+- "Here's what I" → weak (no pull)
+- "I tested 47" → strong (number + open loop)
+- "Most people think" → strong (sets up a fight)
+Cut filler from the front. The strongest word goes first.
+
+**Hook rules:**
+- Fill every placeholder with real specifics — never leave [brackets] in the output
+- Specific beats abstract: "47 candle scents" beats "many scents"
+- Never start with: "In today's fast-paced world," "Let me tell you," "Are you ready to," or "Picture this"
+- No filler words: "really," "very," "just," "actually," "basically"
+- One hook, one idea — do not stack two hooks
+- Could it stand alone as a tweet? If not, it's too weak
+
+Pick the strongest of your 3 variations as the final hook.
+
+---
+
+Generate the following four sections. Use the exact delimiters — no extra commentary outside them.
+
+HOOK_START
+[The single strongest hook variation — 1–2 sentences, all placeholders filled with real specifics from the script]
+HOOK_END
+
+CAPTION_START
+[Full caption body after the hook. 3–5 sentences. Tell the story, back up the hook, deliver value or emotion. End with a question or CTA that invites comments. No hashtags.]
+CAPTION_END
+
+HASHTAGS_START
+[Exactly 15 hashtags. Mix: 5 broad reach, 5 mid-size community, 5 niche-specific. One per line, starting with #. No commas.]
+HASHTAGS_END
+
+THUMBNAIL_START
+[AI image prompt for a high-CTR thumbnail. Lifestyle or conceptual photo — no text in image, no faces unless essential. Describe mood, lighting, composition, style. Under 40 words.]
+THUMBNAIL_END`;
   }
 
   async function generatePack() {

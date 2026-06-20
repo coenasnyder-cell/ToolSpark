@@ -35,18 +35,24 @@ service cloud.firestore {
 
     // USERS collection
     match /users/{userId} {
-      // Allow users to read their own data so they can check their status
       allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
-      // But only active users or admins can read OTHER users' data
       allow list: if isActive();
 
-      allow create: if isSignedIn() && isOwner(userId);
-      // Owner/admin can update anything; active users can only increment engagement fields on others
+      // Owner creates their own doc — privileged fields must come from admin only
+      allow create: if isSignedIn() && isOwner(userId) &&
+                       !request.resource.data.keys().hasAny(['userRole', 'certified', 'banned']);
+
       allow update: if !isBanned() && (
-        isOwner(userId) ||
+        // Admin can update any field
         isAdmin() ||
+        // Owner can update their own doc but never touch privileged fields
+        (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['userRole', 'certified', 'banned'])) ||
+        // Any active member can increment engagement counters on another user's doc
+        // (e.g. liking a post bumps the author's totalLikesReceived)
+        // Move to Cloud Functions to remove this branch if abuse becomes a concern
         (isActive() && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['points', 'totalLikesReceived', 'badges']))
+            .hasOnly(['points', 'totalLikesReceived', 'badges']))
       );
       allow delete: if isAdmin();
     }
@@ -62,7 +68,9 @@ service cloud.firestore {
     // THREADS collection
     match /threads/{threadId} {
       allow read: if isActive();
-      allow create: if isActive();
+      allow create: if isActive() &&
+                       request.resource.data.title.size() < 300 &&
+                       request.resource.data.content.size() < 20000;
       allow update: if isActive() && (
         isAdmin() ||
         // Owner can edit content fields only — not pinned, likeCount, etc.
@@ -81,7 +89,7 @@ service cloud.firestore {
       // COMMENTS subcollection
       match /comments/{commentId} {
         allow read: if isActive();
-        allow create: if isActive();
+        allow create: if isActive() && request.resource.data.content.size() < 5000;
         allow update: if isActive() && (
           isAdmin() ||
           // Owner can only edit content, not authorId or createdAt
@@ -131,7 +139,7 @@ service cloud.firestore {
     resource.data.clientEmailLower == request.auth.token.email ||
     isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid ||
     resource.data.clientEmail == request.auth.token.email ||
@@ -150,7 +158,7 @@ match /spark_profiles/{sessionId} {
     resource.data.email == request.auth.token.email ||
     isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid ||
     resource.data.email == request.auth.token.email ||
@@ -169,7 +177,7 @@ match /spark_results/{resultId} {
     resource.data.accountEmail == request.auth.token.email ||
     isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid ||
     resource.data.accountEmail == request.auth.token.email ||
@@ -189,7 +197,7 @@ match /spark_results/{resultId} {
     resource.data.email == request.auth.token.email ||
     isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid ||
     resource.data.email == request.auth.token.email ||
@@ -208,7 +216,7 @@ match /spark_results/{resultId} {
     resource.data.accountEmail == request.auth.token.email ||
     isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid ||
     resource.data.accountEmail == request.auth.token.email ||
@@ -220,7 +228,7 @@ match /breakthrough_sessions/{sessionId} {
   allow read: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
-  allow create: if isActive();
+  allow create: if isActive() && request.resource.data.userId == request.auth.uid;
   allow update: if isActive() && (
     resource.data.userId == request.auth.uid || isAdmin()
   );
@@ -426,7 +434,8 @@ match /conversations/{conversationId} {
       request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
     allow create: if isActive() &&
       exists(/databases/$(database)/documents/conversations/$(conversationId)) &&
-      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants &&
+      request.resource.data.text.size() < 5000;
     allow update: if isActive() &&
       resource.data.senderId == request.auth.uid;
     allow delete: if isAdmin();
@@ -563,9 +572,12 @@ match /conversations/{conversationId} {
                      || isAdmin();
         allow write: if isCreatorOwner(creatorId) || isAdmin();
 
-        // Lessons inherit course-level access — course isPublished is the gate
+        // Lessons respect the parent course isPublished gate for members
         match /lessons/{lessonId} {
-          allow read:  if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
+          allow read: if isCreatorOwner(creatorId) || isAdmin() ||
+                         (isMemberOf(creatorId) &&
+                          get(/databases/$(database)/documents/creators/$(creatorId)/courses/$(courseId))
+                            .data.get('isPublished', false) == true);
           allow write: if isCreatorOwner(creatorId) || isAdmin();
         }
       }
@@ -606,7 +618,8 @@ match /conversations/{conversationId} {
       match /community/{postId} {
         allow read: if isMemberOf(creatorId) || isCreatorOwner(creatorId) || isAdmin();
         allow create: if isMemberOf(creatorId) &&
-                         request.resource.data.authorId == request.auth.uid;
+                         request.resource.data.authorId == request.auth.uid &&
+                         request.resource.data.body.size() < 10000;
         allow update: if (isMemberOf(creatorId) &&
                           resource.data.authorId == request.auth.uid &&
                           request.resource.data.diff(resource.data).affectedKeys()
