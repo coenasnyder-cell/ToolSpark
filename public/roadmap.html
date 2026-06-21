@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Roadmap — ToolSpark</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -28,33 +28,29 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
+    --purple: #6B2FB3;
+    --purple-dim: rgba(107,47,179,0.1);
+    --purple-border: rgba(107,47,179,0.2);
+    --yellow: #FFC820;
     --dark: #0C0B09;
-    --dark2: #141210;
-    --dark3: #1C1A17;
     --border-dark: #2A2720;
-    --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE;
+    --bg: #FAF8F5;
     --surface: #FFFFFF;
-    --border: #E4E0D8;
+    --border: #E8E1F0;
     --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #9E9891;
-    --green: #2A5C45;
-    --green-light: #3D8A65;
-    --purple: #4B3F8A;
-    --coral: #C4622D;
+    --text2: #5F5B72;
+    --text3: #9E99B0;
+    --green-field: #1A6B52;
+    --purple-field: #3C3489;
+    --gold-field: #8A6800;
     --radius: 14px;
     --radius-sm: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
     --sidebar-width: 220px;
     --header-height: 64px;
   }
 
   body {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -67,20 +63,20 @@
   /* ── SIDEBAR ── */
   .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
   .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
-  .logo-text span { color: var(--gold); }
+  .logo-text { font-family: 'Poppins', sans-serif; font-size: 20px; color: #F0EDE6; font-weight: 600; }
+  .logo-text span { color: var(--yellow); }
   .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
   .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
   .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
   .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
+  .nav-item.active { background: var(--purple-dim); color: var(--purple); font-weight: 700; border: 1px solid var(--purple-border); }
   .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
   .nav-item.active .nav-icon { opacity: 1; }
   .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
   .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
   .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-dim); border: 1px solid var(--purple-border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--purple); flex-shrink: 0; overflow: hidden; }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .user-info { flex: 1; min-width: 0; }
   .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -91,197 +87,254 @@
 
   /* ── LAYOUT ── */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; padding: 1.75rem 2rem 3rem; max-width: 860px; width: 100%; }
 
-  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem 3rem; max-width: 860px; width: 100%; }
-
-  /* ── WELCOME CARD ── */
-  .welcome-card { background: var(--dark); border: 1px solid var(--border-dark); border-radius: var(--radius); padding: 2rem 2.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; position: relative; overflow: hidden; }
-  .welcome-card::before { content: ''; position: absolute; top: 0; right: 0; width: 320px; height: 100%; background: radial-gradient(ellipse at right, rgba(201,168,76,0.08) 0%, transparent 70%); pointer-events: none; }
-  .welcome-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); border-radius: 100px; padding: 3px 10px; font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
-  .welcome-card h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: #F0EDE6; line-height: 1.2; margin-bottom: 8px; }
-  .welcome-card p { font-size: 13px; color: #9A9488; line-height: 1.7; max-width: 480px; }
-  .hero-mark { width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(61,138,101,0.16)); border: 1px solid rgba(201,168,76,0.18); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
-
-  /* ── LOADING / EMPTY ── */
-  .loading-state { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; text-align: center; color: var(--text3); font-size: 13px; }
-  .empty-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 3rem 2rem; text-align: center; }
-  .empty-card h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin-bottom: 8px; }
-  .empty-card p { font-size: 13px; color: var(--text3); line-height: 1.7; margin-bottom: 1.5rem; max-width: 380px; margin-left: auto; margin-right: auto; }
-  .empty-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--gold); color: var(--dark); border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.15s; }
-  .empty-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
-
-  /* ── SESSION META ── */
-  .session-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .meta-pill { display: inline-flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 4px 12px; font-size: 12px; color: var(--text2); }
-  .meta-pill strong { color: var(--text); font-weight: 700; }
-
-  /* ── ROADMAP TIMELINE ── */
-  .roadmap-wrap { display: flex; flex-direction: column; }
-
-  .roadmap-step { display: flex; gap: 1.25rem; position: relative; }
-  .roadmap-step:not(:last-child) { padding-bottom: 0; }
-
-  .step-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 44px; }
-  .step-node {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-weight: 400;
-    flex-shrink: 0;
-    border: 2px solid;
-    position: relative;
-    z-index: 1;
+  /* ── HERO ── */
+  .welcome-card {
+    background: var(--purple);
+    border-radius: 16px;
+    padding: 2rem 2.25rem;
   }
-  .step-node.s1 { background: rgba(42,92,69,0.12); border-color: rgba(42,92,69,0.35); color: var(--green-light); }
-  .step-node.s2 { background: rgba(75,63,138,0.12); border-color: rgba(75,63,138,0.35); color: #8B7FD4; }
-  .step-node.s3 { background: rgba(196,98,45,0.12); border-color: rgba(196,98,45,0.35); color: #D97548; }
-
-  .step-connector { flex: 1; width: 2px; background: var(--border); margin: 6px 0; min-height: 28px; }
-
-  .step-card {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    margin-bottom: 1.25rem;
-  }
-  .step-card-head {
-    padding: 1.125rem 1.375rem 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .step-card-head.c1 { background: rgba(42,92,69,0.06); }
-  .step-card-head.c2 { background: rgba(75,63,138,0.06); }
-  .step-card-head.c3 { background: rgba(196,98,45,0.06); }
-  .choose-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; transition: all 0.15s; border: 1px solid var(--border); background: none; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
-  .choose-btn:hover { background: var(--gold); color: var(--dark); border-color: var(--gold); }
-  .choose-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .step-tool-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
-  .step-badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-  .priority-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 100px; }
-  .priority-badge.b1 { background: var(--green); color: #fff; }
-  .priority-badge.b2 { background: var(--purple); color: #fff; }
-  .priority-badge.b3 { background: var(--coral); color: #fff; }
-  .complexity-badge { font-size: 11px; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 3px 10px; }
-
-  .step-card-body { padding: 1.125rem 1.375rem; }
-  .step-what { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.5; }
-  .step-why { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 1.25rem; font-weight: 300; }
-
-  .prompt-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--gold);
+  .welcome-eyebrow {
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--yellow);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .prompt-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  .prompt-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.125rem;
-    font-size: 12.5px;
-    color: var(--text2);
-    line-height: 1.75;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 220px;
-    overflow-y: auto;
     margin-bottom: 10px;
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
   }
-  .copy-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .copy-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 16px;
-    background: var(--dark);
-    color: var(--gold);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: var(--radius-sm);
+  .welcome-card h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .welcome-card p {
+    font-size: 13px;
+    color: #E8DEF7;
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 1.25rem;
+  }
+  .hero-progress-wrap { display: flex; flex-direction: column; gap: 6px; max-width: 340px; }
+  .hero-progress-track {
+    height: 7px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 100px;
+    overflow: visible;
+    position: relative;
+  }
+  .hero-progress-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 100px;
+    position: relative;
+    transition: width 0.5s ease;
+    min-width: 0;
+  }
+  .hero-progress-dot {
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 11px;
+    height: 11px;
+    background: var(--yellow);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  .hero-progress-label {
     font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    transition: all 0.15s;
+    color: var(--yellow);
+    font-weight: 500;
+    margin-top: 2px;
   }
-  .copy-btn:hover { background: var(--gold); color: var(--dark); border-color: var(--gold); }
-  .builder-note { font-size: 11px; color: var(--text3); }
-  .builder-note a { color: var(--gold); text-decoration: none; font-weight: 700; }
-  .no-prompt { font-size: 12px; color: var(--text3); font-style: italic; }
 
-  /* ── SPARK SECTION ── */
-  .spark-section-card {
+  /* ── LOADING / EMPTY ── */
+  .loading-state { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; color: var(--text3); font-size: 13px; }
+  .empty-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 3rem 2rem; text-align: center; }
+  .empty-card h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .empty-card p { font-size: 13px; color: var(--text3); line-height: 1.7; margin-bottom: 1.5rem; max-width: 380px; margin-left: auto; margin-right: auto; }
+  .empty-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--purple); color: #fff; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif; text-decoration: none; transition: opacity 0.15s; }
+  .empty-btn:hover { opacity: 0.88; }
+
+  /* ── JOURNEY COMPANION BANNER ── */
+  .companion-banner {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .spark-section-header {
-    padding: 1.125rem 1.375rem 1rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(42,92,69,0.06);
+    padding: 1rem 1.375rem;
     display: flex;
     align-items: center;
     gap: 12px;
   }
-  .spark-section-icon {
-    width: 38px; height: 38px;
-    border-radius: var(--radius-sm);
-    background: rgba(42,92,69,0.1);
-    border: 1px solid rgba(42,92,69,0.18);
+  .companion-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--purple-dim);
+    border: 1px solid var(--purple-border);
     display: flex; align-items: center; justify-content: center;
-    color: var(--green-light);
+    color: var(--purple);
     flex-shrink: 0;
   }
-  .spark-section-title { font-weight: 700; font-size: 15px; color: var(--text); }
+  .companion-text { flex: 1; min-width: 0; }
+  .companion-title { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
+  .companion-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .companion-btn {
+    padding: 7px 16px;
+    border: 1.5px solid var(--purple);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--purple);
+    background: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .companion-btn:hover { background: var(--purple-dim); }
+
+  /* ── STEP CARDS ── */
+  .spark-section-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .spark-section-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .spark-section-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--purple-dim);
+    border: 1px solid var(--purple-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--purple);
+    flex-shrink: 0;
+  }
+  .header-text { flex: 1; min-width: 0; }
+  .spark-section-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; color: var(--text); }
   .spark-section-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .section-tool-btn { margin-left: auto; padding: 5px 13px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text2); text-decoration: none; transition: all 0.15s; flex-shrink: 0; white-space: nowrap; }
-  .section-tool-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-  .section-results-btn { padding: 5px 13px; border: 1px solid var(--gold); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--gold); background: var(--gold-dim); text-decoration: none; transition: all 0.15s; flex-shrink: 0; white-space: nowrap; }
-  .section-results-btn:hover { background: rgba(201,168,76,0.22); }
-  .section-btn-group { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+
+  /* status badges */
+  .step-status-badge { flex-shrink: 0; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .status-pill.complete { background: #E1F5EE; color: #085041; }
+  .status-pill.in-progress { background: #F7F4FB; color: #3C3489; }
+  .status-pill.locked { background: #F1EFE8; color: #5F5E5A; }
+
+  /* header buttons */
+  .section-btn-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .btn-outline-purple {
+    padding: 6px 13px;
+    border: 1.5px solid var(--purple);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--purple);
+    background: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+  .btn-outline-purple:hover { background: var(--purple-dim); }
+  .btn-fill-purple {
+    padding: 6px 13px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--purple);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+  .btn-fill-purple:hover { opacity: 0.88; }
+
+  /* card body */
   .spark-section-body {
-    padding: 1.25rem 1.375rem;
+    padding: 1.25rem;
+  }
+  .summary-inner {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: relative;
   }
+  .summary-inner.collapsed {
+    max-height: 175px;
+    overflow: hidden;
+  }
+  .summary-fade {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .summary-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--purple);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+  }
+  .summary-toggle:hover { opacity: 0.75; }
+
+  /* locked / in-progress body overrides */
+  .state-locked .summary-inner { opacity: 0.6; }
+  .state-locked .spark-section-header { opacity: 0.7; }
+  .locked-body-msg { font-size: 13px; color: var(--text3); font-style: italic; }
+
   .spark-field-label {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--green-light);
+    color: var(--green-field);
     margin-bottom: 5px;
   }
+  .spark-field-label.aud-label { color: var(--purple-field); }
+  .spark-field-label.bt-label { color: var(--gold-field); }
   .spark-field-value {
     font-size: 14px;
     color: var(--text);
     line-height: 1.65;
   }
+  .spark-field-value.spark-accent { color: var(--green-field); }
+  .spark-field-value.aud-accent { color: var(--purple-field); }
 
-  /* ── AUDIENCE SECTION ── */
+  /* ── AUDIENCE WORDS BOX ── */
   .audience-words-box {
-    background: rgba(75,63,138,0.06);
-    border: 1px solid rgba(75,63,138,0.18);
+    background: rgba(60,52,137,0.05);
+    border: 1px solid rgba(60,52,137,0.15);
     border-left: 3px solid var(--purple);
     border-radius: var(--radius-sm);
     padding: 0.875rem 1.125rem;
@@ -293,6 +346,67 @@
     word-break: break-word;
   }
 
+  /* ── ROADMAP TIMELINE (breakthrough tool cards) ── */
+  .roadmap-wrap { display: flex; flex-direction: column; }
+  .roadmap-step { display: flex; gap: 1.25rem; position: relative; }
+  .step-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 44px; }
+  .step-node {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+    border: 2px solid var(--purple-border);
+    background: var(--purple-dim);
+    color: var(--purple);
+    position: relative;
+    z-index: 1;
+  }
+  .step-connector { flex: 1; width: 2px; background: var(--border); margin: 6px 0; min-height: 28px; }
+  .step-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .step-card.selected-tool { border: 2px solid var(--purple); }
+  .step-card-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .choose-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .choose-btn:hover { opacity: 0.88; }
+  .choose-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .step-tool-name { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .step-badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .priority-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 100px; background: var(--purple); color: #fff; }
+  .selected-badge-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; background: #F7F4FB; color: var(--purple); }
+  .complexity-badge { font-size: 11px; color: #5F5E5A; background: #F1EFE8; border-radius: 100px; padding: 3px 10px; }
+  .step-card-body { padding: 1rem 1.25rem; }
+  .step-what { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; line-height: 1.5; font-family: 'Poppins', sans-serif; }
+  .step-why { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 1rem; }
+
   /* ── CHOOSE YOUR PATH ── */
   .path-section-grid {
     display: grid;
@@ -300,20 +414,19 @@
     gap: 1rem;
   }
   .path-option-card {
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,242,238,0.96));
+    background: #fff;
     padding: 1.125rem;
     display: flex;
     flex-direction: column;
     gap: 0.875rem;
     min-height: 100%;
-    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    transition: border-color 0.15s;
   }
   .path-option-card.selected {
-    border-color: rgba(201,168,76,0.45);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.14);
-    transform: translateY(-1px);
+    border-color: var(--purple);
+    border-width: 2px;
   }
   .path-option-head {
     display: flex;
@@ -322,35 +435,36 @@
     gap: 0.75rem;
   }
   .path-option-icon {
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    border: 1px solid;
-  }
-  .path-option-card.build .path-option-icon {
-    background: rgba(42,92,69,0.1);
-    border-color: rgba(42,92,69,0.2);
-    color: var(--green-light);
-  }
-  .path-option-card.dwy .path-option-icon {
-    background: rgba(75,63,138,0.1);
-    border-color: rgba(75,63,138,0.2);
-    color: #9B8FD0;
-  }
-  .path-option-card.dfy .path-option-icon {
-    background: var(--gold-dim);
-    border-color: rgba(201,168,76,0.2);
-    color: var(--gold);
+    border: 1px solid var(--purple-border);
+    background: var(--purple-dim);
+    color: var(--purple);
   }
   .path-option-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
     line-height: 1.2;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .free-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: #E1F5EE;
+    color: #085041;
+    vertical-align: middle;
   }
   .path-option-copy {
     font-size: 13px;
@@ -364,18 +478,16 @@
     gap: 5px;
     padding: 4px 10px;
     border-radius: 100px;
-    background: rgba(201,168,76,0.12);
-    border: 1px solid rgba(201,168,76,0.24);
-    color: var(--gold);
+    background: #F7F4FB;
+    border: 1px solid var(--purple-border);
+    color: var(--purple);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
   }
-  .path-option-card.selected .path-choice-badge {
-    display: inline-flex;
-  }
+  .path-option-card.selected .path-choice-badge { display: inline-flex; }
   .path-option-action {
     display: inline-flex;
     align-items: center;
@@ -385,46 +497,31 @@
     border-radius: 12px;
     text-decoration: none;
     font-size: 13px;
-    font-weight: 700;
-    transition: all 0.15s;
-    border: 1px solid transparent;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    transition: opacity 0.15s;
     cursor: pointer;
   }
   .path-option-card.build .path-option-action {
-    background: var(--green);
+    background: var(--purple);
     color: #fff;
+    border: none;
   }
-  .path-option-card.build .path-option-action:hover {
-    background: var(--green-light);
-  }
-  .path-option-card.dwy .path-option-action {
-    background: rgba(75,63,138,0.1);
-    color: var(--text);
-    border-color: rgba(75,63,138,0.24);
-  }
-  .path-option-card.dwy .path-option-action:hover {
-    background: rgba(75,63,138,0.18);
-    border-color: rgba(75,63,138,0.4);
-  }
+  .path-option-card.build .path-option-action:hover { opacity: 0.88; }
+  .path-option-card.dwy .path-option-action,
   .path-option-card.dfy .path-option-action {
-    background: var(--gold-dim);
-    color: var(--text);
-    border-color: rgba(201,168,76,0.28);
+    background: #fff;
+    color: var(--purple);
+    border: 1.5px solid var(--purple);
   }
-  .path-option-card.dfy .path-option-action:hover {
-    background: rgba(201,168,76,0.2);
-    border-color: rgba(201,168,76,0.4);
-  }
-  .path-status-note {
-    font-size: 12px;
-    color: var(--text3);
-    padding-top: 2px;
-  }
+  .path-option-card.dwy .path-option-action:hover,
+  .path-option-card.dfy .path-option-action:hover { background: var(--purple-dim); }
+  .path-status-note { font-size: 12px; color: var(--text3); padding-top: 2px; }
 
   /* ── MOBILE ── */
   .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
   .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; }
-  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--yellow); }
 
   @media (max-width: 1023px) {
     .sidebar { width: 60px; }
@@ -441,11 +538,12 @@
     .sidebar-overlay { display: block; }
     .main-wrap { margin-left: 0; }
     .page-content { padding: 1rem 1rem 80px; }
-    .welcome-card { padding: 1.25rem; flex-direction: column; align-items: flex-start; }
     .mobile-bottom-nav { display: flex; }
     .step-left { width: 32px; }
     .step-node { width: 32px; height: 32px; font-size: 14px; }
     .path-section-grid { grid-template-columns: 1fr; }
+    .spark-section-header { flex-wrap: wrap; }
+    .section-btn-group { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -483,22 +581,31 @@
 
   <main class="page-content">
     <div class="welcome-card">
-      <div>
-        <h1>Your roadmap starts here.</h1>
-        <p>Everything you discovered during the Challenge, in one place. Your spark, your audience, your breakthrough — use this as your reference as you build.</p>
+      <div class="welcome-eyebrow">ToolSpark · Discover Hub</div>
+      <h1>Your roadmap starts here.</h1>
+      <p>Everything you discovered in Discover, in one place — your spark, your audience, and your breakthrough. It's all here as your reference while you build.</p>
+      <div class="hero-progress-wrap">
+        <div class="hero-progress-track">
+          <div class="hero-progress-fill" id="hero-progress-fill" style="width:0%">
+            <div class="hero-progress-dot"></div>
+          </div>
+        </div>
+        <div class="hero-progress-label" id="hero-progress-label">0 of 3 steps complete</div>
       </div>
     </div>
 
     <div id="loading" class="loading-state">Loading your roadmap...</div>
 
-    <a href="journey-companion.html" style="display:flex;align-items:center;gap:12px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.18);border-radius:12px;padding:14px 18px;text-decoration:none;margin-bottom:1.25rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(201,168,76,0.13)'" onmouseout="this.style.background='rgba(201,168,76,0.07)'">
-      <span style="font-size:22px;flex-shrink:0;">🧭</span>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--gold);">Journey Companion</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px;">Feeling stuck? Get unstuck with your AI accountability coach.</div>
+    <div class="companion-banner">
+      <div class="companion-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </div>
-      <span style="margin-left:auto;color:var(--text3);font-size:13px;">→</span>
-    </a>
+      <div class="companion-text">
+        <div class="companion-title">Journey companion</div>
+        <div class="companion-desc">Pop this open anytime for your AI coach's take on what you've found so far.</div>
+      </div>
+      <a href="journey-companion.html" class="companion-btn">Open companion</a>
+    </div>
 
     <div id="spark-section">
       <div class="spark-section-card">
@@ -506,28 +613,31 @@
           <div class="spark-section-icon">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.8 6.8 19l.99-5.78-4.21-4.1 5.82-.85L12 3z"/></svg>
           </div>
-          <div>
-            <div class="spark-section-title">Find Your Spark</div>
-            <div class="spark-section-desc">Your core business identity from your Spark session</div>
+          <div class="header-text">
+            <div class="spark-section-title">Find your spark</div>
+            <div class="spark-section-desc">Your spark statement, distilled</div>
           </div>
+          <div class="step-status-badge" id="spark-badge"></div>
           <div class="section-btn-group">
-            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=SEAOpa1ZLlb1ZkTvDqvL" class="section-results-btn">🎬 Watch Lesson</a>
-            <a href="spark-results.html" class="section-results-btn" id="spark-results-btn" style="display:none;">View Full Results</a>
-            <a href="spark.html" class="section-tool-btn">Open tool →</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=SEAOpa1ZLlb1ZkTvDqvL" class="btn-outline-purple">Watch lesson</a>
+            <a href="spark-results.html" class="btn-outline-purple" id="spark-results-btn" style="display:none;">View my results</a>
+            <a href="spark.html" class="btn-fill-purple">Open tool</a>
           </div>
         </div>
         <div class="spark-section-body">
-          <div>
-            <div class="spark-field-label">Your Spark Statement</div>
-            <div class="spark-field-value" id="spark-statement">No Spark statement yet. Run the tool to generate your business identity.</div>
-          </div>
-          <div>
-            <div class="spark-field-label">What You Know</div>
-            <div class="spark-field-value" id="spark-what-you-know">Your experience, knowledge, and strengths will appear here after your Spark session.</div>
-          </div>
-          <div>
-            <div class="spark-field-label">Who You Help</div>
-            <div class="spark-field-value" id="spark-who-you-help">Your ideal audience and who you serve will appear here after your Spark session.</div>
+          <div class="summary-inner" id="spark-summary-inner">
+            <div>
+              <div class="spark-field-label">Your Spark Statement</div>
+              <div class="spark-field-value spark-accent" id="spark-statement">No Spark statement yet. Run the tool to generate your business identity.</div>
+            </div>
+            <div>
+              <div class="spark-field-label">What You Saw in Yourself</div>
+              <div class="spark-field-value" id="spark-what-you-know">Your experience, knowledge, and strengths will appear here after your Spark session.</div>
+            </div>
+            <div>
+              <div class="spark-field-label">What You Said</div>
+              <div class="spark-field-value" id="spark-who-you-help">Your ideal audience and who you serve will appear here after your Spark session.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -535,69 +645,75 @@
 
     <div id="audience-section">
       <div class="spark-section-card">
-        <div class="spark-section-header" style="background:rgba(75,63,138,0.06);">
-          <div class="spark-section-icon" style="background:rgba(75,63,138,0.1);border-color:rgba(75,63,138,0.18);color:var(--purple);">
+        <div class="spark-section-header">
+          <div class="spark-section-icon">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
           </div>
-          <div>
-            <div class="spark-section-title">Audience Deep Dive</div>
-            <div class="spark-section-desc">Your client profile from your most recent session</div>
+          <div class="header-text">
+            <div class="spark-section-title">Audience deep dive</div>
+            <div class="spark-section-desc">Who you’re built to serve</div>
           </div>
+          <div class="step-status-badge" id="audience-badge"></div>
           <div class="section-btn-group">
-            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=YaNX7o8wNEQrZvHYVGly" class="section-results-btn">🎬 Watch Lesson</a>
-            <a href="audienceresults.html" class="section-results-btn" id="aud-results-btn" style="display:none;">View Full Results</a>
-            <a href="audiencetool.html" class="section-tool-btn">Open tool →</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=YaNX7o8wNEQrZvHYVGly" class="btn-outline-purple">Watch lesson</a>
+            <a href="audienceresults.html" class="btn-outline-purple" id="aud-results-btn" style="display:none;">View my results</a>
+            <a href="audiencetool.html" class="btn-fill-purple">Open tool</a>
           </div>
         </div>
         <div class="spark-section-body">
-          <div id="aud-who-wrap">
-            <div class="spark-field-label" style="color:var(--purple);">Who They Are</div>
-            <div class="spark-field-value" id="aud-who-they-are">Run the Audience Deep Dive to define exactly who your best-fit customer is.</div>
-          </div>
-          <div id="aud-frustration-wrap">
-            <div class="spark-field-label" style="color:var(--purple);">Daily Frustration</div>
-            <div class="spark-field-value" id="aud-daily-frustration">Their biggest recurring frustration will appear here after you finish the tool.</div>
-          </div>
-          <div id="aud-outcome-wrap">
-            <div class="spark-field-label" style="color:var(--purple);">Dream Outcome</div>
-            <div class="spark-field-value" id="aud-dream-outcome">Their desired transformation and end result will appear here after the session.</div>
-          </div>
-          <div id="aud-words-wrap">
-            <div class="spark-field-label" style="color:var(--purple);">Their Exact Words</div>
-            <div class="audience-words-box" id="aud-their-words">You’ll see the language your audience actually uses once you complete the Audience Deep Dive.</div>
+          <div class="summary-inner" id="audience-summary-inner">
+            <div id="aud-who-wrap">
+              <div class="spark-field-label aud-label">Who They Are</div>
+              <div class="spark-field-value aud-accent" id="aud-who-they-are">Run the Audience Deep Dive to define exactly who your best-fit customer is.</div>
+            </div>
+            <div id="aud-frustration-wrap">
+              <div class="spark-field-label aud-label">Daily Frustration</div>
+              <div class="spark-field-value" id="aud-daily-frustration">Their biggest recurring frustration will appear here after you finish the tool.</div>
+            </div>
+            <div id="aud-outcome-wrap">
+              <div class="spark-field-label aud-label">Dream Outcome</div>
+              <div class="spark-field-value" id="aud-dream-outcome">Their desired transformation and end result will appear here after the session.</div>
+            </div>
+            <div id="aud-words-wrap">
+              <div class="spark-field-label aud-label">Their Exact Words</div>
+              <div class="audience-words-box" id="aud-their-words">You’ll see the language your audience actually uses once you complete the Audience Deep Dive.</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div id="breakthrough-section">
-      <div class="spark-section-card" style="margin-bottom:1.25rem;">
-        <div class="spark-section-header" style="background:rgba(201,168,76,0.06);">
-          <div class="spark-section-icon" style="background:var(--gold-dim);border-color:rgba(201,168,76,0.2);color:var(--gold);">
+      <div class="spark-section-card">
+        <div class="spark-section-header">
+          <div class="spark-section-icon">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
           </div>
-          <div>
-            <div class="spark-section-title">Discover Your Breakthrough</div>
-            <div class="spark-section-desc">Your three recommended tools and build prompts, newest session</div>
+          <div class="header-text">
+            <div class="spark-section-title">Discover your breakthrough</div>
+            <div class="spark-section-desc">Your three recommended tools</div>
           </div>
+          <div class="step-status-badge" id="breakthrough-badge"></div>
           <div class="section-btn-group">
-            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=1JJvTC3jg2Qnl2Xjzpjp" class="section-results-btn">🎬 Watch Lesson</a>
-            <a href="#" class="section-results-btn" id="breakthrough-results-btn" style="display:none;">View Results</a>
-            <a href="clarity.html" class="section-tool-btn">Open tool →</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=1JJvTC3jg2Qnl2Xjzpjp" class="btn-outline-purple">Watch lesson</a>
+            <a href="#" class="btn-outline-purple" id="breakthrough-results-btn" style="display:none;">View my results</a>
+            <a href="clarity.html" class="btn-fill-purple">Open tool</a>
           </div>
         </div>
         <div class="spark-section-body">
-          <div>
-            <div class="spark-field-label" style="color:var(--gold);">Business Summary</div>
-            <div class="spark-field-value" id="breakthrough-summary">Run Discover Your Breakthrough to generate your business summary and next best tool directions.</div>
-          </div>
-          <div>
-            <div class="spark-field-label" style="color:var(--gold);">Recommended Tools</div>
-            <div class="spark-field-value" id="breakthrough-tools">Your three recommended build directions will appear here after you finish the session.</div>
-          </div>
-          <div>
-            <div class="spark-field-label" style="color:var(--gold);">Selected Direction</div>
-            <div class="spark-field-value" id="breakthrough-chosen">Once you choose one of your recommended tools, it will show here.</div>
+          <div class="summary-inner" id="breakthrough-summary-inner">
+            <div>
+              <div class="spark-field-label bt-label">Business Summary</div>
+              <div class="spark-field-value" id="breakthrough-summary">Run Discover Your Breakthrough to generate your business summary and next best tool directions.</div>
+            </div>
+            <div>
+              <div class="spark-field-label bt-label">Recommended Tools</div>
+              <div class="spark-field-value" id="breakthrough-tools">Your three recommended build directions will appear here after you finish the session.</div>
+            </div>
+            <div>
+              <div class="spark-field-label bt-label">Selected Direction</div>
+              <div class="spark-field-value" id="breakthrough-chosen">Once you choose one of your recommended tools, it will show here.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -608,16 +724,16 @@
     </div>
     <div id="choose-path-section">
       <div class="spark-section-card">
-        <div class="spark-section-header" style="background:rgba(42,92,69,0.05);">
-          <div class="spark-section-icon" style="background:rgba(42,92,69,0.08);border-color:rgba(42,92,69,0.15);color:var(--green-light);">
+        <div class="spark-section-header">
+          <div class="spark-section-icon">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 011.4 0l1.6 1.6a1 1 0 010 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/></svg>
           </div>
-          <div>
+          <div class="header-text">
             <div class="spark-section-title">Choose Your Path</div>
             <div class="spark-section-desc">Pick how you want to bring your tool to life. We'll use this choice to guide what comes next.</div>
           </div>
           <div class="section-btn-group">
-            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=TnWmLdIMBlWXRgXriKf9" class="section-results-btn">🎬 Watch Lesson</a>
+            <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=TnWmLdIMBlWXRgXriKf9" class="btn-outline-purple">Watch Lesson</a>
           </div>
         </div>
         <div class="spark-section-body">
@@ -629,7 +745,7 @@
                 </div>
                 <div class="path-choice-badge" id="path-badge-build">Selected</div>
               </div>
-              <div class="path-option-title">Build It Yourself</div>
+              <div class="path-option-title">Build It Yourself <span class="free-pill">Free</span></div>
               <div class="path-option-copy">You have your prompt. You have your platform. The Build Agent and the community are beside you the whole way.</div>
               <a href="diy.html" class="path-option-action" onclick="return handlePathSelection(event, 'build_it_yourself', 'diy.html');">Start Building →</a>
             </div>
@@ -1071,32 +1187,33 @@
     const tools = chosenIndex !== null ? [{ ...allTools[chosenIndex], _origIndex: chosenIndex }] : allTools.map((t, i) => ({ ...t, _origIndex: i }));
 
     const changeLink = chosenIndex !== null
-      ? `<div style="margin-bottom:1rem;"><button onclick="clearTool()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'Lato',sans-serif;padding:0;">← Change tool selection</button></div>`
+      ? `<div style="margin-bottom:1rem;"><button onclick="clearTool()" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;padding:0;">← Change tool selection</button></div>`
       : '';
 
     const noPick = chosenIndex === null
-      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:8px;font-size:12px;color:var(--gold);">Choose one of the three tools below to focus your roadmap.</div>`
+      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:var(--purple-dim);border:1px solid var(--purple-border);border-radius:8px;font-size:12px;color:var(--purple);">Choose one of the three tools below to focus your roadmap.</div>`
       : '';
 
     const wrap = document.getElementById('roadmap-wrap');
     wrap.innerHTML = (chosenIndex !== null ? changeLink : '') + noPick + tools.map((t, i) => {
       const oi = t._origIndex;
+      const isSelected = chosenIndex !== null;
       return `
       <div class="roadmap-step">
         <div class="step-left">
-          <div class="step-node ${nodeClass[oi]}">${oi + 1}</div>
+          <div class="step-node">${oi + 1}</div>
           ${chosenIndex === null && i < tools.length - 1 ? '<div class="step-connector"></div>' : ''}
         </div>
-        <div class="step-card">
-          <div class="step-card-head ${headClass[oi]}">
+        <div class="step-card${isSelected ? ' selected-tool' : ''}">
+          <div class="step-card-head">
             <div>
               <div class="step-tool-name">${escapeHtml(t.name)}</div>
               <div class="step-badges">
-                <span class="priority-badge ${badgeClass[oi]}">${escapeHtml(t.priority)}</span>
-                ${t.complexity ? `<span class="complexity-badge">Complexity: ${escapeHtml(t.complexity)}</span>` : ''}
+                ${isSelected ? '<span class="selected-badge-pill">Selected</span>' : `<span class="priority-badge">${escapeHtml(t.priority)}</span>`}
+                ${t.complexity ? `<span class="complexity-badge">${escapeHtml(t.complexity)}</span>` : ''}
               </div>
             </div>
-            ${chosenIndex === null ? `<button class="choose-btn" data-choose="${oi + 1}" onclick="chooseTool(${oi + 1})">Choose this tool</button>` : ''}
+            ${chosenIndex === null ? `<button class="choose-btn" data-choose="${oi + 1}" onclick="chooseTool(${oi + 1})">Build here</button>` : ''}
           </div>
           <div class="step-card-body">
             ${t.summary ? `<div class="step-what">${escapeHtml(t.summary)}</div>` : ''}
@@ -1108,6 +1225,74 @@
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
+  }
+
+  function toggleSummary(btn) {
+    const inner = btn.previousElementSibling;
+    const isCollapsed = inner.classList.contains('collapsed');
+    inner.classList.toggle('collapsed', !isCollapsed);
+    const fade = inner.querySelector('.summary-fade');
+    if (fade) fade.style.display = isCollapsed ? 'none' : '';
+    btn.textContent = isCollapsed ? 'Show less ▲' : 'Show full summary ▾';
+  }
+
+  function updateHeroProgress(sparkDone, audienceDone, breakthroughDone) {
+    const count = [sparkDone, audienceDone, breakthroughDone].filter(Boolean).length;
+    const pct = (count / 3) * 100;
+    const fill = document.getElementById('hero-progress-fill');
+    const label = document.getElementById('hero-progress-label');
+    if (fill) fill.style.width = pct + '%';
+    if (label) label.textContent = count + ' of 3 steps complete';
+  }
+
+  function applyCardState(sectionId, badgeId, summaryInnerId, state, prevStepName, continueUrl) {
+    const section = document.getElementById(sectionId);
+    const badge = document.getElementById(badgeId);
+    const inner = document.getElementById(summaryInnerId);
+    if (!section) return;
+
+    section.classList.remove('state-complete', 'state-in-progress', 'state-locked');
+    section.classList.add('state-' + state);
+
+    if (badge) {
+      if (state === 'complete') {
+        badge.innerHTML = '<span class="status-pill complete">✓ Complete</span>';
+      } else if (state === 'in-progress') {
+        badge.innerHTML = '<span class="status-pill in-progress">In progress</span>';
+      } else {
+        badge.innerHTML = '<span class="status-pill locked">🔒 Locked</span>';
+      }
+    }
+
+    if (state === 'locked' && inner) {
+      inner.innerHTML = `<div class="locked-body-msg">Unlocks after ${prevStepName}.</div>`;
+      const btns = section.querySelectorAll('.btn-fill-purple, .btn-outline-purple');
+      btns.forEach(b => { b.style.display = 'none'; });
+    }
+
+    if (state === 'in-progress') {
+      const openBtn = section.querySelector('.btn-fill-purple');
+      if (openBtn && continueUrl) {
+        openBtn.textContent = 'Continue →';
+        openBtn.href = continueUrl;
+      }
+    }
+
+    if (state === 'complete' && inner && !inner.classList.contains('collapsed')) {
+      inner.classList.add('collapsed');
+      inner.insertAdjacentHTML('beforeend', '<div class="summary-fade"></div>');
+      inner.insertAdjacentHTML('afterend', '<button class="summary-toggle" onclick="toggleSummary(this)">Show full summary ▾</button>');
+    }
+  }
+
+  function updateStepStates(sparkDone, audienceDone, breakthroughDone) {
+    updateHeroProgress(sparkDone, audienceDone, breakthroughDone);
+    applyCardState('spark-section', 'spark-badge', 'spark-summary-inner',
+      sparkDone ? 'complete' : 'in-progress', null, 'spark.html');
+    applyCardState('audience-section', 'audience-badge', 'audience-summary-inner',
+      audienceDone ? 'complete' : (sparkDone ? 'in-progress' : 'locked'), 'Find Your Spark', 'audiencetool.html');
+    applyCardState('breakthrough-section', 'breakthrough-badge', 'breakthrough-summary-inner',
+      breakthroughDone ? 'complete' : (audienceDone ? 'in-progress' : 'locked'), 'Audience Deep Dive', 'clarity.html');
   }
 
   auth.onAuthStateChanged(async function(user) {
@@ -1253,6 +1438,10 @@
 
       document.getElementById('loading').style.display = 'none';
 
+      const sparkDone = sparkSessions.length > 0;
+      const audienceDone = audienceSessions.length > 0;
+      const breakthroughDone = completed.length > 0;
+
       if (!completed.length) {
         document.getElementById('content').style.display = 'none';
       } else {
@@ -1262,8 +1451,9 @@
           breakthroughResultsBtn.href = 'results.html?session=' + completed[0].id;
           breakthroughResultsBtn.style.display = '';
         }
-
       }
+
+      updateStepStates(sparkDone, audienceDone, breakthroughDone);
     } catch(e) {
       console.error('Roadmap load error:', e);
       document.getElementById('loading').textContent = 'Could not load your roadmap right now.';

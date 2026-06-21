@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/creatorhub.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+      authDomain:        "toolspark-2d62d.firebaseapp.com",
+      projectId:         "toolspark-2d62d",
+      storageBucket:     "toolspark-2d62d.firebasestorage.app",
+      messagingSenderId: "82966513396",
+      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    document.addEventListener('DOMContentLoaded', () => {
+      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
+    });
+  </script>
+  <script src="/js/hub-shell.js"></script>
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: #FAF8F5;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1.5px solid #E8E1F0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 50;
+    }
+    .sidebar-top {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid #E8E1F0;
+    }
+    .sidebar-hub-logo {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: #FFC820;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #000;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .sidebar-hub-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .sidebar-hub-name { font-size: 14px; font-weight: 700; color: #111; line-height: 1.3; font-family: 'Poppins', sans-serif; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      color: #555; font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: background .15s, color .15s; cursor: pointer;
+    }
+    .nav-item:hover { background: #F7F4FB; color: #6B2FB3; }
+    .nav-item.active { background: rgba(107,47,179,.09); color: #6B2FB3; font-weight: 600; }
+    .nav-item svg { flex-shrink: 0; opacity: .6; }
+    .nav-item.active svg, .nav-item:hover svg { opacity: 1; }
+    .nav-item.disabled { opacity: .4; cursor: default; pointer-events: none; }
+    .sidebar-footer { padding: 16px 12px; border-top: 1px solid #E8E1F0; }
+    .sidebar-user-name { font-size: 13px; font-weight: 600; color: #111; margin-bottom: 2px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-email { font-size: 11px; color: #999; padding: 0 4px; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sign-out-btn { background: none; border: none; color: #999; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; padding: 6px 8px; border-radius: 6px; width: 100%; text-align: left; transition: color .15s, background .15s; }
+    .sign-out-btn:hover { background: #FEE2E2; color: #DC2626; }
+
+    /* ── MOBILE BAR ── */
+    .mobile-bar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #fff; border-bottom: 1px solid #E8E1F0; align-items: center; padding: 0 16px; justify-content: space-between; z-index: 50; }
+    .mobile-hub-name { font-size: 15px; font-weight: 700; font-family: 'Poppins', sans-serif; }
+    .mobile-menu-btn { background: none; border: none; cursor: pointer; padding: 4px; color: #111; }
+    .mobile-nav-drawer { display: none; position: fixed; inset: 0; z-index: 100; }
+    .mobile-nav-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+    .mobile-nav-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 240px; background: #fff; display: flex; flex-direction: column; padding: 24px 16px; }
+    .mobile-nav-close { background: none; border: none; cursor: pointer; align-self: flex-end; padding: 4px; color: #555; margin-bottom: 16px; }
+
+    /* ── MAIN ── */
+    .main { margin-left: 220px; flex: 1; padding: 36px 40px 60px; max-width: 900px; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #B4B2A9;
+      margin-bottom: 18px;
+      font-family: 'Inter', sans-serif;
+    }
+    .breadcrumb-sep { opacity: .6; }
+    .breadcrumb-current { color: #6B2FB3; font-weight: 500; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .page-header-left {}
+    .page-title { font-family: 'Poppins', sans-serif; font-size: 21px; font-weight: 600; color: #0D0D0D; margin-bottom: 3px; }
+    .page-subtitle { font-family: 'Inter', sans-serif; font-size: 12px; font-style: italic; color: #8A7FA0; }
+    .page-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+    .progress-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: #6B2FB3; }
+    .progress-bar-wrap { width: 110px; height: 5px; background: #E8E1F0; border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #6B2FB3; border-radius: 3px; width: 0%; transition: width .4s ease; }
+
+    /* ── STEPPER ── */
+    .stepper {
+      display: flex; align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    .step-node-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0; position: relative; z-index: 1;
+    }
+    .step-circle {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .step-circle.complete { background: #6B2FB3; color: #fff; }
+    .step-circle.active { background: #fff; border: 2px solid #6B2FB3; color: #6B2FB3; }
+    .step-circle.locked { background: #F1EFE8; color: #B4B2A9; }
+    .step-node-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px; font-weight: 500;
+      color: #0D0D0D; text-align: center;
+      margin-top: 7px; max-width: 72px; line-height: 1.3;
+    }
+    .step-node-label.locked { color: #888780; }
+    .step-connector {
+      flex: 1; height: 2px; background: #E8E1F0;
+      margin-top: 15px; min-width: 24px;
+    }
+    .step-connector.done { background: #6B2FB3; }
+
+    /* ── TOOL CARDS ── */
+    .tool-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .tool-card {
+      background: #fff;
+      border: 1.5px solid #E8E1F0;
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .tool-card.locked .tool-card-body { opacity: 0.65; }
+    .tool-icon-chip {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tool-icon-chip.active-chip { background: #F7F4FB; color: #6B2FB3; }
+    .tool-icon-chip.complete-chip { background: #F7F4FB; color: #6B2FB3; }
+    .tool-icon-chip.locked-chip { background: #F1EFE8; color: #B4B2A9; }
+    .tool-card-body { flex: 1; min-width: 0; }
+    .tool-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .tool-card-title { font-family: 'Poppins', sans-serif; font-size: 14.5px; font-weight: 600; color: #0D0D0D; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .status-pill.complete { background: #E1F5EE; color: #085041; }
+    .status-pill.in-progress { background: #F7F4FB; color: #3C3489; }
+    .status-pill.locked { background: #F1EFE8; color: #5F5E5A; }
+    .tool-card-body-text { font-family: 'Inter', sans-serif; font-size: 13px; color: #5F5E5A; line-height: 1.5; margin-bottom: 10px; }
+    .tool-card-body-text:last-child { margin-bottom: 0; }
+    .btn-continue {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; background: #6B2FB3; color: #fff;
+      border: none; border-radius: 7px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: opacity .15s;
+    }
+    .btn-continue:hover { opacity: .88; }
+
+    /* ── VALIDATION CARD ── */
+    .validation-card {
+      background: #fff;
+      border: 1.5px dashed #E8E1F0;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      transition: opacity .2s;
+    }
+    .validation-card.locked { opacity: 0.7; }
+    .validation-eyebrow {
+      font-family: 'Inter', sans-serif; font-size: 10px;
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: #8A7FA0;
+      margin-bottom: 4px;
+    }
+    .validation-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .validation-title { font-family: 'Poppins', sans-serif; font-size: 13.5px; font-weight: 600; color: #0D0D0D; }
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+    .checklist-item {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Inter', sans-serif; font-size: 13px; color: #0D0D0D;
+      cursor: pointer; user-select: none;
+    }
+    .checklist-item.locked-item { color: #B4B2A9; cursor: default; pointer-events: none; }
+    .checklist-icon { flex-shrink: 0; }
+    .checklist-icon.checked { color: #6B2FB3; }
+    .checklist-icon.unchecked { color: #B4B2A9; }
+
+    /* ── VALIDATED BANNER ── */
+    .validated-banner {
+      background: #F7F4FB;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .validated-cert-chip {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      color: #6B2FB3; flex-shrink: 0;
+    }
+    .validated-title { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; color: #0D0D0D; margin-bottom: 2px; }
+    .validated-sub { font-family: 'Inter', sans-serif; font-size: 11.5px; color: #5F5E5A; }
+
+    /* ── LOADING ── */
+    #hub-loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #999; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-bar { display: flex; }
+      .main { margin-left: 0; padding: 76px 16px 48px; }
+      .page-header { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hub-loading">Loading...</div>
+
+  <!-- Mobile top bar -->
+  <div class="mobile-bar" id="mobile-bar" style="display:none;">
+    <div class="mobile-hub-name" id="mobile-hub-name"></div>
+    <button class="mobile-menu-btn" onclick="openMobileNav()">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+    <div class="mobile-nav-backdrop" onclick="closeMobileNav()"></div>
+    <div class="mobile-nav-panel">
+      <button class="mobile-nav-close" onclick="closeMobileNav()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div id="mobile-nav-items"></div>
+    </div>
+  </div>
+
+  <!-- Desktop sidebar -->
+  <aside class="sidebar" id="sidebar" style="display:none;">
+    <div class="sidebar-top">
+      <div class="sidebar-hub-logo" id="sidebar-logo">
+        <span id="sidebar-initial">H</span>
+        <img id="sidebar-logo-img" src="" alt="" style="display:none;" />
+      </div>
+      <div class="sidebar-hub-name" id="sidebar-hub-name"></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-name" id="sidebar-user-name"></div>
+      <div class="sidebar-user-email" id="sidebar-user-email"></div>
+      <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main" id="main-content" style="display:none;">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span>Creator Hub</span>
+      <span class="breadcrumb-sep">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+      <span class="breadcrumb-current">Build Hub</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-title">Build Hub</div>
+        <div class="page-subtitle">Can I build something people will use?</div>
+      </div>
+      <div class="page-header-right">
+        <div class="progress-label" id="progress-label">0 of 4 complete</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Tool cards -->
+    <div class="tool-cards" id="tool-cards">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Validation checklist card -->
+    <div class="validation-card locked" id="validation-card">
+      <div class="validation-eyebrow">After publish</div>
+      <div class="validation-header">
+        <div class="validation-title">Validate your tool</div>
+        <span class="status-pill locked" id="validation-pill">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Locked
+        </span>
+      </div>
+      <div class="checklist" id="checklist">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Validated tool banner -->
+    <div class="validated-banner" id="validated-banner" style="display:none;">
+      <div class="validated-cert-chip">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+      </div>
+      <div>
+        <div class="validated-title">Validated tool</div>
+        <div class="validated-sub">Unlocked once your checklist is complete.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const NAV_ITEMS = [
+      {
+        label: 'Dashboard',
+        href:  'dashboard',
+        icon:  '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'
+      },
+      {
+        label: 'Courses',
+        href:  'courses',
+        icon:  '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'
+      },
+      {
+        label: 'Build Hub',
+        href:  'build-hub',
+        icon:  '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/></svg>'
+      },
+      {
+        label:    'Community',
+        href:     null,
+        disabled: true,
+        icon:     '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+      }
+    ];
+
+    let hubSlug = '';
+    let currentUserId = '';
+
+    const STEPS = [
+      { key: 'setup',       label: 'Creator Hub Setup', icon: iconSettings(), href: '/hub/setup'        },
+      { key: 'toolBuilder', label: 'Tool Builder',       icon: iconPuzzle(),   href: '/hub/tool-builder' },
+      { key: 'preview',     label: 'Preview',            icon: iconEye(),       href: '/hub/tool-preview' },
+      { key: 'publish',     label: 'Publish',            icon: iconRocket(),    href: '/hub/tool-builder' }
+    ];
+
+    const CHECKLIST_ITEMS = [
+      { key: 'usersGot',            label: 'Get 3 users'                    },
+      { key: 'feedbackGot',         label: 'Get feedback'                   },
+      { key: 'improvementsRecorded',label: 'Record improvements'            },
+      { key: 'updateMade',          label: 'Make 1 meaningful update'       },
+      { key: 'sharedInCommunity',   label: 'Share results in community'     }
+    ];
+
+    // ── SVG ICONS ──
+    function iconSettings() {
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    }
+    function iconPuzzle() {
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.77L12 21l7.65-7.65.77-.77a5.4 5.4 0 0 0 0-7.65z"/></svg>';
+    }
+    function iconEye() {
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+    function iconRocket() {
+      return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>';
+    }
+    function iconCheck() {
+      return '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
+    function iconLock() {
+      return '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    }
+    function iconCheckSquare() {
+      return '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+    }
+    function iconSquare() {
+      return '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+    }
+
+    // ── NAV ──
+    function buildNavItem(item, isActive) {
+      const cls  = ['nav-item', isActive ? 'active' : '', item.disabled ? 'disabled' : ''].filter(Boolean).join(' ');
+      const href = item.href ? `/hub/${item.href}?hub=${hubSlug}` : '#';
+      const tag  = item.href && !item.disabled ? 'a' : 'div';
+      const ha   = item.href && !item.disabled ? `href="${href}"` : '';
+      return `<${tag} class="${cls}" ${ha}>${item.icon}<span>${item.label}</span></${tag}>`;
+    }
+
+    function renderNav(slug) {
+      hubSlug = slug;
+      const html = NAV_ITEMS.map(item => buildNavItem(item, item.href === 'build-hub')).join('');
+      document.getElementById('sidebar-nav').innerHTML    = html;
+      document.getElementById('mobile-nav-items').innerHTML = html;
+    }
+
+    function openMobileNav()  { document.getElementById('mobile-nav-drawer').style.display = 'block'; }
+    function closeMobileNav() { document.getElementById('mobile-nav-drawer').style.display = 'none';  }
+    function signOut() { auth.signOut().then(() => { window.location.href = '/hub/join?hub=' + hubSlug; }); }
+
+    // ── RENDER ──
+    function renderPage(progress) {
+      const { setupComplete, toolBuilderComplete, previewComplete, publishComplete, validation } = progress;
+      const stateOf = [setupComplete, toolBuilderComplete, previewComplete, publishComplete];
+      const completedCount = stateOf.filter(Boolean).length;
+
+      // Progress header
+      document.getElementById('progress-label').textContent = completedCount + ' of 4 complete';
+      document.getElementById('progress-bar-fill').style.width = ((completedCount / 4) * 100) + '%';
+
+      // Stepper
+      const stepperEl = document.getElementById('stepper');
+      let stepperHtml = '';
+      STEPS.forEach((step, i) => {
+        const isDone   = stateOf[i];
+        const isActive = !isDone && (i === 0 || stateOf[i - 1]);
+        const isLocked = !isDone && !isActive;
+        const circleClass = isDone ? 'complete' : isActive ? 'active' : 'locked';
+        const circleContent = isDone
+          ? iconCheck()
+          : isLocked
+            ? iconLock()
+            : (i + 1);
+
+        stepperHtml += `<div class="step-node-wrap">
+          <div class="step-circle ${circleClass}">${circleContent}</div>
+          <div class="step-node-label${isLocked ? ' locked' : ''}">${step.label}</div>
+        </div>`;
+
+        if (i < STEPS.length - 1) {
+          const lineClass = stateOf[i] ? 'done' : '';
+          stepperHtml += `<div class="step-connector ${lineClass}"></div>`;
+        }
+      });
+      stepperEl.innerHTML = stepperHtml;
+
+      // Tool cards
+      const cardsEl = document.getElementById('tool-cards');
+      let cardsHtml = '';
+      STEPS.forEach((step, i) => {
+        const isDone   = stateOf[i];
+        const isActive = !isDone && (i === 0 || stateOf[i - 1]);
+        const isLocked = !isDone && !isActive;
+
+        const chipClass = isDone ? 'complete-chip' : isActive ? 'active-chip' : 'locked-chip';
+        const cardClass = isLocked ? ' locked' : '';
+
+        let pillHtml = '';
+        let bodyHtml = '';
+
+        if (isDone) {
+          pillHtml = `<span class="status-pill complete">${iconCheck()} Complete</span>`;
+          const doneMsg = [
+            'Your hub profile is set and ready.',
+            'Your tool prompt is built and saved.',
+            'Your preview is complete.',
+            'Your tool is live and published.'
+          ][i];
+          bodyHtml = `<div class="tool-card-body-text">${doneMsg}</div>`;
+        } else if (isActive) {
+          pillHtml = `<span class="status-pill in-progress">In progress</span>`;
+          const inProgressMsg = [
+            'Finish setting up your Creator Hub profile to unlock the next step.',
+            step.key === 'toolBuilder' && progress.toolBuilderProgress
+              ? progress.toolBuilderProgress
+              : 'Build your AI tool prompt with Sparky.',
+            'Run a preview to test your tool before publishing.',
+            'Publish your tool to make it live.'
+          ][i];
+          bodyHtml = `<div class="tool-card-body-text">${inProgressMsg}</div>
+            <a href="${step.href}?hub=${hubSlug}" class="btn-continue">
+              Continue
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>`;
+        } else {
+          pillHtml = `<span class="status-pill locked">${iconLock()} Locked</span>`;
+          const prevLabel = STEPS[i - 1]?.label || '';
+          bodyHtml = `<div class="tool-card-body-text">Unlocks after ${prevLabel}.</div>`;
+        }
+
+        cardsHtml += `<div class="tool-card${cardClass}">
+          <div class="tool-icon-chip ${chipClass}">${step.icon}</div>
+          <div class="tool-card-body">
+            <div class="tool-card-header">
+              <div class="tool-card-title">${step.label}</div>
+              ${pillHtml}
+            </div>
+            ${bodyHtml}
+          </div>
+        </div>`;
+      });
+      cardsEl.innerHTML = cardsHtml;
+
+      // Validation card
+      const validationCard = document.getElementById('validation-card');
+      const validationPill = document.getElementById('validation-pill');
+      const checklistEl    = document.getElementById('checklist');
+
+      if (!publishComplete) {
+        validationCard.classList.add('locked');
+        validationPill.className = 'status-pill locked';
+        validationPill.innerHTML = `${iconLock()} Locked`;
+        checklistEl.innerHTML = CHECKLIST_ITEMS.map(item =>
+          `<div class="checklist-item locked-item">
+            <span class="checklist-icon unchecked">${iconSquare()}</span>
+            <span>${item.label}</span>
+          </div>`
+        ).join('');
+      } else {
+        validationCard.classList.remove('locked');
+        const val = validation || {};
+        const allChecked = CHECKLIST_ITEMS.every(item => val[item.key]);
+
+        validationPill.className = allChecked ? 'status-pill complete' : 'status-pill in-progress';
+        validationPill.innerHTML = allChecked
+          ? `${iconCheck()} Complete`
+          : `In progress`;
+
+        checklistEl.innerHTML = CHECKLIST_ITEMS.map(item => {
+          const checked = !!val[item.key];
+          return `<div class="checklist-item" onclick="toggleCheck('${item.key}', ${!checked})">
+            <span class="checklist-icon ${checked ? 'checked' : 'unchecked'}">${checked ? iconCheckSquare() : iconSquare()}</span>
+            <span>${item.label}</span>
+          </div>`;
+        }).join('');
+
+        // Validated tool banner
+        if (allChecked) {
+          document.getElementById('validated-banner').style.display = 'flex';
+        }
+      }
+    }
+
+    async function toggleCheck(itemKey, newValue) {
+      if (!currentUserId) return;
+      const update = {};
+      update[`buildValidation.${itemKey}`] = newValue;
+      try {
+        await db.collection('users').doc(currentUserId).update(update);
+        const doc = await db.collection('users').doc(currentUserId).get();
+        const data = doc.exists ? doc.data() : {};
+        renderPage(buildProgressFromUserData(data));
+      } catch(e) {
+        console.error('Checklist save error:', e);
+      }
+    }
+
+    function buildProgressFromUserData(data) {
+      return {
+        setupComplete:        !!(data.hubOnboarding),
+        toolBuilderComplete:  !!(data.toolBuilderComplete),
+        toolBuilderProgress:  data.toolBuilderProgress || '',
+        previewComplete:      !!(data.previewComplete),
+        publishComplete:      !!(data.publishComplete),
+        validation:           data.buildValidation || {}
+      };
+    }
+
+    // ── INIT ──
+    initHubPage(async function(hub, slug, creatorId, user) {
+      hubSlug       = slug;
+      currentUserId = user.uid;
+
+      // Sidebar & mobile
+      const name    = hub.displayName || 'Your Hub';
+      const initial = name.charAt(0).toUpperCase();
+      document.getElementById('sidebar-hub-name').textContent = name;
+      document.getElementById('sidebar-initial').textContent  = initial;
+      document.getElementById('mobile-hub-name').textContent  = name;
+
+      if (hub.branding && hub.branding.logoUrl) {
+        const img = document.getElementById('sidebar-logo-img');
+        img.src = hub.branding.logoUrl;
+        img.style.display = 'block';
+        document.getElementById('sidebar-initial').style.display = 'none';
+      }
+
+      const displayName = user.displayName || user.email;
+      document.getElementById('sidebar-user-name').textContent  = displayName;
+      document.getElementById('sidebar-user-email').textContent = user.email;
+
+      renderNav(slug);
+
+      // Load progress fields from user doc
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        renderPage(buildProgressFromUserData(userData));
+      } catch(e) {
+        console.error('Build Hub load error:', e);
+        renderPage({ setupComplete: false, toolBuilderComplete: false, previewComplete: false, publishComplete: false, validation: {} });
+      }
+
+      // Show UI
+      document.getElementById('hub-loading').style.display  = 'none';
+      document.getElementById('sidebar').style.display      = 'flex';
+      document.getElementById('main-content').style.display = 'block';
+
+      if (window.innerWidth <= 768) {
+        document.getElementById('mobile-bar').style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+</html>
