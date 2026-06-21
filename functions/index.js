@@ -2699,7 +2699,21 @@ For approval:         {"message":"...","action":"approved"}`;
   };
 });
 
-// callCreatorTool — powers the live tool for hub members.
+// ── SUBSCRIPTION TIERS & CREDITS ─────────────────────────────────────────────
+const TIER_CREDITS = { starter: 50, premium: 100, advanced: 300 };
+
+// Credit cost per tool run. Expensive tools (memory/multi-turn) = 5, everything else = 1.
+const TOOL_CREDIT_COSTS = {
+  "spark-conversation":    5, // Find Your Spark (clarity)
+  "clarity-conversation":  5, // Discover Your Breakthrough (clarity)
+  "audience-conversation": 5, // Audience Deep Dive (clarity)
+  "toolfinder-public":     5, // Tool Finder (clarity)
+  "journey-companion":     5, // Journey Companion (memory)
+  "agent-conversation":    5, // Build Agent (accountability)
+};
+// All unlisted tools cost 1 credit. Admin users bypass all checks.
+
+// ── callCreatorTool — powers the live tool for hub members.
 // Reads system prompt and API key server-side; members never see the key.
 exports.callCreatorTool = onCall(async (request) => {
   const uid = request.auth?.uid;
@@ -2797,4 +2811,245 @@ ${tool.systemPrompt}`;
 
   const text = await callAI(keys, enforcedPrompt, messages);
   return { text };
+});
+
+// ── STRIPE: CREATE CHECKOUT SESSION ──────────────────────────────────────────
+// Called from the frontend when a user clicks "Subscribe".
+// Returns a Stripe-hosted checkout URL for the chosen tier.
+exports.createCheckoutSession = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["STRIPE_SECRET_KEY", "STRIPE_PRICE_STARTER", "STRIPE_PRICE_PREMIUM", "STRIPE_PRICE_ADVANCED"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+
+  const { tier } = req.body;
+  if (!["starter", "premium", "advanced"].includes(tier)) {
+    res.status(400).json({ error: "Invalid tier. Must be starter, premium, or advanced." });
+    return;
+  }
+
+  const priceMap = {
+    starter:  process.env.STRIPE_PRICE_STARTER,
+    premium:  process.env.STRIPE_PRICE_PREMIUM,
+    advanced: process.env.STRIPE_PRICE_ADVANCED,
+  };
+
+  try {
+    const Stripe = require("stripe");
+    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const db     = admin.firestore();
+
+    // Get or create Stripe customer linked to this Firebase user
+    const userDoc  = await db.collection("users").doc(decoded.uid).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+    let customerId = userData.stripeCustomerId;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: decoded.email || userData.userEmail || userData.email || "",
+        metadata: { uid: decoded.uid },
+      });
+      customerId = customer.id;
+      await db.collection("users").doc(decoded.uid).update({ stripeCustomerId: customerId });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      customer:             customerId,
+      payment_method_types: ["card"],
+      line_items:           [{ price: priceMap[tier], quantity: 1 }],
+      mode:                 "subscription",
+      success_url:          "https://toolspark.co/dashboard.html?checkout=success",
+      cancel_url:           "https://toolspark.co/pricing.html?checkout=cancelled",
+      metadata:             { uid: decoded.uid, tier },
+      subscription_data:    { metadata: { uid: decoded.uid, tier } },
+    });
+
+    console.log(JSON.stringify({ event: "checkout_session_created", uid: decoded.uid, tier, sessionId: session.id }));
+    res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "checkout_session_error", message: err.message }));
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── STRIPE: WEBHOOK ───────────────────────────────────────────────────────────
+// Receives Stripe events and updates subscriptionTier + credits in Firestore.
+// Register this URL in your Stripe dashboard webhook settings.
+exports.stripeWebhook = onRequest({
+  cors: false,
+  invoker: "public",
+  secrets: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_STARTER", "STRIPE_PRICE_PREMIUM", "STRIPE_PRICE_ADVANCED"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  const Stripe = require("stripe");
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+  const sig    = req.headers["stripe-signature"];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err.message);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  const db = admin.firestore();
+
+  // Helper: look up UID by Stripe customer ID
+  async function getUidFromCustomer(customerId) {
+    const snap = await db.collection("users")
+      .where("stripeCustomerId", "==", customerId).limit(1).get();
+    return snap.empty ? null : snap.docs[0].id;
+  }
+
+  // Map price IDs back to tier names (for subscription.updated events)
+  const priceToTier = {
+    [process.env.STRIPE_PRICE_STARTER]:  "starter",
+    [process.env.STRIPE_PRICE_PREMIUM]:  "premium",
+    [process.env.STRIPE_PRICE_ADVANCED]: "advanced",
+  };
+
+  try {
+    switch (event.type) {
+
+      // ── New subscription activated via checkout ──────────────────────────
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        const uid     = session.metadata?.uid;
+        const tier    = session.metadata?.tier;
+        if (!uid || !TIER_CREDITS[tier]) break;
+
+        await db.collection("users").doc(uid).update({
+          subscriptionTier:    tier,
+          subscriptionStatus:  "active",
+          credits:             TIER_CREDITS[tier],
+          stripeCustomerId:    session.customer,
+          stripeSubscriptionId: session.subscription,
+        });
+        console.log(JSON.stringify({ event: "subscription_activated", uid, tier, credits: TIER_CREDITS[tier] }));
+        break;
+      }
+
+      // ── Monthly renewal — reset credits ───────────────────────────────────
+      case "invoice.paid": {
+        const invoice = event.data.object;
+        // Skip the initial invoice — checkout.session.completed already handled it
+        if (invoice.billing_reason === "subscription_create") break;
+
+        const uid = await getUidFromCustomer(invoice.customer);
+        if (!uid) break;
+
+        const userDoc = await db.collection("users").doc(uid).get();
+        const tier    = userDoc.data()?.subscriptionTier;
+        if (!tier || !TIER_CREDITS[tier]) break;
+
+        await db.collection("users").doc(uid).update({
+          credits:            TIER_CREDITS[tier],
+          subscriptionStatus: "active",
+        });
+        console.log(JSON.stringify({ event: "credits_reset_on_renewal", uid, tier, credits: TIER_CREDITS[tier] }));
+        break;
+      }
+
+      // ── Plan change (upgrade or downgrade) ────────────────────────────────
+      case "customer.subscription.updated": {
+        const sub  = event.data.object;
+        const uid  = sub.metadata?.uid || await getUidFromCustomer(sub.customer);
+        if (!uid) break;
+
+        const newPriceId = sub.items.data[0]?.price?.id;
+        const newTier    = priceToTier[newPriceId];
+        if (!newTier) break;
+
+        const userDoc      = await db.collection("users").doc(uid).get();
+        const currentTier  = userDoc.data()?.subscriptionTier;
+        const currentCredits = userDoc.data()?.credits || 0;
+
+        const updates = {
+          subscriptionTier:   newTier,
+          subscriptionStatus: sub.status === "active" ? "active" : sub.status,
+        };
+
+        // On upgrade, add the difference in credit allocation mid-cycle
+        if (currentTier !== newTier) {
+          const newMax = TIER_CREDITS[newTier]     || 0;
+          const oldMax = TIER_CREDITS[currentTier] || 0;
+          if (newMax > oldMax) {
+            updates.credits = currentCredits + (newMax - oldMax);
+          }
+        }
+
+        await db.collection("users").doc(uid).update(updates);
+        console.log(JSON.stringify({ event: "subscription_updated", uid, newTier }));
+        break;
+      }
+
+      // ── Cancelled or expired ──────────────────────────────────────────────
+      case "customer.subscription.deleted": {
+        const sub = event.data.object;
+        const uid = sub.metadata?.uid || await getUidFromCustomer(sub.customer);
+        if (!uid) break;
+
+        await db.collection("users").doc(uid).update({
+          subscriptionTier:    null,
+          subscriptionStatus:  "cancelled",
+          credits:             0,
+          stripeSubscriptionId: null,
+        });
+        console.log(JSON.stringify({ event: "subscription_cancelled", uid }));
+        break;
+      }
+    }
+
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "webhook_handler_error", message: err.message, type: event.type }));
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── DEDUCT CREDITS (callable) ─────────────────────────────────────────────────
+// Frontend calls this before running a tool. Uses a Firestore transaction
+// so concurrent calls can't overdraw the balance.
+// cost: number of credits to deduct (use TOOL_CREDIT_COSTS values)
+exports.deductCredits = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login required.");
+
+  const { cost } = request.data;
+  if (typeof cost !== "number" || cost < 1) {
+    throw new HttpsError("invalid-argument", "cost must be a positive number.");
+  }
+
+  const db      = admin.firestore();
+  const userRef = db.collection("users").doc(uid);
+
+  // Admins bypass credit checks
+  const userSnap = await userRef.get();
+  if (userSnap.data()?.userRole === "admin") return { success: true, creditsRemaining: -1 };
+
+  try {
+    const newBalance = await db.runTransaction(async (tx) => {
+      const doc     = await tx.get(userRef);
+      const credits = doc.data()?.credits || 0;
+      if (credits < cost) {
+        throw Object.assign(new Error("Insufficient credits"), { code: "insufficient_credits" });
+      }
+      const updated = credits - cost;
+      tx.update(userRef, { credits: updated });
+      return updated;
+    });
+
+    return { success: true, creditsRemaining: newBalance };
+  } catch (err) {
+    if (err.code === "insufficient_credits") {
+      throw new HttpsError("resource-exhausted", "Not enough credits. Add more or upgrade your plan.");
+    }
+    throw new HttpsError("internal", err.message);
+  }
 });
