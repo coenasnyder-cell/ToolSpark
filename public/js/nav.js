@@ -116,7 +116,7 @@
       '.nav-item{color:rgba(255,255,255,0.55)!important;}' +
       '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
       '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;border-color:rgba(255,200,32,0.2)!important;}' +
-      '.nav-icon{opacity:0.6;}' +
+      '.nav-icon{width:18px;height:18px;flex-shrink:0;opacity:0.6;}' +
       '.nav-item:hover .nav-icon,.nav-item.active .nav-icon{opacity:1;}' +
       /* ── Sidebar user area ── */
       '.user-name{color:#fff!important;}' +
