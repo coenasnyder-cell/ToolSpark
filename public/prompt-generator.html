@@ -634,6 +634,7 @@
 
   // ── PROMPT GENERATION ──
   async function generatePrompt() {
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     const btn = currentMode === 'refine'
       ? document.getElementById('refine-btn')
       : document.getElementById('generate-btn');

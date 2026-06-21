@@ -126,6 +126,20 @@
   .credit-row-label { color: var(--text2); }
   .credit-row-cost { font-weight: 700; color: var(--yellow); }
 
+  /* TOP-UP */
+  .topup-section { margin-top: 2.5rem; display: none; }
+  .topup-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .topup-subtitle { font-size: 13px; color: var(--text3); margin-bottom: 1.25rem; }
+  .topup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .topup-card { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 6px; }
+  .topup-credits { font-size: 22px; font-weight: 800; color: #fff; }
+  .topup-price { font-size: 28px; font-weight: 800; color: var(--yellow); }
+  .topup-desc { font-size: 12px; color: var(--text3); line-height: 1.5; flex: 1; margin-bottom: 8px; }
+  .btn-topup { width: 100%; padding: 11px; border-radius: 8px; background: var(--dark3); border: 1px solid var(--border); color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-topup:hover { border-color: var(--yellow); color: var(--yellow); }
+  .btn-topup:disabled { opacity: 0.5; cursor: not-allowed; }
+  .topup-success-banner { background: rgba(90,196,138,0.08); border: 1px solid rgba(90,196,138,0.25); border-radius: 12px; padding: 14px 20px; margin-bottom: 2rem; display: none; align-items: center; gap: 10px; color: #5ac48a; font-size: 14px; font-weight: 600; }
+
   /* FAQ */
   .faq { margin-top: 2.5rem; }
   .faq-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 1.25rem; }
@@ -335,6 +349,31 @@
 
     </div><!-- /pricing-grid -->
 
+    <!-- TOP-UP SUCCESS BANNER -->
+    <div class="topup-success-banner" id="topup-success-banner">
+      ✓ Credits added! Your balance has been updated.
+    </div>
+
+    <!-- TOP-UP SECTION — shown only to active subscribers -->
+    <div class="topup-section" id="topup-section">
+      <div class="topup-title">Need more credits this month?</div>
+      <div class="topup-subtitle">One-time purchase — no subscription change, credits added instantly.</div>
+      <div class="topup-grid">
+        <div class="topup-card">
+          <div class="topup-credits">25 credits</div>
+          <div class="topup-price">$5</div>
+          <div class="topup-desc">~25 regular tool runs or 5 clarity/diagnostic sessions</div>
+          <button class="btn-topup" id="btn-topup-25" onclick="topup(25)">Buy 25 Credits — $5</button>
+        </div>
+        <div class="topup-card">
+          <div class="topup-credits">60 credits</div>
+          <div class="topup-price">$10</div>
+          <div class="topup-desc">~60 regular tool runs or 12 clarity/diagnostic sessions</div>
+          <button class="btn-topup" id="btn-topup-60" onclick="topup(60)">Buy 60 Credits — $10</button>
+        </div>
+      </div>
+    </div>
+
     <!-- CREDIT COSTS -->
     <div class="credit-info">
       <div class="credit-info-title">How credits work</div>
@@ -389,6 +428,7 @@
 initNav('pricing', 'Plans & Pricing');
 
 var CHECKOUT_URL = 'https://createcheckoutsession-e6qya4oddq-uc.a.run.app';
+var TOPUP_URL    = 'https://createtopupsession-e6qya4oddq-uc.a.run.app';
 var currentUser  = null;
 var STRIPE_PUBLISHABLE_KEY = 'pk_test_51TkcJ8DyYJbBjAJEwOkT86ezN0iz3yhUWTRM7oXUg9CQEl3MytmL956RQFZQWh8jN0hycxh0BQziNdvTZMytklyZ000fDJGtyi';
 
@@ -406,6 +446,10 @@ auth.onAuthStateChanged(async function(user) {
     document.getElementById('success-banner').style.display = 'flex';
     window.history.replaceState({}, '', 'pricing.html');
   }
+  if (window.location.search.includes('topup=success')) {
+    document.getElementById('topup-success-banner').style.display = 'flex';
+    window.history.replaceState({}, '', 'pricing.html');
+  }
 
   try {
     var snap = await db.collection('users').doc(user.uid).get();
@@ -419,6 +463,7 @@ auth.onAuthStateChanged(async function(user) {
       document.getElementById('current-plan-name').textContent    = names[tier] || tier;
       document.getElementById('current-credits').textContent      = credits;
       document.getElementById('current-plan-banner').style.display = 'flex';
+      document.getElementById('topup-section').style.display      = 'block';
       markCurrentPlan(tier);
     }
 
@@ -443,6 +488,27 @@ function markCurrentPlan(tier) {
       btn.querySelector('.btn-label').textContent = 'Switch to ' + t.charAt(0).toUpperCase() + t.slice(1);
     }
   });
+}
+
+async function topup(bundle) {
+  if (!currentUser) { window.location.href = 'signon.html'; return; }
+  var btn = document.getElementById('btn-topup-' + bundle);
+  btn.disabled = true;
+  btn.textContent = 'Redirecting…';
+  try {
+    var idToken = await currentUser.getIdToken();
+    var res = await fetch(TOPUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+      body: JSON.stringify({ bundle: bundle })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+    throw new Error('No URL returned');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Buy ' + bundle + ' Credits — $' + (bundle === 25 ? '5' : '10');
+  }
 }
 
 async function subscribe(tier) {

@@ -1038,6 +1038,7 @@
       return;
     }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     const btn = document.getElementById('btn-generate');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-sm"></span> Generating...';
@@ -1202,6 +1203,7 @@ ${whatsNext ? `\nWHAT'S NEXT: ${whatsNext}` : ''}`.trim();
       return;
     }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-sm"></span> Fetching results...';
 

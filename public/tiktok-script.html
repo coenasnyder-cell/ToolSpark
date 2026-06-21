@@ -442,6 +442,7 @@ Return ONLY the sentences, one per line. No labels, no extra text.`;
     const topic = document.getElementById('topic').value.trim();
     if (!topic) { document.getElementById('topic').focus(); return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     const vibe = getSelected('vibe-row', 'vibe') || 'general';
     const lines = getSelected('length-row', 'length') || '5';
 

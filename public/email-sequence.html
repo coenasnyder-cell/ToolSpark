@@ -450,6 +450,7 @@
   }
 
   async function generate() {
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     document.getElementById('ready-section').style.display = 'none';
     document.getElementById('gen-card').style.display = 'block';
     document.getElementById('error-msg').style.display = 'none';
@@ -626,6 +627,7 @@
   }
 
   initNav('email-sequence', 'Email Sequence');
+  window.tsGatePage('advanced');
 </script>
 </body>
 </html>

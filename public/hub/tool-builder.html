@@ -1,499 +1,640 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tool Builder — ToolSpark</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/creatorhub.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey:            "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
-      authDomain:        "toolspark-2d62d.firebaseapp.com",
-      projectId:         "toolspark-2d62d",
-      storageBucket:     "toolspark-2d62d.firebasestorage.app",
-      messagingSenderId: "82966513396",
-      appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth      = firebase.auth();
-    const db        = firebase.firestore();
-    const functions = firebase.functions();
-    document.addEventListener('DOMContentLoaded', () => {
-      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
-    });
-  </script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Builder — ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-    }
+  :root {
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
+    --border-dark: #2A2720;
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9E9891;
+    --green: #2A5C45;
+    --green-light: #3D8A65;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+  }
 
-    /* ── Top bar ── */
-    .builder-bar {
-      height: 56px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      gap: 16px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 50;
-    }
-    .bar-logo {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text);
-      text-decoration: none;
-      white-space: nowrap;
-    }
-    .bar-logo span { color: var(--yellow); }
-    .bar-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
-    .bar-tool-name {
-      flex: 1;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      border: none;
-      background: transparent;
-      font-family: var(--font);
-      outline: none;
-      cursor: text;
-      min-width: 0;
-    }
-    .bar-tool-name::placeholder { color: var(--text3); font-weight: 400; }
-    .bar-tool-name:focus { background: var(--card-alt); border-radius: 6px; padding: 4px 8px; margin: -4px -8px; }
-    .bar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-    /* ── Split layout ── */
-    .builder-body {
-      display: flex;
-      height: calc(100vh - 56px);
-      margin-top: 56px;
-    }
+  /* ── SIDEBAR (via nav.js) ── */
+  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
+  .logo-text span { color: var(--gold); }
+  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: #D4CFC8; }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold-light); }
+  .nav-item svg { flex-shrink: 0; }
+  .sidebar-bottom { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
+  .user-info { padding: 10px 12px; }
+  .user-name { font-size: 13px; font-weight: 700; color: #D4CFC8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .logout-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: none; border: none; color: #6B6560; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.15s; margin-top: 4px; }
+  .logout-btn:hover { background: rgba(255,255,255,0.05); color: #9E9891; }
+  .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
 
-    /* ── Left: chat panel ── */
-    .chat-panel {
-      width: 40%;
-      min-width: 320px;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--border);
-      background: var(--card);
-    }
-    .chat-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .sparky-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--yellow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-      color: #000;
-      flex-shrink: 0;
-    }
-    .chat-header-text { font-size: 14px; font-weight: 700; color: var(--text); }
-    .chat-header-sub  { font-size: 12px; color: var(--text3); }
+  /* ── MAIN LAYOUT ── */
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .page-content { flex: 1; padding: 2rem 2rem 4rem; max-width: 760px; width: 100%; margin: 0 auto; }
 
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .msg { display: flex; gap: 10px; align-items: flex-start; }
-    .msg.user { flex-direction: row-reverse; }
+  /* ── LOADING ── */
+  #loading-state { display: flex; align-items: center; gap: 10px; color: var(--text2); font-size: 14px; padding: 3rem 2rem; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #main-content { display: none; }
 
-    .msg-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--yellow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: #000;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .msg.user .msg-avatar { background: var(--purple); color: #fff; }
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 1.75rem; }
+  .page-header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .page-header p { font-size: 15px; color: var(--text2); line-height: 1.6; }
 
-    .msg-bubble {
-      max-width: 85%;
-      padding: 11px 14px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.55;
-    }
-    .msg.sparky .msg-bubble { background: rgba(107,47,179,.08); color: var(--text); border-radius: 4px 16px 16px 16px; }
-    .msg.user   .msg-bubble { background: var(--yellow); color: #000; border-radius: 16px 4px 16px 16px; }
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 16px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; }
 
-    /* Publish nudge */
-    .publish-nudge {
-      padding: 4px 0 0 38px;
-    }
+  /* ── DATA PILLS ── */
+  .data-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+  .data-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+  .data-pill.found { background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.2); }
+  .data-pill.found::before { content: '●'; font-size: 8px; }
+  .data-pill.missing { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
+  .data-pill.missing::before { content: '○'; font-size: 8px; }
+  .data-detail { font-size: 13px; color: var(--text2); line-height: 1.55; padding: 10px 14px; background: rgba(42,92,69,0.04); border-radius: var(--radius-sm); border-left: 3px solid rgba(42,92,69,0.25); margin-bottom: 8px; }
+  .data-detail strong { color: var(--text); font-weight: 700; display: block; margin-bottom: 2px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .data-missing-note { font-size: 13px; color: var(--text3); padding: 10px 14px; background: var(--bg); border-radius: var(--radius-sm); border: 1px dashed var(--border); margin-bottom: 8px; }
+  .data-missing-note a { color: var(--gold); text-decoration: none; font-weight: 700; }
 
-    /* Text input area */
-    .chat-input-wrap {
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      flex-shrink: 0;
-    }
-    .chat-input {
-      flex: 1;
-      resize: none;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-family: var(--font);
-      font-size: 14px;
-      line-height: 1.5;
-      background: var(--card-alt);
-      color: var(--text);
-      max-height: 120px;
-      transition: border-color .15s;
-      outline: none;
-    }
-    .chat-input:focus { border-color: var(--purple); }
-    .chat-send-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--purple);
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: opacity .15s;
-    }
-    .chat-send-btn:hover { opacity: .85; }
-    .chat-send-btn:disabled { opacity: .4; cursor: default; }
-    .skip-btn {
-      font-size: 12px;
-      color: var(--text3);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px 0;
-      font-family: var(--font);
-      transition: color .15s;
-    }
-    .skip-btn:hover { color: var(--purple); }
+  /* ── FORM INPUTS ── */
+  .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; }
+  .input-group:last-of-type { margin-bottom: 0; }
+  .input-label { font-size: 12px; font-weight: 900; color: var(--text); text-transform: uppercase; letter-spacing: 0.07em; }
+  .input-hint { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .text-input { width: 100%; padding: 11px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Lato', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; resize: vertical; }
+  .text-input:focus { border-color: var(--gold); }
+  .text-input::placeholder { color: var(--text3); }
 
-    /* Building state */
-    .building-msg {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      font-size: 13px;
-      color: var(--text2);
-      font-weight: 500;
-    }
-    .building-msg.show { display: flex; }
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--purple);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  /* ── TYPE / TONE BUTTON GROUPS ── */
+  .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .type-btn, .tone-btn { padding: 7px 13px; font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif; border: 1.5px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .type-btn:hover, .tone-btn:hover { border-color: var(--gold); color: var(--text); }
+  .type-btn.active, .tone-btn.active { border-color: var(--green); background: rgba(42,92,69,0.08); color: var(--green); }
 
-    /* ── Right: preview panel ── */
-    .preview-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg);
-      min-width: 0;
-    }
-    .preview-bar {
-      height: 48px;
-      border-bottom: 1px solid var(--border);
-      background: var(--card);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .preview-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--text3);
-    }
-    .preview-toggle-group {
-      display: flex;
-      background: var(--card-alt);
-      border-radius: 8px;
-      padding: 3px;
-      gap: 2px;
-    }
-    .preview-toggle {
-      padding: 5px 12px;
-      border-radius: 6px;
-      border: none;
-      background: transparent;
-      font-family: var(--font);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text2);
-      cursor: pointer;
-      transition: background .15s, color .15s;
-    }
-    .preview-toggle.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-    .try-mode-btn {
-      margin-left: auto;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      color: var(--text2);
-      cursor: pointer;
-      font-family: var(--font);
-      transition: border-color .15s, color .15s;
-    }
-    .try-mode-btn:hover { border-color: var(--purple); color: var(--purple); }
-    .try-mode-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+  /* ── GENERATE BUTTON ── */
+  .generate-btn { width: 100%; padding: 14px; background: var(--gold); color: var(--dark); font-family: 'Lato', sans-serif; font-size: 15px; font-weight: 900; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; margin-top: 1.5rem; }
+  .generate-btn:hover { background: #d4b35a; }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .preview-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      overflow: hidden;
-    }
+  /* ── RESULT CARD ── */
+  .result-card { display: none; }
+  .result-card.visible { display: block; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Desktop mockup */
-    .preview-desktop {
-      width: 100%;
-      max-width: 680px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--card);
-      box-shadow: 0 4px 24px rgba(0,0,0,.08);
-      height: calc(100vh - 56px - 48px - 48px);
-    }
-    .preview-desktop iframe {
-      width: 100%; height: 100%;
-      border: none;
-    }
+  .prompt-textarea { width: 100%; min-height: 360px; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: 'Lato', sans-serif; color: var(--text); line-height: 1.7; resize: vertical; outline: none; margin-bottom: 1rem; transition: border-color 0.15s; }
+  .prompt-textarea:focus { border-color: var(--gold); }
 
-    /* Mobile mockup */
-    .preview-mobile {
-      display: none;
-      width: 375px;
-      height: calc(100vh - 56px - 48px - 48px);
-      max-height: 700px;
-      border: 8px solid #222;
-      border-radius: 44px;
-      overflow: hidden;
-      background: var(--card);
-      box-shadow: 0 8px 40px rgba(0,0,0,.2);
-    }
-    .preview-mobile iframe { width: 100%; height: 100%; border: none; }
+  .result-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .copy-btn { padding: 10px 20px; background: var(--dark); color: #F0EDE6; font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { background: var(--dark2); }
+  .regen-btn { padding: 10px 20px; background: none; color: var(--text2); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .regen-btn:hover { border-color: var(--gold); color: var(--text); }
+  .regen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .save-status { font-size: 13px; color: var(--green); font-weight: 700; }
+  .prompt-note { font-size: 13px; color: var(--text3); line-height: 1.6; padding: 12px 14px; background: var(--bg); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
 
-    /* Static mockup (before tool is built) */
-    .preview-static {
-      width: 100%;
-      max-width: 560px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      background: var(--card);
-      padding: 32px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.06);
-    }
-    .preview-static-logo {
-      width: 48px; height: 48px;
-      border-radius: 12px;
-      background: var(--yellow);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 800; color: #000;
-      margin: 0 auto 20px;
-    }
-    .preview-static-title {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-    .preview-static-sub {
-      text-align: center;
-      font-size: 14px;
-      color: var(--text2);
-      margin-bottom: 28px;
-      line-height: 1.5;
-    }
-    .preview-static-progress {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin-bottom: 28px;
-      overflow: hidden;
-    }
-    .preview-static-progress-bar {
-      height: 100%;
-      background: var(--purple);
-      border-radius: 2px;
-      transition: width .4s ease;
-    }
-    .preview-question-mock {
-      background: var(--card-alt);
-      border-radius: 10px;
-      padding: 16px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text2);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .preview-btn-mock {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      background: var(--purple);
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
-      text-align: center;
-      border: none;
-      cursor: default;
-    }
-
-    /* Mobile layout */
-    @media (max-width: 768px) {
-      body { overflow: auto; }
-      .builder-body { flex-direction: column; height: auto; }
-      .chat-panel { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); height: 60vh; }
-      .preview-panel { height: 50vh; }
-      .preview-content { padding: 16px; }
-      .preview-desktop { height: 100%; }
-    }
-  </style>
+  /* ── MOBILE ── */
+  @media (max-width: 640px) {
+    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
+    .sidebar.open { transform: translateX(0); }
+    .hamburger { display: block; }
+    .main-wrap { margin-left: 0; }
+    .page-content { padding: 1.25rem 1rem 3rem; }
+    .btn-group { gap: 5px; }
+    .type-btn, .tone-btn { font-size: 12px; padding: 6px 11px; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- Top bar -->
-  <div class="builder-bar">
-    <a class="bar-logo" href="/hub/admin-tools">⚡ Tool<span>Spark</span></a>
-    <div class="bar-divider"></div>
-    <input class="bar-tool-name" id="bar-tool-name" type="text" placeholder="Untitled Tool" maxlength="60" />
-    <div class="bar-actions">
-      <button class="btn-outline" id="save-draft-btn" onclick="saveDraft()">Save Draft</button>
-      <button class="btn-primary" id="publish-btn" onclick="publishTool()">Publish</button>
-    </div>
-  </div>
+<div class="main-wrap">
+  <div class="page-content">
 
-  <!-- Builder body -->
-  <div class="builder-body">
-
-    <!-- Left: Sparky chat -->
-    <div class="chat-panel">
-      <div class="chat-header">
-        <div class="sparky-avatar">⚡</div>
-        <div>
-          <div class="chat-header-text">Sparky</div>
-          <div class="chat-header-sub">Refine your tool</div>
-        </div>
-      </div>
-
-      <div class="chat-messages" id="chat-messages"></div>
-
-      <div class="building-msg" id="building-msg">
-        <div class="spinner"></div>
-        <span>Building your tool...</span>
-      </div>
-
-      <div class="chat-input-wrap" id="chat-input-wrap">
-        <textarea class="chat-input" id="chat-input" rows="1"
-          placeholder="Type your answer..."
-          onkeydown="handleInputKey(event)"
-          oninput="autoGrow(this)"></textarea>
-        <button class="chat-send-btn" id="send-btn" onclick="sendRefinement()">
-          <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
-      </div>
+    <div id="loading-state">
+      <div class="spinner"></div>
+      <span>Loading your profile data...</span>
     </div>
 
-    <!-- Right: preview -->
-    <div class="preview-panel">
-      <div class="preview-bar">
-        <span class="preview-label">Preview</span>
-        <div class="preview-toggle-group">
-          <button class="preview-toggle active" id="toggle-desktop" onclick="setView('desktop')">Desktop</button>
-          <button class="preview-toggle" id="toggle-mobile" onclick="setView('mobile')">Mobile</button>
-        </div>
-        <button class="try-mode-btn" id="try-mode-btn" onclick="toggleTryMode()">Try as User</button>
+    <div id="main-content">
+
+      <div class="page-header">
+        <h1>Tool Builder</h1>
+        <p>Describe your tool below and we'll generate the system prompt that powers it.</p>
       </div>
-      <div class="preview-content" id="preview-content">
-        <!-- Static mockup shown before tool is built -->
-        <div class="preview-static" id="preview-static">
-          <div class="preview-static-logo" id="prev-logo">⚡</div>
-          <div class="preview-static-title" id="prev-title">Your Tool Name</div>
-          <div class="preview-static-sub" id="prev-sub">Powered by AI</div>
-          <div class="preview-static-progress">
-            <div class="preview-static-progress-bar" id="prev-progress" style="width:0%"></div>
+
+      <!-- Profile data card -->
+      <div class="card" id="data-card">
+        <div class="card-title">Your Profile Data</div>
+        <div class="card-sub">Data found from your completed tools is used automatically to make your prompt more specific to your niche.</div>
+        <div class="data-pills" id="data-status"></div>
+        <div id="data-details"></div>
+      </div>
+
+      <!-- Form card -->
+      <div class="card">
+
+        <div class="input-group">
+          <label class="input-label" for="tool-name">Tool Name</label>
+          <input type="text" id="tool-name" class="text-input" placeholder="e.g. The Clarity Compass, Content Kit, The Action Blueprint" maxlength="80">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Tool Type</label>
+          <div class="btn-group" id="type-group">
+            <button class="type-btn active" data-type="clarity" onclick="selectType(this)">Clarity Assessment</button>
+            <button class="type-btn" data-type="content" onclick="selectType(this)">Content Generator</button>
+            <button class="type-btn" data-type="planner" onclick="selectType(this)">Action Planner</button>
+            <button class="type-btn" data-type="quiz" onclick="selectType(this)">Quiz / Assessment</button>
+            <button class="type-btn" data-type="coach" onclick="selectType(this)">AI Coach</button>
           </div>
-          <div class="preview-question-mock" id="prev-question">Answer a few questions to get your personalized results.</div>
-          <button class="preview-btn-mock" id="prev-btn">Get Started →</button>
         </div>
-        <!-- Live iframe shown after tool is built -->
-        <div class="preview-desktop" id="preview-desktop" style="display:none;">
-          <iframe id="preview-iframe" src="" title="Tool Preview"></iframe>
+
+        <div class="input-group">
+          <label class="input-label" for="who-for">Who It's For</label>
+          <div class="input-hint">Be specific — not "coaches" but what kind, at what stage, struggling with what.</div>
+          <textarea id="who-for" class="text-input" rows="2" placeholder="e.g. Female solopreneurs leaving corporate who know what they do but can't explain it to strangers online"></textarea>
         </div>
-        <div class="preview-mobile" id="preview-mobile">
-          <iframe id="preview-mobile-iframe" src="" title="Tool Preview Mobile"></iframe>
+
+        <div class="input-group">
+          <label class="input-label" for="real-problem">The Real Problem</label>
+          <div class="input-hint">In your audience's own words — what do they say when venting about this?</div>
+          <textarea id="real-problem" class="text-input" rows="2" placeholder="e.g. 'I've been at this for months and I still don't have anything to show for it — I don't even know where to start anymore'"></textarea>
         </div>
+
+        <div class="input-group">
+          <label class="input-label" for="transformation">The Transformation</label>
+          <div class="input-hint">What can they do, say, or decide after using this tool that they couldn't before?</div>
+          <textarea id="transformation" class="text-input" rows="2" placeholder="e.g. They walk away with a clear one-sentence positioning statement they can use everywhere — bio, intro, content, DMs"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="output-format">Output Format</label>
+          <div class="input-hint">What does the actual result look like? Name the sections, pieces, or formats it produces.</div>
+          <textarea id="output-format" class="text-input" rows="2" placeholder="e.g. A 4-section report: Your Superpower, Who You're Built For, The Gap You Fill, and Your First Message to a stranger"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Tone</label>
+          <div class="btn-group" id="tone-group">
+            <button class="tone-btn active" data-tone="Warm and encouraging — like a trusted friend who believes in them" onclick="selectTone(this)">Warm & Encouraging</button>
+            <button class="tone-btn" data-tone="Direct and no-fluff — gets to the point, no filler, no corporate language" onclick="selectTone(this)">Direct & No-Fluff</button>
+            <button class="tone-btn" data-tone="Bold and edgy — a little provocative, confident, not afraid to challenge them" onclick="selectTone(this)">Bold & Edgy</button>
+            <button class="tone-btn" data-tone="Professional and premium — polished, credible, calm confidence" onclick="selectTone(this)">Professional & Premium</button>
+          </div>
+        </div>
+
+        <button class="generate-btn" id="generate-btn" onclick="generatePrompt()">Generate My Tool System Prompt →</button>
+
+      </div><!-- /form card -->
+
+      <!-- Result card -->
+      <div class="card result-card" id="result-card">
+        <div class="card-title">Your System Prompt</div>
+        <div class="card-sub">This is the instruction set that powers your AI tool. Edit it directly if you want to tweak anything.</div>
+        <textarea class="prompt-textarea" id="prompt-output" spellcheck="false"></textarea>
+        <div class="result-actions">
+          <button class="copy-btn" id="copy-btn" onclick="copyPrompt()">Copy Prompt</button>
+          <button class="regen-btn" id="regen-btn" onclick="generatePrompt()">Regenerate (2 left)</button>
+          <span class="save-status" id="save-status" style="display:none">✓ Draft saved</span>
+        </div>
+        <div class="prompt-note">This is your starting point. Copy it and keep it somewhere safe — we'll wire up the next steps soon.</div>
       </div>
-    </div>
 
-  </div>
+    </div><!-- /main-content -->
+  </div><!-- /page-content -->
+</div><!-- /main-wrap -->
 
-  <script src="/js/tool-builder.js"></script>
+<script>
+  const FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
+  const MODEL = 'claude-sonnet-4-6';
+  const MAX_GENERATIONS = 3;
+
+  let generateCount = 0;
+  let currentUser = null;
+  let selectedType = 'clarity';
+  let selectedTone = 'Warm and encouraging — like a trusted friend who believes in them';
+
+  let memberData = { spark: null, audience: null, breakthrough: null };
+
+  // ── HELPERS ──
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function mostRecent(snaps) {
+    const map = new Map();
+    snaps.forEach(snap => snap.forEach(d => { if (!map.has(d.id)) map.set(d.id, d); }));
+    return Array.from(map.values()).sort((a, b) =>
+      (b.data().createdAt?.toMillis?.() || 0) - (a.data().createdAt?.toMillis?.() || 0)
+    );
+  }
+
+  function parseToolsFromActionPlan(actionPlan) {
+    if (!actionPlan) return [];
+    const fieldDefs = [
+      { key: 'name', tag: 'NAME' }, { key: 'summary', tag: 'SUMMARY' },
+      { key: 'why', tag: 'WHY' }, { key: 'how', tag: 'HOW' }
+    ];
+    const tools = [];
+    for (let i = 1; i <= 3; i++) {
+      const tool = {};
+      fieldDefs.forEach(({ key, tag }, fi) => {
+        const nextBoundary = fi < fieldDefs.length - 1
+          ? `TOOL_${i}_${fieldDefs[fi+1].tag}:`
+          : (i < 3 ? `TOOL_${i+1}_NAME:` : String.raw`\*\*ACTION_PLAN_END`);
+        const regex = new RegExp(`TOOL_${i}_${tag}:([\\s\\S]+?)(?=${nextBoundary}|$)`);
+        const match = actionPlan.match(regex);
+        tool[key] = match ? match[1].trim() : '';
+      });
+      tools.push(tool);
+    }
+    return tools;
+  }
+
+  // ── UI SELECTIONS ──
+  function selectType(el) {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedType = el.dataset.type;
+  }
+
+  function selectTone(el) {
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedTone = el.dataset.tone;
+  }
+
+  // ── DATA CARD ──
+  function renderDataCard() {
+    const statusEl  = document.getElementById('data-status');
+    const detailsEl = document.getElementById('data-details');
+    statusEl.innerHTML = '';
+    detailsEl.innerHTML = '';
+
+    if (memberData.spark) {
+      statusEl.innerHTML += `<span class="data-pill found">Spark Statement</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Spark Statement</strong>${escHtml(memberData.spark.statement)}</div>`;
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Spark Statement</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Spark results found. <a href="/spark.html">Run the Spark tool →</a></div>`;
+    }
+
+    if (memberData.audience) {
+      statusEl.innerHTML += `<span class="data-pill found">Audience Profile</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Target Client</strong>${escHtml(memberData.audience.whoTheyAre)}</div>`;
+      // Pre-fill the "who it's for" field if empty
+      const whoForEl = document.getElementById('who-for');
+      if (whoForEl && !whoForEl.value) {
+        whoForEl.value = memberData.audience.whoTheyAre || '';
+      }
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Audience Profile</span>`;
+      detailsEl.innerHTML += `<div class="data-missing-note">No Audience results found. <a href="/audiencetool.html">Run the Audience tool →</a></div>`;
+    }
+
+    if (memberData.breakthrough) {
+      statusEl.innerHTML += `<span class="data-pill found">Breakthrough Tool</span>`;
+      detailsEl.innerHTML += `<div class="data-detail"><strong>Tool Identified</strong>${escHtml(memberData.breakthrough.name)}</div>`;
+      // Pre-fill tool name if empty
+      const nameEl = document.getElementById('tool-name');
+      if (nameEl && !nameEl.value && memberData.breakthrough.name) {
+        nameEl.value = memberData.breakthrough.name;
+      }
+    } else {
+      statusEl.innerHTML += `<span class="data-pill missing">Breakthrough Tool</span>`;
+    }
+  }
+
+  // ── GENERATE ──
+  async function authHeaders() {
+    const user = firebase.auth().currentUser;
+    const token = user ? await user.getIdToken() : '';
+    let acToken = '';
+    try {
+      const t = await Promise.race([
+        firebase.appCheck().getToken(false),
+        new Promise((_,r) => setTimeout(() => r(), 3000))
+      ]);
+      acToken = t?.token || '';
+    } catch(e) {}
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-Firebase-AppCheck': acToken };
+  }
+
+  const TYPE_GUIDANCE = {
+    clarity:  'A conversational clarity tool that asks 4–6 questions one at a time and generates a named multi-section personal report. Each section must have a specific name that reflects this creator\'s method — not generic headers like "Introduction."',
+    content:  'A content generator that takes a few inputs about the user\'s situation and produces 2–4 named, ready-to-use content pieces. Each format must be distinctly named and immediately usable.',
+    planner:  'An action planner that collects context about the user\'s current situation and biggest obstacle, then produces a structured step-by-step plan with named phases and specific actions in each phase.',
+    quiz:     'A quiz or assessment with structured questions that results in a scored tiered outcome — 3 tiers with different next-step recommendations based on where they land.',
+    coach:    'An AI coach that establishes the user\'s goal and accountability style in the first session, then provides ongoing guidance and check-ins using the creator\'s specific voice and methodology.'
+  };
+
+  async function generatePrompt() {
+    const toolName   = document.getElementById('tool-name').value.trim();
+    const whoFor     = document.getElementById('who-for').value.trim();
+    const problem    = document.getElementById('real-problem').value.trim();
+    const transform  = document.getElementById('transformation').value.trim();
+    const outputFmt  = document.getElementById('output-format').value.trim();
+
+    if (!toolName) {
+      document.getElementById('tool-name').focus();
+      document.getElementById('tool-name').style.borderColor = '#C0392B';
+      setTimeout(() => document.getElementById('tool-name').style.borderColor = '', 2000);
+      return;
+    }
+    if (!problem) {
+      document.getElementById('real-problem').focus();
+      return;
+    }
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = 'Generating your prompt...';
+
+    // Build context block
+    const ctx = [];
+    ctx.push(`TOOL NAME: ${toolName}`);
+    ctx.push(`TOOL TYPE: ${selectedType} — ${TYPE_GUIDANCE[selectedType]}`);
+    ctx.push(`WHO IT IS FOR: ${whoFor || 'Not specified'}`);
+    ctx.push(`THE REAL PROBLEM: ${problem}`);
+    ctx.push(`THE TRANSFORMATION: ${transform || 'Not specified'}`);
+    ctx.push(`OUTPUT FORMAT: ${outputFmt || 'Not specified'}`);
+    ctx.push(`TONE: ${selectedTone}`);
+
+    if (memberData.spark) {
+      ctx.push('');
+      ctx.push(`CREATOR SPARK STATEMENT: ${memberData.spark.statement || ''}`);
+      if (memberData.spark.whatYouKnow) ctx.push(`WHAT THEY KNOW: ${memberData.spark.whatYouKnow}`);
+      if (memberData.spark.whoYouHelp) ctx.push(`WHO THEY HELP: ${memberData.spark.whoYouHelp}`);
+      if (memberData.spark.yourEdge) ctx.push(`THEIR EDGE: ${memberData.spark.yourEdge}`);
+    }
+
+    if (memberData.audience) {
+      ctx.push('');
+      ctx.push(`TARGET CLIENT: ${memberData.audience.whoTheyAre || ''}`);
+      if (memberData.audience.dailyFrustration) ctx.push(`THEIR DAILY FRUSTRATION: ${memberData.audience.dailyFrustration}`);
+      if (memberData.audience.dreamOutcome) ctx.push(`THEIR DREAM OUTCOME: ${memberData.audience.dreamOutcome}`);
+      if (memberData.audience.theirWords) ctx.push(`IN THEIR OWN WORDS: "${memberData.audience.theirWords}"`);
+    }
+
+    if (memberData.breakthrough) {
+      ctx.push('');
+      ctx.push(`BREAKTHROUGH TOOL IDENTIFIED: ${memberData.breakthrough.name || ''}`);
+      if (memberData.breakthrough.summary) ctx.push(`TOOL SUMMARY: ${memberData.breakthrough.summary}`);
+      if (memberData.breakthrough.how) ctx.push(`HOW IT WORKS: ${memberData.breakthrough.how}`);
+    }
+
+    const systemPrompt = `You write AI system prompts for solo creators who build tools for their specific audience.
+
+You will receive details about a creator's tool and context about their business. Use ALL of it. Generic output is failure — every line must feel specific to this creator's exact niche, not a fill-in template.
+
+Write a system prompt with these sections in this exact order:
+
+1. IDENTITY (2 sentences) — "You are [Tool Name], a [what it does] for [specific who]. You help [specific person] [specific problem] so they can [specific result]." Use their exact niche words.
+
+2. AUDIENCE CONTEXT (1 short paragraph) — A vivid picture of who this user is and their real situation. Use the creator's words where possible. The AI reads this for empathy — do NOT restate it to the user.
+
+3. HIDDEN EMOTIONAL PREPARATION — Include this block exactly:
+"Before asking your first question, silently identify the top 3 emotional drivers for this user — their core fear, their deepest desire, and the result they most want to brag about. Do NOT show this analysis. Use it to shape how you phrase every question and how you write the final output so it feels personal, not generic."
+
+4. YOUR JOB — What the AI collects via questions and what specific deliverable it produces at the end. Name the output explicitly.
+
+5. INTAKE QUESTIONS — 4–6 specific questions asked ONE AT A TIME. Each must:
+- Sound like it comes from someone who deeply understands this exact audience
+- Use the audience's real language — not generic phrases
+- Directly produce what is needed for a specific named section of the output
+No generic demographics. No vague questions like "describe your goals."
+
+6. CRITICAL RULES — Copy this block exactly, replacing [output name] with the tool's specific output name:
+CRITICAL RULES
+CONVERSATION PHASE: Your only job is to ask the intake questions and collect answers. Do NOT generate the [output name] during this phase.
+When you have received an answer to every single question, write one short closing sentence and add [READY_TO_GENERATE] on its own line. Nothing else.
+GENERATION PHASE: When asked to generate, write the complete [output name] from scratch based on everything shared.
+
+7. OUTPUT FORMAT — The exact named sections of the final output. For each section: its specific name, what goes in it, and any length or format guidance. This is the creator's signature method — make it feel distinct and theirs.
+
+8. TONE — One sentence on voice, specific to this creator's style and their audience's expectations.
+
+Output ONLY the system prompt. Second person ("You are..."). 350–500 words. No preamble, no explanation, no markdown wrapper around the prompt itself.`;
+
+    const userMessage = `Generate a system prompt for this AI tool:
+
+${ctx.join('\n')}
+
+Write the system prompt now.`;
+
+    try {
+      const resp = await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: await authHeaders(),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 2000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userMessage }],
+          _meta: { tool: 'hub-tool-builder' }
+        })
+      });
+
+      if (!resp.ok) throw new Error(`API ${resp.status}`);
+      const data = await resp.json();
+      const promptText = data.content?.map(b => b.type === 'text' ? b.text : '').join('') || '';
+      if (!promptText) throw new Error('Empty response');
+
+      document.getElementById('prompt-output').value = promptText;
+      const resultCard = document.getElementById('result-card');
+      resultCard.classList.add('visible');
+      setTimeout(() => resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+      saveDraft(toolName, promptText);
+
+      generateCount++;
+      const left = MAX_GENERATIONS - generateCount;
+      const regenBtn = document.getElementById('regen-btn');
+      if (left <= 0) {
+        regenBtn.textContent = 'Regeneration limit reached';
+        regenBtn.disabled = true;
+      } else {
+        regenBtn.textContent = `Regenerate (${left} left)`;
+      }
+
+      btn.textContent = 'Regenerate Prompt →';
+      btn.disabled = false;
+
+    } catch(e) {
+      console.error('Generation error:', e);
+      btn.textContent = 'Something went wrong — try again';
+      btn.disabled = false;
+    }
+  }
+
+  // ── COPY ──
+  function copyPrompt() {
+    const text = document.getElementById('prompt-output').value;
+    const btn = document.getElementById('copy-btn');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2500);
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text; document.body.appendChild(el); el.select();
+      document.execCommand('copy'); document.body.removeChild(el);
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2500);
+    });
+  }
+
+  // ── SAVE DRAFT ──
+  async function saveDraft(toolName, promptText) {
+    if (!currentUser) return;
+    try {
+      await db.collection('tool_builder_drafts').doc(currentUser.uid).set({
+        userId: currentUser.uid,
+        toolName,
+        toolType: selectedType,
+        tone: selectedTone,
+        whoFor: document.getElementById('who-for').value.trim(),
+        problem: document.getElementById('real-problem').value.trim(),
+        transformation: document.getElementById('transformation').value.trim(),
+        outputFormat: document.getElementById('output-format').value.trim(),
+        systemPrompt: promptText,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const el = document.getElementById('save-status');
+      if (el) el.style.display = 'inline';
+    } catch(e) {
+      console.error('Save error:', e);
+    }
+  }
+
+  // ── LOAD SAVED DRAFT ──
+  async function loadDraft() {
+    if (!currentUser) return;
+    try {
+      const doc = await db.collection('tool_builder_drafts').doc(currentUser.uid).get();
+      if (!doc.exists) return;
+      const d = doc.data();
+      if (d.toolName)       document.getElementById('tool-name').value = d.toolName;
+      if (d.whoFor)         document.getElementById('who-for').value = d.whoFor;
+      if (d.problem)        document.getElementById('real-problem').value = d.problem;
+      if (d.transformation) document.getElementById('transformation').value = d.transformation;
+      if (d.outputFormat)   document.getElementById('output-format').value = d.outputFormat;
+      if (d.toolType) {
+        const typeBtn = document.querySelector(`.type-btn[data-type="${d.toolType}"]`);
+        if (typeBtn) selectType(typeBtn);
+      }
+      if (d.tone) {
+        const toneBtn = Array.from(document.querySelectorAll('.tone-btn')).find(b => b.dataset.tone === d.tone);
+        if (toneBtn) selectTone(toneBtn);
+      }
+      if (d.systemPrompt) {
+        document.getElementById('prompt-output').value = d.systemPrompt;
+        document.getElementById('result-card').classList.add('visible');
+        document.getElementById('save-status').style.display = 'inline';
+        generateCount = 1;
+        const left = MAX_GENERATIONS - generateCount;
+        document.getElementById('regen-btn').textContent = `Regenerate (${left} left)`;
+        document.getElementById('generate-btn').textContent = 'Regenerate Prompt →';
+      }
+    } catch(e) {
+      console.error('Load error:', e);
+    }
+  }
+
+  // ── AUTH + DATA LOAD ──
+  auth.onAuthStateChanged(async function(user) {
+    if (!user) { window.location.href = '/signon.html?redirect=hub/tool-builder'; return; }
+    currentUser = user;
+
+    const emailLower = (user.email || '').toLowerCase();
+
+    try {
+      const [
+        sparkByUser, sparkByEmail,
+        audByUser, audByEmail,
+        clarityByUser, clarityByEmail, clarityByEmailLower
+      ] = await Promise.all([
+        db.collection('spark_results').where('userId', '==', user.uid).get(),
+        db.collection('spark_results').where('accountEmail', '==', emailLower).get(),
+        db.collection('audience_results').where('userId', '==', user.uid).get(),
+        db.collection('audience_results').where('accountEmail', '==', emailLower).get(),
+        db.collection('clarity_sessions').where('userId', '==', user.uid).get(),
+        db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
+        db.collection('clarity_sessions').where('clientEmailLower', '==', emailLower).get()
+      ]);
+
+      const sparkDocs = mostRecent([sparkByUser, sparkByEmail]);
+      if (sparkDocs.length) memberData.spark = sparkDocs[0].data();
+
+      const audDocs = mostRecent([audByUser, audByEmail]);
+      if (audDocs.length) memberData.audience = audDocs[0].data();
+
+      const clarityDocs = mostRecent([clarityByUser, clarityByEmail, clarityByEmailLower])
+        .filter(d => d.data().actionPlan);
+      if (clarityDocs.length) {
+        const session = clarityDocs[0].data();
+        const tools = parseToolsFromActionPlan(session.actionPlan);
+        const idx = session.chosenTool ? session.chosenTool - 1 : 0;
+        const tool = tools[idx] || tools[0];
+        if (tool && tool.name) memberData.breakthrough = tool;
+      }
+    } catch(e) {
+      console.error('Data load error:', e);
+    }
+
+    renderDataCard();
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    await loadDraft();
+  });
+</script>
+<script src="/js/nav.js"></script>
+<script>initNav('build-agent', 'Tool Builder');</script>
 </body>
 </html>

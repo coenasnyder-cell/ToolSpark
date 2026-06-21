@@ -397,6 +397,7 @@ WHAT'S NEXT: ${next || '(not provided)'}`;
     const toolName = document.getElementById('f-tool-name').value.trim();
     if (!toolName) { showError('Enter a Tool Name first.'); return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     clearError();
     document.getElementById('btn-generate').disabled = true;
     document.getElementById('progress-card').classList.add('visible');

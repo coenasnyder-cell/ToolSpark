@@ -197,6 +197,7 @@
             tier:    data.subscriptionTier  || null,
             credits: typeof data.credits === 'number' ? data.credits : 0,
           };
+          window.dispatchEvent(new CustomEvent('tsUserReady'));
           // Credits chip
           var creditsBtn   = document.getElementById('header-credits');
           var creditsCount = document.getElementById('header-credits-count');
@@ -253,6 +254,172 @@
       }
     });
   }
+
+  // ── CREDIT DEDUCTION ──────────────────────────────────────────────────────
+  // Call from any tool: await window.tsDeductCredits(1) or (5) for expensive tools.
+  // Resolves true if credits were deducted, resolves false if user has no subscription,
+  // and shows the "not enough credits" modal + rejects if balance is insufficient.
+
+  function injectCreditsModal() {
+    if (document.getElementById('ts-credits-modal')) return;
+    var s = document.createElement('style');
+    s.textContent =
+      '#ts-credits-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}' +
+      '#ts-credits-modal{background:#111;border:1px solid rgba(255,200,32,0.25);border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;font-family:"Inter",sans-serif;}' +
+      '#ts-credits-modal h3{color:#fff;font-size:18px;font-weight:700;margin:0 0 10px;}' +
+      '#ts-credits-modal p{color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;margin:0 0 24px;}' +
+      '#ts-credits-modal .ts-credit-balance{display:inline-block;background:rgba(255,200,32,0.1);border:1px solid rgba(255,200,32,0.25);border-radius:8px;padding:8px 16px;color:#FFC820;font-size:13px;font-weight:600;margin-bottom:20px;}' +
+      '#ts-credits-modal .ts-modal-btns{display:flex;gap:10px;justify-content:center;}' +
+      '#ts-credits-modal .ts-btn-upgrade{background:#FFC820;color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}' +
+      '#ts-credits-modal .ts-btn-dismiss{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit;}' +
+      '#ts-credits-modal .ts-btn-dismiss:hover{background:rgba(255,255,255,0.1);}' +
+      '#ts-credits-modal .ts-topup-row{display:flex;gap:8px;margin-bottom:12px;}' +
+      '#ts-credits-modal .ts-btn-topup{flex:1;background:rgba(255,255,255,0.05);color:#fff;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:border-color 0.2s;}' +
+      '#ts-credits-modal .ts-btn-topup:hover{border-color:#FFC820;color:#FFC820;}' +
+      '#ts-credits-modal .ts-topup-label{font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:8px;}';
+    document.head.appendChild(s);
+
+    var TOPUP_URL = 'https://createtopupsession-e6qya4oddq-uc.a.run.app';
+
+    var overlay = document.createElement('div');
+    overlay.id = 'ts-credits-overlay';
+    overlay.style.display = 'none';
+    overlay.innerHTML =
+      '<div id="ts-credits-modal">' +
+        '<div style="font-size:32px;margin-bottom:12px;">⚡</div>' +
+        '<h3>You\'re out of credits</h3>' +
+        '<p>You\'ve used all your credits for this month. Top up now or upgrade for more.</p>' +
+        '<div class="ts-credit-balance" id="ts-credits-balance-display">0 credits remaining</div>' +
+        '<div class="ts-topup-label">Quick top-up (one-time)</div>' +
+        '<div class="ts-topup-row">' +
+          '<button class="ts-btn-topup" id="ts-topup-25">25 credits — $5</button>' +
+          '<button class="ts-btn-topup" id="ts-topup-60">60 credits — $10</button>' +
+        '</div>' +
+        '<div class="ts-modal-btns">' +
+          '<a href="pricing.html" class="ts-btn-upgrade">Upgrade Plan</a>' +
+          '<button class="ts-btn-dismiss" id="ts-credits-dismiss">Maybe Later</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    document.getElementById('ts-credits-dismiss').addEventListener('click', function() {
+      overlay.style.display = 'none';
+    });
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.style.display = 'none';
+    });
+
+    function handleTopup(bundle) {
+      return async function() {
+        var btn = document.getElementById('ts-topup-' + bundle);
+        btn.textContent = 'Redirecting…';
+        btn.disabled = true;
+        try {
+          var user = firebase.auth().currentUser;
+          if (!user) { window.location.href = 'pricing.html'; return; }
+          var idToken = await user.getIdToken();
+          var res = await fetch(TOPUP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({ bundle: bundle })
+          });
+          var data = await res.json();
+          if (data.url) { window.location.href = data.url; return; }
+          throw new Error('no url');
+        } catch(e) {
+          btn.textContent = bundle === 25 ? '25 credits — $5' : '60 credits — $10';
+          btn.disabled = false;
+        }
+      };
+    }
+    document.getElementById('ts-topup-25').addEventListener('click', handleTopup(25));
+    document.getElementById('ts-topup-60').addEventListener('click', handleTopup(60));
+  }
+
+  function showCreditsModal(currentBalance) {
+    injectCreditsModal();
+    var display = document.getElementById('ts-credits-balance-display');
+    if (display) display.textContent = (currentBalance || 0) + ' credits remaining';
+    document.getElementById('ts-credits-overlay').style.display = 'flex';
+  }
+
+  // Tier gate — call once per gated page: window.tsGatePage('premium') or tsGatePage('advanced').
+  // Admins always pass. Non-qualifying tiers see a full-screen upgrade lock.
+  var TIER_ORDER = { starter: 1, premium: 2, advanced: 3 };
+  function showTierLock(minTier) {
+    var label = minTier === 'advanced' ? 'Advanced' : 'Premium or Advanced';
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(12,11,9,0.96);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Inter,sans-serif;';
+    overlay.innerHTML =
+      '<div style="text-align:center;padding:40px;max-width:400px;">' +
+        '<div style="font-size:44px;margin-bottom:16px;">🔒</div>' +
+        '<h2 style="color:#FFC820;font-size:22px;margin:0 0 12px;font-weight:700;">Upgrade Required</h2>' +
+        '<p style="color:#bbb;margin:0 0 28px;line-height:1.6;font-size:15px;">This tool is available on the <strong style="color:#fff;">' + label + '</strong> plan.</p>' +
+        '<a href="pricing.html" style="display:inline-block;background:#FFC820;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:15px;">View Plans →</a>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  }
+  window.tsGatePage = function(minTier) {
+    function check() {
+      if (!window.tsUser) { showTierLock(minTier); return; }
+      if (window.tsUser.role === 'admin') return;
+      var userLevel = TIER_ORDER[window.tsUser.tier] || 0;
+      var required  = TIER_ORDER[minTier] || 1;
+      if (userLevel < required) showTierLock(minTier);
+    }
+    if (window.tsUser !== undefined) { check(); return; }
+    window.addEventListener('tsUserReady', check, { once: true });
+  };
+
+  // Global credit deduction function — call from any tool before the AI request.
+  // cost: number of credits (1 for standard tools, 5 for expensive tools)
+  // Returns a promise that resolves to true on success.
+  // Shows the credits modal and rejects on insufficient balance.
+  // Skips deduction entirely for admin users (window.tsUser.role === 'admin').
+  window.tsDeductCredits = function(cost) {
+    return new Promise(function(resolve, reject) {
+      // Admins bypass credit checks
+      if (window.tsUser && window.tsUser.role === 'admin') {
+        resolve(true);
+        return;
+      }
+
+      // No subscription — redirect to pricing
+      if (!window.tsUser || !window.tsUser.tier) {
+        window.location.href = 'pricing.html';
+        reject(new Error('no_subscription'));
+        return;
+      }
+
+      // Optimistic client-side check to give instant feedback
+      if (window.tsUser.credits < cost) {
+        showCreditsModal(window.tsUser.credits);
+        reject(new Error('insufficient_credits'));
+        return;
+      }
+
+      // Server-side deduction (transaction-safe)
+      var deductFn = firebase.functions().httpsCallable('deductCredits');
+      deductFn({ cost: cost })
+        .then(function(result) {
+          // Update local balance so UI reflects it immediately
+          if (window.tsUser && typeof result.data.creditsRemaining === 'number') {
+            window.tsUser.credits = result.data.creditsRemaining;
+          }
+          resolve(true);
+        })
+        .catch(function(err) {
+          if (err.code === 'functions/resource-exhausted') {
+            showCreditsModal(window.tsUser ? window.tsUser.credits : 0);
+            reject(new Error('insufficient_credits'));
+          } else {
+            // Non-credit error (network, etc.) — don't block the tool, just log it
+            console.warn('tsDeductCredits error:', err.message);
+            resolve(true);
+          }
+        });
+    });
+  };
 
   window.initNav = function(activeKey, pageTitle) {
     injectHeaderStyles();

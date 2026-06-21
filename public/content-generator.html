@@ -658,6 +658,7 @@ COMMENTS_3_END`;
       if (!autoTopic && !topic) { document.getElementById('topic-input').focus(); return; }
     }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     const btn = document.getElementById('generate-btn');
     const spinner = document.getElementById('btn-spinner');
     const btnText = document.getElementById('btn-text');

@@ -884,7 +884,7 @@
       }, 950);
 
       // Tell the AI to return structured JSON so we can render cards
-      const jsonInstruction = '\n\n---\nReturn your response as valid JSON only — no markdown, no prose outside the JSON. Use this exact structure:\n{"headline":"string","subtitle":"string","status_chip":"string","items":[{"label":"string","tag":"string","title":"string","subtitle":"string","bullets":["string"]}],"tips":{"title":"string","items":["string"],"footer_label":"string","footer_value":"string"}}';
+      const jsonInstruction = '\n\n---\nReturn your response as raw valid JSON only. Do NOT wrap in markdown code fences. Do NOT include any text before or after the JSON. Start your response with { and end with }. Use this exact structure:\n{"headline":"string","subtitle":"string","status_chip":"string","items":[{"label":"string","tag":"string","title":"string","subtitle":"string","bullets":["string"]}],"tips":{"title":"string","items":["string"],"footer_label":"string","footer_value":"string"}}';
 
       const fn = functions.httpsCallable('callCreatorTool');
       fn({
@@ -912,9 +912,8 @@
 
     function tryParseGenJSON(raw) {
       try {
-        let cleaned = raw
-          .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '')
-          .trim();
+        let cleaned = (raw || '').trim();
+        cleaned = cleaned.replace(/^```(?:json)?\s*/im, '').replace(/```\s*$/im, '').trim();
         const match = cleaned.match(/\{[\s\S]*\}/);
         if (match) cleaned = match[0];
         return JSON.parse(cleaned);

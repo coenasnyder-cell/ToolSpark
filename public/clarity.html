@@ -666,7 +666,8 @@ const CHIPS_BY_PHASE = {
 // ══════════════════════════════════════════
 // START SESSION
 // ══════════════════════════════════════════
-function startSession() {
+async function startSession() {
+  try { await window.tsDeductCredits(5); } catch(e) { return; }
   displayName = document.getElementById('s_displayName').value.trim() || 'there';
 
   const ss = document.getElementById('start-screen');

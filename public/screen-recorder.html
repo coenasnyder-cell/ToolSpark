@@ -647,6 +647,7 @@
 
     if (!toolName) { status.className = 'save-status err'; status.textContent = 'Enter a tool name first.'; return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     btn.disabled = true;
     btn.textContent = 'Generating...';
     status.className = 'save-status';
@@ -738,6 +739,7 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
 
     if (!d.toolName) { status.className = 'save-status err'; status.textContent = 'Fill in Tool Name first.'; return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     btn.disabled = true;
     btn.textContent = 'Generating...';
     status.className = 'save-status';

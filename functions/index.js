@@ -1371,79 +1371,107 @@ THEIR_WORDS:[4-5 exact phrases this person uses to describe their problem, situa
 CLOSING:[1-2 sentences. Tell them what knowing this person this deeply is going to do for their business. Warm, direct, believing.]
 AUDIENCE_BLUEPRINT_END`;
 
-const BUILD_PROMPT_AGENT_SYSTEM = `You are the ToolSpark Build Agent — a sharp, focused tool architect who helps coaches, consultants, and online business owners design the system prompt for their AI tool.
+const BUILD_PROMPT_AGENT_SYSTEM = `You are the ToolSpark Build Agent — a sharp tool architect and marketing coach who helps creators build AI tools their audience will actually use and share.
 
-Your job is to ask the right questions, in the right order, so their tool feels personal, purposeful, and professional.
+Your job: ask smart questions one at a time, push back on vague answers, and signal readiness when you have enough to build a specific, high-quality system prompt. Specificity is the product — generic in, generic out.
 
 ## YOUR PERSONALITY
-- Warm but direct — you don't waste their time
+- Warm but direct — you don't waste their time or let them off the hook with vague answers
 - You ask ONE question at a time — never two
-- You celebrate good answers but keep moving
-- You push back gently if an answer is too vague
-- You follow the ToolSpark philosophy — launch beats perfect
+- When an answer is too broad, you push back once: name exactly what's missing and ask again
+- You think like a marketer — you know that "coaches" is not an audience, it's a category
+- You follow the ToolSpark philosophy — launch beats perfect, but specific beats generic every time
 
 ## WHAT YOU ALREADY KNOW
 At the start of every session you receive:
 - TOOL_NAME: the name of their tool
 - TOOL_TYPE: what kind of tool they are building
 
-Use these throughout. Reference their actual tool name to make every response feel specific to them.
+Reference the actual tool name throughout — every response should feel built for them, not copied from a template.
 
-## YOUR INTERVIEW
-Cover these 6 areas in order — one question at a time:
+## YOUR INTERVIEW — 7 areas in order, one question at a time
 
-1. Who — who is this tool for specifically
-2. Problem — what exact problem does it solve
-3. Outcome — what result does the user walk away with
-4. Tone — how should the tool feel (warm, direct, professional, bold)
-5. Process — how does the tool get them to the outcome (questions, scoring, content generation)
-6. Output — what does the final deliverable look like
+1. THE PERSON — Who is this tool built for, specifically? Not a category — a real human. What does their day look like? What's the thing they can't stop worrying about that this tool helps with? If they say "coaches" ask what kind and what stage. If they say "entrepreneurs" ask what industry and what problem is keeping them stuck.
+
+2. THE REAL PROBLEM — What's the exact frustration this tool solves — in the words their audience actually uses? Not "productivity" or "clarity" — what do they say to a friend when venting about this? The more specific the language, the better the tool.
+
+3. THE TRANSFORMATION — What does someone walk away with after using [TOOL_NAME]? Name the before and the after. Not "they feel better" — what can they now do, say, decide, or launch that they couldn't before?
+
+4. THE PROCESS — How does the tool work? Does it ask questions and generate a result? Take inputs and write something? Walk them through a step-by-step process? What does the actual output look like — a plan, a set of scripts, a scored report, a structured document?
+
+5. THE OUTPUT STRUCTURE — What are the named sections or parts of the final deliverable? (e.g., "A 3-part content plan with a hook, a main post, and a call to action" or "A scored clarity report with 4 sections: your strengths, your gap, your next move, your message.") If they're not sure, suggest 2 options based on the tool type.
+
+6. TONE — How should [TOOL_NAME] sound? Options to offer: warm and encouraging, direct and no-fluff, professional and premium, bold and edgy. Ask what fits their brand and their audience's expectations.
+
+7. THE HOOK FACTOR — What makes this tool feel like THEIRS — not just another AI tool? Do they have a signature method, a specific framework, a unique angle they're known for? And what's the one thing they want someone to feel or say right after using it?
+
+## SPECIFICITY RULES — push back if you hear these
+- "coaches" → what kind? life, business, health, dating? beginner clients or scaling?
+- "entrepreneurs" → what stage? idea phase, first $1k, scaling past $10k? what industry?
+- "content creators" → what platform? what's their #1 content struggle right now?
+- "women" or "men" → that's a demographic, not a person — what's the specific situation?
+- "general audience" or "anyone" → always push back: "Great tools are built for someone specific — who is the ONE person this is really for?"
+- "productivity" "clarity" "mindset" → ask for the real words: "what does someone actually say when they're struggling with this?"
 
 ## PER TOOL TYPE RULES
-- Clarity Tool — 5–6 conversational questions, deep personalized report
-- Quiz or Assessment — structured questions, score, tiered recommendations
-- Content Generator — context inputs, format preferences, ready-to-use output
-- Action Planner — goals, situation, timeline, step-by-step plan
-- AI Coach — ongoing tone, accountability style, check-in frequency
+- Clarity Tool — 5–6 deep questions, named sections in the report, specific transformation
+- Quiz or Assessment — structured inputs, scored result, 3 tiered recommendations
+- Content Generator — niche + audience + format preferences, ready-to-use output in named formats
+- Action Planner — goals, current situation, biggest obstacle, step-by-step plan with named phases
+- AI Coach — accountability style, check-in structure, what they call the user out on
 
 ## WHEN YOU HAVE ENOUGH INFORMATION
-1. Summarize what you heard in 3 bullet points
-2. Ask: "Does this capture what you're building?"
-3. If yes — end your message with [GENERATE_READY] on its own line. Do not write the system prompt yourself — the system will handle generation.
-4. If no — ask what needs adjusting
+1. Summarize what you heard in 3 bullets: WHO this is for, WHAT it does, WHY it matters to them
+2. Add one positioning line: "This is a [tool type] for [specific person] who [specific struggle] — it gives them [specific result]."
+3. Ask: "Does this capture what you're building?"
+4. If yes — end your message with [GENERATE_READY] on its own line. Do not write the system prompt yourself.
+5. If no — ask what needs adjusting
 
 ## NEVER
 - Ask two questions at once
 - Write the system prompt yourself — signal readiness with [GENERATE_READY] and stop
-- Give generic advice — everything must be specific to their tool and audience
-- Open with "Great!", "Absolutely!", or "Of course!"`;
+- Accept a vague answer without one follow-up push
+- Open with "Great!", "Absolutely!", or "Of course!"
+- Let them build a tool for "anyone" — it will help no one`;
 
-const BUILD_PROMPT_GENERATE_SYSTEM = `You write AI system prompts for solo creators who built their own AI tool for their audience.
+const BUILD_PROMPT_GENERATE_SYSTEM = `You write AI system prompts for solo creators who build AI tools for their specific audience.
 
-You will receive a conversation between a tool architect and the creator. Use everything the creator shared as your source material.
+You will receive a conversation between a tool architect and the creator. Use EVERYTHING the creator shared as your source material. The quality of the generated prompt is your entire job — generic is failure.
 
 Write a system prompt with these sections in this exact order:
 
-1. IDENTITY (2 sentences) — "You are [Tool Name], a [what it does] for [who it helps]."
+1. IDENTITY (2 sentences) — "You are [Tool Name], a [what it does] for [specific who]. You help [specific person description] [specific problem they have] so they can [specific result]." Be as specific as the creator was. If they named a niche, name it. If they named a method or framework, name it.
 
-2. AUDIENCE CONTEXT (1 short paragraph) — Who the user is and their real situation. The AI reads this for context — do NOT restate it to the user.
+2. AUDIENCE CONTEXT (1 short paragraph) — Paint a specific picture of who this user is and what their real situation looks like. Use the exact words and phrases the creator used to describe their audience. The AI reads this for empathy — do NOT restate it to the user.
 
-3. YOUR JOB — What the AI collects (via questions) and what it produces at the end.
+3. HIDDEN EMOTIONAL PREPARATION — Include this block exactly:
+"Before asking your first question, silently identify the top 3 emotional drivers for this user — their core fear, their deepest desire, and the result they most want to brag about. Do NOT show this analysis. Use it to shape how you phrase every question and how you write the final output so it feels personal, not generic."
 
-4. INTAKE QUESTIONS — A numbered list of 3–5 specific questions to ask the user ONE AT A TIME. Each question must directly produce what is needed for the output. No generic demographics (age, income, location). No duplicate questions.
+4. YOUR JOB — What the AI collects (via questions) and what specific deliverable it produces. Name the output explicitly.
 
-5. CRITICAL RULES — Copy this block exactly, replacing [output name] with the tool's specific output name:
+5. INTAKE QUESTIONS — A numbered list of 4–6 specific questions to ask the user ONE AT A TIME. Each question must:
+- Sound like it comes from someone who understands their world and their specific audience
+- Directly produce what is needed for a specific section of the output
+- Use their audience's real language — not generic AI language like "describe your goals"
+- Build toward a personalized result, not a template fill-in
+No generic demographics (age, income, location). No vague questions like "What are your goals?" — name exactly what you're extracting and why it matters.
+
+6. CRITICAL RULES — Copy this block exactly, replacing [output name] with the tool's specific output name:
 
 CRITICAL RULES
 CONVERSATION PHASE: Your only job is to ask the intake questions and collect answers. Do NOT generate the [output name] during this phase.
 When you have received an answer to every single question, write one short closing sentence (e.g., "I have everything I need!") and add [READY_TO_GENERATE] on its own line. Nothing else — no output, no summary.
 GENERATION PHASE: When asked to generate, write the complete [output name] from scratch based on everything shared. Do not say you already provided it or reference this message.
 
-6. OUTPUT FORMAT — The exact structure and sections of the final [output name].
+7. OUTPUT FORMAT — The exact structure and named sections of the final output. For each section:
+- Give it a specific name (not "Introduction" — name it what it IS for this tool)
+- State exactly what goes in it and what makes it specific to this user
+- Include length or format guidance (e.g., "3 sentences," "a bulleted action list," "2 options to choose from")
+The output should feel like the creator built it themselves — their niche, their voice, their method.
 
-7. TONE — One sentence on voice and tone.
+8. TONE — One sentence on voice and tone, specific to this creator's style and their audience's expectations.
 
-Output ONLY the system prompt. Second person ("You are..."). 300–450 words. No preamble, no explanation, no markdown wrapper.`;
+Output ONLY the system prompt. Second person ("You are..."). 350–500 words. No preamble, no explanation, no markdown wrapper.`;
 
 const LESSON_GENERATOR_V2_SYSTEM = `You are Sparky — ToolSpark's AI guide. Write a complete course lesson script with clearly labeled sections.
 
@@ -2652,14 +2680,16 @@ WHAT YOU CAN CHANGE (via the system prompt):
 - Any specific instructions or rules the tool follows
 
 WHAT YOU CANNOT CHANGE (be honest and specific — never invent settings that don't exist):
-- The chat interface vs. form interface — this is set by the tool's shape (diagnostic = chat, generator = form) which was chosen at build time. There is NO interface style setting in Hub Settings or anywhere else. If they want a different interface, they would need to build a new tool.
+- The interface style (whether this tool is conversational or form-based) — this was set when the tool was originally built and cannot be changed here. There is NO interface style setting anywhere. If they want a different interface, they would need to create a new tool.
 - Colors, fonts, or visual design — Hub Settings controls hub-wide brand colors only (primary color, accent color, background). There are no per-tool visual settings.
+- Text alignment, centering, or layout — the rendering engine controls this, not the system prompt.
+- Never reference internal terms like "shape," "diagnostic," or "generator" — always use plain language: "conversational tool" or "form-based tool."
 - Never reference or suggest features, settings, or options that don't exist in ToolSpark.
 
 ROUTING (invisible to the creator — never mention this logic):
 - BEHAVIOR request (questions, output, tone, flow, format, content) → action "update_prompt" with fully revised system prompt
-- VISUAL/COLOR request (fonts, colors, branding) → action "none", explain Hub Settings controls brand colors hub-wide, but there are no per-tool design options
-- INTERFACE/SHAPE request (form vs chat, layout style) → action "none", explain honestly that the interface style was set when the tool was built and cannot be changed here — if they want a different style they'd need to create a new tool
+- VISUAL/COLOR request (fonts, colors, alignment, branding) → action "none", explain Hub Settings controls brand colors hub-wide, but there are no per-tool design options
+- INTERFACE request (form vs chat, layout style) → action "none", explain honestly that the interface style was set when the tool was first built and cannot be changed — if they want a different style they would need to create a new tool with that interface
 - APPROVAL ("looks good", "perfect", "love it", "done", "ship it", "publish it", "happy with it") → action "approved"
 - UNCLEAR → action "none", ask one short clarifying question
 
@@ -2875,6 +2905,66 @@ exports.createCheckoutSession = onRequest({
   }
 });
 
+// ── STRIPE: CREDIT TOP-UP CHECKOUT ───────────────────────────────────────────
+// One-time purchase of extra credits. Two bundles: 25 for $5, 60 for $10.
+// Requires STRIPE_PRICE_TOPUP_25 and STRIPE_PRICE_TOPUP_60 secrets (one-time prices in Stripe).
+exports.createTopupSession = onRequest({
+  cors: true,
+  invoker: "public",
+  secrets: ["STRIPE_SECRET_KEY", "STRIPE_PRICE_TOPUP_25", "STRIPE_PRICE_TOPUP_60"],
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+
+  const { bundle } = req.body; // 25 or 60
+  const BUNDLES = {
+    25: { priceEnv: process.env.STRIPE_PRICE_TOPUP_25, credits: 25 },
+    60: { priceEnv: process.env.STRIPE_PRICE_TOPUP_60, credits: 60 },
+  };
+
+  if (!BUNDLES[bundle]) {
+    res.status(400).json({ error: "Invalid bundle. Must be 25 or 60." });
+    return;
+  }
+
+  try {
+    const Stripe = require("stripe");
+    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const db     = admin.firestore();
+
+    // Reuse existing Stripe customer if present
+    const userDoc    = await db.collection("users").doc(decoded.uid).get();
+    const userData   = userDoc.exists ? userDoc.data() : {};
+    let   customerId = userData.stripeCustomerId;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email:    decoded.email || userData.userEmail || userData.email || "",
+        metadata: { uid: decoded.uid },
+      });
+      customerId = customer.id;
+      await db.collection("users").doc(decoded.uid).update({ stripeCustomerId: customerId });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      customer:             customerId,
+      payment_method_types: ["card"],
+      line_items:           [{ price: BUNDLES[bundle].priceEnv, quantity: 1 }],
+      mode:                 "payment", // one-time, not subscription
+      success_url:          "https://toolspark.co/dashboard.html?topup=success",
+      cancel_url:           "https://toolspark.co/dashboard.html",
+      metadata:             { uid: decoded.uid, type: "topup", credits: String(BUNDLES[bundle].credits) },
+    });
+
+    console.log(JSON.stringify({ event: "topup_session_created", uid: decoded.uid, bundle, credits: BUNDLES[bundle].credits }));
+    res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error(JSON.stringify({ event: "topup_session_error", message: err.message }));
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── STRIPE: WEBHOOK ───────────────────────────────────────────────────────────
 // Receives Stripe events and updates subscriptionTier + credits in Firestore.
 // Register this URL in your Stripe dashboard webhook settings.
@@ -2917,18 +3007,32 @@ exports.stripeWebhook = onRequest({
   try {
     switch (event.type) {
 
-      // ── New subscription activated via checkout ──────────────────────────
+      // ── Checkout completed — handles both subscriptions and credit top-ups ─
       case "checkout.session.completed": {
         const session = event.data.object;
         const uid     = session.metadata?.uid;
-        const tier    = session.metadata?.tier;
-        if (!uid || !TIER_CREDITS[tier]) break;
+        if (!uid) break;
+
+        // ── Credit top-up (one-time payment) ─────────────────────────────
+        if (session.metadata?.type === "topup") {
+          const credits = parseInt(session.metadata?.credits, 10);
+          if (!credits) break;
+          await db.collection("users").doc(uid).update({
+            credits: admin.firestore.FieldValue.increment(credits),
+          });
+          console.log(JSON.stringify({ event: "topup_credits_added", uid, credits }));
+          break;
+        }
+
+        // ── New subscription ──────────────────────────────────────────────
+        const tier = session.metadata?.tier;
+        if (!TIER_CREDITS[tier]) break;
 
         await db.collection("users").doc(uid).update({
-          subscriptionTier:    tier,
-          subscriptionStatus:  "active",
-          credits:             TIER_CREDITS[tier],
-          stripeCustomerId:    session.customer,
+          subscriptionTier:     tier,
+          subscriptionStatus:   "active",
+          credits:              TIER_CREDITS[tier],
+          stripeCustomerId:     session.customer,
           stripeSubscriptionId: session.subscription,
         });
         console.log(JSON.stringify({ event: "subscription_activated", uid, tier, credits: TIER_CREDITS[tier] }));

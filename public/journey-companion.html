@@ -520,6 +520,7 @@
 
   // ── START ──
   async function startCompanion(mode = 'text') {
+    try { await window.tsDeductCredits(5); } catch(e) { return; }
     voiceMode = mode === 'voice';
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('chat-ui').style.display = 'flex';

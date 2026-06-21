@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   const firebaseConfig = {
@@ -446,7 +447,7 @@
     try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r)=>setTimeout(()=>r(),3000))]); acToken = t?.token||""; } catch(e) {}
     return { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, "X-Firebase-AppCheck": acToken };
   }
-  const MODEL = "claude-sonnet-4-6";
+  const MODEL = "claude-opus-4-8";
   const ADVISOR_SECTIONS = [
     { key: "contrarian", header: "THE CONTRARIAN", name: "The Contrarian" },
     { key: "firstPrinciples", header: "THE FIRST PRINCIPLES THINKER", name: "The First Principles Thinker" },
@@ -588,6 +589,26 @@
       return;
     }
 
+    const userDoc = await db.collection('users').doc(currentUser.uid).get();
+    const ud = userDoc.exists ? userDoc.data() : {};
+    const isAdmin = ud.userRole === 'admin';
+    const tier = ud.subscriptionTier || null;
+    if (!isAdmin && tier !== 'premium' && tier !== 'advanced') {
+      status.textContent = "The Spark Council is available on Premium and Advanced plans. Upgrade at any time from the Plans & Credits page.";
+      return;
+    }
+
+    if (!isAdmin) {
+      try {
+        const deductFn = firebase.functions().httpsCallable('deductCredits');
+        await deductFn({ cost: 5 });
+      } catch(e) {
+        status.textContent = e.message && e.message.includes('credits')
+          ? "Not enough credits. Upgrade your plan to continue."
+          : "Something went wrong. Please try again.";
+        return;
+      }
+    }
     button.disabled = true;
     button.textContent = "Convening...";
     status.textContent = "The council is in session. Gathering all six voices now.";

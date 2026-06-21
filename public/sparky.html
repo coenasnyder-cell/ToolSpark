@@ -825,6 +825,7 @@ async function handleSend() {
   const text  = input.value.trim();
   if (!text) return;
 
+  try { await window.tsDeductCredits(1); } catch(e) { return; }
   input.value = ""; input.style.height = "auto";
   document.getElementById("sendBtn").disabled = true;
 

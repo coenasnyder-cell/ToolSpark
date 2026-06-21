@@ -524,6 +524,7 @@ THUMBNAIL_END`;
     var script = document.getElementById('script-input').value.trim();
     if (!script) { document.getElementById('script-input').focus(); return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     var platform = getSelected('platform-row', 'platform') || 'tiktok';
     var niche = document.getElementById('niche-input').value.trim();
 

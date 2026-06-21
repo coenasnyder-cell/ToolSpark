@@ -1063,6 +1063,7 @@ auth.onAuthStateChanged(function(user) {
 });
 
 async function startSpark() {
+  try { await window.tsDeductCredits(5); } catch(e) { return; }
   const welcome = document.getElementById('sparkwelcome');
   welcome.classList.add('hidden');
   setTimeout(() => { welcome.style.display = 'none'; }, 460);

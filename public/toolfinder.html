@@ -1241,6 +1241,14 @@ TOOL_REPORT_END`;
     status.textContent = "Generating the report shell and preparing your results.";
 
     try {
+      await window.tsDeductCredits(5);
+    } catch(e) {
+      button.disabled = false;
+      button.textContent = "Show My Results →";
+      return;
+    }
+
+    try {
       console.log("Tool Finder lead captured:", { firstName: lead.firstName, email: lead.email, tag: "breakthrough-public" });
       await saveLeadContactPlaceholder();
       const rawReport = await runReport();

@@ -279,6 +279,7 @@ auth.onAuthStateChanged(async function(user) {
 });
 
 async function generateJourney(user) {
+  try { await window.tsDeductCredits(1); } catch(e) { hideEl('loading-screen'); showEl('lock-screen', 'flex'); return; }
   showEl('loading-screen', 'flex');
   hideEl('results-screen');
   setStep('Reading your profile…', 'Pulling your Spark Statement and audience data');
@@ -491,6 +492,7 @@ async function regenerate() {
 }
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('journey-builder', 'Journey Builder');</script>
+<script>initNav('journey-builder', 'Journey Builder');
+window.tsGatePage('premium');</script>
 </body>
 </html>

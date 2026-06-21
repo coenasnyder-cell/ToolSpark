@@ -335,6 +335,7 @@ WHAT\'S NEXT: ${d.whatsNext || '(not provided)'}`;
 
     if (!d.toolName) { status.className = 'status-msg err'; status.textContent = 'Enter your Tool Name first.'; return; }
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     btn.disabled = true;
     btn.textContent = 'Generating...';
     status.className = 'status-msg';

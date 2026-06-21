@@ -620,6 +620,7 @@ auth.onAuthStateChanged(async function(user) {
 
 // ── GENERATE ──────────────────────────────────────────────────
 async function generatePage() {
+  try { await window.tsDeductCredits(1); } catch(e) { return; }
   var proof   = document.getElementById('q-proof').value.trim();
   var payment = document.getElementById('q-payment').value.trim();
 
@@ -738,7 +739,7 @@ async function generatePage() {
       headers: await authHeaders(),
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 2500,
+        max_tokens: 1500,
         system: 'You are a conversion copywriter. Follow the SECTION:KEY format exactly. No markdown headers, no extra formatting.',
         messages: [{ role: 'user', content: lines.join('\n') }],
         _meta: { tool: 'sales-page-builder', userId: currentUser && currentUser.uid }
@@ -879,6 +880,7 @@ function regenerate() {
 }
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('sales-page-builder', 'Sales Page Builder');</script>
+<script>initNav('sales-page-builder', 'Sales Page Builder');
+window.tsGatePage('premium');</script>
 </body>
 </html>

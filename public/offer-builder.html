@@ -550,6 +550,7 @@
   }
 
   async function generateOutput() {
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     var inputArea = document.getElementById('chat-input-area');
     inputArea.innerHTML = '<div class="gen-row"><div class="gen-dots"><span></span><span></span><span></span></div><span>Building your offer...</span></div>';
     addSparkyMsg('Got everything I need. Calculating your pricing now...');
@@ -713,6 +714,7 @@
   }
 
   initNav('offer-builder', 'Offer Builder');
+  window.tsGatePage('premium');
 </script>
 </body>
 </html>

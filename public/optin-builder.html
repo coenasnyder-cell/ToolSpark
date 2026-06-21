@@ -509,6 +509,7 @@
 <script src="js/nav.js"></script>
 <script>
 initNav('courses', 'Opt-In Page Builder');
+window.tsGatePage('advanced');
 
 var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
 var MODEL = 'claude-sonnet-4-6';
@@ -600,6 +601,7 @@ async function generate() {
     return;
   }
 
+  try { await window.tsDeductCredits(1); } catch(e) { return; }
   showOnly('step2-loading');
   setStep(2);
 

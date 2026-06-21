@@ -440,6 +440,7 @@
       .replace(/\{\{obstacle_remover\}\}/g, obstacle)
       .replace(/\{\{dump_list\}\}/g, dumpListText);
 
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     document.getElementById('sort-btn').disabled = true;
     document.getElementById('gen-state').classList.add('visible');
     document.getElementById('error-msg').style.display = 'none';
@@ -621,6 +622,7 @@
   }
 
   initNav('offer-sort', 'Offer Sort');
+  window.tsGatePage('premium');
 </script>
 </body>
 </html>

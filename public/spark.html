@@ -1008,7 +1008,8 @@ auth.onAuthStateChanged(function(user) {
   }
 });
 
-function startSpark() {
+async function startSpark() {
+  try { await window.tsDeductCredits(5); } catch(e) { return; }
   unlockAudio();
   const welcome = document.getElementById('sparkwelcome');
   welcome.classList.add('hidden');

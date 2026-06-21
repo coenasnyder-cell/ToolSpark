@@ -415,7 +415,7 @@
 <script>
   var currentUser = null;
   var FUNCTION_URL = 'https://analyze-e6qya4oddq-uc.a.run.app';
-  var MODEL = 'claude-sonnet-4-6';
+  var MODEL = 'claude-haiku-4-5-20251001';
 
   var fData = {
     toolName: '', toolDescription: '', toolPrice: '',
@@ -624,6 +624,7 @@
 
   // ── GENERATE ──
   async function generate() {
+    try { await window.tsDeductCredits(1); } catch(e) { return; }
     var brandName      = fData.brandName || 'Your Brand';
     var primaryColor   = document.getElementById('q2-primary').value;
     var accentColor    = document.getElementById('q2-accent').value;
@@ -1070,6 +1071,7 @@
   }
 
   initNav('funnel-generator', 'Funnel Generator');
+  window.tsGatePage('advanced');
 </script>
 </body>
 </html>
