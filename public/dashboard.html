@@ -380,6 +380,13 @@
 
   <div class="page-content">
 
+    <!-- CHECKOUT SUCCESS BANNER -->
+    <div id="checkout-success-banner" style="display:none;align-items:center;gap:12px;background:rgba(42,92,69,0.12);border:1px solid rgba(42,92,69,0.3);border-radius:12px;padding:14px 20px;font-size:14px;color:#5ac48a;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+      <div><strong style="color:#5ac48a;">You're subscribed!</strong> Your plan is active and credits have been added to your account. <a href="pricing.html" style="color:#5ac48a;font-weight:700;">View your plan →</a></div>
+      <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:#5ac48a;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;">×</button>
+    </div>
+
     <!-- WELCOME -->
     <div class="welcome-card">
       <div>
@@ -666,6 +673,12 @@
     const name = user.displayName || user.email || 'Builder';
     const first = name.split(' ')[0];
     document.getElementById('welcome-heading').textContent = 'Welcome back, ' + first + ' 👋';
+
+    // Show success banner if redirected from Stripe checkout
+    if (window.location.search.includes('checkout=success')) {
+      document.getElementById('checkout-success-banner').style.display = 'flex';
+      window.history.replaceState({}, '', 'dashboard.html');
+    }
     document.getElementById('sidebar-name').textContent = name;
 
     // Avatar
