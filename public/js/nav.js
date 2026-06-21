@@ -113,10 +113,10 @@
       '.logo-text span{color:#FFC820!important;}' +
       '.logo-tag{color:rgba(255,255,255,0.35)!important;}' +
       /* ── Sidebar nav items ── */
-      '.nav-item{color:rgba(255,255,255,0.55)!important;}' +
+      '.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;}' +
       '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
       '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;border-color:rgba(255,200,32,0.2)!important;}' +
-      '.nav-icon{width:18px;height:18px;flex-shrink:0;opacity:0.6;}' +
+      '.nav-icon{width:20px;height:20px;flex-shrink:0;opacity:0.6;}' +
       '.nav-item:hover .nav-icon,.nav-item.active .nav-icon{opacity:1;}' +
       /* ── Sidebar user area ── */
       '.user-name{color:#fff!important;}' +
