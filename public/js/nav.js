@@ -180,6 +180,12 @@
         // Admin + onboarding check
         firebase.firestore().collection('users').doc(user.uid).get().then(function(snap) {
           var data = snap.exists ? snap.data() : {};
+          // Expose subscription info globally so any page can gate without a second Firestore read
+          window.tsUser = {
+            role:    data.userRole          || null,
+            tier:    data.subscriptionTier  || null,
+            credits: typeof data.credits === 'number' ? data.credits : 0,
+          };
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
             revealNav();

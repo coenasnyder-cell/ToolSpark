@@ -71,6 +71,9 @@ node_modules/
 # Claude Code
 .agents/
 skills-lock.json
+.claude/
+.continue/
+.windsurf/
 
 # Video files
 videos/
