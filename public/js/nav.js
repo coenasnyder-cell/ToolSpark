@@ -35,6 +35,10 @@
       key: 'marketplace', href: 'marketplace.html', label: 'Marketplace',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
     },
+    {
+      key: 'pricing', href: 'pricing.html', label: 'Plans & Credits',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+    },
   ];
 
   var START_HERE_URL = 'course.html?courseId=JQYsP0RQUPWZ0twQtiQg&lessonId=XQW5SV09fR0fuvkaHT50';
@@ -98,6 +102,12 @@
       '.header-auth-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.5);transition:all 0.15s;font-family:inherit;text-decoration:none;}' +
       '.header-auth-btn:hover{border-color:rgba(255,200,32,0.4);color:#FFC820;}' +
       '.mobile-bottom-nav{-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;}' +
+      /* ── Credits chip ── */
+      '.header-credits{display:none;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,200,32,0.08);border:1px solid rgba(255,200,32,0.2);border-radius:100px;font-size:12px;font-weight:700;color:#FFC820;text-decoration:none;transition:all 0.15s;white-space:nowrap;}' +
+      '.header-credits:hover{background:rgba(255,200,32,0.15);border-color:rgba(255,200,32,0.4);}' +
+      '.header-credits.low{background:rgba(220,50,50,0.1);border-color:rgba(220,50,50,0.3);color:#e05555;}' +
+      '.header-credits.low:hover{background:rgba(220,50,50,0.18);}' +
+      '@media(max-width:767px){.header-credits-label{display:none;}}' +
       /* ── Sidebar logo ── */
       '.logo-text{font-family:"Inter",sans-serif!important;font-size:16px!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.2px;}' +
       '.logo-text span{color:#FFC820!important;}' +
@@ -133,6 +143,7 @@
       '<button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation">' + HAMBURGER_SVG + '</button>' +
       '<div class="header-title">' + (pageTitle || '') + '</div>' +
       '<div class="header-actions">' +
+        '<a href="pricing.html" class="header-credits" id="header-credits" title="Credits remaining">⚡ <span id="header-credits-count">0</span> <span class="header-credits-label">credits</span></a>' +
         '<a href="admindashboard.html" class="header-admin-btn" id="header-admin-btn" style="display:none" title="Admin dashboard">' + ADMIN_SVG + '</a>' +
         '<a href="inbox.html" class="notif-btn" id="header-inbox-btn" style="display:none" title="Inbox">' + ENVELOPE_SVG + '<div class="notif-dot" id="inbox-dot" style="display:none"></div></a>' +
         '<a href="notifications.html" class="notif-btn" id="header-notif-btn" title="Notifications">' + BELL_SVG + '<div class="notif-dot" id="notif-dot" style="display:none"></div></a>' +
@@ -186,6 +197,16 @@
             tier:    data.subscriptionTier  || null,
             credits: typeof data.credits === 'number' ? data.credits : 0,
           };
+          // Credits chip
+          var creditsBtn   = document.getElementById('header-credits');
+          var creditsCount = document.getElementById('header-credits-count');
+          if (creditsBtn && data.userRole !== 'admin' && data.subscriptionTier && data.subscriptionStatus === 'active') {
+            var c = typeof data.credits === 'number' ? data.credits : 0;
+            creditsCount.textContent = c;
+            creditsBtn.style.display = 'flex';
+            if (c < 10) creditsBtn.classList.add('low');
+          }
+
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
             revealNav();
