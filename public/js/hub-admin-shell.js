@@ -65,7 +65,7 @@ function _injectAdminBranding(branding) {
 function renderAdminSidebarBranding(branding, displayName) {
   const logoEl = document.getElementById('admin-hub-logo');
   if (!logoEl) return;
-
+l
   const name = (displayName || 'Your Hub').trim() || 'Your Hub';
   const nameEl = document.getElementById('admin-hub-name');
   const badgeEl = document.querySelector('.admin-badge');
