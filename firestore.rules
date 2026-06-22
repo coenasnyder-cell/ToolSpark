@@ -512,6 +512,12 @@ match /conversations/{conversationId} {
       allow delete: if isAdmin();
     }
 
+    // BLOG POSTS — public can read published; admin can do anything
+    match /blogPosts/{postId} {
+      allow read: if resource.data.status == 'published';
+      allow read, write: if isAdmin();
+    }
+
     // WAITLIST (public signups — no auth required)
     match /waitlist/{email} {
       allow create, update: if true;

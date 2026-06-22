@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Post — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #16A34A; --red: #DC2626; --red-bg: #FEE2E2;
+    --purple: #6B2FB3;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .btn-ghost { background: none; border: none; color: #9A9488; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 2px; font-family: 'Lato', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-ghost:hover { color: #F0EDE6; }
+
+  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 860px; width: 100%; }
+
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; }
+  .form-group input, .form-group textarea, .form-group select {
+    background: #FAFAF8; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; font-size: 14px; color: var(--text); font-family: 'Lato', sans-serif;
+    transition: border-color .15s; outline: none; width: 100%;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--purple); }
+  .form-group input[readonly] { background: var(--bg); color: var(--text3); cursor: default; }
+  .form-group .field-hint { font-size: 11px; color: var(--text3); }
+  .cover-preview { margin-top: 6px; width: 100%; max-height: 160px; object-fit: cover; border-radius: var(--radius-sm); display: none; border: 1px solid var(--border); }
+
+  .action-bar { display: flex; align-items: center; gap: 10px; padding-top: 0.5rem; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .btn-primary { background: #C9A84C; color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 10px 22px; font-size: 14px; font-weight: 700; font-family: 'Lato', sans-serif; cursor: pointer; transition: background .15s; }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-outline { background: none; border: 2px solid var(--purple); color: var(--purple); border-radius: var(--radius-sm); padding: 9px 20px; font-size: 14px; font-weight: 700; font-family: 'Lato', sans-serif; cursor: pointer; transition: background .15s, color .15s; }
+  .btn-outline:hover { background: var(--purple); color: #fff; }
+  .btn-secondary { background: var(--purple); color: #fff; border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-size: 14px; font-weight: 600; font-family: 'Lato', sans-serif; cursor: pointer; transition: background .15s; }
+  .btn-secondary:hover { background: #5a2699; }
+  .btn-cancel { background: none; border: none; color: var(--text3); font-size: 14px; font-family: 'Lato', sans-serif; cursor: pointer; padding: 10px 4px; text-decoration: none; }
+  .btn-cancel:hover { color: var(--text2); }
+  .btn-delete { background: none; border: none; color: var(--red); font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; padding: 10px 4px; margin-left: auto; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-delete:hover { text-decoration: underline; }
+  .save-msg { font-size: 13px; font-weight: 600; padding: 4px 0; }
+  .save-msg.success { color: var(--green); }
+  .save-msg.error { color: var(--red); }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+  #loading-post { padding: 3rem 2rem; color: var(--text3); text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="ts-admin-sidebar"></div>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Edit Post</div>
+      <div class="header-subtitle" id="header-subtitle">Loading…</div>
+    </div>
+    <a href="/admin/blog" class="btn-ghost">← Blog Posts</a>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">Admin only.</div>
+    <a href="/admindashboard" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+    <div id="loading-post">Loading post…</div>
+    <div class="form-card" id="edit-form" style="display:none;">
+
+      <div class="form-group">
+        <label for="f-title">Title <span style="color:var(--red)">*</span></label>
+        <input type="text" id="f-title" placeholder="Post headline…">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-slug">Slug <span style="color:var(--red)">*</span></label>
+          <input type="text" id="f-slug" placeholder="post-slug">
+          <span class="field-hint" id="slug-hint">URL: /blog?slug=<span id="slug-preview">…</span></span>
+        </div>
+        <div class="form-group">
+          <label for="f-category">Category <span style="color:var(--red)">*</span></label>
+          <select id="f-category">
+            <option value="">— Select category —</option>
+            <option>Sunday Reset</option>
+            <option>Confessions of an Introvert</option>
+            <option>Building ToolSpark</option>
+            <option>Lessons Learned</option>
+            <option>AI &amp; Tools</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f-description">Description / Excerpt <span style="color:var(--red)">*</span></label>
+        <textarea id="f-description" rows="3" placeholder="Short summary…"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-cover">Cover Image URL</label>
+          <input type="url" id="f-cover" placeholder="https://…" oninput="previewCover(this.value)">
+          <img id="cover-preview" class="cover-preview" alt="Cover preview">
+        </div>
+        <div class="form-group">
+          <label for="f-author">Author Name</label>
+          <input type="text" id="f-author">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f-content">Content <span style="color:var(--red)">*</span></label>
+        <textarea id="f-content" rows="18" style="min-height:400px; font-family:monospace; font-size:13px; line-height:1.7;"></textarea>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn-primary" id="btn-publish" onclick="publishPost()" style="display:none;">Publish</button>
+        <button class="btn-secondary" id="btn-unpublish" onclick="unpublishPost()" style="display:none;">Unpublish</button>
+        <button class="btn-outline" onclick="saveDraft()">Save as Draft</button>
+        <a href="/admin/blog" class="btn-cancel">Cancel</a>
+        <span id="save-msg" class="save-msg" style="display:none;"></span>
+        <button class="btn-delete" onclick="deletePost()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Delete Post
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="/js/admin-shell.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513736",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  window.SITE_ADMIN_ACTIVE = 'blog';
+  const postId = new URLSearchParams(window.location.search).get('id');
+  let currentPost = null;
+
+  if (!postId) { window.location.href = '/admin/blog'; }
+
+  initSiteAdminPage(function() {
+    document.getElementById('admin-content').style.display = 'block';
+    loadPost();
+  });
+
+  async function loadPost() {
+    try {
+      const doc = await db.collection('blogPosts').doc(postId).get();
+      if (!doc.exists) { document.getElementById('loading-post').textContent = 'Post not found.'; return; }
+      currentPost = { id: doc.id, ...doc.data() };
+      populateForm(currentPost);
+    } catch(e) {
+      document.getElementById('loading-post').textContent = 'Could not load post.';
+      console.error(e);
+    }
+  }
+
+  function populateForm(post) {
+    document.getElementById('loading-post').style.display = 'none';
+    document.getElementById('edit-form').style.display = 'flex';
+    document.getElementById('header-subtitle').textContent = post.title || 'Edit post';
+
+    document.getElementById('f-title').value = post.title || '';
+    document.getElementById('f-slug').value = post.slug || '';
+    document.getElementById('f-description').value = post.description || '';
+    document.getElementById('f-author').value = post.authorName || 'Coena';
+    document.getElementById('f-cover').value = post.coverImage || '';
+    document.getElementById('f-content').value = post.content || '';
+    updateSlugPreview(post.slug || '');
+
+    const catSel = document.getElementById('f-category');
+    for (const opt of catSel.options) {
+      if (opt.value === post.category) { opt.selected = true; break; }
+    }
+
+    if (post.coverImage) previewCover(post.coverImage);
+
+    // Lock slug if already published
+    if (post.publishedAt) {
+      const slugInput = document.getElementById('f-slug');
+      slugInput.readOnly = true;
+      document.getElementById('slug-hint').innerHTML =
+        'URL: /blog?slug=' + esc(post.slug) + ' <span style="color:var(--purple);font-weight:700;">🔒 locked</span>';
+    }
+
+    // Show publish / unpublish buttons based on status
+    if (post.status === 'published') {
+      document.getElementById('btn-unpublish').style.display = 'inline-block';
+    } else {
+      document.getElementById('btn-publish').style.display = 'inline-block';
+    }
+  }
+
+  document.getElementById('f-slug').addEventListener('input', function() {
+    updateSlugPreview(this.value);
+  });
+
+  function updateSlugPreview(val) {
+    document.getElementById('slug-preview').textContent = val || '…';
+  }
+
+  async function ensureUniqueSlug(slug, excludeId) {
+    let candidate = slug;
+    let n = 2;
+    for (let i = 0; i < 20; i++) {
+      const q = await db.collection('blogPosts').where('slug', '==', candidate).get();
+      const conflicts = q.docs.filter(d => d.id !== excludeId);
+      if (!conflicts.length) return candidate;
+      candidate = slug + '-' + n++;
+    }
+    return candidate;
+  }
+
+  function previewCover(url) {
+    const img = document.getElementById('cover-preview');
+    if (url && url.startsWith('http')) {
+      img.src = url;
+      img.style.display = 'block';
+      img.onerror = () => { img.style.display = 'none'; };
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
+  function getFormValues() {
+    return {
+      title: document.getElementById('f-title').value.trim(),
+      slug: document.getElementById('f-slug').value.trim(),
+      description: document.getElementById('f-description').value.trim(),
+      category: document.getElementById('f-category').value,
+      coverImage: document.getElementById('f-cover').value.trim(),
+      authorName: document.getElementById('f-author').value.trim() || 'Coena',
+      content: document.getElementById('f-content').value.trim(),
+    };
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('save-msg');
+    el.textContent = text;
+    el.className = 'save-msg ' + type;
+    el.style.display = 'inline';
+    if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 3000);
+  }
+
+  function validate(vals) {
+    if (!vals.title) { showMsg('Title is required.', 'error'); return false; }
+    if (!vals.slug) { showMsg('Slug is required.', 'error'); return false; }
+    if (!vals.description) { showMsg('Description is required.', 'error'); return false; }
+    if (!vals.category) { showMsg('Please select a category.', 'error'); return false; }
+    if (!vals.content) { showMsg('Content is required.', 'error'); return false; }
+    return true;
+  }
+
+  async function saveDraft() {
+    const vals = getFormValues();
+    if (!validate(vals)) return;
+    showMsg('Saving…', 'success');
+    try {
+      const slug = currentPost.publishedAt ? vals.slug : await ensureUniqueSlug(vals.slug, postId);
+      await db.collection('blogPosts').doc(postId).update({
+        ...vals, slug,
+        status: 'draft',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      showMsg('Saved as draft.', 'success');
+      setTimeout(() => { window.location.href = '/admin/blog'; }, 1200);
+    } catch(e) {
+      showMsg('Save failed. Try again.', 'error');
+      console.error(e);
+    }
+  }
+
+  async function publishPost() {
+    const vals = getFormValues();
+    if (!validate(vals)) return;
+    showMsg('Publishing…', 'success');
+    try {
+      const slug = currentPost.publishedAt ? vals.slug : await ensureUniqueSlug(vals.slug, postId);
+      const update = {
+        ...vals, slug,
+        status: 'published',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+      if (!currentPost.publishedAt) {
+        update.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
+      }
+      await db.collection('blogPosts').doc(postId).update(update);
+      window.location.href = '/admin/blog';
+    } catch(e) {
+      showMsg('Publish failed. Try again.', 'error');
+      console.error(e);
+    }
+  }
+
+  async function unpublishPost() {
+    showMsg('Unpublishing…', 'success');
+    try {
+      await db.collection('blogPosts').doc(postId).update({
+        status: 'draft',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      window.location.href = '/admin/blog';
+    } catch(e) {
+      showMsg('Could not unpublish. Try again.', 'error');
+    }
+  }
+
+  async function deletePost() {
+    if (!confirm('Delete this post? This cannot be undone.')) return;
+    try {
+      await db.collection('blogPosts').doc(postId).delete();
+      window.location.href = '/admin/blog';
+    } catch(e) { alert('Could not delete. Try again.'); }
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

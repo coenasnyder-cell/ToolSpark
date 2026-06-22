@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yellow: #FFC820; --purple: #6B2FB3; --black: #000000;
+    --text: #111111; --text2: #555555; --text3: #999999;
+    --bg: #F5F5F5; --card: #FFFFFF; --card-alt: #FAFAFA;
+    --border: #E5E7EB;
+    --green: #16A34A; --green-bg: #DCFCE7;
+    --red: #DC2626; --red-bg: #FEE2E2;
+    --yellow-bg: #FEF9C3;
+    --radius: 14px; --radius-sm: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 24px rgba(0,0,0,.09);
+    --font: 'Inter', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* NAV */
+  .site-nav { background: var(--black); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .nav-wordmark { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; text-decoration: none; }
+  .nav-wordmark .tool { color: #ffffff; }
+  .nav-wordmark .spark { color: var(--yellow); }
+  .nav-tag { font-size: 11px; font-weight: 600; color: #b08cf0; text-transform: uppercase; letter-spacing: .08em; }
+  .nav-back { color: #9A9488; font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+  .nav-back:hover { color: #fff; }
+
+  /* LAYOUT */
+  main { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+
+  /* INDEX VIEW */
+  #view-index { display: block; }
+  .blog-hero { margin-bottom: 2.5rem; }
+  .blog-eyebrow { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px; }
+  .blog-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 400; color: var(--text); margin-bottom: 10px; }
+  .blog-tagline { font-size: 15px; color: var(--text2); max-width: 520px; }
+
+  .post-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+
+  .post-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .15s, transform .15s; }
+  .post-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .card-cover { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  .card-body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+  .cat-pill { display: inline-block; background: rgba(107,47,179,0.08); color: var(--purple); font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 10px; align-self: flex-start; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500; color: var(--text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-desc { font-size: 13px; color: var(--text2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+  .card-date { font-size: 12px; color: var(--text3); }
+  .read-more { color: var(--purple); font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; transition: gap .15s; }
+  .read-more:hover { gap: 6px; }
+
+  .blog-loading { text-align: center; padding: 4rem 1rem; color: var(--text3); }
+  .blog-empty { text-align: center; padding: 4rem 1rem; color: var(--text3); font-size: 15px; }
+
+  /* POST VIEW */
+  #view-post { display: none; }
+  .post-back { display: inline-flex; align-items: center; gap: 6px; color: var(--text3); font-size: 14px; text-decoration: none; margin-bottom: 1.5rem; }
+  .post-back:hover { color: var(--purple); }
+  .post-header { max-width: 720px; margin-bottom: 2rem; }
+  .post-cat { display: inline-block; background: rgba(107,47,179,0.08); color: var(--purple); font-size: 12px; font-weight: 600; border-radius: 20px; padding: 4px 12px; margin-bottom: 1rem; }
+  .post-title { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 400; color: var(--text); line-height: 1.2; margin-bottom: 0.75rem; }
+  .post-description { font-size: 18px; color: var(--text2); font-style: italic; line-height: 1.5; margin-bottom: 1rem; }
+  .post-meta { font-size: 13px; color: var(--text3); }
+  .post-cover { width: 100%; max-height: 480px; object-fit: cover; border-radius: var(--radius); margin: 1.5rem 0; display: block; }
+  hr.post-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  .post-content { max-width: 720px; line-height: 1.75; font-size: 17px; color: var(--text); }
+  .post-content h2 { font-size: 22px; font-weight: 700; margin: 32px 0 12px; color: var(--text); }
+  .post-content h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; color: var(--text); }
+  .post-content p { margin-bottom: 18px; }
+  .post-content ul, .post-content ol { padding-left: 24px; margin-bottom: 18px; }
+  .post-content li { margin-bottom: 6px; }
+  .post-content blockquote { border-left: 4px solid var(--yellow); padding: 12px 20px; background: var(--yellow-bg); border-radius: 0 8px 8px 0; margin: 24px 0; font-style: italic; }
+  .post-content a { color: var(--purple); text-decoration: underline; }
+  .post-content strong { font-weight: 700; }
+  .post-content em { font-style: italic; }
+
+  .post-not-found { text-align: center; padding: 4rem 1rem; }
+  .post-not-found h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; margin-bottom: 0.75rem; }
+  .post-not-found a { color: var(--purple); font-weight: 600; text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .post-grid { grid-template-columns: 1fr; }
+    .blog-title { font-size: 28px; }
+    .post-title { font-size: 28px; }
+    main { padding: 32px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="/" class="nav-wordmark"><span class="tool">Tool</span><span class="spark">Spark</span></a>
+  <span class="nav-tag">Founder Journal</span>
+</nav>
+
+<main>
+
+  <!-- INDEX VIEW -->
+  <div id="view-index">
+    <div class="blog-hero">
+      <div class="blog-eyebrow">ToolSpark</div>
+      <div class="blog-title">Founder Journal</div>
+      <div class="blog-tagline">Behind the scenes, lessons learned, and honest notes from building ToolSpark.</div>
+    </div>
+    <div id="index-loading" class="blog-loading">Loading posts…</div>
+    <div id="post-grid" class="post-grid" style="display:none;"></div>
+    <div id="index-empty" class="blog-empty" style="display:none;">Nothing published yet. Check back soon.</div>
+  </div>
+
+  <!-- POST VIEW -->
+  <div id="view-post">
+    <div id="post-loading" class="blog-loading">Loading…</div>
+    <div id="post-not-found" class="post-not-found" style="display:none;">
+      <h2>Post not found</h2>
+      <p style="color:var(--text3);margin-bottom:1rem;">This post doesn't exist or may have been removed.</p>
+      <a href="/blog">← Back to Blog</a>
+    </div>
+    <div id="post-body" style="display:none;">
+      <a href="/blog" class="post-back">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Blog
+      </a>
+      <div class="post-header">
+        <div class="post-cat" id="post-cat"></div>
+        <h1 class="post-title" id="post-title"></h1>
+        <div class="post-description" id="post-description"></div>
+        <div class="post-meta" id="post-meta"></div>
+      </div>
+      <img id="post-cover" class="post-cover" alt="" style="display:none;">
+      <hr class="post-divider">
+      <div class="post-content" id="post-content"></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  try { firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true); } catch(e) {}
+  const db = firebase.firestore();
+
+  const slug = new URLSearchParams(window.location.search).get('slug');
+
+  if (slug) {
+    document.getElementById('view-index').style.display = 'none';
+    document.getElementById('view-post').style.display = 'block';
+    loadPost(slug);
+  } else {
+    loadIndex();
+  }
+
+  async function loadIndex() {
+    try {
+      const snap = await db.collection('blogPosts')
+        .where('status', '==', 'published')
+        .orderBy('publishedAt', 'desc')
+        .get();
+      document.getElementById('index-loading').style.display = 'none';
+      if (snap.empty) {
+        document.getElementById('index-empty').style.display = 'block';
+        return;
+      }
+      const posts = snap.docs.map(d => d.data());
+      document.getElementById('post-grid').style.display = 'grid';
+      document.getElementById('post-grid').innerHTML = posts.map(p => {
+        const date = p.publishedAt
+          ? p.publishedAt.toDate().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+          : '';
+        const coverHtml = p.coverImage
+          ? `<img src="${esc(p.coverImage)}" class="card-cover" alt="${esc(p.title)}" onerror="this.style.display='none'">`
+          : '';
+        return `<div class="post-card">
+          ${coverHtml}
+          <div class="card-body">
+            <span class="cat-pill">${esc(p.category || '')}</span>
+            <div class="card-title">${esc(p.title)}</div>
+            <div class="card-desc">${esc(p.description || '')}</div>
+            <div class="card-footer">
+              <span class="card-date">${date}</span>
+              <a href="/blog?slug=${encodeURIComponent(p.slug)}" class="read-more">Read More →</a>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      document.getElementById('index-loading').textContent = 'Could not load posts. Try refreshing.';
+      console.error(e);
+    }
+  }
+
+  async function loadPost(slug) {
+    try {
+      const q = await db.collection('blogPosts')
+        .where('slug', '==', slug)
+        .where('status', '==', 'published')
+        .limit(1)
+        .get();
+      document.getElementById('post-loading').style.display = 'none';
+      if (q.empty) {
+        document.getElementById('post-not-found').style.display = 'block';
+        return;
+      }
+      const post = q.docs[0].data();
+      renderPost(post);
+    } catch(e) {
+      document.getElementById('post-loading').textContent = 'Could not load post.';
+      console.error(e);
+    }
+  }
+
+  function renderPost(post) {
+    document.title = (post.title || 'Post') + ' — ToolSpark';
+    document.getElementById('post-cat').textContent = post.category || '';
+    document.getElementById('post-title').textContent = post.title || '';
+    document.getElementById('post-description').textContent = post.description || '';
+
+    const date = post.publishedAt
+      ? post.publishedAt.toDate().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      : '';
+    document.getElementById('post-meta').textContent =
+      (post.authorName || 'Coena') + (date ? ' · ' + date : '');
+
+    if (post.coverImage) {
+      const img = document.getElementById('post-cover');
+      img.src = post.coverImage;
+      img.style.display = 'block';
+      img.onerror = () => { img.style.display = 'none'; };
+    }
+
+    document.getElementById('post-content').innerHTML = post.content || '';
+    document.getElementById('post-body').style.display = 'block';
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

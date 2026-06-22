@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog Posts — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #16A34A; --green-bg: #DCFCE7;
+    --red: #DC2626; --red-bg: #FEE2E2;
+    --yellow-bg: #FEF9C3;
+    --purple: #6B2FB3;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .btn-primary { background: #C9A84C; color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 9px 20px; font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background .15s; }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-ghost { background: none; border: none; color: var(--purple); font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-family: 'Lato', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: background .15s; }
+  .btn-ghost:hover { background: rgba(107,47,179,.06); }
+  .btn-icon { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 5px; display: inline-flex; align-items: center; transition: background .15s; }
+  .btn-icon:hover { background: rgba(0,0,0,.06); }
+  .btn-icon.danger:hover { background: var(--red-bg); color: var(--red); }
+
+  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 1000px; width: 100%; }
+
+  .filter-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; }
+  .filter-tab { background: none; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; font-family: 'Lato', sans-serif; transition: background .15s, color .15s; }
+  .filter-tab:hover { background: rgba(0,0,0,.04); color: var(--text); }
+  .filter-tab.active { background: var(--surface); color: var(--purple); box-shadow: var(--shadow); }
+
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 0.75rem 1rem; text-align: left; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; background: var(--bg); border-bottom: 1px solid var(--border); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFAF8; }
+  td { padding: 0.875rem 1rem; font-size: 14px; vertical-align: middle; }
+  .td-title { font-weight: 700; color: var(--text); }
+  .td-title .post-desc { font-size: 12px; font-weight: 400; color: var(--text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
+  .cover-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--border); display: block; flex-shrink: 0; }
+  .cover-placeholder { width: 40px; height: 40px; border-radius: 8px; background: var(--border); flex-shrink: 0; }
+  .category-pill { display: inline-block; background: rgba(107,47,179,0.08); color: var(--purple); font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 10px; white-space: nowrap; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 10px; white-space: nowrap; }
+  .badge-published { background: var(--green-bg); color: var(--green); }
+  .badge-draft { background: var(--yellow-bg); color: #92400E; }
+  .td-date { color: var(--text3); font-size: 12px; white-space: nowrap; }
+  .td-actions { display: flex; align-items: center; gap: 4px; }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text3); }
+  .empty-state a { color: var(--purple); font-weight: 700; text-decoration: none; }
+  .loading-state { text-align: center; padding: 3rem 1rem; color: var(--text3); }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="ts-admin-sidebar"></div>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Blog Posts</div>
+      <div class="header-subtitle">Founder journal &amp; articles</div>
+    </div>
+    <a href="/admin/blog/new" class="btn-primary">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Post
+    </a>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">Admin only.</div>
+    <a href="/admindashboard" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-tab" onclick="setFilter('published', this)">Published</button>
+      <button class="filter-tab" onclick="setFilter('draft', this)">Drafts</button>
+    </div>
+
+    <div class="admin-card">
+      <div class="loading-state" id="posts-loading">Loading posts…</div>
+      <table id="posts-table" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:48px;"></th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th style="width:120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="posts-body"></tbody>
+      </table>
+      <div class="empty-state" id="posts-empty" style="display:none;">
+        No posts yet. <a href="/admin/blog/new">Create your first post →</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="/js/admin-shell.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  window.SITE_ADMIN_ACTIVE = 'blog';
+  let allPosts = [];
+  let currentFilter = 'all';
+
+  initSiteAdminPage(function() {
+    document.getElementById('admin-content').style.display = 'block';
+    loadPosts();
+  });
+
+  async function loadPosts() {
+    try {
+      const snap = await db.collection('blogPosts').orderBy('createdAt', 'desc').get();
+      allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('posts-loading').style.display = 'none';
+      renderPosts(currentFilter);
+    } catch(e) {
+      document.getElementById('posts-loading').textContent = 'Could not load posts. Try refreshing.';
+      console.error(e);
+    }
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderPosts(filter);
+  }
+
+  function renderPosts(filter) {
+    const posts = filter === 'all' ? allPosts : allPosts.filter(p => p.status === filter);
+    const tbody = document.getElementById('posts-body');
+    const table = document.getElementById('posts-table');
+    const empty = document.getElementById('posts-empty');
+
+    if (!posts.length) {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      empty.innerHTML = filter === 'all'
+        ? 'No posts yet. <a href="/admin/blog/new">Create your first post →</a>'
+        : 'No ' + filter + ' posts.';
+      return;
+    }
+
+    table.style.display = 'table';
+    empty.style.display = 'none';
+
+    tbody.innerHTML = posts.map(p => {
+      const isPublished = p.status === 'published';
+      const coverHtml = p.coverImage
+        ? `<img src="${esc(p.coverImage)}" class="cover-thumb" onerror="this.outerHTML='<div class=cover-placeholder></div>'">`
+        : '<div class="cover-placeholder"></div>';
+      const dateStr = isPublished && p.publishedAt
+        ? p.publishedAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '—';
+
+      return `<tr>
+        <td>${coverHtml}</td>
+        <td class="td-title">
+          ${esc(p.title)}
+          <div class="post-desc">${esc(p.description || '')}</div>
+        </td>
+        <td><span class="category-pill">${esc(p.category || '')}</span></td>
+        <td><span class="badge ${isPublished ? 'badge-published' : 'badge-draft'}">${isPublished ? 'Published' : 'Draft'}</span></td>
+        <td class="td-date">${dateStr}</td>
+        <td>
+          <div class="td-actions">
+            <a href="/admin/blog/edit?id=${p.id}" class="btn-icon" title="Edit">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </a>
+            <button class="btn-icon" title="${isPublished ? 'Unpublish' : 'Publish'}" onclick="togglePublish('${p.id}', '${p.status}', ${p.publishedAt ? 'true' : 'false'})">
+              ${isPublished
+                ? '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'
+                : '<svg width="15" height="15" fill="none" stroke="#16A34A" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'}
+            </button>
+            <button class="btn-icon danger" title="Delete" onclick="deletePost('${p.id}')">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function togglePublish(id, currentStatus, hasPublishedAt) {
+    const publishing = currentStatus !== 'published';
+    const update = {
+      status: publishing ? 'published' : 'draft',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (publishing && !hasPublishedAt) {
+      update.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+    try {
+      await db.collection('blogPosts').doc(id).update(update);
+      loadPosts();
+    } catch(e) { alert('Could not update. Try again.'); }
+  }
+
+  async function deletePost(id) {
+    if (!confirm('Delete this post? This cannot be undone.')) return;
+    try {
+      await db.collection('blogPosts').doc(id).delete();
+      loadPosts();
+    } catch(e) { alert('Could not delete. Try again.'); }
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
