@@ -9,10 +9,10 @@
  *
  * Flow:
  *   1. Wait for Firebase auth
- *   2. No user → /signon.html
+ *   2. No user -> /signon.html
  *   3. Load /creators/{uid} directly (uid is the creatorId)
- *   4. Doc missing → /hub/setup (creator hasn't set up yet)
- *   5. ownerId mismatch → denied (safety check)
+ *   4. Doc missing -> /hub/setup (creator hasn't set up yet)
+ *   5. ownerId mismatch -> denied (safety check)
  *   6. Inject branding, call callback
  */
 
@@ -39,7 +39,7 @@ function initAdminPage(callback) {
         }
 
         _injectAdminBranding(hub.branding);
-        _injectAdminLogo(hub.branding, hub.displayName);
+        renderAdminSidebarBranding(hub.branding, hub.displayName);
         callback(hub, user.uid);
       })
       .catch(function(err) {
@@ -57,20 +57,57 @@ function _injectAdminBranding(branding) {
   if (!overrides.length) return;
 
   const style = document.createElement('style');
-  style.id    = 'hub-branding';
+  style.id = 'hub-branding';
   style.textContent = ':root { ' + overrides.join(' ') + ' }';
   document.head.appendChild(style);
 }
 
-function _injectAdminLogo(branding, displayName) {
-  const el = document.getElementById('admin-hub-logo');
-  if (!el) return;
+function renderAdminSidebarBranding(branding, displayName) {
+  const logoEl = document.getElementById('admin-hub-logo');
+  if (!logoEl) return;
+
+  const name = (displayName || 'Your Hub').trim() || 'Your Hub';
+  const nameEl = document.getElementById('admin-hub-name');
+  const badgeEl = document.querySelector('.admin-badge');
+
+  if (nameEl) nameEl.style.display = 'none';
+  if (badgeEl) badgeEl.style.display = 'none';
+
   if (branding && branding.logoUrl) {
-    el.style.background = 'transparent';
-    el.innerHTML = '<img src="' + branding.logoUrl + '" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />';
-  } else {
-    el.textContent = (displayName || 'H').charAt(0).toUpperCase();
+    logoEl.style.display = 'inline-flex';
+    logoEl.style.width = '40px';
+    logoEl.style.height = '40px';
+    logoEl.style.minHeight = '40px';
+    logoEl.style.padding = '0';
+    logoEl.style.borderRadius = '10px';
+    logoEl.style.background = 'transparent';
+    logoEl.style.color = '#000';
+    logoEl.style.fontSize = '18px';
+    logoEl.style.fontWeight = '800';
+    logoEl.style.justifyContent = 'center';
+    logoEl.style.textAlign = 'center';
+    logoEl.style.wordBreak = 'normal';
+    logoEl.style.lineHeight = '1';
+    logoEl.innerHTML = '<img src="' + branding.logoUrl + '" alt="Hub logo" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />';
+    return;
   }
+
+  logoEl.style.display = 'inline-flex';
+  logoEl.style.width = 'auto';
+  logoEl.style.height = 'auto';
+  logoEl.style.minHeight = '40px';
+  logoEl.style.maxWidth = '100%';
+  logoEl.style.padding = '10px 12px';
+  logoEl.style.borderRadius = '12px';
+  logoEl.style.background = 'rgba(255,255,255,.06)';
+  logoEl.style.color = '#fff';
+  logoEl.style.fontSize = '14px';
+  logoEl.style.fontWeight = '700';
+  logoEl.style.justifyContent = 'flex-start';
+  logoEl.style.textAlign = 'left';
+  logoEl.style.wordBreak = 'break-word';
+  logoEl.style.lineHeight = '1.25';
+  logoEl.textContent = name;
 }
 
 function _adminShellError(msg) {

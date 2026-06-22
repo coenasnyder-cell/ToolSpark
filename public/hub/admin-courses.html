@@ -649,8 +649,6 @@
     initAdminPage(function(hub, creatorId) {
       creatorIdGlobal = creatorId;
       const name = hub.displayName || 'Your Hub';
-      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('admin-hub-name').textContent = name;
       document.getElementById('admin-nav').innerHTML = buildAdminNav('courses', hub.slug || '');
       document.title = 'Courses — ' + name;
 

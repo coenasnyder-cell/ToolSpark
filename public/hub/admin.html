@@ -381,8 +381,6 @@
 
     initAdminPage(function(hub, creatorId) {
       const name = hub.displayName || 'Your Hub';
-      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('admin-hub-name').textContent = name;
       document.getElementById('admin-nav').innerHTML = buildAdminNav('admin');
       document.title = 'Admin — ' + name;
 

@@ -567,7 +567,6 @@
       currentUserId = creatorId;
 
       // Sidebar
-      document.getElementById('admin-hub-name').textContent = hub.displayName || 'Your Hub';
       document.getElementById('admin-nav').innerHTML = buildAdminNav('build-hub', hubSlug);
 
       // Load progress fields from user doc (admin uid === creatorId)

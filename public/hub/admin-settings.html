@@ -617,15 +617,7 @@
       .then(() => {
         originalData = { ...originalData, displayName: name, branding };
         pendingLogoUrl = null;
-        document.getElementById('admin-hub-name').textContent = name;
-        // Update sidebar logo
-        const sidebarLogo = document.getElementById('admin-hub-logo');
-        if (branding.logoUrl) {
-          sidebarLogo.style.background = 'transparent';
-          sidebarLogo.innerHTML = `<img src="${branding.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />`;
-        } else {
-          sidebarLogo.textContent = name.charAt(0).toUpperCase();
-        }
+        renderAdminSidebarBranding(branding, name);
         document.getElementById('logo-upload-status').style.display = 'none';
         markClean();
         showToast('Settings saved.');
@@ -772,8 +764,6 @@
       originalData    = hub;
 
       const name = hub.displayName || 'Your Hub';
-      document.getElementById('admin-hub-logo').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('admin-hub-name').textContent = name;
       document.getElementById('admin-nav').innerHTML = buildAdminNav('settings', hub.slug || '');
       document.title = 'Settings — ' + name;
 
