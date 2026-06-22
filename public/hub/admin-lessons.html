@@ -30,44 +30,6 @@
   <style>
     body { display: flex; min-height: 100vh; }
 
-    .admin-sidebar {
-      width: 220px; flex-shrink: 0; background: #111;
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; height: 100vh; z-index: 50;
-    }
-    .admin-sidebar-top { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
-    .admin-hub-logo {
-      width: 40px; height: 40px; border-radius: 10px; background: var(--yellow);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 800; color: #000; margin-bottom: 10px;
-    }
-    .admin-hub-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 2px; }
-    .admin-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--yellow); opacity: .7; }
-    .admin-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
-    .admin-nav-item {
-      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-      border-radius: 8px; color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
-      text-decoration: none; transition: background .15s, color .15s;
-    }
-    .admin-nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
-    .admin-nav-item.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 700; }
-    .admin-nav-item svg { opacity: .6; flex-shrink: 0; }
-    .admin-nav-item.active svg { opacity: 1; }
-    .admin-nav-divider { height: 1px; background: rgba(255,255,255,.07); margin: 8px 12px; }
-    .view-hub-link {
-      display: flex; align-items: center; gap: 8px; padding: 9px 12px;
-      border-radius: 8px; color: rgba(255,255,255,.4); font-size: 13px; font-weight: 500;
-      text-decoration: none; transition: background .15s, color .15s;
-    }
-    .view-hub-link:hover { background: rgba(255,255,255,.05); color: rgba(255,255,255,.7); }
-    .admin-sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,.07); }
-    .admin-signout-btn {
-      background: none; border: none; color: rgba(255,255,255,.35); font-family: var(--font);
-      font-size: 12px; font-weight: 500; cursor: pointer; padding: 6px 8px;
-      border-radius: 6px; width: 100%; text-align: left; transition: color .15s, background .15s;
-    }
-    .admin-signout-btn:hover { background: rgba(220,50,50,.15); color: #e05555; }
-
     .admin-main { margin-left: 220px; flex: 1; padding: 40px 36px 80px; max-width: 960px; }
 
     .breadcrumb {
@@ -232,7 +194,6 @@
     }
 
     @media (max-width: 768px) {
-      .admin-sidebar { display: none; }
       .admin-main { margin-left: 0; padding: 24px 16px 60px; }
       .drawer { width: 100vw; }
     }
@@ -242,17 +203,7 @@
 
   <div id="admin-loading">Loading...</div>
 
-  <aside class="admin-sidebar" id="admin-sidebar" style="display:none;">
-    <div class="admin-sidebar-top">
-      <div class="admin-hub-logo" id="admin-hub-logo"></div>
-      <div class="admin-hub-name" id="admin-hub-name"></div>
-      <div class="admin-badge">Admin</div>
-    </div>
-    <nav class="admin-nav" id="admin-nav"></nav>
-    <div class="admin-sidebar-footer">
-      <button class="admin-signout-btn" onclick="adminSignOut()">Sign out</button>
-    </div>
-  </aside>
+  <div id="hub-admin-sidebar"></div>
 
   <main class="admin-main" id="admin-main" style="display:none;">
     <div class="breadcrumb">
@@ -339,35 +290,7 @@
   </div>
 
   <script>
-    const NAV = [
-      { label: 'Overview',  href: '/hub/admin',          key: 'admin',
-        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>' },
-      { label: 'Members',   href: '/hub/admin-members',  key: 'members',
-        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
-      { label: 'Courses',   href: '/hub/admin-courses',  key: 'courses',
-        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
-      { label: 'Tools',     href: '/hub/admin-tools',    key: 'tools',
-        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
-      { label: 'Settings',  href: '/hub/admin-settings', key: 'settings',
-        icon: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
-    ];
-
-    function buildAdminNav(activeKey, hubSlug) {
-      return NAV.map(item => {
-        const cls = 'admin-nav-item' + (item.key === activeKey ? ' active' : '');
-        return `<a class="${cls}" href="${item.href}">${item.icon}<span>${item.label}</span></a>`;
-      }).join('') +
-      '<div class="admin-nav-divider"></div>' +
-      `<a class="view-hub-link" href="/hub/dashboard?hub=${hubSlug}">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-        </svg>View Hub</a>`;
-    }
-
-    function adminSignOut() {
-      auth.signOut().then(() => { window.location.href = '/signon.html'; });
-    }
+    window.HUB_ADMIN_ACTIVE = 'courses';
 
     const urlParams   = new URLSearchParams(window.location.search);
     const courseId    = urlParams.get('course') || '';
@@ -600,14 +523,10 @@
 
     initAdminPage(function(hub, creatorId) {
       creatorIdGlobal = creatorId;
-      const name = hub.displayName || 'Your Hub';
-      document.getElementById('admin-nav').innerHTML = buildAdminNav('courses', hub.slug || '');
-      document.title = 'Lessons — ' + name;
+      document.title = 'Lessons — ' + (hub.displayName || 'Your Hub');
+      document.getElementById('admin-main').style.display = 'block';
 
       if (!courseId) {
-        document.getElementById('admin-loading').style.display = 'none';
-        document.getElementById('admin-sidebar').style.display = 'flex';
-        document.getElementById('admin-main').style.display    = 'block';
         document.getElementById('lessons-list').innerHTML =
           '<div class="empty-state"><div class="empty-state-title">No course selected.</div></div>';
         return;
@@ -623,10 +542,6 @@
         });
 
       loadLessons();
-
-      document.getElementById('admin-loading').style.display = 'none';
-      document.getElementById('admin-sidebar').style.display = 'flex';
-      document.getElementById('admin-main').style.display    = 'block';
     });
   </script>
 </body>
