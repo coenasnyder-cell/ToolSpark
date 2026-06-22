@@ -49,66 +49,6 @@
     text-rendering: optimizeLegibility;
   }
 
-  .sidebar {
-    width: var(--sidebar-width);
-    background: linear-gradient(180deg, #0B0907 0%, #15120F 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    border-right: 1px solid var(--border-dark);
-    z-index: 40;
-  }
-  .sidebar-logo { padding: 1.6rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; color: #F3EFE7; }
-  .logo-text span { color: var(--gold); }
-  .logo-tag { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin-top: 4px; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .nav-section-label { font-size: 10px; font-weight: 700; color: #4B4438; text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.45rem; }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #9A9488;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-  }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(201,168,76,0.2); font-weight: 700; }
-  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.78; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
-  .user-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.28);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold); font-size: 13px; font-weight: 700; overflow: hidden;
-  }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .user-name { color: #F0EDE6; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { color: var(--text3); font-size: 11px; }
-  .logout-btn {
-    width: 100%;
-    margin-top: 6px;
-    border: none;
-    background: none;
-    color: #7F706B;
-    padding: 9px 12px;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
   .top-header {
     position: sticky;
@@ -619,54 +559,7 @@
 </style>
 </head>
 <body>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-text">Tool<span>Spark</span></div>
-    <div class="logo-tag">Admin Panel</div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Navigation</div>
-    <a href="dashboard.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </a>
-    <a href="community.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Community
-    </a>
-    <div class="nav-section-label">Admin</div>
-    <a href="admindashboard.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Admin Dashboard
-    </a>
-    <a href="admintoollist.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-      Members & Activity
-    </a>
-    <a href="admincrm.html" class="nav-item active">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
-      CRM
-    </a>
-    <a href="admincrm-automation.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l2.92-2.92a5 5 0 00-7.07-7.07l-1.68 1.68"/><path d="M14 11a5 5 0 00-7.54-.54L3.54 13.4a5 5 0 107.07 7.07l1.67-1.67"/></svg>
-      Automation
-    </a>
-    <a href="adminuserprofiles.html" class="nav-item">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Members
-    </a>
-  </nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div>
-        <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role">Admin</div>
-      </div>
-    </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">Sign Out</button>
-  </div>
-</aside>
+<div id="ts-admin-sidebar"></div>
 
 <div class="main-wrap">
   <header class="top-header">
@@ -872,6 +765,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="/js/admin-shell.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -1487,31 +1381,9 @@
   document.getElementById("cancel-lead-save-btn").addEventListener("click", closeLeadModal);
   document.getElementById("save-lead-btn").addEventListener("click", saveLead);
 
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      window.location.href = "signon.html";
-      return;
-    }
-    try {
-      const snap = await db.collection("users").doc(user.uid).get();
-      if (!snap.exists || snap.data().userRole !== "admin") {
-        document.getElementById("access-denied").style.display = "flex";
-        return;
-      }
-    } catch (err) {
-      document.getElementById("access-denied").style.display = "flex";
-      return;
-    }
-
+  window.SITE_ADMIN_ACTIVE = 'crm';
+  initSiteAdminPage(async function(user) {
     document.getElementById("page-shell").style.display = "flex";
-    const name = user.displayName || user.email || "Admin";
-    document.getElementById("sidebar-name").textContent = name;
-    const avatar = document.getElementById("sidebar-avatar");
-    if (user.photoURL) {
-      avatar.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
-    } else {
-      avatar.textContent = name.charAt(0).toUpperCase();
-    }
     await loadSnapshot(false);
   });
 

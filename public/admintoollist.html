@@ -61,6 +61,8 @@
 <body>
 
 
+<div id="ts-admin-sidebar"></div>
+
 <div class="main-wrap">
   <header class="top-header">
     <div>
@@ -203,6 +205,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="/js/admin-shell.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -220,23 +223,10 @@
     firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true);
   } catch(e) {}
 
-  auth.onAuthStateChanged(async user => {
-    if (!user) { window.location.href = 'signon.html'; return; }
-    try {
-      const snap = await db.collection('users').doc(user.uid).get();
-      const role = snap.exists ? snap.data().userRole : 'member';
-      if (role !== 'admin') {
-        document.getElementById('access-denied').style.display = 'flex';
-        return;
-      }
-    } catch(e) {
-      document.getElementById('access-denied').style.display = 'flex';
-      return;
-    }
+  window.SITE_ADMIN_ACTIVE = 'users';
+  initSiteAdminPage(function(user) {
     document.getElementById('admin-content').style.display = 'flex';
   });
 </script>
-<script src="js/nav.js"></script>
-<script>initNav('admintoollist', 'Manage Tools');</script>
 </body>
 </html>
