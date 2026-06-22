@@ -518,6 +518,33 @@
       </a>
     </div>
 
+
+    <!-- SITE BRANDING -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-icon">🎨</div>
+        <div>
+          <div class="admin-card-title">Site Branding</div>
+          <div class="admin-card-desc">Upload a logo that appears in the admin sidebar across all pages.</div>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <div id="logo-preview" style="width:60px;height:60px;border-radius:12px;background:#f5c842;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#000;overflow:hidden;flex-shrink:0;">TS</div>
+          <div style="flex:1;">
+            <div class="form-label" style="margin-bottom:8px;">Admin Sidebar Logo</div>
+            <input type="file" id="logo-input" accept="image/*" style="display:none;" onchange="handleLogoSelect(this)">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-primary" onclick="document.getElementById('logo-input').click()">Upload Image</button>
+              <button class="btn-danger" id="remove-logo-btn" onclick="removeAdminLogo()" style="display:none;">Remove Logo</button>
+            </div>
+            <div class="form-hint" style="margin-top:8px;">Recommended: square image, at least 80×80px. PNG or JPG.</div>
+          </div>
+        </div>
+        <div class="save-msg" id="logo-msg"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -525,6 +552,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="/js/admin-shell.js"></script>
 <script>
   const firebaseConfig = {
@@ -539,6 +567,7 @@
   firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
   window.SITE_ADMIN_ACTIVE = 'dashboard';
 
@@ -546,7 +575,66 @@
     document.getElementById('admin-content').style.display = 'flex';
     loadCurrentQuote();
     loadAnalytics();
+    loadBranding();
   });
+
+  async function loadBranding() {
+    try {
+      const snap = await db.collection('settings').doc('branding').get();
+      if (snap.exists && snap.data().logoUrl) {
+        updateLogoPreview(snap.data().logoUrl);
+      }
+    } catch(e) {}
+  }
+
+  function updateLogoPreview(url) {
+    const preview = document.getElementById('logo-preview');
+    if (url) {
+      preview.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:contain;border-radius:12px;" alt="Logo">';
+      document.getElementById('remove-logo-btn').style.display = 'inline-flex';
+    } else {
+      preview.textContent = 'TS';
+      document.getElementById('remove-logo-btn').style.display = 'none';
+    }
+  }
+
+  async function handleLogoSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const msg = document.getElementById('logo-msg');
+    msg.className = 'save-msg';
+    msg.textContent = 'Uploading...';
+    msg.style.display = 'block';
+    try {
+      const ref = storage.ref('adminBranding/logo');
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      await db.collection('settings').doc('branding').set({ logoUrl: url }, { merge: true });
+      updateLogoPreview(url);
+      msg.className = 'save-msg success';
+      msg.textContent = 'Logo saved! Reload any admin page to see it in the sidebar.';
+    } catch(e) {
+      msg.className = 'save-msg error';
+      msg.textContent = 'Upload failed: ' + e.message;
+    }
+    input.value = '';
+  }
+
+  async function removeAdminLogo() {
+    const msg = document.getElementById('logo-msg');
+    msg.className = 'save-msg';
+    msg.textContent = 'Removing...';
+    msg.style.display = 'block';
+    try {
+      await db.collection('settings').doc('branding').set({ logoUrl: '' }, { merge: true });
+      updateLogoPreview('');
+      msg.className = 'save-msg success';
+      msg.textContent = 'Logo removed.';
+    } catch(e) {
+      msg.className = 'save-msg error';
+      msg.textContent = 'Error: ' + e.message;
+    }
+  }
 
   async function loadCurrentQuote() {
     try {

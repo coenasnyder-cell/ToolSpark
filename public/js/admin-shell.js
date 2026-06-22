@@ -86,9 +86,13 @@ function _siteAdminSignOut() {
   auth.signOut().then(function () { window.location.href = '/signon.html'; });
 }
 
-function _renderSiteAdminSidebar(user) {
+function _renderSiteAdminSidebar(user, logoUrl) {
   const activeKey = window.SITE_ADMIN_ACTIVE || '';
   const name = user.displayName || user.email || 'Admin';
+
+  const logoInner = logoUrl
+    ? '<img src="' + logoUrl + '" style="width:100%;height:100%;object-fit:contain;" alt="">'
+    : 'TS';
 
   const navHtml = SITE_ADMIN_NAV.map(function (item) {
     const cls = 'ts-nav-item' + (item.key === activeKey ? ' active' : '');
@@ -100,7 +104,7 @@ function _renderSiteAdminSidebar(user) {
   mount.innerHTML =
     '<aside class="ts-sidebar">' +
       '<div class="ts-sidebar-top">' +
-        '<div class="ts-sidebar-logo">TS</div>' +
+        '<div class="ts-sidebar-logo">' + logoInner + '</div>' +
       '</div>' +
       '<nav class="ts-sidebar-nav">' + navHtml + '</nav>' +
       '<div class="ts-sidebar-footer">' +
@@ -128,7 +132,13 @@ function initSiteAdminPage(callback) {
       return;
     }
 
-    _renderSiteAdminSidebar(user);
+    let logoUrl = '';
+    try {
+      const brandSnap = await db.collection('settings').doc('branding').get();
+      if (brandSnap.exists) logoUrl = brandSnap.data().logoUrl || '';
+    } catch (e) {}
+
+    _renderSiteAdminSidebar(user, logoUrl);
     if (callback) callback(user);
   });
 }
