@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --purple: #4B3F8A; --green: #2A5C45; --green-light: #3D8A65;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-header { background: var(--dark2); border-bottom: 1px solid var(--border-dark); height: var(--header-height); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: #F0EDE6; }
+  .header-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25); color: var(--gold); border-radius: 100px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .page-content { flex: 1; padding: 2rem; max-width: 860px; width: 100%; }
+
+  .page-eyebrow { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); margin-bottom: 2rem; }
+
+  /* AGENT GRID */
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+
+  .agent-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 2rem 1.5rem; display: flex; flex-direction: column;
+    align-items: center; text-align: center; gap: 0.875rem;
+    text-decoration: none; color: inherit;
+    position: relative; overflow: hidden;
+    aspect-ratio: 1; justify-content: center;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .agent-card.unlocked:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); cursor: pointer; }
+
+  .agent-icon { width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; }
+  .agent-name { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--text); line-height: 1.2; }
+  .agent-desc { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+  #access-denied { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; padding: 3rem; text-align: center; }
+
+  @media (max-width: 700px) {
+    .agent-grid { grid-template-columns: 1fr; }
+    .agent-card { aspect-ratio: unset; padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ts-admin-sidebar"></div>
+
+<div class="main-wrap">
+  <header class="top-header">
+    <div>
+      <div class="header-title">Agents</div>
+      <div class="header-subtitle">AI coaching companions</div>
+    </div>
+    <div class="admin-badge">⚡ Agents</div>
+  </header>
+
+  <div id="access-denied">
+    <div style="font-size:2.5rem;">🔒</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;">Access Restricted</div>
+    <div style="font-size:14px;color:var(--text2);">Admin only.</div>
+    <a href="admindashboard.html" style="color:var(--gold);font-weight:700;font-size:14px;text-decoration:none;">← Back</a>
+  </div>
+
+  <main class="page-content" id="admin-content" style="display:none;">
+    <div class="page-eyebrow">Admin</div>
+    <div class="page-title">Agents</div>
+    <div class="page-sub">Your AI coaching companions — accessible to all admins without restrictions.</div>
+
+    <div class="agent-grid">
+
+      <!-- Journey Companion -->
+      <a href="journey-companion.html" class="agent-card unlocked" style="border-color:rgba(42,92,69,0.3);padding:0;overflow:hidden;">
+        <img src="journey-companion-preview.png" alt="Journey Companion" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;border-radius:var(--radius);">
+      </a>
+
+      <!-- Sparky — always unlocked for admin -->
+      <a href="sparky.html" class="agent-card unlocked" style="border-color:rgba(107,47,179,0.25);padding:0;overflow:hidden;">
+        <img src="Sparky.png" alt="Sparky" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;border-radius:var(--radius);">
+      </a>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="/js/admin-shell.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  firebase.appCheck().activate('6LfxWCsrAAAAAIkmBgN9b5hB9_TOdcXwHELZFqf-', true);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  window.SITE_ADMIN_ACTIVE = 'tools';
+  initSiteAdminPage(function(user) {
+    document.getElementById('admin-content').style.display = 'block';
+  });
+</script>
+</body>
+</html>

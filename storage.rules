@@ -117,6 +117,14 @@ service firebase.storage {
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // ADMIN BRANDING — publicly readable, admin only write
+    match /adminBranding/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        request.resource.size < 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
     // GENERAL ASSETS
     match /assets/{fileName} {
       allow read: if true;
