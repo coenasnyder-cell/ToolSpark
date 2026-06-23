@@ -1,5 +1,8 @@
 // Shared sidebar nav + header — call initNav('pagekey', 'Page Title') on each member page.
 (function() {
+  // ── Brand config — change these one values to update across all member pages ──
+  var LOGO_TAG_COLOR = 'rgba(255,255,255,0.45)'; // e.g. '#BBA8D4' for purple
+
   var HAMBURGER_SVG = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
   var BELL_SVG      = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>';
   var ENVELOPE_SVG  = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
@@ -109,14 +112,14 @@
       '.header-credits.low:hover{background:rgba(220,50,50,0.18);}' +
       '@media(max-width:767px){.header-credits-label{display:none;}}' +
       /* ── Sidebar logo ── */
-      '.logo-text{font-family:"Inter",sans-serif!important;font-size:16px!important;font-weight:800!important;color:#fff!important;letter-spacing:-0.2px;}' +
-      '.logo-text span{color:#FFC820!important;}' +
-      '.logo-tag{color:rgba(255,255,255,0.35)!important;}' +
+      '.logo-text{font-family:"Playfair Display",serif!important;font-size:30px!important;font-weight:700!important;color:#ffffff!important;letter-spacing:-0.2px;}' +
+      '.logo-text span{color:#f5c842!important;}' +
+      '.logo-tag{color:' + LOGO_TAG_COLOR + '!important;font-size:14px!important;letter-spacing:0.12em;text-align:center;margin-top:0px!important;}' +
       /* ── Sidebar nav items ── */
-      '.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;}' +
+      '.nav-item{display:flex;align-items:center;gap:16px;padding:8px 14px;border-radius:8px;font-size:24px;font-weight:600;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
       '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
-      '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;border-color:rgba(255,200,32,0.2)!important;}' +
-      '.nav-icon{width:20px;height:20px;flex-shrink:0;opacity:0.6;}' +
+      '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;}' +
+      '.nav-icon{width:32px;height:32px;flex-shrink:0;opacity:0.6;}' +
       '.nav-item:hover .nav-icon,.nav-item.active .nav-icon{opacity:1;}' +
       /* ── Sidebar user area ── */
       '.user-name{color:#fff!important;}' +
@@ -137,7 +140,27 @@
 
   function initHeader(pageTitle) {
     var header = document.querySelector('.top-header');
-    if (!header) return;
+    if (!header) {
+      // No sidebar header on this page — still set up window.tsUser so credit gates work
+      if (window.firebase && firebase.auth) {
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (!user) { window.tsUser = null; return; }
+          firebase.firestore().collection('users').doc(user.uid).get().then(function(snap) {
+            var data = snap.exists ? snap.data() : {};
+            window.tsUser = {
+              role:    data.userRole         || null,
+              tier:    data.subscriptionTier || null,
+              credits: typeof data.credits === 'number' ? data.credits : 0,
+            };
+            window.dispatchEvent(new CustomEvent('tsUserReady'));
+          }).catch(function() {
+            window.tsUser = null;
+            window.dispatchEvent(new CustomEvent('tsUserReady'));
+          });
+        });
+      }
+      return;
+    }
 
     header.innerHTML =
       '<button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation">' + HAMBURGER_SVG + '</button>' +
@@ -235,7 +258,11 @@
               revealNav();
             }).catch(function() { revealNav(); });
           }
-        }).catch(function() { revealNav(); });
+        }).catch(function() {
+          window.tsUser = null;
+          window.dispatchEvent(new CustomEvent('tsUserReady'));
+          revealNav();
+        });
 
         // Notification dot
         firebase.firestore().collection('notifications')
@@ -378,18 +405,19 @@
   // Skips deduction entirely for admin users (window.tsUser.role === 'admin').
   window.tsDeductCredits = function(cost) {
     return new Promise(function(resolve, reject) {
-      // Admins bypass credit checks
-      if (window.tsUser && window.tsUser.role === 'admin') {
-        resolve(true);
-        return;
-      }
+      function doCheck() {
+        // Admins bypass credit checks
+        if (window.tsUser && window.tsUser.role === 'admin') {
+          resolve(true);
+          return;
+        }
 
-      // No subscription — redirect to pricing
-      if (!window.tsUser || !window.tsUser.tier) {
-        window.location.href = 'pricing.html';
-        reject(new Error('no_subscription'));
-        return;
-      }
+        // No subscription — redirect to pricing
+        if (!window.tsUser || !window.tsUser.tier) {
+          window.location.href = 'pricing.html';
+          reject(new Error('no_subscription'));
+          return;
+        }
 
       // Optimistic client-side check to give instant feedback
       if (window.tsUser.credits < cost) {
@@ -418,6 +446,11 @@
             resolve(true);
           }
         });
+      }
+
+      // Wait for auth+Firestore to resolve before checking, same pattern as tsGatePage
+      if (window.tsUser !== undefined) { doCheck(); return; }
+      window.addEventListener('tsUserReady', doCheck, { once: true });
     });
   };
 
