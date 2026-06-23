@@ -1,6 +1,6 @@
 # Skippy the Coder — Tool Styling Spec
 **Companion to:** `skippy-spec.md` (Architecture)
-**Focus:** How every tool you build must look. Design system, component patterns, results rendering.
+**Focus:** How to structure tool output and state. Brand tokens live elsewhere — do not hardcode colors from this file.
 
 ---
 
@@ -14,115 +14,34 @@ The biggest failure mode is this: dumping the AI's text response straight into a
 
 ---
 
-## Brand Tokens
-
-Use these exact values. No near-equivalents.
-
-| Token | Value | When to use |
-|-------|-------|-------------|
-| Purple primary | `#6B2FB3` | Buttons, focus rings, progress bar, eyebrow labels, `→` bullets |
-| Yellow accent | `#FFC820` | Small chips/badges only — never as a fill or large background |
-| Yellow text | `#5A3A00` | Text on `#FFC820` backgrounds |
-| Near-black | `#0D0D0D` | All headlines and body text |
-| Page background | `#F7F4FB` | Outer page bg — warm purple-tinted off-white. NEVER use flat `#F4F4F4` |
-| Card border | `#E8E1F0` | 1.5px flat border on all cards. No box-shadow. |
-| Muted text | `#6B6B6B` | Subtitles, helper text |
-| Purple-light fill | `#F3EDF9` | Tag backgrounds, tip section background |
-| Tag text | `#4A1B8A` | Text on purple-light backgrounds |
-| Purple hover button bg | `#5A2598` | Purple button hover state |
-
----
-
-## Typography
-
-Always load both fonts. Never use the same font family for headlines and body — that's the biggest "generic AI tool" tell.
-
-```html
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-```
-
-| Use | Font | Weight |
-|-----|------|--------|
-| Headlines, button text, eyebrow labels, day labels | `'Sora', sans-serif` | 700 |
-| Body copy, field labels, helper text, bullet text | `'Inter', system-ui, sans-serif` | 400–500 |
-
----
-
-## Page Shell
-
-Every tool uses this exact outer wrapper. Never skip the header, branding line, or progress bar.
-
-```html
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-
-<div style="background:#F7F4FB; min-height:100vh; padding:32px 16px; font-family:'Inter',system-ui,sans-serif;">
-
-  <!-- Header -->
-  <div style="text-align:center; margin-bottom:24px;">
-    <h1 style="font-family:'Sora',sans-serif; font-size:22px; font-weight:700; color:#0D0D0D; margin:0 0 4px;">[Tool Name]</h1>
-    <p style="font-size:12px; color:#999; margin:0 0 14px;">Powered by ToolSpark ⚡</p>
-    <!-- Progress bar -->
-    <div style="max-width:460px; margin:0 auto; height:3px; background:#E8E1F0; border-radius:2px;">
-      <div id="progress-bar" style="height:100%; background:#6B2FB3; border-radius:2px; width:33%; transition:width 0.5s ease;"></div>
-    </div>
-  </div>
-
-  <!-- Card container -->
-  <div style="background:white; border:1.5px solid #E8E1F0; border-radius:12px; padding:32px; max-width:600px; margin:0 auto;">
-    <!-- States go here (form / loading / results) -->
-  </div>
-
-</div>
-```
-
-**Progress bar widths:** Form state = `33%` → Loading = `66%` → Results = `100%`
-
----
-
 ## Form State
 
 ```html
 <div id="state-form">
-  <!-- Eyebrow (Step indicator) -->
-  <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0 0 6px; font-family:'Sora',sans-serif;">Step 1 of 2</p>
-
   <!-- Headline — specific to this tool, never generic -->
-  <h2 style="font-family:'Sora',sans-serif; font-size:19px; font-weight:700; color:#0D0D0D; margin:0 0 6px;">[Specific headline]</h2>
-  <p style="font-size:13px; color:#6B6B6B; margin:0 0 24px; line-height:1.6;">[One sentence of context. Make it specific — not "Tell us about yourself."]</p>
+  <h2>[Specific headline]</h2>
+  <p>[One sentence of context. Make it specific — not "Tell us about yourself."]</p>
 
   <!-- Input field -->
-  <div style="margin-bottom:18px;">
-    <label style="display:block; font-weight:500; font-size:13px; color:#0D0D0D; margin-bottom:6px;">[Field label]</label>
-    <input type="text" id="field-id"
-      placeholder="e.g. ..."
-      style="width:100%; box-sizing:border-box; border:1.5px solid #E8E1F0; border-radius:8px; padding:10px 14px; font-size:14px; font-family:'Inter',system-ui,sans-serif; outline:none; color:#0D0D0D; background:white; transition:border-color 0.2s;"
-      onfocus="this.style.borderColor='#6B2FB3'"
-      onblur="this.style.borderColor='#E8E1F0'">
+  <div>
+    <label>[Field label]</label>
+    <input type="text" id="field-id" placeholder="e.g. ..." />
   </div>
 
   <!-- Textarea field (when needed) -->
-  <div style="margin-bottom:28px;">
-    <label style="display:block; font-weight:500; font-size:13px; color:#0D0D0D; margin-bottom:6px;">[Field label]</label>
-    <textarea id="field-id" rows="3"
-      placeholder="e.g. ..."
-      style="width:100%; box-sizing:border-box; border:1.5px solid #E8E1F0; border-radius:8px; padding:10px 14px; font-size:14px; font-family:'Inter',system-ui,sans-serif; outline:none; color:#0D0D0D; background:white; resize:none; transition:border-color 0.2s;"
-      onfocus="this.style.borderColor='#6B2FB3'"
-      onblur="this.style.borderColor='#E8E1F0'"></textarea>
+  <div>
+    <label>[Field label]</label>
+    <textarea id="field-id" rows="3" placeholder="e.g. ..."></textarea>
   </div>
 
   <!-- CTA button — always name the outcome -->
-  <button onclick="startLoading()"
-    style="width:100%; background:#6B2FB3; color:white; border:none; border-radius:8px; padding:14px 24px; font-size:15px; font-weight:700; font-family:'Sora',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"
-    onmouseover="this.style.background='#5A2598'"
-    onmouseout="this.style.background='#6B2FB3'">
-    [Outcome-named CTA] →
-  </button>
+  <button onclick="startLoading()">[Outcome-named CTA] →</button>
 </div>
 ```
 
 **CTA button copy — name the actual outcome:**
 - ✅ "Generate My Week of Content"
-- ✅ "Build My Client Roadmap"  
+- ✅ "Build My Client Roadmap"
 - ✅ "Calculate My Revenue Goal"
 - ❌ "Submit" / "Send" / "Go" / "Generate"
 
@@ -134,14 +53,10 @@ Never show just a spinner. Always show branded copy that rotates.
 
 ```html
 <div id="state-loading" style="display:none; text-align:center; padding:32px 0;">
-  <div style="width:44px; height:44px; border:3px solid #E8E1F0; border-top-color:#6B2FB3; border-radius:50%; margin:0 auto 20px; animation:spin 0.75s linear infinite;"></div>
-  <p id="loading-msg" style="font-family:'Sora',sans-serif; font-size:16px; font-weight:700; color:#0D0D0D; margin:0 0 4px;">[First loading message]</p>
-  <p style="font-size:13px; color:#999; margin:0;">[Specific promise — what is being built]</p>
+  <div class="spinner"></div>
+  <p id="loading-msg">[First loading message]</p>
+  <p>[Specific promise — what is being built]</p>
 </div>
-
-<style>
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
 ```
 
 Rotating messages JS:
@@ -160,7 +75,7 @@ const msgInterval = setInterval(() => {
 
 ---
 
-## Results State ⚡
+## Results State
 
 **This is the most important section. Read it carefully.**
 
@@ -174,13 +89,13 @@ The AI returns text. That text gets split into structured cards. Every day, step
 
 ```html
 <div id="state-results" style="display:none;">
-  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+  <div>
     <div>
-      <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0 0 3px; font-family:'Sora',sans-serif;">Your Result</p>
-      <h2 style="font-family:'Sora',sans-serif; font-size:18px; font-weight:700; color:#0D0D0D; margin:0;">[Result headline — specific to what was generated]</h2>
-      <p style="font-size:13px; color:#888; margin:4px 0 0;">[Subtitle — reflect inputs back, e.g. "For Introverted Entrepreneurs"]</p>
+      <p>[Eyebrow — e.g. "Your Result"]</p>
+      <h2>[Result headline — specific to what was generated]</h2>
+      <p>[Subtitle — reflect inputs back, e.g. "For Introverted Entrepreneurs"]</p>
     </div>
-    <span style="background:#FFC820; color:#5A3A00; font-size:11px; font-weight:700; padding:4px 11px; border-radius:20px; white-space:nowrap; flex-shrink:0; margin-top:2px;">✦ [Status chip e.g. Ready to film]</span>
+    <span>[Status chip e.g. "Ready to film"]</span>
   </div>
 
   <div id="result-cards-container"></div>
@@ -188,12 +103,7 @@ The AI returns text. That text gets split into structured cards. Every day, step
   <!-- Tips section goes here (if applicable) -->
 
   <!-- Always include this button -->
-  <button onclick="resetTool()"
-    style="width:100%; background:white; color:#6B2FB3; border:1.5px solid #6B2FB3; border-radius:8px; padding:12px 24px; font-size:14px; font-weight:600; font-family:'Sora',sans-serif; cursor:pointer; margin-top:8px; transition:background 0.15s;"
-    onmouseover="this.style.background='#F7F4FB'"
-    onmouseout="this.style.background='white'">
-    ↺ Generate Another [output noun]
-  </button>
+  <button onclick="resetTool()">↺ Generate Another [output noun]</button>
 </div>
 ```
 
@@ -202,34 +112,27 @@ The AI returns text. That text gets split into structured cards. Every day, step
 ### Content card (one per day / step / idea / item)
 
 ```html
-<div style="border:1.5px solid #E8E1F0; border-radius:12px; padding:20px 22px; margin-bottom:12px;">
-
+<div class="result-card">
   <!-- Row 1: Eyebrow label + tag badge -->
-  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px;">
-    <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0; font-family:'Sora',sans-serif;">[Day 1 / Step 1 / Idea 1]</p>
-    <span style="background:#F3EDF9; color:#4A1B8A; font-size:11px; font-weight:600; padding:3px 9px; border-radius:12px; white-space:nowrap;">[Content type tag]</span>
+  <div>
+    <p>[Day 1 / Step 1 / Idea 1]</p>
+    <span>[Content type tag]</span>
   </div>
 
   <!-- Card headline -->
-  <h3 style="font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:#0D0D0D; margin:0 0 6px;">[Card title]</h3>
+  <h3>[Card title]</h3>
 
   <!-- Card subtitle (optional) -->
-  <p style="font-size:13px; font-weight:500; color:#3D1A7A; margin:0 0 10px;">[Subtitle or angle]</p>
+  <p>[Subtitle or angle]</p>
 
   <!-- Bullets — use → instead of • -->
-  <ul style="margin:0; padding:0; list-style:none;">
-    <li style="font-size:13px; color:#444; line-height:1.6; padding:3px 0 3px 16px; position:relative;">
-      <span style="position:absolute; left:0; color:#6B2FB3; font-size:12px;">→</span>
-      [Bullet point text]
-    </li>
+  <ul>
+    <li>→ [Bullet point text]</li>
     <!-- Repeat li for each bullet -->
   </ul>
 
   <!-- Optional footer (link or note) -->
-  <div style="margin-top:12px; padding-top:10px; border-top:1px solid #F0EBF8;">
-    <span style="font-size:12px; font-weight:600; color:#6B2FB3;">[Action or note] →</span>
-  </div>
-
+  <div>[Action or note] →</div>
 </div>
 ```
 
@@ -240,25 +143,25 @@ The AI returns text. That text gets split into structured cards. Every day, step
 Use for production tips, bonus notes, or action checklists at the end of results.
 
 ```html
-<div style="background:#F3EDF9; border:1.5px solid #D4B8F0; border-radius:12px; padding:20px 22px; margin-bottom:16px;">
-  <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0 0 12px; font-family:'Sora',sans-serif;">[Section title e.g. Production Tips]</p>
+<div class="tips-section">
+  <p>[Section title e.g. Production Tips]</p>
 
   <!-- Tip row — repeat for each item -->
-  <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; font-size:13px; color:#3D1A7A; line-height:1.5;">
-    <span style="color:#6B2FB3; font-size:15px; flex-shrink:0; margin-top:1px;">✓</span>
+  <div>
+    <span>✓</span>
     <span>[Tip text]</span>
   </div>
 
   <!-- Footer stat (optional) -->
-  <div style="margin-top:12px; padding-top:10px; border-top:1px solid #D4B8F0; font-size:13px; color:#555;">
-    <strong style="color:#0D0D0D;">[Label e.g. Total time to produce]:</strong> [Value]
+  <div>
+    <strong>[Label e.g. Total time to produce]:</strong> [Value]
   </div>
 </div>
 ```
 
 ---
 
-## How to Render AI Results as Cards (The Critical Part)
+## How to Render AI Results as Cards
 
 ### Preferred: Ask the AI to return JSON, then render it
 
@@ -301,39 +204,35 @@ function renderResults(data) {
   const container = document.getElementById('result-cards-container');
   container.innerHTML = '';
   data.items.forEach(item => {
-    const bullets = item.bullets.map(b => `
-      <li style="font-size:13px; color:#444; line-height:1.6; padding:3px 0 3px 16px; position:relative;">
-        <span style="position:absolute; left:0; color:#6B2FB3; font-size:12px;">→</span>
-        ${b}
-      </li>`).join('');
+    const bullets = item.bullets.map(b => `<li>→ ${b}</li>`).join('');
 
     container.innerHTML += `
-      <div style="border:1.5px solid #E8E1F0; border-radius:12px; padding:20px 22px; margin-bottom:12px;">
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:6px;">
-          <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0; font-family:'Sora',sans-serif;">${item.label}</p>
-          <span style="background:#F3EDF9; color:#4A1B8A; font-size:11px; font-weight:600; padding:3px 9px; border-radius:12px; white-space:nowrap;">${item.tag}</span>
+      <div class="result-card">
+        <div class="card-header">
+          <p class="card-eyebrow">${item.label}</p>
+          <span class="card-tag">${item.tag}</span>
         </div>
-        <h3 style="font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:#0D0D0D; margin:0 0 6px;">${item.title}</h3>
-        ${item.subtitle ? `<p style="font-size:13px; font-weight:500; color:#3D1A7A; margin:0 0 10px;">${item.subtitle}</p>` : ''}
-        <ul style="margin:0; padding:0; list-style:none;">${bullets}</ul>
+        <h3>${item.title}</h3>
+        ${item.subtitle ? `<p class="card-subtitle">${item.subtitle}</p>` : ''}
+        <ul>${bullets}</ul>
       </div>`;
   });
 
   // Render tips section
   if (data.tips) {
     const tipRows = data.tips.items.map(t => `
-      <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; font-size:13px; color:#3D1A7A; line-height:1.5;">
-        <span style="color:#6B2FB3; font-size:15px; flex-shrink:0;">✓</span>
+      <div class="tip-row">
+        <span>✓</span>
         <span>${t}</span>
       </div>`).join('');
 
     container.innerHTML += `
-      <div style="background:#F3EDF9; border:1.5px solid #D4B8F0; border-radius:12px; padding:20px 22px; margin-bottom:16px;">
-        <p style="font-size:11px; font-weight:700; color:#6B2FB3; text-transform:uppercase; letter-spacing:0.07em; margin:0 0 12px; font-family:'Sora',sans-serif;">${data.tips.title}</p>
+      <div class="tips-section">
+        <p class="tips-eyebrow">${data.tips.title}</p>
         ${tipRows}
         ${data.tips.footer_label ? `
-        <div style="margin-top:12px; padding-top:10px; border-top:1px solid #D4B8F0; font-size:13px; color:#555;">
-          <strong style="color:#0D0D0D;">${data.tips.footer_label}:</strong> ${data.tips.footer_value}
+        <div class="tips-footer">
+          <strong>${data.tips.footer_label}:</strong> ${data.tips.footer_value}
         </div>` : ''}
       </div>`;
   }
@@ -392,39 +291,20 @@ function resetTool() {
 }
 ```
 
----
-
-## Pre-Ship Checklist
-
-Before calling any tool done:
-
-- [ ] Background is `#F7F4FB`, not flat gray `#F4F4F4`
-- [ ] All cards use `border:1.5px solid #E8E1F0` — no `box-shadow`
-- [ ] Headline font is Sora, body font is Inter — never the same family for both
-- [ ] Progress bar advances through all three states (33% → 66% → 100%)
-- [ ] Loading state has rotating branded messages, not just a spinner
-- [ ] Results are individual cards — not a raw text dump
-- [ ] Yellow `#FFC820` appears only as a small chip/badge — never as a large fill
-- [ ] CTA button copy names the actual outcome
-- [ ] "Generate Another [noun]" button is present at the bottom of results
-- [ ] Empty/first load shows the form with intro context — not a blank screen
-- [ ] All three states have been wired: form → loading → results → reset
+**Progress bar widths:** Form state = `33%` → Loading = `66%` → Results = `100%`
 
 ---
 
 ## What to Avoid
 
-| ❌ Don't | ✅ Do instead |
-|----------|-------------|
-| `background:#F4F4F4` (flat gray) | `background:#F7F4FB` (warm tinted) |
-| `box-shadow: 0 2px 8px rgba(0,0,0,0.1)` | `border:1.5px solid #E8E1F0` |
-| Same font for headline and body | Sora headlines / Inter body |
-| `innerHTML = rawApiResponseText` | Parse JSON → `renderResults(data)` |
-| Button says "Submit" or "Generate" | Button names the outcome |
-| No loading messages — just a spinner | Rotating branded loading copy |
-| Yellow as a section background or card fill | Yellow only as a small badge chip |
+| Don't | Do instead |
+|-------|------------|
+| `innerHTML = rawApiResponseText` | Parse JSON then call `renderResults(data)` |
+| Button says "Submit" or "Generate" | Name the actual outcome |
+| No loading messages, just a spinner | Rotating branded loading copy |
+| One big result block | Individual cards per item |
+| Bullet points with `•` | Arrow bullets `→` |
 | Numbered markers `01 / 02 / 03` | `Day 1 / Step 1 / Idea 1` eyebrow labels |
-| Bullet points with `•` | Arrow bullets `→` in purple |
 
 ---
 

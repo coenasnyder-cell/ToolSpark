@@ -54,31 +54,31 @@
 }
 .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem; max-width: 1100px; width: 100%; }
 .page-hero {
-  background: #000000;
+  background: #1A1510;
   border-radius: 16px;
   padding: 2rem 2.25rem;
 }
 .page-hero-eyebrow {
-  font-family: 'Poppins', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color:#FFC820;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 6px;
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #C9A84C;
+  margin-bottom: 8px;
 }
 .page-title {
- font-family: 'Poppins', sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-    color: #ffffff;
-    line-height: 1.2;
-    margin-bottom: 4px;
+  font-family: 'Lato', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  margin-bottom: 6px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .page-subtitle {
-  font-size: 18px;
-  color: #E8DEF7;
-  line-height: 1.7;
+  font-size: 15px;
+  color: #E8D9B8;
+  line-height: 1.6;
   max-width: 520px;
   margin-bottom: 1.25rem;
 }
@@ -118,7 +118,6 @@
   .quote-preview-label { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
   .quote-preview-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--text); line-height: 1.6; }
   .quote-preview-author { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
-  .quote-preview-author::before { content: '— '; }
 
   /* FORM */
   .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -229,7 +228,7 @@
     display: inline-flex; align-items: center; gap: 8px;
     background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
     padding: 9px 22px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    color: var(--text2); cursor: pointer; transition: all 0.15s;
+    color: var(--text2); cursor: pointer; transition: border-color 0.15s, color 0.15s;
   }
   .btn-load-more:hover { border-color: var(--gold); color: var(--gold); }
   .btn-load-more:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -261,6 +260,26 @@
     }
     .admin-shortcut-title {
       font-size: 18px;
+    }
+  }
+
+  /* HERO ENTRANCE */
+  @keyframes hero-rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .page-hero-eyebrow,
+  .page-title,
+  .page-subtitle {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: hero-rise 280ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+  .page-hero-eyebrow { animation-delay: 0ms; }
+  .page-title        { animation-delay: 60ms; }
+  .page-subtitle     { animation-delay: 120ms; }
+  @media (prefers-reduced-motion: reduce) {
+    .page-hero-eyebrow, .page-title, .page-subtitle {
+      animation: none; opacity: 1; transform: none;
     }
   }
 
@@ -387,15 +406,15 @@
           <div class="hub-card-sub">Build and manage your AI tool hub</div>
         </a>
         <a href="admin-content-hub" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
+          <div class="hub-card-icon" style="background:rgba(123,111,160,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#7B6FA0" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
           </div>
           <div class="hub-card-title">Content Hub</div>
           <div class="hub-card-sub">Content Creation Tools</div>
         </a>
       <a href="adminagents.html" class="hub-card">
-          <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
-            <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
+          <div class="hub-card-icon" style="background:rgba(123,111,160,0.12);">
+            <svg width="20" height="20" fill="none" stroke="#7B6FA0" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>
           </div>
           <div class="hub-card-title">Admin Agenets</div>
           <div class="hub-card-sub">Your AI coaching companions</div>
