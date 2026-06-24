@@ -897,18 +897,7 @@
         document.getElementById('notif-dot').style.display = 'block';
       }
     } catch(e) {}
-  });
-      if (!res.ok) throw new Error((await res.json()).error || 'Deletion failed');
-      await auth.signOut();
-      window.location.href = 'index.html';
-    } catch (err) {
-      errEl.textContent = err.message || 'Something went wrong. Please try again.';
-      errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Delete account';
-    }
   }
-
 
 </script>
 
