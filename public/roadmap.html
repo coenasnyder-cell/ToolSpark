@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Roadmap — ToolSpark</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -45,7 +45,10 @@
     --gold-field: #8A6800;
     --radius: 14px;
     --radius-sm: 8px;
-    --sidebar-width: 220px;
+    --gold: #C9A84C;
+    --gold-dim: rgba(201,168,76,0.12);
+    --gold-light: #E8D5A3;
+    --sidebar-width: 370px;
     --header-height: 64px;
   }
 
@@ -59,33 +62,7 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-
-  /* ── SIDEBAR ── */
-  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border-dark); transition: transform 0.3s ease; }
-  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
-  .logo-text { font-family: 'Poppins', sans-serif; font-size: 20px; color: #F0EDE6; font-weight: 600; }
-  .logo-text span { color: var(--yellow); }
-  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--purple-dim); color: var(--purple); font-weight: 700; border: 1px solid var(--purple-border); }
-  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
-  .nav-item.active .nav-icon { opacity: 1; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-dim); border: 1px solid var(--purple-border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--purple); flex-shrink: 0; overflow: hidden; }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 11px; color: var(--text3); }
-  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
-  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
-  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
-
-  /* ── LAYOUT ── */
+    /* ── LAYOUT ── */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
   .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; padding: 1.75rem 2rem 3rem; max-width: 860px; width: 100%; }
 
@@ -518,27 +495,8 @@
   .path-option-card.dfy .path-option-action:hover { background: var(--purple-dim); }
   .path-status-note { font-size: 12px; color: var(--text3); padding-top: 2px; }
 
-  /* ── MOBILE ── */
-  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
-  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; }
-  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--yellow); }
-
-  @media (max-width: 1023px) {
-    .sidebar { width: 60px; }
-    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: none; }
-    .main-wrap { margin-left: 60px; }
-    .nav-item { justify-content: center; padding: 10px; }
-  }
   @media (max-width: 767px) {
-    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-logo > div:first-child, .nav-item span, .logo-tag, .user-info { display: block; }
-    .nav-item { justify-content: flex-start; padding: 9px 12px; }
-    .sidebar-close-btn { display: flex; }
-    .sidebar-overlay { display: block; }
-    .main-wrap { margin-left: 0; }
     .page-content { padding: 1rem 1rem 80px; }
-    .mobile-bottom-nav { display: flex; }
     .step-left { width: 32px; }
     .step-node { width: 32px; height: 32px; font-size: 14px; }
     .path-section-grid { grid-template-columns: 1fr; }
@@ -548,37 +506,9 @@
 </style>
 </head>
 <body>
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div>
-      <div class="logo-text">Tool<span>Spark</span></div>
-      <div class="logo-tag">Builder Platform</div>
-    </div>
-    <button class="sidebar-close-btn" id="sidebar-close-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <nav class="sidebar-nav" id="sidebar-nav"></nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Member</div>
-      </div>
-    </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sign Out
-    </button>
-  </div>
-</aside>
 
 <div class="main-wrap">
   <header class="top-header"></header>
-
   <main class="page-content">
     <div class="welcome-card">
       <div class="welcome-eyebrow">ToolSpark · Discover Hub</div>
@@ -786,21 +716,6 @@
 
   </main>
 </div>
-
-<nav class="mobile-bottom-nav">
-  <a href="community.html" class="mobile-nav-item">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-    <span>Community</span>
-  </a>
-  <a href="courses.html" class="mobile-nav-item">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-    <span>Courses</span>
-  </a>
-  <a href="dashboard.html" class="mobile-nav-item active">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Dashboard</span>
-  </a>
-</nav>
 
 <script>
   function escapeHtml(str) {
@@ -1298,24 +1213,12 @@
   auth.onAuthStateChanged(async function(user) {
     if (!user) { window.location.href = 'signon.html?redirect=roadmap'; return; }
 
-    const name = user.displayName || user.email || 'Builder';
-    document.getElementById('sidebar-name').textContent = name;
-    const av = document.getElementById('sidebar-avatar');
-    if (user.photoURL) {
-      av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
-    } else {
-      av.textContent = name.charAt(0).toUpperCase();
-    }
-
     try {
       const snap = await db.collection('users').doc(user.uid).get();
         if (snap.exists) {
           const userData = snap.data() || {};
           currentBuildPathChoice = userData.buildPathChoice || null;
           currentHubSlug = userData.hubSlug || null;
-          if (userData.userRole === 'admin') {
-            document.getElementById('sidebar-role').textContent = 'Admin';
-          }
         }
     } catch(e) {}
     renderPathSelection();

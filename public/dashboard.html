@@ -49,88 +49,7 @@
     overflow: hidden;
   }
 
-  /* -- SIDEBAR -- */
-  .sidebar {
-    width: var(--sidebar-width);
-    background: var(--dark);
-    height: 100%;
-    min-height: unset;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0;
-    z-index: 100;
-    border-right: 1px solid var(--border-dark);
-    transition: transform 0.3s ease;
-  }
-  .sidebar-logo { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 30px; color: #ffffff; }
-  .logo-text span { color: #f5c842; }
-  .logo-tag { font-size: 14px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 0; font-weight: 700; text-align: center; }
-  /* sidebar-middle wraps nav + inspire so inspire centers in remaining space */
-  .sidebar-middle { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .sidebar-nav { padding: 0.5rem 1rem; display: flex; flex-direction: column; gap: 1px; }
-  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.5rem 0.5rem 0.3rem; }
-
-  .sidebar-inspire-text {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 22px;
-    font-weight: 400;
-    color: #E8E4DC;
-    line-height: 1.5;
-    margin-top: auto;
-  }
-  .sidebar-inspire-cta {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 28px;
-    font-weight: 400;
-    color: var(--gold);
-    line-height: 1.1;
-    display: inline-block;
-    text-decoration: none;
-     opacity: 0.8;
-     margin-bottom: 12px;
-  }
-  /* sidebar sparkle stars */
-  .sidebar-star { position: absolute; color: var(--gold); pointer-events: none; }
-  .ss1 { top: 18px; right: 28px; animation: twinkle 2.8s cubic-bezier(0.77,0,0.175,1) 0.2s infinite; }
-  .ss2 { top: 42px; left: 22px; animation: twinkle 3.1s cubic-bezier(0.77,0,0.175,1) 1.0s infinite; }
-  .ss3 { top: 90px; right: 18px; animation: twinkle 2.6s cubic-bezier(0.77,0,0.175,1) 1.8s infinite; }
-  .ss4 { top: 140px; left: 30px; animation: twinkle 3.3s cubic-bezier(0.77,0,0.175,1) 0.6s infinite; }
-
-  .sidebar-footer { padding: 1rem 1rem 1.5rem; 
-    position: relative; 
-    text-align: center; 
-    border-top: 1px solid rgba(201,168,76,0.15);
-    padding-top: 16px;
-  }
-  .sidebar-user { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); }
-  .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--gold-dim); border: 2px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; color: var(--gold); flex-shrink: 0; overflow: hidden; }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-info { min-width: 0; }
-  .user-name { font-size: 15px; font-weight: 700; color: #F0EDE6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 12px; color: var(--text3); margin-top: 1px; }
-
-  /* Sidebar close button */
-  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; }
-  .sidebar-close-btn:hover { color: #F0EDE6; }
-
-  /* Overlay */
-  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
-  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
-
-  /* -- MAIN -- */
-  .main-wrap {
-    margin-left: var(--sidebar-width);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow-y: auto;
-  }
-  /* -- PAGE CONTENT -- */
+  /* -- PAGE CONTENT --*/
 .page-content { 
   flex: 1; 
   display: flex; 
@@ -142,11 +61,6 @@
   padding-bottom: 3rem;
   margin: 0 auto;  /* add this */
 }
-  /* -- SPARKLE -- */
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.85; transform: scale(1) rotate(0deg); }
-    50%       { opacity: 0.1;  transform: scale(0.5) rotate(20deg); }
-  }
   @media (prefers-reduced-motion: reduce) { .wc-sparkle { animation: none !important; opacity: 0.5 !important; } }
 
   /* -- WELCOME CARD -- */
@@ -366,17 +280,103 @@
   .hub-card-title, .qa-card-title { font-size: 14px; font-weight: 700; color: var(--text); grid-column: 2; grid-row: 1; align-self: end; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hub-card-sub, .qa-card-sub { font-size: 11px; color: var(--text3); grid-column: 2; grid-row: 2; align-self: start; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hub-card::after, .qa-card::after { content: '→'; grid-column: 3; grid-row: 1 / 3; color: var(--text3); font-size: 15px; justify-self: end; align-self: center; transition: transform 0.2s var(--ease-out); }
-  .hub-card:hover::after, .qa-card:hover::after { transform: translateX(3px); color: var(--gold); }
-  
+  .hub-card:hover::after, .qa-card:hover::after { transform: translateX(3px); color: var(--gold); 
+  }
   .quick-access-section {
   margin-top: 24px;
+  background: white;
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid var(--border);
+}
+  .qa-card { 
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    padding: 16px 20px; box-shadow: var(--shadow); 
+    text-decoration: none; color: inherit; 
+    transition: box-shadow 0.2s var(--ease-out), 
+    transform 0.2s var(--ease-out); display: grid; 
+    grid-template-columns: 50px 1fr 18px; 
+    grid-template-rows: auto auto; 
+    align-items: center; 
+    column-gap: 14px; height: auto; 
+    position: relative;
+    overflow: hidden;
+  }
+.qa-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gold);
+}
+ .qa-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-  /* -- BOTTOM NAV (mobile) -- */
-  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
-  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
-  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
+.qa-card:hover .qa-card-icon {
+    transform: scale(1.12) rotate(-4deg);
+}
+  
+  .qa-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
+    filter: saturate(2.2);
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    background: rgba(201,168,76,.12);
+    border: 1px solid rgba(201,168,76,.15);
+}
+  
+  .qa-card-title { 
+    font-size: 14px; 
+    font-weight: 700; 
+    color: var(--text); 
+    grid-column: 2; 
+    grid-row: 1; align-self: end; 
+    margin-bottom: 3px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+  }
+  
+  .qa-card-sub { 
+    font-size: 11px; 
+    color: var(--text3); 
+    grid-column: 2; 
+    grid-row: 2; 
+    align-self: start; 
+    line-height: 1.4; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+  }
+  
+  .qa-card::after { 
+    content: '→'; 
+    grid-column: 3; 
+    grid-row: 1 / 3; 
+    color: var(--text3); 
+    font-size: 15px; 
+    justify-self: end; 
+    align-self: center; 
+    transition: transform 0.2s var(--ease-out); 
+    }
 
+.qa-card:hover::after { 
+  transform: translateX(3px); 
+  color: var(--gold); 
+  }
   /* -- RESPONSIVE -- */
   @media (max-width: 1199px) {
     .hub-grid { grid-template-columns: repeat(2, 1fr); }
@@ -387,27 +387,15 @@
   }
 
   @media (max-width: 1023px) {
-    .sidebar { width: 60px; }
-    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info, .sidebar-footer { display: none; }
-    .main-wrap { margin-left: 60px; }
-    .nav-item { justify-content: center; padding: 10px; }
     .profile-hub-row { gap: 16px; }
   }
 
   @media (max-width: 767px) {
-    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: block; }
-    .nav-item { justify-content: flex-start; padding: 9px 12px; }
-    .sidebar-close-btn { display: flex; }
-    .sidebar-overlay { display: block; }
-    .main-wrap { margin-left: 0; }
     .page-content { padding: 1rem 1rem 80px; gap: 1rem; }
     .welcome-card { padding: 1.25rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
     .welcome-card h1 { font-size: 30px; }
     .hub-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     .qa-grid  { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-    .mobile-bottom-nav { display: flex; }
     .profile-hub-row { grid-template-columns: 1fr; }
     .wc-stats { min-width: unset; width: 100%; }
     .wc-sparky-wrap { display: none; }
@@ -437,39 +425,6 @@
 </style>
 </head>
 <body data-loading="true">
-
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div style="text-align:center;line-height:1.1;">
-      <div class="logo-text">Tool<span>Spark</span></div>
-      <div class="logo-tag">Creator Hub</div>
-    </div>
-    <button class="sidebar-close-btn" id="sidebar-close-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <div class="sidebar-middle">
-    <nav class="sidebar-nav" id="sidebar-nav"></nav>
-  </div>
-
-  <div class="sidebar-footer">
-    <svg class="sidebar-star ss1" width="14" height="14" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-    <svg class="sidebar-star ss2" width="10" height="10" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-    <svg class="sidebar-star ss3" width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-    <svg class="sidebar-star ss4" width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-    <div class="sidebar-inspire-cta">Let's build ♡</d>
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Member</div>
-      </div>
-    </div>
-  </div>
-</aside>
 
 <!-- MAIN -->
 <div class="main-wrap">
@@ -660,33 +615,8 @@
       <div class="qa-card-title">My Sessions</div>
       <div class="qa-card-sub">View all your past sessions</div>
     </a>
-
   </div>
 </div>
-    <!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-bottom-nav">
-  <a href="community.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-    Community
-  </a>
-  <a href="courses.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-    Courses
-  </a>
-  <a href="tools.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-    Tools
-  </a>
-  <a href="inbox.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    Inbox
-  </a>
-  <a href="dashboard.html" class="mobile-nav-item active">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Dashboard
-  </a>
-</nav>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
