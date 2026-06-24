@@ -116,7 +116,7 @@
       '.logo-text span{color:#f5c842!important;}' +
       '.logo-tag{color:' + LOGO_TAG_COLOR + '!important;font-size:14px!important;letter-spacing:0.12em;text-align:center;margin-top:0px!important;}' +
       /* ── Sidebar nav items ── */
-      '.nav-item{display:flex;align-items:center;gap:16px;padding:8px 14px;border-radius:8px;font-size:24px;font-weight:600;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
+      '.nav-item{display:flex;align-items:center;padding:8px 14px;border-radius:8px;font-family:"Playfair Display",serif;font-size:24px;font-weight:700;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
       '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
       '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;}' +
       '.nav-icon{width:32px;height:32px;flex-shrink:0;opacity:0.6;}' +
@@ -440,7 +440,7 @@
       nav.innerHTML = ITEMS.map(function(item) {
         var active = item.key === activeKey ? ' active' : '';
         return '<a href="' + item.href + '" class="nav-item' + active + '">' +
-          item.icon + '<span>' + item.label + '</span></a>';
+          '<span>' + item.label + '</span></a>';
       }).join('');
     }
 

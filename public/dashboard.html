@@ -113,26 +113,6 @@
   .sidebar-user { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: var(--radius-sm); }
   .logout-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; margin-top: 6px; background: none; border: none; border-radius: var(--radius-sm); color: #9A8A8A; font-size: 20px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
   .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .delete-acct-btn { display: block; width: 100%; padding: 6px 12px; margin-top: 2px; background: none; border: none; border-radius: var(--radius-sm); color: #4A3A3A; font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; text-align: left; transition: all 0.15s; letter-spacing: 0.01em; }
-  .delete-acct-btn:hover { color: #E05555; background: rgba(220,50,50,0.07); }
-
-  /* Delete account modal */
-  .da-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
-  .da-overlay.open { display: flex; }
-  .da-modal { background: #fff; border-radius: var(--radius); padding: 2rem; max-width: 400px; width: 100%; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
-  .da-icon { width: 44px; height: 44px; border-radius: 50%; background: rgba(196,98,45,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
-  .da-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 6px; }
-  .da-body { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 1.25rem; }
-  .da-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .da-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; margin-bottom: 1.25rem; }
-  .da-input:focus { border-color: var(--coral); }
-  .da-actions { display: flex; gap: 10px; }
-  .da-cancel { flex: 1; padding: 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: none; font-size: 14px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text2); cursor: pointer; transition: all 0.15s; }
-  .da-cancel:hover { background: var(--bg); }
-  .da-confirm { flex: 1; padding: 11px; border: none; border-radius: var(--radius-sm); background: var(--coral); font-size: 14px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; color: #fff; cursor: pointer; transition: all 0.15s; }
-  .da-confirm:hover:not(:disabled) { background: #b5511f; }
-  .da-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
-  .da-error { font-size: 12px; color: var(--coral); margin-bottom: 0.75rem; display: none; }
   .user-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--gold-dim); border: 2px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .user-info { flex: 1; min-width: 0; }
@@ -917,36 +897,7 @@
         document.getElementById('notif-dot').style.display = 'block';
       }
     } catch(e) {}
-  }
-
-  function openDeleteModal() {
-    document.getElementById('da-overlay').classList.add('open');
-    document.getElementById('da-input').value = '';
-    document.getElementById('da-confirm-btn').disabled = true;
-    document.getElementById('da-error').style.display = 'none';
-  }
-  function closeDeleteModal() {
-    document.getElementById('da-overlay').classList.remove('open');
-  }
-  document.addEventListener('DOMContentLoaded', function() {
-    const daOverlay = document.getElementById('da-overlay');
-    if (daOverlay) daOverlay.addEventListener('click', function(e) {
-      if (e.target === this) closeDeleteModal();
-    });
   });
-
-  async function confirmDeleteAccount() {
-    const btn = document.getElementById('da-confirm-btn');
-    const errEl = document.getElementById('da-error');
-    btn.disabled = true;
-    btn.textContent = 'Deleting...';
-    errEl.style.display = 'none';
-    try {
-      const token = await currentUser.getIdToken();
-      const res = await fetch('https://us-central1-toolspark-2d62d.cloudfunctions.net/deleteAccount', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
       if (!res.ok) throw new Error((await res.json()).error || 'Deletion failed');
       await auth.signOut();
       window.location.href = 'index.html';
@@ -960,23 +911,7 @@
 
 
 </script>
-<!-- DELETE ACCOUNT MODAL -->
-<div class="da-overlay" id="da-overlay">
-  <div class="da-modal">
-    <div class="da-icon">
-      <svg width="20" height="20" fill="none" stroke="#C4622D" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-    </div>
-    <div class="da-title">Delete your account</div>
-    <p class="da-body">This permanently deletes your account, profile, spark results, community posts, and all progress. <strong>This cannot be undone.</strong></p>
-    <div class="da-label">Type DELETE to confirm</div>
-    <input class="da-input" id="da-input" type="text" placeholder="DELETE" autocomplete="off" oninput="document.getElementById('da-confirm-btn').disabled = this.value !== 'DELETE'">
-    <div class="da-error" id="da-error"></div>
-    <div class="da-actions">
-      <button class="da-cancel" onclick="closeDeleteModal()">Cancel</button>
-      <button class="da-confirm" id="da-confirm-btn" disabled onclick="confirmDeleteAccount()">Delete account</button>
-    </div>
-  </div>
-</div>
+
 
 <script src="js/nav.js"></script>
 <script>initNav('dashboard', 'Dashboard');</script>
