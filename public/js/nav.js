@@ -233,31 +233,8 @@
 
           if (data.userRole === 'admin') {
             if (adminBtn) adminBtn.style.display = 'inline-flex';
-            revealNav();
-          } else if (!data.onboardingComplete) {
-            lockNav();
-            revealNav();
-          } else {
-            firebase.firestore().collection('certification_progress').doc(user.uid).get().then(function(cpSnap) {
-              if (!cpSnap.exists || !cpSnap.data().phase1Complete) {
-                var nav = document.getElementById('sidebar-nav');
-                if (!nav) { revealNav(); return; }
-                var CHALLENGE_HREFS = ['courses.html', 'community.html', 'roadmap.html'];
-                var links = nav.querySelectorAll('a.nav-item');
-                for (var i = 0; i < links.length; i++) {
-                  var href = links[i].getAttribute('href');
-                  if (CHALLENGE_HREFS.indexOf(href) === -1) {
-                    links[i].style.display = 'none';
-                  } else if (href === 'courses.html') {
-                    links[i].setAttribute('href', START_HERE_URL);
-                    var span = links[i].querySelector('span');
-                    if (span) span.textContent = 'Challenge';
-                  }
-                }
-              }
-              revealNav();
-            }).catch(function() { revealNav(); });
           }
+          revealNav();
         }).catch(function() {
           window.tsUser = null;
           window.dispatchEvent(new CustomEvent('tsUserReady'));
