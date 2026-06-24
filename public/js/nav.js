@@ -92,7 +92,7 @@
     s.id = 'nav-header-styles';
     s.textContent =
       /* ── Top header ── */
-      '.top-header{background:#000;border-bottom:1px solid rgba(255,255,255,0.08);height:var(--header-height);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;}' +
+      '.top-header{background:#000;border-bottom:1px solid rgba(255,255,255,0.08);height:var(--header-height);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;width:100%;}' +
       '.hamburger-btn{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:6px;border-radius:6px;transition:background 0.15s;flex-shrink:0;align-items:center;justify-content:center;}' +
       '.hamburger-btn:hover{background:rgba(255,255,255,0.08);}' +
       '.header-title{font-family:"Inter",sans-serif;font-size:18px;font-weight:700;color:#fff;flex:1;line-height:1.2;}' +
@@ -104,6 +104,7 @@
       '.header-admin-btn:hover{background:rgba(255,200,32,0.2);border-color:rgba(255,200,32,0.55);}' +
       '.header-auth-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.5);transition:all 0.15s;font-family:inherit;text-decoration:none;}' +
       '.header-auth-btn:hover{border-color:rgba(255,200,32,0.4);color:#FFC820;}' +
+      '#header-signout-btn:hover{border-color:rgba(220,50,50,0.4)!important;color:#E05555!important;}' +
       '.mobile-bottom-nav{-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;}' +
       /* ── Credits chip ── */
       '.header-credits{display:none;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,200,32,0.08);border:1px solid rgba(255,200,32,0.2);border-radius:100px;font-size:12px;font-weight:700;color:#FFC820;text-decoration:none;transition:all 0.15s;white-space:nowrap;}' +
@@ -116,7 +117,7 @@
       '.logo-text span{color:#f5c842!important;}' +
       '.logo-tag{color:' + LOGO_TAG_COLOR + '!important;font-size:14px!important;letter-spacing:0.12em;text-align:center;margin-top:0px!important;}' +
       /* ── Sidebar nav items ── */
-      '.nav-item{display:flex;align-items:center;padding:8px 14px;border-radius:8px;font-family:"Playfair Display",serif;font-size:24px;font-weight:700;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
+      '.nav-item{display:flex;align-items:center;padding:8px 14px;border-radius:8px;font-family:"Playfair Display",serif;font-size:20px;font-weight:700;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
       '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
       '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;}' +
       '.nav-icon{width:32px;height:32px;flex-shrink:0;opacity:0.6;}' +
@@ -171,6 +172,7 @@
         '<a href="inbox.html" class="notif-btn" id="header-inbox-btn" style="display:none" title="Inbox">' + ENVELOPE_SVG + '<div class="notif-dot" id="inbox-dot" style="display:none"></div></a>' +
         '<a href="notifications.html" class="notif-btn" id="header-notif-btn" title="Notifications">' + BELL_SVG + '<div class="notif-dot" id="notif-dot" style="display:none"></div></a>' +
         '<a href="profile.html" class="header-auth-btn" id="header-profile-btn" style="display:none" title="My Profile">' + PERSON_SVG + '</a>' +
+        '<button class="header-auth-btn" id="header-signout-btn" style="display:none" title="Sign out">' + SIGNOUT_SVG + '</button>' +
         '<a href="signon.html" class="header-auth-btn" id="header-signin-btn" title="Sign in">' + SIGNIN_SVG + '</a>' +
       '</div>';
 
@@ -200,7 +202,11 @@
     var adminBtn   = document.getElementById('header-admin-btn');
     var inboxBtn   = document.getElementById('header-inbox-btn');
     var profileBtn = document.getElementById('header-profile-btn');
+    var signoutBtn = document.getElementById('header-signout-btn');
     var signinBtn  = document.getElementById('header-signin-btn');
+    if (signoutBtn) signoutBtn.addEventListener('click', function() {
+      firebase.auth().signOut().then(function() { window.location.href = 'signon.html'; });
+    });
     var notifDot   = document.getElementById('notif-dot');
     var inboxDot   = document.getElementById('inbox-dot');
 
@@ -209,6 +215,7 @@
         // Show logged-in icons, hide sign-in
         if (inboxBtn)   inboxBtn.style.display   = 'flex';
         if (profileBtn) profileBtn.style.display = 'flex';
+        if (signoutBtn) signoutBtn.style.display = 'flex';
         if (signinBtn)  signinBtn.style.display  = 'none';
 
         // Admin + onboarding check

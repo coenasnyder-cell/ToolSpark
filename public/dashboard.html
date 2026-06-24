@@ -53,7 +53,8 @@
   .sidebar {
     width: var(--sidebar-width);
     background: var(--dark);
-    height: 100vh;
+    height: 100%;
+    min-height: unset;
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -70,16 +71,6 @@
   .sidebar-middle { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .sidebar-nav { padding: 0.5rem 1rem; display: flex; flex-direction: column; gap: 1px; }
   .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.5rem 0.5rem 0.3rem; }
-  /* -- SIDEBAR INSPIRE — centered in remaining space -- */
-  .sidebar-inspire {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 1.5rem 1.5rem 1.25rem;
-    position: relative;
-  }
 
   .sidebar-inspire-text {
     font-family: 'Playfair Display', serif;
@@ -88,8 +79,7 @@
     font-weight: 400;
     color: #E8E4DC;
     line-height: 1.5;
-    margin-top: 0;
-    margin-bottom: 2px;
+    margin-top: auto;
   }
   .sidebar-inspire-cta {
     font-family: 'Playfair Display', serif;
@@ -100,7 +90,8 @@
     line-height: 1.1;
     display: inline-block;
     text-decoration: none;
-    margin-top: 6px;
+     opacity: 0.8;
+     margin-bottom: 12px;
   }
   /* sidebar sparkle stars */
   .sidebar-star { position: absolute; color: var(--gold); pointer-events: none; }
@@ -109,15 +100,18 @@
   .ss3 { top: 90px; right: 18px; animation: twinkle 2.6s cubic-bezier(0.77,0,0.175,1) 1.8s infinite; }
   .ss4 { top: 140px; left: 30px; animation: twinkle 3.3s cubic-bezier(0.77,0,0.175,1) 0.6s infinite; }
 
-  .sidebar-footer { padding: 1rem 1rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: var(--radius-sm); }
-  .logout-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; margin-top: 6px; background: none; border: none; border-radius: var(--radius-sm); color: #9A8A8A; font-size: 20px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .user-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--gold-dim); border: 2px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+  .sidebar-footer { padding: 1rem 1rem 1.5rem; 
+    position: relative; 
+    text-align: center; 
+    border-top: 1px solid rgba(201,168,76,0.15);
+    padding-top: 16px;
+  }
+  .sidebar-user { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); }
+  .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--gold-dim); border: 2px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; color: var(--gold); flex-shrink: 0; overflow: hidden; }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-name { font-size: 24px; font-weight: 700; color: #F0EDE6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 16px; color: var(--text3); }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 15px; font-weight: 700; color: #F0EDE6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 12px; color: var(--text3); margin-top: 1px; }
 
   /* Sidebar close button */
   .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; }
@@ -128,12 +122,26 @@
   .sidebar-overlay.open { opacity: 1; pointer-events: all; }
 
   /* -- MAIN -- */
-  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; }
-
-
+  .main-wrap {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+  }
   /* -- PAGE CONTENT -- */
-  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2.5rem; max-width: 1600px; width: 100%; padding-bottom: 3rem; }
-
+.page-content { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.5rem; 
+  padding: 1.75rem 2.5rem; 
+  max-width: 1600px; 
+  width: 100%; 
+  padding-bottom: 3rem;
+  margin: 0 auto;  /* add this */
+}
   /* -- SPARKLE -- */
   @keyframes twinkle {
     0%, 100% { opacity: 0.85; transform: scale(1) rotate(0deg); }
@@ -269,7 +277,15 @@
   }
 
   /* -- PROFILE + COMMUNITY HUB ROW -- */
-  .profile-hub-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+  .profile-hub-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
   /* -- MY PROFILE CARD -- */
   .my-profile-card { min-width: 0; display: flex; flex-direction: column; height: 100%; }
   .pc-header { display: flex; align-items: center; justify-content: space-between; height: 40px; flex-shrink: 0; }
@@ -330,7 +346,7 @@
   #community-section .hub-grid { flex: 1; align-content: start; margin-top: 0; }
   #community-section .hub-card { 
     padding: 16px 12px; 
-    background: var(--bg-surface);
+    background: var(--bg);
    }
 
   /* -- SECTION HEADERS -- */
@@ -342,30 +358,15 @@
 
   /* -- HUB CARDS -- */
   .hub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.875rem; }
-  .hub-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out); display: grid; grid-template-columns: 50px 1fr 18px; grid-template-rows: auto auto; align-items: center; column-gap: 14px; height: auto; }
-  .hub-card:hover { box-shadow: var(--shadow-md); }
-  .hub-card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; grid-column: 1; grid-row: 1 / 3; align-self: center; filter: saturate(2.2); transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
-  .hub-card:hover .hub-card-icon { transform: scale(1.14) rotate(-6deg); }
-  .hub-card-title { 
-    font-size: 14px; 
-    font-weight: 700; 
-    color: var(--text); grid-column: 2; 
-    grid-row: 1; align-self: end; 
-    margin-bottom: 3px; 
-     white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  }
-  .hub-card-sub { font-size: 11px; 
-    color: var(--text3); grid-column: 2; 
-    grid-row: 2; align-self: start; 
-    line-height: 1.4; 
-     white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  }
-  .hub-card::after { content: '→'; grid-column: 3; grid-row: 1 / 3; color: var(--text3); font-size: 15px; justify-self: end; align-self: center; transition: transform 0.2s var(--ease-out); }
-  .hub-card:hover::after { transform: translateX(3px); color: var(--gold); }
+  .qa-grid  { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.875rem; }
+  .hub-card, .qa-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out); display: grid; grid-template-columns: 50px 1fr 18px; grid-template-rows: auto auto; align-items: center; column-gap: 14px; height: auto; }
+  .hub-card:hover, .qa-card:hover { box-shadow: var(--shadow-md); }
+  .hub-card-icon, .qa-card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; grid-column: 1; grid-row: 1 / 3; align-self: center; filter: saturate(2.2); transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+  .hub-card:hover .hub-card-icon, .qa-card:hover .qa-card-icon { transform: scale(1.14) rotate(-6deg); }
+  .hub-card-title, .qa-card-title { font-size: 14px; font-weight: 700; color: var(--text); grid-column: 2; grid-row: 1; align-self: end; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hub-card-sub, .qa-card-sub { font-size: 11px; color: var(--text3); grid-column: 2; grid-row: 2; align-self: start; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hub-card::after, .qa-card::after { content: '→'; grid-column: 3; grid-row: 1 / 3; color: var(--text3); font-size: 15px; justify-self: end; align-self: center; transition: transform 0.2s var(--ease-out); }
+  .hub-card:hover::after, .qa-card:hover::after { transform: translateX(3px); color: var(--gold); }
   
   .quick-access-section {
   margin-top: 24px;
@@ -379,14 +380,18 @@
   /* -- RESPONSIVE -- */
   @media (max-width: 1199px) {
     .hub-grid { grid-template-columns: repeat(2, 1fr); }
+    .qa-grid  { grid-template-columns: repeat(3, 1fr); }
     .welcome-card h1 { font-size: 36px; }
+    .wc-stats { gap: 1.5rem; }
+    .wc-tagline { font-size: 20px; }
   }
 
   @media (max-width: 1023px) {
     .sidebar { width: 60px; }
-    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info, .sidebar-inspire { display: none; }
+    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info, .sidebar-footer { display: none; }
     .main-wrap { margin-left: 60px; }
     .nav-item { justify-content: center; padding: 10px; }
+    .profile-hub-row { gap: 16px; }
   }
 
   @media (max-width: 767px) {
@@ -401,14 +406,34 @@
     .welcome-card { padding: 1.25rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
     .welcome-card h1 { font-size: 30px; }
     .hub-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .qa-grid  { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     .mobile-bottom-nav { display: flex; }
+    .profile-hub-row { grid-template-columns: 1fr; }
+    .wc-stats { min-width: unset; width: 100%; }
+    .wc-sparky-wrap { display: none; }
+    .wc-left { max-width: 100%; flex: 1; }
+    .wc-tagline { font-size: 16px; }
+    .mp-row { flex-wrap: wrap; gap: 12px; }
   }
 
   @media (max-width: 480px) {
     .hub-grid { grid-template-columns: 1fr; }
+    .qa-grid  { grid-template-columns: 1fr; }
     .page-content { padding: 0.875rem 0.875rem 80px; }
     .welcome-card h1 { font-size: 26px; }
-  }
+    .profile-hub-row { grid-template-columns: 1fr; }
+    .wc-stats { min-width: unset; width: 100%; }
+    .wc-sparky-wrap { display: none; }
+    .wc-left { max-width: 100%; flex: 1; }
+    .wc-tagline { font-size: 16px; }
+    .mp-row { flex-wrap: wrap; gap: 12px; }
+    .wc-stats { gap: 1rem; }
+  .wc-stat-num { font-size: 26px; }
+  .mp-row { flex-direction: column; align-items: flex-start; }
+  .mp-stat { align-items: flex-start; text-align: left; }
+  .profile-hub-row { padding: 16px; gap: 16px; }
+}
+  
 </style>
 </head>
 <body data-loading="true">
@@ -428,17 +453,14 @@
   </div>
   <div class="sidebar-middle">
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
-
-    <div class="sidebar-inspire">
-      <svg class="sidebar-star ss1" width="14" height="14" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-      <svg class="sidebar-star ss2" width="10" height="10" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-      <svg class="sidebar-star ss3" width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-      <svg class="sidebar-star ss4" width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
-      <p class="sidebar-inspire-cta">Let's build ♡</p>
-    </div>
   </div>
 
   <div class="sidebar-footer">
+    <svg class="sidebar-star ss1" width="14" height="14" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
+    <svg class="sidebar-star ss2" width="10" height="10" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
+    <svg class="sidebar-star ss3" width="12" height="12" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
+    <svg class="sidebar-star ss4" width="8" height="8" viewBox="0 0 12 12"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z" fill="currentColor"/></svg>
+    <div class="sidebar-inspire-cta">Let's build ♡</d>
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebar-avatar">?</div>
       <div class="user-info">
@@ -446,10 +468,6 @@
         <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sign Out
-    </button>
   </div>
 </aside>
 
@@ -601,46 +619,46 @@
   <div class="section-header">
     <div class="section-title">Quick Access <span>⚡</span></div>
   </div>
-  <div class="hub-grid">
+  <div class="qa-grid">
 
-    <a href="creator-hub.html" class="hub-card">
-      <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);">
+    <a href="creator-hub.html" class="qa-card">
+      <div class="qa-card-icon" style="background:rgba(201,168,76,0.12);">
         <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d=""M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
-      <div class="hub-card-title">Creator Hub</div>
-      <div class="hub-card-sub">Build and manage your AI tool hub</div>
+      <div class="qa-card-title">Creator Hub</div>
+      <div class="qa-card-sub">Build and manage your AI tool hub</div>
     </a>
 
-    <a href="my-hub.html" class="hub-card">
-      <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
+    <a href="my-hub.html" class="qa-card">
+      <div class="qa-card-icon" style="background:rgba(75,63,138,0.12);">
         <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
-      <div class="hub-card-title">My Hub</div>
-      <div class="hub-card-sub">Your ToolSpark workspace</div>
+      <div class="qa-card-title">My Hub</div>
+      <div class="qa-card-sub">Your ToolSpark workspace</div>
     </a>
 
-    <a href="agents.html" class="hub-card">
-      <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
+    <a href="agents.html" class="qa-card">
+      <div class="qa-card-icon" style="background:rgba(75,63,138,0.12);">
         <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M15 8h.01M9 8h.01"/></svg>
       </div>
-      <div class="hub-card-title">My Agents</div>
-      <div class="hub-card-sub">Your AI coaching companions</div>
+      <div class="qa-card-title">My Agents</div>
+      <div class="qa-card-sub">Your AI coaching companions</div>
     </a>
 
-    <a href="courses.html" class="hub-card">
-      <div class="hub-card-icon" style="background:rgba(56,132,158,0.12);">
+    <a href="courses.html" class="qa-card">
+      <div class="qa-card-icon" style="background:rgba(56,132,158,0.12);">
         <svg width="20" height="20" fill="none" stroke="#38849E" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
       </div>
-      <div class="hub-card-title">Courses & Training</div>
-      <div class="hub-card-sub">Step-by-step programs to build AI tools</div>
+      <div class="qa-card-title">Courses & Training</div>
+      <div class="qa-card-sub">Step-by-step programs to build AI tools</div>
     </a>
 
-    <a href="sessions.html" class="hub-card">
-      <div class="hub-card-icon" style="background:rgba(201,168,76,0.12);">
+    <a href="sessions.html" class="qa-card">
+      <div class="qa-card-icon" style="background:rgba(201,168,76,0.12);">
         <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </div>
-      <div class="hub-card-title">My Sessions</div>
-      <div class="hub-card-sub">View all your past sessions</div>
+      <div class="qa-card-title">My Sessions</div>
+      <div class="qa-card-sub">View all your past sessions</div>
     </a>
 
   </div>
