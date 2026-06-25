@@ -273,6 +273,49 @@
   display: none;
 }
 
+/* Sub-agent uploader (full card image area) */
+.sub-agent-uploader {
+  cursor: pointer;
+  position: relative;
+}
+.sub-agent-img-full {
+  width: 100%;
+  min-height: 160px;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  background: rgba(201,168,76,0.04);
+  border-bottom: 1px dashed rgba(201,168,76,0.25);
+}
+.upload-zone-full {
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .15s;
+}
+.sub-agent-uploader:hover .upload-zone-full { background: rgba(201,168,76,0.1); }
+.upload-zone-full svg { color: rgba(201,168,76,0.5); }
+.upload-zone-full span {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(201,168,76,0.6);
+}
+.sub-agent-img-full .upload-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: none;
+}
+
 /* ── SUB-AGENT SECTION ── */
 .sub-agents-section {
   display: flex;
@@ -527,25 +570,25 @@
     <div class="sub-agent-grid">
 
       <div class="sub-agent-card">
-        <div class="sub-agent-inner">
-          <div class="sub-agent-img"><img src="" alt="Focus Guardian"></div>
-          <div class="sub-agent-body">
-            <div class="sub-agent-title">Focus Guardian</div>
-            <div class="sub-agent-desc">Helps you block distractions and stay on track.</div>
-            <span class="sub-agent-badge">Accountability</span>
+        <div class="sub-agent-uploader sub-agent-img-full" data-agent="focus-guardian" onclick="triggerUpload(this)">
+          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+          <div class="upload-zone-full">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Add Photo</span>
           </div>
+          <img class="upload-preview" alt="Focus Guardian">
         </div>
         <a href="#" class="sub-agent-btn">Chat Now</a>
       </div>
 
       <div class="sub-agent-card">
-        <div class="sub-agent-inner">
-          <div class="sub-agent-img"><img src="" alt="Momentum Keeper"></div>
-          <div class="sub-agent-body">
-            <div class="sub-agent-title">Momentum Keeper</div>
-            <div class="sub-agent-desc">Keeps you moving forward, even on the hard days.</div>
-            <span class="sub-agent-badge">Accountability</span>
+        <div class="sub-agent-uploader sub-agent-img-full" data-agent="momentum-keeper" onclick="triggerUpload(this)">
+          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+          <div class="upload-zone-full">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Add Photo</span>
           </div>
+          <img class="upload-preview" alt="Momentum Keeper">
         </div>
         <a href="#" class="sub-agent-btn">Chat Now</a>
       </div>
@@ -560,25 +603,25 @@
     <div class="sub-agent-grid">
 
       <div class="sub-agent-card">
-        <div class="sub-agent-inner">
-          <div class="sub-agent-img"><img src="" alt="Launch Guide"></div>
-          <div class="sub-agent-body">
-            <div class="sub-agent-title">Launch Guide</div>
-            <div class="sub-agent-desc">Helps you go from idea to launch with confidence.</div>
-            <span class="sub-agent-badge">Guided</span>
+        <div class="sub-agent-uploader sub-agent-img-full" data-agent="launch-guide" onclick="triggerUpload(this)">
+          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+          <div class="upload-zone-full">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Add Photo</span>
           </div>
+          <img class="upload-preview" alt="Launch Guide">
         </div>
         <a href="#" class="sub-agent-btn">Chat Now</a>
       </div>
 
       <div class="sub-agent-card">
-        <div class="sub-agent-inner">
-          <div class="sub-agent-img"><img src="" alt="Marketing Mentor"></div>
-          <div class="sub-agent-body">
-            <div class="sub-agent-title">Marketing Mentor</div>
-            <div class="sub-agent-desc">Finds your message and helps you reach your people.</div>
-            <span class="sub-agent-badge">Guided</span>
+        <div class="sub-agent-uploader sub-agent-img-full" data-agent="marketing-mentor" onclick="triggerUpload(this)">
+          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+          <div class="upload-zone-full">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Add Photo</span>
           </div>
+          <img class="upload-preview" alt="Marketing Mentor">
         </div>
         <a href="#" class="sub-agent-btn">Chat Now</a>
       </div>
@@ -686,14 +729,14 @@
   }
 
   function showUploadedImage(uploaderEl, dataUrl) {
-    const zone = uploaderEl.querySelector('.upload-zone');
+    const zone = uploaderEl.querySelector('.upload-zone, .upload-zone-full');
     const preview = uploaderEl.querySelector('.upload-preview');
     preview.src = dataUrl;
     preview.style.display = 'block';
-    zone.style.display = 'none';
+    if (zone) zone.style.display = 'none';
   }
 
-  document.querySelectorAll('.agent-uploader[data-agent]').forEach(function(el) {
+  document.querySelectorAll('.agent-uploader[data-agent], .sub-agent-uploader[data-agent]').forEach(function(el) {
     const agentKey = el.dataset.agent;
     try {
       const saved = localStorage.getItem('agent-img-' + agentKey);
