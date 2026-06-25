@@ -280,16 +280,18 @@
 }
 .sub-agent-img-full {
   width: 100%;
-  min-height: 160px;
+  height: 220px;
   border-radius: 16px 16px 0 0;
   overflow: hidden;
   background: rgba(201,168,76,0.04);
   border-bottom: 1px dashed rgba(201,168,76,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .upload-zone-full {
   width: 100%;
   height: 100%;
-  min-height: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -308,9 +310,9 @@
 }
 .sub-agent-img-full .upload-preview {
   width: 100%;
-  height: 160px;
+  height: 100%;
   object-fit: contain;
-  object-position: center;
+  object-position: center bottom;
   display: none;
   background: transparent;
 }
@@ -610,7 +612,7 @@
           </div>
           <img class="upload-preview" alt="Launch Guide">
         </div>
-        <a href="#" class="sub-agent-btn">Chat Now</a>
+        <a href="#" class="sub-agent-btn">Find Your Spark/a>
       </div>
 
       <div class="sub-agent-card">
@@ -622,7 +624,7 @@
           </div>
           <img class="upload-preview" alt="Marketing Mentor">
         </div>
-        <a href="#" class="sub-agent-btn">Chat Now</a>
+        <a href="#" class="sub-agent-btn">Discover The Who?/a>
       </div>
 
     </div>
