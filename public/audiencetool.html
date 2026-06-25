@@ -120,47 +120,135 @@
     display: block; font-weight: 700;
   }
   .aud-really { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+  
+  /* ── SPARKLE ── */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.9; transform: scale(1) rotate(0deg); }
+    50%       { opacity: 0.15; transform: scale(0.55) rotate(18deg); }
+  }
+  .sp { position: absolute; color: var(--gold); flex-shrink: 0; }
+  .sp-tl { top: -8px;  left: -30px; animation: twinkle 2.8s var(--ease-in-out) 0.1s infinite; }
+  .sp-tr { top: -6px;  right: -18px; animation: twinkle 2.8s var(--ease-in-out) 0.9s infinite; }
+  .sp-br { bottom: 14px; right: -26px; animation: twinkle 2.8s var(--ease-in-out) 1.7s infinite; }
 
-  /* ── BODY TEXT ── */
+  /* ── HERO ── */
+  .spark-hero {
+    display: grid; grid-template-columns: 55% 1fr;
+    gap: 36px; align-items: flex-start; margin-bottom: 28px;
+  }
+  .spark-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4.2vw, 44px); font-weight: 700;
+    color: var(--ink); line-height: 1.15; margin-bottom: 16px;
+  }
+  .spark-headline em { font-style: italic; color: var(--gold-text); display: block; }
   .spark-body { font-size: 14px; color: var(--ink-mid); line-height: 1.75; }
   .spark-body p + p { margin-top: 12px; }
   .spark-body b { color: var(--gold-text); font-weight: 600; }
 
-  /* ── AVATAR COLUMN (overlap notecard) ── */
-  .spark-hero-avatar {
-    display: flex; flex-direction: column; align-items: center;
+  /* ── KEYFRAMES ── */
+  @keyframes sidFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
   }
+  @keyframes glowPulse {
+    0%, 100% { transform: translateX(-50%) scaleX(1);   opacity: 0.55; }
+    50%       { transform: translateX(-50%) scaleX(0.7); opacity: 0.25; }
+  }
+  @keyframes sidEntrance {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  @keyframes bubblePop {
+    from { opacity: 0; transform: translateX(-50%) scale(0.88) translateY(-10px); }
+    to   { opacity: 1; transform: translateX(-50%) scale(1)    translateY(0); }
+  }
+  /* ── AVATAR ── */
+  .spark-hero-avatar { position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 0; 
+    padding-top: 80px; 
+    padding-bottom: 0; }
+
   .sparky-avatar-wrap {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
-    z-index: 1;
+    animation: sidEntrance 600ms cubic-bezier(0.23, 1, 0.32, 1) forwards,
+               sidFloat    3.6s   cubic-bezier(0.45, 0, 0.55, 1) 600ms infinite;
+    opacity: 0;
+  }
+  /* Gold ground glow — pulses inverse to the float */
+  .sparky-avatar-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 130px; height: 18px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.35) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 3.6s cubic-bezier(0.45, 0, 0.55, 1) 600ms infinite;
+    pointer-events: none;
   }
   .sparky-avatar {
-    width: 150px; height: 150px; border-radius: 50%;
-    border: 2.5px solid var(--gold);
-    background: var(--bg-surface);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    box-shadow: 0 0 0 10px var(--gold-dim);
+    width: 240px; height: 250px; border-radius: 0;
+    border: none;
+    background: transparent;
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: visible;
+    box-shadow: none;
   }
-  .sparky-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .sparky-avatar img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; border-radius: 0; }
   .sparky-avatar-ph {
     font-family: 'Playfair Display', serif; font-style: italic;
-    font-size: 48px; color: var(--gold-text); user-select: none;
+    font-size: 36px; color: var(--gold-text); user-select: none;
   }
 
   /* Notecard overlapping the avatar */
+   /* ── SPEECH BUBBLE ── */
   .spark-speech {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px 18px;
-    font-family: 'Caveat', cursive; font-size: 19px;
-    color: var(--ink); line-height: 1.45; text-align: center;
-    box-shadow: 0 4px 16px rgba(26,20,10,0.10);
-    width: 100%;
-    margin-top: -20px; /* avatar rests on top edge of notecard */
-    position: relative; z-index: 2;
+    border-radius: 14px; padding: 8px 20px;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink); line-height: 1.4; text-align: center;
+    box-shadow: 0 4px 20px rgba(26,20,10,0.10);
+    width: 300px;
+    max-width: none;
+    white-space: normal;
+    animation: bubblePop 420ms cubic-bezier(0.23, 1, 0.32, 1) 500ms forwards;
+    opacity: 0;
+    padding: 12px 16px;
+   
   }
+  /* Tail pointing down toward Sid */
+  .spark-speech::before {
+    content: '';
+    position: absolute;
+    bottom: -12px; left: 50%;
+    transform: translateX(-50%);
+    border: 11px solid transparent;
+    border-top-color: var(--border);
+    border-bottom: none;
+  }
+  .spark-speech::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-top-color: var(--bg-card);
+    border-bottom: none;
+  }
+  .spark-speech em { font-style: italic; 
+    text-decoration: underline; 
+    color: var(--gold-text); }
 
   /* ── DISCOVER LIST ── */
   .add-discover {
@@ -409,16 +497,17 @@
           </div>
         </div>
 
-        <div class="spark-hero-avatar">
+         <div class="spark-hero-avatar">
           <div class="sparky-avatar-wrap">
             <svg class="sp sp-tl" width="20" height="20" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
             <svg class="sp sp-tr" width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
+            <svg class="sp sp-br" width="16" height="16" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
             <div class="sparky-avatar">
-              <span class="sparky-avatar-ph">S</span>
+              <img src="pip.png" alt="Sid">
             </div>
           </div>
           <div class="spark-speech">
-            We'll dig into your audience so you can stop guessing and start connecting. ♡
+            Let's uncover what you're <em>already great at</em> and turn it into impact. ♡
           </div>
         </div>
 
