@@ -126,14 +126,54 @@
   .spark-body p + p { margin-top: 12px; }
   .spark-body b { color: var(--gold-text); font-weight: 600; }
 
+  /* ── KEYFRAMES ── */
+  @keyframes sidFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+  }
+  @keyframes glowPulse {
+    0%, 100% { transform: translateX(-50%) scaleX(1);   opacity: 0.55; }
+    50%       { transform: translateX(-50%) scaleX(0.7); opacity: 0.25; }
+  }
+  @keyframes sidEntrance {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  @keyframes bubblePop {
+    from { opacity: 0; transform: translateX(-50%) scale(0.88) translateY(-10px); }
+    to   { opacity: 1; transform: translateX(-50%) scale(1)    translateY(0); }
+  }
+
   /* ── AVATAR ── */
-  .spark-hero-avatar { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; padding-bottom: 60px; }
+  .spark-hero-avatar { position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 0; 
+    padding-top: 120px; 
+    padding-bottom: 0; }
+
   .sparky-avatar-wrap {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
+    animation: sidEntrance 600ms cubic-bezier(0.23, 1, 0.32, 1) forwards,
+               sidFloat    3.6s   cubic-bezier(0.45, 0, 0.55, 1) 600ms infinite;
+    opacity: 0;
+  }
+  /* Gold ground glow — pulses inverse to the float */
+  .sparky-avatar-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 130px; height: 18px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.35) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 3.6s cubic-bezier(0.45, 0, 0.55, 1) 600ms infinite;
+    pointer-events: none;
   }
   .sparky-avatar {
-    width: 200px; height: 260px; border-radius: 0;
+    width: 240px; height: 250px; border-radius: 0;
     border: none;
     background: transparent;
     display: flex; align-items: flex-end; justify-content: center;
@@ -149,19 +189,48 @@
   /* ── SPEECH BUBBLE ── */
   .spark-speech {
     position: absolute;
-    bottom: 0;
-    right: -10px;
-    transform: rotate(3deg);
+    top: 0; left: 50%;
+    transform: translateX(-50%);
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px 18px;
-    font-family: 'Caveat', cursive; font-size: 19px;
-    color: var(--ink); line-height: 1.45; text-align: center;
-    box-shadow: 0 4px 16px rgba(26,20,10,0.10);
-    max-width: 200px;
-    z-index: 2;
+    border-radius: 14px; padding: 8px 20px;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink); line-height: 1.4; text-align: center;
+    box-shadow: 0 4px 20px rgba(26,20,10,0.10);
+    max-width: 190px;
+    white-space: normal;
+    animation: bubblePop 420ms cubic-bezier(0.23, 1, 0.32, 1) 500ms forwards;
+    opacity: 0;
+  }
+  /* Tail pointing down toward Sid */
+  .spark-speech::before {
+    content: '';
+    position: absolute;
+    bottom: -12px; left: 50%;
+    transform: translateX(-50%);
+    border: 11px solid transparent;
+    border-top-color: var(--border);
+    border-bottom: none;
+  }
+  .spark-speech::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-top-color: var(--bg-card);
+    border-bottom: none;
   }
   .spark-speech em { font-style: italic; text-decoration: underline; color: var(--gold-text); }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    .sparky-avatar-wrap { animation: sidEntrance 300ms ease-out forwards; }
+    .sparky-avatar-wrap::after { animation: none; opacity: 0.3; }
+    .spark-speech { animation: none; opacity: 1; transform: translateX(-50%); }
+  }
 
   /* ── DISCOVERY ── */
   .spark-discover {
@@ -419,7 +488,7 @@
         <div class="spark-hero-text">
           <div class="jc-eyebrow-row">
             <svg class="jc-sp jc-sp-l" width="15" height="15" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-            <span class="jc-eyebrow-pill">ToolSpark · Find Your Spark</span>
+            <span class="jc-eyebrow-pill">Find Your Spark</span>
           </div>
           <h1 class="spark-headline">
             You've Got More<br>
