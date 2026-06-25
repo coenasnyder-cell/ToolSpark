@@ -236,6 +236,43 @@
   gap: 10px;
 }
 
+/* ── IMAGE UPLOADER ── */
+.agent-uploader {
+  position: relative;
+  cursor: pointer;
+}
+.upload-zone {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-right: 1px dashed rgba(201,168,76,0.3);
+  background: rgba(201,168,76,0.04);
+  transition: background .15s;
+  padding: 16px;
+}
+.agent-uploader:hover .upload-zone {
+  background: rgba(201,168,76,0.1);
+}
+.upload-zone svg { color: rgba(201,168,76,0.6); }
+.upload-zone span {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(201,168,76,0.7);
+}
+.upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: none;
+}
+
 /* ── SUB-AGENT SECTION ── */
 .sub-agents-section {
   display: flex;
@@ -434,7 +471,14 @@
   <!-- Journey Companion -->
   <div class="agent-card agent-card--wide-btn">
     <div class="agent-card-inner">
-      <div class="agent-preview"><img src="pip.png" alt="Journey Companion" style="object-fit:contain;object-position:center;"></div>
+      <div class="agent-preview agent-uploader" data-agent="pip" onclick="triggerUpload(this)">
+        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.agent-uploader'))">
+        <div class="upload-zone">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Add Photo</span>
+        </div>
+        <img class="upload-preview" alt="Pip">
+      </div>
       <div class="agent-body">
         <div class="agent-badge">Journey Companion</div>
         <div class="agent-title">Meet Pip</div>
@@ -451,7 +495,14 @@
   <!-- Sid -->
   <div class="agent-card agent-card--wide-btn">
     <div class="agent-card-inner">
-      <div class="agent-preview"><img src="sid.png" alt="Sid" style="object-fit:contain;object-position:center;"></div>
+      <div class="agent-preview agent-uploader" data-agent="sid" onclick="triggerUpload(this)">
+        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.agent-uploader'))">
+        <div class="upload-zone">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Add Photo</span>
+        </div>
+        <img class="upload-preview" alt="Sid">
+      </div>
       <div class="agent-body">
         <div class="agent-badge">Accountability Coach</div>
         <div class="agent-title">Meet Sid</div>
@@ -616,6 +667,39 @@
 <script src="js/nav.js"></script>
 <script>
   if (window.initNav) initNav('useragents', 'My Agents');
+
+  function triggerUpload(el) {
+    el.querySelector('.upload-input').click();
+  }
+
+  function handleUpload(e, uploaderEl) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      const agentKey = uploaderEl.dataset.agent;
+      try { localStorage.setItem('agent-img-' + agentKey, dataUrl); } catch(_) {}
+      showUploadedImage(uploaderEl, dataUrl);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showUploadedImage(uploaderEl, dataUrl) {
+    const zone = uploaderEl.querySelector('.upload-zone');
+    const preview = uploaderEl.querySelector('.upload-preview');
+    preview.src = dataUrl;
+    preview.style.display = 'block';
+    zone.style.display = 'none';
+  }
+
+  document.querySelectorAll('.agent-uploader[data-agent]').forEach(function(el) {
+    const agentKey = el.dataset.agent;
+    try {
+      const saved = localStorage.getItem('agent-img-' + agentKey);
+      if (saved) showUploadedImage(el, saved);
+    } catch(_) {}
+  });
 
   document.addEventListener('tsUserReady', async function(e) {
     if (!e.detail) { window.location.href = 'signon.html'; return; }
