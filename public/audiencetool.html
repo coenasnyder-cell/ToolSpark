@@ -63,33 +63,9 @@
     display: flex; flex-direction: column;
   }
 
-  /* ── SHARED HEADER ── */
-  .site-header, .spark-header {
-    height: 48px; background: #1A1510;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px; flex-shrink: 0; position: relative;
-  }
-  .ph-back {
-    display: flex; align-items: center; gap: 6px;
-    text-decoration: none; color: rgba(255,255,255,0.55);
-    font-size: 13px; font-weight: 500;
-    transition: color 0.15s var(--ease-out); white-space: nowrap;
-  }
-  .ph-back:hover { color: #FFFFFF; }
-  .ph-brandblock {
-    display: flex; flex-direction: column; line-height: 1.1;
-    position: absolute; left: 50%; transform: translateX(-50%);
-    pointer-events: none;
-  }
-  .ph-wordmark { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
-  .ph-wordmark .tool { color: #FFFFFF; }
-  .ph-wordmark .spark { color: var(--gold); }
-  .ph-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #BBA8D4; text-align: center; }
-
   /* ── WELCOME OVERLAY ── */
   #sparkwelcome {
-    position: fixed; inset: 0; background: var(--bg);
+    position: fixed; top: 48px; left: 0; right: 0; bottom: 0; background: var(--bg);
     z-index: 200; display: flex; flex-direction: column;
     overflow-y: auto; transition: opacity 0.45s var(--ease-out);
   }
@@ -408,24 +384,11 @@
   }
 </style>
 </head>
-<body>
+<body data-page-title="Audience Deep Dive">
 
 <!-- SPARK WELCOME -->
 <div id="sparkwelcome">
-
-  <header class="spark-header">
-    <a href="dashboard.html" class="ph-back">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Dashboard
-    </a>
-    <div class="ph-brandblock">
-      <span class="ph-wordmark"><span class="tool">Tool</span><span class="spark">Spark</span></span>
-      <span class="ph-tag">Creator Hub</span>
-    </div>
-    <span></span>
-  </header>
-
-  <div class="spark-content">
+   <div class="spark-content">
     <div class="sw-card">
 
       <!-- HERO -->
@@ -505,17 +468,6 @@
   </div>
 </div>
 
-<header class="site-header">
-  <a href="dashboard.html" class="ph-back">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Dashboard
-  </a>
-  <div class="ph-brandblock">
-    <span class="ph-wordmark"><span class="tool">Tool</span><span class="spark">Spark</span></span>
-    <span class="ph-tag">Creator Hub</span>
-  </div>
-  <span></span>
-</header>
 <!-- PROGRESS -->
 <div class="progress-wrap">
   <span class="progress-txt">YOUR JOURNEY</span>
@@ -1121,7 +1073,8 @@ function stopMic() {
   if (recognition) recognition.stop();
 }
 </script>
-<script src="js/nav.js"></script>
-<script>initAuthOnly();</script>
+<script src="js/auth.js"></script>
+<script src="js/credits.js"></script>
+<script src="js/topbar.js"></script>
 </body>
 </html>

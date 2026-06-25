@@ -641,10 +641,10 @@
 
   // Delight: Sparky speech rotation
   var sparkyLines = [
-    "Sparky's here if you need anything ♡",
+    "Sid's here if you need anything ♡",
     "What are we building today? ✨",
     "You showed up. That's 90% of it.",
-    "Sparky believes in you (no pressure).",
+    "Sid believes in you (no pressure).",
     "Every great tool started right here."
   ];
   var speechEl = document.querySelector('.wc-speech');
@@ -729,7 +729,7 @@
         // Streak-aware greeting (delight)
         var greetings = ['Welcome back, ' + first + ' 👋'];
         if (streak >= 14) greetings = [first + ', you\'re on a roll — ' + streak + ' days ✨'];
-        else if (streak >= 7) greetings = ['Day ' + streak + ', ' + first + '. Sparky\'s impressed.'];
+        else if (streak >= 7) greetings = ['Day ' + streak + ', ' + first + '. Sid\'s impressed.'];
         else if (streak >= 1) greetings = ['Day ' + streak + ' — you showed up ♡'];
         document.getElementById('welcome-heading').textContent = greetings[0];
 
