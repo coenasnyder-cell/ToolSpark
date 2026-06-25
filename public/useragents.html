@@ -22,469 +22,565 @@
   const db   = firebase.firestore();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
-    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
-    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
-    --purple: #4B3F8A; --green: #2A5C45; --green-light: #3D8A65;
-    --radius: 14px; --radius-sm: 8px;
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --border-dark: #2A2720;
+    --bg: #ECE8DF;
+    --surface: #FBF8F1;
+    --border: #e2dccd;
+    --hairline: #e7e1d3;
+    --text: #231d16;
+    --text2: #6e665b;
+    --text3: #9a9183;
+    --text-muted: #a4977d;
+    --gold: #C6A24E;
+    --gold-dim: rgba(198,162,78,0.12);
+    --gold-border: rgba(198,162,78,0.18);
+    --gold-bright: #E3BE63;
+    --dark-btn: #1c1712;
+    --dark-btn-hover: #2a2219;
+    --dark-btn-text: #f6efe2;
+    --radius: 14px;
+    --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
     --sidebar-width: 220px;
   }
-  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body { font-family: 'Hanken Grotesk', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-    /* MAIN */
+  /* MAIN LAYOUT */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .page-content { 
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  width: 100%;
+.page-content{
+  position:relative;
+  max-width:1180px;
+  padding:40px 40px 60px;
 }
-  @media (max-width: 1024px) {
-    .nav-item { justify-content: center; padding: 10px; }
-    .main-wrap { margin-left: 60px; }
+.page-content::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 5%, rgba(198,162,78,.16), transparent 24%),
+    radial-gradient(circle at 82% 12%, rgba(198,162,78,.11), transparent 22%),
+    radial-gradient(circle at 54% 58%, rgba(198,162,78,.08), transparent 28%);
+}
+.page-content > *{ position:relative; z-index:1; }
+  @media (max-width: 1024px) { .nav-item { justify-content: center; padding: 10px; } .main-wrap { margin-left: 60px; } }
+  @media (max-width: 767px) { .main-wrap { margin-left: 0; } .page-content { padding: 1.25rem 1rem; } }
+
+  /* PAGE HEADER */
+  .page-eyebrow { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.22em; margin-bottom: 12px; }
+  .page-title { font-family: 'Newsreader', serif; font-size: 42px; font-weight: 600; color: #1c1711; line-height: 1; margin-bottom: 10px; }
+  .page-title .sparkle { color: #C6A24E; font-size: 0.6em; vertical-align: 0.12em; }
+  .page-sub { font-size: 16px; color: var(--text2); margin-bottom: 2rem; max-width: 620px; }
+
+  /* TABS */
+  .agent-tabs { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .agent-tabs button {
+    padding: 9px 18px; border-radius: 999px; border: 1px solid #d8d1c2;
+    background: transparent; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    color: #5f574b; font-family: 'Hanken Grotesk', sans-serif; transition: all .15s;
   }
-  @media (max-width: 767px) {
-    .main-wrap { margin-left: 0; }
-    .page-content { padding: 1.25rem 1rem; }
-  }
+  .agent-tabs button.active { background: #1c1712; color: #f6efe2; border-color: #1c1712; }
+  .agent-tabs button:not(.active):hover { border-color: #bcae97; color: #3d372f; }
 
-  .page-eyebrow { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-  .page-sub { font-size: 14px; font-weight: 700; color: var(--text2); margin-bottom: 2rem; }
-
-  /* AGENT GRID */
- .agent-grid {
+.card-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
-  gap: 24px;
-}
-.agent-card {
-  display: flex;
-  flex-direction: row;
-  background: #111;
-  border: 1px solid rgba(201,168,76,.15);
-  border-radius: 20px;
-  overflow: hidden;
-  text-decoration: none;
-  color: #fff;
-  transition: .2s ease;
-  min-width: 0;
-
-}
-
-.agent-card:hover {
-  transform:translateY(-3px);
-  box-shadow:0 12px 30px rgba(0,0,0,.18);
-}
-
-.agent-preview {
-  width: 160px;
-  flex-shrink: 0;
-  align-self: stretch;
-}
-.agent-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
-
-.agent-body {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;  /* stack badge, title, desc, list, button */
-}
-
-.agent-badge {
-  display:inline-flex;
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:.7rem;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  background:rgba(201,168,76,.15);
-  color:var(--gold);
-  margin-bottom:12px;
-}
-
-.agent-title {
-  font-size:1.25rem;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.agent-desc {
-  opacity:.85;
-  line-height:1.6;
-  margin-bottom:16px;
-}
-
-.agent-list {
-  list-style:none;
-  padding:0;
-  margin:0 0 20px;
-}
-
-.agent-list li {
-  margin-bottom:6px;
-  font-size:.85rem;
-}
-
-.agent-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: var(--gold);
-  color: #111;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: auto;
-  text-align: center;
-  text-decoration: none;
-  display: block;
-}
-/* Tabs */
-.agent-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.agent-tabs button {
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: transparent;
-  font-size: .85rem;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--text2);
-  transition: all .15s;
-}
-.agent-tabs button.active,
-.agent-tabs button:hover {
-  background: var(--text);
-  color: #fff;
-  border-color: var(--text);
-}
-
-/* Wide-button card variant: image+text row on top, full-width button below */
-.agent-card--wide-btn { flex-direction: column; }
-.agent-card-inner { display: flex; flex-direction: row; flex: 1; align-items: center; }
-.agent-card--wide-btn .agent-body { padding-bottom: 8px; }
-.agent-card--wide-btn .agent-btn { margin: 0 16px 16px; width: calc(100% - 32px); border-radius: 12px; }
-
-/* Locked card */
-.agent-card.locked {
-  opacity: 0.45;
-  cursor: default;
-  pointer-events: none;
-}
-.agents-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 28px;
-  align-items: start;
-}
-
-.agents-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.agents-sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.sidebar-widget {
-  background: #F7F4EE;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
-}
-
-.sidebar-widget h3 {
-  font-size: .95rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--text);
-}
-
-.sidebar-widget p,
-.sidebar-widget li {
-  font-size: .85rem;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-.sidebar-widget ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* ── IMAGE UPLOADER ── */
-.agent-uploader {
-  position: relative;
-  cursor: pointer;
-}
-.upload-zone {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-right: 1px dashed rgba(201,168,76,0.3);
-  background: rgba(201,168,76,0.04);
-  transition: background .15s;
-  padding: 16px;
-}
-.agent-uploader:hover .upload-zone {
-  background: rgba(201,168,76,0.1);
-}
-.upload-zone svg { color: rgba(201,168,76,0.6); }
-.upload-zone span {
-  font-size: .72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: rgba(201,168,76,0.7);
-}
-.upload-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  display: none;
-}
-
-/* Sub-agent uploader (full card image area) */
-.sub-agent-uploader {
-  cursor: pointer;
-  position: relative;
-}
-.sub-agent-img-full {
-  width: 100%;
-  height: 140px;
-  border-radius: 16px 16px 0 0;
-  overflow: hidden;
-  background: rgba(201,168,76,0.04);
-  border-bottom: 1px dashed rgba(201,168,76,0.25);
-  position: relative;
-}
-.upload-zone-full {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background .15s;
-}
-.sub-agent-uploader:hover .upload-zone-full { background: rgba(201,168,76,0.1); }
-.upload-zone-full svg { color: rgba(201,168,76,0.5); }
-.upload-zone-full span {
-  font-size: .7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: rgba(201,168,76,0.6);
-}
-.sub-agent-img-full .upload-preview {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: left top;
-  display: none;
-}
-
-/* ── SUB-AGENT SECTION ── */
-.sub-agents-section {
-  margin-top: 40px;
-}
-.sub-agents-label {
-  font-size: .75rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--green);
-  margin-bottom: 4px;
-}
-.sub-agents-sub {
-  font-size: .85rem;
-  color: var(--text2);
-  margin-bottom: 16px;
-}
-.sub-agent-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
-}
-.sub-agent-card {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: .2s ease;
-}
-.sub-agent-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.sub-agent-inner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex: 1;
-  padding: 16px 16px 8px;
-  gap: 12px;
-}
-.sub-agent-img { width: 80px; flex-shrink: 0; }
-.sub-agent-img img { width: 100%; height: auto; object-fit: contain; display: block; }
-.sub-agent-body { flex: 1; min-width: 0; }
-.sub-agent-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
-.sub-agent-desc { font-size: .8rem; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
-.sub-agent-badge {
-  display: inline-flex;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: .65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  background: var(--bg);
-  color: var(--text3);
-  border: 1px solid var(--border);
-}
-.sub-agent-btn {
-  display: block;
-  margin: 0 12px 12px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #FAF8F4;
-  color: var(--text);
-  font-size: .85rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  transition: background .15s;
-}
-.sub-agent-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
-
-.one-team-banner {
-  background: #0C0B09;
-  border-radius: 20px;
-  padding: 36px 40px;
-  margin-top: 32px;
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.one-team-left {
-  flex-shrink: 0;
-  max-width: 240px;
-}
-
-.one-team-heading {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 10px;
-  line-height: 1.2;
-}
-
-.one-team-sub {
-  font-size: .85rem;
-  color: rgba(255,255,255,0.5);
-  line-height: 1.6;
-}
-
-.one-team-steps {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.step-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.4);
-}
-
-.step.active .step-icon {
-  background: rgba(201,168,76,0.15);
-  border-color: rgba(201,168,76,0.4);
-  color: var(--gold);
-}
-
-.step span {
-  font-size: .75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: rgba(255,255,255,0.35);
-}
-
-.step.active span {
-  color: var(--gold);
-}
-
-.step-line {
-  flex: 1;
-  height: 1px;
-  border-top: 2px dashed rgba(255,255,255,0.1);
   margin-bottom: 20px;
 }
-
-@media (max-width: 700px) {
-  .one-team-banner { flex-direction: column; }
-  .one-team-left { max-width: 100%; }
+.card {
+  border-radius: 14px;
+  padding: 12px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+    background:rgba(251,248,241,.88);
+}
+.card-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+.card-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+/* Oval image with Emil gold ring */
+.card-img {
+  width: 120px;
+  height: 130px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  background: #ede8df;
+  box-shadow:
+    0 0 0 2px rgba(198,162,78,0.38),
+    0 0 14px rgba(198,162,78,0.10);
+  transition:
+    transform 240ms cubic-bezier(0.23,1,0.32,1),
+    box-shadow 240ms cubic-bezier(0.23,1,0.32,1);
+}
+.card:hover .card-img {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 0 2px rgba(198,162,78,0.65),
+    0 0 20px rgba(198,162,78,0.18);
+}
+.card:active { transform: scale(0.97); transition: transform 120ms cubic-bezier(0.23,1,0.32,1); }
+.card-img .upload-zone {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(198,162,78,0.65);
+  background: #000000;
+  width: 110px;
+  height: 130px;
+ 
+}
+.card-img:hover .upload-zone { background: rgba(198,162,78,0.10); }
+.card-img .upload-zone svg { opacity: 0.65; }
+.card-img img.upload-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: none;
+}
+/* Content column */
+.card-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+.card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.card-list li {
+ display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--text2);
+}
+.card-list li::before {
+  content: "✓";
+  color: var(--gold);
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+.card-btn {
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Hanken Grotesk', sans-serif;
+  transition: filter 150ms ease-out, transform 150ms cubic-bezier(0.23,1,0.32,1);
+}
+.card-btn:hover { filter: brightness(1.06); }
+.card-btn:active { transform: scale(0.97); }
+/* Coming soon card */
+.card--coming-soon {
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+}
+.coming-soon-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-img, .card:hover .card-img, .card:active, .card-btn:active { transition: none; transform: none; }
+}
+  /* TWO-COLUMN LAYOUT */
+.agents-layout,
+.agents-main{ display:block; }
+.agents-sidebar{ display:none; }
+.resource-art img,
+.focus-avatar img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:contain;
 }
 
-@media (max-width: 900px) {
-  .agents-layout { flex-direction: column; }
-  .agents-sidebar { width: 100%; }
-}
 
+  .focus-strip{
+    background:rgba(251,248,241,.88);
+    border:1px solid var(--border);
+    border-radius:22px;
+    box-shadow:0 12px 32px rgba(120,86,24,.07);
+    padding:18px 20px 20px;
+    margin:0 0 28px;
+  }
+  .focus-strip-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Newsreader',serif;
+    font-size:22px;
+    font-weight:500;
+    color:#1c1711;
+    margin-bottom:16px;
+  }
+  .focus-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+  .focus-item{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:8px 18px 8px 0;
+  }
+  .focus-item + .focus-item{
+    padding-left:18px;
+    border-left:1px solid var(--hairline);
+  }
+  .focus-avatar{
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    overflow:hidden;
+    flex:none;
+    background:#f2eadc;
+  }
+  .focus-meta{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#b1842e;
+    margin-bottom:4px;
+  }
+  .focus-question{
+    font-size:17px;
+    font-weight:700;
+    line-height:1.25;
+    color:#231d16;
+    margin-bottom:6px;
+  }
+  .focus-copy{
+    font-size:14px;
+    line-height:1.45;
+    color:#5f574b;
+  }
+
+  .resources-section{ margin-bottom:20px; }
+  .resources-heading{
+    font-family:'Newsreader',serif;
+    font-size:28px;
+    font-weight:500;
+    color:#1c1711;
+    margin:0 0 14px 10px;
+  }
+  .resource-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:18px;
+  }
+  .resource-card{
+    background:rgba(251,248,241,.94);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 10px 28px rgba(120,86,24,.05);
+  }
+  .resource-top{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:20px 22px;
+    min-height:198px;
+  }
+  .resource-copy-wrap{ flex:1; }
+  .resource-tag{
+    display:inline-flex;
+    padding:4px 10px;
+    border:1px solid #e3d4b5;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#a57216;
+    margin-bottom:14px;
+  }
+  .resource-title{
+    font-family:'Newsreader',serif;
+    font-size:27px;
+    line-height:1.02;
+    font-weight:600;
+    color:#231d16;
+  }
+  .resource-title em{
+    display:block;
+    font-style:italic;
+    color:#b1842e;
+    font-weight:500;
+  }
+  .resource-copy{
+    margin-top:14px;
+    max-width:290px;
+    font-size:14px;
+    line-height:1.45;
+    color:#5f574b;
+  }
+  .resource-art{
+    width:145px;
+    min-height:156px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    flex:none;
+  }
+  .resource-art .upload-zone-full{
+    position:static;
+    width:100%;
+    min-height:156px;
+    border-radius:16px;
+    background:rgba(198,162,78,0.06);
+  }
+  .resource-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 22px;
+    border-top:1px solid var(--border);
+    text-decoration:none;
+    color:#1f1912;
+    font-size:16px;
+    font-weight:700;
+  }
+  .resource-arrow{
+    color:#a57216;
+    font-size:28px;
+    line-height:1;
+  }
+
+  /* SIDEBAR */
+  .sidebar-widget { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+  .sidebar-widget h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+  .sidebar-widget p, .sidebar-widget li { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .sidebar-widget ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  /* IMAGE UPLOADER */
+  .agent-uploader { position: relative; cursor: pointer; }
+  .upload-zone {
+    width: 100%; height: 100%; min-height: 120px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    background: rgba(198,162,78,0.04); transition: background .15s; padding: 16px;
+  }
+  .agent-uploader:hover .upload-zone { background: rgba(198,162,78,0.1); }
+  .upload-zone svg { color: rgba(198,162,78,0.6); }
+  .upload-zone span { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: rgba(198,162,78,0.7); }
+  .upload-preview { width: 100%; height: 100%; object-fit: cover; object-position: top; display: none; }
+
+  /* Sub-agent uploader */
+  .sub-agent-uploader { cursor: pointer; position: relative; }
+  .sub-agent-img-full {
+    width: 100%; height: 140px; border-radius: 16px 16px 0 0; overflow: hidden;
+    background: rgba(198,162,78,0.04); border-bottom: 1px dashed rgba(198,162,78,0.25); position: relative;
+  }
+  .upload-zone-full {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s;
+  }
+  .sub-agent-uploader:hover .upload-zone-full { background: rgba(198,162,78,0.1); }
+  .upload-zone-full svg { color: rgba(198,162,78,0.5); }
+  .upload-zone-full span { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: rgba(198,162,78,0.6); }
+  .sub-agent-img-full .upload-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left top; display: none; }
+
+  /* TOOLS / SUB-AGENT SECTION */
+  .sub-agents-section { margin-top: 36px; }
+  .sub-agents-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-muted); margin-bottom: 4px; }
+  .sub-agents-sub { font-family: 'Newsreader', serif; font-size: 25px; font-weight: 500; color: #1c1711; margin-bottom: 18px; }
+  .sub-agent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .sub-agent-card {
+    display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    min-height: 212px; transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .sub-agent-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 16px 32px -18px rgba(80,58,18,0.45); }
+  .sub-agent-inner { display: flex; flex-direction: row; align-items: center; flex: 1; padding: 16px 16px 8px; gap: 12px; }
+  .sub-agent-img { width: 80px; flex-shrink: 0; }
+  .sub-agent-img img { width: 100%; height: auto; object-fit: contain; display: block; }
+  .sub-agent-body { flex: 1; min-width: 0; }
+  .sub-agent-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .sub-agent-desc { font-size: .8rem; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
+  .sub-agent-badge { display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
+  .sub-agent-btn {
+    display: block; margin-top: auto; padding: 12px 16px 14px;
+    border: 1.5px solid var(--gold); border-top: none;
+    border-radius: 0 0 16px 16px;
+    background: transparent; color: #956f1f;
+    font-size: 14px; font-weight: 600; text-align: center; text-decoration: none;
+    font-family: 'Hanken Grotesk', sans-serif;
+    transition: background .15s, color .15s;
+  }
+  .sub-agent-btn:hover { background: var(--gold); color: #1a1409; }
+
+  /* ONE TEAM BANNER */
+  .one-team-banner {
+    background: linear-gradient(135deg, #1d1810, #100c08);
+    border-radius: 20px; border: 1px solid rgba(198,162,78,0.16);
+    padding: 34px 40px; margin-top: 34px;
+    display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+  }
+  .one-team-left { flex: 0 0 280px; }
+  .one-team-heading { font-family: 'Newsreader', serif; font-size: 27px; font-weight: 600; color: #fbf7ee; margin-bottom: 10px; line-height: 1.2; }
+  .one-team-sub { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+  .one-team-steps { flex: 1; display: flex; align-items: center; justify-content: space-between; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .step-icon {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: transparent; border: 2px solid rgba(255,255,255,0.16);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.4);
+  }
+  .step.done .step-icon { background: rgba(198,162,78,0.12); border: 2px solid var(--gold); color: var(--gold); }
+  .step.active .step-icon { background: linear-gradient(180deg, #e2ba5d, #c6a24e); border: none; color: #16120d; box-shadow: 0 0 0 5px rgba(198,162,78,0.16); }
+  .step span { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.38); }
+  .step.done span { color: rgba(255,255,255,0.72); }
+  .step.active span { color: #e8c673; }
+  .step-line { flex: 1; height: 1px; border-top: 2px dashed rgba(255,255,255,0.16); margin-bottom: 20px; }
+  .step-line.done { border-color: var(--gold); }
+  .one-team-banner{ margin-top:16px; }
+  .one-team-heading .sparkle{ color:#E3BE63; font-size:.72em; }
+  .one-team-steps{ gap:8px; }
+  .step{
+    min-width:92px;
+    gap:6px;
+  }
+  .step strong{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:inherit;
+  }
+  .step small{
+    font-size:13px;
+    line-height:1.3;
+    color:rgba(255,255,255,.82);
+    text-align:center;
+  }
+  .step:not(.done):not(.active) small{ color:rgba(255,255,255,.48); }
+
+  .bottom-cta{
+    margin-top:16px;
+    background:rgba(251,248,241,.94);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .bottom-cta-copy{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .bottom-cta-icon{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(180deg,#e2ba5d,#c6a24e);
+    color:#1a1409;
+  }
+  .bottom-cta-title{
+    font-family:'Newsreader',serif;
+    font-size:20px;
+    font-weight:600;
+    color:#1c1711;
+  }
+  .bottom-cta-sub{
+    font-size:14px;
+    color:#6e665b;
+  }
+  .cta-chat-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:11px 28px; min-height:40px; min-width:180px;
+    border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(180deg, #dcb559, #c39a3f);
+    color:#1a1409; font-weight:700; font-size:14px;
+    font-family:'Hanken Grotesk', sans-serif; text-decoration:none;
+    transition: filter 160ms ease-out, transform 160ms cubic-bezier(0.23,1,0.32,1);
+  }
+  .cta-chat-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .cta-chat-btn:active { transform: scale(0.97); filter: brightness(0.98); }
+
+  @media (max-width: 900px){
+    .agent-layouts,
+    .focus-grid,
+    .resource-grid{ grid-template-columns:1fr; }
+    .focus-item + .focus-item{
+      padding-left:0;
+      margin-top:14px;
+      padding-top:18px;
+      border-left:none;
+      border-top:1px solid var(--hairline);
+    }
+    .bottom-cta{ flex-direction:column; align-items:stretch; }
+  }
   @media (max-width: 700px) {
-  .agent-grid { grid-template-columns: 1fr; }
-  .agent-card { flex-direction: column; }
-  .agent-preview { width: 100%; min-height: 200px; }
-}
+    .agent {
+     grid-template-columns: 1fr; 
+    }
+    .one-team-banner { flex-direction: column; }
+    .one-team-left { flex: none; max-width: 100%; }
+    .agents-main { min-width: 0; }
+  }
 </style>
 </head>
 <body>
@@ -493,7 +589,7 @@
   <header class="top-header"></header>
   <div class="page-content">
     <div class="page-eyebrow">ToolSpark</div>
-    <div class="page-title">My Agents ✦</div>
+    <div class="page-title">My Agents <span class="sparkle">✦</span></div>
     <div class="page-sub">Your AI coaching companions — here to guide you at every stage of your build.</div>
 
     <div class="agent-tabs">
@@ -503,189 +599,263 @@
       <button>Guided</button>
     </div><!-- end agent-tabs -->
 
-    <div class="agents-layout">
+    <div class="card-grid">
 
-      <div class="agents-main">
-
-  <div class="agent-grid">
-  <!-- Journey Companion -->
-  <div class="agent-card agent-card--wide-btn">
-    <div class="agent-card-inner">
-      <div class="agent-preview agent-uploader" data-agent="pip" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.agent-uploader'))">
-        <div class="upload-zone">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="card-top">
+          <div class="card-img" data-agent="card-1" onclick="triggerUpload(this)">
+            <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.card-img'))">
+            <div class="upload-zone">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Add Photo</span>
+            </div>
+            <img class="upload-preview" alt="">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">Journey Companion</span>
+            <div class="card-title">Meet Pip</div>
+            <ul class="card-list">
+              <li>Celebrate Wins</li>
+              <li>Get Unstuck</li>
+              <li>Discover Next Steps</li>
+            </ul>
+          </div>
         </div>
-        <img class="upload-preview" alt="Pip">
+        <button class="card-btn">Chat Now</button>
       </div>
-      <div class="agent-body">
-        <div class="agent-badge">Journey Companion</div>
-        <div class="agent-title">Meet Pip</div>
-        <ul class="agent-list">
-          <li>✓ Reflect on your progress</li>
-          <li>✓ Celebrate wins and milestones</li>
-          <li>✓ Discover your next action step</li>
-        </ul>
-      </div>
-    </div>
-    <a href="journey-companion.html" class="agent-btn">Chat With Pip</a>
-  </div>
 
-  <!-- Sid -->
-  <div class="agent-card agent-card--wide-btn">
-    <div class="agent-card-inner">
-      <div class="agent-preview agent-uploader" data-agent="sid" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.agent-uploader'))">
-        <div class="upload-zone">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="card-top">
+          <div class="card-img" data-agent="card-2" onclick="triggerUpload(this)">
+            <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.card-img'))">
+            <div class="upload-zone">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Add Photo</span>
+            </div>
+            <img class="upload-preview" alt="">
+          </div>
+          <div class="card-body">
+            <span class="card-badge">Accountability Coach</span>
+            <div class="card-title">Meet Sid</div>
+            <ul class="card-list">
+              <li>Daily Check-ins</li>
+              <li>Track momentum</li>
+              <li>Plan next steps</li>
+            </ul>
+          </div>
         </div>
-        <img class="upload-preview" alt="Sid">
+        <button class="card-btn">Chat Now</button>
       </div>
-      <div class="agent-body">
-        <div class="agent-badge">Accountability Coach</div>
-        <div class="agent-title">Meet Sid</div>
-        <ul class="agent-list">
-          <li>✓ Daily check-ins</li>
-          <li>✓ Momentum tracking</li>
-          <li>✓ Friendly nudges when you stall</li>
-        </ul>
-      </div>
-    </div>
-    <a href="sparky.html" class="agent-btn">Chat with Sid</a>
-  </div>
-</div><!-- end agent-grid -->
 
-<!-- SUB-AGENT SECTION -->
-<div class="sub-agents-section">
-  <div class="sub-agents-label">Your Coaching Team</div>
-  <div class="sub-agents-sub">Specialists to guide you, keep you on track, and help you grow.</div>
-  <div class="sub-agent-grid">
-
-    <div class="sub-agent-card">
-      <div class="sub-agent-uploader sub-agent-img-full" data-agent="focus-guardian" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
-        <div class="upload-zone-full">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
+      <!-- Card 3 — Coming Soon -->
+      <div class="card card--coming-soon">
+        <div class="card-img" data-agent="card-3" onclick="triggerUpload(this)">
+          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.card-img'))">
+          <div class="upload-zone">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Add Photo</span>
+          </div>
+          <img class="upload-preview" alt="">
         </div>
-        <img class="upload-preview" alt="Find Your Spark">
+        <span class="coming-soon-label">Coming Soon</span>
       </div>
-      <a href="#" class="sub-agent-btn">Find Your Spark</a>
-    </div>
 
-    <div class="sub-agent-card">
-      <div class="sub-agent-uploader sub-agent-img-full" data-agent="momentum-keeper" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
-        <div class="upload-zone-full">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
-        </div>
-        <img class="upload-preview" alt="Momentum Keeper">
-      </div>
-      <a href="#" class="sub-agent-btn">Find Your Who?</a>
-    </div>
+    </div><!-- end card-grid -->
 
-    <div class="sub-agent-card">
-      <div class="sub-agent-uploader sub-agent-img-full" data-agent="launch-guide" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
-        <div class="upload-zone-full">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
+    <section class="focus-strip">
+      <div class="focus-strip-title"><span style="color:#C6A24E;">✦</span> Today’s Focus</div>
+      <div class="focus-grid">
+        <div class="focus-item">
+          <div class="focus-avatar sub-agent-uploader" data-agent="focus-pip" onclick="triggerUpload(this)">
+            <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+            <div class="upload-zone-full">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Add Photo</span>
+            </div>
+            <img class="upload-preview" alt="Pip focus avatar">
+          </div>
+          <div class="focus-content">
+            <div class="focus-meta">Pip's Reflection</div>
+            <div class="focus-question">What’s one win from this week?</div>
+            <div class="focus-copy">Celebrate progress, no matter how small. It all adds up.</div>
+          </div>
         </div>
-        <img class="upload-preview" alt="Launch Guide">
-      </div>
-      <a href="#" class="sub-agent-btn">Find Out Which Tool?</a>
-    </div>
 
-    <div class="sub-agent-card">
-      <div class="sub-agent-uploader sub-agent-img-full" data-agent="marketing-mentor" onclick="triggerUpload(this)">
-        <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
-        <div class="upload-zone-full">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Add Photo</span>
+        <div class="focus-item">
+          <div class="focus-avatar sub-agent-uploader" data-agent="focus-sid" onclick="triggerUpload(this)">
+            <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+            <div class="upload-zone-full">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>Add Photo</span>
+            </div>
+            <img class="upload-preview" alt="Sid focus avatar">
+          </div>
+          <div class="focus-content">
+            <div class="focus-meta">Sid’s Reminder</div>
+            <div class="focus-question">What foundation are you building today?</div>
+            <div class="focus-copy">Small steps today create massive momentum tomorrow.</div>
+          </div>
         </div>
-        <img class="upload-preview" alt="Marketing Mentor">
       </div>
-      <a href="#" class="sub-agent-btn">Let's Build It</a>
-    </div>
+    </section>
 
-  </div>
-</div><!-- end sub-agents-section -->
+    <section class="resources-section">
+      <h2 class="resources-heading">Your Coaching Resources</h2>
+      <div class="resource-grid">
+        <article class="resource-card">
+          <div class="resource-top">
+            <div class="resource-copy-wrap">
+              <div class="resource-tag">Mindset &amp; Motivation</div>
+              <div class="resource-title">You’ve Got More <em>Than You Think.</em></div>
+              <div class="resource-copy">You have more power, creativity, and clarity than you realize. Let’s uncover it.</div>
+            </div>
+            <div class="resource-art sub-agent-uploader" data-agent="resource-spark" onclick="triggerUpload(this)">
+              <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+              <div class="upload-zone-full">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <span>Add Photo</span>
+              </div>
+              <img class="upload-preview" alt="Find Your Spark artwork">
+            </div>
+          </div>
+          <a href="#" class="resource-footer">
+            <span>Find Your Spark</span>
+            <span class="resource-arrow">→</span>
+          </a>
+        </article>
 
-<!-- ONE TEAM BANNER -->
-<div class="one-team-banner">
-  <div class="one-team-left">
-    <h2 class="one-team-heading">One Team. Every Step.</h2>
-    <p class="one-team-sub">Your agents are here to help you think, build, and grow.<br>Bring them into your journey whenever you need support.</p>
-  </div>
-  <div class="one-team-steps">
-    <div class="step">
-      <div class="step-icon">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      </div>
-      <span>Discover</span>
-    </div>
-    <div class="step-line"></div>
-    <div class="step active">
-      <div class="step-icon">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <span>Plan</span>
-    </div>
-    <div class="step-line"></div>
-    <div class="step active">
-      <div class="step-icon">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-      </div>
-      <span>Build</span>
-    </div>
-    <div class="step-line"></div>
-    <div class="step">
-      <div class="step-icon">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg>
-      </div>
-      <span>Launch</span>
-    </div>
-    <div class="step-line"></div>
-    <div class="step">
-      <div class="step-icon">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      </div>
-      <span>Grow</span>
-    </div>
-  </div>
-</div><!-- end one-team-banner -->
+        <article class="resource-card">
+          <div class="resource-top">
+            <div class="resource-copy-wrap">
+              <div class="resource-tag">Clarity &amp; Direction</div>
+              <div class="resource-title">Let’s Get Clear on <em>Who You’re Building This For.</em></div>
+              <div class="resource-copy">The clearer you are on your audience, the easier everything becomes.</div>
+            </div>
+            <div class="resource-art sub-agent-uploader" data-agent="resource-who" onclick="triggerUpload(this)">
+              <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+              <div class="upload-zone-full">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <span>Add Photo</span>
+              </div>
+              <img class="upload-preview" alt="Find Your Who artwork">
+            </div>
+          </div>
+          <a href="#" class="resource-footer">
+            <span>Find Your Who</span>
+            <span class="resource-arrow">→</span>
+          </a>
+        </article>
 
-</div><!-- end agents-main -->
+        <article class="resource-card">
+          <div class="resource-top">
+            <div class="resource-copy-wrap">
+              <div class="resource-tag">Decision &amp; Prioritization</div>
+              <div class="resource-title">Which Tool <em>Should You Build First?</em></div>
+              <div class="resource-copy">Answer a few quick questions and get your recommended starting point.</div>
+            </div>
+            <div class="resource-art sub-agent-uploader" data-agent="resource-tool" onclick="triggerUpload(this)">
+              <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+              <div class="upload-zone-full">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <span>Add Photo</span>
+              </div>
+              <img class="upload-preview" alt="Which tool artwork">
+            </div>
+          </div>
+          <a href="#" class="resource-footer">
+            <span>Find Out Which Tool</span>
+            <span class="resource-arrow">→</span>
+          </a>
+        </article>
 
-      <aside class="agents-sidebar">
-        <div class="sidebar-widget">
-          <h3>🌟Meet Your Team</h3>
-          <p>Pip helps you reflect.</p>
-          <p>Sid helps you stay focused.</p>
-          <p>Together they're here for every stage of your build.</p>
-          <a href="#">Learn More About Agents</a>
+        <article class="resource-card">
+          <div class="resource-top">
+            <div class="resource-copy-wrap">
+              <div class="resource-tag">Action &amp; Momentum</div>
+              <div class="resource-title">Which Tool <em>Should You Build First?</em></div>
+              <div class="resource-copy">A proven framework to help you move forward with confidence.</div>
+            </div>
+            <div class="resource-art sub-agent-uploader" data-agent="resource-build" onclick="triggerUpload(this)">
+              <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.sub-agent-uploader'))">
+              <div class="upload-zone-full">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <span>Add Photo</span>
+              </div>
+              <img class="upload-preview" alt="Let's build it artwork">
+            </div>
+          </div>
+          <a href="#" class="resource-footer">
+            <span>Let's Build It</span>
+            <span class="resource-arrow">→</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <div class="one-team-banner">
+      <div class="one-team-left">
+        <h2 class="one-team-heading">One Team. Every Step. <span class="sparkle">✦</span></h2>
+        <p class="one-team-sub">Your agents are here to help you think, build, and grow.<br>Bring them into your journey whenever you need support.</p>
+      </div>
+      <div class="one-team-steps">
+        <div class="step done">
+          <div class="step-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <span>Discover</span>
+          <small>Get clarity</small>
         </div>
-        <div class="sidebar-widget">
-          <h3>Sid's Reminder</h3>
-          <ul>
-            <li><strong>Building a foundation is the most improtant thing</strong></li>
-          </ul>
+        <div class="step-line done"></div>
+        <div class="step done">
+          <div class="step-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <span>Plan</span>
+          <small>Map your path</small>
         </div>
-        <div class="sidebar-widget">
-          <h3>Pip's Reflection</h3>
-          <ul>
-            <li><strong>What's one win from this week?</strong></li>
-            <li><strong>Lean on your agents</strong> to stay consistent and confident.</li>
-          </ul>
+        <div class="step-line done"></div>
+        <div class="step active">
+          <div class="step-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <span>Build</span>
+          <small>Create with focus</small>
         </div>
-        <div class="sidebar-widget">
-          <h3>⚡ Agent Activity</h3>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg>
+          </div>
+          <span>Launch</span>
+          <small>Bring it to life</small>
         </div>
-      </aside><!-- end agents-sidebar -->
-    </div><!-- end agents-layout -->
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <span>Grow</span>
+          <small>Scale your impact</small>
+        </div>
+      </div>
+    </div><!-- end one-team-banner -->
+
+    <section class="bottom-cta">
+      <div class="bottom-cta-copy">
+        <div class="bottom-cta-icon">✦</div>
+        <div>
+          <div class="bottom-cta-title">Ready to Keep Building?</div>
+          <div class="bottom-cta-sub">Your next breakthrough is one conversation away.</div>
+        </div>
+      </div>
+      <button type="button" class="cta-chat-btn" onclick="window.location.href='journey-companion.html'">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5 8.38 8.38 0 01-3.61-.8L3 21l1.92-5.33A8.5 8.5 0 1112.5 20"/></svg>
+        <span>Chat With Pip</span>
+      </button>
+    </section>
+
   </div><!-- end page-content -->
 </div><!-- end main-wrap -->
 <script src="js/auth.js"></script>
