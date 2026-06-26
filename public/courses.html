@@ -1,454 +1,619 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Courses — ToolSpark</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --dark: #0C0B09;
-    --dark2: #141210;
-    --dark3: #1C1A17;
-    --border-dark: #2A2720;
-    --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE;
-    --surface: #FFFFFF;
-    --border: #E4E0D8;
-    --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #9E9891;
-    --green: #2A5C45;
-    --green-light: #3D8A65;
-    --purple: #4B3F8A;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
-    --sidebar-width: 220px;
-    --header-height: 64px;
-  }
-
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: var(--sidebar-width);
-    background: var(--dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0;
-    z-index: 100;
-    border-right: 1px solid var(--border-dark);
-    transition: transform 0.3s ease;
-  }
-  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; }
-  .logo-text span { color: var(--gold); }
-  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; cursor: pointer; text-decoration: none; transition: all 0.15s; }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
-  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
-  .nav-item.active .nav-icon { opacity: 1; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: var(--radius-sm); color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden; }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 11px; color: var(--text3); }
-  .sidebar-close-btn { display: none; background: none; border: none; color: #9A9488; cursor: pointer; padding: 4px; border-radius: 6px; }
-  .sidebar-close-btn:hover { color: #F0EDE6; }
-  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
-  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
-
-  /* ── MAIN ── */
-  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-
-  /* ── PAGE CONTENT ── */
-  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 960px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
-
-  /* ── PAGE HEADER ── */
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
-  .page-sub { font-size: 14px; color: var(--text3); }
-
-  /* ── FILTER BAR ── */
-  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .filter-chip { padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-  .filter-chip:hover { border-color: var(--gold); color: var(--gold); }
-  .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); }
-
-  /* ── COURSES GRID ── */
-  .courses-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-
-  /* ── COURSE CARD ── */
-  .course-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; cursor: pointer; transition: box-shadow 0.15s, transform 0.15s; display: flex; flex-direction: column; }
-  .course-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-  .course-card.locked { cursor: default; opacity: 0.7; }
-  .course-card.locked:hover { box-shadow: var(--shadow); transform: none; }
-
-  .course-body { padding: 14px 14px 10px; display: flex; flex-direction: column; }
-  .course-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.35; margin-bottom: 10px; }
-
-  .course-thumb-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 8px; margin-bottom: 10px; }
-  .course-thumb-wrap img { width: 100%; height: 100%; object-fit: contain; background: #000; }
-  .course-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-  .course-thumb-1 { background: linear-gradient(135deg, #1a1410, #2d1f0a); }
-  .course-thumb-2 { background: linear-gradient(135deg, #0d1a14, #0a2018); }
-  .course-thumb-3 { background: linear-gradient(135deg, #12101a, #1a1030); }
-  .course-thumb-4 { background: linear-gradient(135deg, #0a1520, #0d2535); }
-  .course-thumb-5 { background: linear-gradient(135deg, #1a100a, #2d1505); }
-
-  .thumb-status { position: absolute; top: 8px; right: 8px; }
-  .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; border-radius: 8px; }
-  .locked-icon { font-size: 24px; }
-
-  .free-badge { font-size: 10px; font-weight: 700; color: var(--green-light); background: rgba(42,92,69,0.1); border: 1px solid rgba(42,92,69,0.2); border-radius: 100px; padding: 1px 7px; }
-  .complete-badge { font-size: 10px; font-weight: 700; color: white; background: var(--green-light); border-radius: 100px; padding: 2px 8px; }
-  .in-progress-badge { font-size: 10px; font-weight: 700; color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; padding: 2px 8px; }
-
-  .course-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border); margin-top: auto; }
-  .course-meta { font-size: 11px; color: var(--text3); }
-  .course-cta { font-size: 11px; font-weight: 700; color: var(--gold); }
-  .locked-label { font-size: 11px; color: var(--text3); }
-
-  .progress-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-  .progress-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
-  .progress-label { font-size: 10px; color: var(--text3); margin-bottom: 8px; }
-
-  /* ── EMPTY STATE ── */
-  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
-  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
-  .empty-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
-  .empty-sub { font-size: 14px; }
-
-  /* ── MOBILE BOTTOM NAV ── */
-  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark); z-index: 200; align-items: stretch; padding-bottom: env(safe-area-inset-bottom, 0); }
-  .mobile-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
-  .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--gold); }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 1023px) {
-    .sidebar { width: 60px; }
-    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
-    .main-wrap { margin-left: 60px; }
-    .nav-item { justify-content: center; padding: 10px; }
-    .courses-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 767px) {
-    .sidebar { width: 280px; transform: translateX(-100%); z-index: 300; }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-logo > div:first-child, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: block; }
-    .nav-item { justify-content: flex-start; padding: 9px 12px; }
-    .sidebar-close-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
-    .sidebar-overlay { display: block; }
-    .main-wrap { margin-left: 0; }
-    .page-content { padding: 1rem 1rem 80px; gap: 1rem; }
-    .courses-grid { grid-template-columns: 1fr; }
-    .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .mobile-bottom-nav { display: flex; }
-  }
-
-  @media (max-width: 480px) {
-    .page-content { padding: 0.875rem 0.875rem 80px; }
-  }
-</style>
-</head>
-<body>
-
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div>
-      <div class="logo-text">Tool<span>Spark</span></div>
-      <div class="logo-tag">Builder Platform</div>
-    </div>
-    <button class="sidebar-close-btn" id="sidebar-close-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
- <nav class="sidebar-nav" id="sidebar-nav"></nav>
-
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Member</div>
-      </div>
-    </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sign Out
-    </button>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main-wrap">
-  <header class="top-header"></header>
-
-  <div class="page-content">
-
-    <!-- Page header -->
-    <div class="page-header">
-      <div>
-        <div class="page-title">Courses & Training</div>
-        <div class="page-sub">Step-by-step programs to help you build and sell AI tools</div>
-      </div>
-    </div>
-
-    <!-- Filter bar hidden until enough courses to warrant filtering -->
-    <div class="filter-bar" id="filter-bar" style="display:none;"></div>
-
-    <!-- Courses grid -->
-    <div class="courses-grid" id="courses-grid">
-      <div style="color:var(--text3);font-size:13px;grid-column:1/-1;padding:1rem 0;">Loading courses...</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-bottom-nav">
-  <a href="community.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-    Community
-  </a>
-  <a href="courses.html" class="mobile-nav-item active">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-    Courses
-  </a>
-  <a href="tools.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-    Tools
-  </a>
-  <a href="inbox.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    Inbox
-  </a>
-  <a href="dashboard.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Dashboard
-  </a>
-</nav>
-
+<title>Courses & Training — ToolSpark</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
-  const firebaseConfig = {
+  firebase.initializeApp({
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
     authDomain: "toolspark-2d62d.firebaseapp.com",
     projectId: "toolspark-2d62d",
     storageBucket: "toolspark-2d62d.firebasestorage.app",
     messagingSenderId: "82966513396",
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
-  };
-  firebase.initializeApp(firebaseConfig);
+  });
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const auth = firebase.auth();
-  const db = firebase.firestore();
+  const db   = firebase.firestore();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --dark: #0C0B09;
+  --dark2: #141210;
+  --border-dark: #2A2720;
+  --bg: #ECE8DF;
+  --surface: #FBF8F1;
+  --border: #e2dccd;
+  --hairline: #e7e1d3;
+  --text: #231d16;
+  --text2: #6e665b;
+  --text3: #9a9183;
+  --text-muted: #a4977d;
+  --gold: #C6A24E;
+  --gold-dim: rgba(198,162,78,0.12);
+  --gold-border: rgba(198,162,78,0.22);
+  --gold-bright: #E3BE63;
+  --dark-btn: #1c1712;
+  --radius: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+  --sidebar-width: 220px;
+}
 
-  let currentUser = null;
-  let allCourses = [];
-  let activeFilter = 'All';
+body {
+  font-family: 'Hanken Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
 
-  auth.onAuthStateChanged(async function(user) {
-    if (!user) { window.location.href = 'signon.html'; return; }
-    currentUser = user;
+img { max-width: 100%; display: block; }
+a { text-decoration: none; color: inherit; }
 
-    const name = user.displayName || user.email || 'Builder';
-    const first = name.split(' ')[0];
-    document.getElementById('sidebar-name').textContent = name;
+/* ── LAYOUT ── */
+.main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.page-content { flex: 1; padding: 40px 40px 80px; max-width: 1080px; width: 100%; display: flex; flex-direction: column; gap: 36px; }
 
-    const av = document.getElementById('sidebar-avatar');
-    if (user.photoURL) {
-      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
-    } else {
-      av.textContent = first.charAt(0).toUpperCase();
-    }
+@media (max-width: 1024px) { .main-wrap { margin-left: 60px; } }
+@media (max-width: 767px)  { .main-wrap { margin-left: 0; } .page-content { padding: 1.25rem 1rem 60px; } }
 
-    try {
-      const snap = await db.collection('users').doc(user.uid).get();
-      if (snap.exists) {
-        const data = snap.data();
-        if (data.userRole === 'admin') {
-          document.getElementById('sidebar-role').textContent = 'Admin';
-        }
-      }
-    } catch(e) {}
+/* ── PAGE HEADER ── */
+.page-eyebrow { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.22em; margin-bottom: 8px; }
+.page-title   { font-family: 'Newsreader', serif; font-size: 42px; font-weight: 600; color: #1c1711; line-height: 1; margin-bottom: 8px; }
+.page-title .sparkle { color: var(--gold); font-size: 0.6em; vertical-align: 0.12em; }
+.page-sub     { font-size: 15px; color: var(--text2); max-width: 540px; }
 
-    // Check notifications
-    try {
-      const notifSnap = await db.collection('notifications')
-        .where('userId', '==', user.uid)
-        .where('read', '==', false)
-        .limit(1).get();
-      if (!notifSnap.empty) {
-        document.getElementById('notif-dot').style.display = 'block';
-      }
-    } catch(e) {}
+/* ── SECTION TITLES ── */
+.section-title {
+  font-family: 'Newsreader', serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: #1c1711;
+  margin-bottom: 16px;
+}
 
-    loadCourses(user.uid);
-  });
+/* ── STAT CARDS ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 220ms cubic-bezier(0.23,1,0.32,1), box-shadow 220ms cubic-bezier(0.23,1,0.32,1);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.stat-icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.stat-number { font-size: 26px; font-weight: 700; line-height: 1; color: var(--text); }
+.stat-label  { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.stat-sublabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 3px; }
+.stat-path-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
 
-  async function loadCourses(uid) {
-    const grid = document.getElementById('courses-grid');
-    try {
-      // Load courses
-      const snap = await db.collection('courses')
-        .where('isPublished', '==', true)
-        .orderBy('order', 'asc')
-        .get();
+/* ── CONTINUE LEARNING ── */
+.continue-card {
+  display: grid;
+  grid-template-columns: 190px 1fr auto;
+  gap: 24px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: transform 220ms cubic-bezier(0.23,1,0.32,1), box-shadow 220ms cubic-bezier(0.23,1,0.32,1);
+}
+.continue-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.continue-thumb {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.continue-thumb img { width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+.continue-thumb-placeholder { flex-shrink: 0; width: 190px; }
+.course-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.course-chip--progress  { background: #eaf5ec; color: #2a7a3e; border: 1px solid #b4d9bb; }
+.course-chip--completed { background: #e8f0fe; color: #1a56db; border: 1px solid #b4c8fa; }
+.course-chip--locked    { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
+.continue-title { font-family: 'Newsreader', serif; font-size: 24px; font-weight: 500; margin-bottom: 4px; }
+.continue-meta  { font-size: 13px; color: var(--text2); margin-bottom: 14px; }
 
-      if (snap.empty) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📚</div><div class="empty-title">No courses yet</div><div class="empty-sub">Check back soon — courses are coming</div></div>';
-        return;
-      }
+/* ── PROGRESS BAR ── */
+.progress-wrap { display: flex; align-items: center; gap: 10px; }
+.progress { flex: 1; height: 7px; background: var(--hairline); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+.progress-label { font-size: 12px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
 
-      // Load progress for each course
-      const progressPromises = snap.docs.map(function(doc) {
-        return db.collection('userProgress').doc(uid + '_' + doc.id).get().catch(function() { return null; });
-      });
-      const progressDocs = await Promise.all(progressPromises);
+/* ── COURSE GRID ── */
+.courses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.courses-header .section-title { margin-bottom: 0; }
+.filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-pill {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'Hanken Grotesk', sans-serif;
+  transition: all 150ms;
+}
+.filter-pill:hover { border-color: var(--gold); color: var(--gold); }
+.filter-pill.active { background: var(--dark-btn); color: #f6efe2; border-color: var(--dark-btn); }
 
-      // Build courses array
-      allCourses = snap.docs.map(function(doc, i) {
-        const c = doc.data();
-        const p = progressDocs[i] && progressDocs[i].exists ? progressDocs[i].data() : null;
-        const total = c.totallessons || 0;
-        const completed = p ? (p.completedLessons || []).length : 0;
-        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 18px;
+}
+.course-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 18px;
+  transition: transform 220ms cubic-bezier(0.23,1,0.32,1), box-shadow 220ms cubic-bezier(0.23,1,0.32,1);
+}
+.course-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.course-thumb {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  align-self: start;
+}
+.course-thumb img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.course-content { display: flex; flex-direction: column; justify-content: space-between; }
+.course-title { font-family: 'Newsreader', serif; font-size: 20px; font-weight: 500; margin-bottom: 5px; line-height: 1.2; }
+.course-desc  { font-size: 13px; color: var(--text2); line-height: 1.55; }
+.course-footer { margin-top: 12px; }
+.course-meta  { font-size: 12px; color: var(--text3); margin-top: 6px; }
+.course-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.course-time { font-size: 12px; color: var(--text3); }
+.course-link { font-size: 13px; font-weight: 700; color: var(--gold); transition: opacity 150ms; }
+.course-link:hover { opacity: 0.75; }
 
-        return {
-          id: doc.id,
-          title: c.title || 'Untitled',
-          description: c.description || '',
-          category: c.category || 'Foundations',
-          isFree: c.isFree || false,
-          thumbnail: c.thumbnail || '',
-          totallessons: total,
-          completed,
-          pct,
-          locked: false,
-          isComplete: completed >= total && total > 0,
-          isStarted: completed > 0,
-          lastLessonId: p ? (p.lastLessonId || '') : '',
-        };
-      });
+/* ── BUTTONS ── */
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  background: var(--dark-btn);
+  color: #f6efe2;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 200ms, transform 150ms cubic-bezier(0.23,1,0.32,1);
+}
+.btn-dark:hover { background: #2a2219; }
+.btn-dark:active { transform: scale(0.97); }
 
-      renderCourses();
-      buildFilterChips();
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: border-color 150ms, background 150ms, transform 150ms cubic-bezier(0.23,1,0.32,1);
+}
+.btn-outline:hover { border-color: var(--text); background: rgba(0,0,0,0.03); }
+.btn-outline:active { transform: scale(0.97); }
 
-    } catch(e) {
-      console.error(e);
-      grid.innerHTML = '<div style="color:var(--text3);font-size:13px;grid-column:1/-1;">Could not load courses. Please refresh.</div>';
-    }
-  }
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #dcb559, #c39a3f);
+  color: #1a1409;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: none;
+  transition: filter 150ms, transform 150ms cubic-bezier(0.23,1,0.32,1);
+}
+.btn-gold:hover  { filter: brightness(1.07); }
+.btn-gold:active { transform: scale(0.97); }
 
-  function buildFilterChips() {
-    const categories = [...new Set(allCourses.map(c => c.category))];
-    const bar = document.getElementById('filter-bar');
-    bar.innerHTML = '<div class="filter-chip active" data-filter="All">All</div>' +
-      categories.map(cat => '<div class="filter-chip" data-filter="' + escHtml(cat) + '">' + escHtml(cat) + '</div>').join('');
+/* ── RECENTLY VIEWED ── */
+.recent-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.recent-thumb {
+  width: 76px; height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.recent-info { flex: 1; }
+.recent-info strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.recent-info p { font-size: 12px; color: var(--text2); }
 
-    bar.querySelectorAll('.filter-chip').forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        bar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        activeFilter = chip.dataset.filter;
-        renderCourses();
+/* ── HELP SECTION ── */
+.help-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.help-intro h2 {
+  font-family: 'Newsreader', serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #1c1711;
+  margin-bottom: 10px;
+}
+.help-intro p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.help-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  transition: transform 220ms cubic-bezier(0.23,1,0.32,1), box-shadow 220ms cubic-bezier(0.23,1,0.32,1);
+}
+.help-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.help-card img { width: 100px; }
+.help-card-eyebrow { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.help-card-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.help-card-role { font-size: 12px; color: var(--text3); }
+
+/* ── COURSE THUMBNAIL PLACEHOLDERS ── */
+.course-thumb-placeholder {
+  border-radius: 10px;
+  overflow: hidden;
+  align-self: start;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  aspect-ratio: 4/3;
+  position: relative;
+}
+.course-thumb-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+}
+.course-thumb-placeholder span {
+  font-family: 'Newsreader', serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+.course-thumb-placeholder--challenge {
+  background: linear-gradient(145deg, #1a1409 0%, #2e2210 50%, #3d2e14 100%);
+}
+.course-thumb-placeholder--challenge::before {
+  background: radial-gradient(ellipse at 70% 30%, rgba(198,162,78,0.25) 0%, transparent 60%);
+}
+.course-thumb-placeholder--build {
+  background: linear-gradient(145deg, #0d1219 0%, #121d2b 50%, #1a2b3d 100%);
+}
+.course-thumb-placeholder--build::before {
+  background: radial-gradient(ellipse at 30% 30%, rgba(130,180,220,0.18) 0%, transparent 60%);
+}
+.continue-thumb-placeholder {
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1a1409 0%, #2e2210 50%, #3d2e14 100%);
+  aspect-ratio: 16/10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.continue-thumb-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 65% 35%, rgba(198,162,78,0.2) 0%, transparent 65%);
+}
+.recent-thumb-placeholder {
+  width: 76px;
+  height: 54px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #121d2b 0%, #1a2b3d 100%);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1000px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .continue-card { grid-template-columns: 1fr; }
+  .continue-card .btn-dark { align-self: flex-start; }
+  .course-grid { grid-template-columns: 1fr; }
+  .course-card { grid-template-columns: 140px 1fr; }
+  .help-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .course-card { grid-template-columns: 1fr; }
+  .course-thumb { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="main-wrap">
+  <header class="top-header"></header>
+  <div class="page-content">
+
+    <!-- PAGE HEADER -->
+    <div>
+      <div class="page-eyebrow">ToolSpark</div>
+      <div class="page-title">Courses &amp; Training <span class="sparkle">✦</span></div>
+      <div class="page-sub">Step-by-step programs to help you build, launch, and grow with AI tools.</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div>
+          <div class="stat-number" id="stat-enrolled">2</div>
+          <div class="stat-label">Courses Enrolled</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✓</div>
+        <div>
+          <div class="stat-number" id="stat-lessons">3 / 14</div>
+          <div class="stat-label">Lessons Completed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱</div>
+        <div>
+          <div class="stat-number" id="stat-time">2h 18m</div>
+          <div class="stat-label">Total Learning Time</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div>
+          <div class="stat-sublabel">Current Path</div>
+          <div class="stat-path-name" id="stat-path">Build It Yourself</div>
+          <div class="stat-label" id="stat-remaining">7 lessons remaining</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTINUE LEARNING -->
+    <section>
+      <div class="section-title">Continue Learning ✦</div>
+      <div class="continue-card">
+        <div class="continue-thumb-placeholder"></div>
+        <div>
+          <span class="course-chip course-chip--progress">In Progress</span>
+          <div class="continue-title">ToolSpark Challenge</div>
+          <div class="continue-meta">Lesson 3 of 7 &bull; The AI Tool Idea</div>
+          <div class="progress-wrap">
+            <div class="progress"><div class="progress-fill" style="width:43%" id="continue-bar"></div></div>
+            <span class="progress-label" id="continue-pct">43%</span>
+          </div>
+        </div>
+        <div>
+          <a href="course.html" class="btn-dark">Resume Lesson →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- YOUR COURSES -->
+    <section>
+      <div class="courses-header">
+        <div class="section-title">Your Courses</div>
+        <div class="filter-pills">
+          <button class="filter-pill active">All Courses</button>
+          <button class="filter-pill">In Progress</button>
+          <button class="filter-pill">Completed</button>
+          <button class="filter-pill">Not Started</button>
+        </div>
+      </div>
+
+      <div class="course-grid">
+
+        <!-- ToolSpark Challenge -->
+        <article class="course-card" data-status="progress">
+          <div class="course-thumb-placeholder course-thumb-placeholder--challenge">
+            <span>ToolSpark<br>Challenge</span>
+          </div>
+          <div class="course-content">
+            <div>
+              <span class="course-chip course-chip--progress">In Progress</span>
+              <div class="course-title">ToolSpark Challenge</div>
+              <div class="course-desc">7-day challenge to help you go from idea to AI tool in just one week.</div>
+            </div>
+            <div class="course-footer">
+              <div class="progress-wrap">
+                <div class="progress"><div class="progress-fill" style="width:29%"></div></div>
+                <span class="progress-label">29%</span>
+              </div>
+              <div class="course-meta">2 of 7 lessons completed</div>
+              <div class="course-time-row">
+                <span class="course-time">⏱ 1h 45m remaining &nbsp;·&nbsp; 7 lessons</span>
+                <a href="course.html" class="course-link">Continue →</a>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Your First Build -->
+        <article class="course-card" data-status="progress">
+          <div class="course-thumb-placeholder course-thumb-placeholder--build">
+            <span>Your First<br>Build</span>
+          </div>
+          <div class="course-content">
+            <div>
+              <span class="course-chip course-chip--progress">In Progress</span>
+              <div class="course-title">Your First Build</div>
+              <div class="course-desc">Step-by-step program to build your first AI tool with guidance at every step.</div>
+            </div>
+            <div class="course-footer">
+              <div class="progress-wrap">
+                <div class="progress"><div class="progress-fill" style="width:29%"></div></div>
+                <span class="progress-label">29%</span>
+              </div>
+              <div class="course-meta">2 of 7 lessons completed</div>
+              <div class="course-time-row">
+                <span class="course-time">⏱ 2h 10m remaining &nbsp;·&nbsp; 7 lessons</span>
+                <a href="course.html" class="course-link">Continue →</a>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- RECENTLY VIEWED -->
+    <section>
+      <div class="section-title">Recently Viewed</div>
+      <div class="recent-card">
+        <div class="recent-thumb-placeholder"></div>
+        <div class="recent-info">
+          <strong>Your First Build</strong>
+          <p>Lesson 2: Define Your Core Problem</p>
+        </div>
+        <a href="course.html" class="btn-outline">Resume Lesson →</a>
+      </div>
+    </section>
+
+    <!-- HELP -->
+    <section>
+      <div class="help-grid">
+        <div class="help-intro">
+          <h2>Need Help on Your<br>Learning Journey?</h2>
+          <p>Your AI coaching companions are here to help you stay on track and keep moving forward.</p>
+        </div>
+
+        <div class="help-card">
+          <img src="pip.png" alt="Pip">
+          <div>
+            <div class="help-card-eyebrow">Have questions about a lesson?</div>
+            <div class="help-card-name">Chat with Pip</div>
+            <div class="help-card-role">Your journey companion</div>
+          </div>
+          <a href="journey-companion.html" class="btn-gold">Chat with Pip →</a>
+        </div>
+
+        <div class="help-card">
+          <img src="sid.png" alt="Sid">
+          <div>
+            <div class="help-card-eyebrow">Need accountability or a pep talk?</div>
+            <div class="help-card-name">Chat with Sid</div>
+            <div class="help-card-role">Your accountability coach</div>
+          </div>
+          <a href="sparky.html" class="btn-gold">Chat with Sid →</a>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end page-content -->
+</div><!-- end main-wrap -->
+
+<script src="js/auth.js"></script>
+<script src="js/credits.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (window.initNav) initNav('courses', 'Courses & Training');
+
+  /* Filter pills */
+  document.querySelectorAll('.filter-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      pill.classList.add('active');
+      const filter = pill.textContent.trim();
+      document.querySelectorAll('.course-card').forEach(function(card) {
+        if (filter === 'All Courses') { card.style.display = ''; return; }
+        const map = { 'In Progress': 'progress', 'Completed': 'completed', 'Not Started': 'not-started' };
+        card.style.display = card.dataset.status === map[filter] ? '' : 'none';
       });
     });
-  }
+  });
 
-  function renderCourses() {
-    const grid = document.getElementById('courses-grid');
-    const filtered = activeFilter === 'All'
-      ? allCourses
-      : allCourses.filter(c => c.category === activeFilter);
-
-    if (filtered.length === 0) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📚</div><div class="empty-title">No courses in this category</div></div>';
-      return;
-    }
-
-    const gradients = ['course-thumb-1','course-thumb-2','course-thumb-3','course-thumb-4','course-thumb-5'];
-
-    grid.innerHTML = filtered.map(function(course, i) {
-      const gradClass = gradients[i % gradients.length];
-      const url = 'course.html?courseId=' + course.id + (course.lastLessonId ? '&lessonId=' + course.lastLessonId : '');
-
-      let statusBadge = '';
-      if (course.isComplete) statusBadge = '<span class="complete-badge">✓ Complete</span>';
-      else if (course.isStarted) statusBadge = '<span class="in-progress-badge">In Progress</span>';
-      else if (course.isFree) statusBadge = '<span class="free-badge">Free</span>';
-
-      let ctaText = 'Start course →';
-      if (course.isComplete) ctaText = 'Review →';
-      else if (course.isStarted) ctaText = 'Continue →';
-
-      const thumbInner = course.thumbnail
-        ? '<img src="' + escHtml(course.thumbnail) + '" alt="' + escHtml(course.title) + '">'
-        : '<div class="course-thumb-placeholder ' + gradClass + '"><svg width="36" height="36" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg></div>';
-
-      const progressHtml = course.pct > 0
-        ? '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + course.pct + '%"></div></div><div class="progress-label">' + course.completed + ' of ' + course.totallessons + ' lessons complete</div>'
-        : '';
-
-      if (course.locked) {
-        return '<div class="course-card locked">' +
-          '<div class="course-body">' +
-          '<div class="course-title">' + escHtml(course.title) + '</div>' +
-          '<div class="course-thumb-wrap"><div class="locked-overlay"><div class="locked-icon">🔒</div></div>' + thumbInner + '</div>' +
-          '<div class="course-footer"><span class="course-meta">' + course.totallessons + ' lessons</span><span class="locked-label">🔒 Locked</span></div>' +
-          '</div></div>';
-      }
-
-      return '<div class="course-card" onclick="window.location.href=\'' + url + '\'">' +
-        '<div class="course-body">' +
-        '<div class="course-title">' + escHtml(course.title) + '</div>' +
-        '<div class="course-thumb-wrap">' + thumbInner + (statusBadge ? '<div class="thumb-status">' + statusBadge + '</div>' : '') + '</div>' +
-        progressHtml +
-        '<div class="course-footer"><span class="course-meta">' + course.totallessons + ' lessons · ' + (course.isFree ? 'Free' : 'Members') + '</span><span class="course-cta">' + ctaText + '</span></div>' +
-        '</div></div>';
-    }).join('');
-  }
-
-  function escHtml(str) {
-    return String(str == null ? '' : str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
+  /* Auth guard */
+  document.addEventListener('tsUserReady', function(e) {
+    if (!e.detail) { window.location.href = 'signon.html'; }
+  });
 </script>
-<script src="js/nav.js"></script>
-<script>initNav('courses', 'Courses');</script>
 </body>
 </html>
