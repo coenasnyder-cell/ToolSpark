@@ -62,7 +62,7 @@ a { text-decoration: none; color: inherit; }
 
 /* ── LAYOUT ── */
 .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.page-content { flex: 1; padding: 40px 40px 80px; max-width: 1080px; width: 100%; display: flex; flex-direction: column; gap: 36px; }
+.page-content { flex: 1; padding: 40px 40px 80px; max-width: 1180px; width: 100%; display: flex; flex-direction: column; gap: 36px; }
 
 @media (max-width: 1024px) { .main-wrap { margin-left: 60px; } }
 @media (max-width: 767px)  { .main-wrap { margin-left: 0; } .page-content { padding: 1.25rem 1rem 60px; } }
@@ -456,21 +456,21 @@ a { text-decoration: none; color: inherit; }
     </div>
 
     <!-- CONTINUE LEARNING -->
-    <section>
+    <section id="continue-section">
       <div class="section-title">Continue Learning ✦</div>
-      <div class="continue-card">
-        <div class="continue-thumb-placeholder"></div>
-        <div>
-          <span class="course-chip course-chip--progress">In Progress</span>
-          <div class="continue-title">ToolSpark Challenge</div>
-          <div class="continue-meta">Lesson 3 of 7 &bull; The AI Tool Idea</div>
-          <div class="progress-wrap">
-            <div class="progress"><div class="progress-fill" style="width:43%" id="continue-bar"></div></div>
-            <span class="progress-label" id="continue-pct">43%</span>
+      <div id="continue-card-wrap">
+        <div class="continue-card">
+          <div class="continue-thumb-placeholder"></div>
+          <div>
+            <span class="course-chip course-chip--progress">In Progress</span>
+            <div class="continue-title">Loading...</div>
+            <div class="continue-meta"></div>
+            <div class="progress-wrap">
+              <div class="progress"><div class="progress-fill" style="width:0%"></div></div>
+              <span class="progress-label">0%</span>
+            </div>
           </div>
-        </div>
-        <div>
-          <a href="course.html?courseId=JQYsP0RQUPWZ0twQtiQg" class="btn-dark">Resume Lesson →</a>
+          <div></div>
         </div>
       </div>
     </section>
@@ -487,7 +487,7 @@ a { text-decoration: none; color: inherit; }
         </div>
       </div>
 
-      <div class="course-grid">
+      <div class="course-grid" id="course-grid">
 
         <!-- ToolSpark Challenge -->
         <article class="course-card" data-status="progress">
@@ -594,24 +594,137 @@ a { text-decoration: none; color: inherit; }
 <script>
   if (window.initNav) initNav('courses', 'Courses & Training');
 
-  /* Filter pills */
-  document.querySelectorAll('.filter-pill').forEach(function(pill) {
-    pill.addEventListener('click', function() {
-      document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
-      pill.classList.add('active');
-      const filter = pill.textContent.trim();
-      document.querySelectorAll('.course-card').forEach(function(card) {
-        if (filter === 'All Courses') { card.style.display = ''; return; }
-        const map = { 'In Progress': 'progress', 'Completed': 'completed', 'Not Started': 'not-started' };
-        card.style.display = card.dataset.status === map[filter] ? '' : 'none';
+  const db = firebase.firestore();
+
+  window.addEventListener('tsUserReady', async function(e) {
+    if (!e.detail) { window.location.href = 'signon.html'; return; }
+    const uid = e.detail.uid;
+
+    try {
+      // Load all published courses ordered by display order
+      const coursesSnap = await db.collection('courses')
+        .where('isPublished', '==', true)
+        .orderBy('order')
+        .get();
+
+      if (coursesSnap.empty) {
+        document.getElementById('course-grid').innerHTML =
+          '<p style="color:var(--text2);font-size:14px;">No courses available yet.</p>';
+        return;
+      }
+
+      // Load lessons + progress for each course in parallel
+      const courseData = await Promise.all(coursesSnap.docs.map(async function(doc) {
+        const course = { id: doc.id, ...doc.data() };
+        const [lessonsSnap, progressSnap] = await Promise.all([
+          db.collection('courses').doc(doc.id).collection('lessons').orderBy('lessonOrder').get(),
+          db.collection('userProgress').doc(uid + '_' + doc.id).get()
+        ]);
+        course.lessonCount = lessonsSnap.size;
+        course.progress = progressSnap.exists ? progressSnap.data() : null;
+        course.firstLessonId = lessonsSnap.size ? lessonsSnap.docs[0].id : '';
+        return course;
+      }));
+
+      // Stats
+      const enrolled = courseData.filter(function(c) { return c.progress; }).length;
+      let totalCompleted = 0, totalLessons = 0;
+      courseData.forEach(function(c) {
+        totalLessons += c.lessonCount;
+        totalCompleted += c.progress ? (c.progress.completedLessons || []).length : 0;
       });
-    });
+      document.getElementById('stat-enrolled').textContent = enrolled;
+      document.getElementById('stat-lessons').textContent = totalCompleted + ' / ' + totalLessons;
+
+      // Continue Learning — most recently active course
+      const inProgress = courseData.filter(function(c) {
+        return c.progress && (c.progress.completedLessons || []).length > 0 &&
+               (c.progress.completedLessons || []).length < c.lessonCount;
+      });
+      const continueSection = document.getElementById('continue-section');
+      const continueWrap = document.getElementById('continue-card-wrap');
+      if (inProgress.length && continueWrap) {
+        const c = inProgress[0];
+        const done = (c.progress.completedLessons || []).length;
+        const pct = Math.round((done / c.lessonCount) * 100);
+        const resumeId = c.progress.lastLessonId || c.firstLessonId;
+        const thumbHtml = c.thumbnail
+          ? '<div class="continue-thumb"><img src="' + esc(c.thumbnail) + '" alt="' + esc(c.title) + '"></div>'
+          : '<div class="continue-thumb-placeholder"></div>';
+        continueWrap.innerHTML =
+          '<div class="continue-card">' +
+            thumbHtml +
+            '<div>' +
+              '<span class="course-chip course-chip--progress">In Progress</span>' +
+              '<div class="continue-title">' + esc(c.title) + '</div>' +
+              '<div class="continue-meta">Lesson ' + (done + 1) + ' of ' + c.lessonCount + '</div>' +
+              '<div class="progress-wrap">' +
+                '<div class="progress"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+                '<span class="progress-label">' + pct + '%</span>' +
+              '</div>' +
+            '</div>' +
+            '<div><a href="course.html?courseId=' + esc(c.id) + (resumeId ? '&lessonId=' + esc(resumeId) : '') + '" class="btn-dark">Resume Lesson →</a></div>' +
+          '</div>';
+      } else if (continueSection) {
+        continueSection.style.display = 'none';
+      }
+
+      // Course grid
+      const grid = document.getElementById('course-grid');
+      grid.innerHTML = courseData.map(function(c) {
+        const done = c.progress ? (c.progress.completedLessons || []).length : 0;
+        const pct = c.lessonCount ? Math.round((done / c.lessonCount) * 100) : 0;
+        const status = done === 0 ? 'not-started' : (done === c.lessonCount ? 'completed' : 'progress');
+        const chipLabel = { 'not-started': 'Not Started', 'progress': 'In Progress', 'completed': 'Completed' }[status];
+        const chipClass = { 'not-started': 'course-chip--locked', 'progress': 'course-chip--progress', 'completed': 'course-chip--completed' }[status];
+        const resumeId = (c.progress && c.progress.lastLessonId) ? c.progress.lastLessonId : c.firstLessonId;
+        const thumbHtml = c.thumbnail
+          ? '<div class="course-thumb"><img src="' + esc(c.thumbnail) + '" alt="' + esc(c.title) + '"></div>'
+          : '<div class="course-thumb-placeholder"><span>' + esc(c.title) + '</span></div>';
+        return '<article class="course-card" data-status="' + status + '">' +
+          thumbHtml +
+          '<div class="course-content">' +
+            '<div>' +
+              '<span class="course-chip ' + chipClass + '">' + chipLabel + '</span>' +
+              '<div class="course-title">' + esc(c.title) + '</div>' +
+              '<div class="course-desc">' + esc(c.description || '') + '</div>' +
+            '</div>' +
+            '<div class="course-footer">' +
+              (status !== 'not-started' ? '<div class="progress-wrap"><div class="progress"><div class="progress-fill" style="width:' + pct + '%"></div></div><span class="progress-label">' + pct + '%</span></div>' : '') +
+              '<div class="course-meta">' + done + ' of ' + c.lessonCount + ' lessons completed</div>' +
+              '<div class="course-time-row">' +
+                '<span class="course-time">✦ ' + c.lessonCount + ' lessons</span>' +
+                '<a href="course.html?courseId=' + esc(c.id) + (resumeId ? '&lessonId=' + esc(resumeId) : '') + '" class="course-link">' + (status === 'not-started' ? 'Start Course' : 'Continue') + ' →</a>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+
+      // Filter pills
+      document.querySelectorAll('.filter-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
+          pill.classList.add('active');
+          const filter = pill.textContent.trim();
+          document.querySelectorAll('.course-card').forEach(function(card) {
+            if (filter === 'All Courses') { card.style.display = ''; return; }
+            const map = { 'In Progress': 'progress', 'Completed': 'completed', 'Not Started': 'not-started' };
+            card.style.display = card.dataset.status === map[filter] ? '' : 'none';
+          });
+        });
+      });
+
+    } catch(err) {
+      console.error('courses load error', err);
+      document.getElementById('course-grid').innerHTML =
+        '<p style="color:var(--text2);font-size:14px;">Could not load courses. Please refresh.</p>';
+    }
   });
 
-  /* Auth guard */
-  document.addEventListener('tsUserReady', function(e) {
-    if (!e.detail) { window.location.href = 'signon.html'; }
-  });
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 </script>
 </body>
 </html>

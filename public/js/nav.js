@@ -88,6 +88,12 @@
 
   function injectHeaderStyles() {
     if (document.getElementById('nav-header-styles')) return;
+    if (!document.getElementById('nav-dm-sans')) {
+      var fl = document.createElement('link');
+      fl.id = 'nav-dm-sans'; fl.rel = 'stylesheet';
+      fl.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap';
+      document.head.appendChild(fl);
+    }
     var s = document.createElement('style');
     s.id = 'nav-header-styles';
     s.textContent =
@@ -145,10 +151,10 @@
       '.logo-text span{color:#f5c842!important;}' +
       '.logo-tag{font-size:14px!important;color:' + LOGO_TAG_COLOR + '!important;text-transform:uppercase;letter-spacing:0.12em;margin-top:0!important;font-weight:700;text-align:center;}' +
       /* ── Sidebar nav items ── */
-      '.nav-item{display:flex;align-items:center;padding:8px 14px;border-radius:8px;font-family:"Playfair Display",serif;font-size:20px;font-weight:700;text-decoration:none;transition:all 0.15s;cursor:pointer;color:rgba(255,255,255,0.55)!important;white-space:nowrap;}' +
-      '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:#fff!important;}' +
-      '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;}' +
-      '.nav-icon{width:32px;height:32px;flex-shrink:0;opacity:0.6;}' +
+      '.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-family:"DM Sans",system-ui,sans-serif;font-size:13px;font-weight:500;letter-spacing:0.01em;text-decoration:none;transition:background 0.15s,color 0.15s;cursor:pointer;color:rgba(255,255,255,0.5)!important;white-space:nowrap;}' +
+      '.nav-item:hover{background:rgba(255,255,255,0.06)!important;color:rgba(255,255,255,0.9)!important;}' +
+      '.nav-item.active{background:rgba(255,200,32,0.1)!important;color:#FFC820!important;font-weight:600;}' +
+      '.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:0.55;}' +
       '.nav-item:hover .nav-icon,.nav-item.active .nav-icon{opacity:1;}' +
       /* ── Logout ── */
       '.logout-btn{color:rgba(255,255,255,0.35)!important;}' +
@@ -394,7 +400,7 @@
       nav.innerHTML = ITEMS.map(function(item) {
         var active = item.key === activeKey ? ' active' : '';
         return '<a href="' + item.href + '" class="nav-item' + active + '">' +
-          '<span>' + item.label + '</span></a>';
+          item.icon + '<span>' + item.label + '</span></a>';
       }).join('');
     }
 
