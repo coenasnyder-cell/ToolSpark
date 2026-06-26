@@ -97,18 +97,18 @@
 }
 .card {
   border-radius: 14px;
-  padding: 12px 10px 10px;
+  background: rgba(251,248,241,.88);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-    background:rgba(251,248,241,.88);
+  gap: 12px;
+  padding: 16px 14px;
+    height: 100%;
 }
-.card-top {
+.card-header {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 10px;
+  justify-content: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
 }
 .card-badge {
   font-size: 9px;
@@ -117,34 +117,36 @@
   text-transform: uppercase;
   padding: 3px 9px;
   border-radius: 999px;
-  align-self: flex-start;
 }
-/* Oval image with Emil gold ring */
+.card-badge--muted {
+  color: var(--text3);
+  background: var(--hairline);
+}
+.card-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
 .card-img {
-  width: 120px;
-  height: 130px;
+  width: 84px;
+  height: 100px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
   cursor: pointer;
   background: #ede8df;
-  box-shadow:
-    0 0 0 2px rgba(198,162,78,0.38),
-    0 0 14px rgba(198,162,78,0.10);
-  transition:
-    transform 240ms cubic-bezier(0.23,1,0.32,1),
-    box-shadow 240ms cubic-bezier(0.23,1,0.32,1);
+  box-shadow: 0 0 0 2px rgba(198,162,78,0.38), 0 0 14px rgba(198,162,78,0.10);
+  transition: transform 240ms cubic-bezier(0.23,1,0.32,1), box-shadow 240ms cubic-bezier(0.23,1,0.32,1);
 }
 .card:hover .card-img {
   transform: scale(1.05);
-  box-shadow:
-    0 0 0 2px rgba(198,162,78,0.65),
-    0 0 20px rgba(198,162,78,0.18);
+  box-shadow: 0 0 0 2px rgba(198,162,78,0.65), 0 0 20px rgba(198,162,78,0.18);
 }
 .card:active { transform: scale(0.97); transition: transform 120ms cubic-bezier(0.23,1,0.32,1); }
 .card-img .upload-zone {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
@@ -153,11 +155,9 @@
   gap: 3px;
   font-size: 9px;
   font-weight: 600;
-  color: rgba(198,162,78,0.65);
-  background: #000000;
-  width: 110px;
-  height: 130px;
- 
+  color: rgba(198,162,78,0.7);
+  background: rgba(0,0,0,0.05);
+  transition: background 150ms;
 }
 .card-img:hover .upload-zone { background: rgba(198,162,78,0.10); }
 .card-img .upload-zone svg { opacity: 0.65; }
@@ -170,32 +170,36 @@
   object-position: center top;
   display: none;
 }
-/* Content column */
 .card-body {
+  flex: 1;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 24px;
 }
 .card-title {
   font-size: 16px;
   font-weight: 700;
   margin: 0;
   line-height: 1.2;
+  padding-left: 12px;
 }
 .card-list {
   list-style: none;
-  padding: 0;
+  padding-left: 12px;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  width: fit-content;
+
 }
 .card-list li {
- display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 5px;
   font-size: 11.5px;
   line-height: 1.35;
   color: var(--text2);
@@ -219,21 +223,27 @@
   transition: filter 150ms ease-out, transform 150ms cubic-bezier(0.23,1,0.32,1);
 }
 .card-btn:hover { filter: brightness(1.06); }
-.card-btn:active { transform: scale(0.97); }
-/* Coming soon card */
-.card--coming-soon {
-  align-items: center;
-  justify-content: center;
-  min-height: 140px;
+.card-btn:active { transform: scale(0.97); 
 }
-.coming-soon-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-top: 6px;
+.card-img--square {
+   width: 100%;
+  height: 100%;
+  min-height: 160px;
+  border-radius: 10px;
+  box-shadow: none;
+  border: 1.5px dashed rgba(198,162,78,0.4);
+  background: rgba(198,162,78,0.04);
+  flex-shrink: 0; 
+  object-fit: cover;
+  object-position: top center;
 }
+
+.card:hover .card-img--square { border-color: rgba(198,162,78,0.7); background: rgba(198,162,78,0.08); transform: none; box-shadow: none; }
+.card-img--square img.upload-preview {
+  object-fit: cover;
+  object-position: top center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-img, .card:hover .card-img, .card:active, .card-btn:active { transition: none; transform: none; }
 }
@@ -600,7 +610,6 @@
     </div><!-- end agent-tabs -->
 
     <div class="card-grid">
-
       <!-- Card 1 -->
       <div class="card">
         <div class="card-top">
@@ -622,7 +631,7 @@
             </ul>
           </div>
         </div>
-        <button class="card-btn">Chat Now</button>
+        <button class="card-btn">Chat With Pip</button>
       </div>
 
       <!-- Card 2 -->
@@ -646,23 +655,19 @@
             </ul>
           </div>
         </div>
-        <button class="card-btn">Chat Now</button>
+        <button class="card-btn">Chat With Sid</button>
       </div>
-
-      <!-- Card 3 — Coming Soon -->
-      <div class="card card--coming-soon">
-        <div class="card-img" data-agent="card-3" onclick="triggerUpload(this)">
-          <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.card-img'))">
-          <div class="upload-zone">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            <span>Add Photo</span>
-          </div>
-          <img class="upload-preview" alt="">
-        </div>
-        <span class="coming-soon-label">Coming Soon</span>
-      </div>
-
-    </div><!-- end card-grid -->
+<div class="card">
+  <div class="card-img card-img--square" data-agent="card-3" onclick="triggerUpload(this)">
+    <input type="file" accept="image/*" class="upload-input" hidden onchange="handleUpload(event, this.closest('.card-img'))">
+    <div class="upload-zone">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span>Add Photo</span>
+    </div>
+    <img class="upload-preview" alt="">
+  </div>
+</div>
+       </div><!-- end card-grid -->
 
     <section class="focus-strip">
       <div class="focus-strip-title"><span style="color:#C6A24E;">✦</span> Today’s Focus</div>
@@ -807,7 +812,7 @@
           <span>Discover</span>
           <small>Get clarity</small>
         </div>
-        <div class="step-line done"></div>
+        <div class="step-line done"></div>A
         <div class="step done">
           <div class="step-icon">
             <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -899,7 +904,7 @@
     if (zone) zone.style.display = 'none';
   }
 
-  document.querySelectorAll('.agent-uploader[data-agent], .sub-agent-uploader[data-agent]').forEach(function(el) {
+  document.querySelectorAll('.agent-uploader[data-agent], .sub-agent-uploader[data-agent], .card-img[data-agent]').forEach(function(el) {
     const agentKey = el.dataset.agent;
     try {
       const saved = localStorage.getItem('agent-img-' + agentKey);
