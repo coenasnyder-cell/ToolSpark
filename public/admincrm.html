@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -778,7 +778,6 @@
 
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (err) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
 
   const FUNCTION_REGION = "us-central1";
@@ -830,7 +829,7 @@
   }
 
   async function authHeaders() {
-    const user = auth.currentUser;
+    const user = firebase.auth().currentUser;
     const token = await user.getIdToken();
     return {
       "Authorization": `Bearer ${token}`,

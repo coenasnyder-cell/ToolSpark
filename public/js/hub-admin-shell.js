@@ -38,11 +38,11 @@ var ADMIN_NAV = [
 ];
 
 function _adminSignOut() {
-  auth.signOut().then(function() { window.location.href = '/signon.html'; });
+  firebase.auth().signOut().then(function() { window.location.href = '/signon.html'; });
 }
 
 function initAdminPage(callback) {
-  auth.onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function(user) {
     if (!user) {
       window.location.href = '/signon.html?redirect=/hub/admin';
       return;

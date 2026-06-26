@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -257,7 +257,6 @@
 
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (err) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
   const CRM_API_URL = `https://us-central1-${firebaseConfig.projectId}.cloudfunctions.net/crmAdmin`;
 
@@ -276,7 +275,7 @@
   }
 
   async function authHeaders() {
-    const token = await auth.currentUser.getIdToken();
+    const token = await firebase.auth().currentUser.getIdToken();
     return {
       "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json"

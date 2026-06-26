@@ -21,13 +21,11 @@
       appId:             "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth      = firebase.auth();
+    try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
     const db        = firebase.firestore();
     const functions = firebase.functions();
-    document.addEventListener('DOMContentLoaded', () => {
-      firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true);
-    });
   </script>
+  <script src="js/auth.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -41,24 +39,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* ── Header ── */
-    .agent-header {
-      height: 56px;
-      background: #000;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      flex-shrink: 0;
-    }
-    .agent-logo {
-      font-size: 16px;
-      font-weight: 800;
-      color: #fff;
-      text-decoration: none;
-    }
-    .agent-logo span { color: var(--yellow); }
 
     /* ── Screens ── */
     .screen {
@@ -264,11 +244,7 @@
     .building-sub   { font-size: 14px; color: var(--text2); line-height: 1.6; }
   </style>
 </head>
-<body>
-
-  <div class="agent-header">
-    <a class="agent-logo" href="/hub/admin-tools">⚡ Tool<span>Spark</span></a>
-  </div>
+<body data-page-title="Build Agent">
 
   <!-- No API key -->
   <div class="screen" id="screen-nokey">
@@ -336,11 +312,9 @@
     let creatorId    = '';
 
     // ── Auth ─────────────────────────────────────────────────────────────────────
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = '/signon.html?redirect=/build-agent';
-        return;
-      }
+    window.addEventListener('tsUserReady', function() {
+      const user = firebase.auth().currentUser;
+      if (!user) { window.location.href = 'signon.html'; return; }
       db.collection('users').doc(user.uid).get().then(userDoc => {
         const ud = userDoc.exists ? userDoc.data() : {};
         if (ud.userRole !== 'admin' && ud.subscriptionTier !== 'premium' && ud.subscriptionTier !== 'advanced') {
@@ -576,5 +550,6 @@
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
   </script>
+<script src="js/topbar.js"></script>
 </body>
 </html>

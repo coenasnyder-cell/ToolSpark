@@ -94,7 +94,7 @@ const SITE_ADMIN_NAV = [
 ];
 
 function _siteAdminSignOut() {
-  auth.signOut().then(function () { window.location.href = '/signon.html'; });
+  firebase.auth().signOut().then(function () { window.location.href = '/signon.html'; });
 }
 
 function _renderSiteAdminSidebar(user, logoUrl) {
@@ -143,7 +143,7 @@ mount.innerHTML =
 }
 
 function initSiteAdminPage(callback) {
-  auth.onAuthStateChanged(async function (user) {
+  firebase.auth().onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = '/signon.html'; return; }
 
     try {

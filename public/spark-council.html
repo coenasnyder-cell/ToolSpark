@@ -21,9 +21,9 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch (e) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -61,52 +61,6 @@
     margin: 0 auto;
     padding: 32px 0 72px;
   }
-
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 26px;
-  }
-
-  .brand-lockup {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .brand-mark {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gold);
-    background: var(--gold-dim);
-    border: 1px solid var(--border-mid);
-  }
-
-  .brand-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    color: var(--cream);
-  }
-
-  .brand-text span { color: var(--gold); }
-
-  .topbar-link {
-    color: var(--text3);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    transition: color 0.15s;
-  }
-
-  .topbar-link:hover { color: var(--gold-light); }
 
   .hero {
     position: relative;
@@ -385,21 +339,11 @@
     .responses-shell { padding: 20px; }
     .input-label { font-size: 22px; }
     .responses-head h2 { font-size: 26px; }
-    .topbar { margin-bottom: 18px; }
   }
 </style>
 </head>
-<body>
+<body data-page-title="Spark Council">
   <div class="page-shell">
-    <div class="topbar">
-      <div class="brand-lockup">
-        <div class="brand-mark">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14z"/><path d="M5 15l.7 1.6L7.3 17l-1.6.7L5 19.3l-.7-1.6L2.7 17l1.6-.7L5 15z"/></svg>
-        </div>
-        <div class="brand-text">Tool<span>Spark</span></div>
-      </div>
-      <a href="dashboard.html" class="topbar-link">Back to Dashboard</a>
-    </div>
 
     <section class="hero">
       <div class="hero-orbit"></div>
@@ -640,11 +584,13 @@
 
   document.getElementById("convene-btn").addEventListener("click", conveneCouncil);
 
-  auth.onAuthStateChanged(function(user) {
-    if (!user) { window.location.href = "signon.html"; return; }
+  window.addEventListener('tsUserReady', function() {
+    const user = firebase.auth().currentUser;
+    if (!user) { window.location.href = 'signon.html'; return; }
     currentUser = user;
     document.getElementById("status-note").textContent = "Signed in as " + user.email + ". Council sessions will be saved to your account.";
   });
 </script>
+<script src="js/topbar.js"></script>
 </body>
 </html>

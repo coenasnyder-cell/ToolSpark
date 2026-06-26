@@ -18,8 +18,8 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,8 +30,16 @@
     --coral: #C4622D; --green: #2A5C45; --green-light: #3D8A65;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --sidebar-width: 220px;
+    --header-height: 64px;
+    --border-dark: rgba(255,255,255,0.08);
+    --gold-dim: rgba(201,168,76,0.1);
+    --text3-nav: #9A9488;
+    --radius-sm-nav: 8px;
   }
-  body { font-family: 'Lato', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  body { font-family: 'Lato', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+  .main-wrap { margin-left: var(--sidebar-width); display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
 
   .card {
     background: var(--surface);
@@ -148,22 +156,14 @@
   .tip { font-size: 12px; color: var(--text3); display: flex; gap: 8px; line-height: 1.5; }
   .tip-dot { color: var(--gold); flex-shrink: 0; }
 
-  /* AUTH GATE */
-  #auth-gate { text-align: center; }
-  #auth-gate p { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
-  .btn-signin { display: inline-block; padding: 12px 28px; background: var(--gold); color: var(--dark); border-radius: var(--radius-sm); font-family: 'Lato', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; }
 </style>
 </head>
 <body>
 
-<div class="card" id="auth-gate" style="display:none;">
-  <div class="logo">Tool<span>Spark</span></div>
-  <div class="title">Sign In to Record</div>
-  <p>You need a ToolSpark account to record walkthroughs.</p>
-  <a href="signon.html" class="btn-signin">Sign In →</a>
-</div>
-
-<div class="card" id="recorder-card" style="display:none;">
+<div class="main-wrap">
+<div class="top-header"></div>
+<div class="page-content">
+<div class="card" id="recorder-card">
   <div class="logo">Tool<span>Spark</span></div>
   <div class="title">Record Walkthrough</div>
 
@@ -209,6 +209,8 @@
     <div class="tip"><span class="tip-dot">✦</span><span>Records as MP4 when your browser supports it, WebM otherwise — both work in most editors.</span></div>
   </div>
 </div>
+</div>
+</div>
 
 <script>
   let mediaRecorder  = null;
@@ -218,14 +220,10 @@
   let secondsElapsed = 0;
   let downloadUrl    = null;
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById('auth-gate').style.display    = 'none';
-      document.getElementById('recorder-card').style.display = 'flex';
-    } else {
-      document.getElementById('auth-gate').style.display    = 'flex';
-      document.getElementById('recorder-card').style.display = 'none';
-    }
+  window.addEventListener('tsUserReady', function() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    document.getElementById('recorder-card').style.display = 'flex';
   });
 
   function fmt(s) {
@@ -327,5 +325,7 @@
     setStatus('', 'Ready to record');
   }
 </script>
+<script src="js/nav.js"></script>
+<script>initNav('tools', 'Record Walkthrough');</script>
 </body>
 </html>

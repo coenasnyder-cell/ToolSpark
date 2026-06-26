@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script>
   firebase.initializeApp({
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
@@ -17,9 +18,10 @@
     messagingSenderId: "82966513396",
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   });
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const db = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -330,7 +332,7 @@
   }
 </style>
 </head>
-<body>
+<body data-page-title="Your Certificate">
 
 <div class="certificate-wrap">
   <div class="certificate">
@@ -401,7 +403,8 @@
     return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   }
 
-  auth.onAuthStateChanged(async (user) => {
+  window.addEventListener('tsUserReady', async function() {
+    const user = firebase.auth().currentUser;
     if (!user) { window.location.href = 'signon.html'; return; }
 
     try {
@@ -424,6 +427,6 @@
     }
   });
 </script>
-
+<script src="js/topbar.js"></script>
 </body>
 </html>

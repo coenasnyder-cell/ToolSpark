@@ -22,8 +22,8 @@
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
-  const auth = firebase.auth();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -611,7 +611,8 @@ async function init() {
 
 init();
 
-auth.onAuthStateChanged(user => {
+window.addEventListener('tsUserReady', function() {
+  const user = firebase.auth().currentUser;
   if (user) {
     document.getElementById("cta-join").parentElement.style.display = "none";
     document.getElementById("cta-member").style.display = "flex";

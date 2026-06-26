@@ -22,8 +22,8 @@
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
-  const auth = firebase.auth();
 </script>
+<script src="js/auth.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -748,7 +748,7 @@ function showError() {
 
 function getCurrentUser() {
   return new Promise(resolve => {
-    const unsub = auth.onAuthStateChanged(user => { unsub(); resolve(user); });
+    const unsub = firebase.auth().onAuthStateChanged(user => { unsub(); resolve(user); });
   });
 }
 
