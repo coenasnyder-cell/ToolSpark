@@ -30,7 +30,7 @@
     --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
-    --sidebar-width: 370px;
+    --sidebar-width: 220px;
     --header-height: 64px;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -56,7 +56,7 @@
   flex-direction: column; 
   gap: 1.5rem; 
   padding: 1.75rem 2.5rem; 
-  max-width: 1600px; 
+  max-width: 1100px;
   width: 100%; 
   padding-bottom: 3rem;
   margin: 0 auto;  /* add this */
@@ -85,12 +85,12 @@
     max-width: 750px;
   }
   .welcome-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); border-radius: 100px; padding: 3px 12px; font-size: 13px; font-weight: 700; color: var(--dark); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
-  .welcome-card h1 { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 400; color: #F0EDE6; line-height: 1.1; margin-bottom: 12px; }
+  .welcome-card h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 400; color: #F0EDE6; line-height: 1.1; margin-bottom: 12px; }
   .wc-stats { 
     display: flex; 
     gap: 2rem; 
     align-items: center; 
-     font-size: 60px;
+     font-size: 40px;
      flex-shrink: 0;
     margin-top: 1rem; 
     min-width: 400px;
@@ -111,19 +111,20 @@
   .welcome-avatar-fallback { width: 64px; height: 64px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--dark); flex-shrink: 0; }
 
   /* -- SPARKY AVATAR + SPEECH (welcome card) -- */
-  .wc-sparky-wrap { 
+  .wc-sparky-wrap {
     display: flex;
-    flex-direction: column; 
-    align-items: center; 
-    flex-shrink: 0; 
-    position: relative; 
-    width: 180px; 
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    width: 160px;
+    max-width: 160px;
     justify-content:flex-end;
     margin-left: auto;
-  } 
-  
+  }
+
     .wc-sparky-circle {
-    width: 180px; height: 180px; border-radius: 50%;
+    width: 148px; height: 148px; border-radius: 50%;
     background: var(--dark3);
     border: 2.5px solid var(--gold);
     box-shadow: 0 0 0 10px rgba(201,168,76,0.10);
@@ -143,17 +144,17 @@
   .wc-sp-c { top: 30px; left: -14px; animation: twinkle 2.6s cubic-bezier(0.77,0,0.175,1) 1.8s infinite; }
   .wc-speech {
     background: #fff; border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 16px; padding: 14px 16px;
-    font-family: 'Caveat', cursive; font-size: 18px;
+    border-radius: 12px; padding: 8px 12px;
+    font-family: 'Caveat', cursive; font-size: 15px;
     color: #2A1F0A; line-height: 1.45; text-align: center;
     box-shadow: 0 4px 16px rgba(0,0,0,0.20);
-    width: 100%;
+    width: 85%;
     margin-top: -18px; position: relative; z-index: 2;
     transform: rotate(2deg);
     transform-origin: center top;
   }
 .wc-tagline {
-  font-size: 24px;
+  font-size: 18px;
   color: rgba(255,255,255,0.65);
   line-height: 1.6;
   max-width: 680px;
@@ -453,7 +454,7 @@
 
   <div class="wc-left">
     <div class="welcome-eyebrow">✦ Members Area</div>
-    <h1 id="welcome-heading">Welcome back, <span class="wc-name-underline" id="welcome-name">—</span> 👋</h1>
+    <h1 id="welcome-heading">Welcome back, <span class="wc-name-underline" id="welcome-name">—</span></h1>
     <p class="wc-tagline">You're building something real. Everything you need to create, launch, and grow your AI-powered tools is right here.</p>
   </div>
 
@@ -477,7 +478,7 @@
     <svg class="wc-sparky-sp wc-sp-b" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
     <svg class="wc-sparky-sp wc-sp-c" width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
     <div class="wc-sparky-circle">
-      <span class="wc-sparky-ph">S</span>
+      <img src="sid.png" alt="Sid" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
     </div>
     <div class="wc-speech">What are we building today? ✨</div>
   </div>
@@ -632,14 +633,15 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+</script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (window.initNav) initNav('dashboard', 'Dashboard');
 
-  let currentUser = null;
-  let isAdmin = false;
-  let currentUserData = {};
+  var db = firebase.firestore();
 
-  // Delight: Sparky speech rotation
+  // Sparky speech rotation
   var sparkyLines = [
     "Sid's here if you need anything ♡",
     "What are we building today? ✨",
@@ -650,10 +652,9 @@
   var speechEl = document.querySelector('.wc-speech');
   if (speechEl) speechEl.textContent = sparkyLines[Math.floor(Math.random() * sparkyLines.length)];
 
-  // Delight: count-up animation for a single number element
   function countUp(el, target, duration) {
     if (!el || target === 0) { el && (el.textContent = target); return; }
-    var start = 0, startTime = null;
+    var startTime = null;
     function step(ts) {
       if (!startTime) startTime = ts;
       var progress = Math.min((ts - startTime) / duration, 1);
@@ -665,15 +666,15 @@
     requestAnimationFrame(step);
   }
 
-  auth.onAuthStateChanged(async function(user) {
+  document.addEventListener('tsUserReady', async function(e) {
+    var user = e.detail;
     if (!user) { window.location.href = 'signon.html'; return; }
-    currentUser = user;
 
-    const name = user.displayName || user.email || 'Builder';
-    const first = name.split(' ')[0];
-    document.getElementById('welcome-heading').textContent = 'Welcome, ' + first + ' 👋';
+    var firebaseUser = firebase.auth().currentUser;
+    var name  = (firebaseUser && (firebaseUser.displayName || firebaseUser.email)) || user.email || 'Builder';
+    var first = name.split(' ')[0];
+    document.getElementById('welcome-heading').textContent = 'Welcome, ' + first;
 
-    // Show success banner if redirected from Stripe checkout
     if (window.location.search.includes('checkout=success')) {
       document.getElementById('checkout-success-banner').style.display = 'flex';
       window.history.replaceState({}, '', 'dashboard.html');
@@ -682,141 +683,106 @@
       document.getElementById('topup-success-banner').style.display = 'flex';
       window.history.replaceState({}, '', 'dashboard.html');
     }
-    document.getElementById('sidebar-name').textContent = name;
-
-    // Avatar
-    const av = document.getElementById('sidebar-avatar');
-    if (user.photoURL) {
-      av.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
-    } else {
-      av.textContent = first.charAt(0).toUpperCase();
-    }
 
     try {
-      const snap = await db.collection('users').doc(user.uid).get();
+      var snap = await db.collection('users').doc(user.uid).get();
       if (snap.exists) {
-        const data = snap.data();
-        currentUserData = data;
+        var data = snap.data();
 
-        // My Hub card — show if user is a member of a creator's hub
+        // My Hub card
         if (data.creatorId) {
           db.collection('creators').doc(data.creatorId).get().then(function(creatorDoc) {
             if (creatorDoc.exists && creatorDoc.data().slug) {
               var slug = creatorDoc.data().slug;
               var card = document.getElementById('my-hub-card');
               var sub  = document.getElementById('my-hub-sub');
-              if (card) {
-                card.href         = '/hub/dashboard?hub=' + slug;
-                card.style.display = 'block';
-              }
-              if (sub) sub.textContent = creatorDoc.data().displayName || 'Go to your hub';
+              if (card) { card.href = '/hub/dashboard?hub=' + slug; card.style.display = 'block'; }
+              if (sub)  sub.textContent = creatorDoc.data().displayName || 'Go to your hub';
             }
           }).catch(function(){});
         }
 
-        // Role
-        if (data.userRole === 'admin') {
-          isAdmin = true;
-          document.getElementById('sidebar-role').textContent = 'Admin';
-        }
-
-        // Stats — with count-up animation
-        const pts = data.points || 0;
-        countUp(document.getElementById('stat-points'), pts, 700);
-        const streak = data.streak || 0;
+        // Stats
+        countUp(document.getElementById('stat-points'), data.points || 0, 700);
+        var streak = data.streak || 0;
         countUp(document.getElementById('stat-streak'), streak, 500);
 
-        // Streak-aware greeting (delight)
-        var greetings = ['Welcome back, ' + first + ' 👋'];
-        if (streak >= 14) greetings = [first + ', you\'re on a roll — ' + streak + ' days ✨'];
-        else if (streak >= 7) greetings = ['Day ' + streak + ', ' + first + '. Sid\'s impressed.'];
-        else if (streak >= 1) greetings = ['Day ' + streak + ' — you showed up ♡'];
-        document.getElementById('welcome-heading').textContent = greetings[0];
+        // Streak-aware greeting
+        var greeting = 'Welcome back, ' + first;
+        if (streak >= 14) greeting = first + ', you\'re on a roll — ' + streak + ' days ✨';
+        else if (streak >= 7) greeting = 'Day ' + streak + ', ' + first + '. Sid\'s impressed.';
+        else if (streak >= 1) greeting = 'Day ' + streak + ' — you showed up ♡';
+        document.getElementById('welcome-heading').textContent = greeting;
 
-        // Days active
         if (data.createdAt) {
-          const created = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-          const days = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+          var created = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+          var days = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
           countUp(document.getElementById('stat-days'), days, 600);
         }
 
-        // Remove loading state — all primary stats are set
         document.body.removeAttribute('data-loading');
 
-        // Sync email verification to Firestore if just verified
-        if (user.emailVerified && !data.isVerified) {
-          db.collection('users').doc(user.uid).update({ isVerified: true }).catch(() => {});
+        if (firebaseUser && firebaseUser.emailVerified && !data.isVerified) {
+          db.collection('users').doc(user.uid).update({ isVerified: true }).catch(function(){});
           data.isVerified = true;
         }
 
-        // My Profile section
-        renderMyProfile(user, data);
-        renderChecklist(user.uid, data);
+        renderMyProfile(firebaseUser, data);
+        renderChecklist(firebaseUser, data);
 
-        // Creator Hub card
         if (data.hubSlug) {
-          var card = document.getElementById('creator-hub-card');
-          if (card) {
-            card.href = '/hub/' + data.hubSlug + '/login';
+          var hubCard = document.getElementById('creator-hub-card');
+          if (hubCard) {
+            hubCard.href = '/hub/' + data.hubSlug + '/login';
             document.getElementById('creator-hub-card-title').textContent = 'My Creator Hub';
             document.getElementById('creator-hub-card-sub').textContent = 'toolspark.co/hub/' + data.hubSlug;
           }
         }
-
-        // Notifications
-        checkNotifications(user.uid);
       }
     } catch(e) { console.error(e); }
 
     loadStats(user.uid);
   });
 
-  function renderMyProfile(user, data) {
-    const displayName = data.displayName || user.displayName || user.email || 'Builder';
-    const bio         = data.bio || '';
-    const photoURL    = data.photoURL || user.photoURL || '';
-
-    const av = document.getElementById('mp-avatar');
-    if (photoURL) {
-      av.innerHTML = '<img src="' + photoURL + '" alt="avatar">';
-    } else {
-      av.textContent = displayName.charAt(0).toUpperCase();
+  function renderMyProfile(firebaseUser, data) {
+    var displayName = data.displayName || (firebaseUser && (firebaseUser.displayName || firebaseUser.email)) || 'Builder';
+    var photoURL    = data.photoURL    || (firebaseUser && firebaseUser.photoURL) || '';
+    var av = document.getElementById('mp-avatar');
+    if (av) {
+      if (photoURL) av.innerHTML = '<img src="' + photoURL + '" alt="avatar">';
+      else          av.textContent = displayName.charAt(0).toUpperCase();
     }
-
     document.getElementById('mp-name').textContent = displayName;
-
     if (data.createdAt) {
-      const created = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-      const days = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
-      const sinceEl = document.getElementById('mp-since');
-      const daysEl  = document.getElementById('mp-days');
+      var created = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+      var days    = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+      var sinceEl = document.getElementById('mp-since');
+      var daysEl  = document.getElementById('mp-days');
       if (daysEl)  daysEl.textContent  = days;
       if (sinceEl) sinceEl.textContent = created.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
     }
-
-    const bioEl = document.getElementById('mp-bio');
-    if (bio) {
-      bioEl.textContent = bio;
-    } else {
-      bioEl.textContent = 'No bio yet — add one on your profile.';
-      bioEl.classList.add('empty');
+    var bioEl = document.getElementById('mp-bio');
+    if (bioEl) {
+      if (data.bio) { bioEl.textContent = data.bio; }
+      else { bioEl.textContent = 'No bio yet — add one on your profile.'; bioEl.classList.add('empty'); }
     }
   }
 
-  function renderChecklist(uid, data) {
-    const emailVerified = !!(auth.currentUser?.emailVerified || data.isVerified);
+  function renderChecklist(firebaseUser, data) {
+    var emailVerified = !!(firebaseUser && firebaseUser.emailVerified) || !!data.isVerified;
     if (!emailVerified) {
-      document.getElementById('email-verify-banner').style.display = 'flex';
+      var banner = document.getElementById('email-verify-banner');
+      if (banner) banner.style.display = 'flex';
     }
   }
 
   async function sendVerifyEmail(e) {
     e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return;
-    if (user.emailVerified) { location.reload(); return; }
+    var firebaseUser = firebase.auth().currentUser;
+    if (!firebaseUser) return;
+    if (firebaseUser.emailVerified) { location.reload(); return; }
     try {
-      await user.sendEmailVerification();
+      await firebaseUser.sendEmailVerification();
       alert('Verification email sent! Check your inbox then come back and refresh this page.');
     } catch(err) {
       if (err.code === 'auth/too-many-requests') {
@@ -829,28 +795,11 @@
 
   async function loadStats(uid) {
     try {
-      const threadsSnap = await db.collection('threads').where('authorId', '==', uid).get();
-      const mpThreads = document.getElementById('mp-threads');
+      var threadsSnap = await db.collection('threads').where('authorId', '==', uid).get();
+      var mpThreads = document.getElementById('mp-threads');
       if (mpThreads) mpThreads.textContent = threadsSnap.size;
     } catch(e) { console.error(e); }
   }
-
-  async function checkNotifications(uid) {
-    try {
-      const snap = await db.collection('notifications')
-        .where('userId', '==', uid)
-        .where('read', '==', false)
-        .limit(1).get();
-      if (!snap.empty) {
-        document.getElementById('notif-dot').style.display = 'block';
-      }
-    } catch(e) {}
-  }
-
 </script>
-
-
-<script src="js/nav.js"></script>
-<script>initNav('dashboard', 'Dashboard');</script>
 </body>
 </html>

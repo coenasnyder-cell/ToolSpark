@@ -22,9 +22,9 @@
     messagingSenderId: "82966513396",
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   });
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
+  const db = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -540,8 +540,9 @@
     return ICON_COLORS[i % ICON_COLORS.length];
   }
 
-  // ── AUTH (optional) ──
-  auth.onAuthStateChanged(async (user) => {
+  // ── AUTH (optional — public page) ──
+  document.addEventListener('tsUserReady', async function(e) {
+    const user = e.detail ? firebase.auth().currentUser : null;
     currentUser = user;
     if (user) {
       document.getElementById('nav-guest').style.display = 'none';

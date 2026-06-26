@@ -43,66 +43,6 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: var(--sidebar-width);
-    background: var(--dark);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0;
-    z-index: 100;
-    border-right: 1px solid var(--border-dark);
-  }
- .sidebar-close-btn {
-  display: none;
-  background: none;
-  border: none;
-  color: #9A9488;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-}
-  .sidebar-logo {
-    padding: 1.5rem 1.25rem 1.25rem;
-    border-bottom: 1px solid var(--border-dark);
-  }
-  .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; color: #F0EDE6; letter-spacing: 0.01em; }
-  .logo-text span { color: var(--gold); }
-  .logo-tag { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .nav-section-label { font-size: 10px; font-weight: 700; color: var(--border-dark); text-transform: uppercase; letter-spacing: 0.14em; padding: 0.75rem 0.5rem 0.5rem; }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
-    border-radius: var(--radius-sm); color: #9A9488; font-size: 14px; font-weight: 400;
-    cursor: pointer; text-decoration: none; transition: all 0.15s;
-  }
-  .nav-item:hover { background: rgba(255,255,255,0.05); color: #F0EDE6; }
-  .nav-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 700; border: 1px solid rgba(201,168,76,0.2); }
-  .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
-  .nav-item.active .nav-icon { opacity: 1; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border-dark); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; }
-  .sidebar-user:hover { background: rgba(255,255,255,0.05); }
-  .logout-btn {
-    display: flex; align-items: center; gap: 10px;
-    width: 100%; padding: 8px 12px; margin-top: 4px;
-    background: none; border: none; border-radius: var(--radius-sm);
-    color: #6B5F5F; font-size: 13px; font-family: 'Lato', sans-serif;
-    cursor: pointer; transition: background 0.15s, color 0.15s; text-align: left;
-  }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #E05555; }
-  .user-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0; overflow: hidden;
-  }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-name { font-size: 13px; color: #F0EDE6; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 11px; color: var(--text3); }
 
   /* ── MAIN LAYOUT ── */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
@@ -338,61 +278,13 @@
   .cl-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
   .cl-arrow { color: var(--text3); font-size: 14px; }
 
-  /* ── MOBILE BOTTOM NAV ── */
-  .mobile-bottom-nav { display: none; }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .sidebar { width: 60px; }
-    .sidebar-logo, .nav-section-label, .nav-item span, .logo-tag, .user-info { display: none; }
-    .main-wrap { margin-left: 60px; }
-    .nav-item { justify-content: center; padding: 10px; }
-    .nav-icon { opacity: 0.7; }
-    .nav-item.active .nav-icon { opacity: 1; }
-    .sidebar-user { justify-content: center; padding: 8px; }
-    .user-avatar { margin: 0; }
-  }
-
   @media (max-width: 600px) {
-    .sidebar { display: none; }
-    .main-wrap { margin-left: 0; }
     .page-content { padding: 0.875rem 0.875rem 80px; gap: 0.875rem; }
     .profile-body { padding: 0 1.25rem 1.25rem; }
     .profile-name { font-size: 19px; }
     .stats-card, .clarity-card { padding: 1.25rem; }
-   .stats-grid { grid-template-columns: repeat(3, 1fr); }
-    .mobile-bottom-nav {
-      display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-      height: 60px; background: var(--dark); border-top: 1px solid var(--border-dark);
-      z-index: 200; align-items: stretch;
-      padding: 0 env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
-   .sidebar-close-btn { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    width: 32px; 
-    height: 32px; 
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
   }
-       }
-    .mobile-nav-item {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 3px; text-decoration: none; color: #7A7468; font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em; transition: color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .mobile-nav-item svg { flex-shrink: 0; }
-    .mobile-nav-item:hover, .mobile-nav-item.active { color: var(--gold); }
-    .mobile-nav-item.active svg { stroke: var(--gold); }
-  }
-@media (max-width: 767px) {
-  .sidebar-close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-  }
-}
   @media (max-width: 480px) {
     .top-header { padding: 0 0.875rem; }
     .page-content { padding: 0.75rem 0.75rem 80px; gap: 0.625rem; }
@@ -410,34 +302,6 @@
 </head>
 <body>
 
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<!-- ── SIDEBAR ── -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div>
-      <div class="logo-text">Tool<span>Spark</span></div>
-      <div class="logo-tag">Builder Platform</div>
-    </div>
-    <button class="sidebar-close-btn" id="sidebar-close-btn">  
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <nav class="sidebar-nav" id="sidebar-nav"></nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading...</div>
-        <div class="user-role" id="sidebar-role">Member</div>
-      </div>
-    </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sign Out
-    </button>
-  </div>
-</aside>
 
 <!-- ── MAIN WRAP ── -->
 <div class="main-wrap">
@@ -630,29 +494,6 @@
   </div>
 </div>
 
-<!-- ── MOBILE BOTTOM NAV ── -->
-<nav class="mobile-bottom-nav">
-  <a href="community.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-    Community
-  </a>
-  <a href="courses.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 17A2.5 2.5 0 014 14.5V5a2 2 0 012-2h14v14"/></svg>
-    Courses
-  </a>
-  <a href="tools.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-    Tools
-  </a>
-  <a href="inbox.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    Inbox
-  </a>
-  <a href="dashboard.html" class="mobile-nav-item">
-    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Dashboard
-  </a>
-</nav>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -669,11 +510,12 @@
     appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
   };
   firebase.initializeApp(firebaseConfig);
-try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}  
-  const auth = firebase.auth();
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
   const storage = firebase.storage();
-
+</script>
+<script src="js/auth.js"></script>
+<script>
   let currentUser = null;
   let editOpen = false;
 
@@ -814,7 +656,8 @@ try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', t
 
       // Update read views
       document.getElementById('profile-name').textContent = nameVal;
-      document.getElementById('sidebar-name').textContent = nameVal;
+      const sidebarNameEl = document.getElementById('sidebar-name');
+      if (sidebarNameEl) sidebarNameEl.textContent = nameVal;
       const bioView = document.getElementById('profile-bio-view');
       if (bioVal) { bioView.textContent = bioVal; bioView.classList.remove('empty'); }
       else { bioView.textContent = 'No bio yet — add one by clicking Edit Profile.'; bioView.classList.add('empty'); }
@@ -872,21 +715,10 @@ function renderBadges(badges) {
   }).join('');
 }
   /* ── Auth state + data load ── */
-  auth.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = 'signon.html';
-      return;
-    }
-    currentUser = user;
-
-    // Sidebar
-    const sidebarAv = document.getElementById('sidebar-avatar');
-    if (user.photoURL) {
-      sidebarAv.innerHTML = '<img src="' + user.photoURL + '" alt="avatar">';
-    } else {
-      sidebarAv.textContent = (user.displayName || user.email || '?').charAt(0).toUpperCase();
-    }
-    document.getElementById('sidebar-name').textContent = user.displayName || user.email || 'Builder';
+  window.addEventListener('tsUserReady', async function(e) {
+    const firebaseUser = firebase.auth().currentUser;
+    currentUser = firebaseUser;
+    const user = firebaseUser;
 
     // Check if viewing another user's profile
     const viewUid = new URLSearchParams(window.location.search).get('uid');
@@ -968,12 +800,6 @@ function renderBadges(badges) {
       const statsPlaceholder = document.getElementById('profile-stats-placeholder');
       if (statsBlock) statsBlock.style.display = 'none';
       if (statsPlaceholder) statsPlaceholder.style.display = 'block';
-    }
-
-    // Admin nav
-    if (role === 'admin') {
-      const sidebarRole = document.getElementById('sidebar-role');
-      if (sidebarRole) sidebarRole.textContent = 'Admin';
     }
 
     // Profile photo
@@ -1238,7 +1064,7 @@ function renderBadges(badges) {
         headers: { 'Authorization': 'Bearer ' + token }
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Deletion failed');
-      await auth.signOut();
+      await firebase.auth().signOut();
       window.location.href = 'index.html';
     } catch (err) {
       errEl.textContent = err.message || 'Something went wrong. Please try again.';
@@ -1250,6 +1076,6 @@ function renderBadges(badges) {
 
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('', 'My Profile');</script>
+<script>initNav('profile', 'My Profile');</script>
 </body>
 </html>

@@ -22,7 +22,8 @@
   const auth = firebase.auth();
   const db   = firebase.firestore();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -43,23 +44,6 @@
   }
   body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
 
-  /* SIDEBAR */
-  .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid var(--border); transition: transform 0.3s ease; }
-  .sidebar-logo { padding: 1.5rem 1.25rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
-  .sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid var(--border); }
-  .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--yellow-dim); border: 1px solid var(--yellow-border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--yellow); flex-shrink: 0; overflow: hidden; }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-name { font-size: 13px; color: #fff; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-role { font-size: 11px; color: var(--text3); }
-  .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; margin-top: 4px; background: none; border: none; border-radius: 8px; color: var(--text3); font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; text-align: left; }
-  .logout-btn:hover { background: rgba(220,50,50,0.1); color: #e05555; }
-  .sidebar-close-btn { display: none; background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; border-radius: 6px; }
-  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
-
   /* MAIN */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
   .top-header { background: var(--dark); border-bottom: 1px solid var(--border); height: var(--header-height); display: flex; align-items: center; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
@@ -67,9 +51,10 @@
   .page-content { flex: 1; padding: 3rem 2rem 4rem; max-width: 1000px; width: 100%; margin: 0 auto; }
 
   /* HERO */
-  .page-hero { text-align: center; margin-bottom: 3rem; }
-  .page-hero h1 { font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px; }
-  .page-hero p { font-size: 16px; color: var(--text2); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+  .page-hero { text-align: center; margin-bottom: 1.75rem; }
+  .page-hero h1 { font-family: 'Playfair Display', serif; font-size: 54px; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px; line-height: 1.1; margin-left: auto; margin-right: auto; }
+  .page-hero h1 em { color: var(--yellow); font-style: italic; }
+  .page-hero p { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 800; color: var(--text2); line-height: 1.6; max-width: 620px; margin: 0 auto; }
 
   /* SUCCESS BANNER */
   .success-banner { background: rgba(42,92,69,0.15); border: 1px solid rgba(42,92,69,0.3); border-radius: 12px; padding: 14px 20px; margin-bottom: 2rem; display: none; align-items: center; gap: 12px; font-size: 14px; color: #5ac48a; }
@@ -81,10 +66,87 @@
   .current-plan-label strong { color: var(--yellow); }
   .current-plan-credits { font-size: 13px; color: var(--text3); }
 
-  /* PRICING GRID */
-  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: start; }
+.trust-bar{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:0;
+    width:100%;
+    margin:32px auto 48px;
+    background: #141414;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+}
 
-  .plan-card { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.2s; }
+  /* Item */
+
+.trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    padding: 0 1.25rem;
+    transition: all .25s ease;
+}
+.trust-item:first-child { padding-left: 0; }
+.trust-item:last-child { padding-right: 0; }
+
+.trust-text { display: flex; flex-direction: column; gap: 4px; }
+.trust-title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; }
+.trust-sub { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+.trust-item:hover{
+    transform:translateY(-2px);
+}
+/* Icon Circle */
+.trust-icon{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#C9A84C;
+    background:rgba(201,168,76,.08);
+    border:1px solid rgba(201,168,76,.25);
+    transition:.25s ease;
+      animation:trustFloat 4s ease-in-out infinite;
+}
+
+.trust-item:hover .trust-icon{
+    background:rgba(201,168,76,.18);
+    border-color:#C9A84C;
+    box-shadow:
+    0 0 12px rgba(201,168,76,.25);
+}
+/* Divider */
+.trust-divider{
+    width:1px;
+    align-self: stretch;
+    background:rgba(255,255,255,.12);
+    flex-shrink: 0;
+}
+.trust-item:nth-child(1) .trust-icon{
+    animation-delay:0s;
+}
+.trust-item:nth-child(3) .trust-icon{
+    animation-delay:.6s;
+}
+.trust-item:nth-child(5) .trust-icon{
+    animation-delay:1.2s;
+}
+@keyframes trustFloat{ 0%,100%{ transform:translateY(0);} 50% { transform:translateY(-3px);} }
+.credits-explainer { display: flex; align-items: center; background: #141414; border: 1px solid var(--yellow-border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
+.credits-label { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; min-width: 160px; }
+.credits-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--yellow-dim); border: 1px solid var(--yellow-border); display: flex; align-items: center; justify-content: center; color: var(--yellow); font-size: 16px; flex-shrink: 0; }
+.credits-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; margin: 0 1.25rem; }
+.credits-col { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* PRICING GRID */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: stretch; }
+
+  .plan-card { background: #141414; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.2s; }
   .plan-card:hover { border-color: rgba(255,255,255,0.15); }
   .plan-card.recommended { border-color: var(--yellow); position: relative; }
   .plan-card.recommended::before { content: 'Most Popular'; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--yellow); color: #000; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 14px; border-radius: 0 0 8px 8px; white-space: nowrap; }
@@ -97,9 +159,11 @@
   .plan-price-period { font-size: 14px; color: var(--text3); }
   .plan-tagline { font-size: 13px; color: var(--text2); line-height: 1.5; }
 
-  .plan-credits { margin: 0 1.5rem; padding: 12px 14px; background: var(--yellow-dim); border: 1px solid var(--yellow-border); border-radius: 10px; }
-  .plan-credits-amount { font-size: 20px; font-weight: 800; color: var(--yellow); }
-  .plan-credits-label { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .plan-credits { margin: 0 1.5rem; padding: 12px 14px; background: var(--dark3); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .plan-credits-left { display: flex; align-items: baseline; gap: 8px; }
+  .plan-credits-amount { font-size: 28px; font-weight: 800; color: var(--yellow); }
+  .plan-credits-label { font-size: 13px; color: var(--text2); }
+  .plan-credits-bolt { color: var(--yellow); font-size: 14px; }
 
   .plan-features { padding: 1.25rem 1.5rem; flex: 1; display: flex; flex-direction: column; gap: 10px; }
   .feature-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text2); line-height: 1.45; }
@@ -108,7 +172,17 @@
   .feature-check.no { color: var(--text3); opacity: 0.4; }
   .feature-section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--border); }
 
+  /* Plan name colors per tier */
+  #card-starter .plan-name { color: #5ac48a; }
+  #card-premium .plan-name { color: var(--yellow); }
+  #card-advanced .plan-name { color: #7b9cff; }
+
+  /* Feature label colors per tier */
+  #card-premium .feature-section-label:first-child { color: var(--yellow); border-top-color: rgba(255,200,32,0.15); }
+  #card-advanced .feature-section-label:first-child { color: #7b9cff; border-top-color: rgba(123,156,255,0.15); }
+
   .plan-footer { padding: 1.25rem 1.5rem 1.5rem; }
+  .plan-secure { text-align: center; font-size: 12px; color: var(--text3); padding: 8px 0 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
   .btn-subscribe { width: 100%; padding: 13px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-subscribe.primary { background: var(--yellow); color: #000; }
   .btn-subscribe.primary:hover { background: #ffd84d; transform: translateY(-1px); }
@@ -117,6 +191,11 @@
   .btn-subscribe.current { background: rgba(90,196,138,0.1); color: #5ac48a; border: 1px solid rgba(90,196,138,0.25); cursor: default; }
   .btn-subscribe:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
   .btn-loading { display: none; }
+
+  /* PAGE FOOTER */
+  .page-footer-note { text-align: center; font-size: 14px; color: var(--text3); margin-top: 0.75rem; }
+  .page-footer-note em { color: var(--text2); font-style: normal; cursor: pointer; }
+  .page-footer-note em:hover { color: #fff; text-decoration: underline; }
 
   /* CREDIT INFO */
   .credit-info { margin-top: 2.5rem; background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
@@ -148,45 +227,31 @@
   .faq-q { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
   .faq-a { font-size: 13px; color: var(--text2); line-height: 1.6; }
 
-  @media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; } .faq-grid { grid-template-columns: 1fr; } .credit-table { grid-template-columns: 1fr; } }
-  @media (max-width: 767px) { .main-wrap { margin-left: 0; } .page-content { padding: 2rem 1rem 3rem; } .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; } .sidebar.open { transform: translateX(0); } .sidebar-close-btn { display: flex; } .sidebar-overlay { display: block; } .page-hero h1 { font-size: 28px; } }
+  @media (max-width: 900px) { 
+    .pricing-grid { grid-template-columns: 1fr; } 
+    .faq-grid { grid-template-columns: 1fr; } 
+    .credit-table { grid-template-columns: 1fr; } 
+    .trust-bar{ flex-direction:column; gap:18px; }
+    .trust-divider{ display:none; }
+    .trust-icon {animation: none; }
+    }
+  @media (max-width: 767px) { .main-wrap { margin-left: 0; } .page-content { padding: 2rem 1rem 3rem; } .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; } .sidebar.open { transform: translateX(0); } .sidebar-close-btn { display: flex; } .sidebar-overlay { display: block; } 
+  .page-hero h1 { font-size: 24px; } }
 </style>
 </head>
 <body>
 
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-      <div class="logo-text">Tool<span>Spark</span> ⚡</div>
-      <button class="sidebar-close-btn" id="sidebar-close-btn">✕</button>
-    </div>
-  </div>
-  <nav class="sidebar-nav" id="sidebar-nav"></nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-info">
-        <div class="user-name" id="sidebar-name">Loading…</div>
-        <div class="user-role" id="sidebar-role">Member</div>
-      </div>
-    </div>
-    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
-  </div>
-</aside>
-
 <div class="main-wrap">
   <header class="top-header"></header>
 
   <div class="page-content">
-
     <!-- SUCCESS BANNER -->
     <div class="success-banner" id="success-banner">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       You're all set! Your subscription is active and your credits have been added.
     </div>
-
     <!-- CURRENT PLAN BANNER -->
     <div class="current-plan-banner" id="current-plan-banner">
       <div>
@@ -194,14 +259,25 @@
         <div class="current-plan-credits"><span id="current-credits">0</span> credits remaining this month</div>
       </div>
     </div>
-
     <div class="page-hero">
-      <h1>Choose Your Plan</h1>
-      <p>Credits refresh monthly. No contracts — cancel anytime.</p>
+     <h1>Choose the plan that matches<br>your <em>builder journey.</em></h1>
+      <p>Start building AI tolls today. Upgrade anytime as you grow.</p>
     </div>
-
+<div class="credits-explainer">
+  <div class="credits-label">
+    <div class="credits-icon"><i class="fa-solid fa-bolt"></i></div>
+    <span>How credits work</span>
+  </div>
+  <div class="credits-divider"></div>
+  <div class="credits-col">Credits power every AI response and generation.</div>
+  <div class="credits-divider"></div>
+  <div class="credits-col">Different tools use different amounts.</div>
+  <div class="credits-divider"></div>
+  <div class="credits-col">Your credits refresh each month.</div>
+  <div class="credits-divider"></div>
+  <div class="credits-col">Unused credits don't roll over.</div>
+</div>
     <div class="pricing-grid">
-
       <!-- STARTER -->
       <div class="plan-card" id="card-starter">
         <div class="plan-header">
@@ -213,8 +289,11 @@
           <div class="plan-tagline">Get clarity on your idea and find your direction.</div>
         </div>
         <div class="plan-credits">
-          <div class="plan-credits-amount">50</div>
-          <div class="plan-credits-label">credits per month</div>
+          <div class="plan-credits-left">
+            <div class="plan-credits-amount">50</div>
+            <div class="plan-credits-label">AI Credits / month</div>
+          </div>
+          <i class="fa-solid fa-bolt plan-credits-bolt"></i>
         </div>
         <div class="plan-features">
           <div class="feature-section-label">Included Tools</div>
@@ -253,6 +332,7 @@
             <span class="btn-label">Get Started</span>
             <span class="btn-loading">...</span>
           </button>
+          <div class="plan-secure"><i class="fa-solid fa-lock"></i> Secure checkout</div>
         </div>
       </div>
 
@@ -267,8 +347,11 @@
           <div class="plan-tagline">Build your tool and grow your audience.</div>
         </div>
         <div class="plan-credits">
-          <div class="plan-credits-amount">100</div>
-          <div class="plan-credits-label">credits per month</div>
+          <div class="plan-credits-left">
+            <div class="plan-credits-amount">100</div>
+            <div class="plan-credits-label">AI Credits / month</div>
+          </div>
+          <i class="fa-solid fa-bolt plan-credits-bolt"></i>
         </div>
         <div class="plan-features">
           <div class="feature-section-label">Everything in Starter, plus</div>
@@ -303,6 +386,7 @@
             <span class="btn-label">Get Premium →</span>
             <span class="btn-loading">...</span>
           </button>
+          <div class="plan-secure"><i class="fa-solid fa-lock"></i> Secure checkout</div>
         </div>
       </div>
 
@@ -317,8 +401,11 @@
           <div class="plan-tagline">Full access to every tool in the platform.</div>
         </div>
         <div class="plan-credits">
-          <div class="plan-credits-amount">300</div>
-          <div class="plan-credits-label">credits per month</div>
+          <div class="plan-credits-left">
+            <div class="plan-credits-amount">300</div>
+            <div class="plan-credits-label">AI Credits / month</div>
+          </div>
+          <i class="fa-solid fa-bolt plan-credits-bolt"></i>
         </div>
         <div class="plan-features">
           <div class="feature-section-label">Everything in Premium, plus</div>
@@ -344,6 +431,7 @@
             <span class="btn-label">Get Advanced</span>
             <span class="btn-loading">...</span>
           </button>
+          <div class="plan-secure"><i class="fa-solid fa-lock"></i> Secure checkout</div>
         </div>
       </div>
 
@@ -373,172 +461,113 @@
         </div>
       </div>
     </div>
-
-    <!-- CREDIT COSTS -->
-    <div class="credit-info">
-      <div class="credit-info-title">How credits work</div>
-      <div class="credit-table">
-        <div class="credit-row">
-          <span class="credit-row-label">Clarity & diagnostic tools</span>
-          <span class="credit-row-cost">5 credits</span>
+    <!-- TRUST BAR -->
+    <div class="trust-bar">
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <div class="trust-text">
+          <div class="trust-title">Cancel anytime</div>
+          <div class="trust-sub">No contracts or commitments.</div>
         </div>
-        <div class="credit-row">
-          <span class="credit-row-label">Everything else</span>
-          <span class="credit-row-cost">1 credit</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-rotate"></i></div>
+        <div class="trust-text">
+          <div class="trust-title">Credits refresh monthly</div>
+          <div class="trust-sub">Fresh start every billing cycle.</div>
         </div>
-        <div class="credit-row">
-          <span class="credit-row-label">Credits roll over?</span>
-          <span class="credit-row-cost" style="color:var(--text3);">No — reset monthly</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="trust-text">
+          <div class="trust-title">Secure &amp; safe</div>
+          <div class="trust-sub">All payments processed securely by Stripe.</div>
         </div>
-        <div class="credit-row">
-          <span class="credit-row-label">Admin accounts</span>
-          <span class="credit-row-cost" style="color:var(--text3);">Unlimited</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-item">
+        <div class="trust-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div class="trust-text">
+          <div class="trust-title">Upgrade anytime</div>
+          <div class="trust-sub">Move to a higher plan whenever you're ready.</div>
         </div>
       </div>
     </div>
 
-    <!-- FAQ -->
-    <div class="faq">
-      <div class="faq-title">Common questions</div>
-      <div class="faq-grid">
-        <div class="faq-item">
-          <div class="faq-q">Can I cancel anytime?</div>
-          <div class="faq-a">Yes. Cancel from your Stripe billing portal whenever you like. Your access continues until the end of the billing period.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">What happens when I run out of credits?</div>
-          <div class="faq-a">You'll see a "not enough credits" message when you try to run a tool. Credits reset on your next monthly renewal date.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Can I upgrade or downgrade?</div>
-          <div class="faq-a">Yes — changes take effect at the next billing cycle. Upgrades are prorated immediately.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Is this the same as the Certification Program?</div>
-          <div class="faq-a">No — the Certification Program is a separate one-time purchase. These plans are for ongoing platform access and AI tool credits.</div>
-        </div>
-      </div>
-    </div>
+    <div class="page-footer-note">Still have questions? Visit our <em>Help Center</em> or contact support — we're happy to help!</div>
 
   </div>
 </div>
 
+<script src="js/auth.js"></script>
+<script src="js/credits.js"></script>
 <script src="js/nav.js"></script>
 <script>
-initNav('pricing', 'Plans & Pricing');
+  if (window.initNav) initNav('pricing', 'Plans & Pricing');
 
-var CHECKOUT_URL = 'https://createcheckoutsession-e6qya4oddq-uc.a.run.app';
-var TOPUP_URL    = 'https://createtopupsession-e6qya4oddq-uc.a.run.app';
-var currentUser  = null;
-var STRIPE_PUBLISHABLE_KEY = 'pk_test_51TkcJ8DyYJbBjAJEwOkT86ezN0iz3yhUWTRM7oXUg9CQEl3MytmL956RQFZQWh8jN0hycxh0BQziNdvTZMytklyZ000fDJGtyi';
+  var CHECKOUT_URL = 'https://createcheckoutsession-e6qya4oddq-uc.a.run.app';
 
-auth.onAuthStateChanged(async function(user) {
-  if (!user) { window.location.href = 'signon.html'; return; }
-  currentUser = user;
+  document.addEventListener('tsUserReady', function(e) {
+    var user = e.detail;
+    if (!user) { window.location.href = 'signon.html'; return; }
 
-  var av = document.getElementById('sidebar-avatar');
-  var nm = document.getElementById('sidebar-name');
-  if (av) av.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
-  if (nm) nm.textContent = user.displayName || user.email || '';
+    if (window.location.search.includes('checkout=success')) {
+      document.getElementById('success-banner').style.display = 'flex';
+      window.history.replaceState({}, '', 'pricing.html');
+    }
 
-  // Show success banner if redirected from Stripe
-  if (window.location.search.includes('checkout=success')) {
-    document.getElementById('success-banner').style.display = 'flex';
-    window.history.replaceState({}, '', 'pricing.html');
-  }
-  if (window.location.search.includes('topup=success')) {
-    document.getElementById('topup-success-banner').style.display = 'flex';
-    window.history.replaceState({}, '', 'pricing.html');
-  }
-
-  try {
-    var snap = await db.collection('users').doc(user.uid).get();
-    var data = snap.exists ? snap.data() : {};
-    var tier   = data.subscriptionTier   || null;
-    var status = data.subscriptionStatus || null;
-    var credits = typeof data.credits === 'number' ? data.credits : 0;
-
-    if (tier && status === 'active') {
+    if (user.tier) {
       var names = { starter: 'Starter', premium: 'Premium', advanced: 'Advanced' };
-      document.getElementById('current-plan-name').textContent    = names[tier] || tier;
-      document.getElementById('current-credits').textContent      = credits;
+      document.getElementById('current-plan-name').textContent = names[user.tier] || user.tier;
+      document.getElementById('current-credits').textContent = user.credits;
       document.getElementById('current-plan-banner').style.display = 'flex';
-      document.getElementById('topup-section').style.display      = 'block';
-      markCurrentPlan(tier);
-    }
-
-    // Admins see all plans but don't need to subscribe
-    if (data.userRole === 'admin') {
-      document.getElementById('sidebar-role').textContent = 'Admin';
-    }
-  } catch(e) {}
-});
-
-function markCurrentPlan(tier) {
-  ['starter','premium','advanced'].forEach(function(t) {
-    var card = document.getElementById('card-' + t);
-    var btn  = document.getElementById('btn-' + t);
-    if (t === tier) {
-      card.classList.add('current-plan');
-      card.classList.remove('recommended');
-      btn.className = 'btn-subscribe current';
-      btn.querySelector('.btn-label').textContent = '✓ Current Plan';
-      btn.disabled = true;
-    } else {
-      btn.querySelector('.btn-label').textContent = 'Switch to ' + t.charAt(0).toUpperCase() + t.slice(1);
+      markCurrentPlan(user.tier);
     }
   });
-}
 
-async function topup(bundle) {
-  if (!currentUser) { window.location.href = 'signon.html'; return; }
-  var btn = document.getElementById('btn-topup-' + bundle);
-  btn.disabled = true;
-  btn.textContent = 'Redirecting…';
-  try {
-    var idToken = await currentUser.getIdToken();
-    var res = await fetch(TOPUP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
-      body: JSON.stringify({ bundle: bundle })
+  function markCurrentPlan(tier) {
+    ['starter','premium','advanced'].forEach(function(t) {
+      var card = document.getElementById('card-' + t);
+      var btn  = document.getElementById('btn-' + t);
+      if (t === tier) {
+        card.classList.add('current-plan');
+        card.classList.remove('recommended');
+        btn.className = 'btn-subscribe current';
+        btn.querySelector('.btn-label').textContent = '✓ Current Plan';
+        btn.disabled = true;
+      } else {
+        btn.querySelector('.btn-label').textContent = 'Switch to ' + t.charAt(0).toUpperCase() + t.slice(1);
+      }
     });
-    var data = await res.json();
-    if (data.url) { window.location.href = data.url; return; }
-    throw new Error('No URL returned');
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Buy ' + bundle + ' Credits — $' + (bundle === 25 ? '5' : '10');
   }
-}
 
-async function subscribe(tier) {
-  if (!currentUser) { window.location.href = 'signon.html'; return; }
-  var btn = document.getElementById('btn-' + tier);
-  btn.disabled = true;
-  btn.querySelector('.btn-label').style.display = 'none';
-  btn.querySelector('.btn-loading').style.display = 'inline';
-  btn.querySelector('.btn-loading').textContent = 'Redirecting…';
-
-  try {
-    var idToken = await currentUser.getIdToken();
-    var res = await fetch(CHECKOUT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
-      body: JSON.stringify({ tier: tier })
-    });
-    var data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
+  async function subscribe(tier) {
+    var firebaseUser = firebase.auth().currentUser;
+    if (!firebaseUser) { window.location.href = 'signon.html'; return; }
+    var btn = document.getElementById('btn-' + tier);
+    btn.disabled = true;
+    btn.querySelector('.btn-label').style.display = 'none';
+    btn.querySelector('.btn-loading').style.display = 'inline';
+    btn.querySelector('.btn-loading').textContent = 'Redirecting…';
+    try {
+      var idToken = await firebaseUser.getIdToken();
+      var res = await fetch(CHECKOUT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+        body: JSON.stringify({ tier: tier })
+      });
+      var data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
       throw new Error('No URL returned');
+    } catch(e) {
+      btn.disabled = false;
+      btn.querySelector('.btn-label').style.display = 'inline';
+      btn.querySelector('.btn-loading').style.display = 'none';
+      alert('Something went wrong. Please try again.');
     }
-  } catch(e) {
-    btn.disabled = false;
-    btn.querySelector('.btn-label').style.display = 'inline';
-    btn.querySelector('.btn-loading').style.display = 'none';
-    alert('Something went wrong. Please try again.');
   }
-}
 </script>
 </body>
 </html>
