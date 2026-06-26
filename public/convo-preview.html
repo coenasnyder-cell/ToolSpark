@@ -385,9 +385,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-const auth = firebase.auth();
 const db = firebase.firestore();
-
+</script>
+<script src="js/auth.js"></script>
+<script>
 // ── State ──
 let scriptDoc = null;
 let charMap   = {};
@@ -396,15 +397,15 @@ let idx       = 0;
 const scriptId = new URLSearchParams(location.search).get('id');
 
 // ── Auth gate ──
-auth.onAuthStateChanged(async user => {
-  if (!user) { location.href = 'signon.html'; return; }
+window.addEventListener('tsUserReady', async function() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
   try {
     const snap = await db.collection('users').doc(user.uid).get();
     if ((snap.exists ? snap.data().userRole : '') !== 'admin') {
       location.href = 'dashboard.html'; return;
     }
-  } catch(e) { location.href = 'signon.html'; return; }
-
+  } catch(e) { return; }
   if (!scriptId) { showError('No script ID', 'Open this page with ?id=YOUR_SCRIPT_ID in the URL.'); return; }
   loadData();
 });

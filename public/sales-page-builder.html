@@ -20,9 +20,9 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
   const db   = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -190,7 +190,7 @@
         <div class="user-role">Member</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
+    <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='signon.html')">Sign Out</button>
   </div>
 </aside>
 
@@ -479,14 +479,9 @@ function setMode(m) {
 }
 
 // ── DATA LOAD ─────────────────────────────────────────────────
-auth.onAuthStateChanged(async function(user) {
-  if (!user) { window.location.href = 'signon.html?redirect=sales-page-builder'; return; }
+window.addEventListener('tsUserReady', async function() {
+  const user = firebase.auth().currentUser; if (!user) return;
   currentUser = user;
-
-  var avatarEl = document.getElementById('sidebar-avatar');
-  var nameEl   = document.getElementById('sidebar-name');
-  if (avatarEl) avatarEl.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
-  if (nameEl)   nameEl.textContent   = user.displayName || user.email || 'Builder';
 
   var uid   = user.uid;
   var email = (user.email || '').toLowerCase().trim();

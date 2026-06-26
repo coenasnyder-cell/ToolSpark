@@ -19,9 +19,9 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
   const db   = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -173,7 +173,7 @@
         <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="auth.signOut().then(()=>location.href='signon.html')">Sign Out</button>
+    <button class="logout-btn" onclick="firebase.auth().signOut().then(()=>location.href='signon.html')">Sign Out</button>
   </div>
 </aside>
 
@@ -600,13 +600,9 @@ async function loadValueMirror(uid) {
   } catch(e) {}
 }
 
-auth.onAuthStateChanged(async function(user) {
-  if (!user) { window.location.href = 'signon.html?redirect=cert-phase2'; return; }
+window.addEventListener('tsUserReady', async function() {
+  const user = firebase.auth().currentUser; if (!user) return;
   currentUser = user;
-
-  var avatarEl = document.getElementById('sidebar-avatar');
-  var nameEl   = document.getElementById('sidebar-name');
-  var roleEl   = document.getElementById('sidebar-role');
 
   try {
     var [userSnap, progSnap] = await Promise.all([
@@ -616,17 +612,6 @@ auth.onAuthStateChanged(async function(user) {
 
     var userData = userSnap.exists ? userSnap.data() : {};
     var prog     = progSnap.exists ? progSnap.data() : {};
-
-    var displayName = userData.displayName || userData.name || user.email || 'Builder';
-    if (avatarEl) {
-      if (userData.photoURL) {
-        avatarEl.innerHTML = '<img src="' + escHtml(userData.photoURL) + '" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">';
-      } else {
-        avatarEl.textContent = displayName[0].toUpperCase();
-      }
-    }
-    if (nameEl) nameEl.textContent = displayName;
-    if (roleEl) roleEl.textContent = userData.userRole === 'admin' ? 'Admin' : 'Member';
 
     // Redirect if Phase 1 not done and no cert progress at all (graceful: let them in if they have steps saved)
     if (!prog.phase1Complete && !prog.phase2Steps) {

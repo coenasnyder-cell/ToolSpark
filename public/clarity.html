@@ -23,7 +23,6 @@
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
   const db = firebase.firestore();
-  const auth = firebase.auth();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -794,7 +793,7 @@ async function finishSession(actionPlanText) {
   const sessionId = CLARITY_SESSION_ID;
   const toolResults = parseActionPlanToResults(actionPlanText);
 
-  const currentUser = auth.currentUser;
+  const currentUser = firebase.auth().currentUser;
   const userId = currentUser ? currentUser.uid : null;
   const accountEmail = currentUser ? currentUser.email : null;
 
@@ -942,7 +941,8 @@ if (_params.get('name')) document.getElementById('s_displayName').value = _param
 
 // ── Session limit check + context fetch ──
 const DEFAULT_LIMIT = 5;
-auth.onAuthStateChanged(async function(user) {
+window.addEventListener('tsUserReady', async function(e) {
+  const user = firebase.auth().currentUser;
   if (!user) {
     window.location.href = 'signon.html?redirect=clarity';
     return;

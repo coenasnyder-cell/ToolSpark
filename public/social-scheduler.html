@@ -21,10 +21,10 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
   const storage = firebase.storage();
 </script>
+<script src="js/auth.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -36,6 +36,7 @@
     --radius: 12px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
     --sidebar-width: 220px;
+    --header-height: 64px;
   }
   body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
 
@@ -249,13 +250,22 @@
   let saveTimer = null;
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  auth.onAuthStateChanged(async user => {
-    if (!user) { window.location.href = 'signon.html'; return; }
+  window.addEventListener('tsUserReady', async function() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
     uid = user.uid;
     await loadAllData();
     renderGrid(activeTab);
     renderTopics(activeTab);
   });
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open');
+    document.body.style.overflow = sidebar && sidebar.classList.contains('open') ? 'hidden' : '';
+  }
 
   // ── Firestore ────────────────────────────────────────────────────────────
   async function loadAllData() {
@@ -483,6 +493,6 @@
   }
 </script>
 <script src="js/nav.js"></script>
-<script>initNav('social-scheduler', '30-Day Post Planner');</script>
+<script>initNav('tools', '31-Day Post Planner');</script>
 </body>
 </html>

@@ -22,7 +22,6 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
@@ -621,9 +620,7 @@ let sparkContextData = null;
 
 const sparkContextPromise = (async () => {
   try {
-    const user = await new Promise(resolve => {
-      const unsub = auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-    });
+    const user = firebase.auth().currentUser;
 
     let sparkProfile = null;
 
@@ -771,7 +768,7 @@ function showEmailGate() {
   setTimeout(() => {
     const emailEl = document.getElementById("emailInput");
     if (emailEl) {
-      const user = auth.currentUser;
+      const user = firebase.auth().currentUser;
       if (user && user.email) emailEl.value = user.email;
       emailEl.addEventListener("keydown", e => { if (e.key === "Enter") submitEmail(); });
       emailEl.focus();
@@ -842,7 +839,7 @@ async function submitEmail() {
   const emailEl = document.getElementById("emailInput");
   const btnEl   = document.getElementById("emailBtn");
   const email   = emailEl?.value?.trim();
-  const currentUser = auth.currentUser;
+  const currentUser = firebase.auth().currentUser;
   if (!email || !email.includes("@")) {
     emailEl.style.borderColor = "rgba(200,80,60,0.5)";
     emailEl.placeholder = "Please enter a valid email";
@@ -1016,14 +1013,12 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
 // ── Auth gate ──
 const audienceWelcomeEl = document.getElementById('sparkwelcome');
 audienceWelcomeEl.style.display = 'none';
-auth.onAuthStateChanged(function(user) {
+window.addEventListener('tsUserReady', async function(e) {
+  let user = firebase.auth().currentUser;
   if (!user) {
-    firebase.auth().signInAnonymously().catch(() => {
-      window.location.href = 'signon.html?redirect=audiencetool';
-    });
-  } else {
-    audienceWelcomeEl.style.display = 'flex';
+    try { const cred = await firebase.auth().signInAnonymously(); user = cred.user; } catch(e) { return; }
   }
+  audienceWelcomeEl.style.display = 'flex';
 });
 
 async function startSpark() {

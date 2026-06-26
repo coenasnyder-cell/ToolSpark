@@ -19,9 +19,9 @@
   };
   firebase.initializeApp(firebaseConfig);
   try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-  const auth = firebase.auth();
   const db = firebase.firestore();
 </script>
+<script src="js/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -222,7 +222,7 @@
         <div class="user-role" id="sidebar-role">Member</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="auth.signOut().then(() => window.location.href='signon.html')">
+    <button class="logout-btn" onclick="firebase.auth().signOut().then(() => window.location.href='signon.html')">
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Sign Out
     </button>
@@ -474,25 +474,6 @@
   async function loadUserData(user) {
     const email = (user.email || '').toLowerCase().trim();
 
-    // Sidebar user info
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (userDoc.exists) {
-      const u = userDoc.data();
-      const nameEl = document.getElementById('sidebar-name');
-      const roleEl = document.getElementById('sidebar-role');
-      const avatarEl = document.getElementById('sidebar-avatar');
-      if (nameEl) nameEl.textContent = u.displayName || u.name || user.email;
-      if (roleEl) roleEl.textContent = u.userRole === 'admin' ? 'Admin' : 'Member';
-      if (avatarEl) {
-        if (u.photoURL) {
-          avatarEl.innerHTML = `<img src="${u.photoURL}" alt="avatar">`;
-        } else {
-          const initial = (u.displayName || u.name || user.email || '?')[0].toUpperCase();
-          avatarEl.textContent = initial;
-        }
-      }
-    }
-
     const [promptDoc, techstackByUser, techstackByEmail, clarityByUser] = await Promise.all([
       db.collection('prompt_results').doc(user.uid).get(),
       db.collection('techstack_results').where('userId', '==', user.uid).get(),
@@ -551,10 +532,9 @@
 
   renderChecklist();
 
-  auth.onAuthStateChanged(async user => {
-    if (user) {
-      await loadUserData(user);
-    }
+  window.addEventListener('tsUserReady', async function() {
+    const user = firebase.auth().currentUser; if (!user) return;
+    await loadUserData(user);
   });
 </script>
 <script src="js/nav.js"></script>

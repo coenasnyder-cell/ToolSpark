@@ -27,19 +27,26 @@
     --radius: 10px;
     --radius-lg: 14px;
     --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --sidebar-width: 220px;
+    --header-height: 64px;
+    --dark: #0E0D0B;
+    --border-dark: rgba(255,255,255,0.08);
+    --gold: #C9A84C;
+    --gold-dim: rgba(201,168,76,0.1);
+    --text3: #9A9488;
+    --radius-sm: 8px;
   }
 
   body {
     font-family: var(--font);
     background: var(--surface-2);
     color: var(--text);
-    min-height: 100vh;
-    padding: 2rem 1rem 4rem;
   }
 
   .page {
     max-width: 780px;
     margin: 0 auto;
+    padding: 2rem 1rem 4rem;
   }
 
   .page-header {
@@ -325,25 +332,14 @@
   }
   .warn-badge.show { display: inline-block; }
 
-  #auth-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    font-size: 14px;
-    color: var(--text-3);
-  }
-
-  #page-wrap { display: none; }
 </style>
 </head>
 <body>
 
-<div id="auth-loading">Checking access…</div>
+<div class="main-wrap">
+<div class="top-header"></div>
 
-<div class="page" id="page-wrap">
-
-  <a href="admindashboard.html" class="back-link">← Admin Dashboard</a>
+<div class="page">
 
   <div class="page-header">
     <div class="logo-mark">⚡</div>
@@ -442,6 +438,7 @@
   </div>
 
 </div>
+</div>
 
 <script>
 const firebaseConfig = {
@@ -455,9 +452,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
-const auth = firebase.auth();
 const db = firebase.firestore();
-
+</script>
+<script src="js/auth.js"></script>
+<script>
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
 
 let characters = [];
@@ -465,21 +463,15 @@ let lines = [];
 let currentUser = null;
 
 // ── Auth gate ──
-auth.onAuthStateChanged(async user => {
-  if (!user) { window.location.href = 'signon.html'; return; }
-
+window.addEventListener('tsUserReady', async function() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
   try {
     const snap = await db.collection('users').doc(user.uid).get();
     const role = snap.exists ? snap.data().userRole : 'member';
     if (role !== 'admin') { window.location.href = 'dashboard.html'; return; }
-  } catch(e) {
-    window.location.href = 'signon.html';
-    return;
-  }
-
+  } catch(e) { return; }
   currentUser = user;
-  document.getElementById('auth-loading').style.display = 'none';
-  document.getElementById('page-wrap').style.display = 'block';
   loadCharacters();
 });
 
@@ -772,5 +764,7 @@ function escapeHtml(str) {
   return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 </script>
+<script src="js/nav.js"></script>
+<script>initNav('tools', 'ConvoFlip');</script>
 </body>
 </html>
