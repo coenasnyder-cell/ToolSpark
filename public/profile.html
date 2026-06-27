@@ -3,251 +3,1392 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile · ToolSpark</title>
+<title>Profile - ToolSpark</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17;
+    --dark: #0C0B09;
+    --dark2: #141210;
+    --dark3: #1C1A17;
     --border-dark: #2A2720;
-    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
-    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
-    --green: #2A5C45; --coral: #C4622D;
-    --radius: 14px; --radius-sm: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --surface-tint: #FBF8F2;
+    --border: #E4E0D8;
+    --text: #1A1714;
+    --text2: #625B54;
+    --text3: #948D86;
+    --green: #2A5C45;
+    --coral: #C4622D;
+    --radius: 22px;
+    --radius-sm: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.06);
+    --shadow-lg: 0 24px 60px rgba(0,0,0,0.14);
     --sidebar-width: 220px;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
-  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; padding: 1.75rem 2rem 3rem; max-width: 1060px; width: 100%; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background:
+      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 28%),
+      linear-gradient(180deg, #F7F3EC 0%, #F1EBE2 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  /* ── PROFILE HERO ── */
-  .profile-hero { background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); overflow: hidden; }
+  .main-wrap {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem 1.75rem 3rem;
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Hero */
+  .profile-hero {
+    position: relative;
+    background: linear-gradient(145deg, rgba(18,16,13,0.99) 0%, rgba(12,11,9,0.99) 60%, rgba(24,22,18,0.99) 100%);
+    border: 1px solid var(--border-dark);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    right: -8%;
+    bottom: -18%;
+    width: 52%;
+    height: 180px;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(201,168,76,0.9) 0 1px, transparent 2px),
+      radial-gradient(circle at 45% 22%, rgba(201,168,76,0.75) 0 1px, transparent 2px),
+      radial-gradient(circle at 68% 36%, rgba(201,168,76,0.65) 0 1px, transparent 2px),
+      linear-gradient(180deg, transparent 0%, rgba(201,168,76,0.2) 100%);
+    opacity: 0.8;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+  }
+
   .profile-banner {
-    height: 120px;
-    background: linear-gradient(135deg, #1C1A17 0%, #2A2520 60%, #1C1A17 100%);
-    background-size: cover; background-position: center;
+    height: 170px;
+    background:
+      linear-gradient(135deg, rgba(23,21,18,0.88) 0%, rgba(38,34,29,0.74) 55%, rgba(23,21,18,0.86) 100%);
+    background-size: cover;
+    background-position: center;
     position: relative;
   }
+
+  .profile-banner.hidden-banner {
+    display: none;
+  }
+
+  .profile-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.42) 100%),
+      radial-gradient(circle at 78% 28%, rgba(201,168,76,0.12), transparent 26%);
+    pointer-events: none;
+  }
+
   .banner-upload-btn {
-    position: absolute; bottom: 10px; right: 12px; z-index: 2;
-    display: none; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 100px;
-    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    z-index: 2;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: rgba(12,11,9,0.62);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: rgba(255,255,255,0.86);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), transform 180ms var(--ease-out);
   }
 
-  .profile-body { padding: 0 1.75rem 1.75rem; }
+  .profile-body {
+    padding: 1.5rem;
+    position: relative;
+  }
 
-  .profile-photo-wrap { position: relative; width: 88px; height: 88px; margin-top: -44px; margin-bottom: 14px; flex-shrink: 0; }
-  .profile-photo { width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--dark2); object-fit: cover; display: block; }
+  .profile-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.8fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .profile-overview {
+    margin-top: 0;
+    min-width: 0;
+  }
+
+  .profile-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .profile-photo-wrap {
+    position: relative;
+    width: 116px;
+    height: 116px;
+    flex-shrink: 0;
+    margin-top: 0.8rem;
+  }
+
+  .profile-photo,
   .profile-photo-initials {
-    width: 88px; height: 88px; border-radius: 50%;
-    border: 3px solid var(--dark2);
-    background: linear-gradient(135deg, #2A2520, var(--dark3));
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); font-style: italic;
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    border: 4px solid rgba(245,241,234,0.92);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.22);
   }
+
+  .profile-photo {
+    object-fit: cover;
+    display: block;
+    background: #201d19;
+  }
+
+  .profile-photo-initials {
+    background: linear-gradient(145deg, #2B2722 0%, #171512 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    color: var(--gold);
+    font-style: italic;
+  }
+
   .photo-upload-btn {
-    position: absolute; bottom: 2px; right: 2px;
-    width: 26px; height: 26px; border-radius: 50%;
-    background: var(--gold); border: 2px solid var(--dark2);
-    display: none; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--dark);
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--dark2);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--dark);
   }
+
   .profile-photo-wrap.edit-open .photo-upload-btn { display: flex; }
 
-  .profile-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 10px; }
-  .profile-name-block { display: flex; flex-direction: column; gap: 4px; }
-  .profile-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500; color: #F0EDE6; line-height: 1.2; }
-  .profile-email { font-size: 12px; color: rgba(255,255,255,0.4); display: none; }
+  .profile-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+    padding-top: 0.2rem;
+  }
 
-  .badge-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
-  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
-  .badge-admin   { background: rgba(196,98,45,0.2); border: 1px solid rgba(196,98,45,0.3); color: #E0875A; }
-  .badge-builder { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
-  .badge-member  { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.55); }
-  .badge-certified { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
-  .badge-since { background: transparent; border: none; color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 400; padding: 0; gap: 4px; }
+  .profile-name-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .profile-kicker {
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,241,234,0.58);
+  }
+
+  .profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.1rem, 5vw, 3rem);
+    font-weight: 500;
+    color: #F5F1EA;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .profile-role {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .profile-email {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.55);
+    display: none;
+  }
+
+  .badge-row {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0;
+  }
+
+  .profile-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+  }
+
+  .profile-action-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .hero-stats-wrap {
+    margin-top: 1rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    min-height: 34px;
+    padding: 0.38rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  .badge-admin   { background: rgba(196,98,45,0.15); border: 1px solid rgba(196,98,45,0.24); color: #F1A37E; }
+  .badge-builder { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.26); color: #F0DCA6; }
+  .badge-member  { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.72); }
+  .badge-certified { background: rgba(201,168,76,0.16); border: 1px solid rgba(201,168,76,0.28); color: #F0DCA6; }
+  .badge-since { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 0.72rem; font-weight: 500; padding: 0; gap: 0.38rem; }
 
   .edit-profile-btn {
-    flex-shrink: 0; display: none; align-items: center; gap: 6px;
-    padding: 8px 18px; border-radius: 8px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.8); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.15s;
+    flex-shrink: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.72rem 1.05rem;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.88);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 180ms var(--ease-out), background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
   }
-  .edit-profile-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-  .edit-profile-btn.cancel { background: rgba(196,98,45,0.15); border-color: rgba(196,98,45,0.3); color: #E0875A; }
 
-  .profile-bio { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.7; max-width: 640px; margin-bottom: 8px; }
-  .profile-bio.empty { color: rgba(255,255,255,0.3); font-style: italic; }
+  .profile-meta-row .edit-profile-btn,
+  .profile-action-row .edit-profile-btn {
+    min-height: 34px;
+    padding: 0.38rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    line-height: 1;
+  }
+
+  .edit-profile-btn.cancel {
+    background: rgba(196,98,45,0.15);
+    border-color: rgba(196,98,45,0.26);
+    color: #F1A37E;
+  }
+
+  .spark-card {
+    margin-top: 0.35rem;
+    padding: 1.35rem 1.4rem;
+    border-radius: 22px;
+    border: none;
+    background: linear-gradient(180deg, rgba(23,21,18,0.88) 0%, rgba(14,13,11,0.9) 100%);
+    min-height: 204px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    align-self: start;
+  }
+
+  .spark-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 82% 18%, rgba(201,168,76,0.85) 0 1px, transparent 2px),
+      radial-gradient(circle at 68% 36%, rgba(201,168,76,0.6) 0 1px, transparent 2px),
+      radial-gradient(circle at 90% 48%, rgba(201,168,76,0.7) 0 1px, transparent 2px);
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .spark-placeholder {
+    font-size: 1rem;
+    color: rgba(245,241,234,0.56);
+    line-height: 1.75;
+    max-width: 28ch;
+    position: relative;
+    z-index: 1;
+  }
 
   .spark-statement {
-    padding-left: 14px; border-left: 2.5px solid var(--gold);
-    font-family: 'Playfair Display', serif; font-size: 15px; font-style: italic;
-    color: rgba(255,255,255,0.75); line-height: 1.6; max-width: 580px;
-    margin: 10px 0;
+    padding-left: 0;
+    border-left: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-style: italic;
+    color: rgba(245,241,234,0.92);
+    line-height: 1.38;
+    max-width: 24ch;
+    width: 100%;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    text-wrap: pretty;
+    overflow-wrap: normal;
   }
+
   .spark-statement.hidden { display: none; }
 
-  .social-links-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .social-links-row.hidden { display: none; }
-  .social-link-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 14px; border-radius: 100px;
-    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700;
-    text-decoration: none; transition: all 0.15s;
+  .spark-note {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding-top: 1rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(245,241,234,0.45);
   }
-  .social-link-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .social-link-btn.hidden { display: none; }
 
-  .my-tool-card {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 12px; padding: 10px 14px;
-    background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2);
-    border-radius: var(--radius-sm); max-width: 360px;
-  }
-  .my-tool-card.hidden { display: none; }
-  .my-tool-icon { font-size: 20px; }
-  .my-tool-info { display: flex; flex-direction: column; gap: 2px; }
-  .my-tool-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
-  .my-tool-name { font-size: 14px; font-weight: 700; color: #F0EDE6; }
-  .my-tool-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gold); font-weight: 700; text-decoration: none; }
-  .my-tool-link.hidden { display: none; }
-
-  /* ── EDIT FORM ── */
+  /* Edit form */
   .edit-form { display: none; }
+
   .edit-form.open {
-    display: flex; flex-direction: column; gap: 14px;
-    margin-top: 1.25rem; padding-top: 1.25rem;
-    border-top: 1px solid var(--border-dark);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.95rem 1rem;
+    margin-top: 1.35rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
   }
-  .form-field { display: flex; flex-direction: column; gap: 5px; }
-  .form-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: rgba(255,255,255,0.58);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
   .form-input, .form-textarea {
-    width: 100%; padding: 9px 12px;
-    border: 1px solid var(--border-dark); border-radius: var(--radius-sm);
-    background: rgba(255,255,255,0.05); color: #F0EDE6;
-    font-family: inherit; font-size: 14px; outline: none;
-    transition: border-color 0.15s;
+    width: 100%;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    color: #F0EDE6;
+    font-family: inherit;
+    font-size: 0.94rem;
+    outline: none;
+    transition: border-color 180ms var(--ease-out), background-color 180ms var(--ease-out);
   }
-  .form-input:focus, .form-textarea:focus { border-color: var(--gold); background: rgba(255,255,255,0.08); }
-  .form-textarea { resize: vertical; min-height: 80px; }
-  .form-note { font-size: 11px; color: rgba(255,255,255,0.35); }
-  .form-note a { color: var(--gold); text-decoration: none; }
-  .form-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .form-input:focus, .form-textarea:focus {
+    border-color: rgba(201,168,76,0.55);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  .form-note {
+    font-size: 0.76rem;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .form-note a {
+    color: var(--gold-light);
+    text-decoration: none;
+  }
+
+  .tool-logo-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .tool-logo-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .tool-logo-upload-btn {
+    min-height: 42px;
+    padding: 0.72rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: #F5F1EA;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), transform 180ms var(--ease-out);
+  }
+
+  .tool-logo-upload-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(201,168,76,0.35);
+  }
+
+  .tool-logo-upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .tool-logo-upload-status {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.62);
+    line-height: 1.5;
+  }
+
+  #tool-fields {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    padding-top: 0.4rem;
+  }
+
+  .edit-danger-zone {
+    grid-column: 1 / -1;
+    margin-top: 0.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .edit-danger-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.05rem;
+    border-radius: 18px;
+    border: 1px solid rgba(196,98,45,0.26);
+    background: rgba(196,98,45,0.08);
+  }
+
+  .edit-danger-kicker {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.25rem;
+  }
+
+  .edit-danger-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #F5F1EA;
+    line-height: 1.35;
+  }
+
+  .edit-danger-copy {
+    margin-top: 0.2rem;
+    max-width: 54ch;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.62);
+    line-height: 1.55;
+  }
+
   .save-btn {
-    padding: 10px 24px; border-radius: 8px;
-    background: var(--gold); color: var(--dark);
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    border: none; cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+    min-height: 46px;
+    padding: 0.8rem 1.3rem;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #F4C85A 0%, #D7A93D 100%);
+    color: var(--dark);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out);
   }
-  .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .success-msg { display: none; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #5CB88A; }
+
+  .save-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .success-msg {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #6DB68C;
+  }
+
   .success-msg.show { display: inline-flex; }
 
-  /* ── CONTENT ROW ── */
-  .content-row { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: start; }
-  .main-col { display: flex; flex-direction: column; gap: 1.25rem; }
-  .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  /* Layout */
+  .content-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) 340px;
+    gap: 1.25rem;
+    align-items: start;
+  }
 
-  /* ── CARDS ── */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  .card-header { padding: 0.875rem 1.5rem; border-bottom: 1px solid var(--border); }
-  .card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); }
+  .main-col, .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
 
-  /* ── STATS ── */
-  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); }
-  .stat-cell { background: var(--surface); padding: 1rem 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px; }
-  .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; }
-  .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
-  .stats-locked { padding: 1.25rem 1.5rem; font-size: 13px; color: var(--text3); display: none; }
+  /* Cards */
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(251,248,242,0.98) 100%);
+    border: 1px solid rgba(228,224,216,0.92);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
 
-  /* ── CURRENTLY BUILDING ── */
-  .building-body { padding: 1.25rem 1.5rem; }
-  .building-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-  .building-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 10px; }
-  .building-meta { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
-  .building-empty { padding: 1.5rem; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.6; }
+  .card-header {
+    padding: 1rem 1.25rem 0.9rem;
+    border-bottom: 1px solid rgba(228,224,216,0.9);
+    background: linear-gradient(180deg, rgba(255,255,255,0.64) 0%, rgba(255,255,255,0) 100%);
+  }
 
-  /* ── BUILDER JOURNEY ── */
-  .journey-phases { display: flex; flex-direction: column; }
-  .journey-phase { display: flex; align-items: center; gap: 12px; padding: 0.875rem 1.5rem; border-bottom: 1px solid var(--border); }
-  .journey-phase:last-child { border-bottom: none; }
+  .card-label {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .bio-card-body {
+    padding: 1.25rem;
+  }
+
+  .profile-bio {
+    font-size: 1.02rem;
+    color: var(--text);
+    line-height: 1.82;
+    max-width: 70ch;
+  }
+
+  .profile-bio.empty {
+    color: var(--text3);
+    font-style: italic;
+  }
+
+  .project-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .my-tool-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.95rem;
+    padding: 1rem;
+    background: linear-gradient(180deg, #FBF7EE 0%, #F4EBDD 100%);
+    border: 1px solid rgba(201,168,76,0.24);
+    border-radius: 20px;
+    max-width: none;
+    margin-top: 0;
+  }
+
+  .my-tool-card.hidden { display: none; }
+
+  .my-tool-icon {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.24);
+    font-size: 1.8rem;
+    color: #8C6E21;
+  }
+
+  .my-tool-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    display: block;
+  }
+
+  .my-tool-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    min-width: 0;
+  }
+
+  .my-tool-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #A8821F;
+  }
+
+  .my-tool-name {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .my-tool-description {
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.65;
+    max-width: 54ch;
+  }
+
+  .my-tool-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.84rem;
+    color: #8C6E21;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .my-tool-link.hidden { display: none; }
+
+  .journey-phases {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.9rem;
+    padding: 1.35rem 1.1rem 1.2rem;
+  }
+
+  .journey-phases::before {
+    content: '';
+    position: absolute;
+    left: 1.9rem;
+    right: 1.9rem;
+    top: 3.3rem;
+    height: 2px;
+    background:
+      linear-gradient(90deg, rgba(92,184,138,0.2) 0%, rgba(228,224,216,0.9) 100%);
+    z-index: 0;
+  }
+
+  .journey-phase {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.55rem;
+    min-width: 0;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: journey-enter 320ms var(--ease-out) forwards;
+  }
+
+  .journey-phase:nth-child(2) { animation-delay: 40ms; }
+  .journey-phase:nth-child(3) { animation-delay: 80ms; }
+  .journey-phase:nth-child(4) { animation-delay: 120ms; }
+  .journey-phase:nth-child(5) { animation-delay: 160ms; }
+
+  .phase-step {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text3);
+    line-height: 1;
+  }
+
   .phase-dot {
-    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700;
-    border: 2px solid var(--border); color: var(--text3); background: var(--bg);
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 800;
+    border: 2px solid rgba(198,191,182,0.95);
+    color: var(--text3);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FBF8F2 100%);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.05);
   }
-  .phase-dot.done { background: var(--dark); border-color: var(--dark); color: #fff; }
-  .phase-dot.current { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-  .phase-info { flex: 1; }
-  .phase-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
-  .phase-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .phase-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.07em; flex-shrink: 0; }
-  .phase-badge.done    { background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.2); }
-  .phase-badge.current { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
-  .phase-badge.locked  { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
 
-  /* ── GETTING STARTED ── */
-  .cl-header { padding: 0.875rem 1.5rem 0.75rem; border-bottom: 1px solid var(--border); }
-  .cl-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-  .cl-title { font-size: 13px; font-weight: 700; color: var(--text); }
-  .cl-count { font-size: 11px; color: var(--text3); }
-  .cl-bar { height: 3px; background: var(--border); border-radius: 10px; overflow: hidden; }
-  .cl-fill { height: 100%; background: var(--gold); border-radius: 10px; transition: width 0.4s ease; }
-  .cl-steps { display: flex; flex-direction: column; }
+  .phase-dot.done {
+    background: linear-gradient(180deg, #70C88E 0%, #58B57A 100%);
+    border-color: #58B57A;
+    color: #fff;
+    box-shadow: 0 14px 26px rgba(88,181,122,0.22);
+  }
+
+  .phase-dot.current {
+    background: linear-gradient(180deg, #E7C46C 0%, #C9A84C 100%);
+    border-color: #C9A84C;
+    color: #fff;
+    box-shadow: 0 14px 28px rgba(201,168,76,0.26);
+  }
+
+  .phase-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .phase-name {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+    max-width: 11ch;
+    text-wrap: balance;
+  }
+
+  .phase-desc {
+    display: none;
+  }
+
+  .phase-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.34rem 0.72rem;
+    border-radius: 999px;
+    letter-spacing: 0;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .phase-badge.done    { background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.16); }
+  .phase-badge.current { background: rgba(201,168,76,0.14); color: #B68718; border: 1px solid rgba(201,168,76,0.18); }
+  .phase-badge.locked  { background: #F5F1EA; color: var(--text3); border: 1px solid var(--border); }
+
+  @keyframes journey-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journey-phase {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .snapshot-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem 1.25rem 0.35rem;
+  }
+
+  .snapshot-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+  }
+
+  .snapshot-key {
+    font-size: 0.85rem;
+    color: var(--text3);
+  }
+
+  .snapshot-value {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--text);
+    text-align: right;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    margin: 0.95rem 1.25rem 1.25rem;
+  }
+
+  .stat-cell {
+    background: var(--surface);
+    padding: 1rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.15rem;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
+
+  .stats-locked {
+    margin: 1rem 1.25rem 1.25rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(201,168,76,0.05);
+    border: 1px dashed rgba(201,168,76,0.3);
+    font-size: 0.9rem;
+    color: var(--text2);
+    display: none;
+  }
+
+  .hero-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    gap: 1.15rem;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .hero-stats-grid .stat-cell {
+    background: transparent;
+    min-height: 0;
+    padding: 0;
+    align-items: center;
+    text-align: center;
+    gap: 0.22rem;
+  }
+
+  .hero-stats-grid .stat-num {
+    color: #F5F1EA;
+  }
+
+  .hero-stats-grid .stat-label {
+    color: rgba(245,241,234,0.65);
+  }
+
+  .hero-stats-grid .stat-cell.hidden-stat {
+    display: none;
+  }
+
+  .hero-stats-locked {
+    margin: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(201,168,76,0.28);
+    color: rgba(245,241,234,0.72);
+  }
+
+  .connect-card-body {
+    padding: 1.25rem;
+  }
+
+  .connect-copy {
+    font-size: 0.95rem;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .connect-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0.8rem 1.1rem;
+    border-radius: 14px;
+    margin-top: 1rem;
+    background: linear-gradient(180deg, #151311 0%, #090907 100%);
+    color: #F2D382;
+    font-size: 0.92rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .message-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(8,7,6,0.62);
+    backdrop-filter: blur(4px);
+  }
+
+  .message-dialog {
+    width: min(100%, 520px);
+    border-radius: 26px;
+    background: linear-gradient(145deg, rgba(18,16,13,0.99) 0%, rgba(12,11,9,0.99) 100%);
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.32);
+    padding: 1.35rem;
+    color: #F5F1EA;
+  }
+
+  .message-kicker {
+    font-size: 0.73rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: rgba(201,168,76,0.88);
+  }
+
+  .message-title {
+    margin-top: 0.55rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: #F5F1EA;
+  }
+
+  .message-subtitle {
+    margin-top: 0.6rem;
+    color: rgba(245,241,234,0.72);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .message-textarea {
+    width: 100%;
+    min-height: 150px;
+    margin-top: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: #F5F1EA;
+    font-family: inherit;
+    font-size: 0.96rem;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+    transition: border-color 180ms var(--ease-out), background-color 180ms var(--ease-out);
+  }
+
+  .message-textarea:focus {
+    border-color: rgba(201,168,76,0.55);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .message-error {
+    min-height: 1.2rem;
+    margin-top: 0.7rem;
+    color: #E08D63;
+    font-size: 0.84rem;
+  }
+
+  .message-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .message-secondary-btn,
+  .message-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.78rem 1.05rem;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out), background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+  }
+
+  .message-secondary-btn {
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    color: rgba(245,241,234,0.86);
+  }
+
+  .message-primary-btn {
+    border: none;
+    background: linear-gradient(180deg, #F4C85A 0%, #D7A93D 100%);
+    color: #141210;
+  }
+
+  .message-primary-btn:disabled,
+  .message-secondary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .message-success-view {
+    display: none;
+  }
+
+  .message-success-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(109,182,140,0.14);
+    color: #7FC99A;
+    margin-bottom: 1rem;
+  }
+
+  .social-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+
+  .social-links-row.hidden { display: none; }
+
+  .social-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0.65rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.18);
+    color: #8C6E21;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .social-link-btn.hidden { display: none; }
+
+  .cl-header {
+    padding: 1rem 1.25rem 0.9rem;
+    border-bottom: 1px solid rgba(228,224,216,0.9);
+  }
+
+  .cl-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.55rem;
+  }
+
+  .cl-title {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .cl-count {
+    font-size: 0.78rem;
+    color: var(--text3);
+  }
+
+  .cl-bar {
+    height: 5px;
+    background: rgba(228,224,216,0.9);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .cl-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #D7A93D 0%, #F4C85A 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .cl-steps {
+    display: flex;
+    flex-direction: column;
+    padding: 0.35rem 0.8rem 0.8rem;
+  }
+
   .cl-step {
-    display: flex; align-items: center; gap: 10px;
-    padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border);
-    text-decoration: none; color: inherit; transition: background 0.12s; cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.82rem 0.75rem;
+    border-bottom: 1px solid rgba(228,224,216,0.7);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 150ms var(--ease-out);
+    cursor: pointer;
+    border-radius: 14px;
   }
+
   .cl-step:last-child { border-bottom: none; }
-  .cl-step:not(.cl-done):hover { background: #FAFAF8; }
   .cl-step.cl-done { cursor: default; }
-  .cl-step.cl-featured:not(.cl-done):hover { background: rgba(201,168,76,0.07); }
+
   .cl-check {
-    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text3);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border);
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text3);
   }
+
   .cl-check.done { background: var(--gold); border-color: var(--gold); color: var(--dark); }
-  .cl-check.current { border-color: var(--gold); color: var(--gold); }
-  .cl-body { flex: 1; }
-  .cl-label { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .cl-check.current { border-color: var(--gold); color: #8C6E21; background: rgba(201,168,76,0.08); }
+
+  .cl-body { flex: 1; min-width: 0; }
+
+  .cl-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
   .cl-label.done { color: var(--text3); text-decoration: line-through; }
-  .cl-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .cl-arrow { color: var(--text3); font-size: 14px; }
 
-  /* ── ACCOUNT SETTINGS ── */
-  .settings-section { display: none; }
-  .settings-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.75rem; }
-  .settings-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--shadow); padding: 1.25rem 1.5rem;
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  .cl-sub {
+    font-size: 0.78rem;
+    color: var(--text3);
+    margin-top: 0.1rem;
   }
+
+  .cl-arrow {
+    color: var(--text3);
+    font-size: 0.95rem;
+  }
+
   .delete-btn {
-    flex-shrink: 0; padding: 8px 16px; border-radius: var(--radius-sm);
-    background: none; border: 1px solid rgba(196,98,45,0.4);
-    color: var(--coral); font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif;
-    cursor: pointer; transition: all 0.15s;
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 0.7rem 1rem;
+    border-radius: 14px;
+    background: none;
+    border: 1px solid rgba(196,98,45,0.35);
+    color: var(--coral);
+    font-size: 0.9rem;
+    font-weight: 800;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
   }
-  .delete-btn:hover { background: rgba(196,98,45,0.08); }
 
-  @media (max-width: 900px) { .content-row { grid-template-columns: 1fr; } }
-  @media (max-width: 600px) {
-    .page-content { padding: 0.875rem 0.875rem 80px; }
-    .profile-banner { height: 90px; }
-    .profile-body { padding: 0 1.25rem 1.25rem; }
-    .profile-name { font-size: 20px; }
+  @media (hover: hover) and (pointer: fine) {
+    .edit-profile-btn:hover,
+    .save-btn:hover,
+    .banner-upload-btn:hover,
+    .social-link-btn:hover,
+    .connect-btn:hover,
+    .delete-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .edit-profile-btn:hover { background: rgba(255,255,255,0.12); }
+    .banner-upload-btn:hover { background: rgba(12,11,9,0.82); border-color: rgba(255,255,255,0.22); }
+    .social-link-btn:hover { background: rgba(201,168,76,0.12); }
+    .delete-btn:hover { background: rgba(196,98,45,0.08); }
+  }
+
+  @media (max-width: 1080px) {
+    .content-row {
+      grid-template-columns: 1fr;
+    }
+
+    .right-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .profile-hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .spark-card {
+      margin-top: 0.2rem;
+      min-height: 0;
+    }
+
+    .edit-form.open {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      grid-column: auto;
+    }
+
+    .journey-phases {
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      overflow-x: auto;
+      padding-bottom: 1.35rem;
+      scrollbar-width: none;
+    }
+
+    .journey-phases::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .page-content {
+      padding: 0.95rem 0.9rem 2rem;
+    }
+
+    .profile-banner {
+      height: 126px;
+    }
+
+    .profile-body {
+      padding: 1rem;
+    }
+
+    .profile-overview {
+      margin-top: 0;
+    }
+
+    .profile-identity {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .profile-photo-wrap,
+    .profile-photo,
+    .profile-photo-initials {
+      width: 88px;
+      height: 88px;
+    }
+
+    .profile-top-row {
+      width: 100%;
+      align-items: flex-start;
+    }
+
+    .profile-name {
+      font-size: 2.15rem;
+    }
+
+    .spark-statement {
+      font-size: 1.42rem;
+    }
+
+    .right-col {
+      grid-template-columns: 1fr;
+    }
+
+    .journey-phases {
+      grid-template-columns: repeat(5, minmax(132px, 1fr));
+      gap: 0.7rem;
+      padding: 1rem 0.9rem 1.2rem;
+    }
+
+    .journey-phases::before {
+      left: 1.7rem;
+      right: 1.7rem;
+      top: 2.95rem;
+    }
+
+    .phase-dot {
+      width: 50px;
+      height: 50px;
+    }
+
+    .phase-name {
+      font-size: 0.9rem;
+    }
+
+    .cl-step {
+      align-items: flex-start;
+    }
   }
 </style>
 </head>
@@ -259,59 +1400,66 @@
   <div class="page-content">
 
     <!-- PROFILE HERO -->
-    <div class="profile-hero">
-      <div class="profile-banner" id="profile-banner">
+    <section class="profile-hero">
+      <div class="profile-banner hidden-banner" id="profile-banner">
         <button class="banner-upload-btn" id="banner-upload-btn" type="button" onclick="document.getElementById('banner-file-input').click()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Change Banner
         </button>
         <input type="file" id="banner-file-input" accept="image/*" style="display:none" onchange="handleBannerSelect(this)">
       </div>
-
       <div class="profile-body">
+        <div class="profile-hero-grid">
+          <div class="profile-overview">
+            <div class="profile-identity">
+              <div class="profile-photo-wrap" id="profile-photo-wrap">
+                <div class="profile-photo-initials" id="profile-photo-el">?</div>
+                <button class="photo-upload-btn" type="button" title="Change photo" onclick="document.getElementById('photo-file-input').click()">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </button>
+                <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+              </div>
 
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <div class="profile-photo-wrap" id="profile-photo-wrap">
-            <div class="profile-photo-initials" id="profile-photo-el">?</div>
-            <button class="photo-upload-btn" type="button" title="Change photo" onclick="document.getElementById('photo-file-input').click()">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </button>
-            <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+              <div class="profile-top-row">
+                <div class="profile-name-block">
+                  <div class="profile-kicker">Creator Profile</div>
+                  <div class="profile-name" id="profile-name">Loading...</div>
+                  <div class="profile-role" id="profile-role-display">ToolSpark Member</div>
+                  <div class="profile-email" id="profile-email"></div>
+                  <div class="badge-row" id="badge-row"></div>
+                  <div class="profile-action-row">
+                    <button class="edit-profile-btn" id="edit-toggle-btn" onclick="toggleEdit()">Edit Profile</button>
+                  </div>
+                  <div class="hero-stats-wrap">
+                    <div class="stats-grid hero-stats-grid" id="stats-grid">
+                      <div class="stat-cell">
+                        <div class="stat-num" id="stat-points">-</div>
+                        <div class="stat-label">Points</div>
+                      </div>
+                      <div class="stat-cell">
+                        <div class="stat-num" id="stat-streak">-</div>
+                        <div class="stat-label">Day Streak</div>
+                      </div>
+                      <div class="stat-cell">
+                        <div class="stat-num" id="stat-days">-</div>
+                        <div class="stat-label">Days Active</div>
+                      </div>
+                      <div class="stat-cell hidden-stat" aria-hidden="true">
+                        <div class="stat-num" id="stat-threads">-</div>
+                        <div class="stat-label">Threads</div>
+                      </div>
+                    </div>
+                    <div class="stats-locked hero-stats-locked" id="stats-locked">Stats unlock after the Clarity phase.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="edit-profile-btn" id="edit-toggle-btn" onclick="toggleEdit()">Edit Profile</button>
-        </div>
 
-        <div class="profile-top-row" style="margin-top:12px;">
-          <div class="profile-name-block">
-            <div class="profile-name" id="profile-name">Loading…</div>
-            <div class="profile-email" id="profile-email"></div>
-            <div class="badge-row" id="badge-row"></div>
-          </div>
-        </div>
-
-        <div class="profile-bio empty" id="profile-bio-view">Loading…</div>
-
-        <div class="spark-statement hidden" id="profile-spark-view"></div>
-
-        <div class="social-links-row hidden" id="profile-social-row">
-          <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-instagram-link">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-            Instagram
-          </a>
-          <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-linkedin-link">
-            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            LinkedIn
-          </a>
-        </div>
-
-        <div class="my-tool-card hidden" id="profile-tool-card">
-          <div class="my-tool-icon">🛠️</div>
-          <div class="my-tool-info">
-            <div class="my-tool-label">My Tool</div>
-            <div class="my-tool-name" id="profile-tool-name"></div>
-            <a href="#" target="_blank" rel="noopener" class="my-tool-link hidden" id="profile-tool-link">
-              View Tool <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
+          <div class="spark-card">
+            <div class="spark-placeholder" id="spark-placeholder">This member is building in public inside ToolSpark. Their spark statement will show here once it is set.</div>
+            <div class="spark-statement hidden" id="profile-spark-view"></div>
+            <div class="spark-note">Builder spotlight</div>
           </div>
         </div>
 
@@ -338,14 +1486,29 @@
             <label class="form-label" for="edit-linkedin">LinkedIn URL</label>
             <input class="form-input" id="edit-linkedin" type="url" placeholder="https://linkedin.com/in/yourprofile">
           </div>
-          <div id="tool-fields" style="display:none;display:flex;flex-direction:column;gap:14px;">
+          <div id="tool-fields" style="display:none;">
             <div class="form-field">
               <label class="form-label" for="edit-tool-name">My Tool Name</label>
               <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
             </div>
             <div class="form-field">
+              <label class="form-label" for="edit-tool-description">Tool Description</label>
+              <textarea class="form-textarea" id="edit-tool-description" placeholder="A short description for your tool" maxlength="180" rows="3"></textarea>
+            </div>
+            <div class="form-field">
               <label class="form-label" for="edit-tool-url">My Tool URL</label>
               <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-tool-logo-file">Tool Logo</label>
+              <div class="tool-logo-upload">
+                <div class="tool-logo-upload-row">
+                  <button class="tool-logo-upload-btn" id="tool-logo-upload-btn" type="button" onclick="document.getElementById('edit-tool-logo-file').click()">Upload Image</button>
+                  <span class="tool-logo-upload-status" id="tool-logo-upload-status">No image uploaded yet.</span>
+                </div>
+                <input id="edit-tool-logo-url" type="hidden">
+                <input id="edit-tool-logo-file" type="file" accept="image/*" hidden onchange="handleToolLogoSelect(this)">
+              </div>
             </div>
           </div>
           <div class="form-actions">
@@ -356,10 +1519,20 @@
               Saved!
             </div>
           </div>
+          <div class="edit-danger-zone">
+            <div class="edit-danger-card">
+              <div>
+                <div class="edit-danger-kicker">Account</div>
+                <div class="edit-danger-title">Delete account</div>
+                <div class="edit-danger-copy">Permanently removes your account, profile, and all data. This cannot be undone.</div>
+              </div>
+              <button class="delete-btn" type="button" onclick="openDeleteModal()">Delete Account</button>
+            </div>
+          </div>
         </div>
 
-      </div><!-- /profile-body -->
-    </div><!-- /profile-hero -->
+      </div>
+    </section>
 
     <!-- CONTENT ROW -->
     <div class="content-row">
@@ -367,20 +1540,34 @@
       <!-- MAIN COLUMN -->
       <div class="main-col">
 
-        <!-- CURRENTLY BUILDING -->
         <div class="card">
           <div class="card-header">
-            <div class="card-label">Currently Building</div>
+            <div class="card-label">Why I Build</div>
           </div>
-          <div id="building-found" style="display:none;" class="building-body">
-            <div class="building-name" id="building-name"></div>
-            <div class="building-desc" id="building-desc"></div>
-            <div class="building-meta" id="building-meta"></div>
+          <div class="bio-card-body">
+            <div class="profile-bio empty" id="profile-bio-view">Loading...</div>
           </div>
-          <div class="building-empty" id="building-empty" style="display:none;"></div>
         </div>
 
-        <!-- BUILDER JOURNEY -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Current Project</div>
+          </div>
+          <div class="project-card-body">
+            <div class="my-tool-card hidden" id="profile-tool-card">
+              <div class="my-tool-icon" id="profile-tool-icon">TS</div>
+              <div class="my-tool-info">
+                <div class="my-tool-label">Signature Tool</div>
+                <div class="my-tool-name" id="profile-tool-name"></div>
+                <div class="my-tool-description" id="profile-tool-description"></div>
+                <a href="#" target="_blank" rel="noopener" class="my-tool-link hidden" id="profile-tool-link">
+                  View Tool <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-header">
             <div class="card-label">Builder Journey</div>
@@ -393,33 +1580,38 @@
       <!-- RIGHT SIDEBAR -->
       <div class="right-col">
 
-        <!-- STATS -->
-        <div class="card">
+        <div class="card snapshot-card">
           <div class="card-header">
-            <div class="card-label">Stats</div>
+            <div class="card-label">Builder Snapshot</div>
           </div>
-          <div class="stats-grid" id="stats-grid">
-            <div class="stat-cell">
-              <div class="stat-num" id="stat-points">—</div>
-              <div class="stat-label">Points</div>
-            </div>
-            <div class="stat-cell">
-              <div class="stat-num" id="stat-streak">—</div>
-              <div class="stat-label">Day Streak</div>
-            </div>
-            <div class="stat-cell">
-              <div class="stat-num" id="stat-threads">—</div>
-              <div class="stat-label">Threads</div>
-            </div>
-            <div class="stat-cell">
-              <div class="stat-num" id="stat-days">—</div>
-              <div class="stat-label">Days Active</div>
-            </div>
+          <div class="snapshot-meta">
+            <div class="snapshot-row"><span class="snapshot-key">Building Since</span><span class="snapshot-value" id="snapshot-since">-</span></div>
+            <div class="snapshot-row"><span class="snapshot-key">Current Role</span><span class="snapshot-value" id="snapshot-role">Member</span></div>
+            <div class="snapshot-row"><span class="snapshot-key">Current Phase</span><span class="snapshot-value" id="snapshot-phase">Getting Started</span></div>
+            <div class="snapshot-row"><span class="snapshot-key">Signature Tool</span><span class="snapshot-value" id="snapshot-tool">In progress</span></div>
           </div>
-          <div class="stats-locked" id="stats-locked">Stats unlock after the Clarity phase.</div>
         </div>
 
-        <!-- GETTING STARTED (own profile only) -->
+        <div class="card connect-card">
+          <div class="card-header">
+            <div class="card-label">Let's Connect</div>
+          </div>
+          <div class="connect-card-body">
+            <div class="connect-copy" id="connect-copy">Open to collaborating, sharing ideas, and building together.</div>
+            <a class="connect-btn" href="community.html" id="connect-cta">Back to Community</a>
+            <div class="social-links-row hidden" id="profile-social-row">
+              <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-instagram-link">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+                Instagram
+              </a>
+              <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-linkedin-link">
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="card" id="getting-started-card" style="display:none;">
           <div class="cl-header">
             <div class="cl-title-row">
@@ -431,24 +1623,41 @@
           <div class="cl-steps" id="cl-steps"></div>
         </div>
 
-      </div><!-- /right-col -->
-
-    </div><!-- /content-row -->
-
-    <!-- ACCOUNT SETTINGS (own profile only) -->
-    <div class="settings-section" id="settings-section">
-      <div class="settings-label">Account Settings</div>
-      <div class="settings-card">
-        <div>
-          <div style="font-size:14px;font-weight:700;color:var(--text);">Delete account</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px;">Permanently removes your account, profile, and all data. Cannot be undone.</div>
-        </div>
-        <button class="delete-btn" onclick="openDeleteModal()">Delete Account</button>
       </div>
+
     </div>
 
-  </div><!-- /page-content -->
-</div><!-- /main-wrap -->
+  </div>
+</div>
+
+<!-- MESSAGE USER MODAL -->
+<div class="message-overlay" id="message-overlay" onclick="if(event.target===this)closeMessageModal()">
+  <div class="message-dialog" role="dialog" aria-modal="true" aria-labelledby="message-title">
+    <div id="message-compose-view">
+      <div class="message-kicker">Message User</div>
+      <div class="message-title" id="message-title">Start a Conversation</div>
+      <p class="message-subtitle" id="message-subtitle">Send a quick note without leaving this profile.</p>
+      <textarea class="message-textarea" id="message-input" placeholder="Write your message here..." maxlength="1000" oninput="handleMessageInput()"></textarea>
+      <div class="message-error" id="message-error"></div>
+      <div class="message-actions">
+        <button class="message-secondary-btn" type="button" id="message-cancel-btn" onclick="closeMessageModal()">Cancel</button>
+        <button class="message-primary-btn" type="button" id="message-send-btn" onclick="sendProfileMessage()" disabled>Send Message</button>
+      </div>
+    </div>
+    <div class="message-success-view" id="message-success-view">
+      <div class="message-success-badge">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="message-kicker">Message Sent</div>
+      <div class="message-title" id="message-success-title">Your message is on its way.</div>
+      <p class="message-subtitle">You can stay on this profile or jump into your inbox to keep the conversation going.</p>
+      <div class="message-actions">
+        <button class="message-secondary-btn" type="button" onclick="closeMessageModal()">Stay on Profile</button>
+        <a class="message-primary-btn" id="message-inbox-link" href="inbox.html">Go to Inbox</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- DELETE ACCOUNT MODAL -->
 <div id="da-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeDeleteModal()">
@@ -491,6 +1700,9 @@
 <script>
   let currentUser = null;
   let editOpen = false;
+  let profileTargetUid = null;
+  let profileTargetName = 'Member';
+  let sendingProfileMessage = false;
 
   function formatDate(ts) {
     if (!ts) return '—';
@@ -512,18 +1724,145 @@
     return '<span class="badge badge-member">Member</span>';
   }
 
+  function roleHeadline(role, certified) {
+    if (certified) return 'Certified Tool Builder';
+    if (role === 'admin') return 'Community Leader';
+    if (role === 'builder') return 'AI Tool Creator';
+    return 'ToolSpark Member';
+  }
+
+  function roleLabel(role) {
+    if (role === 'admin') return 'Admin';
+    if (role === 'builder') return 'Builder';
+    return 'Member';
+  }
+
+  function currentPhaseLabel(certProgress) {
+    const phases = [
+      { key: 'phase1Complete', name: 'Clarity' },
+      { key: 'phase2Complete', name: 'Build' },
+      { key: 'phase3Complete', name: 'Validate' },
+      { key: 'phase4Complete', name: 'Launch + Marketing' },
+      { key: 'phase5Complete', name: 'Community' },
+    ];
+    for (const phase of phases) {
+      if (!(certProgress && certProgress[phase.key])) return phase.name;
+    }
+    return 'Community';
+  }
+
+  function formatSparkStatementDisplay(sparkStatement) {
+    const clean = String(sparkStatement || '').replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+
+    const finallyMatch = clean.match(/\bfinally\b/i);
+    if (finallyMatch && clean.length > 90) {
+      const idx = finallyMatch.index;
+      const lead = clean.slice(0, idx).replace(/[,\s]+$/, '').trim();
+      if (lead) return lead + ', finally...';
+    }
+
+    return clean;
+  }
+
+  function updateSparkCard(sparkStatement, isOwnProfile) {
+    const sparkView = document.getElementById('profile-spark-view');
+    const placeholder = document.getElementById('spark-placeholder');
+    if (sparkStatement) {
+      sparkView.textContent = formatSparkStatementDisplay(sparkStatement);
+      sparkView.classList.remove('hidden');
+      placeholder.style.display = 'none';
+      return;
+    }
+    sparkView.textContent = '';
+    sparkView.classList.add('hidden');
+    placeholder.textContent = isOwnProfile
+      ? 'Complete the Challenge to add your spark statement and give your profile more personality.'
+      : 'This member is building in public inside ToolSpark. Their spark statement will show here once it is set.';
+    placeholder.style.display = 'block';
+  }
+
+  function updateSocialLinks(instagramUrl, linkedinUrl) {
+    const igLink = document.getElementById('profile-instagram-link');
+    const liLink = document.getElementById('profile-linkedin-link');
+    const socialRow = document.getElementById('profile-social-row');
+
+    if (instagramUrl) {
+      igLink.href = instagramUrl;
+      igLink.classList.remove('hidden');
+    } else {
+      igLink.classList.add('hidden');
+    }
+
+    if (linkedinUrl) {
+      liLink.href = linkedinUrl;
+      liLink.classList.remove('hidden');
+    } else {
+      liLink.classList.add('hidden');
+    }
+
+    socialRow.classList.toggle('hidden', !(instagramUrl || linkedinUrl));
+  }
+
+  function toolInitials(name) {
+    const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return 'TS';
+    return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  }
+
+  function updateToolCard(toolName, toolUrl, toolDescription, toolLogoUrl) {
+    const toolCard = document.getElementById('profile-tool-card');
+    const toolLink = document.getElementById('profile-tool-link');
+    const toolIcon = document.getElementById('profile-tool-icon');
+    const toolDescriptionEl = document.getElementById('profile-tool-description');
+    const snapshotTool = document.getElementById('snapshot-tool');
+
+    if (toolName) {
+      document.getElementById('profile-tool-name').textContent = toolName;
+      toolDescriptionEl.textContent = toolDescription || 'A signature tool this member is building inside ToolSpark.';
+      toolCard.classList.remove('hidden');
+      snapshotTool.textContent = toolName;
+      toolIcon.innerHTML = '';
+      if (toolLogoUrl) {
+        const img = document.createElement('img');
+        img.src = toolLogoUrl;
+        img.alt = toolName + ' logo';
+        img.onerror = function() {
+          toolIcon.innerHTML = '';
+          toolIcon.textContent = toolInitials(toolName);
+        };
+        toolIcon.appendChild(img);
+      } else {
+        toolIcon.textContent = toolInitials(toolName);
+      }
+      if (toolUrl) {
+        toolLink.href = toolUrl;
+        toolLink.classList.remove('hidden');
+      } else {
+        toolLink.classList.add('hidden');
+        toolLink.removeAttribute('href');
+      }
+      return;
+    }
+
+    toolCard.classList.add('hidden');
+    toolLink.classList.add('hidden');
+    toolLink.removeAttribute('href');
+    toolDescriptionEl.textContent = '';
+    toolIcon.innerHTML = 'TS';
+    snapshotTool.textContent = 'In progress';
+  }
+
   function toggleEdit() {
     editOpen = !editOpen;
     const form    = document.getElementById('edit-form');
     const btn     = document.getElementById('edit-toggle-btn');
-    const bioView = document.getElementById('profile-bio-view');
     const photoWrap     = document.getElementById('profile-photo-wrap');
     const bannerUploadBtn = document.getElementById('banner-upload-btn');
     if (editOpen) {
       form.classList.add('open');
       btn.textContent = 'Cancel';
       btn.classList.add('cancel');
-      bioView.style.display = 'none';
       if (photoWrap) photoWrap.classList.add('edit-open');
       if (bannerUploadBtn) bannerUploadBtn.style.display = 'flex';
       document.getElementById('success-msg').classList.remove('show');
@@ -531,7 +1870,6 @@
       form.classList.remove('open');
       btn.textContent = 'Edit Profile';
       btn.classList.remove('cancel');
-      bioView.style.display = '';
       if (photoWrap) photoWrap.classList.remove('edit-open');
       if (bannerUploadBtn) bannerUploadBtn.style.display = 'none';
     }
@@ -556,6 +1894,40 @@
       if (sidebarAv) sidebarAv.innerHTML = '<img src="' + url + '" alt="avatar">';
     } catch(err) { console.error('Photo upload failed', err); alert('Could not upload photo. Please try again.'); }
     finally { btn.disabled = false; btn.textContent = 'Save Changes'; input.value = ''; }
+  }
+
+  async function handleToolLogoSelect(input) {
+    const file = input.files[0];
+    if (!file || !currentUser) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); input.value = ''; return; }
+    const uploadBtn = document.getElementById('tool-logo-upload-btn');
+    const statusEl = document.getElementById('tool-logo-upload-status');
+    const hiddenUrlInput = document.getElementById('edit-tool-logo-url');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Uploading...';
+    statusEl.textContent = 'Uploading image...';
+    try {
+      const safeName = (file.name || 'logo').replace(/[^a-zA-Z0-9.\-_]/g, '-');
+      const ref = storage.ref('profile-images/' + currentUser.uid + '/tool-logo-' + Date.now() + '-' + safeName);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      hiddenUrlInput.value = url;
+      statusEl.textContent = 'Image uploaded and ready to save.';
+      updateToolCard(
+        document.getElementById('edit-tool-name').value.trim(),
+        document.getElementById('edit-tool-url').value.trim(),
+        document.getElementById('edit-tool-description').value.trim(),
+        url
+      );
+    } catch(err) {
+      console.error('Tool logo upload failed', err);
+      statusEl.textContent = 'Upload failed. Please try again.';
+      alert('Could not upload tool image. Please try again. ' + (err && err.code ? '(' + err.code + ')' : ''));
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = 'Upload Image';
+      input.value = '';
+    }
   }
 
   async function handleBannerSelect(input) {
@@ -584,12 +1956,23 @@
     const instagramVal = document.getElementById('edit-instagram').value.trim();
     const linkedinVal  = document.getElementById('edit-linkedin').value.trim();
     const toolNameVal  = document.getElementById('edit-tool-name').value.trim();
+    const toolDescriptionVal = document.getElementById('edit-tool-description').value.trim();
     const toolUrlVal   = document.getElementById('edit-tool-url').value.trim();
+    const toolLogoUrlVal = document.getElementById('edit-tool-logo-url').value.trim();
     if (!nameVal) { document.getElementById('edit-name').focus(); return; }
     const btn = document.getElementById('save-btn');
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
-      const update = { displayName: nameVal, bio: bioVal, instagramUrl: instagramVal, linkedinUrl: linkedinVal, myToolName: toolNameVal, myToolUrl: toolUrlVal };
+      const update = {
+        displayName: nameVal,
+        bio: bioVal,
+        instagramUrl: instagramVal,
+        linkedinUrl: linkedinVal,
+        myToolName: toolNameVal,
+        myToolDescription: toolDescriptionVal,
+        myToolUrl: toolUrlVal,
+        myToolLogoUrl: toolLogoUrlVal
+      };
       if (pendingPhotoURL) update.photoURL = pendingPhotoURL;
       await currentUser.updateProfile({ displayName: nameVal, ...(pendingPhotoURL && { photoURL: pendingPhotoURL }) });
       await db.collection('users').doc(currentUser.uid).update(update);
@@ -601,19 +1984,8 @@
       const bioView = document.getElementById('profile-bio-view');
       if (bioVal) { bioView.textContent = bioVal; bioView.classList.remove('empty'); }
       else { bioView.textContent = 'No bio yet — add one by clicking Edit Profile.'; bioView.classList.add('empty'); }
-      const igLink    = document.getElementById('profile-instagram-link');
-      const liLink    = document.getElementById('profile-linkedin-link');
-      const socialRow = document.getElementById('profile-social-row');
-      if (instagramVal) { igLink.href = instagramVal; igLink.classList.remove('hidden'); } else { igLink.classList.add('hidden'); }
-      if (linkedinVal)  { liLink.href = linkedinVal;  liLink.classList.remove('hidden'); } else { liLink.classList.add('hidden'); }
-      if (instagramVal || linkedinVal) socialRow.classList.remove('hidden'); else socialRow.classList.add('hidden');
-      const toolCard = document.getElementById('profile-tool-card');
-      if (toolNameVal) {
-        document.getElementById('profile-tool-name').textContent = toolNameVal;
-        toolCard.classList.remove('hidden');
-        const toolLink = document.getElementById('profile-tool-link');
-        if (toolUrlVal) { toolLink.href = toolUrlVal; toolLink.classList.remove('hidden'); } else { toolLink.classList.add('hidden'); }
-      } else { toolCard.classList.add('hidden'); }
+      updateSocialLinks(instagramVal, linkedinVal);
+      updateToolCard(toolNameVal, toolUrlVal, toolDescriptionVal, toolLogoUrlVal);
 
       document.getElementById('success-msg').classList.add('show');
       setTimeout(() => { document.getElementById('success-msg').classList.remove('show'); toggleEdit(); }, 1800);
@@ -636,11 +2008,14 @@
       if (current) foundCurrent = true;
       const dotClass   = done ? 'done' : current ? 'current' : '';
       const dotInner   = done
-        ? '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
-        : (i + 1);
+        ? '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+        : current
+          ? '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 19c5-1 10-6 11-11 2-1 4 0 4 0s1 2 0 4c-5 1-10 6-11 11-2 1-4 0-4 0s-1-2 0-4Z"/><path d="M9 15l-4 4"/><path d="M15 9l4-4"/></svg>'
+          : '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8 10V7a4 4 0 118 0v3"/></svg>';
       const badgeClass = done ? 'done' : current ? 'current' : 'locked';
       const badgeText  = done ? 'Complete' : current ? 'In Progress' : 'Locked';
       return '<div class="journey-phase">' +
+        '<div class="phase-step">' + (i + 1) + '</div>' +
         '<div class="phase-dot ' + dotClass + '">' + dotInner + '</div>' +
         '<div class="phase-info">' +
           '<div class="phase-name">' + p.name + '</div>' +
@@ -702,6 +2077,102 @@
   }
   function closeDeleteModal() { document.getElementById('da-overlay').style.display = 'none'; }
 
+  function handleMessageInput() {
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('message-send-btn');
+    if (sendBtn) sendBtn.disabled = !(input && input.value.trim());
+  }
+
+  function openMessageModal() {
+    if (!currentUser || !profileTargetUid || profileTargetUid === currentUser.uid) return;
+    document.getElementById('message-overlay').style.display = 'flex';
+    document.getElementById('message-compose-view').style.display = 'block';
+    document.getElementById('message-success-view').style.display = 'none';
+    document.getElementById('message-title').textContent = 'Message ' + profileTargetName;
+    document.getElementById('message-subtitle').textContent = 'Send ' + profileTargetName + ' a quick note without leaving this profile.';
+    document.getElementById('message-success-title').textContent = 'Your message was sent to ' + profileTargetName + '.';
+    document.getElementById('message-inbox-link').href = 'inbox.html?composeTo=' + encodeURIComponent(profileTargetUid);
+    document.getElementById('message-input').value = '';
+    document.getElementById('message-error').textContent = '';
+    document.getElementById('message-send-btn').disabled = true;
+    document.getElementById('message-send-btn').textContent = 'Send Message';
+    document.getElementById('message-cancel-btn').disabled = false;
+    setTimeout(() => document.getElementById('message-input').focus(), 0);
+  }
+
+  function closeMessageModal() {
+    if (sendingProfileMessage) return;
+    document.getElementById('message-overlay').style.display = 'none';
+    document.getElementById('message-error').textContent = '';
+  }
+
+  async function getOrCreateConversation(targetUid) {
+    const snap = await db.collection('conversations')
+      .where('participants', 'array-contains', currentUser.uid)
+      .get();
+    const existing = snap.docs.find(doc => (doc.data().participants || []).includes(targetUid));
+    if (existing) return existing.id;
+
+    const docRef = await db.collection('conversations').add({
+      participants: [currentUser.uid, targetUid],
+      lastMessage: '',
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+      ['unreadCount' + currentUser.uid]: 0,
+      ['unreadCount' + targetUid]: 0
+    });
+    return docRef.id;
+  }
+
+  async function sendProfileMessage() {
+    if (!currentUser || !profileTargetUid || sendingProfileMessage) return;
+    const input = document.getElementById('message-input');
+    const errorEl = document.getElementById('message-error');
+    const sendBtn = document.getElementById('message-send-btn');
+    const cancelBtn = document.getElementById('message-cancel-btn');
+    const content = input.value.trim();
+    if (!content) {
+      handleMessageInput();
+      return;
+    }
+
+    sendingProfileMessage = true;
+    errorEl.textContent = '';
+    sendBtn.disabled = true;
+    cancelBtn.disabled = true;
+    sendBtn.textContent = 'Sending...';
+
+    try {
+      const convId = await getOrCreateConversation(profileTargetUid);
+      await db.collection('conversations').doc(convId).collection('messages').add({
+        senderId: currentUser.uid,
+        content,
+        imageURL: '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false
+      });
+      await db.collection('conversations').doc(convId).update({
+        lastMessage: content,
+        lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ['unreadCount' + profileTargetUid]: firebase.firestore.FieldValue.increment(1)
+      });
+
+      document.getElementById('message-compose-view').style.display = 'none';
+      document.getElementById('message-success-view').style.display = 'block';
+    } catch(err) {
+      console.error('profile message send failed', err);
+      errorEl.textContent = 'Could not send your message. Please try again.';
+      sendBtn.disabled = false;
+      cancelBtn.disabled = false;
+      sendBtn.textContent = 'Send Message';
+    } finally {
+      sendingProfileMessage = false;
+      if (document.getElementById('message-success-view').style.display !== 'block') {
+        sendBtn.disabled = !(input && input.value.trim());
+        cancelBtn.disabled = false;
+      }
+    }
+  }
+
   async function confirmDeleteAccount() {
     const btn = document.getElementById('da-confirm-btn');
     const errEl = document.getElementById('da-error');
@@ -728,14 +2199,12 @@
     currentUser = firebaseUser;
 
     const viewUid      = new URLSearchParams(window.location.search).get('uid');
-    const isOwnProfile = !viewUid || viewUid === firebaseUser.uid;
-    const targetUid    = isOwnProfile ? firebaseUser.uid : viewUid;
+    const isOwnProfile = !viewUid;
+    const targetUid    = viewUid || firebaseUser.uid;
 
     // Show own-profile UI elements
     if (isOwnProfile) {
       document.getElementById('edit-toggle-btn').style.display = 'inline-flex';
-      document.getElementById('profile-email').style.display   = 'block';
-      document.getElementById('settings-section').style.display = 'block';
     }
 
     // Load user Firestore doc
@@ -751,11 +2220,16 @@
     const instagramUrl = data.instagramUrl || '';
     const linkedinUrl  = data.linkedinUrl  || '';
     const myToolName   = data.myToolName   || '';
+    const myToolDescription = data.myToolDescription || '';
     const myToolUrl    = data.myToolUrl    || '';
+    const myToolLogoUrl = data.myToolLogoUrl || '';
     const role         = data.userRole     || 'member';
     const createdAt    = data.createdAt    || null;
     const photoURL     = data.photoURL     || firebaseUser.photoURL || '';
     const bannerURL    = data.bannerURL    || '';
+    const certified    = !!data.certified;
+    profileTargetUid = targetUid;
+    profileTargetName = displayName;
 
     // Spark fallback from spark_profiles
     if (!sparkStatement) {
@@ -798,11 +2272,33 @@
 
     // Name, email, badges
     document.getElementById('profile-name').textContent = displayName;
+    document.getElementById('profile-role-display').textContent = roleHeadline(role, certified);
     if (isOwnProfile) document.getElementById('profile-email').textContent = firebaseUser.email || '';
     let badgeHTML = roleBadgeHTML(role);
-    if (data.certified) badgeHTML += ' <span class="badge badge-certified">🎓 ToolSpark Certified</span>';
+    if (certified) badgeHTML += ' <span class="badge badge-certified">🎓 ToolSpark Certified</span>';
     if (createdAt) badgeHTML += ' <span class="badge badge-since"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Since ' + formatDate(createdAt) + '</span>';
     document.getElementById('badge-row').innerHTML = badgeHTML;
+    document.getElementById('snapshot-since').textContent = createdAt ? formatDate(createdAt) : '-';
+    document.getElementById('snapshot-role').textContent = certified ? 'Certified Builder' : roleLabel(role);
+    document.getElementById('snapshot-phase').textContent = currentPhaseLabel(certProgress);
+    document.getElementById('connect-copy').textContent = isOwnProfile
+      ? 'Keep this page updated so members can quickly understand what you are building and how to connect.'
+      : displayName + ' is building inside ToolSpark and open to thoughtful collaboration, feedback, and shared momentum.';
+    const connectCta = document.getElementById('connect-cta');
+    if (connectCta) {
+      if (isOwnProfile) {
+        connectCta.textContent = 'Open Inbox';
+        connectCta.href = 'inbox.html';
+        connectCta.onclick = null;
+      } else {
+        connectCta.textContent = 'Message User';
+        connectCta.href = 'inbox.html?composeTo=' + encodeURIComponent(targetUid);
+        connectCta.onclick = function(event) {
+          event.preventDefault();
+          openMessageModal();
+        };
+      }
+    }
 
     // Bio
     const bioView = document.getElementById('profile-bio-view');
@@ -811,26 +2307,13 @@
     else { bioView.textContent = 'No bio added yet.'; }
 
     // Spark statement
-    const sparkView = document.getElementById('profile-spark-view');
-    if (sparkStatement) { sparkView.textContent = sparkStatement; sparkView.classList.remove('hidden'); }
+    updateSparkCard(sparkStatement, isOwnProfile);
 
     // Social links
-    const igLink    = document.getElementById('profile-instagram-link');
-    const liLink    = document.getElementById('profile-linkedin-link');
-    const socialRow = document.getElementById('profile-social-row');
-    if (instagramUrl) { igLink.href = instagramUrl; igLink.classList.remove('hidden'); }
-    if (linkedinUrl)  { liLink.href = linkedinUrl;  liLink.classList.remove('hidden'); }
-    if (instagramUrl || linkedinUrl) socialRow.classList.remove('hidden');
+    updateSocialLinks(instagramUrl, linkedinUrl);
 
     // My tool
-    if (myToolName) {
-      document.getElementById('profile-tool-name').textContent = myToolName;
-      document.getElementById('profile-tool-card').classList.remove('hidden');
-      if (myToolUrl) {
-        const toolLink = document.getElementById('profile-tool-link');
-        toolLink.href = myToolUrl; toolLink.classList.remove('hidden');
-      }
-    }
+    updateToolCard(myToolName, myToolUrl, myToolDescription, myToolLogoUrl);
 
     // Prefill edit form
     if (isOwnProfile) {
@@ -840,7 +2323,12 @@
       document.getElementById('edit-instagram').value = instagramUrl;
       document.getElementById('edit-linkedin').value  = linkedinUrl;
       document.getElementById('edit-tool-name').value = myToolName;
+      document.getElementById('edit-tool-description').value = myToolDescription;
       document.getElementById('edit-tool-url').value  = myToolUrl;
+      document.getElementById('edit-tool-logo-url').value = myToolLogoUrl;
+      document.getElementById('tool-logo-upload-status').textContent = myToolLogoUrl
+        ? 'Current image uploaded. Upload a new one to replace it.'
+        : 'No image uploaded yet.';
     }
 
     // Stats
@@ -853,39 +2341,6 @@
     } catch { document.getElementById('stat-threads').textContent = '0'; }
 
     // Currently Building (from clarity session — own profile queries by email)
-    const queryEmail = isOwnProfile ? firebaseUser.email : (data.email || null);
-    if (queryEmail) {
-      try {
-        const cSnap = await db.collection('clarity_sessions')
-          .where('clientEmail', '==', queryEmail)
-          .orderBy('createdAt', 'desc')
-          .limit(1)
-          .get();
-        if (!cSnap.empty) {
-          const cData = cSnap.docs[0].data();
-          document.getElementById('building-name').textContent = cData.businessName || 'Their Project';
-          document.getElementById('building-desc').textContent = cData.clientSummary || '';
-          if (cData.createdAt) {
-            document.getElementById('building-meta').innerHTML =
-              '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>&nbsp;Clarity session completed ' + formatDate(cData.createdAt);
-          }
-          document.getElementById('building-found').style.display = 'block';
-        } else {
-          const emptyEl = document.getElementById('building-empty');
-          emptyEl.textContent = isOwnProfile ? 'Complete a Clarity Session to see your project here.' : 'No clarity session on file yet.';
-          emptyEl.style.display = 'block';
-        }
-      } catch(err) {
-        const emptyEl = document.getElementById('building-empty');
-        emptyEl.textContent = 'Could not load project info.';
-        emptyEl.style.display = 'block';
-      }
-    } else {
-      const emptyEl = document.getElementById('building-empty');
-      emptyEl.textContent = 'Nothing listed yet.';
-      emptyEl.style.display = 'block';
-    }
-
     // Builder Journey
     renderJourney(certProgress);
 

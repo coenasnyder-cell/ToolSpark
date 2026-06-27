@@ -313,11 +313,13 @@
   let selectedMsgImage = null;
   let isSending = false;
   let searchTimeout = null;
+  let pendingComposeUid = null;
 
   // â”€â”€ AUTH â”€â”€
   window.addEventListener('tsUserReady', async function() {
     const user = firebase.auth().currentUser;
     currentUser = user;
+    pendingComposeUid = new URLSearchParams(window.location.search).get('composeTo');
 
     try {
       const snap = await db.collection('users').doc(user.uid).get();
@@ -327,6 +329,10 @@
     const name = user.displayName || user.email || 'Builder';
     userCache[user.uid] = { displayName: user.displayName || name, photoURL: user.photoURL || '' };
     startConvsListener();
+    if (pendingComposeUid && pendingComposeUid !== currentUser.uid) {
+      await startConvWith(pendingComposeUid);
+      clearComposeParam();
+    }
   });
 
   // â”€â”€ CONVERSATIONS LISTENER â”€â”€
@@ -655,6 +661,12 @@
     } catch(e) {
       console.error('startConvWith error', e);
     }
+  }
+
+  function clearComposeParam() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('composeTo');
+    window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
   }
 
 

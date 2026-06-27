@@ -448,6 +448,24 @@
               </div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="evt-type">Event Type</label>
+                <select class="form-select" id="evt-type">
+                  <option value="live-training">Live Training</option>
+                  <option value="coffee-chat">Coffee Chat</option>
+                  <option value="build-session">Build Session</option>
+                  <option value="qa">Q&amp;A</option>
+                  <option value="launch-party">Launch Party</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="evt-host">Host Name</label>
+                <input class="form-input" id="evt-host" type="text"
+                  placeholder="e.g. Sid, Specky, ToolSpark Team">
+              </div>
+            </div>
+
             <div class="form-row single">
               <div class="form-group">
                 <label class="form-label" for="evt-url">Zoom / Meeting Link</label>
@@ -632,6 +650,8 @@
     const startVal = document.getElementById('evt-start').value;
     const lengthVal = parseInt(document.getElementById('evt-length').value, 10) || 60;
     const location = document.getElementById('evt-location').value.trim();
+    const eventType = document.getElementById('evt-type').value.trim() || 'live-training';
+    const hostName = document.getElementById('evt-host').value.trim();
     const url = document.getElementById('evt-url').value.trim();
     const isRecurring = document.getElementById('evt-recurring').checked;
 
@@ -654,7 +674,8 @@
         const updatePayload = {
           eventTitle: title, description, eventDate,
           eventStart: startVal, eventEnd: eventEnd, eventLength: lengthVal,
-          eventLocation: location, eventURL: url, isRecurring: isRecurring
+          eventLocation: location, eventURL: url, eventType: eventType,
+          hostName: hostName, isRecurring: isRecurring
         };
         await db.collection('Events').doc(editingEventId).update(updatePayload);
         editingEventId = null;
@@ -663,7 +684,8 @@
         const createPayload = {
           eventTitle: title, description, eventDate,
           eventStart: startVal, eventEnd: eventEnd, eventLength: lengthVal,
-          eventLocation: location, eventURL: url, isRecurring: isRecurring,
+          eventLocation: location, eventURL: url, eventType: eventType,
+          hostName: hostName, isRecurring: isRecurring,
           status: 'upcoming',
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           createdBy: currentUser.uid
@@ -875,6 +897,12 @@
     if (ev.eventLocation) {
       metaHtml += '<span>📍 ' + escHtml(ev.eventLocation) + '</span>';
     }
+    if (ev.eventType) {
+      metaHtml += '<span>' + escHtml(formatEventTypeLabel(ev.eventType)) + '</span>';
+    }
+    if (ev.hostName) {
+      metaHtml += '<span>Host: ' + escHtml(ev.hostName) + '</span>';
+    }
     const meta = metaHtml ? '<div class="evt-meta">' + metaHtml + '</div>' : '';
 
     const joinBtn = (!isPast && ev.eventURL)
@@ -927,6 +955,15 @@
     return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + ampm;
   }
 
+  function formatEventTypeLabel(value) {
+    const type = String(value || '').toLowerCase().trim();
+    if (type === 'coffee-chat') return 'Coffee Chat';
+    if (type === 'build-session') return 'Build Session';
+    if (type === 'qa') return 'Q&A';
+    if (type === 'launch-party') return 'Launch Party';
+    return 'Live Training';
+  }
+
   function togglePast() {
     pastVisible = !pastVisible;
     document.getElementById('past-list').style.display = pastVisible ? 'block' : 'none';
@@ -948,6 +985,8 @@
     document.getElementById('evt-start').value    = ev.eventStart    || '';
     document.getElementById('evt-length').value   = ev.eventLength   || 60;
     document.getElementById('evt-location').value = ev.eventLocation || '';
+    document.getElementById('evt-type').value     = ev.eventType     || 'live-training';
+    document.getElementById('evt-host').value     = ev.hostName      || '';
     document.getElementById('evt-url').value      = ev.eventURL      || '';
 
     if (ev.eventDate) {
