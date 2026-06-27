@@ -1,475 +1,449 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile — ToolSpark</title>
+<title>Profile · ToolSpark</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --dark: #0C0B09;
-    --dark2: #141210;
-    --dark3: #1C1A17;
+    --dark: #0C0B09; --dark2: #141210; --dark3: #1C1A17;
     --border-dark: #2A2720;
-    --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.12);
-    --bg: #F4F2EE;
-    --surface: #FFFFFF;
-    --border: #E4E0D8;
-    --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #9E9891;
-    --radius: 14px;
-    --radius-sm: 8px;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --coral: #C4622D;
+    --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
     --sidebar-width: 220px;
-    --header-height: 64px;
   }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-
-
-  /* ── MAIN LAYOUT ── */
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-
-
-  /* ── PAGE GRID ── */
-  .page-content {
-    flex: 1; display: flex; flex-direction: column; gap: 1.5rem;
-    padding: 1.75rem 2rem 3rem; max-width: 860px; width: 100%;
-  }
-  .main-col { display: flex; flex-direction: column; gap: 1.25rem; }
-  .member-since-row { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text3); margin-top:10px; }
-
-  /* ── CARD BASE ── */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
-
-  /* ── CARD TITLE ── */
-  .card-title {
-    font-size: 11px; font-weight: 700; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.12em;
-    margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;
-  }
-  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; padding: 1.75rem 2rem 3rem; max-width: 1060px; width: 100%; }
 
   /* ── PROFILE HERO ── */
-  .profile-hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .profile-hero { background: var(--dark2); border: 1px solid var(--border-dark); border-radius: var(--radius); overflow: hidden; }
   .profile-banner {
-    height: 96px;
-    background: linear-gradient(120deg, var(--dark) 0%, #2A2218 60%, #3A2E1A 100%);
+    height: 120px;
+    background: linear-gradient(135deg, #1C1A17 0%, #2A2520 60%, #1C1A17 100%);
+    background-size: cover; background-position: center;
     position: relative;
   }
-  .profile-banner::after {
-    content: ''; position: absolute; inset: 0;
-    background: repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(201,168,76,0.04) 18px, rgba(201,168,76,0.04) 19px);
+  .banner-upload-btn {
+    position: absolute; bottom: 10px; right: 12px; z-index: 2;
+    display: none; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 100px;
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
   }
+
   .profile-body { padding: 0 1.75rem 1.75rem; }
-  .profile-photo-wrap { margin-top: -44px; margin-bottom: 1rem; position: relative; display: inline-block; }
-  .profile-photo {
-    width: 88px; height: 88px; border-radius: 50%;
-    border: 3px solid var(--surface); background: var(--dark3);
-    object-fit: cover; display: block;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-  }
+
+  .profile-photo-wrap { position: relative; width: 88px; height: 88px; margin-top: -44px; margin-bottom: 14px; flex-shrink: 0; }
+  .profile-photo { width: 88px; height: 88px; border-radius: 50%; border: 3px solid var(--dark2); object-fit: cover; display: block; }
   .profile-photo-initials {
     width: 88px; height: 88px; border-radius: 50%;
-    border: 3px solid var(--surface); background: var(--dark3);
+    border: 3px solid var(--dark2);
+    background: linear-gradient(135deg, #2A2520, var(--dark3));
     display: flex; align-items: center; justify-content: center;
-    font-size: 30px; font-weight: 900; color: var(--gold);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2); letter-spacing: -1px;
+    font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); font-style: italic;
   }
-  .photo-upload-btn { display:none; position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,0.45); border:none; cursor:pointer; align-items:center; justify-content:center; color:#fff; transition:background 0.15s; }
-  .photo-upload-btn:hover { background:rgba(0,0,0,0.6); }
-  .photo-upload-btn svg { pointer-events:none; }
-  .edit-open .photo-upload-btn { display:flex; }
-  .banner-upload-btn { display:none; position:absolute; bottom:8px; right:12px; background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:100px; padding:5px 12px; font-size:11px; font-weight:700; font-family:'Lato',sans-serif; cursor:pointer; align-items:center; gap:6px; z-index:2; transition:background 0.15s; }
-  .banner-upload-btn:hover { background:rgba(0,0,0,0.75); }
-  .form-note { font-size:11px; color:var(--text3); margin-top:4px; }
-  .form-note a { color:var(--gold); font-weight:700; text-decoration:none; }
-  .form-input[readonly] { background:var(--bg); cursor:default; color:var(--text2); }
-  .profile-photo-wrap { position:relative; display:inline-block; }
-  .profile-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-  .profile-name-block { flex: 1; min-width: 0; }
-  .profile-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.2; margin-bottom: 5px; }
-  .profile-email { font-size: 13px; color: var(--text3); margin-bottom: 10px; }
-  .badge-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 10px; border-radius: 100px;
-    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  .photo-upload-btn {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--gold); border: 2px solid var(--dark2);
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--dark);
   }
-  .badge-admin { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
-  .badge-builder { background: rgba(59,130,246,0.1); color: #3B82F6; border: 1px solid rgba(59,130,246,0.25); }
-  .badge-member { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
-  .badge-certified { background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(232,213,163,0.1)); color: #B8922E; border: 1px solid rgba(201,168,76,0.45); }
-  .badge-since { font-size: 11px; color: var(--text3); font-weight: 400; text-transform: none; letter-spacing: 0; padding: 0; border: none; background: none; display: inline-flex; align-items: center; gap: 4px; }
-  @media (min-width: 901px) { .badge-since { display: none; } }
-  .edit-profile-btn {
-    background: none; border: 1px solid var(--border); border-radius: 100px;
-    padding: 7px 18px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
-  }
-  .edit-profile-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
-  .edit-profile-btn.cancel { color: var(--text3); }
-  .profile-bio { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 14px; color: var(--text2); line-height: 1.7; }
-  .profile-bio.empty { color: var(--text3); font-style: italic; }
+  .profile-photo-wrap.edit-open .photo-upload-btn { display: flex; }
 
-  /* ── SPARK STATEMENT ── */
-  .spark-statement { margin-top: 1rem; font-size: 15px; font-style: italic; color: var(--gold); font-family: 'Playfair Display', serif; line-height: 1.5; }
+  .profile-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 10px; }
+  .profile-name-block { display: flex; flex-direction: column; gap: 4px; }
+  .profile-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500; color: #F0EDE6; line-height: 1.2; }
+  .profile-email { font-size: 12px; color: rgba(255,255,255,0.4); display: none; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+  .badge-admin   { background: rgba(196,98,45,0.2); border: 1px solid rgba(196,98,45,0.3); color: #E0875A; }
+  .badge-builder { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
+  .badge-member  { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.55); }
+  .badge-certified { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); color: var(--gold-light); }
+  .badge-since { background: transparent; border: none; color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 400; padding: 0; gap: 4px; }
+
+  .edit-profile-btn {
+    flex-shrink: 0; display: none; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 8px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8); font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .edit-profile-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  .edit-profile-btn.cancel { background: rgba(196,98,45,0.15); border-color: rgba(196,98,45,0.3); color: #E0875A; }
+
+  .profile-bio { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.7; max-width: 640px; margin-bottom: 8px; }
+  .profile-bio.empty { color: rgba(255,255,255,0.3); font-style: italic; }
+
+  .spark-statement {
+    padding-left: 14px; border-left: 2.5px solid var(--gold);
+    font-family: 'Playfair Display', serif; font-size: 15px; font-style: italic;
+    color: rgba(255,255,255,0.75); line-height: 1.6; max-width: 580px;
+    margin: 10px 0;
+  }
   .spark-statement.hidden { display: none; }
 
-  /* ── SOCIAL LINKS ── */
-  .social-links-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
-  .social-link-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 700;
-    text-decoration: none; border: 1px solid var(--border); color: var(--text2);
-    background: var(--bg); transition: all 0.15s;
-  }
-  .social-link-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .social-links-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .social-links-row.hidden { display: none; }
+  .social-link-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 100px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700;
+    text-decoration: none; transition: all 0.15s;
+  }
+  .social-link-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .social-link-btn.hidden { display: none; }
 
-  /* ── MY TOOL CARD ── */
   .my-tool-card {
-    margin-top: 1.25rem; padding: 1rem 1.25rem;
-    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2);
-    border-radius: var(--radius-sm); display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 12px; padding: 10px 14px;
+    background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-sm); max-width: 360px;
   }
   .my-tool-card.hidden { display: none; }
-  .my-tool-icon { font-size: 22px; flex-shrink: 0; }
-  .my-tool-info { flex: 1; min-width: 0; }
-  .my-tool-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 2px; }
-  .my-tool-name { font-size: 14px; font-weight: 700; color: var(--text); }
-  .my-tool-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; color: var(--gold); font-weight: 700; text-decoration: none; }
-  .my-tool-link:hover { color: var(--gold-light); }
+  .my-tool-icon { font-size: 20px; }
+  .my-tool-info { display: flex; flex-direction: column; gap: 2px; }
+  .my-tool-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+  .my-tool-name { font-size: 14px; font-weight: 700; color: #F0EDE6; }
+  .my-tool-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--gold); font-weight: 700; text-decoration: none; }
+  .my-tool-link.hidden { display: none; }
 
   /* ── EDIT FORM ── */
-  .edit-form { display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); flex-direction: column; gap: 1rem; }
-  .edit-form.open { display: flex; }
+  .edit-form { display: none; }
+  .edit-form.open {
+    display: flex; flex-direction: column; gap: 14px;
+    margin-top: 1.25rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--border-dark);
+  }
   .form-field { display: flex; flex-direction: column; gap: 5px; }
-  .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .form-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; }
   .form-input, .form-textarea {
-    width: 100%; background: var(--bg); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 14px;
-    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text);
-    outline: none; transition: border-color 0.15s;
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--border-dark); border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.05); color: #F0EDE6;
+    font-family: inherit; font-size: 14px; outline: none;
+    transition: border-color 0.15s;
   }
-  .form-input:focus, .form-textarea:focus { border-color: var(--gold); }
-  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
-  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-  .form-actions { display: flex; align-items: center; gap: 10px; }
+  .form-input:focus, .form-textarea:focus { border-color: var(--gold); background: rgba(255,255,255,0.08); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-note { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .form-note a { color: var(--gold); text-decoration: none; }
+  .form-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .save-btn {
-    background: var(--gold); color: #0C0B09; border: none; border-radius: 100px;
-    padding: 9px 24px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
+    padding: 10px 24px; border-radius: 8px;
+    background: var(--gold); color: var(--dark);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer; transition: opacity 0.15s, transform 0.15s;
   }
-  .save-btn:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.25); }
-  .save-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
-  .success-msg { display: none; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #3D8A65; }
-  .success-msg.show { display: flex; }
+  .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .success-msg { display: none; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: #5CB88A; }
+  .success-msg.show { display: inline-flex; }
 
-  /* ── STATS CARD ── */
-  .stats-card { padding: 1.5rem 1.75rem; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
-  .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--gold); font-weight: 400; line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+  /* ── CONTENT ROW ── */
+  .content-row { display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem; align-items: start; }
+  .main-col { display: flex; flex-direction: column; gap: 1.25rem; }
+  .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
 
-  /* ── CLARITY CARD ── */
-  .clarity-card { padding: 1.5rem 1.75rem; }
-  .clarity-found { display: none; flex-direction: column; gap: 0.75rem; }
-  .clarity-empty { display: none; flex-direction: column; gap: 1rem; align-items: flex-start; }
-  .clarity-business { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 400; color: var(--text); }
-  .clarity-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
-  .clarity-summary { font-size: 13px; color: var(--text2); line-height: 1.7; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.875rem 1rem; }
-  .clarity-meta { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
-  .clarity-cta-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
-  .clarity-cta-text strong { color: var(--text); }
-  .cta-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--gold); color: #0C0B09; border: none; border-radius: 100px;
-    padding: 9px 20px; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
-    text-decoration: none; cursor: pointer; transition: all 0.2s;
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .card-header { padding: 0.875rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); }
+
+  /* ── STATS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); }
+  .stat-cell { background: var(--surface); padding: 1rem 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; }
+  .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
+  .stats-locked { padding: 1.25rem 1.5rem; font-size: 13px; color: var(--text3); display: none; }
+
+  /* ── CURRENTLY BUILDING ── */
+  .building-body { padding: 1.25rem 1.5rem; }
+  .building-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .building-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 10px; }
+  .building-meta { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+  .building-empty { padding: 1.5rem; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.6; }
+
+  /* ── BUILDER JOURNEY ── */
+  .journey-phases { display: flex; flex-direction: column; }
+  .journey-phase { display: flex; align-items: center; gap: 12px; padding: 0.875rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .journey-phase:last-child { border-bottom: none; }
+  .phase-dot {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    border: 2px solid var(--border); color: var(--text3); background: var(--bg);
   }
-  .cta-link:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.25); }
+  .phase-dot.done { background: var(--dark); border-color: var(--dark); color: #fff; }
+  .phase-dot.current { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+  .phase-info { flex: 1; }
+  .phase-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .phase-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .phase-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.07em; flex-shrink: 0; }
+  .phase-badge.done    { background: rgba(42,92,69,0.1); color: var(--green); border: 1px solid rgba(42,92,69,0.2); }
+  .phase-badge.current { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .phase-badge.locked  { background: var(--bg); color: var(--text3); border: 1px solid var(--border); }
 
-  /* ── RIGHT COLUMN CARDS ── */
-  .since-card { padding: 1.25rem 1.5rem; }
-  .since-date { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 3px; }
-
-  /* ── MARKETPLACE SECTION ── */
-  .marketplace-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  .marketplace-section-header { padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .marketplace-section-title { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; }
-  .marketplace-section-link { font-size: 12px; color: var(--gold); font-weight: 700; text-decoration: none; }
-  .marketplace-section-link:hover { color: var(--gold-light); }
-  .tool-list { display: flex; flex-direction: column; }
-  .tool-row { display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--border); text-decoration: none; transition: background 0.15s; }
-  .tool-row:last-child { border-bottom: none; }
-  .tool-row:hover { background: var(--bg); }
-  .tool-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
-  .tool-info { flex: 1; min-width: 0; }
-  .tool-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-  .tool-desc { font-size: 13px; color: var(--text3); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
-  .tool-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-  .tool-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; }
-  .tool-uses { font-size: 12px; color: var(--text3); }
-  .marketplace-empty { padding: 2.5rem 1.75rem; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.7; }
-  .marketplace-empty-icon { font-size: 32px; margin-bottom: 10px; }
-  .marketplace-empty-link { color: var(--gold); font-weight: 700; text-decoration: none; }
-  .marketplace-empty-link:hover { color: var(--gold-light); }
-  .since-sub { font-size: 12px; color: var(--text3); }
-  .links-card { padding: 1.25rem 1.5rem; }
-  .quick-link {
-    display: flex; align-items: center; gap: 10px; padding: 8px 0;
-    border-bottom: 1px solid var(--border); text-decoration: none;
-    color: var(--text2); font-size: 13px; font-weight: 700; transition: color 0.15s;
-  }
-  .quick-link:last-child { border-bottom: none; padding-bottom: 0; }
-  .quick-link:hover { color: var(--gold); }
-  .quick-link svg { opacity: 0.5; flex-shrink: 0; }
-  .quick-link:hover svg { opacity: 1; }
-
-  /* ── GETTING STARTED CHECKLIST ── */
-  .checklist-card { overflow: hidden; }
-  .checklist-header { padding: 1rem 1.25rem 0.875rem; border-bottom: 1px solid var(--border); }
-  .checklist-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-  .checklist-title { font-size: 13px; font-weight: 700; color: var(--text); }
-  .checklist-count { font-size: 11px; color: var(--text3); }
-  .checklist-bar { height: 3px; background: var(--border); border-radius: 10px; overflow: hidden; }
-  .checklist-fill { height: 100%; background: var(--gold); border-radius: 10px; transition: width 0.4s ease; }
-  .checklist-steps { display: flex; flex-direction: column; }
+  /* ── GETTING STARTED ── */
+  .cl-header { padding: 0.875rem 1.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+  .cl-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .cl-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .cl-count { font-size: 11px; color: var(--text3); }
+  .cl-bar { height: 3px; background: var(--border); border-radius: 10px; overflow: hidden; }
+  .cl-fill { height: 100%; background: var(--gold); border-radius: 10px; transition: width 0.4s ease; }
+  .cl-steps { display: flex; flex-direction: column; }
   .cl-step {
     display: flex; align-items: center; gap: 10px;
-    padding: 0.8rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    text-decoration: none; color: inherit;
-    transition: background 0.12s; cursor: pointer;
+    padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border);
+    text-decoration: none; color: inherit; transition: background 0.12s; cursor: pointer;
   }
   .cl-step:last-child { border-bottom: none; }
   .cl-step:not(.cl-done):hover { background: #FAFAF8; }
   .cl-step.cl-done { cursor: default; }
-  .cl-step.cl-featured { background: rgba(201,168,76,0.05); }
-  .cl-step.cl-featured:not(.cl-done):hover { background: rgba(201,168,76,0.09); }
+  .cl-step.cl-featured:not(.cl-done):hover { background: rgba(201,168,76,0.07); }
   .cl-check {
-    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     border: 2px solid var(--border); font-size: 11px; font-weight: 700; color: var(--text3);
   }
-  .cl-check.cl-check-done { background: var(--gold); border-color: var(--gold); color: var(--dark); }
-  .cl-check.cl-check-featured { border-color: var(--gold); color: var(--gold); }
+  .cl-check.done { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .cl-check.current { border-color: var(--gold); color: var(--gold); }
   .cl-body { flex: 1; }
-  .cl-label { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
-  .cl-label.cl-done-text { color: var(--text3); text-decoration: line-through; }
-  .cl-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .cl-label { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .cl-label.done { color: var(--text3); text-decoration: line-through; }
+  .cl-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
   .cl-arrow { color: var(--text3); font-size: 14px; }
 
-  @media (max-width: 600px) {
-    .page-content { padding: 0.875rem 0.875rem 80px; gap: 0.875rem; }
-    .profile-body { padding: 0 1.25rem 1.25rem; }
-    .profile-name { font-size: 19px; }
-    .stats-card, .clarity-card { padding: 1.25rem; }
-    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  /* ── ACCOUNT SETTINGS ── */
+  .settings-section { display: none; }
+  .settings-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.75rem; }
+  .settings-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   }
-  @media (max-width: 480px) {
-    .top-header { padding: 0 0.875rem; }
-    .page-content { padding: 0.75rem 0.75rem 80px; gap: 0.625rem; }
-    .profile-body { padding: 0 1rem 1rem; }
-    .profile-banner { height: 76px; }
-    .profile-photo, .profile-photo-initials { width: 76px; height: 76px; }
-    .profile-photo-wrap { margin-top: -38px; }
-    .profile-photo-initials { font-size: 26px; }
-    .profile-name { font-size: 17px; }
-    .stat-num { font-size: 22px; }
-    .profile-top-row { flex-wrap: wrap; }
-    .edit-profile-btn { width: 100%; justify-content: center; margin-top: 0.25rem; }
+  .delete-btn {
+    flex-shrink: 0; padding: 8px 16px; border-radius: var(--radius-sm);
+    background: none; border: 1px solid rgba(196,98,45,0.4);
+    color: var(--coral); font-size: 13px; font-weight: 700; font-family: 'Lato', sans-serif;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .delete-btn:hover { background: rgba(196,98,45,0.08); }
+
+  @media (max-width: 900px) { .content-row { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) {
+    .page-content { padding: 0.875rem 0.875rem 80px; }
+    .profile-banner { height: 90px; }
+    .profile-body { padding: 0 1.25rem 1.25rem; }
+    .profile-name { font-size: 20px; }
   }
 </style>
 </head>
 <body>
 
-
-<!-- ── MAIN WRAP ── -->
 <div class="main-wrap">
+  <header class="top-header" id="top-header"></header>
 
- <!-- TOP HEADER -->
-<header class="top-header"></header>
-
-  <!-- PAGE CONTENT -->
   <div class="page-content">
 
-    <!-- MAIN COLUMN -->
-    <div class="main-col">
+    <!-- PROFILE HERO -->
+    <div class="profile-hero">
+      <div class="profile-banner" id="profile-banner">
+        <button class="banner-upload-btn" id="banner-upload-btn" type="button" onclick="document.getElementById('banner-file-input').click()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Change Banner
+        </button>
+        <input type="file" id="banner-file-input" accept="image/*" style="display:none" onchange="handleBannerSelect(this)">
+      </div>
 
-      <!-- PROFILE HERO CARD -->
-      <div class="profile-hero">
-        <div class="profile-banner" id="profile-banner" style="background-size:cover;background-position:center;">
-          <button class="banner-upload-btn" id="banner-upload-btn" type="button" onclick="document.getElementById('banner-file-input').click()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Change Banner
-          </button>
-          <input type="file" id="banner-file-input" accept="image/*" style="display:none" onchange="handleBannerSelect(this)">
-        </div>
-        <div class="profile-body">
+      <div class="profile-body">
 
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;">
           <div class="profile-photo-wrap" id="profile-photo-wrap">
-            <!-- Replaced by JS with <img> or initials div -->
             <div class="profile-photo-initials" id="profile-photo-el">?</div>
             <button class="photo-upload-btn" type="button" title="Change photo" onclick="document.getElementById('photo-file-input').click()">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </button>
             <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
           </div>
+          <button class="edit-profile-btn" id="edit-toggle-btn" onclick="toggleEdit()">Edit Profile</button>
+        </div>
 
-          <div class="profile-top-row">
-            <div class="profile-name-block">
-              <div class="profile-name" id="profile-name">Loading…</div>
-              <div class="profile-email" id="profile-email"></div>
-              <div class="badge-row" id="badge-row"></div>
-              <div class="member-since-row" id="member-since-row" style="display:none">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                Member since <span id="since-date">—</span>
-              </div>
-            </div>
-            <button class="edit-profile-btn" id="edit-toggle-btn" onclick="toggleEdit()">Edit Profile</button>
-          </div>
-
-          <!-- Bio (read view) -->
-          <div class="profile-bio empty" id="profile-bio-view">Loading…</div>
-
-          <!-- Spark Statement (read view) -->
-          <div class="spark-statement hidden" id="profile-spark-view"></div>
-
-          <!-- Social Links (read view) -->
-          <div class="social-links-row hidden" id="profile-social-row">
-            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-instagram-link">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-              Instagram
-            </a>
-            <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-linkedin-link">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              LinkedIn
-            </a>
-          </div>
-
-          <!-- My Tool Card (read view) -->
-          <div class="my-tool-card hidden" id="profile-tool-card">
-            <div class="my-tool-icon">🛠️</div>
-            <div class="my-tool-info">
-              <div class="my-tool-label">My Tool</div>
-              <div class="my-tool-name" id="profile-tool-name"></div>
-              <a href="#" target="_blank" rel="noopener" class="my-tool-link hidden" id="profile-tool-link">
-                View Tool <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- Edit form (hidden by default) -->
-          <div class="edit-form" id="edit-form">
-            <div class="form-field">
-              <label class="form-label" for="edit-name">Display Name</label>
-              <input class="form-input" id="edit-name" type="text" placeholder="Your name" maxlength="60">
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-bio">Bio</label>
-              <textarea class="form-textarea" id="edit-bio" placeholder="Tell the community about yourself, what you're building, your background…" maxlength="400" rows="4"></textarea>
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-spark">Spark Statement</label>
-              <input class="form-input" id="edit-spark" type="text" placeholder="Complete the Challenge to set your spark" maxlength="120" readonly>
-              <div class="form-note">Set during the Challenge. <a href="roadmap.html">Update in My Roadmap →</a></div>
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-instagram">Instagram URL</label>
-              <input class="form-input" id="edit-instagram" type="url" placeholder="https://instagram.com/yourhandle">
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="edit-linkedin">LinkedIn URL</label>
-              <input class="form-input" id="edit-linkedin" type="url" placeholder="https://linkedin.com/in/yourprofile">
-            </div>
-            <div id="tool-fields" style="display:none;">
-              <div class="form-field">
-                <label class="form-label" for="edit-tool-name">My Tool Name</label>
-                <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="edit-tool-url">My Tool URL</label>
-                <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
-              </div>
-            </div>
-            <div class="form-actions">
-              <button class="save-btn" id="save-btn" onclick="saveProfile()">Save Changes</button>
-              <button class="edit-profile-btn cancel" onclick="toggleEdit()">Cancel</button>
-              <div class="success-msg" id="success-msg">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Saved!
-              </div>
-            </div>
-          </div>
-      <!-- STATS -->
-      <div id="profile-stats-block" style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
-        <div class="stats-grid">
-          <div>
-            <div class="stat-num" id="stat-threads">—</div>
-            <div class="stat-label">Threads Posted</div>
-          </div>
-          <div>
-            <div class="stat-num" id="stat-points">—</div>
-            <div class="stat-label">Points</div>
-          </div>
-          <div>
-            <div class="stat-num" id="stat-streak">—</div>
-            <div class="stat-label">Day Streak</div>
-          </div>
-          <div>
-            <div class="stat-num" id="stat-days">—</div>
-            <div class="stat-label">Days Active</div>
+        <div class="profile-top-row" style="margin-top:12px;">
+          <div class="profile-name-block">
+            <div class="profile-name" id="profile-name">Loading…</div>
+            <div class="profile-email" id="profile-email"></div>
+            <div class="badge-row" id="badge-row"></div>
           </div>
         </div>
-      </div><!-- /profile-stats-block -->
-      <div id="profile-stats-placeholder" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);color:var(--text3);font-size:13px;">
-        Stats unlock after the Challenge.
-      </div>
+
+        <div class="profile-bio empty" id="profile-bio-view">Loading…</div>
+
+        <div class="spark-statement hidden" id="profile-spark-view"></div>
+
+        <div class="social-links-row hidden" id="profile-social-row">
+          <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-instagram-link">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            Instagram
+          </a>
+          <a href="#" target="_blank" rel="noopener" class="social-link-btn hidden" id="profile-linkedin-link">
+            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+        </div>
+
+        <div class="my-tool-card hidden" id="profile-tool-card">
+          <div class="my-tool-icon">🛠️</div>
+          <div class="my-tool-info">
+            <div class="my-tool-label">My Tool</div>
+            <div class="my-tool-name" id="profile-tool-name"></div>
+            <a href="#" target="_blank" rel="noopener" class="my-tool-link hidden" id="profile-tool-link">
+              View Tool <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Edit form -->
+        <div class="edit-form" id="edit-form">
+          <div class="form-field">
+            <label class="form-label" for="edit-name">Display Name</label>
+            <input class="form-input" id="edit-name" type="text" placeholder="Your name" maxlength="60">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="edit-bio">Bio</label>
+            <textarea class="form-textarea" id="edit-bio" placeholder="Tell the community about yourself…" maxlength="400" rows="3"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="edit-spark">Spark Statement</label>
+            <input class="form-input" id="edit-spark" type="text" placeholder="Complete the Challenge to set your spark" maxlength="120" readonly>
+            <div class="form-note">Set during the Challenge. <a href="roadmap.html">Update in My Roadmap →</a></div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="edit-instagram">Instagram URL</label>
+            <input class="form-input" id="edit-instagram" type="url" placeholder="https://instagram.com/yourhandle">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="edit-linkedin">LinkedIn URL</label>
+            <input class="form-input" id="edit-linkedin" type="url" placeholder="https://linkedin.com/in/yourprofile">
+          </div>
+          <div id="tool-fields" style="display:none;display:flex;flex-direction:column;gap:14px;">
+            <div class="form-field">
+              <label class="form-label" for="edit-tool-name">My Tool Name</label>
+              <input class="form-input" id="edit-tool-name" type="text" placeholder="e.g. Content Creator Pro" maxlength="80">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="edit-tool-url">My Tool URL</label>
+              <input class="form-input" id="edit-tool-url" type="url" placeholder="https://your-tool-link.com">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="save-btn" id="save-btn" onclick="saveProfile()">Save Changes</button>
+            <button class="edit-profile-btn cancel" style="display:inline-flex;" onclick="toggleEdit()">Cancel</button>
+            <div class="success-msg" id="success-msg">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Saved!
+            </div>
+          </div>
+        </div>
+
       </div><!-- /profile-body -->
-    </div><!-- /profile-hero -->    
+    </div><!-- /profile-hero -->
 
-    <!-- MARKETPLACE TOOLS -->
-    <div class="marketplace-section" id="marketplace-section">
-      <div class="marketplace-section-header">
-        <div class="marketplace-section-title">Tools on the Marketplace</div>
-        <a href="marketplace.html" class="marketplace-section-link">View marketplace →</a>
-      </div>
-      <div id="marketplace-list">
-        <div class="marketplace-empty">
-          <div class="marketplace-empty-icon">🛠️</div>
-          Loading tools…
+    <!-- CONTENT ROW -->
+    <div class="content-row">
+
+      <!-- MAIN COLUMN -->
+      <div class="main-col">
+
+        <!-- CURRENTLY BUILDING -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Currently Building</div>
+          </div>
+          <div id="building-found" style="display:none;" class="building-body">
+            <div class="building-name" id="building-name"></div>
+            <div class="building-desc" id="building-desc"></div>
+            <div class="building-meta" id="building-meta"></div>
+          </div>
+          <div class="building-empty" id="building-empty" style="display:none;"></div>
         </div>
-      </div>
-    </div>
 
-    <!-- ACCOUNT SETTINGS -->
-    <div class="profile-section" style="margin-top:0.5rem;">
-      <div class="section-label" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:0.75rem;">Account Settings</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <!-- BUILDER JOURNEY -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Builder Journey</div>
+          </div>
+          <div class="journey-phases" id="journey-phases"></div>
+        </div>
+
+      </div><!-- /main-col -->
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="right-col">
+
+        <!-- STATS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label">Stats</div>
+          </div>
+          <div class="stats-grid" id="stats-grid">
+            <div class="stat-cell">
+              <div class="stat-num" id="stat-points">—</div>
+              <div class="stat-label">Points</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-num" id="stat-streak">—</div>
+              <div class="stat-label">Day Streak</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-num" id="stat-threads">—</div>
+              <div class="stat-label">Threads</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-num" id="stat-days">—</div>
+              <div class="stat-label">Days Active</div>
+            </div>
+          </div>
+          <div class="stats-locked" id="stats-locked">Stats unlock after the Clarity phase.</div>
+        </div>
+
+        <!-- GETTING STARTED (own profile only) -->
+        <div class="card" id="getting-started-card" style="display:none;">
+          <div class="cl-header">
+            <div class="cl-title-row">
+              <div class="cl-title">Getting Started</div>
+              <div class="cl-count" id="cl-count"></div>
+            </div>
+            <div class="cl-bar"><div class="cl-fill" id="cl-fill" style="width:0%"></div></div>
+          </div>
+          <div class="cl-steps" id="cl-steps"></div>
+        </div>
+
+      </div><!-- /right-col -->
+
+    </div><!-- /content-row -->
+
+    <!-- ACCOUNT SETTINGS (own profile only) -->
+    <div class="settings-section" id="settings-section">
+      <div class="settings-label">Account Settings</div>
+      <div class="settings-card">
         <div>
           <div style="font-size:14px;font-weight:700;color:var(--text);">Delete account</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px;">Permanently removes your account, profile, and all data. Cannot be undone.</div>
         </div>
-        <button onclick="openDeleteModal()" style="flex-shrink:0;padding:8px 16px;border:1px solid rgba(196,98,45,0.4);border-radius:var(--radius-sm);background:none;color:var(--coral);font-size:13px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(196,98,45,0.08)'" onmouseout="this.style.background='none'">Delete Account</button>
+        <button class="delete-btn" onclick="openDeleteModal()">Delete Account</button>
       </div>
     </div>
 
@@ -489,11 +463,10 @@
     <div id="da-error" style="display:none;font-size:12px;color:var(--coral);margin-bottom:0.75rem;"></div>
     <div style="display:flex;gap:10px;">
       <button onclick="closeDeleteModal()" style="flex:1;padding:11px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;font-size:14px;font-weight:700;font-family:'Lato',sans-serif;color:var(--text2);cursor:pointer;">Cancel</button>
-      <button id="da-confirm-btn" disabled onclick="confirmDeleteAccount()" style="flex:1;padding:11px;border:none;border-radius:var(--radius-sm);background:var(--coral);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;color:#fff;cursor:pointer;opacity:1;" onmouseover="if(!this.disabled)this.style.background='#b5511f'" onmouseout="this.style.background='var(--coral)'">Delete account</button>
+      <button id="da-confirm-btn" disabled onclick="confirmDeleteAccount()" style="flex:1;padding:11px;border:none;border-radius:var(--radius-sm);background:var(--coral);font-size:14px;font-weight:700;font-family:'Lato',sans-serif;color:#fff;cursor:pointer;">Delete account</button>
     </div>
   </div>
 </div>
-
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -519,16 +492,10 @@
   let currentUser = null;
   let editOpen = false;
 
-  /* ── Helpers ── */
   function formatDate(ts) {
     if (!ts) return '—';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  }
-  function formatYear(ts) {
-    if (!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return String(d.getFullYear());
   }
   function daysActive(ts) {
     if (!ts) return '—';
@@ -540,18 +507,17 @@
     return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
   }
   function roleBadgeHTML(role) {
-    if (role === 'admin') return '<span class="badge badge-admin">&#9733; Admin</span>';
+    if (role === 'admin')   return '<span class="badge badge-admin">&#9733; Admin</span>';
     if (role === 'builder') return '<span class="badge badge-builder">&#9889; Builder</span>';
     return '<span class="badge badge-member">Member</span>';
   }
 
-  /* ── Toggle edit form ── */
   function toggleEdit() {
     editOpen = !editOpen;
-    const form = document.getElementById('edit-form');
-    const btn = document.getElementById('edit-toggle-btn');
+    const form    = document.getElementById('edit-form');
+    const btn     = document.getElementById('edit-toggle-btn');
     const bioView = document.getElementById('profile-bio-view');
-    const photoWrap = document.getElementById('profile-photo-wrap');
+    const photoWrap     = document.getElementById('profile-photo-wrap');
     const bannerUploadBtn = document.getElementById('banner-upload-btn');
     if (editOpen) {
       form.classList.add('open');
@@ -576,33 +542,20 @@
   async function handlePhotoSelect(input) {
     const file = input.files[0];
     if (!file || !currentUser) return;
-    const MAX_MB = 5;
-    if (file.size > MAX_MB * 1024 * 1024) {
-      alert('Image must be under 5 MB.');
-      input.value = '';
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); input.value = ''; return; }
     const btn = document.getElementById('save-btn');
-    btn.disabled = true;
-    btn.textContent = 'Uploading…';
+    btn.disabled = true; btn.textContent = 'Uploading…';
     try {
       const ref = storage.ref('profile-images/' + currentUser.uid + '/photo');
       await ref.put(file);
       const url = await ref.getDownloadURL();
       pendingPhotoURL = url;
-      // Preview immediately
       const photoEl = document.getElementById('profile-photo-el');
       photoEl.outerHTML = '<img id="profile-photo-el" class="profile-photo" src="' + url + '" alt="avatar">';
       const sidebarAv = document.getElementById('sidebar-avatar');
       if (sidebarAv) sidebarAv.innerHTML = '<img src="' + url + '" alt="avatar">';
-    } catch(err) {
-      console.error('Photo upload failed', err);
-      alert('Could not upload photo. Please try again.');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Save Changes';
-      input.value = '';
-    }
+    } catch(err) { console.error('Photo upload failed', err); alert('Could not upload photo. Please try again.'); }
+    finally { btn.disabled = false; btn.textContent = 'Save Changes'; input.value = ''; }
   }
 
   async function handleBannerSelect(input) {
@@ -610,62 +563,49 @@
     if (!file || !currentUser) return;
     if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); input.value = ''; return; }
     const bannerBtn = document.getElementById('banner-upload-btn');
-    bannerBtn.textContent = 'Uploading…';
-    bannerBtn.disabled = true;
+    bannerBtn.textContent = 'Uploading…'; bannerBtn.disabled = true;
     try {
       const ref = firebase.storage().ref('profile-banners/' + currentUser.uid + '/banner');
       await ref.put(file);
       const url = await ref.getDownloadURL();
       await db.collection('users').doc(currentUser.uid).set({ bannerURL: url }, { merge: true });
       document.getElementById('profile-banner').style.backgroundImage = 'url(' + url + ')';
-    } catch(e) {
-      alert('Upload failed. Try again.');
-    } finally {
+    } catch(e) { alert('Upload failed. Try again.'); }
+    finally {
       bannerBtn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Change Banner';
-      bannerBtn.disabled = false;
-      input.value = '';
+      bannerBtn.disabled = false; input.value = '';
     }
   }
 
-  /* ── Save profile ── */
   async function saveProfile() {
     if (!currentUser) return;
-    const nameVal = document.getElementById('edit-name').value.trim();
-    const bioVal = document.getElementById('edit-bio').value.trim();
+    const nameVal      = document.getElementById('edit-name').value.trim();
+    const bioVal       = document.getElementById('edit-bio').value.trim();
     const instagramVal = document.getElementById('edit-instagram').value.trim();
-    const linkedinVal = document.getElementById('edit-linkedin').value.trim();
-    const toolNameVal = document.getElementById('edit-tool-name').value.trim();
-    const toolUrlVal = document.getElementById('edit-tool-url').value.trim();
-    if (!nameVal) {
-      document.getElementById('edit-name').focus();
-      return;
-    }
+    const linkedinVal  = document.getElementById('edit-linkedin').value.trim();
+    const toolNameVal  = document.getElementById('edit-tool-name').value.trim();
+    const toolUrlVal   = document.getElementById('edit-tool-url').value.trim();
+    if (!nameVal) { document.getElementById('edit-name').focus(); return; }
     const btn = document.getElementById('save-btn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
+    btn.disabled = true; btn.textContent = 'Saving…';
     try {
-      const update = {
-        displayName: nameVal, bio: bioVal,
-        instagramUrl: instagramVal, linkedinUrl: linkedinVal,
-        myToolName: toolNameVal, myToolUrl: toolUrlVal
-      };
+      const update = { displayName: nameVal, bio: bioVal, instagramUrl: instagramVal, linkedinUrl: linkedinVal, myToolName: toolNameVal, myToolUrl: toolUrlVal };
       if (pendingPhotoURL) update.photoURL = pendingPhotoURL;
       await currentUser.updateProfile({ displayName: nameVal, ...(pendingPhotoURL && { photoURL: pendingPhotoURL }) });
       await db.collection('users').doc(currentUser.uid).update(update);
       pendingPhotoURL = null;
 
-      // Update read views
       document.getElementById('profile-name').textContent = nameVal;
       const sidebarNameEl = document.getElementById('sidebar-name');
       if (sidebarNameEl) sidebarNameEl.textContent = nameVal;
       const bioView = document.getElementById('profile-bio-view');
       if (bioVal) { bioView.textContent = bioVal; bioView.classList.remove('empty'); }
       else { bioView.textContent = 'No bio yet — add one by clicking Edit Profile.'; bioView.classList.add('empty'); }
-      const igLink = document.getElementById('profile-instagram-link');
-      const liLink = document.getElementById('profile-linkedin-link');
+      const igLink    = document.getElementById('profile-instagram-link');
+      const liLink    = document.getElementById('profile-linkedin-link');
       const socialRow = document.getElementById('profile-social-row');
       if (instagramVal) { igLink.href = instagramVal; igLink.classList.remove('hidden'); } else { igLink.classList.add('hidden'); }
-      if (linkedinVal) { liLink.href = linkedinVal; liLink.classList.remove('hidden'); } else { liLink.classList.add('hidden'); }
+      if (linkedinVal)  { liLink.href = linkedinVal;  liLink.classList.remove('hidden'); } else { liLink.classList.add('hidden'); }
       if (instagramVal || linkedinVal) socialRow.classList.remove('hidden'); else socialRow.classList.add('hidden');
       const toolCard = document.getElementById('profile-tool-card');
       if (toolNameVal) {
@@ -676,291 +616,39 @@
       } else { toolCard.classList.add('hidden'); }
 
       document.getElementById('success-msg').classList.add('show');
-      setTimeout(() => {
-        document.getElementById('success-msg').classList.remove('show');
-        toggleEdit();
-      }, 1800);
-    } catch (err) {
-      console.error('Save failed', err);
-      alert('Could not save changes. Please try again.');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Save Changes';
-    }
+      setTimeout(() => { document.getElementById('success-msg').classList.remove('show'); toggleEdit(); }, 1800);
+    } catch(err) { console.error('Save failed', err); alert('Could not save changes. Please try again.'); }
+    finally { btn.disabled = false; btn.textContent = 'Save Changes'; }
   }
-const BADGE_DEFS = {
-  first_post:       { icon: '✍️',  name: 'First Post',         desc: 'Posted your first thread' },
-  getting_started:  { icon: '🚀',  name: 'Getting Started',    desc: 'Completed the welcome course' },
-  community_voice:  { icon: '🎙️', name: 'Community Voice',    desc: 'Made 10 posts' },
-  liked:            { icon: '❤️',  name: 'Liked',              desc: 'Received your first like' },
-  popular:          { icon: '⭐',  name: 'Popular',             desc: 'Received 10 likes' },
-  first_comment:    { icon: '💬',  name: 'First Comment',      desc: 'Posted your first comment' },
-  course_complete:  { icon: '🎓',  name: 'Course Complete',    desc: 'Completed a course' },
-  scholar:          { icon: '📚',  name: 'Scholar',            desc: 'Completed 3 courses' },
-  early_member:     { icon: '🌟',  name: 'Early Member',       desc: 'Joined in the first month' },
-};
 
-function renderBadges(badges) {
-  if (!badges || badges.length === 0) return;
-  document.getElementById('badges-card').style.display = 'block';
-  document.getElementById('badges-grid').innerHTML = badges.map(function(key) {
-    const def = BADGE_DEFS[key];
-    if (!def) return '';
-    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;width:72px;">' +
-      '<div style="width:48px;height:48px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;">' +
-      def.icon +
-      '</div>' +
-      '<div style="font-size:10px;font-weight:700;color:var(--text2);line-height:1.3;">' + def.name + '</div>' +
-      '</div>';
-  }).join('');
-}
-  /* ── Auth state + data load ── */
-  window.addEventListener('tsUserReady', async function(e) {
-    const firebaseUser = firebase.auth().currentUser;
-    currentUser = firebaseUser;
-    const user = firebaseUser;
-
-    // Check if viewing another user's profile
-    const viewUid = new URLSearchParams(window.location.search).get('uid');
-    const isOwnProfile = !viewUid || viewUid === user.uid;
-    const targetUid = isOwnProfile ? user.uid : viewUid;
-
-    if (!isOwnProfile) {
-      // Hide editable elements, show back link
-      document.getElementById('profile-email').textContent = '';
-      const editBtn = document.getElementById('edit-toggle-btn');
-      if (editBtn) editBtn.style.display = 'none';
-      const editForm = document.getElementById('edit-form');
-      if (editForm) editForm.style.display = 'none';
-      // Insert back link into header
-      if (false) {
-        const back = document.createElement('a');
-        back.href = 'javascript:history.back()';
-        back.style.cssText = 'display:inline-flex;align-items:center;gap:5px;color:#9A9488;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:4px;transition:color 0.15s;';
-        back.onmouseover = function() { this.style.color = '#F0EDE6'; };
-        back.onmouseout = function() { this.style.color = '#9A9488'; };
-        back.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back';
-        headerBlock.prepend(back);
-      }
-    } else {
-      document.getElementById('profile-email').textContent = user.email || '';
-    }
-
-    // Load Firestore user doc
-    let data = {};
-    try {
-      const snap = await db.collection('users').doc(targetUid).get();
-      if (snap.exists) data = snap.data();
-    } catch (err) {
-      console.error('Failed to load user doc', err);
-    }
-
-    const displayName = data.displayName || user.displayName || user.email || 'Member';
-    const bio = data.bio || '';
-    let sparkStatement = data.sparkStatement || '';
-    const instagramUrl = data.instagramUrl || '';
-    const linkedinUrl = data.linkedinUrl || '';
-    const myToolName = data.myToolName || '';
-    const myToolUrl = data.myToolUrl || '';
-    const role = data.userRole || 'member';
-    const createdAt = data.createdAt || null;
-    const photoURL = data.photoURL || user.photoURL || '';
-    const bannerURL = data.bannerURL || '';
-
-    // Load spark from spark_profiles if not in user doc
-    if (!sparkStatement) {
-      try {
-        const spSnap = await db.collection('spark_profiles').doc(targetUid).get();
-        if (spSnap.exists) sparkStatement = spSnap.data().spark || spSnap.data().sparkStatement || '';
-      } catch(e) {}
-    }
-
-    // Load certification_progress for phase gating
-    let phase1Done = false;
-    try {
-      const cpSnap = await db.collection('certification_progress').doc(targetUid).get();
-      if (cpSnap.exists) phase1Done = !!cpSnap.data().phase1Complete;
-    } catch(e) {}
-
-    // Apply banner
-    if (bannerURL) {
-      const bannerEl = document.getElementById('profile-banner');
-      if (bannerEl) bannerEl.style.backgroundImage = 'url(' + bannerURL + ')';
-    }
-
-    // Tool fields visibility
-    if (phase1Done) {
-      const toolFields = document.getElementById('tool-fields');
-      if (toolFields) toolFields.style.display = 'block';
-    }
-
-    // Stats gating
-    if (!phase1Done) {
-      const statsBlock = document.getElementById('profile-stats-block');
-      const statsPlaceholder = document.getElementById('profile-stats-placeholder');
-      if (statsBlock) statsBlock.style.display = 'none';
-      if (statsPlaceholder) statsPlaceholder.style.display = 'block';
-    }
-
-    // Profile photo
-    const photoEl = document.getElementById('profile-photo-el');
-    if (photoURL) {
-      const img = document.createElement('img');
-      img.src = photoURL;
-      img.alt = 'Profile photo';
-      img.className = 'profile-photo';
-      img.id = 'profile-photo-el';
-      photoEl.replaceWith(img);
-    } else {
-      photoEl.textContent = initials(displayName);
-    }
-
-
-    // Name + badges
-    document.getElementById('profile-name').textContent = displayName;
-    let badgeHTML = roleBadgeHTML(role);
-    if (data.certified) {
-      badgeHTML += ' <span class="badge badge-certified">🎓 ToolSpark Certified</span>';
-    }
-    if (createdAt) {
-      badgeHTML += ' <span class="badge badge-since"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Since ' + formatDate(createdAt) + '</span>';
-    }
-    document.getElementById('badge-row').innerHTML = badgeHTML;
-
-    // Bio view
-    const bioView = document.getElementById('profile-bio-view');
-    if (bio) {
-      bioView.textContent = bio;
-      bioView.classList.remove('empty');
-    } else {
-      bioView.textContent = 'No bio yet — add one by clicking Edit Profile.';
-      bioView.classList.add('empty');
-    }
-
-    // Spark Statement view
-    const sparkView = document.getElementById('profile-spark-view');
-    if (sparkStatement) {
-      sparkView.textContent = '"' + sparkStatement + '"';
-      sparkView.classList.remove('hidden');
-    }
-
-    // Social links view
-    const igLink = document.getElementById('profile-instagram-link');
-    const liLink = document.getElementById('profile-linkedin-link');
-    const socialRow = document.getElementById('profile-social-row');
-    if (instagramUrl) { igLink.href = instagramUrl; igLink.classList.remove('hidden'); }
-    if (linkedinUrl) { liLink.href = linkedinUrl; liLink.classList.remove('hidden'); }
-    if (instagramUrl || linkedinUrl) socialRow.classList.remove('hidden');
-
-    // My Tool view
-    if (myToolName) {
-      document.getElementById('profile-tool-name').textContent = myToolName;
-      document.getElementById('profile-tool-card').classList.remove('hidden');
-      if (myToolUrl) {
-        const toolLink = document.getElementById('profile-tool-link');
-        toolLink.href = myToolUrl;
-        toolLink.classList.remove('hidden');
-      }
-    }
-
-    // Pre-fill edit inputs
-    document.getElementById('edit-name').value = displayName;
-    document.getElementById('edit-bio').value = bio;
-    document.getElementById('edit-spark').value = sparkStatement;
-    document.getElementById('edit-instagram').value = instagramUrl;
-    document.getElementById('edit-linkedin').value = linkedinUrl;
-    document.getElementById('edit-tool-name').value = myToolName;
-    document.getElementById('edit-tool-url').value = myToolUrl;
-
-    // Stats
-    document.getElementById('stat-days').textContent = daysActive(createdAt);
-    document.getElementById('since-date').textContent = formatDate(createdAt);
-    const sinceRow = document.getElementById('member-since-row');
-    if (sinceRow) sinceRow.style.display = 'flex';
-  // Points, streak and badges
-    document.getElementById('stat-points').textContent = data.points || 0;
-    document.getElementById('stat-streak').textContent = (data.streak || 0) + ((data.streak || 0) >= 3 ? ' 🔥' : '');
-    renderBadges(data.badges || []);
-
-    // Threads count
-    try {
-      const tSnap = await db.collection('threads').where('authorId', '==', targetUid).get();
-      document.getElementById('stat-threads').textContent = String(tSnap.size);
-    } catch {
-      document.getElementById('stat-threads').textContent = '0';
-    }
-
-    // Clarity session — only shown on own profile
-    const clarityCard = document.querySelector('.clarity-card');
-    if (!isOwnProfile) {
-      if (clarityCard) clarityCard.style.display = 'none';
-    } else try {
-      const cSnap = await db.collection('clarity_sessions')
-        .where('clientEmail', '==', user.email)
-        .orderBy('createdAt', 'desc')
-        .limit(1)
-        .get();
-
-      if (!cSnap.empty) {
-        const cData = cSnap.docs[0].data();
-        document.getElementById('clarity-business').textContent = cData.businessName || 'Your Business';
-        document.getElementById('clarity-summary').textContent = cData.clientSummary || 'No summary recorded.';
-        if (cData.createdAt) {
-          document.getElementById('clarity-meta').innerHTML =
-            '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Completed ' + formatDate(cData.createdAt);
-        }
-        document.getElementById('clarity-found').style.display = 'flex';
-      } else {
-        document.getElementById('clarity-empty').style.display = 'flex';
-      }
-    } catch (err) {
-      console.error('Clarity session query error', err);
-      document.getElementById('clarity-empty').style.display = 'flex';
-    }
-
-    // Getting Started checklist — own profile only
-    if (isOwnProfile) {
-      renderChecklist(user.uid, data);
-    }
-
-    // Marketplace tools
-    loadMarketplaceTools(targetUid, isOwnProfile);
-  });
-
-  async function loadMarketplaceTools(uid, isOwn) {
-    const list = document.getElementById('marketplace-list');
-    try {
-      const snap = await db.collection('marketplace_listings')
-        .where('builderUserId', '==', uid)
-        .where('status', '==', 'active')
-        .get();
-
-      if (snap.empty) {
-        list.innerHTML = '<div class="marketplace-empty">' +
-          '<div class="marketplace-empty-icon">🛠️</div>' +
-          (isOwn
-            ? 'You haven\'t listed any tools yet. <br><a href="marketplace.html" class="marketplace-empty-link">Submit your first tool →</a>'
-            : 'No tools listed on the marketplace yet.') +
-          '</div>';
-        return;
-      }
-
-      list.innerHTML = snap.docs.map(function(doc) {
-        const d = doc.data();
-        const uses = d.useCount > 0 ? '<span class="tool-uses">' + d.useCount + ' uses</span>' : '';
-        const tag = d.category ? '<span class="tool-tag">' + d.category + '</span>' : '';
-        return '<a href="marketplace.html" class="tool-row">' +
-          '<div class="tool-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>' +
-          '<div class="tool-info">' +
-            '<div class="tool-name">' + (d.toolName || 'Untitled Tool') + '</div>' +
-            '<div class="tool-desc">' + (d.description || '') + '</div>' +
-            '<div class="tool-meta">' + tag + uses + '</div>' +
-          '</div>' +
-          '</a>';
-      }).join('');
-    } catch(e) {
-      list.innerHTML = '<div class="marketplace-empty">Could not load tools.</div>';
-    }
+  function renderJourney(certProgress) {
+    const phases = [
+      { key: 'phase1Complete', name: 'Clarity',            desc: 'Find your spark and define your audience' },
+      { key: 'phase2Complete', name: 'Build',              desc: 'Build your first AI-powered tool' },
+      { key: 'phase3Complete', name: 'Validate',           desc: 'Test with real users and gather feedback' },
+      { key: 'phase4Complete', name: 'Launch + Marketing', desc: 'Launch and start attracting clients' },
+      { key: 'phase5Complete', name: 'Community',          desc: 'Grow through community and collaboration' },
+    ];
+    let foundCurrent = false;
+    document.getElementById('journey-phases').innerHTML = phases.map(function(p, i) {
+      const done    = !!(certProgress && certProgress[p.key]);
+      const current = !done && !foundCurrent;
+      if (current) foundCurrent = true;
+      const dotClass   = done ? 'done' : current ? 'current' : '';
+      const dotInner   = done
+        ? '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+        : (i + 1);
+      const badgeClass = done ? 'done' : current ? 'current' : 'locked';
+      const badgeText  = done ? 'Complete' : current ? 'In Progress' : 'Locked';
+      return '<div class="journey-phase">' +
+        '<div class="phase-dot ' + dotClass + '">' + dotInner + '</div>' +
+        '<div class="phase-info">' +
+          '<div class="phase-name">' + p.name + '</div>' +
+          '<div class="phase-desc">' + p.desc + '</div>' +
+        '</div>' +
+        '<span class="phase-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '</div>';
+    }).join('');
   }
 
   async function markStep(uid, key, href) {
@@ -974,65 +662,32 @@ function renderBadges(badges) {
 
   function renderChecklist(uid, data) {
     const steps = data.onboarding?.steps || {};
-
-    // Auto-detect profile completion
-    const profileDone = steps.profileComplete ||
-      data.profileComplete ||
+    const profileDone = steps.profileComplete || data.profileComplete ||
       !!(data.bio && (data.photoURL || (data.displayName && data.displayName !== data.email)));
-
     const allSteps = [
-      {
-        key:      'profileComplete',
-        label:    'Update your profile',
-        desc:     'Add your photo, bio, and what you build',
-        href:     '#profile-edit',
-        featured: true,
-        done:     profileDone,
-      },
-      {
-        key:   'welcomePost',
-        label: 'Introduce yourself',
-        desc:  'Post in the welcome thread',
-        href:  'community.html',
-        done:  !!steps.welcomePost,
-      },
-      {
-        key:   'welcomeCourse',
-        label: 'Welcome to ToolSpark! Lesson',
-        desc:  'Start here before anything else',
-        href:  'courses.html',
-        done:  !!steps.welcomeCourse,
-      },
-      {
-        key:   'visitRoadmap',
-        label: 'Visit your Build Roadmap',
-        desc:  'See your full build path — that\'s where everything starts',
-        href:  'roadmap.html',
-        done:  !!steps.visitRoadmap,
-      },
+      { key: 'profileComplete', label: 'Update your profile',          sub: 'Add your photo, bio, and what you build', href: '#',            featured: true, done: profileDone },
+      { key: 'welcomePost',     label: 'Introduce yourself',           sub: 'Post in the welcome thread',             href: 'community.html',              done: !!steps.welcomePost },
+      { key: 'welcomeCourse',   label: 'Welcome to ToolSpark! Lesson', sub: 'Start here before anything else',        href: 'courses.html',                done: !!steps.welcomeCourse },
+      { key: 'visitRoadmap',    label: 'Visit your Build Roadmap',     sub: "See your full build path",               href: 'roadmap.html',                done: !!steps.visitRoadmap },
     ];
-
     const completed = allSteps.filter(s => s.done).length;
-    if (completed === allSteps.length) return; // all done — hide
+    if (completed === allSteps.length) return;
 
     document.getElementById('getting-started-card').style.display = 'block';
-    document.getElementById('cl-count').textContent = completed + ' of ' + allSteps.length + ' complete';
-    const pct = Math.round((completed / allSteps.length) * 100);
-    document.getElementById('cl-fill').style.width = pct + '%';
-
+    document.getElementById('cl-count').textContent = completed + ' of ' + allSteps.length;
+    document.getElementById('cl-fill').style.width = Math.round((completed / allSteps.length) * 100) + '%';
     document.getElementById('cl-steps').innerHTML = allSteps.map((s, i) => {
-      const checkClass = s.done ? 'cl-check-done' : s.featured ? 'cl-check-featured' : '';
+      const checkClass = s.done ? 'done' : s.featured ? 'current' : '';
       const checkInner = s.done
         ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
         : (i + 1);
       return `<a class="cl-step${s.done ? ' cl-done' : ''}${s.featured ? ' cl-featured' : ''}"
-          href="${s.done ? '#' : s.href}"
-          ${!s.done && s.key !== 'profileComplete' ? `onclick="event.preventDefault();markStep('${uid}','${s.key}','${s.href}')"` : ''}
-        >
+        href="${s.done ? '#' : s.href}"
+        ${!s.done && s.key !== 'profileComplete' ? `onclick="event.preventDefault();markStep('${uid}','${s.key}','${s.href}')"` : ''}>
         <div class="cl-check ${checkClass}">${checkInner}</div>
         <div class="cl-body">
-          <div class="cl-label${s.done ? ' cl-done-text' : ''}">${s.label}</div>
-          <div class="cl-desc">${s.desc}</div>
+          <div class="cl-label${s.done ? ' done' : ''}">${s.label}</div>
+          <div class="cl-sub">${s.sub}</div>
         </div>
         ${s.done ? '' : '<span class="cl-arrow">›</span>'}
       </a>`;
@@ -1040,22 +695,17 @@ function renderBadges(badges) {
   }
 
   function openDeleteModal() {
-    const overlay = document.getElementById('da-overlay');
-    overlay.style.display = 'flex';
+    document.getElementById('da-overlay').style.display = 'flex';
     document.getElementById('da-input').value = '';
     document.getElementById('da-confirm-btn').disabled = true;
     document.getElementById('da-error').style.display = 'none';
   }
-
-  function closeDeleteModal() {
-    document.getElementById('da-overlay').style.display = 'none';
-  }
+  function closeDeleteModal() { document.getElementById('da-overlay').style.display = 'none'; }
 
   async function confirmDeleteAccount() {
     const btn = document.getElementById('da-confirm-btn');
     const errEl = document.getElementById('da-error');
-    btn.disabled = true;
-    btn.textContent = 'Deleting…';
+    btn.disabled = true; btn.textContent = 'Deleting…';
     errEl.style.display = 'none';
     try {
       const token = await currentUser.getIdToken();
@@ -1066,14 +716,182 @@ function renderBadges(badges) {
       if (!res.ok) throw new Error((await res.json()).error || 'Deletion failed');
       await firebase.auth().signOut();
       window.location.href = 'index.html';
-    } catch (err) {
+    } catch(err) {
       errEl.textContent = err.message || 'Something went wrong. Please try again.';
       errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Delete account';
+      btn.disabled = false; btn.textContent = 'Delete account';
     }
   }
 
+  document.addEventListener('tsUserReady', async function(e) {
+    const firebaseUser = firebase.auth().currentUser;
+    currentUser = firebaseUser;
+
+    const viewUid      = new URLSearchParams(window.location.search).get('uid');
+    const isOwnProfile = !viewUid || viewUid === firebaseUser.uid;
+    const targetUid    = isOwnProfile ? firebaseUser.uid : viewUid;
+
+    // Show own-profile UI elements
+    if (isOwnProfile) {
+      document.getElementById('edit-toggle-btn').style.display = 'inline-flex';
+      document.getElementById('profile-email').style.display   = 'block';
+      document.getElementById('settings-section').style.display = 'block';
+    }
+
+    // Load user Firestore doc
+    let data = {};
+    try {
+      const snap = await db.collection('users').doc(targetUid).get();
+      if (snap.exists) data = snap.data();
+    } catch(err) { console.error('load user doc', err); }
+
+    const displayName  = data.displayName || firebaseUser.displayName || firebaseUser.email || 'Member';
+    const bio          = data.bio || '';
+    let   sparkStatement = data.sparkStatement || '';
+    const instagramUrl = data.instagramUrl || '';
+    const linkedinUrl  = data.linkedinUrl  || '';
+    const myToolName   = data.myToolName   || '';
+    const myToolUrl    = data.myToolUrl    || '';
+    const role         = data.userRole     || 'member';
+    const createdAt    = data.createdAt    || null;
+    const photoURL     = data.photoURL     || firebaseUser.photoURL || '';
+    const bannerURL    = data.bannerURL    || '';
+
+    // Spark fallback from spark_profiles
+    if (!sparkStatement) {
+      try {
+        const spSnap = await db.collection('spark_profiles').doc(targetUid).get();
+        if (spSnap.exists) sparkStatement = spSnap.data().spark || spSnap.data().sparkStatement || '';
+      } catch(e) {}
+    }
+
+    // Certification progress
+    let certProgress = null;
+    try {
+      const cpSnap = await db.collection('certification_progress').doc(targetUid).get();
+      if (cpSnap.exists) certProgress = cpSnap.data();
+    } catch(e) {}
+    const phase1Done = !!(certProgress && certProgress.phase1Complete);
+
+    // Banner
+    if (bannerURL) document.getElementById('profile-banner').style.backgroundImage = 'url(' + bannerURL + ')';
+
+    // Tool fields on own profile after phase 1
+    if (isOwnProfile && phase1Done) document.getElementById('tool-fields').style.display = 'flex';
+
+    // Stats gating
+    if (!phase1Done) {
+      document.getElementById('stats-grid').style.display   = 'none';
+      document.getElementById('stats-locked').style.display = 'block';
+    }
+
+    // Profile photo
+    const photoEl = document.getElementById('profile-photo-el');
+    if (photoURL) {
+      const img = document.createElement('img');
+      img.src = photoURL; img.alt = 'Profile photo';
+      img.className = 'profile-photo'; img.id = 'profile-photo-el';
+      photoEl.replaceWith(img);
+    } else {
+      photoEl.textContent = initials(displayName);
+    }
+
+    // Name, email, badges
+    document.getElementById('profile-name').textContent = displayName;
+    if (isOwnProfile) document.getElementById('profile-email').textContent = firebaseUser.email || '';
+    let badgeHTML = roleBadgeHTML(role);
+    if (data.certified) badgeHTML += ' <span class="badge badge-certified">🎓 ToolSpark Certified</span>';
+    if (createdAt) badgeHTML += ' <span class="badge badge-since"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Since ' + formatDate(createdAt) + '</span>';
+    document.getElementById('badge-row').innerHTML = badgeHTML;
+
+    // Bio
+    const bioView = document.getElementById('profile-bio-view');
+    if (bio) { bioView.textContent = bio; bioView.classList.remove('empty'); }
+    else if (isOwnProfile) { bioView.textContent = 'No bio yet — click Edit Profile to add one.'; }
+    else { bioView.textContent = 'No bio added yet.'; }
+
+    // Spark statement
+    const sparkView = document.getElementById('profile-spark-view');
+    if (sparkStatement) { sparkView.textContent = sparkStatement; sparkView.classList.remove('hidden'); }
+
+    // Social links
+    const igLink    = document.getElementById('profile-instagram-link');
+    const liLink    = document.getElementById('profile-linkedin-link');
+    const socialRow = document.getElementById('profile-social-row');
+    if (instagramUrl) { igLink.href = instagramUrl; igLink.classList.remove('hidden'); }
+    if (linkedinUrl)  { liLink.href = linkedinUrl;  liLink.classList.remove('hidden'); }
+    if (instagramUrl || linkedinUrl) socialRow.classList.remove('hidden');
+
+    // My tool
+    if (myToolName) {
+      document.getElementById('profile-tool-name').textContent = myToolName;
+      document.getElementById('profile-tool-card').classList.remove('hidden');
+      if (myToolUrl) {
+        const toolLink = document.getElementById('profile-tool-link');
+        toolLink.href = myToolUrl; toolLink.classList.remove('hidden');
+      }
+    }
+
+    // Prefill edit form
+    if (isOwnProfile) {
+      document.getElementById('edit-name').value      = displayName;
+      document.getElementById('edit-bio').value       = bio;
+      document.getElementById('edit-spark').value     = sparkStatement;
+      document.getElementById('edit-instagram').value = instagramUrl;
+      document.getElementById('edit-linkedin').value  = linkedinUrl;
+      document.getElementById('edit-tool-name').value = myToolName;
+      document.getElementById('edit-tool-url').value  = myToolUrl;
+    }
+
+    // Stats
+    document.getElementById('stat-days').textContent   = daysActive(createdAt);
+    document.getElementById('stat-points').textContent = data.points || 0;
+    document.getElementById('stat-streak').textContent = (data.streak || 0) + ((data.streak || 0) >= 3 ? ' 🔥' : '');
+    try {
+      const tSnap = await db.collection('threads').where('authorId', '==', targetUid).get();
+      document.getElementById('stat-threads').textContent = String(tSnap.size);
+    } catch { document.getElementById('stat-threads').textContent = '0'; }
+
+    // Currently Building (from clarity session — own profile queries by email)
+    const queryEmail = isOwnProfile ? firebaseUser.email : (data.email || null);
+    if (queryEmail) {
+      try {
+        const cSnap = await db.collection('clarity_sessions')
+          .where('clientEmail', '==', queryEmail)
+          .orderBy('createdAt', 'desc')
+          .limit(1)
+          .get();
+        if (!cSnap.empty) {
+          const cData = cSnap.docs[0].data();
+          document.getElementById('building-name').textContent = cData.businessName || 'Their Project';
+          document.getElementById('building-desc').textContent = cData.clientSummary || '';
+          if (cData.createdAt) {
+            document.getElementById('building-meta').innerHTML =
+              '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>&nbsp;Clarity session completed ' + formatDate(cData.createdAt);
+          }
+          document.getElementById('building-found').style.display = 'block';
+        } else {
+          const emptyEl = document.getElementById('building-empty');
+          emptyEl.textContent = isOwnProfile ? 'Complete a Clarity Session to see your project here.' : 'No clarity session on file yet.';
+          emptyEl.style.display = 'block';
+        }
+      } catch(err) {
+        const emptyEl = document.getElementById('building-empty');
+        emptyEl.textContent = 'Could not load project info.';
+        emptyEl.style.display = 'block';
+      }
+    } else {
+      const emptyEl = document.getElementById('building-empty');
+      emptyEl.textContent = 'Nothing listed yet.';
+      emptyEl.style.display = 'block';
+    }
+
+    // Builder Journey
+    renderJourney(certProgress);
+
+    // Getting Started (own profile only)
+    if (isOwnProfile) renderChecklist(firebaseUser.uid, data);
+  });
 </script>
 <script src="js/nav.js"></script>
 <script>initNav('profile', 'My Profile');</script>

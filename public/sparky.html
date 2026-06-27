@@ -450,7 +450,7 @@
     text-align: center;
   }
 
-  /* ── AVATAR CIRCLE — gold-ring frame, drop any image inside ── */
+  /* ── AVATAR ── */
   .sparky-avatar-wrap {
     position: relative;
     display: inline-flex;
@@ -459,18 +459,14 @@
     margin: 0 auto 20px;
   }
   .sparky-avatar {
-    width: 88px; height: 88px;
-    border-radius: 50%;
-    border: 2.5px solid var(--gold);
-    background: var(--bg-card);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 0 0 6px var(--gold-dim);
+    width: 96px; height: 96px;
+    border-radius: 0;
+    background: none;
+    overflow: visible;
   }
   .sparky-avatar img {
     width: 100%; height: 100%;
-    object-fit: cover; border-radius: 50%;
+    object-fit: contain;
   }
   .sparky-avatar-ph {
     font-family: 'Playfair Display', serif;
@@ -943,7 +939,21 @@ async function handleSend() {
     const reply = await callAI(text);
     hideThinking();
 
-    if (reply.includes("SESSION_SUMMARY_START")) {
+    if (reply.includes("[TASK_ASSIGNED]")) {
+      const cleanReply = reply.replace(/\[TASK_ASSIGNED\]/g, '').trim();
+      addMsg("assistant", cleanReply);
+      const autoSummary = `SESSION_SUMMARY_START
+DATE:${new Date().toLocaleDateString()}
+WORKED_ON:${memberToolName || 'their project'}
+WINS:session completed — task assigned
+STUCK_ON:none
+NEW_IDEAS:none
+NEXT_ACTION:${cleanReply.split('\n').pop().trim() || 'task assigned this session'}
+ENERGY:focused
+SESSION_SUMMARY_END`;
+      await saveSession(autoSummary);
+      setTimeout(() => addSavedNote(), 2500);
+    } else if (reply.includes("SESSION_SUMMARY_START")) {
       const beforeSummary = reply.split("SESSION_SUMMARY_START")[0].trim();
       if (beforeSummary) addMsg("assistant", beforeSummary);
       const summaryBlock = reply.match(/SESSION_SUMMARY_START[\s\S]*?SESSION_SUMMARY_END/)?.[0] || '';
@@ -996,6 +1006,8 @@ async function init(feeling, workingOn) {
   let opening = `[Today is ${todayStr}]
 
 You are Sid — an accountability partner for people building AI tools. Your personality: warm, direct, and genuinely funny. You use dry humor and light wit naturally — not forced jokes, not motivational poster quotes. Think sharp best friend who calls you out with a smile, celebrates real wins without being cheesy, and occasionally makes you laugh at yourself when you're overthinking. You're never mean, never sarcastic at the person's expense. The humor is always punchy and brief — one well-placed line, then back to business. Keep responses short. One question at a time.
+
+TASK ASSIGNMENT RULE: Once you have helped the user identify ONE clear, specific next task to go work on — something concrete they should close the app and go do — deliver it with confidence, tell them to go do it and come back when it's done, then end your message with [TASK_ASSIGNED] on its own line. Only emit [TASK_ASSIGNED] when the session has genuinely reached its natural conclusion and they have a real action to take. Do not emit it prematurely or mid-conversation.
 
 ${memberContext}
 `;

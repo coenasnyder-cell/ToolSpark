@@ -335,7 +335,8 @@
   @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
   .message.user { flex-direction: row-reverse; }
   .avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
-  .avatar.ai { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold-text); font-family: 'Playfair Display', serif; font-size: 10px; }
+  .avatar.ai { background: none; border: none; }
+  .avatar.ai img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; }
   .avatar.user-av { background: rgba(26,20,10,0.07); border: 1px solid rgba(26,20,10,0.14); color: var(--ink-mid); }
   .bubble { max-width: 85%; padding: 14px 18px; border-radius: 16px; line-height: 1.65; font-size: 15px; }
   .bubble.ai { background: var(--bg-card); border: 1px solid var(--border); color: var(--ink); border-bottom-left-radius: 4px; box-shadow: var(--shadow); }
@@ -639,7 +640,7 @@ function addMessage(role, content) {
 
   const av = document.createElement("div");
   av.className = `avatar ${role === "user" ? "user-av" : "ai"}`;
-  av.textContent = role === "user" ? "You" : "TS";
+  if (role === "user") { av.textContent = "You"; } else { av.innerHTML = '<img src="specky.png" alt="Specky">'; }
 
   const bubble = document.createElement("div");
   bubble.className = `bubble ${role === "user" ? "user-b" : "ai"}`;
@@ -669,7 +670,7 @@ function showThinking() {
   const t = document.createElement("div");
   t.className = "thinking";
   t.id = "thinking";
-  t.innerHTML = `<div class="avatar ai">TS</div>
+  t.innerHTML = `<div class="avatar ai"><img src="specky.png" alt="Specky"></div>
     <div class="thinking-dots">
       <div class="dot"></div><div class="dot"></div><div class="dot"></div>
     </div>`;

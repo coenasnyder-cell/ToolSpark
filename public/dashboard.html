@@ -258,9 +258,9 @@
   /* -- COMMUNITY HUB (right column) -- */
   #community-section { min-width: 0; display: flex; flex-direction: column; }
   #community-section .section-header { margin-bottom: 0; }
-  #community-section .hub-grid { flex: 1; align-content: start; margin-top: 0; }
+  #community-section .hub-grid { flex: 1; align-content: start; margin-top: 32px; }
   #community-section .hub-card { 
-    padding: 16px 12px; 
+    padding: 12px 12px; 
     background: var(--bg);
    }
 
@@ -276,7 +276,7 @@
   .qa-grid  { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.625rem; }
   .hub-card, .qa-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out); display: grid; grid-template-columns: 40px 1fr 14px; grid-template-rows: auto auto; align-items: center; column-gap: 10px; height: auto; }
   .hub-card:hover, .qa-card:hover { box-shadow: var(--shadow-md); }
-  .hub-card-icon, .qa-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; grid-column: 1; grid-row: 1 / 3; align-self: center; filter: saturate(2.2); transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+  .hub-card-icon, .qa-card-icon { width: 15px; height: 15px; border-radius: 2px; display: flex; align-items: center; justify-content: center; grid-column: 1; grid-row: 1 / 3; align-self: center; filter: saturate(2.2); transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
   .hub-card:hover .hub-card-icon, .qa-card:hover .qa-card-icon { transform: scale(1.14) rotate(-6deg); }
   .hub-card-title, .qa-card-title { font-size: 13px; font-weight: 700; color: var(--text); grid-column: 2; grid-row: 1; align-self: end; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hub-card-sub, .qa-card-sub { font-size: 11px; color: var(--text3); grid-column: 2; grid-row: 2; align-self: start; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -294,7 +294,7 @@
     background: var(--surface); 
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 11px 14px; box-shadow: var(--shadow);
+    padding: 16px 20px; box-shadow: var(--shadow);
     text-decoration: none; color: inherit;
     transition: box-shadow 0.2s var(--ease-out),
     transform 0.2s var(--ease-out); display: grid;
@@ -324,9 +324,9 @@
 }
   
   .qa-card-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -557,7 +557,7 @@
           <div class="hub-card-icon" style="background:rgba(75,63,138,0.12);">
             <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
           </div>
-          <div class="hub-card-title">Tools &amp; Resources</div>
+          <div class="hub-card-title">Tools</div>
           <div class="hub-card-sub">Browse the library</div>
         </a>
         <a href="marketplace.html" class="hub-card">
@@ -577,7 +577,7 @@
   </div>
   <div class="qa-grid">
 
-    <a href="creator-hub.html" class="qa-card">
+    <a href="hub/admin.html" class="qa-card">
       <div class="qa-card-icon" style="background:rgba(201,168,76,0.12);">
         <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d=""M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
@@ -585,7 +585,7 @@
       <div class="qa-card-sub">Build and manage your AI tool hub</div>
     </a>
 
-    <a href="my-hub.html" class="qa-card">
+    <a href="hub/dashboard.html" class="qa-card">
       <div class="qa-card-icon" style="background:rgba(75,63,138,0.12);">
         <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
@@ -593,7 +593,7 @@
       <div class="qa-card-sub">Your ToolSpark workspace</div>
     </a>
 
-    <a href="agents.html" class="qa-card">
+    <a href="useragents.html" class="qa-card">
       <div class="qa-card-icon" style="background:rgba(75,63,138,0.12);">
         <svg width="20" height="20" fill="none" stroke="#8B7FD4" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M15 8h.01M9 8h.01"/></svg>
       </div>
@@ -605,16 +605,8 @@
       <div class="qa-card-icon" style="background:rgba(56,132,158,0.12);">
         <svg width="20" height="20" fill="none" stroke="#38849E" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
       </div>
-      <div class="qa-card-title">Courses & Training</div>
+      <div class="qa-card-title">Courses</div>
       <div class="qa-card-sub">Step-by-step programs to build AI tools</div>
-    </a>
-
-    <a href="sessions.html" class="qa-card">
-      <div class="qa-card-icon" style="background:rgba(201,168,76,0.12);">
-        <svg width="20" height="20" fill="none" stroke="#C9A84C" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </div>
-      <div class="qa-card-title">My Sessions</div>
-      <div class="qa-card-sub">View all your past sessions</div>
     </a>
   </div>
 </div>

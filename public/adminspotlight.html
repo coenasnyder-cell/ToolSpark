@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member Spotlight — ToolSpark Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --dark: #0C0B09; --dark2: #141210; --border-dark: #2A2720;
+    --gold: #C9A84C; --gold-light: #E8D5A3; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #F4F2EE; --surface: #FFFFFF; --border: #E4E0D8;
+    --text: #1A1714; --text2: #6B6560; --text3: #9E9891;
+    --green: #2A5C45; --coral: #C4622D;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px; --header-height: 64px;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2rem 3rem; max-width: 800px; width: 100%; }
+
+  .page-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text3); margin-bottom: 4px; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 500; color: var(--text); line-height: 1.2; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text2); }
+
+  /* FORM CARD */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 20px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 700; color: var(--text); }
+  .field .hint { font-size: 12px; color: var(--text3); }
+  .field input, .field textarea {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px; color: var(--text);
+    background: var(--bg); outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--gold); background: #fff; }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  .btn-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .btn-save {
+    padding: 11px 28px; border-radius: 8px;
+    background: var(--dark); color: #F0EDE6;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .btn-save:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-save:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .save-status { font-size: 13px; font-weight: 700; }
+  .save-status.success { color: var(--green); }
+  .save-status.error   { color: var(--coral); }
+
+  /* PREVIEW */
+  .preview-card {
+    background: var(--dark2); border: 1px solid var(--border-dark);
+    border-radius: var(--radius); padding: 24px 28px;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    gap: 1.5rem; align-items: center; position: relative; overflow: hidden;
+  }
+  .preview-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 120%, rgba(201,168,76,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .preview-left { display: flex; flex-direction: column; gap: 8px; }
+  .preview-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold); }
+  .preview-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 500; color: #F0EDE6; }
+  .preview-achievement { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .preview-center { display: flex; justify-content: center; }
+  .preview-avatar {
+    width: 90px; height: 90px; border-radius: 50%;
+    border: 2.5px solid var(--gold);
+    box-shadow: 0 0 0 6px rgba(201,168,76,0.12);
+    object-fit: cover; display: block; background: #1C1A17;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 32px; font-style: italic; color: var(--gold);
+  }
+  .preview-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+  .preview-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .preview-quote-mark { font-family: 'Playfair Display', serif; font-size: 48px; color: var(--gold); opacity: 0.35; line-height: 1; align-self: flex-start; margin-bottom: -12px; }
+  .preview-quote { font-family: 'Playfair Display', serif; font-size: 17px; font-style: italic; color: #F0EDE6; line-height: 1.5; text-align: right; }
+
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); }
+</style>
+</head>
+<body>
+
+<div id="ts-admin-sidebar"></div>
+<div id="ts-admin-header"></div>
+
+<div class="main-wrap">
+  <div class="page-content">
+
+    <div>
+      <div class="page-eyebrow">Admin · Members</div>
+      <h1 class="page-title">Member <em>Spotlight</em></h1>
+      <p class="page-sub">This card appears at the top of the Members page. Update it whenever you want to feature a new member.</p>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="section-label">Preview</div>
+    <div class="preview-card">
+      <div class="preview-left">
+        <div class="preview-eyebrow">✦ Member Spotlight</div>
+        <div class="preview-name" id="prev-name">Member Name</div>
+        <div class="preview-achievement" id="prev-achievement">Achievement goes here.</div>
+      </div>
+      <div class="preview-center">
+        <div class="preview-avatar" id="prev-avatar">?</div>
+      </div>
+      <div class="preview-right">
+        <div class="preview-quote-mark">"</div>
+        <div class="preview-quote" id="prev-quote">Quote goes here.</div>
+      </div>
+    </div>
+
+    <!-- EDIT FORM -->
+    <div class="section-label">Edit Spotlight</div>
+    <div class="form-card">
+
+      <div class="field">
+        <label>Member Name</label>
+        <input type="text" id="f-name" placeholder="e.g. Jessica">
+      </div>
+
+      <div class="field">
+        <label>Achievement</label>
+        <input type="text" id="f-achievement" placeholder="e.g. Launched her first AI tool in 21 days.">
+      </div>
+
+      <div class="field">
+        <label>Quote</label>
+        <textarea id="f-quote" placeholder="e.g. I went from idea to live tool in 21 days. You can too!"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Photo URL <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+        <input type="url" id="f-photo" placeholder="https://...">
+        <span class="hint">Paste a direct image URL, or leave blank to show initials.</span>
+      </div>
+
+      <div class="field">
+        <label>Profile Link UID <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="f-uid" placeholder="Firebase user UID" style="flex:1;">
+          <button type="button" id="lookup-btn" style="padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Look Up →</button>
+        </div>
+        <span class="hint" id="lookup-status">Paste a UID and click Look Up to auto-fill name and photo.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-save" id="save-btn">Save Spotlight</button>
+        <span class="save-status" id="save-status"></span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark-2d62d.firebaseapp.com",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1"
+  });
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  var db = firebase.firestore();
+</script>
+<script src="js/admin-shell.js"></script>
+<script>
+  window.SITE_ADMIN_ACTIVE = 'tools';
+
+  // ── Live preview wiring ──
+  function updatePreview() {
+    const name        = document.getElementById('f-name').value.trim() || 'Member Name';
+    const achievement = document.getElementById('f-achievement').value.trim() || 'Achievement goes here.';
+    const quote       = document.getElementById('f-quote').value.trim() || 'Quote goes here.';
+    const photo       = document.getElementById('f-photo').value.trim();
+
+    document.getElementById('prev-name').textContent        = name;
+    document.getElementById('prev-achievement').textContent = achievement;
+    document.getElementById('prev-quote').textContent       = quote;
+
+    const av = document.getElementById('prev-avatar');
+    if (photo) {
+      av.innerHTML = '<img src="' + photo + '" alt="' + name + '">';
+    } else {
+      av.innerHTML = name.charAt(0).toUpperCase();
+    }
+  }
+
+  ['f-name','f-achievement','f-quote','f-photo'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', updatePreview);
+  });
+
+  // ── Load existing spotlight ──
+  async function loadSpotlight() {
+    try {
+      const doc = await db.collection('settings').doc('memberSpotlight').get();
+      if (doc.exists) {
+        const d = doc.data();
+        document.getElementById('f-name').value        = d.name || '';
+        document.getElementById('f-achievement').value = d.achievement || '';
+        document.getElementById('f-quote').value       = d.quote || '';
+        document.getElementById('f-photo').value       = d.photoURL || '';
+        document.getElementById('f-uid').value         = d.profileUid || '';
+        updatePreview();
+      }
+    } catch(e) { console.error('load spotlight:', e); }
+  }
+
+  // ── Save ──
+  document.getElementById('save-btn').addEventListener('click', async function() {
+    const btn    = this;
+    const status = document.getElementById('save-status');
+    btn.disabled = true;
+    status.textContent = 'Saving…';
+    status.className = 'save-status';
+
+    try {
+      await db.collection('settings').doc('memberSpotlight').set({
+        name:        document.getElementById('f-name').value.trim(),
+        achievement: document.getElementById('f-achievement').value.trim(),
+        quote:       document.getElementById('f-quote').value.trim(),
+        photoURL:    document.getElementById('f-photo').value.trim(),
+        profileUid:  document.getElementById('f-uid').value.trim(),
+        updatedAt:   firebase.firestore.FieldValue.serverTimestamp()
+      });
+      status.textContent = '✓ Saved!';
+      status.className = 'save-status success';
+    } catch(e) {
+      status.textContent = 'Error: ' + e.message;
+      status.className = 'save-status error';
+    }
+
+    btn.disabled = false;
+    setTimeout(function() { status.textContent = ''; }, 3000);
+  });
+
+  document.getElementById('lookup-btn').addEventListener('click', async function() {
+    const uid    = document.getElementById('f-uid').value.trim();
+    const status = document.getElementById('lookup-status');
+    if (!uid) { status.textContent = 'Paste a UID first.'; return; }
+    status.textContent = 'Looking up…';
+    try {
+      const doc = await db.collection('users').doc(uid).get();
+      if (!doc.exists) { status.textContent = 'No member found with that UID.'; return; }
+      const d = doc.data();
+      if (d.displayName && !document.getElementById('f-name').value) {
+        document.getElementById('f-name').value = d.displayName.split(' ')[0];
+      }
+      if (d.photoURL) {
+        document.getElementById('f-photo').value = d.photoURL;
+      }
+      status.textContent = '✓ Found ' + (d.displayName || uid) + (d.photoURL ? ' — photo auto-filled.' : ' — no photo on file.');
+      updatePreview();
+    } catch(e) {
+      status.textContent = 'Error: ' + e.message;
+    }
+  });
+
+  initSiteAdminPage(function() { loadSpotlight(); });
+</script>
+</body>
+</html>

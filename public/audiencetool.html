@@ -322,9 +322,9 @@
     display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
   }
   .av.ai {
-    background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.25);
-    color: var(--gold-text); font-family: 'Playfair Display', serif; font-size: 10px;
+    background: none; border: none;
   }
+  .av.ai img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; }
   .av.you {
     background: rgba(26,20,10,0.07); border: 1px solid rgba(26,20,10,0.14); color: var(--ink-mid);
   }
@@ -688,7 +688,7 @@ function addMsg(role, content) {
   div.className = `msg ${role === "user" ? "user" : "ai"}`;
   const av  = document.createElement("div");
   av.className  = `av ${role === "user" ? "you" : "ai"}`;
-  av.textContent = role === "user" ? "You" : "TS";
+  if (role === "user") { av.textContent = "You"; } else { av.innerHTML = '<img src="pip.png" alt="Pip">'; }
   const bub = document.createElement("div");
   bub.className  = `bubble ${role === "user" ? "you" : "ai"}`;
   if (role === "user") {
@@ -716,7 +716,7 @@ function showThinking() {
   const wrap = document.getElementById("chatWrap");
   const t = document.createElement("div");
   t.className = "thinking"; t.id = "thinking";
-  t.innerHTML = `<div class="av ai">TS</div>
+  t.innerHTML = `<div class="av ai"><img src="pip.png" alt="Pip"></div>
     <div class="t-dots">
       <div class="dot"></div><div class="dot"></div><div class="dot"></div>
     </div>`;
