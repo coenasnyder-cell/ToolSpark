@@ -300,7 +300,7 @@
   }
 
   /* CREATE THREAD CARD */
-  .create-card { padding: 1.5rem 1.75rem; border: 1px solid rgba(0,0,0,.05); }
+  .create-card { padding: 1.5rem 1.75rem; border: 1.5px solid #C4BEB4; }
   .create-header {
     display: flex;
     align-items: center;
@@ -544,6 +544,24 @@
 
   /* Comment footer */
   .comment-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+  .emoji-picker-popup {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .comment-like-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer;
+    font-size: 11px; font-weight: 700; color: var(--text3);
+    font-family: 'Lato', sans-serif; padding: 0; transition: color 0.15s;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .comment-like-btn:hover { color: var(--gold); }
+  .comment-like-btn.reacted { color: var(--gold); }
   .action-spacer { flex: 1; }
   .thread-views { font-size: 12px; color: var(--text3); }
 img, video, iframe {
@@ -593,8 +611,8 @@ img, video, iframe {
   .comment-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
   .comment-bubble {
     flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: transparent;
+    border: none;
     border-radius: 0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
     padding: 8px 12px;
   }
@@ -1357,6 +1375,12 @@ img, video, iframe {
           <div class="comment-input-row">
             <div class="comment-avatar">${currentUser && currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="avatar">` : (currentUser ? initials(currentUser.displayName || currentUser.email || 'U') : '?')}</div>
             <input class="comment-input" id="comment-input-${id}" type="text" placeholder="Write a comment..." onkeydown="if(event.key==='Enter') postComment('${id}')" />
+            <div class="emoji-btn-wrap" style="position:relative;">
+              <button class="gif-btn" onclick="toggleEmojiPicker('${id}')">😊</button>
+              <div id="emoji-picker-${id}" class="emoji-picker-popup" style="display:none;">
+                <emoji-picker></emoji-picker>
+              </div>
+            </div>
             <button class="gif-btn" onclick="toggleGifPicker('${id}')">GIF</button>
             <button class="comment-submit" onclick="postComment('${id}')">Post</button>
           </div>
@@ -1506,6 +1530,40 @@ async function toggleLike(threadId) {
       const svg = btn.querySelector('svg');
       if (svg) svg.setAttribute('fill', hasLiked ? 'currentColor' : 'none');
     }
+    console.error(e);
+  }
+}
+
+async function likeComment(threadId, commentId) {
+  if (!currentUser) return;
+  const uid = currentUser.uid;
+  const btn = document.getElementById('clbtn-' + commentId);
+  const countEl = document.getElementById('clcount-' + commentId);
+  const hasLiked = btn?.classList.contains('reacted');
+  const newCount = parseInt(countEl?.textContent || '0') + (hasLiked ? -1 : 1);
+
+  // Optimistic UI update
+  if (btn) {
+    btn.classList.toggle('reacted', !hasLiked);
+    const svg = btn.querySelector('svg');
+    if (svg) svg.setAttribute('fill', hasLiked ? 'none' : 'currentColor');
+  }
+  if (countEl) countEl.textContent = newCount;
+
+  try {
+    await db.collection('threads').doc(threadId).collection('comments').doc(commentId).update({
+      ['reactions.' + uid]: hasLiked
+        ? firebase.firestore.FieldValue.delete()
+        : '👍'
+    });
+  } catch(e) {
+    // Revert on failure
+    if (btn) {
+      btn.classList.toggle('reacted', hasLiked);
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', hasLiked ? 'currentColor' : 'none');
+    }
+    if (countEl) countEl.textContent = newCount - (hasLiked ? -1 : 1);
     console.error(e);
   }
 }
@@ -1743,7 +1801,13 @@ async function toggleLike(threadId) {
                 ${textHtml}
                 ${gifHtml}
                 <div class="comment-footer">
-                  <div class="comment-time">${timeAgo(c.createdAt)}</div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="comment-time">${timeAgo(c.createdAt)}</div>
+                    <button class="comment-like-btn${currentUser && (c.reactions || {})[currentUser.uid] ? ' reacted' : ''}" id="clbtn-${doc.id}" onclick="event.stopPropagation();likeComment('${threadId}','${doc.id}')">
+                      <svg width="11" height="11" fill="${currentUser && (c.reactions || {})[currentUser.uid] ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
+                      <span id="clcount-${doc.id}">${Object.keys(c.reactions || {}).length || 0}</span>
+                    </button>
+                  </div>
                   ${(currentUser && (c.authorId === currentUser.uid || currentUserRole === 'admin')) && !isPinned ? `<button onclick="deleteComment('${threadId}','${doc.id}')" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;padding:0;margin-left:8px;font-family:'Lato',sans-serif;transition:color 0.15s;" onmouseover="this.style.color='#E05555'" onmouseout="this.style.color='var(--text3)'">Delete</button>` : ''}
                 </div>
               </div>
@@ -2184,7 +2248,43 @@ await onThreadPosted(currentUser.uid);
 
 </script>
 
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <script src="js/nav.js"></script>
 <script>initNav('community', 'Community');</script>
+<script>
+  function toggleEmojiPicker(threadId) {
+    const picker = document.getElementById('emoji-picker-' + threadId);
+    if (!picker) return;
+    const isOpen = picker.style.display !== 'none';
+    // Close all other open pickers
+    document.querySelectorAll('.emoji-picker-popup').forEach(p => p.style.display = 'none');
+    if (!isOpen) {
+      picker.style.display = 'block';
+      // Wire up emoji selection once
+      const el = picker.querySelector('emoji-picker');
+      if (el && !el._wired) {
+        el._wired = true;
+        el.addEventListener('emoji-click', e => {
+          const input = document.getElementById('comment-input-' + threadId);
+          if (input) {
+            const pos = input.selectionStart || input.value.length;
+            input.value = input.value.slice(0, pos) + e.detail.unicode + input.value.slice(pos);
+            input.focus();
+          }
+          picker.style.display = 'none';
+        });
+      }
+      // Click outside to close
+      setTimeout(() => {
+        document.addEventListener('click', function handler(ev) {
+          if (!picker.contains(ev.target) && !ev.target.closest('.emoji-btn-wrap')) {
+            picker.style.display = 'none';
+            document.removeEventListener('click', handler);
+          }
+        });
+      }, 0);
+    }
+  }
+</script>
 </body>
 </html>

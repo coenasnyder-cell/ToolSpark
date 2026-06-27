@@ -576,11 +576,12 @@
             '<span>' + totalLessons + ' lessons</span>' +
             '<span>Order ' + escHtml(orderNum) + '</span>' +
           '</div>' +
+          (course.thumbnail ? '<img id="thumb-preview-' + escHtml(entry.id) + '" src="' + escHtml(course.thumbnail) + '" alt="thumbnail" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:block;">' : '<img id="thumb-preview-' + escHtml(entry.id) + '" style="display:none;">') +
           '<div class="course-actions">' +
             '<a class="btn-primary" href="' + editorUrl + '">Open Editor</a>' +
             '<button class="btn-secondary" type="button" onclick="toggleCoursePublished(\'' + entry.id + '\', ' + (!published) + ', this)">' + (published ? 'Unpublish' : 'Publish') + '</button>' +
             '<button class="btn-secondary" type="button" data-id="' + escHtml(entry.id) + '" data-title="' + escHtml(course.title || '') + '" onclick="renameCourse(this)">Rename</button>' +
-            '<button class="btn-secondary" type="button" onclick="triggerLibraryImageUpload(\'' + escHtml(entry.id) + '\')">' + (course.thumbnail ? 'Change Image' : 'Add Image') + '</button>' +
+            '<button class="btn-secondary" type="button" data-img-id="' + escHtml(entry.id) + '" onclick="triggerLibraryImageUpload(\'' + escHtml(entry.id) + '\')">' + (course.thumbnail ? 'Change Image' : 'Add Image') + '</button>' +
           '</div>' +
           '<div class="course-id">Course ID: ' + escHtml(entry.id) + '</div>' +
         '</div>';
@@ -685,15 +686,28 @@
     const file = input.files[0];
     if (!file || !libraryUploadCourseId) return;
     if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5 MB.'); return; }
+
+    // Find the button and show loading state
+    const btn = document.querySelector('[data-img-id="' + libraryUploadCourseId + '"]');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+
     try {
       const ref = storage.ref('course-covers/' + libraryUploadCourseId);
       await ref.put(file);
       const url = await ref.getDownloadURL();
       await db.collection('courses').doc(libraryUploadCourseId).update({ thumbnail: url });
-      await loadCourses();
+      if (btn) { btn.textContent = '✓ Saved!'; btn.style.color = 'green'; }
+      // Update the preview image in the card without full reload
+      const preview = document.getElementById('thumb-preview-' + libraryUploadCourseId);
+      if (preview) { preview.src = url; preview.style.display = 'block'; }
+      setTimeout(function() {
+        if (btn) { btn.textContent = 'Change Image'; btn.disabled = false; btn.style.color = ''; }
+      }, 2000);
     } catch (e) {
       console.error('Image upload failed', e);
-      alert('Could not upload image. Please try again.');
+      if (btn) { btn.textContent = originalText; btn.disabled = false; }
+      alert('Could not upload image. Check that you are logged in as admin and try again.\n\nError: ' + (e.message || e));
     }
   }
 

@@ -6,7 +6,7 @@
       if (!firebaseUser) {
         window.tsUser = null;
         window._tsUserReady = true;
-        document.dispatchEvent(new CustomEvent('tsUserReady', { detail: null }));
+        document.dispatchEvent(new CustomEvent('tsUserReady', { detail: null, bubbles: true }));
         return;
       }
 
@@ -24,7 +24,7 @@
             credits: typeof data.credits === 'number' ? data.credits : 0
           };
           window._tsUserReady = true;
-          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser }));
+          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser, bubbles: true }));
         })
         .catch(function (err) {
           console.warn('[auth.js] Firestore read failed:', err);
@@ -37,7 +37,7 @@
             credits: 0
           };
           window._tsUserReady = true;
-          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser }));
+          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser, bubbles: true }));
         });
     });
   }

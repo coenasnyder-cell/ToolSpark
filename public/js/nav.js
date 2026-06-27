@@ -35,12 +35,12 @@
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M18 3l2 2-2 2"/><path d="M6 3L4 5l2 2"/></svg>'
     },
     {
-      key: 'marketplace', href: 'marketplace.html', label: 'Marketplace',
-      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
-    },
-    {
       key: 'pricing', href: 'pricing.html', label: 'Plans & Credits',
       icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+    },
+    {
+      key: 'marketplace', href: 'marketplace.html', label: 'Marketplace',
+      icon: '<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'
     },
   ];
 
@@ -127,7 +127,8 @@
       /* ── Main wrap ── */
       '.main-wrap{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}' +
       /* ── Top header ── */
-      '.top-header{background:#000;border-bottom:1px solid rgba(255,255,255,0.08);height:var(--header-height);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;width:100%;}' +
+      '.top-header{background:#000;border-bottom:1px solid rgba(255,255,255,0.08);height:72px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;width:100%;}' +
+      ':root{--header-height:72px;}' +
       '.hamburger-btn{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:6px;border-radius:6px;transition:background 0.15s;flex-shrink:0;align-items:center;justify-content:center;}' +
       '.hamburger-btn:hover{background:rgba(255,255,255,0.08);}' +
       '.header-title{font-family:"Inter",sans-serif;font-size:18px;font-weight:700;color:#fff;flex:1;line-height:1.2;}' +
@@ -366,7 +367,7 @@
       if (!firebaseUser) {
         window.tsUser = null;
         window._tsUserReady = true;
-        document.dispatchEvent(new CustomEvent('tsUserReady', { detail: null }));
+        document.dispatchEvent(new CustomEvent('tsUserReady', { detail: null, bubbles: true }));
         return;
       }
       firebase.firestore().collection('users').doc(firebaseUser.uid).get()
@@ -380,12 +381,12 @@
             credits: typeof data.credits === 'number' ? data.credits : 0
           };
           window._tsUserReady = true;
-          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser }));
+          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser, bubbles: true }));
         })
         .catch(function() {
           window.tsUser = { uid: firebaseUser.uid, email: firebaseUser.email, role: null, tier: null, credits: 0 };
           window._tsUserReady = true;
-          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser }));
+          document.dispatchEvent(new CustomEvent('tsUserReady', { detail: window.tsUser, bubbles: true }));
         });
     });
   }

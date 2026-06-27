@@ -941,7 +941,7 @@ if (_params.get('name')) document.getElementById('s_displayName').value = _param
 
 // ── Session limit check + context fetch ──
 const DEFAULT_LIMIT = 5;
-window.addEventListener('tsUserReady', async function(e) {
+document.addEventListener('tsUserReady', async function(e) {
   const user = firebase.auth().currentUser;
   if (!user) {
     window.location.href = 'signon.html?redirect=clarity';

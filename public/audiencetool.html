@@ -1010,16 +1010,7 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
 });
 
-// ── Auth gate ──
-const audienceWelcomeEl = document.getElementById('sparkwelcome');
-audienceWelcomeEl.style.display = 'none';
-window.addEventListener('tsUserReady', async function(e) {
-  let user = firebase.auth().currentUser;
-  if (!user) {
-    try { const cred = await firebase.auth().signInAnonymously(); user = cred.user; } catch(e) { return; }
-  }
-  audienceWelcomeEl.style.display = 'flex';
-});
+// Auth/credit gate handled by tsDeductCredits in startSpark()
 
 async function startSpark() {
   try { await window.tsDeductCredits(5); } catch(e) { return; }
