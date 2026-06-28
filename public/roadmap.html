@@ -43,8 +43,8 @@
     --green-field: #1A6B52;
     --purple-field: #3C3489;
     --gold-field: #8A6800;
-    --radius: 22px;
-    --radius-sm: 14px;
+    --radius: 0px;
+    --radius-sm: 0px;
     --gold: #C9A84C;
     --gold-dim: rgba(201,168,76,0.12);
     --gold-light: #E8D5A3;
@@ -86,7 +86,7 @@
   .welcome-card {
     background: var(--dark2);
     border: 1px solid var(--border-dark);
-    border-radius: 26px;
+    border-radius: 0;
     padding: 2.35rem 2.25rem;
     box-shadow: var(--shadow-md);
     display: flex;
@@ -197,7 +197,7 @@
   .wc-sp-c { top: 30px; left: -14px; animation: twinkle 2.6s cubic-bezier(0.77,0,0.175,1) 1.8s infinite; }
   .wc-speech {
     background: #fff; border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 12px; padding: 8px 12px;
+    border-radius: 0; padding: 8px 12px;
     font-size: 14px;
     font-weight: 600;
     color: #2A1F0A; line-height: 1.45; text-align: center;
@@ -235,15 +235,6 @@
     gap: 12px;
     box-shadow: var(--shadow);
   }
-  .companion-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: var(--gold-dim);
-    border: 1px solid rgba(201,168,76,0.2);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold);
-    flex-shrink: 0;
-  }
   .companion-text { flex: 1; min-width: 0; }
   .companion-title { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
   .companion-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
@@ -251,7 +242,7 @@
     min-height: 42px;
     padding: 9px 20px;
     border: none;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 14px;
     font-weight: 700;
     color: #1a1a1a;
@@ -273,7 +264,7 @@
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 0;
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
   .spark-section-header {
@@ -284,19 +275,6 @@
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
-  .spark-section-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--gold-dim);
-  border: 1px solid rgba(201,168,76,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gold);
-  flex-shrink: 0;
-}
-
   .header-text { flex: 1; }
 
   .spark-section-title {
@@ -340,7 +318,7 @@
 .btn-outline {
   min-height: 40px;
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: transparent;
   font-size: .85rem;
@@ -360,7 +338,7 @@
 .btn-fill {
   min-height: 40px;
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: 0;
   border: none;
   background: #111;
   color: #fff;
@@ -520,12 +498,12 @@
     border-radius: var(--radius);
     overflow: hidden;
     margin-bottom: 1.25rem;
-    box-shadow: var(--shadow);
+    box-shadow: none;
   }
   .step-card.selected-tool {
     background: #fdf8f0 !important;
     border: 1.5px solid #e8dfc8 !important;
-    border-radius: 12px;
+    border-radius: 0;
   }
   .step-card.selected-tool button {
     color: #666 !important;
@@ -540,7 +518,7 @@
   }
   .choose-btn {
     padding: 6px 14px;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -600,15 +578,6 @@
     justify-content: space-between;
     gap: 0.75rem;
   }
-  .path-option-icon {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    border: 1px solid rgba(201,168,76,0.2);
-    background: var(--gold-dim);
-    color: var(--gold);
-  }
   .path-option-title {
     font-family: 'Poppins', sans-serif;
     font-size: 18px;
@@ -658,7 +627,7 @@
     padding: 10px 18px;
     background: #1a1a1a;
     color: #fff;
-    border-radius: 12px;
+    border-radius: 0;
     font-weight: 600;
     font-size: 14px;
     text-decoration: none;
@@ -688,7 +657,7 @@
 
   @media (max-width: 767px) {
     .page-content {
-      padding: 1rem 1rem 1.5rem;
+      padding: 1rem 1rem calc(112px + env(safe-area-inset-bottom, 0px));
       gap: 1rem;
     }
     .welcome-card {
@@ -702,10 +671,13 @@
     .hero-progress-wrap { max-width: 100%; width: 100%; }
     .wc-sparky-wrap { display: none; }
   }
+    .path-option-action{
+      margin-top: 12px;
+  }
 
   @media (max-width: 560px) {
     .page-content {
-      padding: 1rem 0.95rem 2rem;
+      padding: 1rem 0.95rem calc(112px + env(safe-area-inset-bottom, 0px));
     }
     .welcome-card,
     .loading-state,
@@ -714,10 +686,13 @@
     .spark-section-card,
     .step-card,
     .path-option-card {
-      border-radius: 20px;
+      border-radius: 0;
     }
     .welcome-card h1 { font-size: 26px; }
     .welcome-card p { font-size: 16px; }
+  }
+    .path-option-action{
+      margin-top: 12px;
   }
 
   @media (max-width: 700px) {
@@ -725,6 +700,9 @@
   .spark-section-header { gap: 10px; }
   .section-btn-group { width: 100%; }
 }
+  .path-option-action{
+      margin-top: 12px;
+  }
 
 </style>
 </head>
@@ -739,7 +717,7 @@
       <svg class="wc-sparkle wc-sp5" width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
 
       <div class="welcome-copy">
-        <div class="welcome-eyebrow">✦ Discover Hub</div>
+        <div class="welcome-eyebrow">Roadmap Hub</div>
         <h1>Your roadmap starts here.</h1>
         <p>Everything you discovered in Discover, in one place, your spark, your audience, and your breakthrough. It is all here as your reference while you build.</p>
         <div class="hero-progress-wrap">
@@ -766,9 +744,6 @@
     <div id="loading" class="loading-state">Loading your roadmap...</div>
 
     <div class="companion-banner">
-      <div class="companion-icon">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      </div>
       <div class="companion-text">
         <div class="companion-title">Journey companion</div>
         <div class="companion-desc">Pop this open anytime for your AI coach's take on what you've found so far.</div>
@@ -784,9 +759,6 @@
       <div id="spark-section">
         <div class="spark-section-card">
           <div class="spark-section-header">
-            <div class="spark-section-icon">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.8 6.8 19l.99-5.78-4.21-4.1 5.82-.85L12 3z"/></svg>
-            </div>
             <div class="header-text">
               <div class="spark-section-title">Find your spark</div>
               <div class="spark-section-desc">Your spark statement, distilled</div>
@@ -821,9 +793,6 @@
       <div id="audience-section">
         <div class="spark-section-card">
           <div class="spark-section-header">
-            <div class="spark-section-icon">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4.13a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 00-3-3.87"/></svg>
-            </div>
             <div class="header-text">
               <div class="spark-section-title">Audience deep dive</div>
               <div class="spark-section-desc">Who you're built to serve</div>
@@ -858,10 +827,7 @@
       <div id="breakthrough-section">
         <div class="spark-section-card">
           <div class="spark-section-header">
-            <div class="spark-section-icon">
-              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 1.1-.9 2-2 2h-1.1a7 7 0 01-11.8 0H5c-1.1 0-2-.9-2-2s.9-2 2-2h1.1a7 7 0 0111.8 0H19c1.1 0 2 .9 2 2z"/></svg>
-            </div>
-            <div class="header-text">
+           <div class="header-text">
               <div class="spark-section-title">Discover your breakthrough</div>
               <div class="spark-section-desc">Your three recommended tools</div>
             </div>
@@ -896,9 +862,6 @@
     <div id="choose-path-section">
       <div class="spark-section-card">
         <div class="spark-section-header">
-          <div class="spark-section-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 011.4 0l1.6 1.6a1 1 0 010 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/></svg>
-          </div>
           <div class="header-text">
             <div class="spark-section-title">Choose Your Path</div>
             <div class="spark-section-desc">Pick how you want to bring your tool to life. We'll use this choice to guide what comes next.</div>
@@ -908,13 +871,10 @@
           </div>
         </div>
         <div class="spark-section-body">
-          <div class="path-section-grid">
+          <div class="path-section-grid ts-mobile-stack-grid">
             <div class="path-option-card build" id="path-card-build">
               <div class="path-option-head">
-                <div class="path-option-icon">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 011.4 0l1.6 1.6a1 1 0 010 1.4l-7.9 7.9-3.3.6.6-3.3 7.6-8.2z"/><path d="M12 20h9"/><path d="M16 3l5 5"/></svg>
-                </div>
-                <div class="path-choice-badge" id="path-badge-build">Selected</div>
+              <div class="path-choice-badge" id="path-badge-build">Selected</div>
               </div>
               <div class="path-option-title">Build It Yourself <span class="free-pill">Free</span></div>
               <div class="path-option-copy">You have your prompt. You have your platform. The Build Agent and the community are beside you the whole way.</div>
@@ -923,10 +883,7 @@
 
             <div class="path-option-card dwy" id="path-card-dwy">
               <div class="path-option-head">
-                <div class="path-option-icon">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                </div>
-                <div class="path-choice-badge" id="path-badge-dwy">Selected</div>
+              <div class="path-choice-badge" id="path-badge-dwy">Selected</div>
               </div>
               <div class="path-option-title">Done With You</div>
               <div class="path-option-copy">We build it together. You stay involved, make the decisions, and walk away knowing exactly how your tool works.</div>
@@ -935,10 +892,7 @@
 
             <div class="path-option-card dfy" id="path-card-dfy">
               <div class="path-option-head">
-                <div class="path-option-icon">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14z"/><path d="M5 15l.7 1.6L7.3 17l-1.6.7L5 19.3l-.7-1.6L2.7 17l1.6-.7L5 15z"/></svg>
-                </div>
-                <div class="path-choice-badge" id="path-badge-dfy">Selected</div>
+              <div class="path-choice-badge" id="path-badge-dfy">Selected</div>
               </div>
               <div class="path-option-title">Done For You</div>
               <div class="path-option-copy">Hand us your Tool Report and we'll build it for you. Branded, deployed, and ready to launch.</div>
@@ -1353,7 +1307,7 @@
       : '';
 
     const noPick = chosenIndex === null
-      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:var(--purple-dim);border:1px solid var(--purple-border);border-radius:8px;font-size:12px;color:var(--purple);">Choose one of the three tools below to focus your roadmap.</div>`
+      ? `<div style="margin-bottom:1rem;padding:10px 14px;background:var(--purple-dim);border:1px solid var(--purple-border);border-radius:0;font-size:12px;color:var(--purple);">Choose one of the three tools below to focus your roadmap.</div>`
       : '';
 
     const wrap = document.getElementById('roadmap-wrap');

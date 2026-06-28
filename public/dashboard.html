@@ -55,10 +55,9 @@
   display: flex; 
   flex-direction: column; 
   gap: 1.5rem; 
-  padding: 1.75rem 2.5rem; 
-  max-width: 1280px;
+  padding: 1.75rem 2rem 3rem; 
+  max-width: 1180px;
   width: 100%; 
-  padding-bottom: 3rem;
   margin: 0 auto;  /* add this */
 }
   @media (prefers-reduced-motion: reduce) { .wc-sparkle { animation: none !important; opacity: 0.5 !important; } }
@@ -152,6 +151,15 @@
     margin-top: -18px; position: relative; z-index: 2;
     transform: rotate(2deg);
     transform-origin: center top;
+  }
+  #dashboard-hero .ts-hero {
+    overflow: visible;
+  }
+  #dashboard-hero .dashboard-hero-speech {
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    line-height: 1.45;
+    max-width: 156px;
   }
 .wc-tagline {
   font-size: 18px;
@@ -439,43 +447,7 @@
     </div>
 
    <!-- WELCOME -->
-<div class="welcome-card">
-  <!-- sparkles -->
-  <svg class="wc-sparkle wc-sp1" width="20" height="20" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-  <svg class="wc-sparkle wc-sp3" width="16" height="16" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-  <svg class="wc-sparkle wc-sp5" width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-
-  <div class="wc-left">
-    <div class="welcome-eyebrow">✦ Members Area</div>
-    <h1 id="welcome-heading">Welcome back, <span class="wc-name-underline" id="welcome-name">—</span></h1>
-    <p class="wc-tagline">You're building something real. Everything you need to create, launch, and grow your AI-powered tools is right here.</p>
-  </div>
-
-  <div class="wc-stats">
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-points">—</span>
-      <span class="wc-stat-label">Points</span>
-    </div>
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-streak">—</span>
-      <span class="wc-stat-label">Day Streak</span>
-    </div>
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-days">—</span>
-      <span class="wc-stat-label">Days Active</span>
-    </div>
-  </div>
-   <!-- Sparky -->
-  <div class="wc-sparky-wrap">
-    <svg class="wc-sparky-sp wc-sp-a" width="16" height="16" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <svg class="wc-sparky-sp wc-sp-b" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <svg class="wc-sparky-sp wc-sp-c" width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <div class="wc-sparky-circle">
-      <img src="sid.png" alt="Sid" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-    </div>
-    <div class="wc-speech">What are we building today? ✨</div>
-  </div>
-</div><!-- end welcome-card -->
+<div id="dashboard-hero"></div>
 
      <!-- PROFILE + COMMUNITY HUB ROW -->
     <div class="profile-hub-row">
@@ -623,19 +595,33 @@
 <script src="js/nav.js"></script>
 <script>
   if (window.initNav) initNav('dashboard', 'Dashboard');
+  if (window.renderSharedHero) {
+    window.renderSharedHero('#dashboard-hero', {
+      eyebrow: '✦ Members Area',
+      titleId: 'welcome-heading',
+      title: 'Welcome back, Builder',
+      subtitle: "You're building something real. Everything you need to create, launch, and grow your AI-powered tools is right here.",
+      stats: [
+        { id: 'stat-points', value: '—', label: 'Points', valueClass: 'stat-val' },
+        { id: 'stat-streak', value: '—', label: 'Day Streak', valueClass: 'stat-val' },
+        { id: 'stat-days', value: '—', label: 'Days Active', valueClass: 'stat-val' }
+      ],
+      avatar: { src: 'sid.png', alt: 'Sid', circle: true },
+      speech: {
+        id: 'dashboard-hero-speech',
+        className: 'dashboard-hero-speech',
+        lines: [
+          "Sid's here if you need anything ♡",
+          "What are we building today? ✨",
+          "You showed up. That's 90% of it.",
+          "Sid believes in you (no pressure).",
+          "Every great tool started right here."
+        ]
+      }
+    });
+  }
 
   var db = firebase.firestore();
-
-  // Sparky speech rotation
-  var sparkyLines = [
-    "Sid's here if you need anything ♡",
-    "What are we building today? ✨",
-    "You showed up. That's 90% of it.",
-    "Sid believes in you (no pressure).",
-    "Every great tool started right here."
-  ];
-  var speechEl = document.querySelector('.wc-speech');
-  if (speechEl) speechEl.textContent = sparkyLines[Math.floor(Math.random() * sparkyLines.length)];
 
   function countUp(el, target, duration) {
     if (!el || target === 0) { el && (el.textContent = target); return; }

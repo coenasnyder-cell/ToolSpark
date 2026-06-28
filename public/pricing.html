@@ -235,8 +235,80 @@
     .trust-divider{ display:none; }
     .trust-icon {animation: none; }
     }
-  @media (max-width: 767px) { .main-wrap { margin-left: 0; } .page-content { padding: 2rem 1rem 3rem; } .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; } .sidebar.open { transform: translateX(0); } .sidebar-close-btn { display: flex; } .sidebar-overlay { display: block; } 
-  .page-hero h1 { font-size: 24px; } }
+ @media (max-width: 767px) {
+   
+  .plan-card{
+      margin-bottom:24px;
+  }
+
+  .main-wrap { margin-left: 0; }
+
+  .page-content {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .page-hero h1 {
+    font-size: 24px;
+  }
+
+  /* Credits section */
+  .credits-explainer{
+      display:none;
+      
+  }
+
+  .credits-divider{
+      display:none;
+  }
+
+  .credits-label{
+      justify-content:center;
+      text-align:center;
+  }
+
+  .credits-col{
+      text-align:center;
+  }
+  .pricing-grid{
+      gap:20px;
+  }
+
+  .plan-header,
+  .plan-features,
+  .plan-footer{
+      padding-left:20px;
+      padding-right:20px;
+  }
+
+  .plan-credits{
+      margin:0 20px;
+  }
+
+  .plan-price-amount{
+      font-size:36px;
+  }
+  .trust-bar{
+    display:none;
+}
+
+}
 </style>
 </head>
 <body>

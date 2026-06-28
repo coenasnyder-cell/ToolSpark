@@ -56,8 +56,22 @@
   margin: 0 auto;
 }
   .events-banner,
-  .welcome-card {
+  .welcome-card,
+  #community-hero {
     grid-column: 1 / -1;
+  }
+
+  #community-hero .ts-hero {
+    overflow: visible;
+  }
+
+  #community-hero .community-hero-speech {
+    width: 88%;
+    max-width: 156px;
+    padding: 8px 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    line-height: 1.45;
   }
   
   .events-banner { display:flex; align-items:center; gap:14px; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.22); border-radius:10px; padding:12px 18px; font-size:13px; box-shadow: var(--shadow); }
@@ -1146,40 +1160,7 @@ img, video, iframe {
       <a href="events.html" class="events-banner-link" id="events-banner-link">Register →</a>
     </div>
 
-    <div class="welcome-card">
-  <!-- sparkles -->
-  <svg class="wc-sparkle wc-sp1" width="20" height="20" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-  <svg class="wc-sparkle wc-sp3" width="16" height="16" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-  <svg class="wc-sparkle wc-sp5" width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-
-  <div class="wc-left">
-    <h1 id="welcome-heading">Welcome Back, <em><span class="wc-name-underline" id="welcome-name">—</span></em></h1>
-    <p class="wc-tagline">Let's Build <em>Something Amazing.</em></p>
-  </div>
-
-  <div class="wc-stats">
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-members">—</span>
-      <span class="wc-stat-label">Members</span>
-    </div>
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-threads">—</span>
-      <span class="wc-stat-label">Threads</span>
-    </div>
-    <div class="wc-stat">
-      <span class="wc-stat-num stat-val" id="stat-online">—</span>
-      <span class="wc-stat-label">Online</span>
-    </div>
-  </div>
-   <!-- Sparky -->
-  <div class="wc-sparky-wrap">
-    <svg class="wc-sparky-sp wc-sp-a" width="16" height="16" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <svg class="wc-sparky-sp wc-sp-b" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <svg class="wc-sparky-sp wc-sp-c" width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
-    <img src="sid.png" alt="Sid" style="width:148px;height:148px;object-fit:contain;">
-    <div class="wc-speech">What are we building today? ✨</div>
-  </div>
-</div><!-- end welcome-card -->
+    <div id="community-hero"></div>
 
     <!-- FEED COLUMN -->
     <div class="feed-col">
@@ -2356,7 +2337,33 @@ await onThreadPosted(currentUser.uid);
 
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <script src="js/nav.js"></script>
-<script>initNav('community', 'Community');</script>
+<script>
+  initNav('community', 'Community');
+  if (window.renderSharedHero) {
+    window.renderSharedHero('#community-hero', {
+      eyebrow: '✦ Members Area',
+      titleId: 'welcome-heading',
+      titleHtml: 'Welcome Back, <em><span class="wc-name-underline" id="welcome-name">—</span></em>',
+      subtitle: "Let's build something amazing.",
+      stats: [
+        { id: 'stat-members', value: '—', label: 'Members', valueClass: 'stat-val' },
+        { id: 'stat-threads', value: '—', label: 'Threads', valueClass: 'stat-val' },
+        { id: 'stat-online', value: '—', label: 'Online', valueClass: 'stat-val' }
+      ],
+      avatar: { src: 'sid.png', alt: 'Sid', circle: true },
+      speech: {
+        className: 'community-hero-speech',
+        lines: [
+          "Sid's here if you need anything ♡",
+          "What are we building today? ✨",
+          "Ask a question, share a win, keep it moving.",
+          "Your crew is here when you need them.",
+          "Build in public, even if public is just us."
+        ]
+      }
+    });
+  }
+</script>
 <script>
   function toggleEmojiPicker(threadId) {
     const picker = document.getElementById('emoji-picker-' + threadId);

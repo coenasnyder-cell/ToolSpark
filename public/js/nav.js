@@ -125,10 +125,10 @@
       '.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(2px);}' +
       '.sidebar-overlay.open{opacity:1;pointer-events:all;}' +
       /* ── Main wrap ── */
-      '.main-wrap{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}' +
+      '.main-wrap{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;}' +
       /* ── Top header ── */
       '.top-header{background:#000;border-bottom:1px solid rgba(255,255,255,0.08);height:72px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;width:100%;}' +
-      ':root{--header-height:72px;}' +
+      ':root{--header-height:72px;--radius:0px;--radius-sm:0px;--radius-lg:0px;}' +
       '.hamburger-btn{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:6px;border-radius:6px;transition:background 0.15s;flex-shrink:0;align-items:center;justify-content:center;}' +
       '.hamburger-btn:hover{background:rgba(255,255,255,0.08);}' +
       '.header-title{font-family:"Inter",sans-serif;font-size:18px;font-weight:700;color:#fff;flex:1;line-height:1.2;}' +
@@ -182,6 +182,8 @@
       '.sidebar-close-btn{display:flex;}' +
       '.sidebar-overlay{display:block;}' +
       '.main-wrap{margin-left:0;}' +
+      '.page-content{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important;}' +
+      '.ts-mobile-stack-grid{grid-template-columns:1fr!important;}' +
       '.top-header{padding:0 1rem;height:54px;}' +
       '.hamburger-btn{display:flex;}' +
       '.header-title{font-size:17px;}' +
@@ -190,6 +192,118 @@
       '}';
     document.head.appendChild(s);
   }
+
+  function injectSharedHeroStyles() {
+    if (document.getElementById('ts-shared-hero-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'ts-shared-hero-styles';
+    s.textContent =
+      '.ts-hero{background:var(--dark2);border:1px solid var(--border-dark);padding:2.35rem 2.25rem;display:flex;align-items:center;justify-content:space-between;gap:2.5rem;position:relative;overflow:hidden;box-shadow:var(--shadow-md);}' +
+      '.ts-hero::before{content:"";position:absolute;top:0;right:0;width:420px;height:100%;background:radial-gradient(ellipse at right, rgba(201,168,76,0.10) 0%, transparent 65%);pointer-events:none;}' +
+      '.ts-hero-spark{position:absolute;color:var(--gold);pointer-events:none;}' +
+      '.ts-hero-sp1{top:18px;right:300px;animation:twinkle 2.8s cubic-bezier(0.77,0,0.175,1) 0.1s infinite;}' +
+      '.ts-hero-sp3{bottom:26px;right:250px;animation:twinkle 2.8s cubic-bezier(0.77,0,0.175,1) 1.7s infinite;}' +
+      '.ts-hero-sp5{bottom:20px;right:160px;animation:twinkle 3s cubic-bezier(0.77,0,0.175,1) 1.3s infinite;}' +
+      '.ts-hero-copy,.ts-hero-stats,.ts-hero-avatar-wrap{position:relative;z-index:1;}' +
+      '.ts-hero-copy{flex:1;min-width:0;max-width:760px;}' +
+      '.ts-hero-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--gold);border-radius:100px;padding:3px 12px;font-size:13px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px;}' +
+      '.ts-hero-title{font-family:"Playfair Display",serif;font-size:34px;font-weight:400;color:#F0EDE6;line-height:1.08;margin-bottom:12px;}' +
+      '.ts-hero-subtitle{font-size:18px;color:rgba(255,255,255,0.68);line-height:1.6;max-width:700px;}' +
+      '.ts-hero-stats{display:flex;gap:2rem;align-items:center;justify-content:space-evenly;flex-shrink:0;min-width:360px;transform:translateY(-6px);}' +
+      '.ts-hero-stat{text-align:center;min-width:84px;}' +
+      '.ts-hero-stat-value{display:block;font-family:"Playfair Display",serif;font-size:36px;font-weight:500;line-height:1.3;color:#F0EDE6;}' +
+      '.ts-hero-stat-label{display:block;margin-top:4px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6B6560;}' +
+      '.ts-hero-avatar-wrap{width:160px;max-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex-shrink:0;align-self:center;}' +
+      '.ts-hero-avatar-wrap.ts-hero-avatar-small{width:132px;max-width:132px;justify-content:center;}' +
+      '.ts-hero-avatar-wrap.ts-hero-avatar-has-speech{gap:0;}' +
+      '.ts-hero-avatar-circle{width:148px;height:148px;border-radius:50%;background:rgba(28,26,23,1);border:2.5px solid var(--gold);box-shadow:0 0 0 10px rgba(201,168,76,0.10);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;z-index:1;}' +
+      '.ts-hero-avatar-small .ts-hero-avatar-circle{width:110px;height:110px;box-shadow:0 0 0 8px rgba(201,168,76,0.08);}' +
+      '.ts-hero-avatar-img{width:100%;height:100%;object-fit:cover;display:block;}' +
+      '.ts-hero-avatar-plain{width:100%;max-width:132px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,0.24));}' +
+      '.ts-hero-speech{display:block;flex-shrink:0;background:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:8px 12px;font-size:14px;font-weight:600;color:#2A1F0A;line-height:1.45;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.20);width:85%;margin-top:-24px;position:relative;z-index:2;transform:rotate(2deg);transform-origin:center top;}' +
+      '.ts-hero-speech.ts-hero-speech-plain{width:100%;margin-top:-10px;}' +
+      '@media(max-width:1000px){.ts-hero{gap:2rem;padding:2rem;justify-content:flex-start;}.ts-hero-title{font-size:30px;}.ts-hero-copy{max-width:100%;}.ts-hero-stats{min-width:0;gap:1.5rem;transform:none;}.ts-hero-stat-value{font-size:30px;}.ts-hero-avatar-wrap.ts-hero-avatar-small{width:110px;max-width:110px;}.ts-hero-avatar-wrap.ts-hero-avatar-small .ts-hero-avatar-plain{max-width:110px;}}' +
+      '@media(max-width:640px){.ts-hero{padding:1.5rem 1.25rem;flex-direction:column;align-items:flex-start;gap:1.25rem;}.ts-hero-title{font-size:26px;}.ts-hero-subtitle{font-size:16px;max-width:100%;}.ts-hero-stats{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:1rem 1.5rem;margin-top:2px;}.ts-hero-stat{min-width:84px;}.ts-hero-stat-value{font-size:24px;}.ts-hero-avatar-wrap{display:none;}.ts-hero-avatar-wrap.ts-hero-avatar-show-mobile{display:flex;width:96px;max-width:96px;align-self:center;}.ts-hero-avatar-wrap.ts-hero-avatar-show-mobile .ts-hero-avatar-plain{max-width:96px;}}';
+    document.head.appendChild(s);
+  }
+
+  function sharedHeroSpark(className, size) {
+    return '<svg class="ts-hero-spark ' + className + '" width="' + size + '" height="' + size + '" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>';
+  }
+
+  function escapeHeroHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function resolveHeroSpeech(speech) {
+    if (!speech) return null;
+    var lines = Array.isArray(speech.lines)
+      ? speech.lines.filter(function(line) { return line != null && String(line).trim(); })
+      : [];
+    var text = lines.length
+      ? lines[Math.floor(Math.random() * lines.length)]
+      : (speech.text || '');
+    if (!text) return null;
+    return {
+      id: speech.id || '',
+      className: speech.className || '',
+      text: text
+    };
+  }
+
+  window.renderSharedHero = function(target, options) {
+    injectSharedHeroStyles();
+    var mount = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!mount) return null;
+    var opts = options || {};
+    var stats = Array.isArray(opts.stats) ? opts.stats : [];
+    var avatar = opts.avatar || {};
+    var speech = resolveHeroSpeech(opts.speech || null);
+    var titleHtml = opts.titleHtml || (opts.title ? escapeHeroHtml(opts.title) : '');
+    var titleAttrs = opts.titleId ? ' id="' + opts.titleId + '"' : '';
+    var subtitle = opts.subtitle ? escapeHeroHtml(opts.subtitle) : '';
+    var statsHtml = stats.length ? '<div class="ts-hero-stats">' + stats.map(function(stat) {
+      var valueAttrs = stat.id ? ' id="' + stat.id + '"' : '';
+      var valueClass = 'ts-hero-stat-value' + (stat.valueClass ? ' ' + stat.valueClass : '');
+      return '<div class="ts-hero-stat"><span class="' + valueClass + '"' + valueAttrs + '>' + (stat.value != null ? stat.value : '—') + '</span><span class="ts-hero-stat-label">' + (stat.label || '') + '</span></div>';
+    }).join('') + '</div>' : '';
+    var avatarWrapClasses = 'ts-hero-avatar-wrap' +
+      (avatar.size === 'small' ? ' ts-hero-avatar-small' : '') +
+      (speech ? ' ts-hero-avatar-has-speech' : '') +
+      (avatar.showOnMobile ? ' ts-hero-avatar-show-mobile' : '');
+    var avatarHtml = '';
+    if (avatar.src) {
+      var speechClasses = 'ts-hero-speech' +
+        (avatar.circle === false ? ' ts-hero-speech-plain' : '') +
+        (speech && speech.className ? ' ' + speech.className : '');
+      var speechAttrs = speech && speech.id ? ' id="' + speech.id + '"' : '';
+      var speechHtml = speech ? '<div class="' + speechClasses + '"' + speechAttrs + '>' + escapeHeroHtml(speech.text) + '</div>' : '';
+      if (avatar.circle === false) {
+        avatarHtml = '<div class="' + avatarWrapClasses + '"><img src="' + avatar.src + '" alt="' + (avatar.alt || '') + '" class="ts-hero-avatar-plain">' + speechHtml + '</div>';
+      } else {
+        avatarHtml = '<div class="' + avatarWrapClasses + '"><div class="ts-hero-avatar-circle"><img src="' + avatar.src + '" alt="' + (avatar.alt || '') + '" class="ts-hero-avatar-img"></div>' +
+          speechHtml +
+          '</div>';
+      }
+    }
+    mount.innerHTML =
+      '<section class="ts-hero">' +
+        sharedHeroSpark('ts-hero-sp1', 20) +
+        sharedHeroSpark('ts-hero-sp3', 16) +
+        sharedHeroSpark('ts-hero-sp5', 14) +
+        '<div class="ts-hero-copy">' +
+          (opts.eyebrow ? '<div class="ts-hero-eyebrow">' + escapeHeroHtml(opts.eyebrow) + '</div>' : '') +
+          '<h1 class="ts-hero-title"' + titleAttrs + '>' + titleHtml + '</h1>' +
+          (subtitle ? '<p class="ts-hero-subtitle">' + subtitle + '</p>' : '') +
+        '</div>' +
+        statsHtml +
+        avatarHtml +
+      '</section>';
+    return mount.firstElementChild;
+  };
 
   function initHeader(pageTitle) {
     var header = document.querySelector('.top-header');
