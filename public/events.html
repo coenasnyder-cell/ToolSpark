@@ -37,9 +37,7 @@
 
   body {
     font-family: 'Lato', sans-serif;
-    background:
-      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 30%),
-      linear-gradient(180deg, #0C0B09 0%, #11100D 100%);
+    background: linear-gradient(180deg, #FFFEFC 0%, #F7F4EE 100%);
     color: var(--cream);
     min-height: 100dvh;
     display: flex;
@@ -299,8 +297,10 @@
   .stats-bar {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-radius: 24px;
+    margin-top: -0.35rem;
+    border-radius: 0 0 24px 24px;
     border: 1px solid rgba(255,255,255,0.07);
+    border-top: none;
     background: linear-gradient(180deg, rgba(17,15,12,0.98) 0%, rgba(13,12,10,0.98) 100%);
     box-shadow: var(--shadow-soft);
     overflow: hidden;
@@ -875,6 +875,7 @@
 
     .stats-bar {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: -0.3rem;
     }
 
     .board-grid {
@@ -929,6 +930,7 @@
 
     .stats-bar {
       grid-template-columns: 1fr;
+      margin-top: -0.2rem;
     }
 
     .stat-card + .stat-card {

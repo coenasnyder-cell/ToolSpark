@@ -35,9 +35,7 @@
 
   body {
     font-family: 'Lato', sans-serif;
-    background:
-      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 26%),
-      linear-gradient(180deg, #F8F4ED 0%, #F1ECE3 100%);
+    background: linear-gradient(180deg, #FFFEFC 0%, #F7F4EE 100%);
     color: var(--text);
     min-height: 100vh;
     display: flex;
@@ -91,6 +89,13 @@
   }
 
   /* ── TOOLBAR ── */
+  .toolbar-shell {
+    background: linear-gradient(180deg, #F6F1E8 0%, #EFE7D8 100%);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 20px;
+    padding: 0.9rem 1rem;
+    box-shadow: var(--shadow);
+  }
   .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 380px; }
   .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
@@ -114,7 +119,7 @@
     min-height: 44px;
     padding: 0.7rem 1rem;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 12px;
     font-size: 12px;
     font-weight: 800;
     color: var(--text2);
@@ -216,8 +221,8 @@
 
   /* ── MEMBER CARD ── */
   .member-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow);
+    background: var(--surface); border: 1px solid rgba(201,168,76,0.26);
+    border-radius: 14px; box-shadow: var(--shadow);
     padding: 14px 16px 16px;
     display: flex; flex-direction: column; gap: 10px;
     text-decoration: none; color: inherit;
@@ -336,19 +341,6 @@
       <p class="page-subtitle">Meet the builders inside ToolSpark, connect, collaborate, and cheer each other on.</p>
     </div>
 
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" id="member-search" type="text" placeholder="Search members…">
-      </div>
-      <div class="filter-chip active" data-filter="all">All</div>
-      <div class="filter-chip" data-filter="active">Active</div>
-      <div class="filter-chip" data-filter="new">New</div>
-      <div class="filter-chip" data-filter="recent">Recently Joined</div>
-      <div class="member-count" id="member-count"></div>
-    </div>
-
     <!-- SPOTLIGHT HERO -->
     <div class="spotlight">
       <!-- Left: avatar + name + CTA -->
@@ -370,6 +362,21 @@
           <div class="spotlight-quote" id="spotlight-quote">I went from idea to live tool in 21 days. You can too!</div>
           <div class="spotlight-attribution" id="spotlight-attribution">— Jessica</div>
         </div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar-shell">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" id="member-search" type="text" placeholder="Search members…">
+        </div>
+        <div class="filter-chip active" data-filter="all">All</div>
+        <div class="filter-chip" data-filter="active">Active</div>
+        <div class="filter-chip" data-filter="new">New</div>
+        <div class="filter-chip" data-filter="recent">Recently Joined</div>
+        <div class="member-count" id="member-count"></div>
       </div>
     </div>
 
