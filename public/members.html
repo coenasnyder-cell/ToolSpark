@@ -58,34 +58,14 @@
     flex-direction: column;
     gap: 1.5rem;
   }
-
-  .page-header {
-    max-width: 52rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
+  #dashboard-hero .ts-hero-avatar-wrap,
+  #dashboard-hero .ts-hero-avatar-wrap.ts-hero-avatar-small {
+    width: 104px;
+    max-width: 104px;
   }
-
-  .page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 4vw, 4rem);
-    font-weight: 500;
-    letter-spacing: -0.04em;
-    line-height: 0.98;
-    color: var(--text);
-    text-wrap: balance;
-  }
-
-  .page-title em {
-    font-style: italic;
-    color: #A97F1E;
-  }
-
-  .page-subtitle {
-    font-size: 1.08rem;
-    color: var(--text2);
-    line-height: 1.65;
-    text-wrap: pretty;
+  #dashboard-hero .ts-hero-avatar-plain,
+  #dashboard-hero .ts-hero-avatar-wrap.ts-hero-avatar-small .ts-hero-avatar-plain {
+    max-width: 104px;
   }
 
   /* ── TOOLBAR ── */
@@ -135,86 +115,6 @@
   .filter-chip.active { background: linear-gradient(180deg, #181613 0%, #0C0B09 100%); border-color: var(--dark); color: var(--gold-light); box-shadow: 0 12px 24px rgba(12,11,9,0.14); }
   .member-count { font-size: 13px; color: var(--text3); margin-left: auto; white-space: nowrap; }
 
-  /* ── SPOTLIGHT HERO ── */
-  .spotlight {
-    background: var(--dark2);
-    border: 1px solid var(--border-dark);
-    border-radius: 12px;
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    overflow: hidden;
-    position: relative;
-    min-height: 160px;
-    box-shadow: var(--shadow-md);
-  }
-  .spotlight-left {
-    display: flex; flex-direction: column;
-    align-items: flex-start; justify-content: center;
-    gap: 10px; padding: 28px 28px;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    position: relative;
-  }
-  .spotlight-left::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 0% 100%, rgba(201,168,76,0.10) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .spotlight-identity { display: flex; align-items: center; gap: 14px; }
-  .spotlight-avatar-ph {
-    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid rgba(201,168,76,0.5);
-    background: #1C1A17;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif; font-size: 22px;
-    color: var(--gold); font-style: italic;
-    overflow: hidden;
-  }
-  .spotlight-avatar-ph img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-  .spotlight-meta { display: flex; flex-direction: column; gap: 3px; }
-  .spotlight-eyebrow {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.14em; color: var(--gold); opacity: 0.8;
-  }
-  .spotlight-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px; font-weight: 500;
-    color: #F0EDE6; line-height: 1.1;
-  }
-  .spotlight-achievement {
-    font-size: 12px; color: rgba(255,255,255,0.4);
-    line-height: 1.5; margin-top: 2px;
-  }
-  .spotlight-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 16px; border-radius: 6px;
-    background: transparent;
-    border: 1px solid rgba(201,168,76,0.35); color: var(--gold);
-    font-family: inherit; font-size: 12px; font-weight: 700;
-    text-decoration: none; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    letter-spacing: 0.02em; margin-top: 4px;
-  }
-  .spotlight-btn:hover { background: rgba(201,168,76,0.10); border-color: var(--gold); }
-
-  .spotlight-right {
-    display: flex; align-items: center;
-    padding: 28px 36px;
-  }
-  .spotlight-quote-wrap {
-    border-left: 2px solid rgba(201,168,76,0.35);
-    padding-left: 24px;
-  }
-  .spotlight-quote {
-    font-family: 'Playfair Display', serif;
-    font-size: 19px; font-style: italic;
-    color: rgba(240,237,230,0.9); line-height: 1.65;
-  }
-  .spotlight-attribution {
-    font-size: 12px; color: rgba(255,255,255,0.3);
-    margin-top: 12px; font-style: normal;
-    letter-spacing: 0.04em;
-  }
 
   /* ── GRID ── */
   .members-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
@@ -222,7 +122,7 @@
   /* ── MEMBER CARD ── */
   .member-card {
     background: var(--surface); border: 1px solid rgba(201,168,76,0.26);
-    border-radius: 10px; box-shadow: var(--shadow);
+    border: 1px solid rgba(201,168,76,0.55);
     padding: 14px 16px 16px;
     display: flex; flex-direction: column; gap: 10px;
     text-decoration: none; color: inherit;
@@ -230,6 +130,7 @@
     position: relative;
     height: 270px;
     overflow: hidden;
+    box-shadow: none;
   }
   .member-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: rgba(201,168,76,0.35); }
 
@@ -325,14 +226,24 @@
   }
   @media (max-width: 767px) {
     .page-content { padding: 1rem 1rem 1.5rem; gap: 1rem; }
-    .spotlight { grid-template-columns: 1fr; }
-    .spotlight-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .spotlight { 
+      display: none; 
+    }
+    .spotlight-left { 
+      display: none;
+     }
     .members-grid { grid-template-columns: repeat(2, 1fr); }
     .member-count { display: none; }
   }
   @media (max-width: 480px) {
     .members-grid { grid-template-columns: 1fr; }
     .page-content { padding: 0.875rem 0.875rem 1.5rem; }
+     .spotlight { 
+      display: none; 
+    }
+    .spotlight-left { 
+      display: none;
+     }
   }
 </style>
 </head>
@@ -343,36 +254,7 @@
   <header class="top-header"></header>
 
   <div class="page-content">
-
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-      <h1 class="page-title">Community <em>Members</em></h1>
-      <p class="page-subtitle">Meet the builders inside ToolSpark, connect, collaborate, and cheer each other on.</p>
-    </div>
-
-    <!-- SPOTLIGHT HERO -->
-    <div class="spotlight">
-      <!-- Left: avatar + name + CTA -->
-      <div class="spotlight-left">
-        <div class="spotlight-eyebrow">Member Spotlight</div>
-        <div class="spotlight-identity">
-          <div class="spotlight-avatar-ph" id="spotlight-avatar">J</div>
-          <div class="spotlight-meta">
-            <div class="spotlight-name" id="spotlight-name">Jessica</div>
-            <div class="spotlight-achievement" id="spotlight-achievement">Launched her first AI tool in 21 days.</div>
-          </div>
-        </div>
-        <a href="#" class="spotlight-btn" id="spotlight-btn">View Story →</a>
-      </div>
-
-      <!-- Right: quote with accent bar -->
-      <div class="spotlight-right">
-        <div class="spotlight-quote-wrap">
-          <div class="spotlight-quote" id="spotlight-quote">I went from idea to live tool in 21 days. You can too!</div>
-          <div class="spotlight-attribution" id="spotlight-attribution">— Jessica</div>
-        </div>
-      </div>
-    </div>
+<div id="dashboard-hero"></div>
 
     <!-- TOOLBAR -->
     <div class="toolbar-shell">
@@ -682,5 +564,23 @@
 </script>
 <script src="js/nav.js"></script>
 <script>initNav('members', 'Members');</script>
+<script>
+  initNav('members', 'Members');
+
+  if (window.renderSharedHero) {
+    window.renderSharedHero('#dashboard-hero', {
+      eyebrow: 'Members Hub',
+      title: 'ToolSpark Community Members',
+      subtitle: 'Meet the builders inside ToolSpark, connect, collaborate, and cheer each other on.',
+
+      avatar: {
+         src: 'pip.png',
+         alt: 'Pip',
+        circle: false,
+        size: 'small'
+      }
+    });
+  }
+</script>
 </body>
 </html>

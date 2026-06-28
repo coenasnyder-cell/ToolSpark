@@ -91,7 +91,17 @@
   .tool-name { font-size: 15px; font-weight: 700; color: var(--text); }
   .featured-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); border-radius: 12px; padding: 2px 7px; }
   .tool-category { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
-  .tool-desc { font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1; }
+.tool-desc {
+     font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+}
+
   .tool-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 0.875rem; border-top: 1px solid var(--border); margin-top: auto; }
   .tool-link { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: #0C0B09; border: none; border-radius: var(--radius-sm); padding: 8px 16px; font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.15s; }
   .tool-link:hover { background: var(--gold-light); }
@@ -152,9 +162,7 @@
     .hero-copy { max-width: 100%; text-align: center; }
     .hero-title { max-width: none; }
     .hero-sub { font-size: 16px; max-width: 100%; margin-left: auto; margin-right: auto; }
-    .hero-avatar-zone { min-width: 0; width: 100%; padding-top: 0.25rem; }
-    .hero-avatar-ring { width: 132px; height: 132px; }
-    .hero-speech { width: min(180px, 100%); margin-top: -12px; transform: rotate(0deg); }
+    .hero-avatar-zone { display: none; }
   .tools-grid { grid-template-columns: 1fr; }
     .browse-row { align-items: stretch; }
     .search-wrap { flex: 1 1 100%; min-width: 0; }
@@ -416,6 +424,14 @@
     grid.innerHTML = toolsToShow.map(renderToolCard).join('');
   }
 
+  function getToolCardDescription(description) {
+    const text = String(description || '').trim();
+    if (!text) return '';
+    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
+    if (!sentences || sentences.length <= 3) return text;
+    return sentences.slice(0, 3).join(' ').trim();
+  }
+
   function renderToolCard(tool) {
     const imgHtml = tool.imageUrl
       ? '<img class="tool-img" src="' + escHtml(tool.imageUrl) + '" alt="' + escHtml(tool.name) + '" />'
@@ -433,7 +449,7 @@
       '</div>' +
       '<div class="tool-category">' + escHtml(tool.category) + '</div>' +
       '</div></div>' +
-      '<div class="tool-desc">' + escHtml(tool.description) + '</div>' +
+      '<div class="tool-desc">' + escHtml(getToolCardDescription(tool.description)) + '</div>' +
       '<div class="tool-footer">' +
       (tool.affiliateUrl
         ? '<a class="tool-link" href="' + escHtml(tool.affiliateUrl) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Visit Tool <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>'
