@@ -24,8 +24,8 @@
     --text3: #9E9891;
     --green: #2A5C45;
     --green-light: #3D8A65;
-    --radius: 22px;
-    --radius-sm: 14px;
+    --radius: 10px;
+    --radius-sm: 8px;
     --shadow: 0 18px 45px rgba(34,27,18,0.08);
     --shadow-md: 0 10px 30px rgba(34,27,18,0.08);
     --sidebar-width: 220px;
@@ -39,26 +39,27 @@
   .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
   /* SEARCH BAR */
-  .search-wrap { position: relative; flex: 1; max-width: 320px; }
-  .search-input { width: 100%; background: var(--dark3); border: 1px solid var(--border-dark); border-radius: 100px; padding: 8px 16px 8px 36px; font-family: 'Lato', sans-serif; font-size: 13px; color: #F0EDE6; outline: none; transition: border-color 0.15s; }
-  .search-input::placeholder { color: #7A7670; }
-  .search-input:focus { border-color: rgba(201,168,76,0.4); }
-  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #4A4840; pointer-events: none; }
+  .browse-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 0 1 320px; min-width: 240px; }
+  .search-input { width: 100%; min-height: 42px; background: rgba(255,255,255,0.96); border: 1px solid var(--border); border-radius: 10px; padding: 8px 16px 8px 38px; font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s; box-shadow: var(--shadow); }
+  .search-input::placeholder { color: var(--text3); }
+  .search-input:focus { border-color: rgba(201,168,76,0.55); box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text3); pointer-events: none; }
 
   /* PAGE */
   .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 1180px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
-  .hero-card { position: relative; overflow: hidden; background: linear-gradient(180deg, #181511 0%, #0C0B09 100%); border: 1px solid rgba(201,168,76,0.18); border-radius: 28px; box-shadow: var(--shadow-md); padding: 1.45rem 1.75rem 1.35rem; }
+  .hero-card { position: relative; overflow: hidden; background: linear-gradient(180deg, #181511 0%, #0C0B09 100%); border: 1px solid rgba(201,168,76,0.18); border-radius: 10px; box-shadow: var(--shadow-md); padding: 1.45rem 1.75rem 1.35rem; }
   .hero-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 76% 24%, rgba(201,168,76,0.10), transparent 18%), radial-gradient(circle at 82% 82%, rgba(201,168,76,0.08), transparent 22%); pointer-events: none; }
   .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.25rem 1.75rem; }
   .hero-copy { min-width: 0; max-width: 52rem; }
   .hero-eyebrow { display: inline-flex; align-items: center; min-height: 30px; padding: 0 14px; border-radius: 999px; background: linear-gradient(180deg, #D5B04F 0%, #C9A84C 100%); color: #141210; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; }
-  .hero-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 400; line-height: 1.08; letter-spacing: -0.02em; color: #F0EDE6; text-wrap: balance; max-width: 15ch; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 400; line-height: 1.08; letter-spacing: -0.02em; color: #F0EDE6; text-wrap: balance; max-width: 24ch; }
   .hero-sub { margin-top: 0; max-width: 42rem; font-size: 18px; color: rgba(255,255,255,0.68); line-height: 1.6; text-wrap: pretty; }
   .hero-avatar-zone { position: relative; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex-shrink: 0; min-width: 160px; width: 160px; margin-left: auto; z-index: 1; }
   .hero-avatar-ring { position: relative; width: 148px; height: 148px; border-radius: 50%; padding: 0; background: #1C1A17; border: 2.5px solid var(--gold); box-shadow: 0 0 0 10px rgba(201,168,76,0.10); overflow: hidden; }
   .hero-avatar-ring::after { display: none; }
   .hero-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center top; background: #221d17; display: block; }
-  .hero-speech { width: 85%; margin-top: -18px; position: relative; right: auto; bottom: auto; background: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 8px 12px; font-size: 14px; font-weight: 600; color: #2A1F0A; line-height: 1.45; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.20); transform: rotate(2deg); transform-origin: center top; z-index: 2; }
+  .hero-speech { width: 85%; margin-top: -18px; position: relative; right: auto; bottom: auto; background: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 8px 12px; font-size: 14px; font-weight: 600; color: #2A1F0A; line-height: 1.45; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.20); transform: rotate(2deg); transform-origin: center top; z-index: 2; }
   .hero-speech::before { display: none; }
   .hero-speech-accent { display: inline; margin-top: 0; color: var(--gold); font-size: 14px; }
   .hero-spark { position: absolute; color: rgba(201,168,76,0.9); pointer-events: none; }
@@ -67,8 +68,8 @@
   .hero-spark--c { right: 12px; bottom: 84px; font-size: 10px; }
 
   /* FILTER BAR */
-  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .filter-chip { padding: 8px 15px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.18s var(--ease-out); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; box-shadow: var(--shadow); }
+  .filter-bar { display: flex; align-items: center; gap: 8px; flex: 1 1 0; flex-wrap: wrap; min-width: 0; }
+  .filter-chip { padding: 8px 15px; border: 1px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--text2); background: var(--surface); cursor: pointer; transition: all 0.18s var(--ease-out); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; box-shadow: var(--shadow); }
   .filter-chip:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
   .filter-chip.active { background: var(--dark); border-color: var(--dark); color: var(--gold-light); box-shadow: 0 12px 24px rgba(12,11,9,0.14); }
 
@@ -88,7 +89,7 @@
   .tool-info { flex: 1; min-width: 0; }
   .tool-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
   .tool-name { font-size: 15px; font-weight: 700; color: var(--text); }
-  .featured-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); border-radius: 100px; padding: 2px 7px; }
+  .featured-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); border-radius: 12px; padding: 2px 7px; }
   .tool-category { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
   .tool-desc { font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1; }
   .tool-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 0.875rem; border-top: 1px solid var(--border); margin-top: auto; }
@@ -126,7 +127,7 @@
   .empty-sub { font-size: 14px; }
 
   /* BOTTOM BANNER */
-  .promo-banner { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; background: linear-gradient(180deg, #141210 0%, #0C0B09 100%); border: 1px solid var(--border-dark); border-radius: 24px; padding: 1.6rem 1.75rem; box-shadow: var(--shadow-md); }
+  .promo-banner { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; background: linear-gradient(180deg, #141210 0%, #0C0B09 100%); border: 1px solid var(--border-dark); border-radius: 10px; padding: 1.6rem 1.75rem; box-shadow: var(--shadow-md); }
   .promo-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 82% 50%, rgba(201,168,76,0.10), transparent 16%); pointer-events: none; }
   .promo-left { position: relative; z-index: 1; display: flex; align-items: center; gap: 18px; min-width: 0; }
   .promo-icon { width: 62px; height: 62px; border-radius: 50%; background: linear-gradient(180deg, #D4AF53 0%, #C9A84C 100%); color: #141210; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 28px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.28); }
@@ -155,7 +156,9 @@
     .hero-avatar-ring { width: 132px; height: 132px; }
     .hero-speech { width: min(180px, 100%); margin-top: -12px; transform: rotate(0deg); }
   .tools-grid { grid-template-columns: 1fr; }
-    .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .browse-row { align-items: stretch; }
+    .search-wrap { flex: 1 1 100%; min-width: 0; }
+    .filter-bar { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; flex: 1 1 100%; }
     .filter-bar::-webkit-scrollbar { display: none; }
     .promo-banner { flex-direction: column; align-items: flex-start; padding: 1.25rem; }
     .promo-left { width: 100%; }
@@ -182,7 +185,7 @@
 
       <div class="hero-grid">
         <div class="hero-copy">
-          <div class="hero-eyebrow">Discover Hub</div>
+          <div class="hero-eyebrow">Tools Hub</div>
           <h1 class="hero-title">Your shortcut to smarter building.</h1>
           <p class="hero-sub">Explore bonus tools, templates, and workflows built to save you time and help you grow faster.</p>
         </div>
@@ -199,9 +202,15 @@
       </div>
     </section>
 
-    <!-- Filter bar -->
-    <div class="filter-bar" id="filter-bar">
-      <div class="filter-chip active" data-filter="All">All</div>
+    <!-- Search + filters -->
+    <div class="browse-row">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="search-input" type="text" placeholder="Search tools..." oninput="filterTools()">
+      </div>
+      <div class="filter-bar" id="filter-bar">
+        <div class="filter-chip active" data-filter="All">All</div>
+      </div>
     </div>
 
     <!-- Featured section -->
