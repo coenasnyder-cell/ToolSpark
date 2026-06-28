@@ -1,146 +1,971 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leaderboard — ToolSpark</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<title>Leaderboard - ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
     --dark: #0C0B09;
     --dark2: #141210;
-    --dark3: #1C1A17;
-    --border-dark: #2A2720;
     --gold: #C9A84C;
-    --gold-light: #E8D5A3;
-    --gold-dim: rgba(201,168,76,0.12);
+    --gold-soft: rgba(201,168,76,0.12);
+    --gold-line: rgba(201,168,76,0.28);
     --bg: #F4F2EE;
-    --surface: #FFFFFF;
+    --surface: rgba(255,255,255,0.96);
+    --surface-strong: #FFFFFF;
+    --surface-tint: #FBF8F2;
     --border: #E4E0D8;
     --text: #1A1714;
-    --text2: #6B6560;
-    --text3: #9E9891;
-    --green-light: #3D8A65;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+    --text2: #645D56;
+    --text3: #968F88;
+    --shadow: 0 18px 45px rgba(34,27,18,0.08);
+    --shadow-soft: 0 8px 26px rgba(34,27,18,0.06);
+    --radius: 22px;
+    --radius-sm: 14px;
     --sidebar-width: 220px;
-    --header-height: 64px;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
 
-  body { font-family: 'Lato', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
 
-  /* MAIN */
-  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background:
+      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 26%),
+      linear-gradient(180deg, #F8F4ED 0%, #F1ECE3 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  /* PAGE */
-  .page-content { flex: 1; padding: 1.75rem 2rem; max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 3rem; }
+  .main-wrap {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-  /* PROFILE CARD */
-  .profile-card { background: var(--surface); border: 1px solid var(--gold); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
-  .profile-top { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; }
-  .profile-avatar-wrap { position: relative; flex-shrink: 0; }
-  .profile-avatar { width: 68px; height: 68px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; }
-  .profile-avatar-fallback { width: 68px; height: 68px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: var(--dark); }
-  .level-badge { position: absolute; bottom: -4px; right: -4px; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 2px solid var(--dark2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--dark); }
-  .profile-info { flex: 1; }
-  .profile-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-  .profile-level { font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 3px; }
-  .profile-next { font-size: 12px; color: var(--text3); }
+  .page-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 1.75rem 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 
-  /* LEVEL GRID */
-  .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-  .level-row { display: flex; align-items: center; gap: 6px; }
-  .level-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
-  .level-num.unlocked { background: var(--gold); color: var(--dark); }
-  .level-num.locked { background: var(--border); color: var(--text3); }
-  .level-name { font-size: 11px; color: var(--text2); }
+  .hero-shell {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .hero-copy {
+    max-width: 42rem;
+  }
+
+  .hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.65rem, 5vw, 4.25rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .hero-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    background: rgba(255,255,255,0.72);
+    box-shadow: var(--shadow-soft);
+    flex-shrink: 0;
+  }
+
+  .hero-subtitle {
+    margin-top: 0.7rem;
+    font-size: clamp(1.1rem, 2vw, 1.7rem);
+    color: var(--text2);
+    line-height: 1.38;
+    text-wrap: balance;
+  }
+
+  .hero-help {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 54px;
+    padding: 0.9rem 1.15rem;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.72);
+    box-shadow: var(--shadow-soft);
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .hero-help svg { color: var(--gold); }
+
+  .surface-card {
+    background:
+      radial-gradient(circle at 86% 14%, rgba(201,168,76,0.15), transparent 18%),
+      linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(251,248,242,0.98) 100%);
+    border: 1px solid rgba(228,224,216,0.92);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .profile-card {
+    padding: 1.9rem 2rem;
+    border-color: var(--gold);
+    box-shadow: 0 18px 50px rgba(201,168,76,0.12);
+  }
+
+  .profile-card-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+    gap: 1.75rem;
+    align-items: center;
+  }
+
+  .profile-current {
+    display: flex;
+    align-items: center;
+    gap: 1.35rem;
+    min-width: 0;
+  }
+
+  .profile-avatar-wrap {
+    position: relative;
+    width: 144px;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar,
+  .profile-avatar-fallback {
+    width: 144px;
+    height: 144px;
+    border-radius: 50%;
+    display: block;
+    border: 3px solid var(--gold);
+    box-shadow: 0 10px 25px rgba(201,168,76,0.16);
+  }
+
+  .profile-avatar {
+    object-fit: cover;
+    background: #F8F4ED;
+  }
+
+  .profile-avatar-fallback {
+    background: linear-gradient(145deg, #E3B94B 0%, #C79D35 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--surface-strong);
+  }
+
+  .level-badge {
+    position: absolute;
+    right: -2px;
+    bottom: -8px;
+    width: 58px;
+    height: 58px;
+    clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%);
+    background: linear-gradient(180deg, #E3B94B 0%, #C89E37 100%);
+    border: 3px solid rgba(255,255,255,0.95);
+    box-shadow: 0 10px 22px rgba(201,168,76,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #FFFFFF;
+  }
+
+  .profile-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .profile-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text2);
+  }
+
+  .profile-kicker {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #B68D25;
+  }
+
+  .profile-level {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+    color: var(--text);
+  }
+
+  .profile-level-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.25rem, 2vw, 2rem);
+    font-weight: 500;
+    line-height: 1.05;
+    color: #A97F1E;
+  }
+
+  .profile-next {
+    margin-top: 0.35rem;
+    max-width: 30ch;
+    font-size: 1.02rem;
+    color: var(--text2);
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .progress-panel {
+    min-width: 0;
+    padding-left: 1.75rem;
+    border-left: 1px solid rgba(228,224,216,0.95);
+  }
+
+  .progress-kicker {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #B68D25;
+  }
+
+  .progress-value {
+    margin-top: 0.25rem;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.25rem, 4vw, 4rem);
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+    color: var(--text);
+  }
+
+  .progress-value span {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.55em;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #B68D25;
+    margin-left: 0.2rem;
+  }
+
+  .progress-copy {
+    margin-top: 0.55rem;
+    font-size: 1rem;
+    color: var(--text2);
+  }
+
+  .progress-bar {
+    margin-top: 1rem;
+    height: 16px;
+    border-radius: 999px;
+    background: #ECE7DF;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #D9A933 0%, #F0C964 100%);
+    transition: width 240ms var(--ease-out);
+  }
+
+  .progress-range {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    font-size: 0.98rem;
+    color: var(--text2);
+  }
+
+  .journey-card {
+    padding: 1.35rem 1.45rem 1.5rem;
+    display: none;
+  }
+
+  .journey-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.15rem;
+  }
+
+  .journey-kicker {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #B68D25;
+  }
+
+  .journey-copy {
+    font-size: 1rem;
+    color: var(--text2);
+  }
+
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 0.55rem;
+    align-items: start;
+  }
+
+  .level-row {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.55rem;
+    padding-top: 0.4rem;
+  }
+
+  .level-row::before {
+    content: '';
+    position: absolute;
+    top: 1.6rem;
+    left: -50%;
+    width: 100%;
+    height: 3px;
+    background: #E6E0D8;
+    z-index: 0;
+  }
+
+  .level-row:first-child::before { display: none; }
+  .level-row.unlocked::before,
+  .level-row.current::before { background: linear-gradient(90deg, #D8A936 0%, #E8C56B 100%); }
+
+  .level-num {
+    position: relative;
+    z-index: 1;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 900;
+    border: 2px solid #DAD3CA;
+    background: #FAF7F1;
+    color: #5F5852;
+    box-shadow: 0 4px 10px rgba(34,27,18,0.04);
+  }
+
+  .level-row.unlocked .level-num {
+    border-color: rgba(201,168,76,0.3);
+    background: linear-gradient(180deg, #E4B84A 0%, #C99E35 100%);
+    color: #FFFFFF;
+  }
+
+  .level-row.current .level-num {
+    width: 58px;
+    height: 58px;
+    border-color: rgba(201,168,76,0.5);
+    background: linear-gradient(180deg, #F4D06C 0%, #D6A43B 100%);
+    color: #FFFFFF;
+    box-shadow: 0 10px 24px rgba(201,168,76,0.22);
+  }
+
+  .level-name {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
   .level-name.locked { color: var(--text3); }
+  .level-row.current .level-name { color: #A57C1D; }
 
-  /* TABS */
-  .tabs { display: flex; background: var(--border); border-radius: var(--radius-sm); padding: 3px; gap: 3px; }
-  .tab { flex: 1; padding: 8px; text-align: center; border-radius: calc(var(--radius-sm) - 2px); font-size: 13px; font-weight: 700; color: var(--text3); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: 'Lato', sans-serif; }
-  .tab.active { background: var(--dark); color: var(--gold); }
-  .tab:hover:not(.active) { color: var(--text2); }
+  .level-status {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
 
-  /* LEADERBOARD */
-  .leaderboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-  .lb-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 1.25rem; border-bottom: 1px solid var(--border); background: var(--bg); }
-  .lb-header-rank { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
-  .lb-header-points { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .level-row.unlocked .level-status { color: #A07C20; }
+  .level-row.current .level-status { color: #A07C20; }
 
-  .lb-row { display: flex; align-items: center; gap: 12px; padding: 12px 1.25rem; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  .leaderboard-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.72fr);
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .tabs-card,
+  .rank-card,
+  .leaderboard-card,
+  .footer-banner {
+    background: var(--surface);
+    border: 1px solid rgba(228,224,216,0.92);
+    border-radius: 22px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .tabs-card {
+    padding: 1rem;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .tab {
+    min-height: 56px;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,244,236,0.98) 100%);
+    color: var(--text2);
+    text-align: center;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out), color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), background-color 180ms var(--ease-out);
+  }
+
+  .tab.active {
+    background: linear-gradient(180deg, #181613 0%, #0C0B09 100%);
+    border-color: rgba(12,11,9,0.95);
+    color: #EECF7A;
+    box-shadow: 0 12px 24px rgba(12,11,9,0.14);
+  }
+
+  .rank-card {
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .rank-star {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .rank-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .rank-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: #B68D25;
+  }
+
+  .rank-copy {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    color: var(--text2);
+  }
+
+  .leaderboard-card {
+    overflow: hidden;
+  }
+
+  .lb-header {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) 130px;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.5rem 0.95rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 100%);
+  }
+
+  .lb-header-rank,
+  .lb-header-points {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .lb-header-name {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .lb-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) 130px;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 180ms var(--ease-out);
+  }
+
   .lb-row:last-child { border-bottom: none; }
-  .lb-row:hover { background: #FAFAF8; }
-  .lb-row.me { background: var(--gold-dim); border-left: 3px solid var(--gold); }
-  .lb-rank { width: 32px; text-align: center; flex-shrink: 0; font-size: 20px; }
-  .lb-rank-num { width: 24px; height: 24px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text3); margin: 0 auto; }
-  .lb-avatar { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); object-fit: cover; flex-shrink: 0; }
-  .lb-avatar-fallback { width: 38px; height: 38px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--dark); flex-shrink: 0; }
-  .lb-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
-  .lb-points { font-size: 14px; font-weight: 700; color: var(--text3); }
-  .lb-points.top { color: var(--gold); }
+  .lb-row:hover { background: #FBF8F2; }
 
-  .lb-loading { text-align: center; padding: 3rem; color: var(--text3); font-size: 13px; }
-  .lb-empty { text-align: center; padding: 3rem; }
-  .lb-empty-icon { font-size: 40px; margin-bottom: 1rem; }
-  .lb-empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
-  .lb-empty-sub { font-size: 13px; color: var(--text3); }
+  .lb-row.me {
+    background:
+      linear-gradient(90deg, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.08) 14%, rgba(255,255,255,0) 60%);
+  }
+
+  .lb-rank {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .lb-rank-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #F4F0E7;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+
+  .lb-rank-badge.top-1,
+  .lb-rank-badge.top-2,
+  .lb-rank-badge.top-3 {
+    font-size: 1.35rem;
+    background: transparent;
+    border: none;
+  }
+
+  .lb-rank-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text2);
+  }
+
+  .lb-member {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+  }
+
+  .lb-avatar,
+  .lb-avatar-fallback {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid rgba(201,168,76,0.2);
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(34,27,18,0.06);
+  }
+
+  .lb-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #E3B94B 0%, #C79D35 100%);
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .lb-name-wrap {
+    min-width: 0;
+  }
+
+  .lb-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lb-meta {
+    margin-top: 0.15rem;
+    font-size: 0.86rem;
+    color: var(--text3);
+  }
+
+  .lb-points {
+    justify-self: end;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .lb-points.top { color: #C3921F; }
+
+  .lb-loading {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text3);
+    font-size: 0.95rem;
+  }
+
+  .lb-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .lb-empty-icon {
+    font-size: 2.8rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .lb-empty-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+  }
+
+  .lb-empty-sub {
+    font-size: 0.96rem;
+    color: var(--text3);
+  }
+
+  .footer-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.45rem 1.6rem;
+  }
+
+  .footer-copy {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .footer-badge {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--gold);
+    background: radial-gradient(circle at 35% 35%, rgba(201,168,76,0.15), rgba(255,255,255,0.95) 60%);
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .footer-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .footer-sub {
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+    color: var(--text2);
+  }
+
+  .footer-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 54px;
+    padding: 0.9rem 1.3rem;
+    border-radius: 16px;
+    border: 1px solid rgba(201,168,76,0.6);
+    background: rgba(255,255,255,0.84);
+    color: #B68D25;
+    font-size: 1rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .tab:hover:not(.active),
+  .hero-help:hover,
+  .footer-cta:hover,
+  .tab:focus-visible,
+  .hero-help:focus-visible,
+  .footer-cta:focus-visible {
+    transform: translateY(-1px);
+  }
+
+  .tab:focus-visible,
+  .hero-help:focus-visible,
+  .footer-cta:focus-visible {
+    outline: 2px solid rgba(201,168,76,0.55);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 1080px) {
+    .page-content { padding: 1.4rem 1.4rem 2.5rem; }
+    .profile-card-grid,
+    .leaderboard-controls { grid-template-columns: 1fr; }
+    .progress-panel {
+      padding-left: 0;
+      padding-top: 1.25rem;
+      border-left: none;
+      border-top: 1px solid rgba(228,224,216,0.95);
+    }
+    .level-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .level-row::before { display: none; }
+    .footer-banner { flex-direction: column; align-items: stretch; }
+  }
+
+  @media (max-width: 860px) {
+    .main-wrap { margin-left: 0; }
+  }
 
   @media (max-width: 767px) {
-    .page-content { padding: 1rem 1rem 1.5rem; gap: 1rem; }
-    .level-grid { grid-template-columns: 1fr; }
+    .hero-shell,
+    .profile-current,
+    .footer-copy { flex-direction: column; align-items: flex-start; }
+    .hero-help { width: 100%; justify-content: center; }
+    .profile-avatar-wrap { width: 120px; }
+    .profile-avatar,
+    .profile-avatar-fallback { width: 120px; height: 120px; }
+    .level-badge { width: 50px; height: 50px; font-size: 1.45rem; }
+    .tabs { grid-template-columns: 1fr; }
+    .lb-header {
+      grid-template-columns: 70px minmax(0, 1fr) 96px;
+      padding: 0.95rem 1rem;
+    }
+    .lb-header-name { display: none; }
+    .lb-row {
+      grid-template-columns: 70px minmax(0, 1fr) 96px;
+      gap: 0.75rem;
+      padding: 0.95rem 1rem;
+    }
+    .lb-rank-label { display: none; }
+    .lb-avatar,
+    .lb-avatar-fallback { width: 40px; height: 40px; }
+    .lb-name { font-size: 1rem; }
+    .lb-points { font-size: 1.05rem; }
+    .footer-title { font-size: 1.5rem; }
+    .footer-sub { font-size: 1rem; }
   }
-  @media (max-width: 480px) {
-    .page-content { padding: 0.875rem 0.875rem 1.5rem; }
+
+  @media (max-width: 560px) {
+    .page-content { padding: 1rem 0.95rem 2rem; }
+    .profile-card,
+    .journey-card,
+    .tabs-card,
+    .rank-card,
+    .footer-banner { padding-left: 1rem; padding-right: 1rem; }
+    .level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .tab,
+    .hero-help,
+    .footer-cta,
+    .progress-fill { transition: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- MAIN -->
 <div class="main-wrap">
   <header class="top-header"></header>
 
   <div class="page-content">
-
-    <!-- PROFILE CARD -->
-    <div class="profile-card" id="profile-card" style="display:none;">
-      <div class="profile-top">
-        <div class="profile-avatar-wrap">
-          <div id="profile-avatar-wrap"></div>
-          <div class="level-badge" id="level-badge">1</div>
+    <section class="hero-shell">
+      <div class="hero-copy">
+        <div class="hero-title-row">
+          <h1 class="hero-title">Leaderboard</h1>
+          <div class="hero-icon" aria-hidden="true">
+            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M8 21h8"></path>
+              <path d="M12 17v4"></path>
+              <path d="M7 4h10v5a5 5 0 01-10 0V4Z"></path>
+              <path d="M17 6h2a2 2 0 010 4h-2"></path>
+              <path d="M7 6H5a2 2 0 000 4h2"></path>
+            </svg>
+          </div>
         </div>
-        <div class="profile-info">
-          <div class="profile-name" id="profile-name">—</div>
-          <div class="profile-level" id="profile-level">Level 1 — Beginner</div>
-          <div class="profile-next" id="profile-next"></div>
+        <p class="hero-subtitle">Build more. Earn more. Climb higher.</p>
+      </div>
+      <a class="hero-help" href="#journey-card">
+        <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 00-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 010 7.75"></path>
+        </svg>
+        How it works
+      </a>
+    </section>
+
+    <section class="surface-card profile-card" id="profile-card" style="display:none;">
+      <div class="profile-card-grid">
+        <div class="profile-current">
+          <div class="profile-avatar-wrap">
+            <div id="profile-avatar-wrap"></div>
+            <div class="level-badge" id="level-badge">1</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-kicker">Your current level</div>
+            <div class="profile-name" id="profile-name">Member</div>
+            <div class="profile-level" id="profile-level">LEVEL 1</div>
+            <div class="profile-level-name" id="profile-level-name">Beginner</div>
+            <div class="profile-next" id="profile-next"></div>
+          </div>
+        </div>
+        <div class="progress-panel">
+          <div class="progress-kicker">XP progress</div>
+          <div class="progress-value" id="profile-progress-value">0<span>XP</span></div>
+          <div class="progress-copy" id="profile-progress-copy">until Level 2</div>
+          <div class="progress-bar" aria-hidden="true">
+            <div class="progress-fill" id="profile-progress-fill"></div>
+          </div>
+          <div class="progress-range">
+            <span id="profile-progress-min">0 XP</span>
+            <span id="profile-progress-max">100 XP</span>
+          </div>
         </div>
       </div>
+    </section>
+
+    <section class="surface-card journey-card" id="journey-card">
+      <div class="journey-header">
+        <div class="journey-kicker">Your journey</div>
+        <div class="journey-copy">Climb the ladder. Unlock your potential.</div>
+      </div>
       <div class="level-grid" id="level-grid"></div>
-    </div>
+    </section>
 
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab" data-tab="all" onclick="switchTab('all')">All-Time</button>
-      <button class="tab" data-tab="30d" onclick="switchTab('30d')">30-Day</button>
-      <button class="tab" data-tab="7d" onclick="switchTab('7d')">7-Day</button>
-    </div>
+    <section class="leaderboard-controls">
+      <div class="tabs-card">
+        <div class="tabs">
+          <button class="tab" data-tab="all" onclick="switchTab('all')">All-Time</button>
+          <button class="tab" data-tab="30d" onclick="switchTab('30d')">30-Day</button>
+          <button class="tab" data-tab="7d" onclick="switchTab('7d')">7-Day</button>
+        </div>
+      </div>
 
-    <!-- LEADERBOARD -->
-    <div class="leaderboard-card">
+      <div class="rank-card">
+        <div class="rank-star" aria-hidden="true">
+          <svg width="26" height="26" fill="currentColor" viewBox="0 0 24 24">
+            <path d="m12 17.27 6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="rank-kicker" id="rank-scope">Your rank</div>
+          <div class="rank-value" id="current-rank">--</div>
+          <div class="rank-copy" id="rank-copy">Loading your position...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="leaderboard-card">
       <div class="lb-header">
         <span class="lb-header-rank">Rank</span>
+        <span class="lb-header-name">Builder</span>
         <span class="lb-header-points" id="points-label">Points</span>
       </div>
       <div id="lb-body">
         <div class="lb-loading">Loading leaderboard...</div>
       </div>
-    </div>
+    </section>
 
+    <section class="footer-banner">
+      <div class="footer-copy">
+        <div class="footer-badge" aria-hidden="true">
+          <svg width="34" height="34" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="footer-title">Every action gets you closer to the top.</div>
+          <div class="footer-sub">Build tools, help others, and stay consistent.</div>
+        </div>
+      </div>
+      <a class="footer-cta" href="roadmap.html">
+        Go Build Something
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </a>
+    </section>
   </div>
 </div>
 
@@ -164,15 +989,15 @@
 <script src="js/auth.js"></script>
 <script>
   const LEVELS = [
-    { level: 1, name: 'Beginner',             min: 0 },
-    { level: 2, name: 'Action Taker',          min: 100 },
-    { level: 3, name: 'Creative Contributor',  min: 300 },
-    { level: 4, name: 'Community Builder',     min: 600 },
-    { level: 5, name: 'Community Expert',      min: 1000 },
-    { level: 6, name: 'Community Pro',         min: 2000 },
-    { level: 7, name: 'Community Leader',      min: 4000 },
-    { level: 8, name: 'Top Performer',         min: 7000 },
-    { level: 9, name: 'LEGENDARY',             min: 10000 },
+    { level: 1, name: 'Beginner', min: 0 },
+    { level: 2, name: 'Action Taker', min: 100 },
+    { level: 3, name: 'Creative Contributor', min: 300 },
+    { level: 4, name: 'Community Builder', min: 600 },
+    { level: 5, name: 'Community Expert', min: 1000 },
+    { level: 6, name: 'Community Pro', min: 2000 },
+    { level: 7, name: 'Community Leader', min: 4000 },
+    { level: 8, name: 'Top Performer', min: 7000 },
+    { level: 9, name: 'LEGENDARY', min: 10000 }
   ];
 
   function getUserLevel(points) {
@@ -182,6 +1007,20 @@
       else break;
     }
     return current;
+  }
+
+  function getRankScopeLabel(tab) {
+    if (tab === '7d') return 'Your 7-Day rank';
+    if (tab === '30d') return 'Your 30-Day rank';
+    return 'Your all-time rank';
+  }
+
+  function getRankCopy(rank, total, isPeriod) {
+    if (!rank) return isPeriod ? 'Earn points in this window to show up here.' : 'Earn points to climb onto the board.';
+    if (rank === 1) return 'You are leading the pack right now.';
+    if (rank <= 3) return 'You are near the top. Keep the momentum going.';
+    if (rank <= 10) return 'Strong work. A few more wins will move you higher.';
+    return 'You are in the mix. Keep building and stacking points.';
   }
 
   let currentUser = null;
@@ -202,7 +1041,7 @@
         currentUserData = snap.data();
         renderProfileCard(currentUserData);
       }
-    } catch(e) {}
+    } catch (e) {}
 
     setActiveTab('all');
     loadAllTime();
@@ -211,18 +1050,32 @@
   function renderProfileCard(data) {
     const points = data.points || 0;
     const level = getUserLevel(points);
-    const nextLevel = LEVELS.find(l => l.level === level.level + 1);
-    const pointsToNext = nextLevel ? nextLevel.min - points : 0;
+    const nextLevel = LEVELS.find(function(l) { return l.level === level.level + 1; });
+    const pointsToNext = nextLevel ? Math.max(nextLevel.min - points, 0) : 0;
+    const levelProgressMin = level.min;
+    const levelProgressMax = nextLevel ? nextLevel.min : level.min;
+    const levelSpan = nextLevel ? Math.max(nextLevel.min - level.min, 1) : 1;
+    const levelProgress = nextLevel ? ((points - level.min) / levelSpan) * 100 : 100;
 
     document.getElementById('profile-card').style.display = 'block';
+    document.getElementById('journey-card').style.display = 'block';
     document.getElementById('profile-name').textContent = data.displayName || 'Member';
-    document.getElementById('profile-level').textContent = 'Level ' + level.level + ' — ' + level.name;
+    document.getElementById('profile-level').textContent = 'LEVEL ' + level.level;
+    document.getElementById('profile-level-name').textContent = level.name;
     document.getElementById('profile-next').textContent = nextLevel
-      ? pointsToNext.toLocaleString() + ' points to level up'
-      : 'Max level reached 🏆';
+      ? 'You need ' + pointsToNext.toLocaleString() + ' more XP to reach Level ' + nextLevel.level + '.'
+      : 'You have reached the highest level. Keep leading the community.';
     document.getElementById('level-badge').textContent = level.level;
+    document.getElementById('profile-progress-value').innerHTML = nextLevel
+      ? pointsToNext.toLocaleString() + '<span>XP</span>'
+      : points.toLocaleString() + '<span>XP</span>';
+    document.getElementById('profile-progress-copy').textContent = nextLevel
+      ? 'until Level ' + nextLevel.level
+      : 'max level reached';
+    document.getElementById('profile-progress-fill').style.width = Math.max(0, Math.min(levelProgress, 100)) + '%';
+    document.getElementById('profile-progress-min').textContent = levelProgressMin.toLocaleString() + ' XP';
+    document.getElementById('profile-progress-max').textContent = levelProgressMax.toLocaleString() + ' XP';
 
-    // Avatar
     const wrap = document.getElementById('profile-avatar-wrap');
     if (data.photoURL) {
       wrap.innerHTML = '<img class="profile-avatar" src="' + escHtml(data.photoURL) + '" alt="avatar">';
@@ -231,14 +1084,15 @@
       wrap.innerHTML = '<div class="profile-avatar-fallback">' + initial + '</div>';
     }
 
-    // Level grid
     document.getElementById('level-grid').innerHTML = LEVELS.map(function(lvl) {
-      const unlocked = points >= lvl.min;
-      return '<div class="level-row">' +
-        '<div class="level-num ' + (unlocked ? 'unlocked' : 'locked') + '">' +
-        (unlocked ? lvl.level : '🔒') +
-        '</div>' +
-        '<div class="level-name ' + (unlocked ? '' : 'locked') + '">Level ' + lvl.level + ' — ' + lvl.name + '</div>' +
+      const isUnlocked = points >= lvl.min;
+      const isCurrent = level.level === lvl.level;
+      const rowClass = isCurrent ? 'current' : (isUnlocked ? 'unlocked' : 'locked');
+      const statusLabel = isCurrent ? 'Current' : (isUnlocked ? 'Unlocked' : 'Locked');
+      return '<div class="level-row ' + rowClass + '">' +
+        '<div class="level-num ' + rowClass + '">' + (isUnlocked ? lvl.level : '🔒') + '</div>' +
+        '<div class="level-name ' + (isUnlocked ? '' : 'locked') + '">' + lvl.name + '</div>' +
+        '<div class="level-status">' + statusLabel + '</div>' +
         '</div>';
     }).join('');
   }
@@ -258,13 +1112,14 @@
           displayName: d.displayName || 'Member',
           photoURL: d.photoURL || '',
           points: d.points || 0,
-          streak: d.streak || 0,
+          streak: d.streak || 0
         };
       });
 
       renderLeaderboard(allEntries, false);
-    } catch(e) {
+    } catch (e) {
       document.getElementById('lb-body').innerHTML = '<div class="lb-loading">Could not load leaderboard.</div>';
+      updateRankCard([], false);
     }
   }
 
@@ -296,59 +1151,75 @@
             displayName: raw.displayName || 'Member',
             photoURL: raw.photoURL || '',
             points: periodPoints,
-            streak: raw.streak || 0,
+            streak: raw.streak || 0
           };
-        } catch(e) {
-          return { userId: userDoc.id, displayName: raw.displayName || 'Member', photoURL: raw.photoURL || '', points: 0, streak: 0 };
+        } catch (e) {
+          return {
+            userId: userDoc.id,
+            displayName: raw.displayName || 'Member',
+            photoURL: raw.photoURL || '',
+            points: 0,
+            streak: 0
+          };
         }
       }));
 
-      const filtered = results.filter(r => r.points > 0).sort((a, b) => b.points - a.points);
+      const filtered = results.filter(function(r) { return r.points > 0; }).sort(function(a, b) { return b.points - a.points; });
 
       if (days === 7) weekEntries = filtered;
       else monthEntries = filtered;
 
       renderLeaderboard(filtered, true);
-    } catch(e) {
+    } catch (e) {
       document.getElementById('lb-body').innerHTML = '<div class="lb-loading">Could not load leaderboard.</div>';
+      updateRankCard([], true);
     }
   }
 
+  function updateRankCard(entries, isPeriod) {
+    const myIndex = currentUser ? entries.findIndex(function(entry) { return entry.userId === currentUser.uid; }) : -1;
+    const rank = myIndex >= 0 ? myIndex + 1 : null;
+    document.getElementById('rank-scope').textContent = getRankScopeLabel(activeTab);
+    document.getElementById('current-rank').textContent = rank ? '#' + rank : '--';
+    document.getElementById('rank-copy').textContent = getRankCopy(rank, entries.length, isPeriod);
+  }
+
   function renderLeaderboard(entries, isPeriod) {
-    document.getElementById('points-label').textContent = isPeriod ? 'Points Earned' : 'Points';
+    document.getElementById('points-label').textContent = isPeriod ? 'Points earned' : 'Points';
+    updateRankCard(entries, isPeriod);
 
     if (entries.length === 0) {
       document.getElementById('lb-body').innerHTML =
         '<div class="lb-empty"><div class="lb-empty-icon">🏆</div><div class="lb-empty-title">No rankings yet</div><div class="lb-empty-sub">' +
-        (isPeriod ? 'No activity in this period yet' : 'Start engaging to earn points') +
+        (isPeriod ? 'No activity in this period yet.' : 'Start engaging to earn points.') +
         '</div></div>';
       return;
     }
 
-    const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
-
     document.getElementById('lb-body').innerHTML = entries.map(function(entry, i) {
       const rank = i + 1;
       const isMe = currentUser && entry.userId === currentUser.uid;
-      const pointsLabel = isPeriod
-        ? '+' + entry.points.toLocaleString()
-        : entry.points.toLocaleString();
-
-      const rankHtml = medals[rank]
-        ? '<span style="font-size:20px;">' + medals[rank] + '</span>'
-        : '<div class="lb-rank-num">' + rank + '</div>';
-
+      const pointsLabel = isPeriod ? '+' + entry.points.toLocaleString() : entry.points.toLocaleString();
+      const rankBadgeClass = rank <= 3 ? 'lb-rank-badge top-' + rank : 'lb-rank-badge';
+      const rankBadgeContent = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
       const avatarHtml = entry.photoURL
         ? '<img class="lb-avatar" src="' + escHtml(entry.photoURL) + '" alt="avatar">'
-        : '<div class="lb-avatar-fallback">' + (entry.displayName.charAt(0).toUpperCase()) + '</div>';
-
-      const streakHtml = (entry.streak || 0) >= 3 ? ' 🔥' : '';
+        : '<div class="lb-avatar-fallback">' + escHtml(entry.displayName.charAt(0).toUpperCase()) + '</div>';
+      const streakMeta = (entry.streak || 0) >= 3 ? 'On a streak 🔥' : (isMe ? 'That is you' : 'Community builder');
 
       return '<div class="lb-row' + (isMe ? ' me' : '') + '">' +
-        '<div class="lb-rank">' + rankHtml + '</div>' +
-        avatarHtml +
-        '<div class="lb-name">' + escHtml(entry.displayName) + streakHtml + (isMe ? ' <span style="font-size:11px;color:var(--gold);font-weight:700;">(you)</span>' : '') + '</div>' +
-        '<div class="lb-points' + (rank <= 3 ? ' top' : '') + '">' + pointsLabel + '</div>' +
+        '<div class="lb-rank">' +
+          '<div class="' + rankBadgeClass + '">' + rankBadgeContent + '</div>' +
+          '<div class="lb-rank-label">#' + rank + '</div>' +
+        '</div>' +
+        '<div class="lb-member">' +
+          avatarHtml +
+          '<div class="lb-name-wrap">' +
+            '<div class="lb-name">' + escHtml(entry.displayName) + (isMe ? ' <span style="font-size:0.78em;color:#B68D25;font-weight:800;">(you)</span>' : '') + '</div>' +
+            '<div class="lb-meta">' + streakMeta + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lb-points' + (rank <= 3 ? ' top' : '') + '">' + pointsLabel + ' XP</div>' +
         '</div>';
     }).join('');
   }
@@ -376,9 +1247,11 @@
 
   function escHtml(str) {
     return String(str == null ? '' : str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
-
 </script>
 <script src="js/nav.js"></script>
 <script>initNav('leaderboard', 'Leaderboard');</script>
