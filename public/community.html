@@ -1421,11 +1421,18 @@ img, video, iframe {
     return ts.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  function profileUidFor(data) {
+    if (!data) return '';
+    return data.authorId || data.userId || data.uid || data.profileUid || '';
+  }
+
   function renderThread(doc) {
     const d = doc.data();
     const id = doc.id;
     const cat = CATEGORY_STYLES[d.category] || CATEGORY_STYLES['Questions'];
     const name = d.displayName || 'Builder';
+    const profileUid = profileUidFor(d);
+    const profileHref = profileUid ? 'profile.html?uid=' + escHtml(profileUid) : 'profile.html';
     const avatarContent = d.authorPhotoURL
       ? '<img src="' + d.authorPhotoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">'
       : initials(name);
@@ -1434,12 +1441,12 @@ img, video, iframe {
     return `
       <div class="card thread-card" id="thread-${id}">
         <div class="thread-top">
-          <a href="profile.html?uid=${escHtml(d.authorId || '')}" class="avatar-link" onclick="event.stopPropagation()">
+          <a href="${profileHref}" class="avatar-link" onclick="event.stopPropagation()">
             <div class="thread-avatar" style="background:${avatarBg}">${avatarContent}</div>
           </a>
           <div class="thread-meta">
             <div class="thread-author-row">
-              <a href="profile.html?uid=${escHtml(d.authorId || '')}" class="thread-author" style="text-decoration:none;color:inherit;" onclick="event.stopPropagation()">${escHtml(name)}</a>
+              <a href="${profileHref}" class="thread-author" style="text-decoration:none;color:inherit;" onclick="event.stopPropagation()">${escHtml(name)}</a>
               ${d.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : ''}
               <span class="thread-category" style="background:${cat.bg};color:${cat.color};border-color:${cat.border};">${escHtml(d.category || '')}</span>
               <span class="thread-time">${timeAgo(d.createdAt)}</span>
@@ -1764,12 +1771,14 @@ async function likeComment(threadId, commentId) {
     listEl.innerHTML = recent.map(d => {
       const name = d.displayName || 'Builder';
       const verb = categoryVerbs[d.category] || 'Active in community';
+      const profileUid = profileUidFor(d);
+      const profileHref = profileUid ? 'profile.html?uid=' + escHtml(profileUid) : 'profile.html';
       const avatarContent = d.authorPhotoURL
         ? `<img src="${d.authorPhotoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="avatar">`
         : initials(name);
       const avatarBg = d.authorPhotoURL ? 'transparent' : avatarGradient(name);
       return `
-        <a href="profile.html?uid=${escHtml(d.authorId || '')}" class="member-item">
+        <a href="${profileHref}" class="member-item">
           <div class="member-av" style="background:${avatarBg}">${avatarContent}</div>
           <div>
       <div class="member-name">${escHtml(name)}</div>
@@ -1880,6 +1889,8 @@ async function likeComment(threadId, commentId) {
             ? `<img src="${c.authorPhotoURL}" alt="avatar">`
             : initials(name);
           const avatarBg = c.authorPhotoURL ? 'transparent' : avatarGradient(name);
+          const profileUid = profileUidFor(c);
+          const profileHref = profileUid ? 'profile.html?uid=' + escHtml(profileUid) : 'profile.html';
           const gifHtml = c.gifUrl
             ? `<img src="${c.gifUrl}" alt="GIF" style="max-width:100px;max-height:140px;border-radius:8px;margin-top:6px;display:block;">`
             : '';
@@ -1892,11 +1903,11 @@ async function likeComment(threadId, commentId) {
             : '';
           return `
             <div class="comment-item" style="${pinnedStyles}">
-              <a href="profile.html?uid=${escHtml(c.authorId || '')}" class="avatar-link" onclick="event.stopPropagation()">
+              <a href="${profileHref}" class="avatar-link" onclick="event.stopPropagation()">
                 <div class="comment-avatar" style="background:${avatarBg}">${avatarContent}</div>
               </a>
               <div class="comment-bubble">
-                <a href="profile.html?uid=${escHtml(c.authorId || '')}" style="text-decoration:none;color:inherit;" onclick="event.stopPropagation()"><div class="comment-author">${escHtml(name)}${pinnedBadge}</div></a>
+                <a href="${profileHref}" style="text-decoration:none;color:inherit;" onclick="event.stopPropagation()"><div class="comment-author">${escHtml(name)}${pinnedBadge}</div></a>
                 ${textHtml}
                 ${gifHtml}
                 <div class="comment-footer">

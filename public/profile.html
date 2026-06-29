@@ -725,6 +725,16 @@
 
   .my-tool-link.hidden { display: none; }
 
+  .project-empty {
+    padding: 1rem 1.05rem;
+    border-radius: 12px;
+    background: rgba(201,168,76,0.07);
+    border: 1px dashed rgba(201,168,76,0.26);
+    font-size: 0.92rem;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
   .journey-phases {
     position: relative;
     display: grid;
@@ -1318,6 +1328,12 @@
   }
 
   @media (max-width: 700px) {
+    body,
+    .main-wrap,
+    .page-content {
+      overflow-x: clip;
+    }
+
     .page-content {
       padding: 0.95rem 0.9rem 2rem;
     }
@@ -1355,8 +1371,11 @@
       font-size: 2.15rem;
     }
 
-    .spark-statement {
-      font-size: 1.42rem;
+    .hero-stats-wrap,
+    .spark-card,
+    .snapshot-card,
+    .journey-card {
+      display: none;
     }
 
     .right-col {
@@ -1364,24 +1383,56 @@
     }
 
     .journey-phases {
-      grid-template-columns: repeat(5, minmax(132px, 1fr));
-      gap: 0.7rem;
-      padding: 1rem 0.9rem 1.2rem;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+      padding: 1rem 1rem 1.1rem;
+      overflow: visible;
     }
 
     .journey-phases::before {
-      left: 1.7rem;
-      right: 1.7rem;
-      top: 2.95rem;
+      left: 2rem;
+      right: auto;
+      top: 1.8rem;
+      bottom: 1.8rem;
+      width: 2px;
+      height: auto;
+      background: linear-gradient(180deg, rgba(92,184,138,0.2) 0%, rgba(228,224,216,0.95) 100%);
+    }
+
+    .journey-phase {
+      display: grid;
+      grid-template-columns: 50px minmax(0, 1fr);
+      align-items: center;
+      justify-items: start;
+      text-align: left;
+      gap: 0.4rem 0.9rem;
+    }
+
+    .phase-step {
+      display: none;
     }
 
     .phase-dot {
       width: 50px;
       height: 50px;
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .phase-info {
+      align-items: flex-start;
+      text-align: left;
+      grid-column: 2;
     }
 
     .phase-name {
-      font-size: 0.9rem;
+      font-size: 0.94rem;
+      max-width: none;
+    }
+
+    .phase-badge {
+      grid-column: 2;
+      justify-self: start;
     }
 
     .cl-step {
@@ -1563,10 +1614,11 @@
                 </a>
               </div>
             </div>
+            <div class="project-empty" id="profile-tool-empty">No current project added yet. Add your tool details in Edit Profile and it will show up here.</div>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card journey-card">
           <div class="card-header">
             <div class="card-label">Builder Journey</div>
           </div>
@@ -1808,30 +1860,48 @@
     return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 
+  function getProfileViewUid() {
+    try {
+      const url = new URL(window.location.href);
+      const searchUid = url.searchParams.get('uid');
+      if (searchUid) return searchUid;
+      const hash = (url.hash || '').replace(/^#/, '');
+      if (hash) {
+        const hashUid = new URLSearchParams(hash).get('uid');
+        if (hashUid) return hashUid;
+      }
+    } catch (err) {}
+    return '';
+  }
+
   function updateToolCard(toolName, toolUrl, toolDescription, toolLogoUrl) {
     const toolCard = document.getElementById('profile-tool-card');
+    const toolEmpty = document.getElementById('profile-tool-empty');
     const toolLink = document.getElementById('profile-tool-link');
     const toolIcon = document.getElementById('profile-tool-icon');
     const toolDescriptionEl = document.getElementById('profile-tool-description');
     const snapshotTool = document.getElementById('snapshot-tool');
+    const hasToolData = !!(toolName || toolUrl || toolDescription || toolLogoUrl);
+    const displayToolName = toolName || 'Current project in progress';
 
-    if (toolName) {
-      document.getElementById('profile-tool-name').textContent = toolName;
+    if (hasToolData) {
+      document.getElementById('profile-tool-name').textContent = displayToolName;
       toolDescriptionEl.textContent = toolDescription || 'A signature tool this member is building inside ToolSpark.';
       toolCard.classList.remove('hidden');
-      snapshotTool.textContent = toolName;
+      if (toolEmpty) toolEmpty.style.display = 'none';
+      snapshotTool.textContent = toolName || 'In progress';
       toolIcon.innerHTML = '';
       if (toolLogoUrl) {
         const img = document.createElement('img');
         img.src = toolLogoUrl;
-        img.alt = toolName + ' logo';
+        img.alt = displayToolName + ' logo';
         img.onerror = function() {
           toolIcon.innerHTML = '';
-          toolIcon.textContent = toolInitials(toolName);
+          toolIcon.textContent = toolName ? toolInitials(toolName) : 'TS';
         };
         toolIcon.appendChild(img);
       } else {
-        toolIcon.textContent = toolInitials(toolName);
+        toolIcon.textContent = toolName ? toolInitials(toolName) : 'TS';
       }
       if (toolUrl) {
         toolLink.href = toolUrl;
@@ -1844,6 +1914,7 @@
     }
 
     toolCard.classList.add('hidden');
+    if (toolEmpty) toolEmpty.style.display = 'block';
     toolLink.classList.add('hidden');
     toolLink.removeAttribute('href');
     toolDescriptionEl.textContent = '';
@@ -2196,7 +2267,7 @@
     const firebaseUser = firebase.auth().currentUser;
     currentUser = firebaseUser;
 
-    const viewUid      = new URLSearchParams(window.location.search).get('uid');
+    const viewUid      = getProfileViewUid();
     const isOwnProfile = !viewUid;
     const targetUid    = viewUid || firebaseUser.uid;
 
@@ -2212,7 +2283,9 @@
       if (snap.exists) data = snap.data();
     } catch(err) { console.error('load user doc', err); }
 
-    const displayName  = data.displayName || firebaseUser.displayName || firebaseUser.email || 'Member';
+    const displayName  = isOwnProfile
+      ? (data.displayName || firebaseUser.displayName || firebaseUser.email || 'Member')
+      : (data.displayName || 'Member');
     const bio          = data.bio || '';
     let   sparkStatement = data.sparkStatement || '';
     const instagramUrl = data.instagramUrl || '';
@@ -2223,7 +2296,9 @@
     const myToolLogoUrl = data.myToolLogoUrl || '';
     const role         = data.userRole     || 'member';
     const createdAt    = data.createdAt    || null;
-    const photoURL     = data.photoURL     || firebaseUser.photoURL || '';
+    const photoURL     = isOwnProfile
+      ? (data.photoURL || firebaseUser.photoURL || '')
+      : (data.photoURL || '');
     const bannerURL    = data.bannerURL    || '';
     const certified    = !!data.certified;
     profileTargetUid = targetUid;

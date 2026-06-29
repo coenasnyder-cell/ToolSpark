@@ -113,7 +113,27 @@
   }
   .filter-chip:hover { border-color: var(--gold); color: #A57C1D; transform: translateY(-1px); }
   .filter-chip.active { background: linear-gradient(180deg, #181613 0%, #0C0B09 100%); border-color: var(--dark); color: var(--gold-light); box-shadow: 0 12px 24px rgba(12,11,9,0.14); }
-  .member-count { font-size: 13px; color: var(--text3); margin-left: auto; white-space: nowrap; }
+  .toolbar-link {
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(201,168,76,0.28);
+    background: linear-gradient(180deg, #181613 0%, #0C0B09 100%);
+    color: var(--gold-light);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    box-shadow: 0 12px 24px rgba(12,11,9,0.14);
+    transition: transform 0.18s var(--ease-out), border-color 0.18s var(--ease-out), color 0.18s var(--ease-out);
+  }
+  .toolbar-link:hover { transform: translateY(-1px); border-color: rgba(201,168,76,0.5); color: #F4E7BF; }
 
 
   /* ── GRID ── */
@@ -233,7 +253,7 @@
       display: none;
      }
     .members-grid { grid-template-columns: repeat(2, 1fr); }
-    .member-count { display: none; }
+    .toolbar-link { margin-left: 0; }
   }
   @media (max-width: 480px) {
     .members-grid { grid-template-columns: 1fr; }
@@ -267,7 +287,7 @@
         <div class="filter-chip" data-filter="active">Active</div>
         <div class="filter-chip" data-filter="new">New</div>
         <div class="filter-chip" data-filter="recent">Recently Joined</div>
-        <div class="member-count" id="member-count"></div>
+        <a class="toolbar-link" href="leaderboard.html">Leaderboard</a>
       </div>
     </div>
 
@@ -455,8 +475,6 @@
         return (m.displayName || '').toLowerCase().includes(q);
       });
     }
-
-    document.getElementById('member-count').textContent = list.length + ' member' + (list.length !== 1 ? 's' : '');
 
     if (list.length === 0) {
       const msg = searchQuery
