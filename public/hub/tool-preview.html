@@ -598,8 +598,8 @@
 
           currentToolName = tool.toolName || 'AI Tool';
           toolShape       = tool.shape    || 'diagnostic';
-          document.getElementById('tool-name').textContent = currentToolName;
-          document.title = currentToolName;
+          document.getElementById('tool-name').textContent = cleanDisplayText(currentToolName);
+          document.title = cleanDisplayText(currentToolName);
 
           if (toolShape === 'generator') {
             showScreen('generator-wrap');
@@ -703,7 +703,7 @@
 
     function addBubble(role, html) {
       const msgs  = document.getElementById('messages');
-      const label = role === 'ai' ? currentToolName : 'You';
+      const label = role === 'ai' ? cleanDisplayText(currentToolName) : 'You';
       const div   = document.createElement('div');
       div.className = 'bubble-wrap' + (role === 'user' ? ' user' : '');
       div.innerHTML = `
@@ -796,9 +796,24 @@
       });
     }
 
+    function cleanDisplayText(text) {
+      return String(text || '')
+        .replace(/^```(?:json|markdown)?\s*/im, '')
+        .replace(/```\s*$/im, '')
+        .replace(/^#{1,6}\s*/gm, '')
+        .replace(/^\s*`{1,3}\s*/gm, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/__(.*?)__/g, '$1')
+        .replace(/_(.*?)_/g, '$1')
+        .replace(/^json\s*/i, '')
+        .replace(/\r/g, '')
+        .trim();
+    }
+
     function initGenerator() {
-      document.getElementById('gen-tool-name').textContent = currentToolName;
-      document.title = currentToolName;
+      document.getElementById('gen-tool-name').textContent = cleanDisplayText(currentToolName);
+      document.title = cleanDisplayText(currentToolName);
       document.getElementById('gen-progress-bar').style.width = '33%';
       showGenState('gen-state-form');
 
@@ -884,7 +899,7 @@
       }, 950);
 
       // Tell the AI to return structured JSON so we can render cards
-      const jsonInstruction = '\n\n---\nReturn your response as raw valid JSON only. Do NOT wrap in markdown code fences. Do NOT include any text before or after the JSON. Start your response with { and end with }. Use this exact structure:\n{"headline":"string","subtitle":"string","status_chip":"string","items":[{"label":"string","tag":"string","title":"string","subtitle":"string","bullets":["string"]}],"tips":{"title":"string","items":["string"],"footer_label":"string","footer_value":"string"}}';
+      const jsonInstruction = '\n\n---\nReturn your final answer as raw valid JSON only. Do NOT wrap in markdown code fences. Do NOT include any text before or after the JSON. Write clean client-facing copy only. Do NOT include internal tags, snake_case labels, field names, or developer notes inside the visible text. Start your response with { and end with }. Use this exact structure:\n{"headline":"string","subtitle":"string","status_chip":"string","items":[{"label":"string","title":"string","subtitle":"string","bullets":["string"]}],"tips":{"title":"string","items":["string"],"footer_label":"string","footer_value":"string"}}';
 
       const fn = functions.httpsCallable('callCreatorTool');
       fn({
@@ -916,81 +931,92 @@
         cleaned = cleaned.replace(/^```(?:json)?\s*/im, '').replace(/```\s*$/im, '').trim();
         const match = cleaned.match(/\{[\s\S]*\}/);
         if (match) cleaned = match[0];
+        cleaned = cleaned
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/[\u2018\u2019]/g, "'")
+          .replace(/,\s*([}\]])/g, '$1')
+          .replace(/[\u0000-\u0019]+/g, '');
         return JSON.parse(cleaned);
       } catch (e) { return null; }
     }
 
     function renderResults(data) {
-      document.getElementById('gen-result-headline').textContent = data.headline    || 'Your Result';
-      document.getElementById('gen-result-subtitle').textContent = data.subtitle    || '';
-      document.getElementById('gen-status-chip').textContent     = '✦ ' + (data.status_chip || 'Ready');
+      document.getElementById('gen-result-headline').textContent = cleanDisplayText(data.headline || 'Your Result');
+      document.getElementById('gen-result-subtitle').textContent = cleanDisplayText(data.subtitle || '');
+      document.getElementById('gen-status-chip').textContent = cleanDisplayText(data.status_chip || 'Ready');
 
       const container = document.getElementById('gen-cards-container');
       container.innerHTML = '';
 
-      (data.items || []).forEach(item => {
+      (data.items || []).forEach((item, i) => {
         const bullets = (item.bullets || []).map(b =>
-          `<li class="gen-item-bullet">${escHtml(b)}</li>`
+          `<li class="gen-item-bullet">${escHtml(cleanDisplayText(b))}</li>`
         ).join('');
 
         const card = document.createElement('div');
         card.className = 'gen-item-card';
         card.innerHTML = `
           <div class="gen-item-row">
-            <p class="gen-item-label">${escHtml(item.label || '')}</p>
-            ${item.tag ? `<span class="gen-item-tag">${escHtml(item.tag)}</span>` : ''}
+            <p class="gen-item-label">${escHtml(cleanDisplayText(item.label || ('Section ' + (i + 1))))}</p>
           </div>
-          <h3 class="gen-item-title">${escHtml(item.title || '')}</h3>
-          ${item.subtitle ? `<p class="gen-item-subtitle">${escHtml(item.subtitle)}</p>` : ''}
-          <ul class="gen-item-bullets">${bullets}</ul>`;
+          <h3 class="gen-item-title">${escHtml(cleanDisplayText(item.title || ''))}</h3>
+          ${item.subtitle ? `<p class="gen-item-subtitle">${escHtml(cleanDisplayText(item.subtitle))}</p>` : ''}
+          ${bullets ? `<ul class="gen-item-bullets">${bullets}</ul>` : ''}`;
         container.appendChild(card);
       });
 
       if (data.tips && (data.tips.items || []).length) {
         const tipRows = data.tips.items.map(t =>
-          `<div class="gen-tip-row"><span class="gen-tip-check">✓</span><span>${escHtml(t)}</span></div>`
+          `<div class="gen-tip-row"><span class="gen-tip-check">+</span><span>${escHtml(cleanDisplayText(t))}</span></div>`
         ).join('');
         const footer = data.tips.footer_label
-          ? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid #D4B8F0;font-size:13px;color:#555;"><strong style="color:#0D0D0D;">${escHtml(data.tips.footer_label)}:</strong> ${escHtml(data.tips.footer_value || '')}</div>`
+          ? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid #D4B8F0;font-size:13px;color:#555;"><strong style="color:#0D0D0D;">${escHtml(cleanDisplayText(data.tips.footer_label))}:</strong> ${escHtml(cleanDisplayText(data.tips.footer_value || ''))}</div>`
           : '';
         const tipsEl = document.createElement('div');
         tipsEl.className = 'gen-tips-card';
-        tipsEl.innerHTML = `<p class="gen-tips-title">${escHtml(data.tips.title || 'Tips')}</p>${tipRows}${footer}`;
+        tipsEl.innerHTML = `<p class="gen-tips-title">${escHtml(cleanDisplayText(data.tips.title || 'Tips'))}</p>${tipRows}${footer}`;
         container.appendChild(tipsEl);
       }
     }
 
     function renderResultsFallback(text) {
-      document.getElementById('gen-result-headline').textContent = currentToolName + ' Results';
+      const cleanedToolName = cleanDisplayText(currentToolName) || 'Your Tool';
+      const cleanedText = cleanDisplayText(text);
+      const reparsed = tryParseGenJSON(cleanedText);
+      if (reparsed) {
+        renderResults(reparsed);
+        return;
+      }
+
+      document.getElementById('gen-result-headline').textContent = cleanedToolName + ' Results';
       document.getElementById('gen-result-subtitle').textContent = '';
-      document.getElementById('gen-status-chip').textContent     = '✦ Ready';
+      document.getElementById('gen-status-chip').textContent = 'Ready';
 
       const container = document.getElementById('gen-cards-container');
       container.innerHTML = '';
 
-      const sections = text.split(/\n(?=\d+[\.\)]|\*\*[A-Z]|##\s)/);
-      const items    = sections.filter(s => s.trim()).slice(0, 10);
+      const sections = cleanedText.split(/\n(?=\d+[\.\)]|\*\*[A-Z]|##\s|[A-Z][A-Z\s]+:)/);
+      const items = sections.filter(s => s.trim()).slice(0, 10);
 
       if (items.length > 1) {
         items.forEach((section, i) => {
           const lines = section.trim().split('\n')
-            .map(l => l.replace(/^[-*#•\d.\)]+\s*/, '').trim())
+            .map(l => cleanDisplayText(l.replace(/^[-*#\d.\)]+\s*/, '').trim()))
             .filter(Boolean);
           if (!lines.length) return;
           const card = document.createElement('div');
           card.className = 'gen-item-card';
-          const bullets = lines.slice(1).map(b => `<li class="gen-item-bullet">${escHtml(b)}</li>`).join('');
+          const bullets = lines.slice(1).map(b => `<li class="gen-item-bullet">${escHtml(cleanDisplayText(b))}</li>`).join('');
           card.innerHTML = `
-            <div class="gen-item-row"><p class="gen-item-label">Item ${i + 1}</p></div>
-            <h3 class="gen-item-title">${escHtml(lines[0])}</h3>
+            <div class="gen-item-row"><p class="gen-item-label">Section ${i + 1}</p></div>
+            <h3 class="gen-item-title">${escHtml(cleanDisplayText(lines[0]))}</h3>
             ${bullets ? `<ul class="gen-item-bullets">${bullets}</ul>` : ''}`;
           container.appendChild(card);
         });
       } else {
-        // Single-blob fallback — wrap it in one card
         const card = document.createElement('div');
         card.className = 'gen-item-card';
-        card.innerHTML = `<div style="font-size:14px;color:#444;line-height:1.7;">${formatMarkdown(text)}</div>`;
+        card.innerHTML = `<div style="font-size:14px;color:#444;line-height:1.7;">${formatMarkdown(cleanedText)}</div>`;
         container.appendChild(card);
       }
     }
