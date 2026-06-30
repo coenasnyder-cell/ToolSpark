@@ -725,6 +725,21 @@ let tab1Form = {
   identityShift: ''
 };
 
+let tab2Form = {
+  stages: [],
+  milestones: {},
+  obstacles: []
+};
+
+const t2 = {
+  step: null,
+  stages: [],
+  stageIndex: 0,
+  answers: {},
+  followupAsked: {},
+  pendingQuestion: null
+};
+
 // ================================================================
 // AUTH + DATA LOADING
 // ================================================================
@@ -742,6 +757,10 @@ function sortDocsByCreatedAtDesc(docs) {
     const bt = b?.data?.().createdAt ? b.data().createdAt.toMillis() : 0;
     return bt - at;
   });
+}
+
+function journeySessionRef(uid) {
+  return db.collection('journey_sessions').doc(uid);
 }
 
 function normalizeAudienceData(data) {
@@ -763,20 +782,12 @@ function normalizeAudienceData(data) {
 
 async function fetchLatestSparkDataForUser(user, legacySparkSnap) {
   const email = user?.email || '';
-  const emailLower = email.toLowerCase();
   const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
   const sparkDocs = [];
 
   try {
-    const [byUser, byEmail, byEmailLower] = await Promise.all([
-      db.collection('spark_results').where('userId', '==', user.uid).limit(10).get(),
-      db.collection('spark_results').where('accountEmail', '==', email).limit(10).get(),
-      db.collection('spark_results').where('accountEmail', '==', emailLower).limit(10).get()
-    ]);
-
-    [byUser, byEmail, byEmailLower].forEach(snap => {
-      if (snap && !snap.empty) sparkDocs.push(...snap.docs);
-    });
+    const byUser = await db.collection('spark_results').where('userId', '==', user.uid).limit(10).get();
+    if (byUser && !byUser.empty) sparkDocs.push(...byUser.docs);
   } catch(e) {
     console.warn('Spark results lookup failed:', e);
   }
@@ -786,14 +797,8 @@ async function fetchLatestSparkDataForUser(user, legacySparkSnap) {
   }
 
   try {
-    const [profilesByEmail, profilesByEmailLower] = await Promise.all([
-      db.collection('spark_profiles').where('email', '==', email).get(),
-      db.collection('spark_profiles').where('email', '==', emailLower).get()
-    ]);
-
-    [profilesByEmail, profilesByEmailLower].forEach(snap => {
-      if (snap && !snap.empty) sparkDocs.push(...snap.docs);
-    });
+    const profilesByEmail = await db.collection('spark_profiles').where('email', '==', email).get();
+    if (profilesByEmail && !profilesByEmail.empty) sparkDocs.push(...profilesByEmail.docs);
   } catch(e) {
     console.warn('Spark profile lookup failed:', e);
   }
@@ -802,8 +807,8 @@ async function fetchLatestSparkDataForUser(user, legacySparkSnap) {
     try {
       const latestSnap = await db.collection('spark_profiles').doc(latestSparkSessionId).get();
       if (latestSnap.exists) {
-        const sessionEmail = (latestSnap.data().email || '').toLowerCase();
-        if (!emailLower || sessionEmail === emailLower) sparkDocs.push(latestSnap);
+        const sessionEmail = latestSnap.data().email || '';
+        if (!email || sessionEmail === email) sparkDocs.push(latestSnap);
       }
     } catch(e) {
       console.warn('Latest Spark session lookup failed:', e);
@@ -819,20 +824,12 @@ async function fetchLatestSparkDataForUser(user, legacySparkSnap) {
 
 async function fetchLatestAudienceDataForUser(user, legacyAudienceSnap) {
   const email = user?.email || '';
-  const emailLower = email.toLowerCase();
   const latestAudienceSessionId = localStorage.getItem('toolspark_latest_audience_session');
   const audienceDocs = [];
 
   try {
-    const [byUser, byEmail, byEmailLower] = await Promise.all([
-      db.collection('audience_results').where('userId', '==', user.uid).limit(10).get(),
-      db.collection('audience_results').where('accountEmail', '==', email).limit(10).get(),
-      db.collection('audience_results').where('accountEmail', '==', emailLower).limit(10).get()
-    ]);
-
-    [byUser, byEmail, byEmailLower].forEach(snap => {
-      if (snap && !snap.empty) audienceDocs.push(...snap.docs);
-    });
+    const byUser = await db.collection('audience_results').where('userId', '==', user.uid).limit(10).get();
+    if (byUser && !byUser.empty) audienceDocs.push(...byUser.docs);
   } catch(e) {
     console.warn('Audience results lookup failed:', e);
   }
@@ -842,14 +839,8 @@ async function fetchLatestAudienceDataForUser(user, legacyAudienceSnap) {
   }
 
   try {
-    const [profilesByEmail, profilesByEmailLower] = await Promise.all([
-      db.collection('audience_tool').where('email', '==', email).get(),
-      db.collection('audience_tool').where('email', '==', emailLower).get()
-    ]);
-
-    [profilesByEmail, profilesByEmailLower].forEach(snap => {
-      if (snap && !snap.empty) audienceDocs.push(...snap.docs);
-    });
+    const profilesByEmail = await db.collection('audience_tool').where('email', '==', email).get();
+    if (profilesByEmail && !profilesByEmail.empty) audienceDocs.push(...profilesByEmail.docs);
   } catch(e) {
     console.warn('Audience profile lookup failed:', e);
   }
@@ -858,8 +849,8 @@ async function fetchLatestAudienceDataForUser(user, legacyAudienceSnap) {
     try {
       const latestSnap = await db.collection('audience_tool').doc(latestAudienceSessionId).get();
       if (latestSnap.exists) {
-        const sessionEmail = (latestSnap.data().email || '').toLowerCase();
-        if (!emailLower || sessionEmail === emailLower) audienceDocs.push(latestSnap);
+        const sessionEmail = latestSnap.data().email || '';
+        if (!email || sessionEmail === email) audienceDocs.push(latestSnap);
       }
     } catch(e) {
       console.warn('Latest Audience session lookup failed:', e);
@@ -876,14 +867,12 @@ async function fetchLatestAudienceDataForUser(user, legacyAudienceSnap) {
 async function loadUserData(user) {
   try {
     const uid = user.uid;
-    const [sparkSnap, audSnap, journeySnap] = await Promise.all([
-      db.collection('users').doc(uid).collection('sparkProfile').doc('profile').get(),
-      db.collection('users').doc(uid).collection('audienceBlueprint').doc('blueprint').get(),
-      db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').get()
-    ]);
+    const legacySparkSnap = null;
+    const legacyAudienceSnap = null;
+    const journeySnap = await journeySessionRef(uid).get();
 
-    sparkData = await fetchLatestSparkDataForUser(user, sparkSnap);
-    audienceData = await fetchLatestAudienceDataForUser(user, audSnap);
+    sparkData = await fetchLatestSparkDataForUser(user, legacySparkSnap);
+    audienceData = await fetchLatestAudienceDataForUser(user, legacyAudienceSnap);
 
     // Spark profile is required
     if (!sparkData) {
@@ -968,9 +957,11 @@ function showReturningUserPrompt() {
     tab2_form:   'The Journey form'
   };
   const label = phaseLabels[journeyData.currentPhase] || 'your session';
+  currentPhase = 'resume_prompt';
   hideWelcome();
   activatePhaseBar('recap');
   activateChat();
+  activateInputArea();
   addAiMessage('Welcome back, <strong>' + escHtml(displayName) + '</strong>. You were working on ' + label + '. Ready to keep going?');
   showChips([
     { label: 'Pick up where I left off', action: resumeSession },
@@ -984,29 +975,79 @@ function resumeSession() {
   currentPhase = p;
   if (p === 'recap') {
     showRecapCard();
-  } else if (p === 'tab1_chat' || p === 'tab1_form') {
+  } else if (p === 'tab1_chat') {
     activatePhaseBar('transform');
     activateTabNav();
     setActiveTab(1);
-    currentPhase = p;
-    // Phase 2 will handle resuming conversation / showing form
-    addAiMessage('Let&rsquo;s pick up where we left off.');
+    addAiMessage('Let&rsquo;s pick up where we left off. I&rsquo;ll restart this part so we have a clean thread to work from.');
     activateInputArea();
-  } else if (p === 'tab2_chat' || p === 'tab2_form') {
+    setTimeout(proceedToTab1, 500);
+  } else if (p === 'tab1_form') {
+    activatePhaseBar('transform');
+    activateTabNav();
+    setActiveTab(1);
+    tab1Form = {
+      currentStateDraft: journeyData.currentStateDraft || '',
+      emotionalState: journeyData.emotionalState || '',
+      whatTheyveTriedEdited: journeyData.whatTheyveTriedEdited || '',
+      desiredOutcomeDraft: journeyData.desiredOutcomeDraft || '',
+      identityShift: journeyData.identityShift || ''
+    };
+    showTab1Form();
+  } else if (p === 'tab2_chat') {
     tab1Locked = true;
     activatePhaseBar('journey');
     activateTabNav();
     unlockTab2();
     setActiveTab(2);
-    currentPhase = p;
-    // Phase 3 will handle resuming
     addAiMessage('Let&rsquo;s continue mapping the journey.');
     activateInputArea();
+    resetTab2State();
+    if (Array.isArray(journeyData.stages) && journeyData.stages.length >= 3) {
+      t2.stages = journeyData.stages.map((stage, index) => ({
+        stageId: stage.stageId || makeStageId(stage.stageName, index),
+        stageIndex: index,
+        stageName: stage.stageName || `Stage ${index + 1}`,
+        stageDescription: stage.stageDescription || '',
+        aiProposed: stage.aiProposed !== false
+      }));
+      tab2Form.stages = t2.stages.map(stage => ({ ...stage }));
+      addAiMessage(formatStageProposalHtml(t2.stages));
+      t2.step = 'proposal_confirm';
+      showChips([
+        { label: 'Yes, these feel right', action: () => acceptStageProposal('Yes, these stages feel right.') },
+        { label: 'I want different names', fillInput: true }
+      ]);
+    } else {
+      addPhaseDivider('Tab 2: The Journey');
+      addAiMessage('I&rsquo;m going to rebuild your stage draft so we can keep going.');
+      showThinking();
+      setTimeout(generateTab2StageProposal, 500);
+    }
+  } else if (p === 'tab2_form') {
+    tab1Locked = true;
+    activatePhaseBar('journey');
+    activateTabNav();
+    unlockTab2();
+    setActiveTab(2);
+    tab2Form = {
+      stages: Array.isArray(journeyData.stages) ? journeyData.stages.map((stage, index) => ({
+        stageId: stage.stageId || makeStageId(stage.stageName, index),
+        stageIndex: typeof stage.stageIndex === 'number' ? stage.stageIndex : index,
+        stageName: stage.stageName || `Stage ${index + 1}`,
+        stageDescription: stage.stageDescription || '',
+        aiProposed: stage.aiProposed !== false
+      })) : [],
+      milestones: journeyData.milestones || {},
+      obstacles: Array.isArray(journeyData.obstacles) ? journeyData.obstacles : []
+    };
+    showTab2Form();
   }
 }
 
 function confirmStartOver() {
   clearChips();
+  currentPhase = 'confirm_start_over';
   addAiMessage('Are you sure? Your existing progress will be archived and you&rsquo;ll start fresh.');
   showChips([
     { label: 'Yes, start fresh', action: archiveAndRestart },
@@ -1019,7 +1060,7 @@ async function archiveAndRestart() {
   const uid = firebase.auth().currentUser?.uid;
   if (uid) {
     try {
-      await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint')
+      await journeySessionRef(uid)
         .update({ status: 'archived', archivedAt: firebase.firestore.FieldValue.serverTimestamp() });
     } catch(e) {}
   }
@@ -1279,10 +1320,17 @@ function handleSend() {
 }
 
 function routeMessage(text) {
-  if (currentPhase === 'tab1_chat') {
+  if (currentPhase === 'resume_prompt') {
+    if (/\b(start over|fresh|restart|new)\b/i.test(text)) confirmStartOver();
+    else resumeSession();
+  } else if (currentPhase === 'confirm_start_over') {
+    if (/\b(yes|start fresh|start over|do it|confirm)\b/i.test(text)) archiveAndRestart();
+    else resumeSession();
+  } else if (currentPhase === 'tab1_chat') {
     handleTab1ChatMessage(text);
+  } else if (currentPhase === 'tab2_chat') {
+    handleTab2ChatMessage(text);
   }
-  // tab2_chat added in Phase 3
 }
 
 // ================================================================
@@ -1362,7 +1410,7 @@ async function persistPhase(phase) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   try {
-    await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+    await journeySessionRef(uid).set({
       userId: uid,
       currentPhase: phase,
       status: 'in_progress',
@@ -1376,7 +1424,8 @@ async function persistField(fields) {
   const uid = firebase.auth().currentUser?.uid;
   if (!uid) return;
   try {
-    await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+    await journeySessionRef(uid).set({
+      userId: uid,
       ...fields,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
@@ -1760,7 +1809,8 @@ async function lockInTab1() {
   const uid = firebase.auth().currentUser?.uid;
   if (uid) {
     try {
-      await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+      await journeySessionRef(uid).set({
+        userId: uid,
         currentStateDraft:            tab1Form.currentStateDraft,
         emotionalState:               tab1Form.emotionalState,
         whatTheyveTriedEdited:        tab1Form.whatTheyveTriedEdited,
@@ -1803,10 +1853,687 @@ function transitionToTab2() {
   activateInputArea();
   addPhaseDivider('Tab 2: The Journey');
   addAiMessage('Now that we know where they start and where they&rsquo;re going, let&rsquo;s map the road between. I&rsquo;ll put together a first draft of the journey stages based on what you&rsquo;ve shared.');
-  // Phase 3 implements stage proposals here
+  resetTab2State();
+  showThinking();
+  setTimeout(generateTab2StageProposal, 500);
+}
+
+const TAB2_QUESTIONS = {
+  ms1: 'What specifically changes for them in this stage?',
+  ms2: 'What do they need to learn or realize to get through it?',
+  ms3: 'What usually stops people right here?',
+  ms4: 'How do they feel at the start of this stage — and how do they feel when they make it through?'
+};
+
+const TAB2_FIELD_LIMITS = {
+  stageName: 30,
+  stageDescription: 160,
+  whatChanges: 300,
+  whatTheyLearn: 300,
+  obstacle: 300,
+  emotionalShift: 60,
+  successMarker: 200
+};
+
+function resetTab2State() {
+  t2.step = null;
+  t2.stages = [];
+  t2.stageIndex = 0;
+  t2.answers = {};
+  t2.followupAsked = {};
+  t2.pendingQuestion = null;
+  tab2Form = { stages: [], milestones: {}, obstacles: [] };
+}
+
+function makeStageId(stageName, index) {
+  const base = String(stageName || `stage-${index + 1}`)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `stage-${index + 1}`;
+  return `${base}-${index + 1}`;
+}
+
+function normalizeStageList(items) {
+  return (Array.isArray(items) ? items : [])
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((item, index) => {
+      const stageName = String(item.stageName || item.name || item || '').trim().slice(0, 30);
+      const stageDescription = String(item.stageDescription || item.description || '').trim().slice(0, 160);
+      return {
+        stageId: makeStageId(stageName, index),
+        stageIndex: index,
+        stageName: stageName || `Stage ${index + 1}`,
+        stageDescription,
+        aiProposed: true
+      };
+    })
+    .filter(stage => stage.stageName);
+}
+
+function getCurrentTab2Stage() {
+  return t2.stages[t2.stageIndex] || null;
+}
+
+function ensureTab2AnswerBucket(stageId) {
+  if (!t2.answers[stageId]) t2.answers[stageId] = {};
+  return t2.answers[stageId];
+}
+
+function formatStageProposalHtml(stages) {
+  const chips = stages.map(stage =>
+    `<span style="display:inline-block;margin:4px 6px 0 0;padding:7px 12px;border:1px solid rgba(201,168,76,0.28);border-radius:999px;background:rgba(201,168,76,0.08);font-weight:600;">${escHtml(stage.stageName)}</span>`
+  ).join('');
+  return (
+    '<div style="margin:10px 0 8px;">' + chips + '</div>' +
+    '<div style="margin-top:12px;">Do these stages feel right, or would you name them differently?</div>'
+  );
+}
+
+function parseCustomStageNames(text) {
+  const cleaned = String(text || '')
+    .replace(/^.*?:/, '')
+    .replace(/\band\b/gi, ',')
+    .replace(/\s+>\s+/g, ',')
+    .replace(/\s+→\s+/g, ',');
+
+  const names = cleaned
+    .split(/[\n,;|]+/)
+    .map(part => part.replace(/^\d+[\).\-\s]*/, '').trim())
+    .filter(Boolean)
+    .slice(0, 6);
+
+  return names.length >= 3 ? names : [];
+}
+
+function acceptStageProposal(asUserText) {
+  clearChips();
+  if (asUserText) addUserMessage(asUserText);
+  showThinking();
   setTimeout(() => {
-    addAiMessage('<em>Stage proposal coming in Phase 3 — Tab 2 conversation engine.</em>');
-  }, 1000);
+    hideThinking();
+    beginCurrentStageConversation();
+  }, 500);
+}
+
+async function generateTab2StageProposal() {
+  const payload = {
+    currentStateDraft: tab1Form.currentStateDraft || '',
+    emotionalState: tab1Form.emotionalState || '',
+    whatTheyveTriedEdited: tab1Form.whatTheyveTriedEdited || '',
+    desiredOutcomeDraft: tab1Form.desiredOutcomeDraft || '',
+    identityShift: tab1Form.identityShift || '',
+    audience: {
+      whoYouHelp: sessionContext.whoYouHelp || '',
+      whatTheyreStrugglingWith: sessionContext.whatTheyreStrugglingWith || '',
+      theTriggerMoment: sessionContext.theTriggerMoment || '',
+      theTransformation: sessionContext.theTransformation || '',
+      wordsTheyUse: sessionContext.wordsTheyUse || ''
+    }
+  };
+
+  const fetchProposal = async (extraMessages) => {
+    const messages = [{
+      role: 'user',
+      content:
+        'Return only a JSON array with 3 to 5 stage objects for a customer journey. ' +
+        'Each object must have stageName and stageDescription. ' +
+        'stageName must be 1 to 3 words, written from the customer perspective, and not generic. ' +
+        'stageDescription must be one sentence. Here is the context:\n' +
+        JSON.stringify(payload)
+    }];
+    if (extraMessages) messages.push(...extraMessages);
+    const resp = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 900,
+        temperature: 0.7,
+        messages,
+        _meta: { tool: 'discover-tab2-stage-proposal', sessionId: 'dtb_stage_' + Date.now() }
+      })
+    });
+    if (!resp.ok) throw new Error('API ' + resp.status);
+    const data = await resp.json();
+    return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
+  };
+
+  try {
+    let raw = await fetchProposal();
+    const parseRaw = (s) => JSON.parse(
+      String(s || '')
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim()
+    );
+
+    let stages;
+    try {
+      stages = normalizeStageList(parseRaw(raw));
+    } catch (e) {
+      raw = await fetchProposal([
+        { role: 'assistant', content: raw },
+        { role: 'user', content: 'Return only the JSON array. No markdown, no backticks, no explanation.' }
+      ]);
+      stages = normalizeStageList(parseRaw(raw));
+    }
+
+    if (stages.length < 3) throw new Error('Too few stages returned');
+
+    hideThinking();
+    t2.stages = stages;
+    tab2Form.stages = stages.map(stage => ({ ...stage }));
+    persistField({ stages: tab2Form.stages });
+    addAiMessage(formatStageProposalHtml(stages));
+    t2.step = 'proposal_confirm';
+    showChips([
+      { label: 'Yes, these feel right', action: () => acceptStageProposal('Yes, these stages feel right.') },
+      { label: 'I want different names', fillInput: true }
+    ]);
+  } catch (err) {
+    hideThinking();
+    console.error('generateTab2StageProposal:', err);
+    addAiMessage(
+      'That didn&rsquo;t come through — ' +
+      '<button onclick="retryTab2StageProposal()" style="background:none;border:none;color:var(--gold-text);cursor:pointer;font-size:inherit;padding:0;font-weight:600;text-decoration:underline;">Try again</button>'
+    );
+  }
+}
+
+function retryTab2StageProposal() {
+  clearChips();
+  showThinking();
+  generateTab2StageProposal();
+}
+
+function beginCurrentStageConversation() {
+  const stage = getCurrentTab2Stage();
+  if (!stage) {
+    finishTab2Conversation();
+    return;
+  }
+  addPhaseDivider(`Stage ${t2.stageIndex + 1}: ${stage.stageName}`);
+  const stageContext = stage.stageDescription
+    ? escHtml(stage.stageDescription.replace(/\.$/, '').toLowerCase())
+    : 'entered a new part of the journey';
+  addAiMessage(`Let&rsquo;s dig into <strong>${escHtml(stage.stageName)}</strong>. At this point your customer has just ${stageContext}.`);
+  showThinking();
+  setTimeout(() => {
+    hideThinking();
+    askCurrentTab2Question('ms1');
+  }, 450);
+}
+
+function askCurrentTab2Question(questionKey) {
+  t2.step = questionKey;
+  addAiMessage(TAB2_QUESTIONS[questionKey]);
+}
+
+function isThinStageAnswer(text) {
+  return String(text || '').trim().split(/\s+/).filter(Boolean).length < 10;
+}
+
+function advanceTab2Question(fromKey) {
+  if (fromKey === 'ms1') return askCurrentTab2Question('ms2');
+  if (fromKey === 'ms2') return askCurrentTab2Question('ms3');
+  if (fromKey === 'ms3') return askCurrentTab2Question('ms4');
+  if (fromKey === 'ms4') {
+    t2.stageIndex += 1;
+    if (t2.stageIndex < t2.stages.length) {
+      showThinking();
+      setTimeout(() => {
+        hideThinking();
+        beginCurrentStageConversation();
+      }, 550);
+      return;
+    }
+    finishTab2Conversation();
+  }
+}
+
+function handleTab2ChatMessage(text) {
+  const stage = getCurrentTab2Stage();
+
+  if (t2.step === 'proposal_confirm') {
+    clearChips();
+    if (/\b(yes|right|good|works|keep|love these)\b/i.test(text)) {
+      acceptStageProposal();
+      return;
+    }
+
+    const customNames = parseCustomStageNames(text);
+    if (customNames.length >= 3) {
+      t2.stages = customNames.map((name, index) => ({
+        stageId: makeStageId(name, index),
+        stageIndex: index,
+        stageName: name.slice(0, 30),
+        stageDescription: '',
+        aiProposed: false
+      }));
+      tab2Form.stages = t2.stages.map(item => ({ ...item }));
+      persistField({ stages: tab2Form.stages });
+      acceptStageProposal();
+      return;
+    }
+
+    addAiMessage('If you want to rename them, send the stage names in order separated by commas. You can also just say they feel right.');
+    showChips([
+      { label: 'Yes, these feel right', action: () => acceptStageProposal('Yes, these stages feel right.') }
+    ]);
+    return;
+  }
+
+  if (!stage) return;
+  const bucket = ensureTab2AnswerBucket(stage.stageId);
+
+  if (t2.step === 'followup' && t2.pendingQuestion) {
+    bucket[t2.pendingQuestion] = [bucket[t2.pendingQuestion], text].filter(Boolean).join(' ');
+    const completedQuestion = t2.pendingQuestion;
+    t2.pendingQuestion = null;
+    showThinking();
+    setTimeout(() => {
+      hideThinking();
+      advanceTab2Question(completedQuestion);
+    }, 450);
+    return;
+  }
+
+  if (!TAB2_QUESTIONS[t2.step]) return;
+
+  bucket[t2.step] = text;
+  const followupKey = `${stage.stageId}:${t2.step}`;
+  if (isThinStageAnswer(text) && !t2.followupAsked[followupKey]) {
+    t2.followupAsked[followupKey] = true;
+    t2.pendingQuestion = t2.step;
+    t2.step = 'followup';
+    showThinking();
+    setTimeout(() => {
+      hideThinking();
+      addAiMessage('Can you be a bit more specific — what does that actually look like for them day-to-day?');
+    }, 450);
+    return;
+  }
+
+  const completedQuestion = t2.step;
+  showThinking();
+  setTimeout(() => {
+    hideThinking();
+    advanceTab2Question(completedQuestion);
+  }, 450);
+}
+
+function buildFallbackTab2Drafts() {
+  const stages = t2.stages.map(stage => {
+    const answers = t2.answers[stage.stageId] || {};
+    const emotionalShift = String(answers.ms4 || '').trim();
+    return {
+      ...stage,
+      whatChanges: String(answers.ms1 || '').trim(),
+      whatTheyLearn: String(answers.ms2 || '').trim(),
+      obstacle: String(answers.ms3 || '').trim(),
+      emotionalShift: emotionalShift || 'Unsure -> Clearer',
+      successMarker: String(answers.ms1 || stage.stageDescription || `They can feel real progress in ${stage.stageName}.`).trim().slice(0, 200)
+    };
+  });
+
+  const obstacles = stages
+    .filter(stage => stage.obstacle)
+    .map((stage, index) => ({
+      obstacleId: `obstacle-${index + 1}`,
+      obstacleTitle: stage.stageName,
+      stageTag: stage.stageName,
+      obstacleType: 'Internal',
+      whyItHappens: stage.obstacle.slice(0, 200),
+      aiProposed: false
+    }));
+
+  return { stages, obstacles };
+}
+
+function finishTab2Conversation() {
+  clearChips();
+  document.getElementById('inputArea').classList.remove('active');
+  addAiMessage('You&rsquo;ve mapped every stage of the journey. Let me pull this together into a form you can review and adjust.');
+  currentPhase = 'tab2_form';
+  persistPhase('tab2_form');
+  logEvent('tab2_chat_complete');
+  showThinking();
+  setTimeout(generateTab2Drafts, 600);
+}
+
+async function generateTab2Drafts() {
+  const payload = {
+    currentStateDraft: tab1Form.currentStateDraft || '',
+    desiredOutcomeDraft: tab1Form.desiredOutcomeDraft || '',
+    identityShift: tab1Form.identityShift || '',
+    audience: {
+      whoYouHelp: sessionContext.whoYouHelp || '',
+      whatTheyreStrugglingWith: sessionContext.whatTheyreStrugglingWith || '',
+      theTransformation: sessionContext.theTransformation || ''
+    },
+    stages: t2.stages.map(stage => ({
+      stageName: stage.stageName,
+      stageDescription: stage.stageDescription,
+      answers: t2.answers[stage.stageId] || {}
+    }))
+  };
+
+  const parseRaw = (s) => {
+    const cleaned = String(s || '')
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim();
+
+    try {
+      return JSON.parse(cleaned);
+    } catch (err) {
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+      }
+      throw err;
+    }
+  };
+
+  const fetchDrafts = async (extraMessages) => {
+    const messages = [{
+      role: 'user',
+      content:
+        'Return only a JSON object with keys stages and obstacles. ' +
+        'stages must be an array with the same stage order provided. Each stage object must include ' +
+        'stageName, stageDescription, whatChanges, whatTheyLearn, obstacle, emotionalShift, successMarker. ' +
+        'obstacles must be an array of grouped obstacle objects with obstacleTitle, stageTag, obstacleType, whyItHappens. ' +
+        'Keep every field concise and concrete. Here is the context:\n' + JSON.stringify(payload)
+    }];
+    if (extraMessages) messages.push(...extraMessages);
+    const resp = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1800,
+        temperature: 0.4,
+        messages,
+        _meta: { tool: 'discover-tab2-draft', sessionId: 'dtb_milestones_' + Date.now() }
+      })
+    });
+    if (!resp.ok) throw new Error('API ' + resp.status);
+    const data = await resp.json();
+    return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
+  };
+
+  try {
+    let raw = await fetchDrafts();
+
+    let drafts;
+    try {
+      drafts = parseRaw(raw);
+    } catch (e) {
+      raw = await fetchDrafts([
+        { role: 'assistant', content: raw },
+        { role: 'user', content: 'Return only the JSON object. No markdown, no backticks, no explanation.' }
+      ]);
+      drafts = parseRaw(raw);
+    }
+
+    const fallback = buildFallbackTab2Drafts();
+    const draftStages = Array.isArray(drafts.stages) ? drafts.stages : fallback.stages;
+    tab2Form.stages = t2.stages.map((stage, index) => {
+      const aiStage = draftStages[index] || {};
+      return {
+        ...stage,
+        stageName: String(aiStage.stageName || stage.stageName).slice(0, TAB2_FIELD_LIMITS.stageName),
+        stageDescription: String(aiStage.stageDescription || stage.stageDescription || '').slice(0, TAB2_FIELD_LIMITS.stageDescription)
+      };
+    });
+
+    tab2Form.milestones = {};
+    tab2Form.stages.forEach((stage, index) => {
+      const aiStage = draftStages[index] || {};
+      const fallbackStage = fallback.stages[index] || {};
+      tab2Form.milestones[stage.stageId] = {
+        whatChanges: String(aiStage.whatChanges || fallbackStage.whatChanges || '').slice(0, TAB2_FIELD_LIMITS.whatChanges),
+        whatTheyLearn: String(aiStage.whatTheyLearn || fallbackStage.whatTheyLearn || '').slice(0, TAB2_FIELD_LIMITS.whatTheyLearn),
+        obstacle: String(aiStage.obstacle || fallbackStage.obstacle || '').slice(0, TAB2_FIELD_LIMITS.obstacle),
+        emotionalShift: String(aiStage.emotionalShift || fallbackStage.emotionalShift || '').slice(0, TAB2_FIELD_LIMITS.emotionalShift),
+        successMarker: String(aiStage.successMarker || fallbackStage.successMarker || '').slice(0, TAB2_FIELD_LIMITS.successMarker),
+        confirmed: false,
+        edited: false
+      };
+    });
+
+    tab2Form.obstacles = Array.isArray(drafts.obstacles) && drafts.obstacles.length
+      ? drafts.obstacles
+      : fallback.obstacles;
+
+    await persistField({
+      stages: tab2Form.stages,
+      milestones: tab2Form.milestones,
+      obstacles: tab2Form.obstacles,
+      currentPhase: 'tab2_form'
+    });
+
+    hideThinking();
+    showTab2Form();
+  } catch (err) {
+    hideThinking();
+    console.error('generateTab2Drafts:', err);
+    const fallback = buildFallbackTab2Drafts();
+    tab2Form.stages = t2.stages.map(stage => ({ ...stage }));
+    tab2Form.milestones = {};
+    tab2Form.stages.forEach((stage, index) => {
+      const item = fallback.stages[index] || {};
+      tab2Form.milestones[stage.stageId] = {
+        whatChanges: item.whatChanges || '',
+        whatTheyLearn: item.whatTheyLearn || '',
+        obstacle: item.obstacle || '',
+        emotionalShift: item.emotionalShift || '',
+        successMarker: item.successMarker || '',
+        confirmed: false,
+        edited: false
+      };
+    });
+    tab2Form.obstacles = fallback.obstacles;
+    try {
+      await persistField({
+        stages: tab2Form.stages,
+        milestones: tab2Form.milestones,
+        obstacles: tab2Form.obstacles,
+        currentPhase: 'tab2_form'
+      });
+    } catch (saveErr) {
+      console.error('generateTab2Drafts fallback save:', saveErr);
+    }
+    showToast('The draft had a hiccup, so I used your answers directly.');
+    showTab2Form();
+  }
+}
+
+function makeTab2FormField(id, label, sublabel, value, maxChars, rows) {
+  const sub = sublabel ? '<div class="form-sublabel">' + escHtml(sublabel) + '</div>' : '';
+  return (
+    '<div class="form-field">' +
+    '<label class="form-label" for="' + id + '">' + label + '</label>' +
+    sub +
+    '<textarea class="form-textarea" id="' + id + '" rows="' + rows + '" maxlength="' + maxChars + '">' + escHtml(value) + '</textarea>' +
+    '<div class="form-char" id="' + id + '-char">' + (value ? value.length : 0) + ' / ' + maxChars + '</div>' +
+    '</div>'
+  );
+}
+
+function makeTab2StageBlock(stage) {
+  const milestone = tab2Form.milestones[stage.stageId] || {};
+  return (
+    '<div style="border:1px solid var(--border);border-radius:18px;padding:20px 20px 10px;margin-bottom:20px;background:var(--bg-card);">' +
+    '<div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold-text);margin-bottom:14px;">Stage ' + (stage.stageIndex + 1) + '</div>' +
+    makeTab2FormField(`t2-${stage.stageId}-stageName`, 'Stage Name', null, stage.stageName, TAB2_FIELD_LIMITS.stageName, 1) +
+    makeTab2FormField(`t2-${stage.stageId}-stageDescription`, 'Stage Description', 'A one-sentence snapshot of what is happening here', stage.stageDescription || '', TAB2_FIELD_LIMITS.stageDescription, 2) +
+    makeTab2FormField(`t2-${stage.stageId}-whatChanges`, 'What Changes', null, milestone.whatChanges || '', TAB2_FIELD_LIMITS.whatChanges, 3) +
+    makeTab2FormField(`t2-${stage.stageId}-whatTheyLearn`, 'What They Learn', null, milestone.whatTheyLearn || '', TAB2_FIELD_LIMITS.whatTheyLearn, 3) +
+    makeTab2FormField(`t2-${stage.stageId}-obstacle`, 'What Usually Stops Them', null, milestone.obstacle || '', TAB2_FIELD_LIMITS.obstacle, 3) +
+    makeTab2FormField(`t2-${stage.stageId}-emotionalShift`, 'Emotional Shift', 'Use a before -> after format if it fits', milestone.emotionalShift || '', TAB2_FIELD_LIMITS.emotionalShift, 2) +
+    makeTab2FormField(`t2-${stage.stageId}-successMarker`, 'Success Marker', 'What tells you they made it through this stage', milestone.successMarker || '', TAB2_FIELD_LIMITS.successMarker, 2) +
+    '</div>'
+  );
+}
+
+function showTab2Form() {
+  const panel = document.getElementById('formPanel2');
+  panel.innerHTML =
+    '<div class="form-headline">The Journey<br><em>Review, edit, and confirm.</em></div>' +
+    '<div class="form-sub">I&rsquo;ve turned your stage conversations into a first draft. Every field is editable before you lock it in.</div>' +
+    tab2Form.stages.map(stage => makeTab2StageBlock(stage)).join('') +
+    '<button class="form-lock-btn" id="lockTab2Btn" onclick="lockInTab2()">Lock In My Journey &rarr;</button>' +
+    '<div class="form-lock-note">This saves your Journey section so you can build the next step from it.</div>';
+
+  document.getElementById('chatWrapper').style.display = 'none';
+  panel.classList.add('active');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  logEvent('tab2_form_shown');
+  setupTab2FormFields();
+}
+
+function syncTab2Field(stageId, key, value) {
+  const stage = tab2Form.stages.find(item => item.stageId === stageId);
+  if (!stage) return;
+
+  if (key === 'stageName' || key === 'stageDescription') {
+    stage[key] = value;
+  } else {
+    if (!tab2Form.milestones[stageId]) {
+      tab2Form.milestones[stageId] = {
+        whatChanges: '',
+        whatTheyLearn: '',
+        obstacle: '',
+        emotionalShift: '',
+        successMarker: '',
+        confirmed: false,
+        edited: false
+      };
+    }
+    tab2Form.milestones[stageId][key] = value;
+    tab2Form.milestones[stageId].edited = true;
+  }
+}
+
+function persistTab2DraftNow() {
+  persistField({
+    stages: tab2Form.stages,
+    milestones: tab2Form.milestones,
+    obstacles: tab2Form.obstacles,
+    currentPhase: 'tab2_form'
+  });
+}
+
+function setupTab2FormFields() {
+  tab2Form.stages.forEach(stage => {
+    [
+      ['stageName', TAB2_FIELD_LIMITS.stageName],
+      ['stageDescription', TAB2_FIELD_LIMITS.stageDescription],
+      ['whatChanges', TAB2_FIELD_LIMITS.whatChanges],
+      ['whatTheyLearn', TAB2_FIELD_LIMITS.whatTheyLearn],
+      ['obstacle', TAB2_FIELD_LIMITS.obstacle],
+      ['emotionalShift', TAB2_FIELD_LIMITS.emotionalShift],
+      ['successMarker', TAB2_FIELD_LIMITS.successMarker]
+    ].forEach(([key, maxLen]) => {
+      const id = `t2-${stage.stageId}-${key}`;
+      const el = document.getElementById(id);
+      const charEl = document.getElementById(id + '-char');
+      if (!el || !charEl) return;
+
+      const updateChar = () => {
+        const len = el.value.length;
+        charEl.textContent = len + ' / ' + maxLen;
+        charEl.className = 'form-char' + (len >= maxLen ? ' over' : len > maxLen * 0.88 ? ' near' : '');
+        el.classList.remove('error');
+      };
+
+      el.addEventListener('input', () => {
+        syncTab2Field(stage.stageId, key, el.value);
+        updateChar();
+        scheduleAutoSave({
+          stages: tab2Form.stages,
+          milestones: tab2Form.milestones,
+          obstacles: tab2Form.obstacles,
+          currentPhase: 'tab2_form'
+        });
+      });
+
+      el.addEventListener('blur', persistTab2DraftNow);
+
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const resetValue = key === 'stageName' || key === 'stageDescription'
+            ? (tab2Form.stages.find(item => item.stageId === stage.stageId)?.[key] || '')
+            : (tab2Form.milestones[stage.stageId]?.[key] || '');
+          el.value = resetValue;
+          updateChar();
+        }
+      });
+
+      updateChar();
+    });
+  });
+}
+
+async function lockInTab2() {
+  let valid = true;
+  tab2Form.stages.forEach(stage => {
+    ['stageName', 'stageDescription', 'whatChanges', 'whatTheyLearn', 'obstacle', 'emotionalShift', 'successMarker'].forEach(key => {
+      const el = document.getElementById(`t2-${stage.stageId}-${key}`);
+      if (!el || !el.value.trim()) {
+        if (el) el.classList.add('error');
+        valid = false;
+      }
+    });
+  });
+
+  if (!valid) {
+    showToast('Fill in all sections before locking in.');
+    return;
+  }
+
+  const btn = document.getElementById('lockTab2Btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  persistTab2DraftNow();
+
+  const uid = firebase.auth().currentUser?.uid;
+  if (uid) {
+    try {
+      await journeySessionRef(uid).set({
+        userId: uid,
+        stages: tab2Form.stages,
+        milestones: tab2Form.milestones,
+        obstacles: tab2Form.obstacles,
+        currentPhase: 'blueprint',
+        status: 'in_progress',
+        completedPhases: firebase.firestore.FieldValue.arrayUnion('tab2'),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.error('lockInTab2:', e);
+      btn.disabled = false;
+      btn.textContent = 'Lock In My Journey →';
+      showToast("Couldn't save — try again.");
+      return;
+    }
+  }
+
+  logEvent('tab2_form_complete');
+  activatePhaseBar('blueprint');
+  btn.textContent = 'Locked In ✔';
+  document.getElementById('formPanel2').classList.remove('active');
+  const chatWrap = document.getElementById('chatWrapper');
+  chatWrap.innerHTML = '';
+  chatWrap.style.display = 'flex';
+  addPhaseDivider('Your Blueprint');
+  addAiMessage('Your journey draft is locked in and saved. The final Blueprint review screen is still being built, but your stages, milestone notes, and obstacles are now captured for the next step.');
 }
 
 // ================================================================
