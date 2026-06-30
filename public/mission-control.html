@@ -588,12 +588,14 @@ html, body {
 .s-card.skippy     { --accent: var(--blue); }
 .s-card.parking    { --accent: var(--purple); }
 .s-card.dex        { --accent: var(--green); }
+.s-card.toolbuilds { --accent: var(--amber); }
 
 .s-card.priorities .s-icon-color { color: var(--gold); }
 .s-card.specky .s-icon-color     { color: var(--red); }
 .s-card.skippy .s-icon-color     { color: var(--blue); }
 .s-card.parking .s-icon-color    { color: var(--purple); }
 .s-card.dex .s-icon-color        { color: var(--green); }
+.s-card.toolbuilds .s-icon-color { color: var(--amber); }
 
 .s-card .s-head-accent {
   width: 3px; border-radius: 2px; height: 20px; flex-shrink: 0;
@@ -835,6 +837,76 @@ html, body {
           </div>
         </div>
 
+        <!-- Dex Queue -->
+        <div class="s-card dex" id="card-dex">
+          <div class="s-head">
+            <div class="s-head-accent"></div>
+            <div class="s-title">
+              <span class="s-icon s-icon-color">🧠</span>
+              Dex Queue
+              <span class="s-count" id="count-dex">0</span>
+            </div>
+            <button class="add-btn" onclick="openAddForm('dex')">+ Add</button>
+          </div>
+          <div class="s-body" id="list-dex">
+            <div class="empty-state">No Dex work queued.</div>
+          </div>
+          <div class="add-form" id="form-dex">
+            <input class="af-input" id="af-dex-text" placeholder="Strategy task or planning work…" />
+            <textarea class="af-notes" id="af-dex-notes" placeholder="Notes (optional)…"></textarea>
+            <div class="af-row">
+              <select class="af-select" id="af-dex-priority">
+                <option value="high">🔴 High</option>
+                <option value="medium" selected>🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+              </select>
+              <select class="af-select" id="af-dex-status">
+                <option value="">No status</option>
+                <option value="Planning">Planning</option>
+                <option value="Research">Research</option>
+                <option value="Ready">Ready</option>
+              </select>
+              <button class="af-cancel" onclick="closeAddForm('dex')">Cancel</button>
+              <button class="af-save" onclick="saveTask('dex')">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool Builds -->
+        <div class="s-card toolbuilds" id="card-toolbuilds">
+          <div class="s-head">
+            <div class="s-head-accent"></div>
+            <div class="s-title">
+              <span class="s-icon s-icon-color">🛠️</span>
+              Tool Builds
+              <span class="s-count" id="count-toolbuilds">0</span>
+            </div>
+            <button class="add-btn" onclick="openAddForm('toolbuilds')">+ Add</button>
+          </div>
+          <div class="s-body" id="list-toolbuilds">
+            <div class="empty-state">No tool builds queued.</div>
+          </div>
+          <div class="add-form" id="form-toolbuilds">
+            <input class="af-input" id="af-toolbuilds-text" placeholder="Tool build or feature build…" />
+            <textarea class="af-notes" id="af-toolbuilds-notes" placeholder="Notes (optional)…"></textarea>
+            <div class="af-row">
+              <select class="af-select" id="af-toolbuilds-priority">
+                <option value="high">🔴 High</option>
+                <option value="medium" selected>🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+              </select>
+              <select class="af-select" id="af-toolbuilds-status">
+                <option value="">No status</option>
+                <option value="Scoping">Scoping</option>
+                <option value="Building">Building</option>
+                <option value="Testing">Testing</option>
+              </select>
+              <button class="af-cancel" onclick="closeAddForm('toolbuilds')">Cancel</button>
+              <button class="af-save" onclick="saveTask('toolbuilds')">Save</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Parking Lot -->
         <div class="s-card parking" id="card-parking">
           <div class="s-head">
@@ -965,6 +1037,7 @@ function defaultState() {
         { id: uid(), text: 'Mobile app store listing', section: 'parking' },
       ],
       dex: [],
+      toolbuilds: [],
     }
   };
 }
@@ -1046,6 +1119,7 @@ function renderAll() {
   renderSection('specky');
   renderSection('skippy');
   renderSection('dex');
+  renderSection('toolbuilds');
   renderParking();
   renderCompleted();
   updateCounts();
@@ -1054,6 +1128,7 @@ function renderAll() {
 
 function renderSection(section) {
   const list = document.getElementById(`list-${section}`);
+  if (!list) return;
   const tasks = state.tasks[section] || [];
   const active = tasks.filter(t => !t.done);
 
@@ -1107,6 +1182,7 @@ function taskHTML(t) {
 
 function renderParking() {
   const list = document.getElementById('list-parking');
+  if (!list) return;
   const items = state.tasks.parking || [];
   if (items.length === 0) {
     list.innerHTML = `<div class="empty-state">No parked ideas.</div>`;
@@ -1131,6 +1207,8 @@ const SECTION_LABELS = {
   priorities: '📋 Today\'s Priorities',
   specky:     '🐞 Specky Queue',
   skippy:     '🤖 Skippy Queue',
+  dex:        '🧠 Dex Queue',
+  toolbuilds: '🛠️ Tool Builds',
 };
 
 function renderCompleted() {
@@ -1138,7 +1216,7 @@ function renderCompleted() {
   const emptyState = document.getElementById('completed-empty-state');
 
   const allDone = [];
-  ['priorities', 'specky', 'skippy'].forEach(sec => {
+  ['priorities', 'specky', 'skippy', 'dex', 'toolbuilds'].forEach(sec => {
     (state.tasks[sec] || []).filter(t => t.done).forEach(t => {
       allDone.push({ ...t, _section: sec });
     });
@@ -1202,7 +1280,7 @@ function formatDoneAt(ts) {
 }
 
 function updateCounts() {
-  const sections = ['priorities', 'specky', 'skippy', 'parking'];
+  const sections = ['priorities', 'specky', 'skippy', 'dex', 'toolbuilds', 'parking'];
   sections.forEach(sec => {
     const el = document.getElementById(`count-${sec}`);
     if (!el) return;
@@ -1212,10 +1290,10 @@ function updateCounts() {
   });
 
   // Tab badges
-  const totalActive = ['priorities','specky','skippy'].reduce((n, sec) => {
+  const totalActive = ['priorities','specky','skippy','dex','toolbuilds'].reduce((n, sec) => {
     return n + (state.tasks[sec] || []).filter(t => !t.done).length;
   }, 0);
-  const totalDone = ['priorities','specky','skippy'].reduce((n, sec) => {
+  const totalDone = ['priorities','specky','skippy','dex','toolbuilds'].reduce((n, sec) => {
     return n + (state.tasks[sec] || []).filter(t => t.done).length;
   }, 0);
 
@@ -1227,7 +1305,7 @@ function updateCounts() {
 }
 
 function updateProgress() {
-  const all = ['priorities','specky','skippy'].flatMap(sec => state.tasks[sec] || []);
+  const all = ['priorities','specky','skippy','dex','toolbuilds'].flatMap(sec => state.tasks[sec] || []);
   const total = all.length;
   const done = all.filter(t => t.done).length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -1278,7 +1356,7 @@ function findTask(id, section) {
 ════════════════════════════════════════════ */
 function openAddForm(section) {
   // Close all others
-  ['priorities','specky','skippy','parking'].forEach(s => {
+  ['priorities','specky','skippy','dex','toolbuilds','parking'].forEach(s => {
     document.getElementById(`form-${s}`).classList.remove('open');
   });
   const form = document.getElementById(`form-${section}`);

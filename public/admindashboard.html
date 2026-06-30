@@ -82,6 +82,73 @@
   max-width: 520px;
   margin-bottom: 1.25rem;
 }
+.page-hero-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.hero-mission-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 100%;
+  padding: 0.95rem 1.1rem;
+  background: linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(232,213,163,0.12) 100%);
+  border: 1px solid rgba(201,168,76,0.32);
+  border-radius: 14px;
+  color: #F8F3E8;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.hero-mission-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(232,213,163,0.5);
+  background: linear-gradient(135deg, rgba(201,168,76,0.28) 0%, rgba(232,213,163,0.18) 100%);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+}
+.hero-mission-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201,168,76,0.18);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold-light);
+  flex-shrink: 0;
+}
+.hero-mission-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hero-mission-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232,217,184,0.75);
+}
+.hero-mission-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #FFFFFF;
+  line-height: 1.15;
+}
+.hero-mission-sub {
+  font-size: 12px;
+  color: rgba(232,217,184,0.7);
+  margin-top: 2px;
+}
+.hero-mission-arrow {
+  margin-left: auto;
+  color: var(--gold-light);
+  flex-shrink: 0;
+}
 
   /* SECTION CARD */
   .admin-card {
@@ -105,19 +172,6 @@
   .admin-card-title { font-weight: 700; font-size: 15px; color: var(--text); }
   .admin-card-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
   .admin-card-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-
-  /* CURRENT QUOTE PREVIEW */
-  .quote-preview {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--gold);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.25rem;
-    display: none;
-  }
-  .quote-preview-label { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
-  .quote-preview-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--text); line-height: 1.6; }
-  .quote-preview-author { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
 
   /* FORM */
   .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -251,6 +305,13 @@
     .page-content {
       padding: 1.25rem 1rem;
     }
+    .page-hero {
+      padding: 1.4rem 1.15rem;
+    }
+    .hero-mission-link {
+      width: 100%;
+      min-width: 0;
+    }
     .analytics-grid,
     .admin-shortcut-row {
       grid-template-columns: 1fr;
@@ -269,7 +330,8 @@
   }
   .page-hero-eyebrow,
   .page-title,
-  .page-subtitle {
+  .page-subtitle,
+  .page-hero-actions {
     opacity: 0;
     transform: translateY(8px);
     animation: hero-rise 280ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
@@ -277,8 +339,9 @@
   .page-hero-eyebrow { animation-delay: 0ms; }
   .page-title        { animation-delay: 60ms; }
   .page-subtitle     { animation-delay: 120ms; }
+  .page-hero-actions { animation-delay: 180ms; }
   @media (prefers-reduced-motion: reduce) {
-    .page-hero-eyebrow, .page-title, .page-subtitle {
+    .page-hero-eyebrow, .page-title, .page-subtitle, .page-hero-actions {
       animation: none; opacity: 1; transform: none;
     }
   }
@@ -304,6 +367,26 @@
   <p class="page-hero-eyebrow">Welcome back, Coena</p>
   <h1 class="page-title">Admin Dashboard</h1>
   <p class="page-subtitle">Here's what's happening across ToolSpark today.</p>
+  <div class="page-hero-actions">
+    <a href="mission-control.html" class="hero-mission-link">
+      <div class="hero-mission-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 3l1.9 5.8L20 10.7l-4.9 3.6 1.9 5.7-5-3.6-5 3.6 1.9-5.7L4 10.7l6.1-1.9L12 3z"/>
+        </svg>
+      </div>
+      <div class="hero-mission-copy">
+        <span class="hero-mission-label">Daily Task Hub</span>
+        <span class="hero-mission-title">Admin Tasks</span>
+        <span class="hero-mission-sub">Open Mission Control for priorities, tool builds, and launch work.</span>
+      </div>
+      <div class="hero-mission-arrow">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M5 12h14"/>
+          <path d="M13 6l6 6-6 6"/>
+        </svg>
+      </div>
+    </a>
+  </div>
 </div>
         <!-- ANALYTICS OVERVIEW -->
     <div class="admin-card">
@@ -346,49 +429,6 @@
             <div class="stat-card-label">Waitlist</div>
             <div class="stat-card-sub">Early access signups</div>
           </div>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- QUOTE OF THE DAY -->
-    <div class="admin-card">
-      <div class="admin-card-header">
-        <div class="admin-card-icon">✦</div>
-        <div>
-          <div class="admin-card-title">Quote of the Day</div>
-          <div class="admin-card-desc">Shown at the top of the community feed. Leave blank to hide it.</div>
-        </div>
-      </div>
-      <div class="admin-card-body">
-
-        <div class="quote-preview" id="quote-preview">
-          <div class="quote-preview-label">Currently showing</div>
-          <div class="quote-preview-text" id="preview-text"></div>
-          <div class="quote-preview-author" id="preview-author" style="display:none;"></div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="quote-input">Quote Text</label>
-          <textarea class="form-textarea" id="quote-input" placeholder="Enter the quote here..."></textarea>
-          <div class="form-hint">Leave blank and save to hide the quote from the community.</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="author-input">Attribution (optional)</label>
-          <input class="form-input" id="author-input" type="text" placeholder="e.g. Alex Hormozi" />
-        </div>
-
-        <div id="quote-save-msg" class="save-msg"></div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-primary" id="save-quote-btn" onclick="saveQuote()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Save Quote
-          </button>
-          <button class="btn-danger" onclick="clearQuote()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            Clear Quote
-          </button>
         </div>
       </div>
     </div>
@@ -494,7 +534,6 @@
 
   initSiteAdminPage(function(user) {
     document.getElementById('admin-content').style.display = 'flex';
-    loadCurrentQuote();
     loadAnalytics();
     loadBranding();
   });
@@ -554,68 +593,6 @@
     } catch(e) {
       msg.className = 'save-msg error';
       msg.textContent = 'Error: ' + e.message;
-    }
-  }
-
-  async function loadCurrentQuote() {
-    try {
-      const snap = await db.collection('settings').doc('quoteOfDay').get();
-      if (!snap.exists || !snap.data().text) return;
-      const data = snap.data();
-      document.getElementById('quote-input').value = data.text || '';
-      document.getElementById('author-input').value = data.author || '';
-      showQuotePreview(data.text, data.author);
-    } catch (e) { /* no quote set yet */ }
-  }
-
-  function showQuotePreview(text, author) {
-    if (!text) { document.getElementById('quote-preview').style.display = 'none'; return; }
-    document.getElementById('preview-text').textContent = text;
-    const authorEl = document.getElementById('preview-author');
-    authorEl.textContent = author || '';
-    authorEl.style.display = author ? '' : 'none';
-    document.getElementById('quote-preview').style.display = 'block';
-  }
-
-  async function saveQuote() {
-    const text = document.getElementById('quote-input').value.trim();
-    const author = document.getElementById('author-input').value.trim();
-    const btn = document.getElementById('save-quote-btn');
-    const msg = document.getElementById('quote-save-msg');
-
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
-
-    try {
-      await db.collection('settings').doc('quoteOfDay').set({
-        text,
-        author,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      showMsg(msg, text ? 'Quote saved and live on the community page.' : 'Quote cleared.', 'success');
-      showQuotePreview(text, author);
-    } catch (e) {
-      showMsg(msg, 'Failed to save. Check your connection.', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Quote`;
-    }
-  }
-
-  async function clearQuote() {
-    if (!confirm('Remove the quote from the community page?')) return;
-    const msg = document.getElementById('quote-save-msg');
-    try {
-      await db.collection('settings').doc('quoteOfDay').set({
-        text: '', author: '',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      document.getElementById('quote-input').value = '';
-      document.getElementById('author-input').value = '';
-      showQuotePreview('', '');
-      showMsg(msg, 'Quote cleared.', 'success');
-    } catch (e) {
-      showMsg(msg, 'Failed to clear. Try again.', 'error');
     }
   }
 
