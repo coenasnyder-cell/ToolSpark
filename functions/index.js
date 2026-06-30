@@ -1528,6 +1528,36 @@ Output rules:
 
 The output must be polished enough for a first draft, but still honest about any missing proof or specifics.`;
 
+const DISCOVER_TAB1_DRAFT_SYSTEM = `You generate pre-filled form data for the "Discover Your Breakthrough" tool inside ToolSpark. A creator has answered a short conversation about their customer's starting point and desired end result. Turn those answers into clean, editable draft text for 5 form fields.
+
+INPUT
+The user message is a JSON object with these keys:
+- cs1: answer to "What does a bad day look like for them — not just the problem, but the feeling?"
+- cs1Followup: (may be empty) answer to follow-up about specific phrases
+- cs2: answer about what the customer has already tried
+- do1: answer to "What does life look like on the other side?"
+- do1Followup: (may be empty) answer to follow-up about day-to-day specifics
+- do2: answer about how the customer wants to feel and be seen
+- audience: { whoYouHelp, whatTheyreStrugglingWith, theTriggerMoment, wordsTheyUse, theTransformation, whatTheyveAlreadyTried }
+
+OUTPUT FORMAT
+Return ONLY valid JSON — no markdown, no explanation, no code fences. Exactly 5 keys:
+
+{
+  "currentStateDraft": "3 to 5 sentences in second-person present tense. Start with emotional state. Include one specific behavioral detail. End with the feeling that makes them ready to seek help. Max 500 characters. No jargon.",
+  "emotionalState": "One vivid phrase or short sentence capturing how they feel right now. Max 200 characters.",
+  "whatTheyveTriedEdited": "What they have already attempted that did not work, in the creator's own words. Synthesize the audience data and their cs2 answer. Max 300 characters.",
+  "desiredOutcomeDraft": "3 to 5 sentences about the end state. First sentence: functional outcome. Middle: identity shift. Last: what others notice. Max 500 characters.",
+  "identityShift": "One vivid phrase or short sentence — how they want to feel and how they want others to see them. Max 200 characters."
+}
+
+WRITING RULES
+- Use their exact words and phrases wherever possible — do not paraphrase into generic coaching language
+- Be specific to what was shared — no generic statements like "they struggle with confidence"
+- Do not use: journey, transformation journey, beautiful, amazing, game-changer
+- No bullet points, headers, or markdown inside field values
+- If any field would exceed its max character count, trim naturally from the end`;
+
 const SERVER_SIDE_SYSTEMS = {
   "spark-council": SPARK_COUNCIL_SYSTEM,
   "spark-conversation": FIND_YOUR_SPARK_SYSTEM,
@@ -1544,6 +1574,7 @@ const SERVER_SIDE_SYSTEMS = {
   "lesson-generator-v2": LESSON_GENERATOR_V2_SYSTEM,
   "audience-conversation": AUDIENCE_SYSTEM,
   "sales-page-generator": SALES_PAGE_GENERATOR_SYSTEM,
+  "discover-tab1-draft": DISCOVER_TAB1_DRAFT_SYSTEM,
 };
 
 exports.analyze = onRequest({

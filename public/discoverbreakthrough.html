@@ -1,0 +1,1830 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover Your Breakthrough &middot; ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark.co",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  const db = firebase.firestore();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   CLARITY THEME TOKENS
+   ================================================================ */
+:root {
+  --bg:          #F7F4EE;
+  --bg-surface:  #EEEADF;
+  --bg-card:     #FFFFFF;
+  --gold:        #C9A84C;
+  --gold-text:   #8A6E1E;
+  --gold-dim:    rgba(201,168,76,0.10);
+  --gold-mid:    rgba(201,168,76,0.22);
+  --gold-glow:   rgba(201,168,76,0.25);
+  --border:      rgba(26,20,10,0.09);
+  --border-mid:  rgba(26,20,10,0.16);
+  --ink:         #1A1510;
+  --ink-mid:     #6B5E50;
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --shadow:      0 1px 4px rgba(26,20,10,0.07);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x: hidden; max-width: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+
+/* ================================================================
+   WELCOME OVERLAY
+   ================================================================ */
+.start-screen {
+  position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 200;
+  flex-direction: column;
+  overflow-y: auto; transition: opacity 0.45s var(--ease-out);
+}
+.start-screen.hidden { opacity: 0; pointer-events: none; }
+
+.spark-content {
+  flex: 1; display: flex;
+  align-items: flex-start; justify-content: center;
+  padding: 32px 20px 48px;
+}
+.start-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 40px;
+  max-width: 740px; width: 100%;
+  box-shadow: 0 2px 20px rgba(26,20,10,0.07);
+}
+
+/* ================================================================
+   EYEBROW
+   ================================================================ */
+.jc-eyebrow-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.jc-eyebrow-pill {
+  font-size: 11px; font-weight: 600; color: var(--gold-text);
+  border: 1px solid rgba(201,168,76,0.35); border-radius: 999px;
+  padding: 4px 12px; letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--gold-dim); white-space: nowrap;
+}
+.jc-sp { color: var(--gold); flex-shrink: 0; }
+.jc-sp-l { animation: twinkle 2.8s var(--ease-in-out) 0.2s infinite; }
+
+/* ================================================================
+   SPARKLE ANIMATION
+   ================================================================ */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; transform: scale(1) rotate(0deg); }
+  50%       { opacity: 0.15; transform: scale(0.55) rotate(18deg); }
+}
+.sp { position: absolute; color: var(--gold); flex-shrink: 0; }
+.sp-tl { top: -8px;  left: -30px; animation: twinkle 2.8s var(--ease-in-out) 0.1s infinite; }
+.sp-tr { top: -6px;  right: -18px; animation: twinkle 2.8s var(--ease-in-out) 0.9s infinite; }
+.sp-br { bottom: 14px; right: -26px; animation: twinkle 2.8s var(--ease-in-out) 1.7s infinite; }
+
+/* ================================================================
+   HERO
+   ================================================================ */
+.spark-hero {
+  display: grid; grid-template-columns: 55% 1fr;
+  gap: 36px; align-items: flex-start; margin-bottom: 28px;
+}
+.spark-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4.2vw, 44px); font-weight: 700;
+  color: var(--ink); line-height: 1.15; margin-bottom: 16px;
+}
+.spark-headline em { font-style: italic; color: var(--gold-text); display: block; }
+.spark-body { font-size: 14px; color: var(--ink-mid); line-height: 1.75; }
+.spark-body p + p { margin-top: 12px; }
+.spark-body b { color: var(--gold-text); font-weight: 600; }
+
+/* ================================================================
+   AVATAR ANIMATIONS
+   ================================================================ */
+@keyframes sidFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes glowPulse {
+  0%, 100% { transform: translateX(-50%) scaleX(1);   opacity: 0.55; }
+  50%       { transform: translateX(-50%) scaleX(0.7); opacity: 0.25; }
+}
+@keyframes sidEntrance {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes bubblePop {
+  from { opacity: 0; transform: translateX(-50%) scale(0.88) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1)    translateY(0); }
+}
+
+.spark-hero-avatar {
+  position: relative; display: flex;
+  flex-direction: column; align-items: center;
+  padding-top: 80px; margin-top: 36px;
+}
+.sparky-avatar-wrap {
+  position: relative; display: inline-flex;
+  align-items: center; justify-content: center;
+  animation: sidEntrance 600ms cubic-bezier(0.23,1,0.32,1) forwards,
+             sidFloat    3.6s   cubic-bezier(0.45,0,0.55,1) 600ms infinite;
+  opacity: 0;
+}
+.sparky-avatar-wrap::after {
+  content: ''; position: absolute;
+  bottom: -10px; left: 50%; transform: translateX(-50%);
+  width: 130px; height: 18px;
+  background: radial-gradient(ellipse, rgba(201,168,76,0.35) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: glowPulse 3.6s cubic-bezier(0.45,0,0.55,1) 600ms infinite;
+  pointer-events: none;
+}
+.sparky-avatar {
+  width: 250px; height: 240px;
+  background: transparent; display: flex;
+  align-items: flex-end; justify-content: center;
+  overflow: visible;
+}
+.sparky-avatar img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; border-radius: 0; }
+
+/* ================================================================
+   SPEECH BUBBLE
+   ================================================================ */
+.spark-speech {
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 20px;
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 17px;
+  color: var(--ink); line-height: 1.4; text-align: center;
+  box-shadow: 0 4px 20px rgba(26,20,10,0.10);
+  width: 240px; white-space: normal;
+  animation: bubblePop 420ms cubic-bezier(0.23,1,0.32,1) 500ms forwards;
+  opacity: 0;
+}
+.spark-speech::before {
+  content: ''; position: absolute;
+  bottom: -12px; left: 50%; transform: translateX(-50%);
+  border: 11px solid transparent; border-top-color: var(--border); border-bottom: none;
+}
+.spark-speech::after {
+  content: ''; position: absolute;
+  bottom: -10px; left: 50%; transform: translateX(-50%);
+  border: 10px solid transparent; border-top-color: var(--bg-card); border-bottom: none;
+}
+.spark-speech em { font-style: italic; color: var(--gold-text); }
+
+/* ================================================================
+   FEATURE CARDS (3-column grid)
+   ================================================================ */
+.spark-discover {
+  border: 1px solid var(--border); border-radius: 18px;
+  padding: 24px 24px 22px; background: #F2EEE5; margin-bottom: 24px;
+}
+.spark-discover-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gold-text);
+  text-align: center; margin-bottom: 20px;
+}
+.spark-discover-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.spark-discover-item { text-align: center; padding: 0 16px; }
+.spark-discover-item:not(:last-child) { border-right: 1px solid rgba(26,20,10,0.11); }
+.spark-discover-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold-text); margin: 0 auto 12px;
+}
+.spark-discover-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.sp-inline { color: var(--gold); font-size: 10px; }
+.spark-discover-copy { font-size: 13px; color: var(--ink-mid); line-height: 1.55; font-weight: 300; }
+
+/* ================================================================
+   PROFILE BANNER
+   ================================================================ */
+.start-expect {
+  background: rgba(42,92,69,0.07); border: 1px solid rgba(42,92,69,0.18);
+  border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 20px; font-size: 13px; color: var(--ink-mid); line-height: 1.6;
+}
+.start-expect strong { color: #2A5C45; font-weight: 700; }
+.start-expect.warning { background: rgba(180,120,0,0.07); border-color: rgba(180,120,0,0.25); }
+.start-expect.warning strong { color: #8A6000; }
+
+/* ================================================================
+   CTA BUTTON
+   ================================================================ */
+.start-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: var(--gold); color: var(--ink);
+  border: none; padding: 17px 24px; border-radius: 4px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+  cursor: pointer; margin-bottom: 14px; text-decoration: none;
+  transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out);
+}
+.start-btn:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) {
+  .start-btn:hover { background: var(--gold-text); color: #fff; transform: translateY(-1px); }
+}
+.start-note {
+  font-family: 'Caveat', cursive; font-style: italic;
+  font-size: 17px; color: var(--ink-mid);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* ================================================================
+   PHASE PROGRESS BAR
+   ================================================================ */
+.phase-bar {
+  display: none; align-items: center;
+  padding: 14px 28px; background: var(--bg-card);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.phase-bar.active { display: flex; }
+.phase-step { display: flex; align-items: center; gap: 8px; flex: 1; position: relative; }
+.phase-step:not(:last-child)::after {
+  content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+  width: calc(100% - 130px); height: 1px;
+  background: rgba(201,168,76,0.2); left: 130px;
+}
+.phase-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(201,168,76,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--ink-mid);
+  transition: all 0.4s ease; flex-shrink: 0; background: var(--bg-card);
+}
+.phase-step.active .phase-dot { border-color: var(--gold); color: var(--gold-text); background: var(--gold-dim); box-shadow: 0 0 12px var(--gold-glow); }
+.phase-step.done .phase-dot { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+.phase-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-mid); transition: color 0.4s; white-space: nowrap; }
+.phase-step.active .phase-label { color: var(--ink); }
+.phase-step.done .phase-label { color: var(--gold-text); }
+
+/* ================================================================
+   TAB NAVIGATION
+   ================================================================ */
+.tab-nav {
+  display: none; align-items: stretch;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 0 28px; flex-shrink: 0;
+}
+.tab-nav.active { display: flex; }
+.tab-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 20px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--ink-mid);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  margin-bottom: -1px;
+}
+.tab-btn.active { color: var(--ink); border-bottom-color: var(--gold); }
+.tab-btn.done { color: var(--gold-text); }
+.tab-btn.locked { opacity: 0.4; cursor: not-allowed; }
+.tab-check { color: var(--gold); }
+
+/* ================================================================
+   CHAT
+   ================================================================ */
+.chat-wrapper {
+  display: none; flex: 1; flex-direction: column;
+  max-width: 780px; width: 100%; margin: 0 auto; padding: 28px 20px 160px;
+}
+.chat-wrapper.active { display: flex; }
+
+.message { display: flex; gap: 14px; margin-bottom: 24px; animation: fadeUp 0.4s var(--ease-out) both; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+.message.user { flex-direction: row-reverse; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.avatar.ai { background: none; border: none; overflow: visible; }
+.avatar.ai img { width: 100%; height: 100%; object-fit: contain; border-radius: 0; }
+.avatar.user-av { background: rgba(26,20,10,0.07); border: 1px solid rgba(26,20,10,0.14); color: var(--ink-mid); font-size: 13px; font-weight: 700; }
+
+.bubble { max-width: 85%; padding: 14px 18px; border-radius: 16px; line-height: 1.65; font-size: 15px; }
+.bubble.ai { background: var(--bg-card); border: 1px solid var(--border); color: var(--ink); border-bottom-left-radius: 4px; box-shadow: var(--shadow); }
+.bubble.user-b { background: rgba(201,168,76,0.09); border: 1px solid rgba(201,168,76,0.18); color: var(--ink); border-bottom-right-radius: 4px; }
+.bubble.ai strong { color: var(--gold-text); }
+.bubble.ai em { color: var(--ink-mid); font-style: italic; }
+
+.phase-divider { display: flex; align-items: center; gap: 12px; margin: 32px 0 20px; animation: fadeUp 0.4s var(--ease-out) both; }
+.phase-divider-line { flex:1; height:1px; background: rgba(201,168,76,0.15); }
+.phase-divider-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-text); opacity: 0.7; padding: 4px 10px; border: 1px solid rgba(201,168,76,0.2); border-radius: 20px; }
+
+.thinking { display: flex; gap: 14px; align-items: flex-end; margin-bottom: 24px; animation: fadeUp 0.3s var(--ease-out) both; }
+.thinking-dots { padding: 14px 18px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; box-shadow: var(--shadow); display: flex; gap: 6px; align-items: center; }
+.tdot { width:7px; height:7px; border-radius:50%; background: var(--gold); opacity:0.5; }
+.tdot:nth-child(1){animation:blink 1.2s 0s infinite;}
+.tdot:nth-child(2){animation:blink 1.2s 0.2s infinite;}
+.tdot:nth-child(3){animation:blink 1.2s 0.4s infinite;}
+@keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+/* ================================================================
+   AUDIENCE RECAP CARD
+   ================================================================ */
+.recap-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 24px; margin-bottom: 20px;
+  animation: fadeUp 0.4s var(--ease-out) both;
+}
+.recap-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.recap-subtitle { font-size: 13px; color: var(--ink-mid); margin-bottom: 20px; line-height: 1.5; }
+.recap-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+.recap-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-text); white-space: nowrap; min-width: 130px; padding-top: 2px; }
+.recap-value { font-size: 14px; color: var(--ink); line-height: 1.55; }
+.recap-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.recap-chip {
+  padding: 9px 18px; background: var(--bg-card); border: 1.5px solid var(--border-mid);
+  border-radius: 100px; color: var(--ink-mid); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.recap-chip:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-text); }
+.recap-chip.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-text); }
+
+/* ================================================================
+   RECAP EDIT FORM
+   ================================================================ */
+.recap-edit { display: none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+.recap-edit.open { display: block; }
+.recap-edit-note { font-size: 12px; color: var(--ink-mid); font-style: italic; margin-bottom: 16px; line-height: 1.6; }
+.re-field { margin-bottom: 14px; }
+.re-label { display: block; font-size: 11px; font-weight: 700; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.re-input {
+  width: 100%; padding: 10px 14px; background: var(--bg); border: 1.5px solid var(--border-mid);
+  border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+  outline: none; transition: border-color 0.18s var(--ease-out); resize: vertical; min-height: 56px;
+}
+.re-input:focus { border-color: var(--gold); }
+.re-save-btn {
+  padding: 11px 24px; background: var(--gold); color: var(--ink);
+  border: none; border-radius: 4px; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 6px;
+  transition: background-color 0.16s var(--ease-out);
+}
+.re-save-btn:hover { background: var(--gold-text); color: #fff; }
+
+/* ================================================================
+   INPUT AREA
+   ================================================================ */
+.input-area {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 16px 20px 20px;
+  background: linear-gradient(transparent, var(--bg) 30%); z-index: 40;
+}
+.input-area.active { display: block; }
+.input-inner { max-width: 780px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
+.input-box {
+  flex: 1; background: var(--bg-card); border: 1.5px solid var(--border-mid);
+  border-radius: 14px; padding: 14px 18px; color: var(--ink);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+  resize: none; min-height: 52px; max-height: 140px; line-height: 1.5;
+  transition: border-color 0.18s var(--ease-out); box-shadow: var(--shadow);
+}
+.input-box::placeholder { color: var(--ink-mid); opacity: 0.7; }
+.input-box:focus { border-color: rgba(201,168,76,0.55); }
+.char-hint { text-align: right; font-size: 11px; color: var(--ink-mid); opacity: 0; transition: opacity 0.2s; max-width: 780px; margin: 0 auto 4px; }
+.char-hint.show { opacity: 1; }
+.char-hint.warn { color: var(--gold-text); opacity: 1; }
+.send-btn {
+  width: 48px; height: 48px; background: var(--gold); border: none;
+  border-radius: 4px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out); flex-shrink: 0;
+}
+.send-btn:hover:not(:disabled) { background: var(--gold-text); transform: scale(1.05); }
+.send-btn:disabled { background: rgba(201,168,76,0.25); cursor:not-allowed; transform:none; }
+.send-btn svg { fill: var(--ink); }
+
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; max-width: 780px; margin-left: auto; margin-right: auto; animation: fadeUp 0.35s var(--ease-out) both; }
+.chip {
+  padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 100px; color: var(--ink-mid); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+}
+.chip:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-text); }
+.chip.selected { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-text); }
+
+/* ================================================================
+   FORM PANEL (Tab 1 & Tab 2 — shown after chat complete)
+   ================================================================ */
+.form-panel {
+  display: none; max-width: 780px; width: 100%; margin: 0 auto;
+  padding: 28px 20px 140px;
+}
+.form-panel.active { display: block; }
+
+.form-headline {
+  font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 28px); font-weight: 700;
+  color: var(--ink); margin-bottom: 6px; line-height: 1.2;
+}
+.form-headline em { font-style: italic; color: var(--gold-text); }
+.form-sub { font-size: 14px; color: var(--ink-mid); margin-bottom: 28px; line-height: 1.6; }
+
+.form-field { margin-bottom: 22px; }
+.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gold-text); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.form-sublabel { font-size: 12px; color: var(--ink-mid); margin-bottom: 8px; font-style: italic; }
+.form-textarea {
+  width: 100%; padding: 13px 16px; background: var(--bg-card); border: 1.5px solid var(--border-mid);
+  border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--ink);
+  outline: none; resize: vertical; line-height: 1.65; min-height: 90px;
+  transition: border-color 0.18s var(--ease-out); box-shadow: var(--shadow);
+}
+.form-textarea:focus { border-color: var(--gold); }
+.form-textarea.error { border-color: #DC2626; }
+.form-char { font-size: 11px; color: var(--ink-mid); text-align: right; margin-top: 4px; }
+.form-char.near { color: var(--gold-text); }
+.form-char.over { color: #DC2626; }
+
+.form-lock-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: var(--gold); color: var(--ink);
+  border: none; padding: 17px 24px; border-radius: 4px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+  cursor: pointer; margin-top: 8px; margin-bottom: 12px;
+  transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out);
+}
+.form-lock-btn:active { transform: scale(0.98); }
+.form-lock-btn:hover { background: var(--gold-text); color: #fff; }
+.form-lock-note { text-align: center; font-size: 13px; color: var(--ink-mid); font-style: italic; }
+
+/* ================================================================
+   SAVED INDICATOR
+   ================================================================ */
+.saved-indicator {
+  position: fixed; top: 10px; right: 16px; z-index: 500;
+  background: var(--bg-card); border: 1px solid rgba(42,92,69,0.3);
+  color: #2A5C45; border-radius: 8px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.saved-indicator.show { opacity: 1; }
+
+/* ================================================================
+   SCROLLBAR
+   ================================================================ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(26,20,10,0.10); border-radius: 10px; }
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .message, .thinking { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .tdot { animation: none !important; opacity: 0.4; }
+  .jc-sp, .sp { animation: none !important; opacity: 0.7 !important; }
+  .spark-speech { opacity: 1 !important; transform: translateX(-50%) !important; }
+  .sparky-avatar-wrap { animation: none !important; opacity: 1 !important; }
+}
+
+/* ================================================================
+   MOBILE
+   ================================================================ */
+@media (max-width: 600px) {
+  .start-card { padding: 24px 16px 28px; border-radius: 20px; }
+  .spark-hero { grid-template-columns: 1fr; }
+  .spark-hero-avatar { display: none; }
+  .spark-discover-grid { grid-template-columns: 1fr; }
+  .spark-discover-item:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px; }
+  .phase-bar { padding: 10px 16px; overflow-x: auto; }
+  .tab-nav { padding: 0 16px; overflow-x: auto; }
+  .recap-row { flex-direction: column; gap: 2px; }
+  .recap-label { min-width: unset; }
+}
+</style>
+</head>
+<body data-page-title="Discover Your Breakthrough">
+
+<!-- SAVED INDICATOR -->
+<div class="saved-indicator" id="savedIndicator">Saved &#10003;</div>
+
+<!-- ================================================================
+     WELCOME SCREEN
+     ================================================================ -->
+<div class="start-screen" id="startScreen" style="display:none;">
+  <div class="spark-content">
+    <div class="start-card">
+
+      <!-- HERO -->
+      <div class="spark-hero">
+        <div class="spark-hero-left">
+          <div class="jc-eyebrow-row">
+            <svg class="jc-sp jc-sp-l" width="15" height="15" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+              <path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/>
+            </svg>
+            <span class="jc-eyebrow-pill">Discover Your Breakthrough</span>
+          </div>
+          <h1 class="spark-headline">Map Your Customer&rsquo;s Journey.<br><em>From where they are to where you take them.</em></h1>
+          <div class="spark-body">
+            <p>You know your spark. You know your audience. Now let&rsquo;s map the exact path you guide them through.</p>
+            <p>This takes about <b>20 minutes</b>.</p>
+          </div>
+        </div>
+
+        <div class="spark-hero-avatar">
+          <div class="sparky-avatar-wrap">
+            <svg class="sp sp-tl" width="20" height="20" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
+            <svg class="sp sp-tr" width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
+            <svg class="sp sp-br" width="16" height="16" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
+            <div class="sparky-avatar">
+              <img src="specky.png" alt="Sparky" />
+            </div>
+          </div>
+          <div class="spark-speech">Let&rsquo;s map the transformation <em>you create.</em></div>
+        </div>
+      </div>
+
+      <!-- FEATURE CARDS -->
+      <div class="spark-discover">
+        <div class="spark-discover-label">What you&rsquo;ll map in this session</div>
+        <div class="spark-discover-grid">
+          <div class="spark-discover-item">
+            <div class="spark-discover-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <div class="spark-discover-title">The Transformation <span class="sp-inline">&#10022;</span></div>
+            <div class="spark-discover-copy">A clear picture of where your customer starts and where they end up</div>
+          </div>
+          <div class="spark-discover-item">
+            <div class="spark-discover-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 12h18M3 6l3 6-3 6M21 6l-3 6 3 6"/>
+              </svg>
+            </div>
+            <div class="spark-discover-title">The Journey <span class="sp-inline">&#10022;</span></div>
+            <div class="spark-discover-copy">The stages between before and after, with every milestone mapped</div>
+          </div>
+          <div class="spark-discover-item">
+            <div class="spark-discover-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+                <line x1="9" y1="11" x2="15" y2="11"/>
+              </svg>
+            </div>
+            <div class="spark-discover-title">The Blueprint <span class="sp-inline">&#10022;</span></div>
+            <div class="spark-discover-copy">A complete, editable plan that becomes the foundation for everything you build</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE BANNER -->
+      <div class="start-expect" id="profileBanner">
+        <strong>Loading your profile&hellip;</strong>
+      </div>
+
+      <!-- CTA -->
+      <button class="start-btn" id="startBtn" onclick="startSession()">
+        <svg width="13" height="13" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L6.7 5.3L12 6L6.7 6.7L6 12L5.3 6.7L0 6L5.3 5.3Z"/></svg>
+        Start Mapping &rarr;
+      </button>
+      <div class="start-note">Usually takes about 20 minutes &hearts;</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     PHASE PROGRESS BAR
+     ================================================================ -->
+<div class="phase-bar" id="phaseBar">
+  <div class="phase-step" id="phaseRecap">
+    <div class="phase-dot">1</div>
+    <span class="phase-label">Recap</span>
+  </div>
+  <div class="phase-step" id="phaseTransform">
+    <div class="phase-dot">2</div>
+    <span class="phase-label">The Transformation</span>
+  </div>
+  <div class="phase-step" id="phaseJourney">
+    <div class="phase-dot">3</div>
+    <span class="phase-label">The Journey</span>
+  </div>
+  <div class="phase-step" id="phaseBlueprint">
+    <div class="phase-dot">&#10003;</div>
+    <span class="phase-label">Your Blueprint</span>
+  </div>
+</div>
+
+<!-- ================================================================
+     TAB NAVIGATION (shown during Tab 1 / Tab 2 phases)
+     ================================================================ -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" id="tab1Btn" onclick="switchTab(1)">
+    Tab 1: The Transformation
+  </button>
+  <button class="tab-btn locked" id="tab2Btn" onclick="switchTab(2)" disabled>
+    Tab 2: The Journey
+  </button>
+</div>
+
+<!-- ================================================================
+     MAIN CHAT WRAPPER
+     ================================================================ -->
+<div class="chat-wrapper" id="chatWrapper"></div>
+
+<!-- ================================================================
+     FORM PANELS (Tab 1 and Tab 2 — shown after chat completes)
+     ================================================================ -->
+<div class="form-panel" id="formPanel1"></div>
+<div class="form-panel" id="formPanel2"></div>
+
+<!-- ================================================================
+     INPUT AREA
+     ================================================================ -->
+<div class="input-area" id="inputArea">
+  <div class="char-hint" id="charHint"></div>
+  <div class="chips-row" id="chipsRow"></div>
+  <div class="input-inner">
+    <textarea
+      id="userInput"
+      class="input-box"
+      placeholder="Type your answer&#8230;"
+      rows="1"
+    ></textarea>
+    <button class="send-btn" id="sendBtn" onclick="handleSend()" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ================================================================
+// CONFIG
+// ================================================================
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken() : "";
+  let acToken = "";
+  try {
+    const t = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise((_,r) => setTimeout(() => r(), 3000))
+    ]);
+    acToken = t?.token || "";
+  } catch(e) {}
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token,
+    "X-Firebase-AppCheck": acToken
+  };
+}
+
+const MODEL = "claude-sonnet-4-6";
+
+// ================================================================
+// STATE
+// ================================================================
+let displayName = '';
+let userInitial = '?';
+let sparkData = null;
+let audienceData = null;
+let journeyData = null;
+let sessionContext = {};     // audience context for this session (editable)
+let conversationHistory = [];
+let currentPhase = 'welcome';
+let currentTab = 1;
+let isThinking = false;
+let tab1Locked = false;
+let autoSaveTimer = null;
+
+// Collected form values (populated in Phase 2 / Phase 3)
+let tab1Form = {
+  currentStateDraft: '',
+  emotionalState: '',
+  whatTheyveTriedEdited: '',
+  desiredOutcomeDraft: '',
+  identityShift: ''
+};
+
+// ================================================================
+// AUTH + DATA LOADING
+// ================================================================
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+  await loadUserData(user);
+});
+
+function sortDocsByCreatedAtDesc(docs) {
+  return [...docs].sort((a, b) => {
+    const at = a?.data?.().createdAt ? a.data().createdAt.toMillis() : 0;
+    const bt = b?.data?.().createdAt ? b.data().createdAt.toMillis() : 0;
+    return bt - at;
+  });
+}
+
+function normalizeAudienceData(data) {
+  const dreamOutcome = data.dreamOutcome || '';
+  const howSeen = data.howTheyWantToBeeSeen || '';
+  const combinedTransformation = [dreamOutcome, howSeen].filter(Boolean).join(' ');
+
+  return {
+    ...data,
+    whoYouHelp: data.whoYouHelp || data.whoTheyAre || '',
+    whatTheyreStrugglingWith: data.whatTheyreStrugglingWith || data.dailyFrustration || '',
+    theTriggerMoment: data.theTriggerMoment || data.whatTriggeredThem || '',
+    theTransformation: data.theTransformation || combinedTransformation || '',
+    whatTheyveAlreadyTried: data.whatTheyveAlreadyTried || data.whatTheyHaveTried || '',
+    wordsTheyUse: data.wordsTheyUse || data.theirWords || '',
+    yourIHelpStatement: data.yourIHelpStatement || data.iHelpStatement || ''
+  };
+}
+
+async function fetchLatestSparkDataForUser(user, legacySparkSnap) {
+  const email = user?.email || '';
+  const emailLower = email.toLowerCase();
+  const latestSparkSessionId = localStorage.getItem('toolspark_latest_spark_session');
+  const sparkDocs = [];
+
+  try {
+    const [byUser, byEmail, byEmailLower] = await Promise.all([
+      db.collection('spark_results').where('userId', '==', user.uid).limit(10).get(),
+      db.collection('spark_results').where('accountEmail', '==', email).limit(10).get(),
+      db.collection('spark_results').where('accountEmail', '==', emailLower).limit(10).get()
+    ]);
+
+    [byUser, byEmail, byEmailLower].forEach(snap => {
+      if (snap && !snap.empty) sparkDocs.push(...snap.docs);
+    });
+  } catch(e) {
+    console.warn('Spark results lookup failed:', e);
+  }
+
+  if (sparkDocs.length) {
+    return sortDocsByCreatedAtDesc(sparkDocs)[0].data();
+  }
+
+  try {
+    const [profilesByEmail, profilesByEmailLower] = await Promise.all([
+      db.collection('spark_profiles').where('email', '==', email).get(),
+      db.collection('spark_profiles').where('email', '==', emailLower).get()
+    ]);
+
+    [profilesByEmail, profilesByEmailLower].forEach(snap => {
+      if (snap && !snap.empty) sparkDocs.push(...snap.docs);
+    });
+  } catch(e) {
+    console.warn('Spark profile lookup failed:', e);
+  }
+
+  if (latestSparkSessionId) {
+    try {
+      const latestSnap = await db.collection('spark_profiles').doc(latestSparkSessionId).get();
+      if (latestSnap.exists) {
+        const sessionEmail = (latestSnap.data().email || '').toLowerCase();
+        if (!emailLower || sessionEmail === emailLower) sparkDocs.push(latestSnap);
+      }
+    } catch(e) {
+      console.warn('Latest Spark session lookup failed:', e);
+    }
+  }
+
+  if (sparkDocs.length) {
+    return sortDocsByCreatedAtDesc(sparkDocs)[0].data();
+  }
+
+  return legacySparkSnap?.exists ? legacySparkSnap.data() : null;
+}
+
+async function fetchLatestAudienceDataForUser(user, legacyAudienceSnap) {
+  const email = user?.email || '';
+  const emailLower = email.toLowerCase();
+  const latestAudienceSessionId = localStorage.getItem('toolspark_latest_audience_session');
+  const audienceDocs = [];
+
+  try {
+    const [byUser, byEmail, byEmailLower] = await Promise.all([
+      db.collection('audience_results').where('userId', '==', user.uid).limit(10).get(),
+      db.collection('audience_results').where('accountEmail', '==', email).limit(10).get(),
+      db.collection('audience_results').where('accountEmail', '==', emailLower).limit(10).get()
+    ]);
+
+    [byUser, byEmail, byEmailLower].forEach(snap => {
+      if (snap && !snap.empty) audienceDocs.push(...snap.docs);
+    });
+  } catch(e) {
+    console.warn('Audience results lookup failed:', e);
+  }
+
+  if (audienceDocs.length) {
+    return normalizeAudienceData(sortDocsByCreatedAtDesc(audienceDocs)[0].data());
+  }
+
+  try {
+    const [profilesByEmail, profilesByEmailLower] = await Promise.all([
+      db.collection('audience_tool').where('email', '==', email).get(),
+      db.collection('audience_tool').where('email', '==', emailLower).get()
+    ]);
+
+    [profilesByEmail, profilesByEmailLower].forEach(snap => {
+      if (snap && !snap.empty) audienceDocs.push(...snap.docs);
+    });
+  } catch(e) {
+    console.warn('Audience profile lookup failed:', e);
+  }
+
+  if (latestAudienceSessionId) {
+    try {
+      const latestSnap = await db.collection('audience_tool').doc(latestAudienceSessionId).get();
+      if (latestSnap.exists) {
+        const sessionEmail = (latestSnap.data().email || '').toLowerCase();
+        if (!emailLower || sessionEmail === emailLower) audienceDocs.push(latestSnap);
+      }
+    } catch(e) {
+      console.warn('Latest Audience session lookup failed:', e);
+    }
+  }
+
+  if (audienceDocs.length) {
+    return normalizeAudienceData(sortDocsByCreatedAtDesc(audienceDocs)[0].data());
+  }
+
+  return legacyAudienceSnap?.exists ? normalizeAudienceData(legacyAudienceSnap.data()) : null;
+}
+
+async function loadUserData(user) {
+  try {
+    const uid = user.uid;
+    const [sparkSnap, audSnap, journeySnap] = await Promise.all([
+      db.collection('users').doc(uid).collection('sparkProfile').doc('profile').get(),
+      db.collection('users').doc(uid).collection('audienceBlueprint').doc('blueprint').get(),
+      db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').get()
+    ]);
+
+    sparkData = await fetchLatestSparkDataForUser(user, sparkSnap);
+    audienceData = await fetchLatestAudienceDataForUser(user, audSnap);
+
+    // Spark profile is required
+    if (!sparkData) {
+      showNoSparkBlock();
+      return;
+    }
+    displayName = sparkData.name || 'there';
+    userInitial = (displayName.charAt(0) || '?').toUpperCase();
+
+    if (audienceData) {
+      sessionContext = {
+        whoYouHelp:                audienceData.whoYouHelp || '',
+        whatTheyreStrugglingWith:  audienceData.whatTheyreStrugglingWith || '',
+        theTriggerMoment:          audienceData.theTriggerMoment || '',
+        theTransformation:         audienceData.theTransformation || '',
+        whatTheyveAlreadyTried:    audienceData.whatTheyveAlreadyTried || '',
+        wordsTheyUse:              audienceData.wordsTheyUse || '',
+        yourIHelpStatement:        audienceData.yourIHelpStatement || ''
+      };
+    }
+
+    if (journeySnap.exists) {
+      journeyData = journeySnap.data();
+    }
+
+    updateProfileBanner();
+    showStartScreen();
+
+  } catch(err) {
+    console.error('loadUserData error:', err);
+    updateProfileBanner();
+    showStartScreen();
+  }
+}
+
+function updateProfileBanner() {
+  const banner = document.getElementById('profileBanner');
+  if (!audienceData) {
+    banner.className = 'start-expect warning';
+    banner.innerHTML = '<strong>Heads up:</strong> You haven&rsquo;t completed Audience Deep Dive yet &mdash; some questions may feel less personalized. <a href="audiencetool.html" style="color:var(--gold-text);font-weight:600;">Complete it first</a> or continue anyway.';
+  } else {
+    banner.className = 'start-expect';
+    banner.innerHTML = '<strong>Profile loaded:</strong> Your Spark and Audience work is ready &mdash; we&rsquo;ll use it throughout this session.';
+  }
+}
+
+function showStartScreen() {
+  const s = document.getElementById('startScreen');
+  s.style.display = 'flex';
+  s.style.flexDirection = 'column';
+}
+
+function showNoSparkBlock() {
+  const s = document.getElementById('startScreen');
+  s.innerHTML = '<div class="spark-content"><div class="start-card" style="text-align:center;max-width:520px;">' +
+    '<div style="font-size:2.2rem;margin-bottom:16px;">&#128274;</div>' +
+    '<h1 style="font-family:\'Playfair Display\',serif;font-size:clamp(24px,4vw,34px);font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:12px;">Start with <em style="font-style:italic;color:var(--gold-text);">Find Your Spark</em> first.</h1>' +
+    '<p style="font-size:15px;color:var(--ink-mid);line-height:1.7;margin-bottom:24px;">This tool builds on your Spark profile. Complete that first and you&rsquo;ll be ready to map your customer&rsquo;s journey.</p>' +
+    '<a href="spark.html" class="start-btn" style="display:flex;text-decoration:none;">Go to Find Your Spark &rarr;</a>' +
+    '</div></div>';
+  s.style.display = 'flex';
+  s.style.flexDirection = 'column';
+}
+
+// ================================================================
+// SESSION START
+// ================================================================
+function startSession() {
+  if (journeyData && journeyData.currentPhase && journeyData.status === 'in_progress') {
+    showReturningUserPrompt();
+    return;
+  }
+  beginNewSession();
+}
+
+function showReturningUserPrompt() {
+  const phaseLabels = {
+    recap:       'the Audience Recap',
+    tab1_chat:   'The Transformation conversation',
+    tab1_form:   'The Transformation form',
+    tab2_chat:   'The Journey conversation',
+    tab2_form:   'The Journey form'
+  };
+  const label = phaseLabels[journeyData.currentPhase] || 'your session';
+  hideWelcome();
+  activatePhaseBar('recap');
+  activateChat();
+  addAiMessage('Welcome back, <strong>' + escHtml(displayName) + '</strong>. You were working on ' + label + '. Ready to keep going?');
+  showChips([
+    { label: 'Pick up where I left off', action: resumeSession },
+    { label: 'Start over',              action: confirmStartOver }
+  ]);
+}
+
+function resumeSession() {
+  clearChips();
+  const p = journeyData.currentPhase;
+  currentPhase = p;
+  if (p === 'recap') {
+    showRecapCard();
+  } else if (p === 'tab1_chat' || p === 'tab1_form') {
+    activatePhaseBar('transform');
+    activateTabNav();
+    setActiveTab(1);
+    currentPhase = p;
+    // Phase 2 will handle resuming conversation / showing form
+    addAiMessage('Let&rsquo;s pick up where we left off.');
+    activateInputArea();
+  } else if (p === 'tab2_chat' || p === 'tab2_form') {
+    tab1Locked = true;
+    activatePhaseBar('journey');
+    activateTabNav();
+    unlockTab2();
+    setActiveTab(2);
+    currentPhase = p;
+    // Phase 3 will handle resuming
+    addAiMessage('Let&rsquo;s continue mapping the journey.');
+    activateInputArea();
+  }
+}
+
+function confirmStartOver() {
+  clearChips();
+  addAiMessage('Are you sure? Your existing progress will be archived and you&rsquo;ll start fresh.');
+  showChips([
+    { label: 'Yes, start fresh', action: archiveAndRestart },
+    { label: 'No, keep going',   action: resumeSession }
+  ]);
+}
+
+async function archiveAndRestart() {
+  clearChips();
+  const uid = firebase.auth().currentUser?.uid;
+  if (uid) {
+    try {
+      await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint')
+        .update({ status: 'archived', archivedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch(e) {}
+  }
+  journeyData = null;
+  tab1Locked = false;
+  conversationHistory = [];
+  document.getElementById('chatWrapper').innerHTML = '';
+  beginNewSession();
+}
+
+function beginNewSession() {
+  hideWelcome();
+  activatePhaseBar('recap');
+  activateChat();
+  currentPhase = 'recap';
+  persistPhase('recap');
+  logEvent('breakthrough_started');
+  showRecapCard();
+}
+
+// ================================================================
+// AUDIENCE RECAP CARD
+// ================================================================
+function showRecapCard() {
+  const aud = sessionContext;
+  const card = document.createElement('div');
+  card.className = 'recap-card';
+  card.id = 'recapCard';
+
+  const safeVal = (v) => v ? escHtml(v) : '<span style="color:var(--ink-mid);font-style:italic;">Not set</span>';
+  const firstSentenceOf = (str) => {
+    if (!str) return '';
+    const m = str.match(/[^.!?]+[.!?]/);
+    return m ? m[0].trim() : str;
+  };
+
+  card.innerHTML =
+    '<div class="recap-title">Here&rsquo;s what we already know about your audience.</div>' +
+    '<div class="recap-subtitle">Does this still feel right?</div>' +
+    '<div class="recap-row"><span class="recap-label">You help</span><span class="recap-value">' + safeVal(aud.whoYouHelp) + '</span></div>' +
+    '<div class="recap-row"><span class="recap-label">Their struggle</span><span class="recap-value">' + safeVal(aud.whatTheyreStrugglingWith) + '</span></div>' +
+    '<div class="recap-row"><span class="recap-label">Their trigger</span><span class="recap-value">' + safeVal(aud.theTriggerMoment) + '</span></div>' +
+    '<div class="recap-row"><span class="recap-label">The transformation</span><span class="recap-value">' + safeVal(firstSentenceOf(aud.theTransformation)) + '</span></div>' +
+    '<div class="recap-actions" id="recapActions">' +
+      '<button class="recap-chip" onclick="recapChoice(\'yes\')">Yes, this is still accurate</button>' +
+      '<button class="recap-chip" onclick="recapChoice(\'edit\')">A few things have shifted</button>' +
+    '</div>' +
+    '<div class="recap-edit" id="recapEditForm">' +
+      '<div class="recap-edit-note"><em>These changes will be used for this session only &mdash; they won&rsquo;t overwrite your Audience Blueprint.</em></div>' +
+      '<div class="re-field"><label class="re-label" for="re-who">You help</label><textarea class="re-input" id="re-who" rows="2">' + escHtml(aud.whoYouHelp) + '</textarea></div>' +
+      '<div class="re-field"><label class="re-label" for="re-struggle">Their struggle</label><textarea class="re-input" id="re-struggle" rows="2">' + escHtml(aud.whatTheyreStrugglingWith) + '</textarea></div>' +
+      '<div class="re-field"><label class="re-label" for="re-trigger">Their trigger moment</label><textarea class="re-input" id="re-trigger" rows="2">' + escHtml(aud.theTriggerMoment) + '</textarea></div>' +
+      '<div class="re-field"><label class="re-label" for="re-transform">The transformation you create</label><textarea class="re-input" id="re-transform" rows="3">' + escHtml(aud.theTransformation) + '</textarea></div>' +
+      '<button class="re-save-btn" onclick="saveRecapEdits()">Save &amp; Continue &rarr;</button>' +
+    '</div>';
+
+  document.getElementById('chatWrapper').appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  logEvent('recap_shown');
+}
+
+function recapChoice(choice) {
+  const actions = document.getElementById('recapActions');
+  const chips = actions.querySelectorAll('.recap-chip');
+  chips.forEach(c => { c.style.opacity = '0.5'; c.style.pointerEvents = 'none'; });
+  if (choice === 'yes') {
+    chips[0].classList.add('selected');
+    chips[0].style.opacity = '1';
+    logEvent('recap_confirmed');
+    setTimeout(proceedToTab1, 500);
+  } else {
+    chips[1].classList.add('selected');
+    chips[1].style.opacity = '1';
+    document.getElementById('recapEditForm').classList.add('open');
+    logEvent('recap_edit_opened');
+  }
+}
+
+function saveRecapEdits() {
+  sessionContext.whoYouHelp               = document.getElementById('re-who').value.trim();
+  sessionContext.whatTheyreStrugglingWith = document.getElementById('re-struggle').value.trim();
+  sessionContext.theTriggerMoment         = document.getElementById('re-trigger').value.trim();
+  sessionContext.theTransformation        = document.getElementById('re-transform').value.trim();
+  document.getElementById('recapEditForm').classList.remove('open');
+  logEvent('recap_edited');
+  setTimeout(proceedToTab1, 300);
+}
+
+// ================================================================
+// PROCEED TO TAB 1
+// ================================================================
+function proceedToTab1() {
+  activatePhaseBar('transform');
+  activateTabNav();
+  setActiveTab(1);
+  currentPhase = 'tab1_chat';
+  persistPhase('tab1_chat');
+  activateInputArea();
+
+  const struggle = sessionContext.whatTheyreStrugglingWith;
+  addAiMessage(
+    'Let&rsquo;s start with where your customer is right now &mdash; before they&rsquo;ve found you.' +
+    (struggle ? ' I already know they&rsquo;re dealing with <strong>' + escHtml(struggle) + '</strong>, but I want to go deeper than the facts.' : '')
+  );
+
+  setTimeout(() => showTab1Step('cs1'), 800);
+}
+
+// ================================================================
+// CHAT UI HELPERS
+// ================================================================
+function activateChat() {
+  document.getElementById('chatWrapper').classList.add('active');
+}
+
+function addAiMessage(html) {
+  const wrapper = document.getElementById('chatWrapper');
+  const div = document.createElement('div');
+  div.className = 'message';
+  div.innerHTML =
+    '<div class="avatar ai"><img src="specky.png" alt="" /></div>' +
+    '<div class="bubble ai">' + html + '</div>';
+  wrapper.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  conversationHistory.push({ role: 'assistant', content: stripTags(html) });
+}
+
+function addUserMessage(text) {
+  const wrapper = document.getElementById('chatWrapper');
+  const div = document.createElement('div');
+  div.className = 'message user';
+  div.innerHTML =
+    '<div class="avatar user-av">' + escHtml(userInitial) + '</div>' +
+    '<div class="bubble user-b">' + escHtml(text) + '</div>';
+  wrapper.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  conversationHistory.push({ role: 'user', content: text });
+}
+
+function showThinking() {
+  if (isThinking) return;
+  isThinking = true;
+  const wrapper = document.getElementById('chatWrapper');
+  const div = document.createElement('div');
+  div.className = 'thinking'; div.id = 'thinkingDots';
+  div.innerHTML =
+    '<div class="avatar ai"><img src="specky.png" alt="" /></div>' +
+    '<div class="thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
+  wrapper.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function hideThinking() {
+  const t = document.getElementById('thinkingDots');
+  if (t) t.remove();
+  isThinking = false;
+}
+
+function addPhaseDivider(label) {
+  const wrapper = document.getElementById('chatWrapper');
+  const div = document.createElement('div');
+  div.className = 'phase-divider';
+  div.innerHTML =
+    '<div class="phase-divider-line"></div>' +
+    '<div class="phase-divider-label">' + escHtml(label) + '</div>' +
+    '<div class="phase-divider-line"></div>';
+  wrapper.appendChild(div);
+}
+
+function showChips(items) {
+  const row = document.getElementById('chipsRow');
+  row.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = item.label;
+    btn.onclick = () => {
+      if (item.fillInput) {
+        // Populate input but don't auto-send (spec 6.4)
+        const input = document.getElementById('userInput');
+        input.value = item.label;
+        input.dispatchEvent(new Event('input'));
+        input.focus();
+        btn.classList.add('selected');
+      } else if (item.action) {
+        clearChips();
+        item.action();
+      }
+    };
+    row.appendChild(btn);
+  });
+}
+
+function clearChips() {
+  document.getElementById('chipsRow').innerHTML = '';
+}
+
+// ================================================================
+// INPUT AREA
+// ================================================================
+function activateInputArea() {
+  const area = document.getElementById('inputArea');
+  area.classList.add('active');
+
+  const input = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const hint = document.getElementById('charHint');
+
+  if (input._listenerAdded) return;
+  input._listenerAdded = true;
+
+  input.addEventListener('input', () => {
+    // Auto-resize
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+
+    const len = input.value.length;
+    const trimLen = input.value.trim().length;
+    sendBtn.disabled = trimLen < 10;
+
+    // Character hint at 600+, hard limit at 800
+    if (len > 800) {
+      input.value = input.value.slice(0, 800);
+      showToast('We trimmed that to keep things focused.');
+    }
+    if (len >= 600) {
+      hint.textContent = (800 - len) + ' characters remaining';
+      hint.className = 'char-hint warn show';
+    } else {
+      hint.className = 'char-hint';
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!sendBtn.disabled) handleSend();
+    }
+  });
+}
+
+function handleSend() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text || text.length < 10) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('charHint').className = 'char-hint';
+  clearChips();
+  addUserMessage(text);
+
+  // Phase 2 will route this to the correct conversation handler
+  // For now: placeholder echo to confirm the UI is wired
+  routeMessage(text);
+}
+
+function routeMessage(text) {
+  if (currentPhase === 'tab1_chat') {
+    handleTab1ChatMessage(text);
+  }
+  // tab2_chat added in Phase 3
+}
+
+// ================================================================
+// TAB NAVIGATION
+// ================================================================
+function activateTabNav() {
+  document.getElementById('tabNav').classList.add('active');
+}
+
+function setActiveTab(n) {
+  document.getElementById('tab1Btn').className = 'tab-btn' + (n === 1 ? ' active' : (tab1Locked ? '' : ' locked'));
+  document.getElementById('tab2Btn').className = 'tab-btn' + (n === 2 ? ' active' : (tab1Locked ? '' : ' locked'));
+  currentTab = n;
+
+  // Show/hide panels
+  const chat = document.getElementById('chatWrapper');
+  const form1 = document.getElementById('formPanel1');
+  const form2 = document.getElementById('formPanel2');
+
+  if (n === 1) {
+    chat.style.display = 'flex';
+    form1.classList.remove('active');
+    form2.classList.remove('active');
+  } else {
+    // Tab 2 chat also uses the main chat wrapper but with a different phase
+    chat.style.display = 'flex';
+    form1.classList.remove('active');
+    form2.classList.remove('active');
+  }
+}
+
+function switchTab(n) {
+  if (n === 2 && !tab1Locked) return;
+  setActiveTab(n);
+  logEvent('tab' + n + '_viewed');
+}
+
+function unlockTab2() {
+  tab1Locked = true;
+  const btn = document.getElementById('tab2Btn');
+  btn.disabled = false;
+  btn.classList.remove('locked');
+  btn.classList.add('done');
+}
+
+// ================================================================
+// PHASE PROGRESS BAR
+// ================================================================
+function activatePhaseBar(active) {
+  const bar = document.getElementById('phaseBar');
+  bar.classList.add('active');
+  const order = ['phaseRecap', 'phaseTransform', 'phaseJourney', 'phaseBlueprint'];
+  const names = { recap: 0, transform: 1, journey: 2, blueprint: 3 };
+  const activeIdx = names[active] ?? 0;
+  order.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active', 'done');
+    if (i < activeIdx) el.classList.add('done');
+    else if (i === activeIdx) el.classList.add('active');
+  });
+}
+
+// ================================================================
+// WELCOME SCREEN HIDE
+// ================================================================
+function hideWelcome() {
+  const s = document.getElementById('startScreen');
+  s.classList.add('hidden');
+  setTimeout(() => { s.style.display = 'none'; }, 460);
+}
+
+// ================================================================
+// FIRESTORE PERSISTENCE
+// ================================================================
+async function persistPhase(phase) {
+  currentPhase = phase;
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  try {
+    await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+      userId: uid,
+      currentPhase: phase,
+      status: 'in_progress',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: journeyData?.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch(e) { console.error('persistPhase:', e); }
+}
+
+async function persistField(fields) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  try {
+    await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+      ...fields,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    showSaved();
+  } catch(e) { console.error('persistField:', e); }
+}
+
+function scheduleAutoSave(fields) {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => persistField(fields), 2000);
+}
+
+function showSaved() {
+  const el = document.getElementById('savedIndicator');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ================================================================
+// ANALYTICS
+// ================================================================
+function logEvent(eventName) {
+  const uid = firebase.auth().currentUser?.uid;
+  if (!uid) return;
+  db.collection('users').doc(uid).collection('analytics').add({
+    event: eventName,
+    tool: 'discoverbreakthrough',
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(() => {});
+}
+
+// ================================================================
+// TOAST
+// ================================================================
+function showToast(msg) {
+  const el = document.getElementById('savedIndicator');
+  const prev = el.textContent;
+  el.textContent = msg;
+  el.style.borderColor = 'rgba(180,120,0,0.3)';
+  el.style.color = '#8A6000';
+  el.classList.add('show');
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => {
+      el.textContent = 'Saved ✓';
+      el.style.borderColor = '';
+      el.style.color = '';
+    }, 320);
+  }, 3000);
+}
+
+// ================================================================
+// TAB 1 — CONVERSATION STATE MACHINE
+// ================================================================
+
+const t1 = {
+  step: null,
+  answers: {},
+  followupAsked: {}
+};
+
+function showTab1Step(stepId) {
+  t1.step = stepId;
+
+  if (stepId === 'cs1') {
+    addAiMessage('What does a bad day look like for them &mdash; not just the problem, but the feeling?');
+    showChips([
+      { label: 'They feel like everyone else has figured it out except them', fillInput: true },
+      { label: 'They\'re overwhelmed and don\'t know where to start', fillInput: true },
+      { label: 'They keep starting over and never finish', fillInput: true },
+      { label: 'They\'re exhausted from trying things that don\'t work', fillInput: true }
+    ]);
+
+  } else if (stepId === 'cs1_followup') {
+    addAiMessage('What&rsquo;s one thing they&rsquo;ve said out loud about this &mdash; even just a phrase you&rsquo;ve heard?');
+
+  } else if (stepId === 'cs2') {
+    const tried = sessionContext.whatTheyveAlreadyTried;
+    if (tried && tried.trim()) {
+      addAiMessage('You mentioned they&rsquo;ve already tried <strong>' + escHtml(tried) + '</strong>. What made that feel like it wasn&rsquo;t working?');
+    } else {
+      addAiMessage('What have they already tried that hasn&rsquo;t worked?');
+    }
+
+  } else if (stepId === 'do_transition') {
+    addAiMessage('You&rsquo;ve painted a real picture of where they start. Now let&rsquo;s flip it &mdash; where do they want to end up?');
+    // Auto-advance; send button stays disabled until user types on the next question
+    setTimeout(() => showTab1Step('do1'), 1400);
+    return;
+
+  } else if (stepId === 'do1') {
+    addAiMessage('What does life look like on the other side? What has actually changed for them?');
+    showChips([
+      { label: 'They finally feel like they know what they\'re doing', fillInput: true },
+      { label: 'They\'ve got real results to show for it', fillInput: true },
+      { label: 'They feel in control instead of overwhelmed', fillInput: true },
+      { label: 'People around them have noticed the change', fillInput: true }
+    ]);
+
+  } else if (stepId === 'do1_followup') {
+    addAiMessage('Can you be a bit more specific &mdash; what does that actually look like for them day-to-day?');
+
+  } else if (stepId === 'do2') {
+    addAiMessage('How do they want to feel &mdash; and how do they want others to see them after this?');
+  }
+}
+
+function isThinAnswer(text) {
+  const words = text.trim().split(/\s+/);
+  let signals = 0;
+
+  if (words.length < 15) signals++;
+
+  const genericPattern = /^(struggle|hard|difficult|don't know|not sure|just|really|very|kind of|sort of)$/i;
+  const allGeneric = words.every(w => genericPattern.test(w));
+  if (allGeneric && words.length < 8) signals++;
+
+  const emotionWords = /feel|felt|overwhelm|afraid|scar|frustrat|anxious|exhaust|confus|stuck|lost|hopeless|excit|confident|proud|relief|embarrass|shame|worr|stress|burden|tired|drain/i;
+  if (!emotionWords.test(text)) signals++;
+
+  const hasSpecifics = /[A-Z][a-z]{2,}/.test(text.replace(/^./, '')) ||
+    /\b(client|customer|business|money|revenue|tool|course|program|platform|system|method|strategy|content|social|email|sales|product|service|niche|audience|coach|consult|teach|learn|skill|job|work|career)\b/i.test(text);
+  if (!hasSpecifics) signals++;
+
+  return signals >= 2;
+}
+
+function handleTab1ChatMessage(text) {
+  const step = t1.step;
+  t1.answers[step] = text;
+
+  if (step === 'cs1') {
+    if (isThinAnswer(text) && !t1.followupAsked.cs1) {
+      t1.followupAsked.cs1 = true;
+      showThinking();
+      setTimeout(() => { hideThinking(); showTab1Step('cs1_followup'); }, 900);
+    } else {
+      showThinking();
+      setTimeout(() => { hideThinking(); showTab1Step('cs2'); }, 900);
+    }
+
+  } else if (step === 'cs1_followup') {
+    t1.answers.cs1_followup = text;
+    showThinking();
+    setTimeout(() => { hideThinking(); showTab1Step('cs2'); }, 900);
+
+  } else if (step === 'cs2') {
+    showThinking();
+    setTimeout(() => { hideThinking(); showTab1Step('do_transition'); }, 900);
+
+  } else if (step === 'do1') {
+    if (isThinAnswer(text) && !t1.followupAsked.do1) {
+      t1.followupAsked.do1 = true;
+      showThinking();
+      setTimeout(() => { hideThinking(); showTab1Step('do1_followup'); }, 900);
+    } else {
+      showThinking();
+      setTimeout(() => { hideThinking(); showTab1Step('do2'); }, 900);
+    }
+
+  } else if (step === 'do1_followup') {
+    t1.answers.do1_followup = text;
+    showThinking();
+    setTimeout(() => { hideThinking(); showTab1Step('do2'); }, 900);
+
+  } else if (step === 'do2') {
+    finishTab1Conversation();
+  }
+}
+
+function finishTab1Conversation() {
+  clearChips();
+  document.getElementById('inputArea').classList.remove('active');
+  addAiMessage('Got it. Let me put that together into something you can review and edit.');
+  currentPhase = 'tab1_form';
+  persistPhase('tab1_form');
+  logEvent('tab1_chat_complete');
+  showThinking();
+  setTimeout(generateTab1Drafts, 600);
+}
+
+// ================================================================
+// TAB 1 — AI DRAFT GENERATION
+// ================================================================
+
+async function generateTab1Drafts() {
+  const payload = {
+    cs1:         t1.answers.cs1         || '',
+    cs1Followup: t1.answers.cs1_followup || '',
+    cs2:         t1.answers.cs2         || '',
+    do1:         t1.answers.do1         || '',
+    do1Followup: t1.answers.do1_followup || '',
+    do2:         t1.answers.do2         || '',
+    audience: {
+      whoYouHelp:               sessionContext.whoYouHelp               || '',
+      whatTheyreStrugglingWith: sessionContext.whatTheyreStrugglingWith || '',
+      theTriggerMoment:         sessionContext.theTriggerMoment         || '',
+      wordsTheyUse:             sessionContext.wordsTheyUse             || '',
+      theTransformation:        sessionContext.theTransformation         || '',
+      whatTheyveAlreadyTried:   sessionContext.whatTheyveAlreadyTried   || ''
+    }
+  };
+
+  const doFetch = async (extraMessages) => {
+    const messages = [{ role: 'user', content: JSON.stringify(payload) }];
+    if (extraMessages) messages.push(...extraMessages);
+    const resp = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1200,
+        temperature: 0.4,
+        messages,
+        _meta: { tool: 'discover-tab1-draft', sessionId: 'dtb_' + Date.now() }
+      })
+    });
+    if (!resp.ok) throw new Error('API ' + resp.status);
+    const data = await resp.json();
+    return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
+  };
+
+  try {
+    let raw = await doFetch();
+    let drafts;
+
+    const parseRaw = (s) => {
+      const cleaned = s.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/,'').trim();
+      return JSON.parse(cleaned);
+    };
+
+    try {
+      drafts = parseRaw(raw);
+    } catch(e) {
+      // One retry with explicit reminder
+      raw = await doFetch([
+        { role: 'assistant', content: raw },
+        { role: 'user', content: 'Return only the JSON object. No markdown, no backticks, no explanation.' }
+      ]);
+      drafts = parseRaw(raw);
+    }
+
+    hideThinking();
+
+    tab1Form = {
+      currentStateDraft:     String(drafts.currentStateDraft     || '').slice(0, 500),
+      emotionalState:        String(drafts.emotionalState        || '').slice(0, 200),
+      whatTheyveTriedEdited: String(drafts.whatTheyveTriedEdited || '').slice(0, 300),
+      desiredOutcomeDraft:   String(drafts.desiredOutcomeDraft   || '').slice(0, 500),
+      identityShift:         String(drafts.identityShift         || '').slice(0, 200)
+    };
+
+    showTab1Form();
+
+  } catch(err) {
+    hideThinking();
+    console.error('generateTab1Drafts:', err);
+    addAiMessage(
+      'That didn&rsquo;t come through &mdash; ' +
+      '<button onclick="generateTab1Drafts()" style="background:none;border:none;color:var(--gold-text);cursor:pointer;font-size:inherit;padding:0;font-weight:600;text-decoration:underline;">Try again</button>'
+    );
+  }
+}
+
+// ================================================================
+// TAB 1 — FORM RENDER & AUTO-SAVE
+// ================================================================
+
+const FIELD_KEYS = {
+  't1-current-state':   'currentStateDraft',
+  't1-emotional-state': 'emotionalState',
+  't1-already-tried':   'whatTheyveTriedEdited',
+  't1-desired-outcome': 'desiredOutcomeDraft',
+  't1-identity-shift':  'identityShift'
+};
+
+function fieldKeyFor(id) { return FIELD_KEYS[id] || ''; }
+
+function showTab1Form() {
+  const panel = document.getElementById('formPanel1');
+  panel.innerHTML =
+    '<div class="form-headline">The Transformation<br><em>Review, edit, and confirm.</em></div>' +
+    '<div class="form-sub">I&rsquo;ve drafted this from our conversation. Every field is editable &mdash; click any one to change it.</div>' +
+    makeFormField('t1-current-state',   'Current State',            'Where your customer is right now',                tab1Form.currentStateDraft,     500, 6) +
+    makeFormField('t1-emotional-state', 'Their Emotional State',    'How they feel at the start',                      tab1Form.emotionalState,         200, 2) +
+    makeFormField('t1-already-tried',   'What They\'ve Already Tried', null,                                           tab1Form.whatTheyveTriedEdited,  300, 3) +
+    makeFormField('t1-desired-outcome', 'Desired Outcome',          'Where they want to end up',                       tab1Form.desiredOutcomeDraft,    500, 6) +
+    makeFormField('t1-identity-shift',  'The Identity Shift',       'How they want to feel and be seen after this',    tab1Form.identityShift,          200, 2) +
+    '<button class="form-lock-btn" id="lockTab1Btn" onclick="lockInTab1()">Lock In My Transformation &rarr;</button>' +
+    '<div class="form-lock-note">You can edit this later from your Blueprint.</div>';
+
+  document.getElementById('chatWrapper').style.display = 'none';
+  panel.classList.add('active');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  logEvent('tab1_form_shown');
+
+  Object.keys(FIELD_KEYS).forEach(id => setupFormField(id));
+}
+
+function makeFormField(id, label, sublabel, value, maxChars, rows) {
+  const sub = sublabel ? '<div class="form-sublabel">' + escHtml(sublabel) + '</div>' : '';
+  return (
+    '<div class="form-field">' +
+    '<label class="form-label" for="' + id + '">' + label + '</label>' +
+    sub +
+    '<textarea class="form-textarea" id="' + id + '" rows="' + rows + '" maxlength="' + maxChars + '">' + escHtml(value) + '</textarea>' +
+    '<div class="form-char" id="' + id + '-char">' + (value ? value.length : 0) + ' / ' + maxChars + '</div>' +
+    '</div>'
+  );
+}
+
+function setupFormField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const charEl = document.getElementById(id + '-char');
+  const maxLen = parseInt(el.getAttribute('maxlength')) || 500;
+
+  el.addEventListener('input', () => {
+    const len = el.value.length;
+    if (charEl) {
+      charEl.textContent = len + ' / ' + maxLen;
+      charEl.className = 'form-char' + (len >= maxLen ? ' over' : len > maxLen * 0.88 ? ' near' : '');
+    }
+    el.classList.remove('error');
+    scheduleFormAutoSave();
+  });
+
+  el.addEventListener('blur', saveFormFieldNow);
+
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const key = fieldKeyFor(id);
+      el.value = tab1Form[key] || '';
+      el.dispatchEvent(new Event('input'));
+    }
+  });
+}
+
+function scheduleFormAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveFormFieldNow, 2000);
+}
+
+function saveFormFieldNow() {
+  const fields = {};
+  Object.entries(FIELD_KEYS).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      tab1Form[key] = el.value;
+      fields[key] = el.value;
+    }
+  });
+  if (Object.keys(fields).length) persistField(fields);
+}
+
+// ================================================================
+// TAB 1 — LOCK IN
+// ================================================================
+
+async function lockInTab1() {
+  let valid = true;
+  Object.keys(FIELD_KEYS).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) {
+      if (el) el.classList.add('error');
+      valid = false;
+    }
+  });
+
+  if (!valid) {
+    showToast('Fill in all sections before locking in.');
+    return;
+  }
+
+  const btn = document.getElementById('lockTab1Btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  saveFormFieldNow();
+
+  const uid = firebase.auth().currentUser?.uid;
+  if (uid) {
+    try {
+      await db.collection('users').doc(uid).collection('journeyBlueprint').doc('blueprint').set({
+        currentStateDraft:            tab1Form.currentStateDraft,
+        emotionalState:               tab1Form.emotionalState,
+        whatTheyveTriedEdited:        tab1Form.whatTheyveTriedEdited,
+        desiredOutcomeDraft:          tab1Form.desiredOutcomeDraft,
+        identityShift:                tab1Form.identityShift,
+        currentStateDraftConfirmed:   true,
+        desiredOutcomeDraftConfirmed: true,
+        currentPhase:                 'tab2_chat',
+        completedPhases:              firebase.firestore.FieldValue.arrayUnion('tab1'),
+        updatedAt:                    firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch(e) {
+      console.error('lockInTab1:', e);
+      btn.disabled = false;
+      btn.textContent = 'Lock In My Transformation →';
+      showToast("Couldn't save — try again.");
+      return;
+    }
+  }
+
+  tab1Locked = true;
+  logEvent('tab1_locked_in');
+  logEvent('tab1_form_complete');
+  unlockTab2();
+  activatePhaseBar('journey');
+
+  btn.textContent = 'Locked In ✔';
+  setTimeout(transitionToTab2, 800);
+}
+
+function transitionToTab2() {
+  document.getElementById('formPanel1').classList.remove('active');
+  const chatWrap = document.getElementById('chatWrapper');
+  chatWrap.innerHTML = '';
+  chatWrap.style.display = 'flex';
+  conversationHistory = [];
+  currentPhase = 'tab2_chat';
+  persistPhase('tab2_chat');
+  setActiveTab(2);
+  activateInputArea();
+  addPhaseDivider('Tab 2: The Journey');
+  addAiMessage('Now that we know where they start and where they&rsquo;re going, let&rsquo;s map the road between. I&rsquo;ll put together a first draft of the journey stages based on what you&rsquo;ve shared.');
+  // Phase 3 implements stage proposals here
+  setTimeout(() => {
+    addAiMessage('<em>Stage proposal coming in Phase 3 — Tab 2 conversation engine.</em>');
+  }, 1000);
+}
+
+// ================================================================
+// UTILS
+// ================================================================
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function stripTags(html) {
+  return html.replace(/<[^>]+>/g, '');
+}
+</script>
+</body>
+</html>
