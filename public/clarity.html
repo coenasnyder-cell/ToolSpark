@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,7 +13,7 @@
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
-    authDomain: "toolspark-2d62d.firebaseapp.com",
+    authDomain: "toolspark.co",
     projectId: "toolspark-2d62d",
     storageBucket: "toolspark-2d62d.firebasestorage.app",
     messagingSenderId: "82966513396",
@@ -65,7 +65,7 @@
     flex-direction: column;
   }
 
-  /* ── START SCREEN (light overlay) ── */
+  /* -- START SCREEN (light overlay) -- */
   .start-screen {
     position: fixed; top: 48px; left: 0; right: 0; bottom: 0; background: var(--bg);
     z-index: 200; flex-direction: column;
@@ -85,7 +85,7 @@
     box-shadow: 0 2px 20px rgba(26,20,10,0.07);
   }
 
-  /* ── EYEBROW ── */
+  /* -- EYEBROW -- */
   .jc-eyebrow-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
   .jc-eyebrow-pill {
     font-size: 11px; font-weight: 600;
@@ -98,7 +98,7 @@
   .jc-sp { color: var(--gold); flex-shrink: 0; }
   .jc-sp-l { animation: twinkle 2.8s var(--ease-in-out) 0.2s infinite; }
 
-  /* ── SPARKLE ── */
+  /* -- SPARKLE -- */
   @keyframes twinkle {
     0%, 100% { opacity: 0.9; transform: scale(1) rotate(0deg); }
     50%       { opacity: 0.15; transform: scale(0.55) rotate(18deg); }
@@ -108,7 +108,7 @@
   .sp-tr { top: -6px;  right: -18px; animation: twinkle 2.8s var(--ease-in-out) 0.9s infinite; }
   .sp-br { bottom: 14px; right: -26px; animation: twinkle 2.8s var(--ease-in-out) 1.7s infinite; }
 
- /* ── HERO ── */
+ /* -- HERO -- */
   .spark-hero {
     display: grid; grid-template-columns: 55% 1fr;
     gap: 36px; align-items: flex-start; margin-bottom: 28px;
@@ -123,7 +123,7 @@
   .spark-body p + p { margin-top: 12px; }
   .spark-body b { color: var(--gold-text); font-weight: 600; }
 
-  /* ── KEYFRAMES ── */
+  /* -- KEYFRAMES -- */
   @keyframes sidFloat {
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-12px); }
@@ -141,7 +141,7 @@
     to   { opacity: 1; transform: translateX(-50%) scale(1)    translateY(0); }
   }
 
-  /* ── AVATAR ── */
+  /* -- AVATAR -- */
   .spark-hero-avatar { position: relative;
     display: flex;
     flex-direction: column;
@@ -184,7 +184,7 @@
     font-size: 36px; color: var(--gold-text); user-select: none;
   }
 
-  /* ── SPEECH BUBBLE ── */
+  /* -- SPEECH BUBBLE -- */
   .spark-speech {
     position: absolute;
     top: 0; left: 50%;
@@ -228,7 +228,7 @@
     text-decoration: underline; 
     color: var(--gold-text); }
 
-  /* ── DISCOVERY GRID ── */
+  /* -- DISCOVERY GRID -- */
   .spark-discover {
     border: 1px solid var(--border); border-radius: 18px;
     padding: 24px 24px 22px; background: #F2EEE5; margin-bottom: 24px;
@@ -251,7 +251,7 @@
   .sp-inline { color: var(--gold); font-size: 10px; }
   .spark-discover-copy { font-size: 13px; color: var(--ink-mid); line-height: 1.55; font-weight: 300; }
 
-  /* ── NAME FIELD ── */
+  /* -- NAME FIELD -- */
   .cla-field { margin-bottom: 16px; }
   .cla-label {
     display: block; font-size: 11px; font-weight: 700;
@@ -272,7 +272,7 @@
   }
   .cla-input::placeholder { color: var(--ink-mid); opacity: 0.6; }
 
-  /* ── PROFILE BANNER ── */
+  /* -- PROFILE BANNER -- */
   .start-expect {
     background: rgba(42,92,69,0.07);
     border: 1px solid rgba(42,92,69,0.18);
@@ -282,11 +282,11 @@
   }
   .start-expect strong { color: #2A5C45; font-weight: 700; }
 
-  /* ── CTA ── */
+  /* -- CTA -- */
   .start-btn {
     width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
     background: var(--gold); color: var(--ink);
-    border: none; padding: 17px 24px; border-radius: 14px;
+    border: none; padding: 17px 24px; border-radius: 4px;
     font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
     cursor: pointer; margin-bottom: 14px;
     transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out);
@@ -302,7 +302,7 @@
   }
   .start-note a { color: var(--gold-text); }
 
-  /* ── PHASE PROGRESS ── */
+  /* -- PHASE PROGRESS -- */
   .phase-bar {
     display: none; align-items: center; gap: 0;
     padding: 14px 28px; background: var(--bg-card);
@@ -328,7 +328,7 @@
   .phase-step.active .phase-label { color: var(--ink); }
   .phase-step.done .phase-label { color: var(--gold-text); }
 
-  /* ── CHAT ── */
+  /* -- CHAT -- */
   .chat-wrapper { display: none; flex: 1; flex-direction: column; max-width: 780px; width: 100%; margin: 0 auto; padding: 28px 20px 140px; }
   .chat-wrapper.active { display: flex; }
   .message { display: flex; gap: 14px; margin-bottom: 24px; animation: fadeUp 0.4s var(--ease-out) both; }
@@ -354,7 +354,7 @@
   .dot:nth-child(3){animation:blink 1.2s 0.4s infinite;}
   @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
 
-  /* ── INPUT ── */
+  /* -- INPUT -- */
   .input-area { display: none; position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px 20px; background: linear-gradient(transparent, var(--bg) 30%); z-index: 40; }
   .input-area.active { display: block; }
   .input-inner { max-width: 780px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
@@ -369,7 +369,7 @@
   .input-box:focus { border-color: rgba(201,168,76,0.55); }
   .send-btn {
     width: 48px; height: 48px; background: var(--gold); border: none;
-    border-radius: 12px; cursor: pointer;
+    border-radius: 4px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out); flex-shrink: 0;
   }
@@ -409,10 +409,10 @@
 <div class="start-screen" id="locked-screen" style="display:none;">
   <div class="spark-content">
     <div class="start-card" style="text-align:center;max-width:520px;">
-      <div style="font-size:2.2rem;margin-bottom:16px;">🔒</div>
+      <div style="font-size:2.2rem;margin-bottom:16px;">&#128274;</div>
       <h1 style="font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,36px);font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:12px;">You've completed your<br><em style="font-style:italic;color:var(--gold-text);">5 Breakthrough sessions</em></h1>
       <p style="font-size:15px;color:var(--ink-mid);line-height:1.7;margin-bottom:24px;">You've already uncovered your best tool opportunities. Head to your roadmap to pick one and start building.</p>
-      <a href="roadmap.html" class="start-btn" style="display:flex;text-decoration:none;margin-bottom:14px;">View My Roadmap →</a>
+      <a href="roadmap.html" class="start-btn" style="display:flex;text-decoration:none;margin-bottom:14px;">View My Roadmap &rarr;</a>
       <div class="start-note">Want another session? <a href="mailto:hello@toolspark.co" style="color:var(--gold-text);">Contact us</a></div>
     </div>
   </div>
@@ -460,7 +460,7 @@
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
             </div>
-            <div class="spark-discover-title">What to focus on <span class="sp-inline">✦</span></div>
+            <div class="spark-discover-title">What to focus on <span class="sp-inline">&#10022;</span></div>
             <div class="spark-discover-copy">Your top tool recommendation matched to your business right now</div>
           </div>
           <div class="spark-discover-item">
@@ -469,7 +469,7 @@
                 <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
               </svg>
             </div>
-            <div class="spark-discover-title">Why it matters <span class="sp-inline">✦</span></div>
+            <div class="spark-discover-title">Why it matters <span class="sp-inline">&#10022;</span></div>
             <div class="spark-discover-copy">A clear explanation of why this tool is the right fit for you specifically</div>
           </div>
           <div class="spark-discover-item">
@@ -478,7 +478,7 @@
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <div class="spark-discover-title">What to do next <span class="sp-inline">✦</span></div>
+            <div class="spark-discover-title">What to do next <span class="sp-inline">&#10022;</span></div>
             <div class="spark-discover-copy">Results saved to your profile so you can start building immediately</div>
           </div>
         </div>
@@ -501,8 +501,8 @@
       </div>
 
       <!-- CTA -->
-      <button class="start-btn" onclick="startSession()">✦ Start My Breakthrough Session →</button>
-      <div class="start-note">Usually takes about 10 minutes ♡</div>
+      <button class="start-btn" onclick="startSession()">&#10022; Start My Breakthrough Session &rarr;</button>
+      <div class="start-note">Usually takes about 10 minutes &hearts;</div>
 
     </div>
   </div>
@@ -527,7 +527,7 @@
     <span class="phase-label">Repeatable Steps</span>
   </div>
   <div class="phase-step" id="phase5">
-    <div class="phase-dot">✓</div>
+    <div class="phase-dot">&#10003;</div>
     <span class="phase-label">Your Tool Report</span>
   </div>
 </div>
@@ -554,9 +554,9 @@
 <script>
 if (typeof emailjs !== 'undefined') emailjs.init('i9Oz0ibL_775xDsSb');
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // CONFIG
-// ══════════════════════════════════════════
+// ------------------------------------------
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
 async function authHeaders() {
   const user = firebase.auth().currentUser;
@@ -567,9 +567,9 @@ async function authHeaders() {
 }
 const MODEL = "claude-sonnet-4-6";
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // STATE
-// ══════════════════════════════════════════
+// ------------------------------------------
 let conversationHistory = [];
 let currentPhase = 1;
 let isThinking = false;
@@ -589,11 +589,11 @@ const PHASES = {
   5: { name: "Your Tool Report",  questions: 0 }
 };
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // QUICK CHIPS
-// ══════════════════════════════════════════
+// ------------------------------------------
 const CHIPS_BY_PHASE = {
   1: ["Yes, that feels accurate", "A few things have shifted"],
   2: ["My clients / customers", "Me", "My business", "Combination of all three"],
@@ -601,9 +601,9 @@ const CHIPS_BY_PHASE = {
   4: [],
   5: ["Clarity", "Confidence", "A plan to follow", "A decision made", "Content created", "Time saved", "Something else"]
 };
-// ══════════════════════════════════════════
+// ------------------------------------------
 // START SESSION
-// ══════════════════════════════════════════
+// ------------------------------------------
 async function startSession() {
   try { await window.tsDeductCredits(5); } catch(e) { return; }
   displayName = document.getElementById('s_displayName').value.trim() || 'there';
@@ -618,9 +618,9 @@ async function startSession() {
   initSession();
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // RENDER
-// ══════════════════════════════════════════
+// ------------------------------------------
 function addMessage(role, content) {
   const wrapper = document.getElementById("chatWrapper");
 
@@ -683,9 +683,9 @@ function hideThinking() {
   if (t) t.remove();
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // PHASE MANAGEMENT
-// ══════════════════════════════════════════
+// ------------------------------------------
 function detectPhase(text) {
   const match = text.match(/\[PHASE:(\d)\]/);
   if (match) {
@@ -724,9 +724,9 @@ function setChips(phase) {
   });
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // API CALL
-// ══════════════════════════════════════════
+// ------------------------------------------
 async function callClaude(userMessage) {
   conversationHistory.push({ role: "user", content: userMessage });
 
@@ -752,9 +752,9 @@ async function callClaude(userMessage) {
   return reply;
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // FINISH SESSION — save to Firestore & redirect
-// ══════════════════════════════════════════
+// ------------------------------------------
 function parseActionPlanToResults(planText) {
   // Strip ** bold markers from field keys so regex stop patterns work
   const plan = planText
@@ -826,9 +826,9 @@ async function finishSession(actionPlanText) {
   window.location.href = 'results.html?session=' + sessionId;
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // HANDLE SEND
-// ══════════════════════════════════════════
+// ------------------------------------------
 async function handleSend() {
   if (isThinking || sessionComplete) return;
   const input = document.getElementById("userInput");
@@ -869,9 +869,9 @@ async function handleSend() {
   document.getElementById("userInput").focus();
 }
 
-// ══════════════════════════════════════════
+// ------------------------------------------
 // INIT SESSION
-// ══════════════════════════════════════════
+// ------------------------------------------
 async function initSession() {
   document.getElementById("sendBtn").disabled = true;
   showThinking();
@@ -922,13 +922,13 @@ Emit [PHASE:1] at the start of your reply. Give a warm 1-2 sentence welcome by n
   document.getElementById("sendBtn").disabled = false;
 }
 
-// ── Auto-resize textarea ──
+// -- Auto-resize textarea --
 document.getElementById("userInput").addEventListener("input", function() {
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight, 140) + "px";
 });
 
-// ── Enter to send (Shift+Enter for newline) ──
+// -- Enter to send (Shift+Enter for newline) --
 document.getElementById("userInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -936,11 +936,11 @@ document.getElementById("userInput").addEventListener("keydown", function(e) {
   }
 });
 
-// ── Pre-fill URL params ──
+// -- Pre-fill URL params --
 const _params = new URLSearchParams(window.location.search);
 if (_params.get('name')) document.getElementById('s_displayName').value = _params.get('name');
 
-// ── Session limit check + context fetch ──
+// -- Session limit check + context fetch --
 const DEFAULT_LIMIT = 5;
 document.addEventListener('tsUserReady', async function(e) {
   const user = firebase.auth().currentUser;

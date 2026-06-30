@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Find Your Spark Results — ToolSpark</title>
+<title>Find Your Spark Results - ToolSpark</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -12,7 +12,7 @@
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
-    authDomain: "toolspark-2d62d.firebaseapp.com",
+    authDomain: "toolspark.co",
     projectId: "toolspark-2d62d",
     storageBucket: "toolspark-2d62d.firebasestorage.app",
     messagingSenderId: "82966513396",
@@ -20,428 +20,167 @@
     measurementId: "G-F6NVJRMHV6"
   };
   firebase.initializeApp(firebaseConfig);
-  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  try { firebase.appCheck().activate("6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ", true); } catch (e) {}
   const db = firebase.firestore();
 </script>
 <script src="js/auth.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/results-shell.css">
 <style>
-  :root {
-    --bg:         #F4F2EE;
-    --surface:    #FFFFFF;
-    --dark:       #0C0B09;
-    --gold:       #C9A84C;
-    --gold-light: #B8922E;
-    --gold-dim:   rgba(201,168,76,0.12);
-    --gold-mid:   rgba(201,168,76,0.20);
-    --border:     #E4E0D8;
-    --border-mid: rgba(0,0,0,0.10);
-    --text:       #1A1714;
-    --text2:      #4A453F;
-    --text3:      #9E9891;
-    --green:      #2A5C45;
-    --green-mid:  #3D8A65;
-    --green-dim:  rgba(42,92,69,0.12);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
+  .spark-quote {
+    padding-top: 38px;
+    padding-bottom: 28px;
   }
 
-  /* ── HERO ── */
-  .hero {
-    text-align: center;
-    padding: 52px 24px 44px;
-    background: #141210;
-    border-bottom: 1px solid var(--border);
-    position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute; top: -80px; left: 50%;
-    transform: translateX(-50%);
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .hero-eyebrow {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: var(--gold-light); opacity: 0.9;
-    margin-bottom: 16px;
-  }
-  .hero-name {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(34px, 6vw, 56px);
-    font-weight: 700; color: #F0EDE6;
-    line-height: 1.1; margin-bottom: 14px;
-  }
-  .hero-name span { color: var(--gold); font-style: italic; }
-  .hero-sub {
-    font-size: 16px; color: #D7D0C6;
-    max-width: 480px; margin: 0 auto;
-    line-height: 1.7;
+  .spark-quote .quote-text {
+    font-size: 18px;
+    font-style: normal;
   }
 
-  /* ── MAIN ── */
-  .page-wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 48px 24px 80px;
+  .spark-grid .result-card {
+    min-height: 100%;
   }
 
-  /* ── STATEMENT CARD ── */
-  .statement-card {
-    background: var(--surface);
-    border: 1px solid rgba(201,168,76,0.45);
-    border-radius: 20px;
-    padding: 36px 32px;
-    margin-bottom: 28px;
-    position: relative;
-    overflow: hidden;
-    animation: rise 0.5s ease both;
-  }
-  .statement-card::before {
-    content: '✦';
-    position: absolute; top: 20px; right: 24px;
-    font-size: 28px; color: var(--gold); opacity: 0.15;
-  }
-  .statement-label {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 2.5px; text-transform: uppercase;
-    color: var(--gold); opacity: 0.7;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .statement-label::after {
-    content: ''; flex: 1; height: 1px;
-    background: rgba(201,168,76,0.15);
-  }
-  .statement-text {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(18px, 3vw, 24px);
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.55;
-    font-style: italic;
+  @media (max-width: 768px) {
+    #heroSection .hero-side {
+      display: none;
+    }
+
+    #heroSection {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
   }
 
-  /* copy button */
-  .copy-row {
-    margin-top: 20px;
-    display: flex; gap: 10px; flex-wrap: wrap;
-  }
-  .copy-btn {
-    padding: 9px 18px;
-    background: var(--gold-dim);
-    border: 1px solid var(--border-mid);
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 9px 13px;
+    background: rgba(0,0,0,0.18);
     border-radius: 8px;
-    color: var(--gold);
-    font-family: 'Lato', sans-serif;
-    font-size: 13px; font-weight: 700;
+    max-width: 300px;
+  }
+  .audio-play-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #C9A84C;
+    background: transparent;
+    color: #fff;
     cursor: pointer;
-    transition: all 0.18s;
-    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    padding: 0;
   }
-  .copy-btn:hover { background: var(--gold-mid); }
-  .copy-btn.copied { color: var(--green-mid); border-color: rgba(61,138,101,0.4); }
-
-  /* ── PROFILE SECTIONS ── */
-  .section-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
+  .audio-play-btn:hover { background: rgba(201,168,76,0.15); }
+  .audio-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
   }
-
-  .profile-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 22px;
-    animation: rise 0.5s ease both;
-    transition: border-color 0.2s;
+  .audio-progress {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 40px;
   }
-  .profile-card:hover { border-color: rgba(201,168,76,0.4); }
-  .profile-card.full {
-    grid-column: 1 / -1;
+  .audio-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #C9A84C;
+    border-radius: 2px;
+    transition: width 0.1s linear;
   }
-/* ── AI SYSTEMS SECTION ── */
-.ai-systems-section {
-  margin: 28px 0;
-  animation: rise 0.5s ease both;
-  animation-delay: 0.4s;
-}
-.section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px; color: var(--text);
-  margin-bottom: 8px; text-align: center;
-}
-.section-intro {
-  color: var(--text3); font-size: 14px;
-  line-height: 1.7; text-align: center;
-  max-width: 580px; margin: 0 auto 24px;
-}
-.ai-tools-grid {
-  display: grid; gap: 14px;
-}
-.ai-tool-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.ai-tool-card:hover {
-  border-color: rgba(201,168,76,0.4);
-  transform: translateY(-2px);
-}
-.tool-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 12px;
-}
-.tool-icon {
-  font-size: 24px;
-}
-.tool-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px; font-weight: 600;
-  color: var(--text);
-}
-.tool-does {
-  font-size: 14px; color: var(--text2);
-  line-height: 1.7; margin-bottom: 10px;
-}
-.tool-fits {
-  font-size: 13px; color: var(--text3);
-  line-height: 1.6; padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-.tool-fits b {
-  color: var(--gold);
-}
-  .card-icon {
-    font-size: 22px; margin-bottom: 12px;
-  }
-  .card-label {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: var(--gold); opacity: 0.65;
-    margin-bottom: 10px;
-  }
-  .card-text {
-    font-size: 15px;
-    color: var(--text2);
-    line-height: 1.75;
-  }
-  .card-text b { color: var(--gold-light); }
-  .card-text em { color: inherit; }
-
-  /* closing / personal note */
-  .closing-card {
-    background: linear-gradient(135deg, #F1ECE3, #EAE4D8);
-    border: 1px solid rgba(201,168,76,0.35);
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin-top: 16px;
-    animation: rise 0.6s ease both;
-    text-align: center;
-  }
-  .closing-card .closing-icon {
-    font-size: 28px; margin-bottom: 14px;
-    display: block;
-  }
-  .closing-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px; font-style: italic;
-    color: var(--text);
-    line-height: 1.7;
-    max-width: 520px; margin: 0 auto;
-  }
-  .closing-text b { color: var(--gold-light); }
-  .closing-text em { color: inherit; }
-  .closing-sig {
-    margin-top: 16px;
-    font-size: 13px; color: var(--text2);
-    letter-spacing: 0.5px;
-  }
-  .closing-sig b { color: var(--gold); }
-
-  /* ── CTA ── */
-  .cta-section {
-    margin-top: 44px;
-    text-align: center;
-    padding: 40px 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    animation: rise 0.7s ease both;
-  }
-  .cta-section h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px; color: var(--text);
-    margin-bottom: 12px;
-  }
-  .cta-section p {
-    color: var(--text2); font-size: 15px;
-    line-height: 1.7; max-width: 460px;
-    margin: 0 auto 28px;
-  }
-  .cta-section p b { color: var(--text); }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 36px;
-    background: var(--gold); color: var(--dark);
-    border: none; border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-size: 16px; font-weight: 700;
-    text-decoration: none; cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
-
-  .share-row {
-    margin-top: 20px;
-    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
-  }
-  .btn-share {
-    padding: 10px 20px;
-    background: transparent; color: var(--gold);
-    border: 1px solid var(--border-mid);
-    border-radius: 10px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px; font-weight: 700;
-    cursor: pointer; text-decoration: none;
-    transition: all 0.18s;
-  }
-  .btn-share:hover { background: var(--gold-dim); }
-
-  /* loading state */
-  .loading-state {
-    text-align: center;
-    padding: 80px 24px;
-  }
-  .loading-state .dot-row {
-    display: flex; justify-content: center; gap: 8px;
-    margin-bottom: 20px;
-  }
-  .loading-state .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--gold);
-  }
-  .loading-state .dot:nth-child(1){animation:blink 1.1s 0s    infinite;}
-  .loading-state .dot:nth-child(2){animation:blink 1.1s 0.18s infinite;}
-  .loading-state .dot:nth-child(3){animation:blink 1.1s 0.36s infinite;}
-  @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
-  .loading-state p {
-    color: var(--text3); font-size: 15px;
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-  }
-
-  @keyframes rise {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  /* staggered animation delays */
-  .statement-card  { animation-delay: 0.1s; }
-  .section-grid .profile-card:nth-child(1) { animation-delay: 0.2s; }
-  .section-grid .profile-card:nth-child(2) { animation-delay: 0.3s; }
-  .profile-card.full { animation-delay: 0.4s; }
-  .closing-card    { animation-delay: 0.5s; }
-  .cta-section     { animation-delay: 0.6s; }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius:10px; }
-
-  .brand-foot {
-    text-align: center;
-    padding: 16px;
-    font-size: 12px; color: var(--text3);
-    letter-spacing: 1px;
-  }
-  .brand-foot a { color: var(--gold); text-decoration: none; opacity: 0.7; }
 </style>
 </head>
-<body>
-
-<div id="loadingState" class="loading-state" style="margin-top:80px">
-  <div class="dot-row">
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+<body class="results-shell">
+<nav class="public-nav">
+  <div class="public-nav__inner">
+    <a href="index.html" class="public-nav__brand">Tool<span>Spark</span></a>
+    <a href="signon.html?redirect=dashboard" class="public-nav__link" id="navAccountLink">Sign in / Go to Dashboard</a>
   </div>
-  <p>Preparing your Spark Profile…</p>
-</div>
+</nav>
 
-<div id="content" style="display:none">
-  <header class="hero" id="heroSection">
-    <div class="hero-name" id="heroName">Your <span>Spark</span> Profile</div>
-    <p class="hero-sub">This is what we found in you. Read it slowly — and believe it.</p>
-  </header>
-
-  <div class="page-wrap">
-
-    <!-- STATEMENT -->
-    <div class="statement-card" id="statementCard">
-      <div class="statement-label">Your Spark Statement</div>
-      <div class="statement-text" id="statementText"></div>
-    </div>
-
-    <!-- PROFILE GRID -->
-    <div class="section-grid">
-      <div class="profile-card" id="knowCard">
-              <div class="card-label">What You Know</div>
-        <div class="card-text" id="knowText"></div>
-      </div>
-      <div class="profile-card" id="whoCard">
-              <div class="card-label">Who You Help</div>
-        <div class="card-text" id="whoText"></div>
-      </div>
-      <div class="profile-card" id="resultCard">
-        <div class="card-label">The Result You Create</div>
-        <div class="card-text" id="resultText"></div>
-      </div>
-      <div class="profile-card" id="edgeCard">
-        <div class="card-label">Your Edge</div>
-        <div class="card-text" id="edgeText"></div>
-      </div>
-      </div>
-
-    <!-- CLOSING NOTE -->
-    <div class="closing-card" id="closingCard">
-      <span class="closing-icon">✦</span>
-      <div class="closing-text" id="closingText"></div>
-      <div class="closing-sig">— <b>ToolSpark</b> · Find Your Spark</div>
-    </div>
-
-    <!-- CTA -->
-    <div class="cta-section">
-      <h2>Now let's go deeper.</h2>
-      <p>You know what you have and who you help. <b>The next step is to understand your audience so deeply that your message lands every time.</b></p>
-      <div id="cta-buttons">
-        <a href="signup.html?redirect=userclaritytools" class="btn-primary" id="cta-join">
-          Join ToolSpark →
-        </a>
-        <div style="margin-top:12px;font-size:13px;color:var(--text3)">Already a member? <a href="signon.html?redirect=userclaritytools" style="color:var(--gold);text-decoration:none;">Sign in</a></div>
-      </div>
-      <div id="cta-member" style="display:none;display:flex;flex-direction:column;align-items:center;gap:12px;">
-        <a href="roadmap.html" class="btn-primary">View My Roadmap →</a>
-      </div>
-    </div>
-
+<main class="page-shell">
+  <div id="loadingState" class="loading-card">
+    <div class="spinner"></div>
+    <h2>Preparing your Spark Profile</h2>
+    <p>We are pulling together the story behind your experience, your edge, and where you create the most momentum.</p>
   </div>
-  <div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
-</div>
+
+  <div id="content" class="page-stack" style="display:none;">
+    <header class="hero-card" id="heroSection">
+      <div class="hero-copy">
+        <div class="hero-pill">Find Your Spark</div>
+        <h1 class="hero-title" id="heroName">Your <span>Spark</span> Profile</h1>
+        <p class="hero-sub">This is what we found in you. Read it slowly, then let it land.</p>
+        <div id="audio-player-mount"></div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-bubble">This is what we found in you.</div>
+        <div class="hero-mascot">
+          <img src="sid.png" alt="Sid, the ToolSpark squirrel mascot">
+        </div>
+      </div>
+    </header>
+
+    <section class="quote-card spark-quote" id="statementCard">
+      <div class="quote-rule"></div>
+      <p class="quote-text" id="statementText"></p>
+      <div class="utility-actions">
+        <button type="button" class="utility-btn copy-btn" id="copyStatementBtn" onclick="copyStatement()">Copy statement</button>
+        <button type="button" class="utility-btn copy-btn" id="copyThreadBtn" onclick="copyForThread()">Copy for thread</button>
+      </div>
+    </section>
+
+    <section class="results-grid spark-grid">
+      <article class="result-card" id="knowCard">
+        <div class="section-label">What You Know</div>
+        <div class="result-copy" id="knowText"></div>
+      </article>
+      <article class="result-card" id="whoCard">
+        <div class="section-label">Who You Help</div>
+        <div class="result-copy" id="whoText"></div>
+      </article>
+      <article class="result-card" id="resultCard">
+        <div class="section-label">The Result You Create</div>
+        <div class="result-copy" id="resultText"></div>
+      </article>
+      <article class="result-card" id="edgeCard">
+        <div class="section-label">Your Edge</div>
+        <div class="result-copy" id="edgeText"></div>
+      </article>
+    </section>
+
+    <section class="note-card" id="closingCard">
+      <div class="note-copy" id="closingText"></div>
+      <div class="note-byline">ToolSpark | Find Your Spark</div>
+    </section>
+
+    <section class="cta-card">
+      <h2 class="cta-title">Now let's go deeper.</h2>
+      <p class="cta-copy">You know what you have and who you help. <strong>The next step is to understand your audience so deeply that your message lands every time.</strong></p>
+      <div class="cta-actions" id="cta-buttons">
+        <a href="signup.html?redirect=userclaritytools" class="primary-button" id="cta-join">Join ToolSpark &rarr;</a>
+        <div class="secondary-link">Already a member? <a href="signon.html?redirect=userclaritytools">Sign in</a></div>
+      </div>
+      <div class="cta-actions" id="cta-member" style="display:none;">
+        <a href="roadmap.html" class="primary-button">View My Roadmap &rarr;</a>
+      </div>
+    </section>
+
+    <div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
+  </div>
+</main>
 
 <script>
-// ─────────────────────────────────────
-// PARSE URL DATA
-// ─────────────────────────────────────
 function getParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
@@ -453,13 +192,13 @@ function parseProfile(raw) {
     const match = raw.match(regex);
     return match ? match[1].trim() : "";
   };
-  profile.name       = extract("NAME");
-  profile.statement  = extract("STATEMENT");
-  profile.whatYouKnow      = extract("WHAT_YOU_KNOW");
-  profile.whoYouHelp       = extract("WHO_YOU_HELP");
-  profile.resultYouCreate  = extract("THE_RESULT_YOU_CREATE");
-  profile.yourEdge         = extract("YOUR_EDGE");
-  profile.closing          = extract("CLOSING");
+  profile.name = extract("NAME");
+  profile.statement = extract("STATEMENT");
+  profile.whatYouKnow = extract("WHAT_YOU_KNOW");
+  profile.whoYouHelp = extract("WHO_YOU_HELP");
+  profile.resultYouCreate = extract("THE_RESULT_YOU_CREATE");
+  profile.yourEdge = extract("YOUR_EDGE");
+  profile.closing = extract("CLOSING");
   return profile;
 }
 
@@ -481,99 +220,143 @@ function buildProfileFromDoc(data) {
   };
 }
 
-function setCopyButtonLabels() {
-  document.querySelectorAll(".copy-btn").forEach(b => {
-    b.dataset.original = b.textContent;
-  });
-}
-
-function renderProfile(profile) {
-  // Hero name
-  if (profile.name) {
-    document.getElementById("heroName").innerHTML =
-      `${profile.name}'s <span>Spark</span> Profile`;
-    document.title = `${profile.name}'s Spark Profile — ToolSpark`;
-  }
-
-  // Statement
-  document.getElementById("statementText").textContent = profile.statement || "";
-
- // Cards
-document.getElementById("knowText").innerHTML   = fmt(profile.whatYouKnow     || "");
-document.getElementById("whoText").innerHTML    = fmt(profile.whoYouHelp      || "");
-document.getElementById("resultText").innerHTML = fmt(profile.resultYouCreate || "");
-document.getElementById("edgeText").innerHTML   = fmt(profile.yourEdge        || "");
-
-document.getElementById("closingText").innerHTML = fmt(profile.closing || "");
-
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("content").style.display = "block";
-}
-
-function fmt(t) {
-  return t
+function fmt(text) {
+  return String(text || "")
     .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/\n/g, "<br>");
 }
-function escHtml(str) {
-  return String(str)
+
+function escapeHtml(str) {
+  return String(str || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
 
-// ─────────────────────────────────────
-// COPY HELPERS
-// ─────────────────────────────────────
+function renderField(cardId, contentId, value) {
+  const card = document.getElementById(cardId);
+  const content = document.getElementById(contentId);
+  const hasValue = Boolean(String(value || "").trim());
+  content.innerHTML = hasValue ? fmt(value) : "";
+  card.classList.toggle("is-hidden", !hasValue);
+}
+
+function renderProfile(profile) {
+  if (profile.name) {
+    document.getElementById("heroName").innerHTML = `${escapeHtml(profile.name)}'s <span>Spark</span> Profile`;
+    document.title = `${profile.name}'s Spark Profile - ToolSpark`;
+  }
+
+  document.getElementById("statementText").textContent = profile.statement || "";
+  renderField("knowCard", "knowText", profile.whatYouKnow);
+  renderField("whoCard", "whoText", profile.whoYouHelp);
+  renderField("resultCard", "resultText", profile.resultYouCreate);
+  renderField("edgeCard", "edgeText", profile.yourEdge);
+
+  const closingCard = document.getElementById("closingCard");
+  const closingText = document.getElementById("closingText");
+  const hasClosing = Boolean(String(profile.closing || "").trim());
+  closingText.innerHTML = hasClosing ? fmt(profile.closing) : "";
+  closingCard.style.display = hasClosing ? "block" : "none";
+
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("content").style.display = "grid";
+}
+
+function flashCopyButton(buttonId, label) {
+  const button = document.getElementById(buttonId);
+  if (!button) return;
+  const original = button.dataset.original || button.textContent;
+  button.dataset.original = original;
+  button.textContent = label;
+  button.classList.add("copied");
+  window.setTimeout(() => {
+    button.textContent = original;
+    button.classList.remove("copied");
+  }, 2200);
+}
+
 let statementText = "";
 
 function copyStatement() {
   navigator.clipboard.writeText(statementText).then(() => {
-    document.querySelectorAll(".copy-btn").forEach(b => {
-      b.textContent = "Copied! ✓";
-      b.classList.add("copied");
-      setTimeout(() => {
-        b.classList.remove("copied");
-        b.textContent = b.dataset.original || b.textContent;
-      }, 2000);
-    });
+    flashCopyButton("copyStatementBtn", "Copied");
   });
 }
 
 function copyForThread() {
-  const threadText = `✦ My Spark Statement:\n\n"${statementText}"\n\nFound this inside the Find Your Spark tool at ToolSpark 🔥`;
+  const threadText = `My Spark Statement:\n\n"${statementText}"\n\nFound this inside the Find Your Spark tool at ToolSpark.`;
   navigator.clipboard.writeText(threadText).then(() => {
-    document.querySelectorAll(".copy-btn").forEach(b => {
-      b.textContent = "Copied for thread! ✓";
-      b.classList.add("copied");
-      setTimeout(() => {
-        b.classList.remove("copied");
-      }, 2500);
-    });
+    flashCopyButton("copyThreadBtn", "Copied for thread");
   });
 }
 
-// ─────────────────────────────────────
-// FALLBACK — if no URL data, show demo
-// ─────────────────────────────────────
 const DEMO_PROFILE = {
   name: "You",
-  statement: "I help people who are sitting on years of hard-earned experience — but have no idea how to turn it into income — finally find their path and build something real, using everything they've already lived through.",
-  whatYouKnow: "You know what it feels like to be capable but stuck. You've figured out things the hard way that most people are still struggling with. That knowledge — the kind that comes from lived experience, not a textbook — is exactly what someone out there is desperate to find.",
-  whoYouHelp: "You help the person who's tried a dozen things and keeps hitting the same wall. They have skills. They have desire. They just can't see their own value clearly enough to build something with it. They need someone who has been exactly where they are.",
-  resultYouCreate: "They walk away with clarity — not just a plan, but a belief that they can actually pull it off. You help them go from circling the same problem to finally moving forward with something that feels true to who they are.",
-  yourEdge: "What sets you apart is that you've actually lived it — you're not teaching theory, you're sharing the map you drew while lost in the dark. Most people in this space are still guessing at shortcuts. You've already found them.",
-  closing: "I see something in you that you probably can't see yet — a depth of experience and a genuine desire to help that most people never have. You haven't failed. You've been preparing. This is where it starts."
+  statement: "I help people who are sitting on years of hard-earned experience, but have no idea how to turn it into income, finally find their path and build something real, using everything they've already lived through.",
+  whatYouKnow: "You know what it feels like to be capable but stuck. You've figured out things the hard way that most people are still struggling with. That knowledge, the kind that comes from lived experience instead of a textbook, is exactly what someone out there is desperate to find.",
+  whoYouHelp: "You help the person who's tried a dozen things and keeps hitting the same wall. They have skills. They have desire. They just cannot see their own value clearly enough to build something with it. They need someone who has been exactly where they are.",
+  resultYouCreate: "They walk away with clarity, not just a plan, but a belief that they can actually pull it off. You help them go from circling the same problem to finally moving forward with something that feels true to who they are.",
+  yourEdge: "What sets you apart is that you've actually lived it. You're not teaching theory, you're sharing the map you drew while lost in the dark. Most people in this space are still guessing at shortcuts. You've already found them.",
+  closing: "I see something in you that you probably cannot see yet, a depth of experience and a genuine desire to help that most people never have. You have not failed. You have been preparing. This is where it starts."
 };
 
-// ─────────────────────────────────────
-// INIT
-// ─────────────────────────────────────
-async function init() {
-  setCopyButtonLabels();
+function applySignedInState(isSignedIn) {
+  const navLink = document.getElementById("navAccountLink");
+  if (navLink) {
+    navLink.href = isSignedIn ? "dashboard.html" : "signon.html?redirect=dashboard";
+    navLink.textContent = isSignedIn ? "Go to Dashboard" : "Sign in / Go to Dashboard";
+  }
 
+  const guestActions = document.getElementById("cta-buttons");
+  const memberActions = document.getElementById("cta-member");
+  if (guestActions && memberActions) {
+    guestActions.style.display = isSignedIn ? "none" : "grid";
+    memberActions.style.display = isSignedIn ? "grid" : "none";
+  }
+}
+
+function renderAudioPlayer(url) {
+  const mount = document.getElementById('audio-player-mount');
+  if (!mount) return;
+  const audio = new Audio(url);
+  mount.innerHTML = `
+    <div class="audio-player">
+      <button class="audio-play-btn" id="audio-btn" aria-label="Listen to your results">
+        <svg id="audio-icon-play" width="11" height="13" viewBox="0 0 11 13" fill="white"><path d="M1 1l9 5.5-9 5.5V1z"/></svg>
+        <svg id="audio-icon-pause" width="11" height="13" viewBox="0 0 11 13" fill="white" style="display:none"><rect x="1" y="1" width="3.5" height="11" rx="1"/><rect x="6.5" y="1" width="3.5" height="11" rx="1"/></svg>
+      </button>
+      <span class="audio-label">Listen to your results</span>
+      <div class="audio-progress"><div class="audio-progress-bar" id="audio-bar"></div></div>
+    </div>`;
+  const btn = document.getElementById('audio-btn');
+  const bar = document.getElementById('audio-bar');
+  const iconPlay  = document.getElementById('audio-icon-play');
+  const iconPause = document.getElementById('audio-icon-pause');
+  btn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+  audio.addEventListener('play',       () => { iconPlay.style.display = 'none';  iconPause.style.display = 'block'; });
+  audio.addEventListener('pause',      () => { iconPlay.style.display = 'block'; iconPause.style.display = 'none';  });
+  audio.addEventListener('timeupdate', () => { if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%'; });
+  audio.addEventListener('ended',      () => { iconPlay.style.display = 'block'; iconPause.style.display = 'none'; bar.style.width = '0%'; });
+}
+
+function startAudioListener(sessionId) {
+  if (!sessionId) return;
+  const sessionRef = db.collection('spark_results').doc(sessionId);
+  const timeout = window.setTimeout(() => unsubscribe(), 30000);
+  const unsubscribe = sessionRef.onSnapshot(doc => {
+    const url = doc.exists && doc.data().audioUrl;
+    if (url) {
+      clearTimeout(timeout);
+      renderAudioPlayer(url);
+      unsubscribe();
+    }
+  });
+}
+
+async function init() {
   const sessionParam = getParam("session");
   const dataParam = getParam("data");
 
@@ -583,11 +366,12 @@ async function init() {
       if (snap.exists) {
         const profile = buildProfileFromDoc(snap.data() || {});
         statementText = profile.statement || DEMO_PROFILE.statement;
-        setTimeout(() => renderProfile(profile), 800);
+        window.setTimeout(() => renderProfile(profile), 700);
+        startAudioListener(sessionParam);
         return;
       }
       console.warn("Spark session not found:", sessionParam);
-    } catch(e) {
+    } catch (e) {
       console.error("Session load error:", e);
     }
   }
@@ -597,27 +381,28 @@ async function init() {
       const decoded = decodeURIComponent(escape(atob(decodeURIComponent(dataParam))));
       const profile = parseProfile(decoded);
       statementText = profile.statement || DEMO_PROFILE.statement;
-      setTimeout(() => renderProfile(profile), 800);
+      window.setTimeout(() => renderProfile(profile), 700);
       return;
-    } catch(e) {
+    } catch (e) {
       console.error("Parse error:", e);
     }
   }
 
-  // Demo / direct visit fallback
   statementText = DEMO_PROFILE.statement;
-  setTimeout(() => renderProfile(DEMO_PROFILE), 800);
+  window.setTimeout(() => renderProfile(DEMO_PROFILE), 700);
 }
 
 init();
 
-window.addEventListener('tsUserReady', function() {
-  const user = firebase.auth().currentUser;
-  if (user) {
-    document.getElementById("cta-join").parentElement.style.display = "none";
-    document.getElementById("cta-member").style.display = "flex";
-  }
+window.addEventListener("tsUserReady", function() {
+  applySignedInState(Boolean(firebase.auth().currentUser));
 });
+
+window.setTimeout(() => {
+  if (firebase.auth) {
+    applySignedInState(Boolean(firebase.auth().currentUser));
+  }
+}, 1200);
 </script>
 </body>
 </html>

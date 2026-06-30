@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Results — ToolSpark</title>
+<title>Your Results - ToolSpark</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -12,7 +12,7 @@
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
-    authDomain: "toolspark-2d62d.firebaseapp.com",
+    authDomain: "toolspark.co",
     projectId: "toolspark-2d62d",
     storageBucket: "toolspark-2d62d.firebasestorage.app",
     messagingSenderId: "82966513396",
@@ -20,735 +20,391 @@
     measurementId: "G-F6NVJRMHV6"
   };
   firebase.initializeApp(firebaseConfig);
-  try { firebase.appCheck().activate('6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ', true); } catch(e) {}
+  try { firebase.appCheck().activate("6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ", true); } catch (e) {}
   const db = firebase.firestore();
 </script>
-<script src="js/auth.js"></script>
+<link rel="stylesheet" href="css/results-shell.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:         #F4F2EE;
-    --surface:    #FFFFFF;
-    --surface2:   #F4F2EE;
-    --dark:       #0C0B09;
-    --border:     #E4E0D8;
-    --border-mid: rgba(0,0,0,0.10);
-    --text:       #1A1714;
-    --text2:      #4A453F;
-    --text3:      #9E9891;
-    --gold:       #C9A84C;
-    --gold-light: #B8922E;
-    --gold-dim:   rgba(201,168,76,0.12);
-    --gold-mid:   rgba(201,168,76,0.20);
-    --green:      #2A5C45;
-    --green-light: #3D8A65;
-    --purple:     #4B3F8A;
-    --coral:      #C4622D;
-    --radius:     16px;
-    --radius-sm:  10px;
-  }
-
-  body {
-    font-family: 'Lato', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.7;
-  }
-
-  /* NAV */
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    height: 60px;
-    border-bottom: 1px solid rgba(201,168,76,0.15);
-    background: #141210;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    color: #F0EDE6;
-  }
-  .nav-logo span { color: var(--gold); }
-  .nav-tag {
-    font-size: 12px;
-    color: var(--gold);
-    background: rgba(201,168,76,0.12);
-    border: 1px solid rgba(201,168,76,0.25);
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  /* LOADING */
-  .loading-screen {
-    min-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-  }
-  .loading-ring {
-    width: 56px; height: 56px;
-    border: 3px solid rgba(201,168,76,0.20);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-    margin-bottom: 1.5rem;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-screen h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .loading-screen p {
-    color: var(--text3);
-    font-size: 14px;
-    font-weight: 300;
-  }
-  .loading-steps {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 300px;
-  }
-  .loading-step {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text3);
-    transition: color 0.3s;
-  }
-  .loading-step.active { color: var(--gold); }
-  .loading-step.done { color: var(--green-light); }
-  .step-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--border);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .loading-step.active .step-dot { background: var(--gold); }
-  .loading-step.done .step-dot { background: var(--green-light); }
-
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* RESULTS */
-  .results-page {
-    display: none;
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 2rem 2rem 4rem;
-    animation: fadeUp 0.5s ease;
-  }
-  .results-page.active { display: block; }
-
-  /* ── HERO ── */
-  .hero {
-    display: none;
-    text-align: center;
-    padding: 52px 24px 44px;
-    background: #141210;
-    border-bottom: 1px solid rgba(201,168,76,0.15);
-    position: relative; overflow: hidden;
-  }
-  .hero.active { display: block; }
-  .hero::before {
-    content: '';
-    position: absolute; top: -80px; left: 50%;
-    transform: translateX(-50%);
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .hero-eyebrow {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 3px; text-transform: uppercase;
-    color: #FFFFFF; opacity: 0.9;
-    margin-bottom: 16px;
-  }
-  .hero-name {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(34px, 6vw, 56px);
-    font-weight: 700; color: #F0EDE6;
-    line-height: 1.1; margin-bottom: 14px;
-  }
-  .hero-name span { color: var(--gold); font-style: italic; }
-  .hero-sub {
-    font-size: 16px; color: #D7D0C6;
-    max-width: 480px; margin: 0 auto;
-    line-height: 1.7;
-  }
-
-  /* SUMMARY */
   .summary-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.75rem;
-    margin-bottom: 2rem;
+    padding: 24px;
   }
-  .summary-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    opacity: 0.8;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .summary-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(201,168,76,0.15);
-  }
+
   .summary-card p {
-    font-size: 15px;
-    color: var(--text2);
-    font-weight: 400;
-    line-height: 1.8;
+    margin: 0;
+    color: var(--page-ink-soft);
+    font-size: 1rem;
+    line-height: 1.78;
+    text-wrap: pretty;
   }
 
-  /* TOOL CARDS */
-  .tools-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .tools-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  #tools-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
+  .tool-list {
+    display: grid;
+    gap: 18px;
   }
 
   .tool-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--page-radius-lg);
+    border: 1px solid var(--page-border);
+    background: rgba(255, 253, 248, 0.94);
+    box-shadow: var(--page-shadow-soft);
     overflow: hidden;
-    transition: border-color 0.2s;
+    transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
   }
-  .tool-card:hover { border-color: rgba(201,168,76,0.4); }
 
-  .tool-header {
-    padding: 1.25rem 1.5rem;
+  .tool-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(243, 181, 66, 0.34);
+  }
+
+  .tool-card.chosen {
+    border-color: rgba(243, 181, 66, 0.62);
+    box-shadow: 0 0 0 1px rgba(243, 181, 66, 0.28), var(--page-shadow-soft);
+  }
+
+  .tool-top {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-  }
-  .tool-header.p1 { background: rgba(42,92,69,0.10); border-bottom: 1px solid rgba(42,92,69,0.15); }
-  .tool-header.p2 { background: rgba(75,63,138,0.10); border-bottom: 1px solid rgba(75,63,138,0.15); }
-  .tool-header.p3 { background: rgba(196,98,45,0.10); border-bottom: 1px solid rgba(196,98,45,0.15); }
-
-  .tool-priority {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 3px 10px;
-    border-radius: 100px;
-  }
-  .p1 .tool-priority { background: var(--green); color: white; }
-  .p2 .tool-priority { background: var(--purple); color: white; }
-  .p3 .tool-priority { background: var(--coral); color: white; }
-
-  .tool-name { font-weight: 700; font-size: 19px; }
-  .p1 .tool-name { color: #236642; }
-  .p2 .tool-name { color: #4B3F8A; }
-  .p3 .tool-name { color: #B85520; }
-
-  .complexity-badge {
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 100px;
-    background: var(--bg);
-    color: var(--text3);
-    border: 1px solid var(--border);
-    white-space: nowrap;
-    flex-shrink: 0;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 24px 24px 18px;
   }
 
-  .tool-body { padding: 1.5rem; background: var(--surface); }
-  .tool-what {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 10px;
-    line-height: 1.5;
-  }
-  .tool-why {
-    font-size: 14px;
-    color: var(--text2);
-    font-weight: 400;
-    line-height: 1.7;
-    margin-bottom: 14px;
-  }
-  .tool-example {
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--text2);
-    border-left: 2px solid rgba(201,168,76,0.35);
-    font-style: italic;
-  }
-  .tool-example strong {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 4px;
-    font-style: normal;
+  .tool-heading {
+    min-width: 0;
   }
 
-  /* CTA */
-  .cta-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2.5rem;
-    text-align: center;
-    margin-top: 2rem;
-  }
-  .cta-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    font-weight: 400;
-    margin-bottom: 10px;
-    line-height: 1.3;
-    color: var(--text);
-  }
-  .cta-card h2 em { font-style: italic; color: var(--gold); }
-  .cta-card p {
-    color: var(--text2);
-    font-size: 15px;
-    font-weight: 400;
-    margin-bottom: 1.75rem;
-    max-width: 440px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.7;
-  }
-  .book-btn {
-    display: inline-block;
-    background: var(--gold);
-    color: var(--dark);
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 14px 32px;
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
-  }
-  .book-btn:hover {
-    background: var(--gold-light);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(201,168,76,0.2);
-  }
-  .cta-note {
-    font-size: 12px;
-    color: var(--text3);
-    margin-top: 1rem;
-    font-weight: 300;
-  }
-
-  /* TOOL SELECTION & BUILD PROMPT */
-  .tool-footer {
-    padding: 1rem 1.5rem;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .tool-footer-hint {
-    font-size: 12px;
-    color: var(--text3);
-    font-weight: 300;
-  }
-  .build-btn {
+  .priority-pill,
+  .complexity-pill,
+  .chosen-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    font-family: 'Lato', sans-serif;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .build-btn.pb1 { background: var(--green); color: #fff; }
-  .build-btn.pb1:hover { background: var(--green-light); }
-  .build-btn.pb2 { background: var(--purple); color: #fff; }
-  .build-btn.pb2:hover { background: #5e50b0; }
-  .build-btn.pb3 { background: var(--coral); color: #fff; }
-  .build-btn.pb3:hover { background: #d97548; }
-  .build-btn:disabled { background: var(--border); color: var(--text3); cursor: default; }
-
-  .tool-card.chosen { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
-  .roadmap-choose-row { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .roadmap-choose-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: 1px solid var(--gold);
-    background: transparent;
-    color: var(--gold);
-    font-family: 'Lato', sans-serif;
-    transition: all 0.2s;
-  }
-  .roadmap-choose-btn:hover { background: var(--gold); color: var(--dark); }
-  .roadmap-choose-btn.chosen { background: var(--gold); color: var(--dark); cursor: default; }
-  .chosen-indicator { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: 0.05em; }
-
-  .prompt-panel {
-    display: none;
-    background: var(--bg);
-    border: 1px solid rgba(201,168,76,0.28);
-    border-top: none;
-    border-radius: 0 0 var(--radius) var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    margin-top: -1rem;
-  }
-  .prompt-panel.open { display: block; animation: fadeUp 0.25s ease; }
-  .prompt-panel-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    text-transform: uppercase;
+    min-height: 30px;
+   border-radius: 4px;
+    padding: 0 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
     letter-spacing: 0.12em;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    text-transform: uppercase;
   }
-  .prompt-panel-sub {
-    font-size: 12px;
-    color: var(--text3);
-    font-weight: 300;
-    margin-bottom: 14px;
-  }
-  .prompt-text-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.125rem;
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.75;
-    font-family: 'Lato', sans-serif;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 260px;
-    overflow-y: auto;
-    margin-bottom: 14px;
-  }
-  .prompt-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .copy-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: var(--gold);
-    color: var(--dark);
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    transition: all 0.2s;
-  }
-  .copy-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
-  .builder-links {
-    font-size: 12px;
-    color: var(--text3);
-  }
-  .builder-links a {
-    color: var(--gold);
-    text-decoration: none;
-    font-weight: 700;
-  }
-  .builder-links a:hover { text-decoration: underline; }
 
-  /* ERROR */
-  .error-screen {
+  .priority-pill {
+    margin-bottom: 12px;
+  }
+
+  .priority-pill.is-primary {
+    background: var(--page-gold);
+    color: #17120d;
+  }
+
+  .priority-pill.is-outline {
+    border: 1px solid rgba(243, 181, 66, 0.42);
+    color: var(--page-gold-deep);
+    background: rgba(243, 181, 66, 0.06);
+  }
+
+  .priority-pill.is-muted {
+    border: 1px solid rgba(34, 28, 20, 0.16);
+    color: var(--page-ink-muted);
+    background: rgba(34, 28, 20, 0.04);
+  }
+
+  .tool-name {
+    margin: 0;
+    font-family: "Playfair Display", serif;
+    font-size: clamp(1.55rem, 3vw, 2rem);
+    line-height: 1.08;
+    color: var(--page-gold-deep);
+    text-wrap: balance;
+  }
+
+  .tool-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .complexity-pill {
+    border: 1px solid var(--page-border);
+    background: rgba(34, 28, 20, 0.04);
+    color: var(--page-ink-muted);
+  }
+
+  .chosen-pill {
     display: none;
-    min-height: 80vh;
+    border: 1px solid rgba(35, 87, 63, 0.2);
+    background: rgba(35, 87, 63, 0.08);
+    color: #23573f;
+  }
+
+  .tool-card.chosen .chosen-pill {
+    display: inline-flex;
+  }
+
+  .tool-body {
+    padding: 0 24px 24px;
+  }
+
+  .tool-what {
+    margin: 0 0 10px;
+    color: var(--page-ink);
+    font-size: 1.06rem;
+    font-weight: 700;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .tool-why {
+    margin: 0;
+    color: var(--page-ink-soft);
+    font-size: 0.98rem;
+    line-height: 1.74;
+    text-wrap: pretty;
+  }
+
+  .tool-work {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(34, 28, 20, 0.1);
+  }
+
+  .tool-work-copy {
+    color: var(--page-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.78;
+    font-style: italic;
+    white-space: pre-line;
+  }
+
+  @media (max-width: 768px) {
+    .tool-top {
+      flex-direction: column;
+    }
+
+    .tool-meta {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 9px 13px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 8px;
+    max-width: 300px;
+  }
+  .audio-play-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #C9A84C;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    flex-direction: column;
-    gap: 1rem;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    padding: 0;
   }
-  .error-screen.active { display: flex; }
-  .error-screen h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: var(--text); }
-  .error-screen p { color: var(--text2); font-size: 14px; }
-  .error-screen a { color: var(--gold); text-decoration: none; }
-
-  footer {
-    text-align: center;
-    padding: 2rem;
-    font-size: 12px;
-    color: var(--text3);
-    border-top: 1px solid var(--border);
-    margin-top: 2rem;
-    letter-spacing: 1px;
+  .audio-play-btn:hover { background: rgba(201,168,76,0.15); }
+  .audio-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
   }
-  footer span { color: var(--gold); }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius: 10px; }
+  .audio-progress {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 40px;
+  }
+  .audio-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #C9A84C;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
 </style>
 </head>
-<body>
-<!-- LOADING -->
-<div class="loading-screen" id="loading-screen">
-  <div class="loading-ring"></div>
-  <h2>Building your tool report...</h2>
-  <p>This takes about 15 seconds</p>
-  <div class="loading-steps">
-    <div class="loading-step active" id="step-1">
-      <div class="step-dot"></div>
-      Loading your Breakthrough session
-    </div>
-    <div class="loading-step" id="step-2">
-      <div class="step-dot"></div>
-      Finding tool opportunities
-    </div>
-    <div class="loading-step" id="step-3">
-      <div class="step-dot"></div>
-      Ranking recommendations
-    </div>
-    <div class="loading-step" id="step-4">
-      <div class="step-dot"></div>
-      Building your report
+<body class="results-shell">
+<nav class="public-nav">
+  <div class="public-nav__inner">
+    <a href="index.html" class="public-nav__brand">Tool<span>Spark</span></a>
+    <a href="signon.html?redirect=dashboard" class="public-nav__link" id="navAccountLink">Sign in / Go to Dashboard</a>
+  </div>
+</nav>
+
+<main class="page-shell">
+  <div class="loading-card" id="loading-screen">
+    <div class="spinner"></div>
+    <h2>Building your tool report</h2>
+    <p>This usually takes about 15 seconds while we pull your session, rank the strongest ideas, and package them into a build-ready report.</p>
+    <div class="loading-steps">
+      <div class="loading-step active" id="step-1">
+        <span class="loading-step__dot"></span>
+        <span>Loading your Breakthrough session</span>
+      </div>
+      <div class="loading-step" id="step-2">
+        <span class="loading-step__dot"></span>
+        <span>Finding tool opportunities</span>
+      </div>
+      <div class="loading-step" id="step-3">
+        <span class="loading-step__dot"></span>
+        <span>Ranking recommendations</span>
+      </div>
+      <div class="loading-step" id="step-4">
+        <span class="loading-step__dot"></span>
+        <span>Building your report</span>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- HERO -->
-<header class="hero" id="hero-section">
-  <div class="hero-eyebrow">Breakthrough Results</div>
-  <div class="hero-name" id="hero-title">Your <span>Tool Report</span></div>
-  <p class="hero-sub" id="hero-sub">Here are the AI tools matched to your business right now.</p>
-</header>
+  <div class="page-stack" id="resultsContent" style="display:none;">
+    <header class="hero-card" id="hero-section">
+      <div class="hero-copy">
+        <div class="hero-pill">Breakthrough Results</div>
+        <h1 class="hero-title" id="hero-title">Your <span>Tool Report</span></h1>
+        <p class="hero-sub" id="hero-sub">Here are the AI tools matched to your business right now.</p>
+        <div id="audio-player-mount"></div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-bubble">Here are your three tools.</div>
+        <div class="hero-mascot">
+          <img src="sid.png" alt="Sid, the ToolSpark squirrel mascot">
+        </div>
+      </div>
+    </header>
 
-<!-- RESULTS -->
-<div class="results-page" id="results-page">
-  <div class="summary-card">
-    <div class="summary-label">Session summary</div>
-    <p id="summary-text"></p>
+    <section class="summary-card result-card">
+      <div class="section-label">Session Summary</div>
+      <p id="summary-text"></p>
+    </section>
+
+    <section class="page-stack" style="gap:18px;">
+      <div class="divider-label">Recommended Tools Ranked by Impact</div>
+      <div class="tool-list" id="tools-container"></div>
+    </section>
+
+    <section class="cta-card">
+      <h2 class="cta-title">Ready to build it?</h2>
+      <p class="cta-copy">Choose your tool above, then head to your roadmap to see your full plan and next steps.</p>
+      <div class="cta-actions" id="ctaGuest" style="display:none;">
+        <a href="signon.html?redirect=roadmap" class="primary-button" id="ctaPrimary">Sign in to open my roadmap &rarr;</a>
+        <div class="secondary-link">Already a member? <a href="signon.html?redirect=dashboard">Go to Dashboard</a></div>
+      </div>
+      <div class="cta-actions" id="ctaMember" style="display:none;">
+        <a href="roadmap.html" class="primary-button">View My Roadmap &rarr;</a>
+        <div class="secondary-link">Or go back to <a href="dashboard.html">Dashboard</a></div>
+      </div>
+    </section>
+
+    <div class="brand-foot">Powered by <a href="https://toolspark.co">ToolSpark</a></div>
   </div>
 
-  <div class="tools-label">Recommended tools — ranked by impact</div>
-  <div id="tools-container"></div>
-
-  <div class="cta-card" style="background:var(--surface);border-color:var(--border);margin-bottom:1rem;">
-    <h2>Ready to <em>build it?</em></h2>
-    <p>Choose your tool above, then head to your roadmap to see your full plan and next steps.</p>
-    <a href="roadmap.html" class="book-btn">View My Roadmap →</a>
-    <div class="cta-note">Or go back to <a href="dashboard.html" style="color:inherit;font-weight:700;">Dashboard</a></div>
+  <div class="error-card" id="error-screen">
+    <h2>Something went wrong</h2>
+    <p>We could not load your results. Please <a href="clarity.html">start a new Breakthrough session</a> or contact us for help.</p>
   </div>
-
-</div>
-
-<!-- ERROR -->
-<div class="error-screen" id="error-screen">
-  <h2>Something went wrong</h2>
-  <p>We couldn't load your results. Please <a href="clarity.html">start a new Breakthrough session</a> or contact us for help.</p>
-</div>
-
-<footer>Powered by <span>ToolSpark</span> · Clarity. Build. Launch.</footer>
+</main>
 
 <script>
 const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+let currentChosenTool = null;
 
 function parseActionPlanToResults(planText) {
   if (!planText) return null;
   const plan = planText
-    .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, '$1:')
-    .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, '$1:');
+    .replace(/\*\*([A-Z][A-Z_0-9]+):\*\*/g, "$1:")
+    .replace(/\*\*([A-Z][A-Z_0-9]+)\*\*:/g, "$1:");
   const extract = (key) => {
-    const regex = new RegExp(key + ':([\\s\\S]*?)(?=\\n[A-Z][A-Z_0-9]*:|\\n###|\\*\\*ACTION_PLAN_END|$)');
-    const m = plan.match(regex);
-    return m ? m[1].trim().replace(/\*\*/g, '') : '';
+    const regex = new RegExp(key + ":([\\s\\S]*?)(?=\\n[A-Z][A-Z_0-9]*:|\\n###|\\*\\*ACTION_PLAN_END|$)");
+    const match = plan.match(regex);
+    return match ? match[1].trim().replace(/\*\*/g, "") : "";
   };
-  const summaryM = plan.match(/###\s*Business Summary\s*[\r\n]+([\s\S]*?)(?=###|TOOL_1_NAME|$)/);
-  const summary = summaryM ? summaryM[1].trim() : '';
-  const tools = [1, 2, 3].map(i => ({
-    name:           extract(`TOOL_${i}_NAME`),
-    priority:       extract(`TOOL_${i}_PRIORITY`),
-    what_it_does:   extract(`TOOL_${i}_SUMMARY`),
-    why_it_fits:    extract(`TOOL_${i}_WHY`),
-    complexity:     extract(`TOOL_${i}_COMPLEXITY`) || 'Medium',
-    example_prompt: extract(`TOOL_${i}_HOW`) || ''
+  const summaryMatch = plan.match(/###\s*Business Summary\s*[\r\n]+([\s\S]*?)(?=###|TOOL_1_NAME|$)/);
+  const summary = summaryMatch ? summaryMatch[1].trim() : "";
+  const tools = [1, 2, 3].map(index => ({
+    name: extract(`TOOL_${index}_NAME`),
+    priority: extract(`TOOL_${index}_PRIORITY`),
+    what_it_does: extract(`TOOL_${index}_SUMMARY`),
+    why_it_fits: extract(`TOOL_${index}_WHY`),
+    complexity: extract(`TOOL_${index}_COMPLEXITY`) || "Medium",
+    example_prompt: extract(`TOOL_${index}_HOW`) || ""
   }));
   if (!tools[0].name) return null;
   return { summary, tools };
 }
+
 async function authHeaders() {
   const user = firebase.auth().currentUser;
   const token = user ? await user.getIdToken() : "";
-  let acToken = "";
-  try { const t = await Promise.race([firebase.appCheck().getToken(false), new Promise((_,r)=>setTimeout(()=>r(),3000))]); acToken = t?.token||""; } catch(e) {}
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, "X-Firebase-AppCheck": acToken };
-}
-
-// ── Lovable prompt helpers ──
-let lovablePrompts = [];
-let currentSessionId = null;
-let currentChosenTool = null;
-
-function parseLovablePrompts(actionPlan) {
-  if (!actionPlan) return [null, null, null];
-  const prompts = [];
-  for (let i = 1; i <= 3; i++) {
-    const nextBoundary = i < 3 ? `TOOL_${i + 1}_NAME:` : String.raw`\*\*ACTION_PLAN_END`;
-    const regex = new RegExp(`TOOL_${i}_LOVABLE_PROMPT:([\\s\\S]+?)(?=${nextBoundary}|$)`);
-    const match = actionPlan.match(regex);
-    prompts.push(match ? match[1].trim() : null);
-  }
-  return prompts;
-}
-
-function selectTool(index) {
-  for (let i = 0; i < 3; i++) {
-    const panel = document.getElementById('prompt-' + i);
-    if (panel) panel.classList.remove('open');
-  }
-  const panel = document.getElementById('prompt-' + index);
-  if (panel) {
-    panel.classList.add('open');
-    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-  }
-}
-
-function copyPrompt(index) {
-  const text = lovablePrompts[index];
-  if (!text) return;
-  const btn = document.querySelector('#prompt-' + index + ' .copy-btn');
-  navigator.clipboard.writeText(text).then(() => {
-    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2200); }
-  }).catch(() => {
-    const el = document.createElement('textarea');
-    el.value = text;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2200); }
-  });
-}
-
-async function chooseForRoadmap(index) {
-  if (!currentSessionId) return;
-  const toolNum = index + 1;
+  let appCheckToken = "";
   try {
-    await db.collection('clarity_sessions').doc(currentSessionId).update({ chosenTool: toolNum });
-    currentChosenTool = toolNum;
-    markChosenTool(index);
-  } catch(e) {
-    console.log('Could not save roadmap choice:', e);
-  }
-}
-
-function markChosenTool(index) {
-  for (let i = 0; i < 3; i++) {
-    const card = document.getElementById('card-' + i);
-    const btn = document.getElementById('roadmap-btn-' + i);
-    const ind = document.getElementById('chosen-ind-' + i);
-    if (card) card.classList.remove('chosen');
-    if (btn) btn.style.display = 'inline-flex';
-    if (ind) ind.style.display = 'none';
-  }
-  const card = document.getElementById('card-' + index);
-  const btn = document.getElementById('roadmap-btn-' + index);
-  const ind = document.getElementById('chosen-ind-' + index);
-  if (card) card.classList.add('chosen');
-  if (btn) btn.style.display = 'none';
-  if (ind) ind.style.display = 'inline';
+    const tokenResult = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise((_, reject) => window.setTimeout(() => reject(new Error("timeout")), 3000))
+    ]);
+    appCheckToken = tokenResult?.token || "";
+  } catch (e) {}
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+    "X-Firebase-AppCheck": appCheckToken
+  };
 }
 
 function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function setStep(num) {
+function cleanResultText(text) {
+  return String(text || "")
+    .replace(/^\s*---+\s*$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function setStep(stepNumber) {
   for (let i = 1; i <= 4; i++) {
-    const el = document.getElementById('step-' + i);
-    if (i < num) { el.className = 'loading-step done'; }
-    else if (i === num) { el.className = 'loading-step active'; }
-    else { el.className = 'loading-step'; }
+    const element = document.getElementById("step-" + i);
+    if (!element) continue;
+    if (i < stepNumber) {
+      element.className = "loading-step done";
+    } else if (i === stepNumber) {
+      element.className = "loading-step active";
+    } else {
+      element.className = "loading-step";
+    }
   }
 }
 
 function showError() {
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('error-screen').classList.add('active');
+  document.getElementById("loading-screen").style.display = "none";
+  document.getElementById("resultsContent").style.display = "none";
+  document.getElementById("error-screen").classList.add("active");
 }
 
 function getCurrentUser() {
   return new Promise(resolve => {
-    const unsub = firebase.auth().onAuthStateChanged(user => { unsub(); resolve(user); });
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    });
   });
 }
 
@@ -757,75 +413,196 @@ async function markClarityComplete(session) {
     const user = await getCurrentUser();
     if (!user || !session.clientEmail) return;
     if (user.email.toLowerCase() !== session.clientEmail.toLowerCase()) return;
-    await db.collection('users').doc(user.uid).update({
-      'onboarding.steps.clarityTool': true
+    await db.collection("users").doc(user.uid).update({
+      "onboarding.steps.clarityTool": true
     });
-  } catch(e) { /* not a logged-in member — ignore */ }
+  } catch (e) {}
 }
 
 async function ensureClientResult(sessionId, session, results) {
   try {
-    await db.collection('clientresults').doc(sessionId).set({
-      displayName: session.displayName || '',
-      businessName: session.businessName || '',
-      clientEmail: session.clientEmail || '',
+    await db.collection("clientresults").doc(sessionId).set({
+      displayName: session.displayName || "",
+      businessName: session.businessName || "",
+      clientEmail: session.clientEmail || "",
       clientResults: results,
-      sessionId: sessionId,
+      sessionId,
       createdAt: session.createdAt || firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
-  } catch(e) { /* non-critical — user may not have update permission */ }
+  } catch (e) {}
 }
 
 async function waitForSession(sessionId, maxAttempts = 6) {
   for (let i = 0; i < maxAttempts; i++) {
-    if (i > 0) await new Promise(r => setTimeout(r, 1500));
-    const snap = await db.collection('clarity_sessions').doc(sessionId).get();
+    if (i > 0) await new Promise(resolve => window.setTimeout(resolve, 1500));
+    const snap = await db.collection("clarity_sessions").doc(sessionId).get();
     if (snap.exists) return snap;
   }
   return null;
 }
 
+function priorityVariant(priority) {
+  const normalized = String(priority || "").toLowerCase();
+  if (normalized.includes("start")) return "is-primary";
+  if (normalized.includes("build")) return "is-outline";
+  return "is-muted";
+}
+
+function formatMultiline(text) {
+  return escapeHtml(cleanResultText(text)).replace(/\n/g, "<br>");
+}
+
+function markChosenTool(index) {
+  const cards = document.querySelectorAll(".tool-card");
+  cards.forEach((card, cardIndex) => {
+    card.classList.toggle("chosen", cardIndex === index);
+  });
+}
+
+function applyAuthUI(isSignedIn) {
+  const navLink = document.getElementById("navAccountLink");
+  if (navLink) {
+    navLink.href = isSignedIn ? "dashboard.html" : "signon.html?redirect=dashboard";
+    navLink.textContent = isSignedIn ? "Go to Dashboard" : "Sign in / Go to Dashboard";
+  }
+
+  const guestActions = document.getElementById("ctaGuest");
+  const memberActions = document.getElementById("ctaMember");
+  if (guestActions && memberActions) {
+    guestActions.style.display = isSignedIn ? "none" : "grid";
+    memberActions.style.display = isSignedIn ? "grid" : "none";
+  }
+}
+
+function renderResults(displayName, summary, parsed) {
+  document.getElementById("loading-screen").style.display = "none";
+  document.getElementById("resultsContent").style.display = "grid";
+  document.getElementById("error-screen").classList.remove("active");
+
+  if (displayName) {
+    document.getElementById("hero-title").innerHTML = `${escapeHtml(displayName)}'s <span>Tool Report</span>`;
+    document.getElementById("hero-sub").textContent = "Here are the three tools recommended in your Breakthrough session, matched to where you are right now.";
+    document.title = `${displayName}'s Tool Report - ToolSpark`;
+  }
+
+  document.getElementById("summary-text").textContent = parsed.summary || summary || "";
+
+  const tools = Array.isArray(parsed.tools) ? parsed.tools.filter(tool => tool && tool.name) : [];
+  const toolsHtml = tools.map((tool, index) => {
+    const variant = priorityVariant(tool.priority);
+    const workSection = tool.example_prompt
+      ? `
+        <div class="tool-work">
+          <div class="section-label">How It Works</div>
+          <div class="tool-work-copy">${formatMultiline(tool.example_prompt)}</div>
+        </div>`
+      : "";
+    return `
+      <article class="tool-card" id="card-${index}">
+        <div class="tool-top">
+          <div class="tool-heading">
+            <div class="priority-pill ${variant}">${escapeHtml(tool.priority || "Recommended")}</div>
+            <h3 class="tool-name">${escapeHtml(tool.name)}</h3>
+          </div>
+          <div class="tool-meta">
+            ${tool.complexity ? `<span class="complexity-pill">Complexity: ${escapeHtml(tool.complexity)}</span>` : ""}
+            <span class="chosen-pill">Chosen for roadmap</span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <p class="tool-what">${escapeHtml(cleanResultText(tool.what_it_does || ""))}</p>
+          <p class="tool-why">${escapeHtml(cleanResultText(tool.why_it_fits || ""))}</p>
+          ${workSection}
+        </div>
+      </article>`;
+  }).join("");
+
+  document.getElementById("tools-container").innerHTML = toolsHtml;
+
+  if (currentChosenTool) {
+    markChosenTool(currentChosenTool - 1);
+  }
+}
+
+function renderAudioPlayer(url) {
+  const mount = document.getElementById('audio-player-mount');
+  if (!mount) return;
+  const audio = new Audio(url);
+  mount.innerHTML = `
+    <div class="audio-player">
+      <button class="audio-play-btn" id="audio-btn" aria-label="Listen to your results">
+        <svg id="audio-icon-play" width="11" height="13" viewBox="0 0 11 13" fill="white"><path d="M1 1l9 5.5-9 5.5V1z"/></svg>
+        <svg id="audio-icon-pause" width="11" height="13" viewBox="0 0 11 13" fill="white" style="display:none"><rect x="1" y="1" width="3.5" height="11" rx="1"/><rect x="6.5" y="1" width="3.5" height="11" rx="1"/></svg>
+      </button>
+      <span class="audio-label">Listen to your results</span>
+      <div class="audio-progress"><div class="audio-progress-bar" id="audio-bar"></div></div>
+    </div>`;
+  const btn = document.getElementById('audio-btn');
+  const bar = document.getElementById('audio-bar');
+  const iconPlay  = document.getElementById('audio-icon-play');
+  const iconPause = document.getElementById('audio-icon-pause');
+  btn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+  audio.addEventListener('play',       () => { iconPlay.style.display = 'none';  iconPause.style.display = 'block'; });
+  audio.addEventListener('pause',      () => { iconPlay.style.display = 'block'; iconPause.style.display = 'none';  });
+  audio.addEventListener('timeupdate', () => { if (audio.duration) bar.style.width = (audio.currentTime / audio.duration * 100) + '%'; });
+  audio.addEventListener('ended',      () => { iconPlay.style.display = 'block'; iconPause.style.display = 'none'; bar.style.width = '0%'; });
+}
+
+function startAudioListener(sessionId) {
+  if (!sessionId) return;
+  const sessionRef = db.collection('clarity_sessions').doc(sessionId);
+  const timeout = window.setTimeout(() => unsubscribe(), 30000);
+  const unsubscribe = sessionRef.onSnapshot(doc => {
+    const url = doc.exists && doc.data().audioUrl;
+    if (url) {
+      clearTimeout(timeout);
+      renderAudioPlayer(url);
+      unsubscribe();
+    }
+  });
+}
+
 async function loadAndAnalyze() {
   const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('session');
+  const sessionId = params.get("session");
 
-  if (!sessionId) { showError(); return; }
-  currentSessionId = sessionId;
+  if (!sessionId) {
+    showError();
+    return;
+  }
 
   try {
-    // Step 1 — Load session from Firestore (retries up to 6x with 1.5s delay)
     setStep(1);
     const doc = await waitForSession(sessionId);
-    if (!doc) { showError(); return; }
+    if (!doc) {
+      showError();
+      return;
+    }
 
+    startAudioListener(sessionId);
     const session = doc.data();
     currentChosenTool = session.chosenTool || null;
 
-    // Re-parse from actionPlan when available (guarantees latest parser, fixes corrupt cached toolResults)
     const reparsed = parseActionPlanToResults(session.actionPlan);
     if (reparsed) {
       if (!session.toolResults || !session.toolResults.tools || !session.toolResults.tools[0].name) {
-        await db.collection('clarity_sessions').doc(sessionId).update({ toolResults: reparsed });
+        await db.collection("clarity_sessions").doc(sessionId).update({ toolResults: reparsed });
       }
       await ensureClientResult(sessionId, session, reparsed);
-      renderResults(session.displayName, session.summary || reparsed.summary, reparsed, session.actionPlan);
-      if (currentChosenTool) markChosenTool(currentChosenTool - 1);
+      renderResults(session.displayName, session.summary || reparsed.summary, reparsed);
       await markClarityComplete(session);
       return;
     }
 
-    // Fall back to saved toolResults if actionPlan parse failed
     if (session.toolResults) {
       await ensureClientResult(sessionId, session, session.toolResults);
-      renderResults(session.displayName, session.summary, session.toolResults, session.actionPlan);
-      if (currentChosenTool) markChosenTool(currentChosenTool - 1);
+      renderResults(session.displayName, session.summary, session.toolResults);
       await markClarityComplete(session);
       return;
     }
 
     const extracted = session.extracted;
 
-    // Step 2 — Run AI analysis
     setStep(2);
     const prompt = `You are an expert product strategist who helps online course creators and coaches turn their programs into AI-powered tools.
 
@@ -838,84 +615,47 @@ BUSINESS INFO:
 - Success outcome: ${extracted.success}
 - Where clients get stuck: ${extracted.friction}
 - What creator repeats most: ${extracted.repetition}
-- Extra context: ${extracted.extra || 'None'}
+- Extra context: ${extracted.extra || "None"}
 
 Respond ONLY with valid JSON, no markdown:
 {"summary":"2-3 sentence opportunity summary","tools":[{"name":"Short name (5 words max)","priority":"Start here","what_it_does":"One sentence what it does for the client","why_it_fits":"2 sentences why it fits this specific friction point","complexity":"Low","example_prompt":"Example of what a client would type into this tool"},{"name":"Short name","priority":"Build next","what_it_does":"One sentence","why_it_fits":"2 sentences","complexity":"Medium","example_prompt":"Example"},{"name":"Short name","priority":"Long term","what_it_does":"One sentence","why_it_fits":"2 sentences","complexity":"High","example_prompt":"Example"}]}`;
 
     setStep(3);
     const response = await fetch(FUNCTION_URL, {
-      method: 'POST',
+      method: "POST",
       headers: await authHeaders(),
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: "claude-sonnet-4-6",
         max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }],
-        _meta: { tool: 'clarity-analysis', sessionId }
+        messages: [{ role: "user", content: prompt }],
+        _meta: { tool: "clarity-analysis", sessionId }
       })
     });
 
     const data = await response.json();
-    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const text = data.content[0].text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(text);
 
-    // Step 4 — Save results back to Firestore
     setStep(4);
-    await db.collection('clarity_sessions').doc(sessionId).update({
+    await db.collection("clarity_sessions").doc(sessionId).update({
       toolResults: parsed,
       analysisDate: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     await ensureClientResult(sessionId, session, parsed);
-    renderResults(session.displayName, session.summary, parsed, session.actionPlan);
-    if (currentChosenTool) markChosenTool(currentChosenTool - 1);
+    renderResults(session.displayName, session.summary, parsed);
     await markClarityComplete(session);
-
-  } catch(err) {
-    console.log('Error:', err);
+  } catch (error) {
+    console.log("Error:", error);
     showError();
   }
 }
 
-function renderResults(displayName, summary, parsed, actionPlan) {
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('hero-section').classList.add('active');
-  document.getElementById('results-page').classList.add('active');
+firebase.auth().onAuthStateChanged(user => {
+  applyAuthUI(Boolean(user));
+});
 
-  if (displayName) {
-    document.getElementById('hero-title').innerHTML = `${escapeHtml(displayName)}'s <span>Tool Report</span>`;
-    document.getElementById('hero-sub').textContent = `Here are the three tools recommended in your Breakthrough session, matched to where you are right now.`;
-    document.title = `${displayName}'s Tool Report — ToolSpark`;
-  }
-
-  document.getElementById('summary-text').textContent = parsed.summary || summary;
-
-  const priorityClass = ['p1', 'p2', 'p3'];
-  const btnClass = ['pb1', 'pb2', 'pb3'];
-  const toolsHTML = parsed.tools.map((t, i) => {
-    const howHtml = t.example_prompt
-      ? `<div class="tool-example"><strong>How it works</strong>${escapeHtml(t.example_prompt)}</div>`
-      : '';
-    return `
-    <div class="tool-card" id="card-${i}">
-      <div class="tool-header ${priorityClass[i]}">
-        <div style="flex:1;min-width:0;">
-          <div style="margin-bottom:6px;"><span class="tool-priority">${escapeHtml(t.priority)}</span></div>
-          <div class="tool-name">${escapeHtml(t.name)}</div>
-        </div>
-        ${t.complexity ? `<span class="complexity-badge">Complexity: ${escapeHtml(t.complexity)}</span>` : ''}
-      </div>
-      <div class="tool-body">
-        <div class="tool-what">${escapeHtml(t.what_it_does)}</div>
-        <div class="tool-why">${escapeHtml(t.why_it_fits)}</div>
-        ${howHtml}
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('tools-container').innerHTML = toolsHTML;
-}
-
+applyAuthUI(Boolean(firebase.auth().currentUser));
 loadAndAnalyze();
 </script>
 </body>
