@@ -528,22 +528,22 @@
             <div class="spark-discover-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <div class="spark-discover-title">Your Spark Statement <span class="sp-inline">&#10022;</span></div>
-            <div class="spark-discover-copy">A powerful one-sentence description of what you do and who you help, written in your own voice.</div>
+            <div class="spark-discover-title">Your Spark <span class="sp-inline">&#10022;</span></div>
+            <div class="spark-discover-copy">A clear naming of what you're naturally drawn to do, make, or solve, written in language that feels like you.</div>
           </div>
           <div class="spark-discover-item">
             <div class="spark-discover-icon">
               <svg width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div class="spark-discover-title">Your Knowledge Profile <span class="sp-inline">&#10022;</span></div>
-            <div class="spark-discover-copy">What you know, who you're built to help, and what makes your path uniquely yours.</div>
+            <div class="spark-discover-copy">What you already know through lived experience, what energizes you, and what this reveals about who you are.</div>
           </div>
           <div class="spark-discover-item">
             <div class="spark-discover-icon">
               <svg width="18" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
             <div class="spark-discover-title">Your Edge <span class="sp-inline">&#10022;</span></div>
-            <div class="spark-discover-copy">The thing you've figured out that most people in your space still haven't.</div>
+            <div class="spark-discover-copy">The overlap between what you love, what bothers you, and what you've already shown you can build.</div>
           </div>
         </div>
       </div>
@@ -636,7 +636,13 @@ const SPARK_SESSION_ID = 'spark_' + Date.now();
 const CHIPS = {};
 
 const QUESTION_HINTS = {
-  7: "<b>Examples:</b> Getting clear on their direction, teaching what you know really well, or walking them through a process."
+  1: "If it feels like play to you, you're probably onto something.",
+  2: "The problems you love solving often become the businesses you love building.",
+  3: "Dream big. No 'practical' answers allowed.",
+  4: "We promise not to judge your algorithm.",
+  5: "Your biggest frustration might be your biggest opportunity.",
+  6: "Your first answer is probably your best answer.",
+  7: "Don't think. Just type the first thing that pops into your head."
 };
 
 // -------------------------------------
@@ -937,7 +943,7 @@ async function handleSend() {
 async function init() {
   showThinking();
   const opening = `Start the Find Your Spark session. 
-Write a warm, personal 2-3 sentence welcome in your voice — acknowledge that a lot of people arrive here feeling like they don't have anything valuable to offer, and tell them that's exactly why this exists. 
+Write a warm, personal 2 sentence welcome in your voice — acknowledge that a lot of people arrive here feeling like they don't have anything valuable to offer, and tell them that's exactly why this exists. 
 Then ask question 1. Emit [Q:1] at the start.`;
 
   try {
@@ -946,7 +952,7 @@ Then ask question 1. Emit [Q:1] at the start.`;
     addMsg("assistant", reply);
   } catch(e) {
     hideThinking();
-    addMsg("assistant", `[Q:1] Welcome — and I'm really glad you're here. A lot of people show up to this feeling like they don't have anything valuable to offer. I know that feeling personally. But that's exactly why I built this.\n\nLet's start simple. <b>What's your first name?</b>`);
+    addMsg("assistant", `[Q:1] Welcome — and I'm really glad you're here. A lot of people show up to this feeling like they don't have anything valuable to offer. I know that feeling personally. But that's exactly why I built this.\n\n<b>What could you happily do every day without getting bored?</b>`);
   }
   document.getElementById("sendBtn").disabled = false;
 }

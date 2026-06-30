@@ -112,6 +112,27 @@
     border-radius: 2px;
     transition: width 0.1s linear;
   }
+  .i-help-version {
+  padding: 14px 18px;
+  border: 1px solid var(--page-border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: rgba(201,168,76,0.05);
+}
+.i-help-version:last-child { margin-bottom: 0; }
+.i-help-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-gold, #C9A84C);
+  margin-bottom: 6px;
+}
+.i-help-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--page-ink, #1A1510);
+}
 </style>
 </head>
 <body class="results-shell">
@@ -145,48 +166,39 @@
       </div>
     </header>
 
-    <div class="context-row">
-      <div class="context-tag" id="contextCard" style="display:none;">
-        <span class="context-tag__dot" aria-hidden="true"></span>
-        <span>You built this profile based on <strong id="pathLabel"></strong>.</span>
-      </div>
-    </div>
+    <!-- ADD THIS above the results-grid — I Help Statement feature card -->
+<section class="feature-card" id="iHelpCard" style="display:none;">
+  <div class="section-label">Your I Help Statement</div>
+  <p class="words-intro">Three ways to say who you help and what you do. Use whichever version fits the moment.</p>
+  <div id="iHelpVersions"></div>
+</section>
 
-    <section class="results-grid audience-grid">
-      <article class="result-card" id="whoTheyAreCard">
-        <div class="section-label">Who They Are</div>
-        <div class="result-copy" id="whoTheyAreText"></div>
-      </article>
-      <article class="result-card" id="dailyFrustrationCard">
-        <div class="section-label">Daily Frustration</div>
-        <div class="result-copy" id="dailyFrustrationText"></div>
-      </article>
-      <article class="result-card" id="whatTriggeredThemCard">
-        <div class="section-label">What Triggered Them</div>
-        <div class="result-copy" id="whatTriggeredThemText"></div>
-      </article>
-      <article class="result-card" id="whatTheyHaveTriedCard">
-        <div class="section-label">What They've Tried</div>
-        <div class="result-copy" id="whatTheyHaveTriedText"></div>
-      </article>
-      <article class="result-card" id="theirObjectionsCard">
-        <div class="section-label">Their Objections</div>
-        <div class="result-copy" id="theirObjectionsText"></div>
-      </article>
-      <article class="result-card" id="dreamOutcomeCard">
-        <div class="section-label">Dream Outcome</div>
-        <div class="result-copy" id="dreamOutcomeText"></div>
-      </article>
-      <article class="result-card" id="howTheyWantToBeSeenCard">
-        <div class="section-label">How They Want to Be Seen</div>
-        <div class="result-copy" id="howTheyWantToBeSeenText"></div>
-      </article>
-      <article class="result-card" id="whereToFindThemCard">
-        <div class="section-label">Where to Find Them</div>
-        <div class="result-copy" id="whereToFindThemText"></div>
-      </article>
-    </section>
-
+<section class="results-grid audience-grid">
+  <article class="result-card" id="whoYouHelpCard">
+    <div class="section-label">Who You Help</div>
+    <div class="result-copy" id="whoYouHelpText"></div>
+  </article>
+  <article class="result-card" id="whatTheyreStrugglingWithCard">
+    <div class="section-label">What They're Struggling With</div>
+    <div class="result-copy" id="whatTheyreStrugglingWithText"></div>
+  </article>
+  <article class="result-card" id="theTriggerMomentCard">
+    <div class="section-label">The Trigger Moment</div>
+    <div class="result-copy" id="theTriggerMomentText"></div>
+  </article>
+  <article class="result-card" id="whatTheyveAlreadyTriedCard">
+    <div class="section-label">What They've Already Tried</div>
+    <div class="result-copy" id="whatTheyveAlreadyTriedText"></div>
+  </article>
+  <article class="result-card" id="theTransformationCard">
+    <div class="section-label">The Transformation</div>
+    <div class="result-copy" id="theTransformationText"></div>
+  </article>
+  <article class="result-card" id="whereToReachThemCard">
+    <div class="section-label">Where to Reach Them</div>
+    <div class="result-copy" id="whereToReachThemText"></div>
+  </article>
+</section>
     <section class="feature-card">
       <div class="section-label">Their Exact Words</div>
       <p class="words-intro">These are the phrases your audience already uses. Pull them into your marketing, your offers, and your emails, word for word.</p>
@@ -251,36 +263,36 @@ function extractBlock(raw) {
 function parseClientBible(raw) {
   const profile = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|AUDIENCE_BLUEPRINT_END|CLIENT_BIBLE_END|$)`);
+    const regex = new RegExp(
+      `\\*{0,2}${key}\\*{0,2}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|AUDIENCE_BLUEPRINT_END|CLIENT_BIBLE_END|$)`
+    );
     const match = raw.match(regex);
     return match ? match[1].trim() : "";
   };
-  profile.name = extract("NAME");
-  profile.whoTheyAre = extract("WHO_THEY_ARE");
-  profile.dailyFrustration = extract("DAILY_FRUSTRATION");
-  profile.whatTriggeredThem = extract("WHAT_TRIGGERED_THEM");
-  profile.whatTheyHaveTried = extract("WHAT_THEY_HAVE_TRIED");
-  profile.theirObjections = extract("THEIR_OBJECTIONS");
-  profile.dreamOutcome = extract("DREAM_OUTCOME");
-  profile.howTheyWantToBeeSeen = extract("HOW_THEY_WANT_TO_BE_SEEN");
-  profile.whereToFindThem = extract("WHERE_TO_FIND_THEM");
-  profile.theirWords = extract("THEIR_WORDS");
-  profile.closing = extract("CLOSING");
+  profile.name                     = extract("NAME");
+  profile.yourIHelpStatement       = extract("YOUR_I_HELP_STATEMENT");
+  profile.whoYouHelp               = extract("WHO_YOU_HELP");
+  profile.whatTheyreStrugglingWith = extract("WHAT_THEYRE_STRUGGLING_WITH");
+  profile.theTriggerMoment         = extract("THE_TRIGGER_MOMENT");
+  profile.whatTheyveAlreadyTried   = extract("WHAT_THEYVE_ALREADY_TRIED");
+  profile.theTransformation        = extract("THE_TRANSFORMATION");
+  profile.wordsTheyUse             = extract("WORDS_THEY_USE");
+  profile.whereToReachThem         = extract("WHERE_TO_REACH_THEM");
+  profile.closing                  = extract("CLOSING");
   return profile;
 }
 
 const DEMO = {
   name: "Your",
   audiencePath: null,
-  whoTheyAre: "They're someone who knows they have something valuable to offer but cannot quite see it clearly yet. They've been around, they've learned things the hard way, and now they're at a point where they want to do something meaningful with what they know.",
-  dailyFrustration: "Every day there's this low hum of, 'I should be further along by now.' They're busy but not moving. They're doing things, but not the right things. The gap between where they are and where they want to be feels like it's getting wider, not smaller.",
-  whatTriggeredThem: "Something finally made the old way feel too expensive to keep carrying. They hit a moment where staying stuck felt heavier than changing.",
-  whatTheyHaveTried: "They've bought courses. They've tried different strategies. They've started things and stopped. None of it stuck because none of it was built around who they actually are and what they actually have to offer.",
-  theirObjections: "They want to say yes, but they're scared it'll be another thing they try and abandon. They're worried they'll invest time or money and it won't work again. That fear of wasting effort is louder than the excitement.",
-  dreamOutcome: "Six months from now they're doing work that feels like them. Not a version of someone else's business, theirs. They're waking up to something they built, helping someone they actually care about, and it's working.",
-  howTheyWantToBeeSeen: "They want to feel capable, respected, and clear. They want other people to look at them and immediately understand that they know what they're doing.",
-  whereToFindThem: "You find them in half-finished notes apps, saved posts, voice memos, and private conversations where they're trying to explain the thing they know they should be building.",
-  theirWords: "- \"I don't know where to start\"\n- \"I feel like I'm spinning my wheels\"\n- \"I know I have something but I can't explain it\"\n- \"I keep starting over\"\n- \"I just want something that actually fits me\"",
+  yourIHelpStatement: "— CLEAR: I help people who know they have something valuable to offer finally build a business around it using AI tools.\n— WARM: I help people who feel stuck between 'I know I have something' and 'I don't know where to start' finally make their move.\n— BOLD: I help overlooked experts turn what they already know into a real AI-powered business — in weeks, not years.",
+  whoYouHelp: "They're someone who knows they have something valuable to offer but cannot quite see it clearly yet. They've been around, they've learned things the hard way, and now they're at a point where they want to do something meaningful with what they know.",
+  whatTheyreStrugglingWith: "Every day there's this low hum of, 'I should be further along by now.' They're busy but not moving. They're doing things, but not the right things. The gap between where they are and where they want to be feels like it's getting wider, not smaller.",
+  theTriggerMoment: "Something finally made the old way feel too expensive to keep carrying. They hit a moment where staying stuck felt heavier than changing.",
+  whatTheyveAlreadyTried: "They've bought courses. They've tried different strategies. They've started things and stopped. None of it stuck because none of it was built around who they actually are and what they actually have to offer.",
+  theTransformation: "Six months from now they're doing work that feels like them — not a version of someone else's business, theirs. They want to feel capable, respected, and clear. They want other people to look at them and immediately understand that they know what they're doing.",
+  wordsTheyUse: "- \"I don't know where to start\"\n- \"I feel like I'm spinning my wheels\"\n- \"I know I have something but I can't explain it\"\n- \"I keep starting over\"\n- \"I just want something that actually fits me\"",
+  whereToReachThem: "You find them in half-finished notes apps, saved posts, voice memos, and private conversations where they're trying to explain the thing they know they should be building.",
   closing: "Knowing your audience this deeply changes everything. When you speak their language, their exact words, their real fears, and their actual dream, you stop chasing and start attracting."
 };
 
@@ -288,15 +300,14 @@ function buildProfile(data, parsed) {
   return {
     name: data.name || parsed.name || DEMO.name,
     audiencePath: data.audiencePath || null,
-    whoTheyAre: parsed.whoTheyAre || data.whoTheyAre || DEMO.whoTheyAre,
-    dailyFrustration: parsed.dailyFrustration || data.dailyFrustration || DEMO.dailyFrustration,
-    whatTriggeredThem: parsed.whatTriggeredThem || data.whatTriggeredThem || DEMO.whatTriggeredThem,
-    whatTheyHaveTried: parsed.whatTheyHaveTried || data.whatTheyHaveTried || DEMO.whatTheyHaveTried,
-    theirObjections: parsed.theirObjections || data.theirObjections || DEMO.theirObjections,
-    dreamOutcome: parsed.dreamOutcome || data.dreamOutcome || DEMO.dreamOutcome,
-    howTheyWantToBeeSeen: parsed.howTheyWantToBeeSeen || data.howTheyWantToBeeSeen || DEMO.howTheyWantToBeeSeen,
-    whereToFindThem: parsed.whereToFindThem || data.whereToFindThem || DEMO.whereToFindThem,
-    theirWords: parsed.theirWords || data.theirWords || DEMO.theirWords,
+    yourIHelpStatement: parsed.yourIHelpStatement || data.yourIHelpStatement || DEMO.yourIHelpStatement,
+    whoYouHelp: parsed.whoYouHelp || data.whoYouHelp || DEMO.whoYouHelp,
+    whatTheyreStrugglingWith: parsed.whatTheyreStrugglingWith || data.whatTheyreStrugglingWith || DEMO.whatTheyreStrugglingWith,
+    theTriggerMoment: parsed.theTriggerMoment || data.theTriggerMoment || DEMO.theTriggerMoment,
+    whatTheyveAlreadyTried: parsed.whatTheyveAlreadyTried || data.whatTheyveAlreadyTried || DEMO.whatTheyveAlreadyTried,
+    theTransformation: parsed.theTransformation || data.theTransformation || DEMO.theTransformation,
+    wordsTheyUse: parsed.wordsTheyUse || data.wordsTheyUse || DEMO.wordsTheyUse,
+    whereToReachThem: parsed.whereToReachThem || data.whereToReachThem || DEMO.whereToReachThem,
     closing: parsed.closing || data.closing || DEMO.closing
   };
 }
@@ -319,7 +330,7 @@ function renderField(cardId, contentId, value) {
   const content = document.getElementById(contentId);
   const hasValue = Boolean(String(value || "").trim());
   content.innerHTML = hasValue ? fmt(value) : "";
-  card.classList.toggle("is-hidden", !hasValue);
+  card.style.display = hasValue ? "" : "none";
 }
 
 let wordsText = "";
@@ -343,22 +354,32 @@ function renderProfile(profile) {
     document.getElementById("heroName").innerHTML = `${escapeHtml(profile.name)}'s <span>Audience</span> Blueprint`;
     document.title = `${profile.name}'s Audience Blueprint - ToolSpark`;
   }
-
-  if (profile.audiencePath) {
-    const card = document.getElementById("contextCard");
-    const label = document.getElementById("pathLabel");
-    card.style.display = "inline-flex";
-    label.textContent = profile.audiencePath === "self" ? "someone like yourself" : "someone you've helped";
+  // I Help Statement — parse 3 versions
+  const iHelpCard = document.getElementById("iHelpCard");
+  const iHelpVersions = document.getElementById("iHelpVersions");
+  if (profile.yourIHelpStatement) {
+    const labels = { CLEAR: "Clear", WARM: "Warm", BOLD: "Bold" };
+    const lines = profile.yourIHelpStatement.split(/\n/).filter(Boolean);
+    let html = "";
+    lines.forEach(line => {
+      const match = line.match(/^[—\-]\s*(CLEAR|WARM|BOLD):\s*(.+)/i);
+      if (match) {
+        const key = match[1].toUpperCase();
+        html += `<div class="i-help-version">
+          <div class="i-help-label">${labels[key] || key}</div>
+          <div class="i-help-text">${escapeHtml(match[2].trim())}</div>
+        </div>`;
+      }
+    });
+    if (html) { iHelpVersions.innerHTML = html; iHelpCard.style.display = "block"; }
   }
 
-  renderField("whoTheyAreCard", "whoTheyAreText", profile.whoTheyAre);
-  renderField("dailyFrustrationCard", "dailyFrustrationText", profile.dailyFrustration);
-  renderField("whatTriggeredThemCard", "whatTriggeredThemText", profile.whatTriggeredThem);
-  renderField("whatTheyHaveTriedCard", "whatTheyHaveTriedText", profile.whatTheyHaveTried);
-  renderField("theirObjectionsCard", "theirObjectionsText", profile.theirObjections);
-  renderField("dreamOutcomeCard", "dreamOutcomeText", profile.dreamOutcome);
-  renderField("howTheyWantToBeSeenCard", "howTheyWantToBeSeenText", profile.howTheyWantToBeeSeen);
-  renderField("whereToFindThemCard", "whereToFindThemText", profile.whereToFindThem);
+  renderField("whoYouHelpCard",               "whoYouHelpText",               profile.whoYouHelp);
+  renderField("whatTheyreStrugglingWithCard",  "whatTheyreStrugglingWithText", profile.whatTheyreStrugglingWith);
+  renderField("theTriggerMomentCard",          "theTriggerMomentText",         profile.theTriggerMoment);
+  renderField("whatTheyveAlreadyTriedCard",    "whatTheyveAlreadyTriedText",   profile.whatTheyveAlreadyTried);
+  renderField("theTransformationCard",         "theTransformationText",        profile.theTransformation);
+  renderField("whereToReachThemCard",          "whereToReachThemText",         profile.whereToReachThem);
 
   const closingCard = document.getElementById("closingCard");
   const closingText = document.getElementById("closingText");
@@ -366,7 +387,7 @@ function renderProfile(profile) {
   closingText.innerHTML = hasClosing ? fmt(profile.closing) : "";
   closingCard.style.display = hasClosing ? "block" : "none";
 
-  renderWords(profile.theirWords || "");
+  renderWords(profile.wordsTheyUse || "");
 
   document.getElementById("loadingState").style.display = "none";
   document.getElementById("content").style.display = "grid";

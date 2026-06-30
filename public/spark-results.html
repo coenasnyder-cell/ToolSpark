@@ -135,7 +135,7 @@
       <div class="quote-rule"></div>
       <p class="quote-text" id="statementText"></p>
       <div class="utility-actions">
-        <button type="button" class="utility-btn copy-btn" id="copyStatementBtn" onclick="copyStatement()">Copy statement</button>
+        <button type="button" class="utility-btn copy-btn" id="copyStatementBtn" onclick="copyStatement()">Copy spark</button>
         <button type="button" class="utility-btn copy-btn" id="copyThreadBtn" onclick="copyForThread()">Copy for thread</button>
       </div>
     </section>
@@ -146,11 +146,11 @@
         <div class="result-copy" id="knowText"></div>
       </article>
       <article class="result-card" id="whoCard">
-        <div class="section-label">Who You Help</div>
+        <div class="section-label">Who You Are</div>
         <div class="result-copy" id="whoText"></div>
       </article>
       <article class="result-card" id="resultCard">
-        <div class="section-label">The Result You Create</div>
+        <div class="section-label">The Result You Could Create</div>
         <div class="result-copy" id="resultText"></div>
       </article>
       <article class="result-card" id="edgeCard">
@@ -166,7 +166,7 @@
 
     <section class="cta-card">
       <h2 class="cta-title">Now let's go deeper.</h2>
-      <p class="cta-copy">You know what you have and who you help. <strong>The next step is to understand your audience so deeply that your message lands every time.</strong></p>
+      <p class="cta-copy">You know what pulls at you and what you're naturally built to create. <strong>The next step is to understand your audience so deeply that your message lands every time.</strong></p>
       <div class="cta-actions" id="cta-buttons">
         <a href="signup.html?redirect=userclaritytools" class="primary-button" id="cta-join">Join ToolSpark &rarr;</a>
         <div class="secondary-link">Already a member? <a href="signon.html?redirect=userclaritytools">Sign in</a></div>
@@ -287,7 +287,7 @@ function copyStatement() {
 }
 
 function copyForThread() {
-  const threadText = `My Spark Statement:\n\n"${statementText}"\n\nFound this inside the Find Your Spark tool at ToolSpark.`;
+  const threadText = `My Spark:\n\n"${statementText}"\n\nFound this inside the Find Your Spark tool at ToolSpark.`;
   navigator.clipboard.writeText(threadText).then(() => {
     flashCopyButton("copyThreadBtn", "Copied for thread");
   });
@@ -295,12 +295,12 @@ function copyForThread() {
 
 const DEMO_PROFILE = {
   name: "You",
-  statement: "I help people who are sitting on years of hard-earned experience, but have no idea how to turn it into income, finally find their path and build something real, using everything they've already lived through.",
-  whatYouKnow: "You know what it feels like to be capable but stuck. You've figured out things the hard way that most people are still struggling with. That knowledge, the kind that comes from lived experience instead of a textbook, is exactly what someone out there is desperate to find.",
-  whoYouHelp: "You help the person who's tried a dozen things and keeps hitting the same wall. They have skills. They have desire. They just cannot see their own value clearly enough to build something with it. They need someone who has been exactly where they are.",
-  resultYouCreate: "They walk away with clarity, not just a plan, but a belief that they can actually pull it off. You help them go from circling the same problem to finally moving forward with something that feels true to who they are.",
-  yourEdge: "What sets you apart is that you've actually lived it. You're not teaching theory, you're sharing the map you drew while lost in the dark. Most people in this space are still guessing at shortcuts. You've already found them.",
-  closing: "I see something in you that you probably cannot see yet, a depth of experience and a genuine desire to help that most people never have. You have not failed. You have been preparing. This is where it starts."
+  statement: "You're naturally drawn to turning messy ideas into something clear, useful, and real. You don't just like possibility - you like building it into form.",
+  whatYouKnow: "You know how to spot the gap between what sounds good and what actually works. You've learned through lived experience how to shape ideas, patterns, and problems into something practical. The fact that you've already built things is proof that your knowledge is real, not borrowed.",
+  whoYouHelp: "At your core, you're a builder with a strong internal compass. You pay attention to what pulls at you, what bothers you, and what keeps returning to your mind until you do something about it. When something matters to you, you don't just admire it from a distance - you move toward it.",
+  resultYouCreate: "You are equipped to create tools, systems, or ideas that help people move from confusion to momentum. There is a real bridge here between what frustrates you, what you dream about making, and what you've already proven you can build. This is less a label and more an opening.",
+  yourEdge: "What sets you apart is that your interest isn't abstract. You care enough to notice what is broken, stay with it long enough to understand it, and then build something useful in response. That combination of obsession, honesty, and follow-through is hard to fake.",
+  closing: "I see someone in you who is more ready than they realize. What keeps pulling at you isn't random - it's pointing toward the work you're here to do."
 };
 
 function applySignedInState(isSignedIn) {

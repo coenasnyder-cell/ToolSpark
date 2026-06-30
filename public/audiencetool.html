@@ -600,7 +600,7 @@ async function authHeaders() {
 const TTS_URL    = "https://us-central1-toolspark-2d62d.cloudfunctions.net/tts";
 const MODEL      = "claude-sonnet-4-6";
 const JOIN_URL   = "https://toolspark.co/signup";
-const Q_TOTAL    = 7;
+let Q_TOTAL    = 7;
 
 // -------------------------------------
 // STATE
@@ -666,10 +666,15 @@ const sparkContextPromise = (async () => {
 // -------------------------------------
 // CHIPS PER QUESTION
 // -------------------------------------
+// 1. CHIPS — path-aware
 const CHIPS = {
-  1: ["A lot like me", "Someone I've helped"],
-  3: ["Something broke down and I couldn't ignore it", "I watched someone else succeed and felt left behind", "I hit the same wall one too many times"],
+  1: ["That's basically me", "Someone I've helped"],
+  A_3: ["Something finally broke", "I got tired of hitting the same wall", "I saw someone else doing it and thought, 'Why not me?'"],
+  A_7: ["Facebook or LinkedIn groups", "YouTube tutorials", "Podcasts or newsletters"],
+  B_4: ["Something finally broke", "They got tired of hitting the same wall", "They saw someone else getting results and wanted the same"],
+  B_8: ["Facebook or LinkedIn groups", "YouTube tutorials", "Podcasts or newsletters"],
 };
+
 
 // -------------------------------------
 // PROGRESS
@@ -705,6 +710,7 @@ function addMsg(role, content) {
 
 function fmt(t) {
   return t
+    .replace(/\[PATH:[AB]\]/g, "")
     .replace(/\[Q:\d+\]/g, "")
     .replace(/\[DONE\]/g, "")
     .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
@@ -728,10 +734,16 @@ function hideThinking() {
   if (el) el.remove();
 }
 
+// 3. setChips — path-aware lookup
 function setChips(qNum) {
   const c = document.getElementById("chips");
   c.innerHTML = "";
-  (CHIPS[qNum] || []).forEach(txt => {
+  let chips = CHIPS[qNum] || [];
+  if (!chips.length && audiencePath) {
+    const pathKey = audiencePath === 'self' ? 'A' : 'B';
+    chips = CHIPS[`${pathKey}_${qNum}`] || [];
+  }
+  chips.forEach(txt => {
     const b = document.createElement("button");
     b.className = "chip"; b.textContent = txt;
     b.onclick = () => {
@@ -781,45 +793,64 @@ function extractProfileBlock(raw) {
   return match ? match[0].trim() : raw.trim();
 }
 
+// 5. parseProfile() — replace entire function
 function parseProfile(raw) {
   const profile = {};
   const extract = (key) => {
-    const regex = new RegExp(`${key}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|CLIENT_BIBLE_END|AUDIENCE_BLUEPRINT_END|$)`);
+    const regex = new RegExp(
+      `\\*{0,2}${key}\\*{0,2}:([\\s\\S]*?)(?=\\n\\s*\\*{0,2}[A-Z][A-Z_]+\\*{0,2}:|AUDIENCE_BLUEPRINT_END|CLIENT_BIBLE_END|$)`
+    );
     const match = raw.match(regex);
     return match ? match[1].trim() : "";
   };
-
   profile.name = extract("NAME");
-  profile.whoTheyAre = extract("WHO_THEY_ARE");
-  profile.dailyFrustration = extract("DAILY_FRUSTRATION");
-  profile.whatTheyHaveTried = extract("WHAT_THEY_HAVE_TRIED");
-  profile.theirObjections = extract("THEIR_OBJECTIONS");
-  profile.dreamOutcome = extract("DREAM_OUTCOME");
-  profile.theirWords = extract("THEIR_WORDS");
-  profile.whatTriggeredThem    = extract("WHAT_TRIGGERED_THEM");
-  profile.howTheyWantToBeeSeen = extract("HOW_THEY_WANT_TO_BE_SEEN");
-  profile.whereToFindThem      = extract("WHERE_TO_FIND_THEM");
-  profile.closing = extract("CLOSING");
+  profile.yourIHelpStatement       = extract("YOUR_I_HELP_STATEMENT");
+  profile.whoYouHelp               = extract("WHO_YOU_HELP");
+  profile.whatTheyreStrugglingWith = extract("WHAT_THEYRE_STRUGGLING_WITH");
+  profile.theTriggerMoment         = extract("THE_TRIGGER_MOMENT");
+  profile.whatTheyveAlreadyTried   = extract("WHAT_THEYVE_ALREADY_TRIED");
+  profile.theTransformation        = extract("THE_TRANSFORMATION");
+  profile.wordsTheyUse             = extract("WORDS_THEY_USE");
+  profile.whereToReachThem         = extract("WHERE_TO_REACH_THEM");
+  profile.closing                  = extract("CLOSING");
   return profile;
 }
 
+// 6. buildAudiencePayload() — replace entire function
 function buildAudiencePayload(sessionId, profile, rawProfile, email, currentUser) {
+  const transformParts = (profile.theTransformation || "").split(/(?<=[.!?])\s+/);
+  const dreamOutcomePart = transformParts[0] || "";
+  const howSeenPart = transformParts.slice(1).join(" ") || "";
+
   return {
     sessionId,
-    name: profile.name || "",
     email,
     userId: currentUser?.uid || null,
+    name: profile.name || "",
     audiencePath,
-    whoTheyAre: profile.whoTheyAre || "",
-    dailyFrustration: profile.dailyFrustration || "",
-    whatTheyHaveTried: profile.whatTheyHaveTried || "",
-    theirObjections: profile.theirObjections || "",
-    dreamOutcome: profile.dreamOutcome || "",
-    theirWords: profile.theirWords || "",
-    whatTriggeredThem:    profile.whatTriggeredThem    || "",
-    howTheyWantToBeeSeen: profile.howTheyWantToBeeSeen || "",
-    whereToFindThem:      profile.whereToFindThem      || "",
-    closing: profile.closing || "",
+
+    // New fields
+  
+    yourIHelpStatement:       profile.yourIHelpStatement       || "",
+    whoYouHelp:               profile.whoYouHelp               || "",
+    whatTheyreStrugglingWith: profile.whatTheyreStrugglingWith || "",
+    theTriggerMoment:         profile.theTriggerMoment         || "",
+    whatTheyveAlreadyTried:   profile.whatTheyveAlreadyTried   || "",
+    theTransformation:        profile.theTransformation        || "",
+    wordsTheyUse:             profile.wordsTheyUse             || "",
+    whereToReachThem:         profile.whereToReachThem         || "",
+    closing:                  profile.closing                  || "",
+
+    // Legacy compatibility — keeps roadmap and clarity from breaking
+    whoTheyAre:          profile.whoYouHelp               || "",
+    dailyFrustration:    profile.whatTheyreStrugglingWith  || "",
+    whatTriggeredThem:   profile.theTriggerMoment          || "",
+    whatTheyHaveTried:   profile.whatTheyveAlreadyTried    || "",
+    dreamOutcome:        dreamOutcomePart,
+    howTheyWantToBeeSeen:howSeenPart,
+    whereToFindThem:     profile.whereToReachThem          || "",
+    theirWords:          profile.wordsTheyUse              || "",
+
     rawProfile,
     transcript: history,
     source: "audience-deep-dive",
@@ -921,12 +952,6 @@ async function handleSend() {
   input.value = ""; input.style.height = "auto";
   document.getElementById("sendBtn").disabled = true;
   document.getElementById("chips").innerHTML = "";
-  // Detect audience path from first answer
-  if (qDone === 0) {
-    const lower = text.toLowerCase();
-    if (lower.includes("like me")) audiencePath = 'self';
-    else if (lower.includes("helped") || lower.includes("someone")) audiencePath = 'other';
-  }
 
   addMsg("user", text);
   showThinking(); busy = true;
@@ -934,6 +959,13 @@ async function handleSend() {
   try {
     const reply = await callAI(text);
     hideThinking();
+
+    // Detect path from AI reply, not user text
+    const pathMatch = reply.match(/\[PATH:(A|B)\]/);
+    if (pathMatch) {
+      audiencePath = pathMatch[1] === 'A' ? 'self' : 'other';
+      Q_TOTAL = audiencePath === 'self' ? 7 : 8;
+    }
 
     // Track question progress
     const qMatch = reply.match(/\[Q:(\d+)\]/);
@@ -991,8 +1023,7 @@ Then ask the path splitter question. Emit [Q:1] at the start.`;
     addMsg("assistant", reply);
     setChips(1);
   } catch(e) {
-    const fallback = `[Q:1] Welcome — and I'm so glad you're here. Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. Today we fix that.\n\nBefore we dive in — the person you most want to help... are they **a lot like you right now**, or **someone you've already been able to help** through something?`;
-    hideThinking();
+const fallback = `[Q:1] Welcome — and I'm so glad you're here. Most people building an online business are sitting on years of experience and still guessing who they're actually building it for. Today we fix that.\n\nQuick one... the person you want to help most — is that **basically you**, or **someone you've already helped**?`;    hideThinking();
     history.push({ role: "assistant", content: fallback });
     addMsg("assistant", fallback);
     setChips(1);
@@ -1046,6 +1077,7 @@ function clearSpeakingAvatar() {
 
 function cleanForSpeech(text) {
   return text
+    .replace(/\[PATH:[AB]\]/g, "")
     .replace(/\[Q:\d+\]/g, "")
     .replace(/\[DONE\]/g, "")
     .replace(/<[^>]+>/g, " ")
