@@ -320,6 +320,11 @@ match /graduation_requests/{requestId} {
       allow write: if isAdmin();
     }
 
+    // PAGE BUILDER DRAFTS (VvvebJs @ /admin/builder — saves are drafts, not live pages)
+    match /page_drafts/{slug} {
+      allow read, write: if isAdmin();
+    }
+
     // TECHSTACK RESULTS
     match /techstack_results/{resultId} {
       allow read: if isActive() && (

@@ -15,6 +15,10 @@
       {
         "source": "/auth-action",
         "destination": "/auth-action.html"
+      },
+      {
+        "source": "/admin/builder",
+        "destination": "/admin/builder/editor.html"
       }
     ]
   },

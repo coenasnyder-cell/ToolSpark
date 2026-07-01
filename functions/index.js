@@ -241,6 +241,112 @@ exports.ttsGenerate = onRequest({
   }
 });
 
+// ── ADMIN PAGE BUILDER (VvvebJs @ /admin/builder) ───────────────────────────
+// Pages are static HTML deployed via `firebase deploy --only hosting` — a Cloud
+// Function has no way to overwrite the live public/*.html file at runtime, so
+// Save writes a DRAFT only. Publishing stays a manual step: copy the saved HTML
+// from page_drafts/{slug} into public/{slug}.html and deploy, same as always.
+exports.builderSavePage = onRequest({
+  cors: true,
+  invoker: "public"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  if (!await requireAppCheck(req, res)) return;
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  if (!await requireAdmin(decoded.uid, res)) return;
+
+  const slug = (req.body.name || "").replace(/[^a-zA-Z0-9_-]/g, "");
+  const html = req.body.html || "";
+
+  if (!slug) { res.status(400).send("Missing page name"); return; }
+  if (!html) { res.status(400).send("Html content is empty"); return; }
+  if (html.length > 2 * 1024 * 1024) { res.status(400).send("Page too large (max 2MB)"); return; }
+
+  try {
+    await admin.firestore().collection("page_drafts").doc(slug).set({
+      html,
+      title: req.body.title || slug,
+      savedBy: decoded.uid,
+      savedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    res.status(200).send(
+      `Draft saved (page_drafts/${slug}) — not live. Copy into public/${slug}.html and deploy to publish.`
+    );
+  } catch (err) {
+    console.error("builderSavePage error:", err);
+    res.status(500).send("Error saving draft: " + err.message);
+  }
+});
+
+exports.builderUploadImage = onRequest({
+  cors: true,
+  invoker: "public",
+  memory: "256MiB"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  if (!await requireAppCheck(req, res)) return;
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  if (!await requireAdmin(decoded.uid, res)) return;
+
+  const allowedExtensions = ["ico", "jpg", "jpeg", "png", "gif", "webp"];
+  const Busboy = require("busboy");
+  const bb = Busboy({ headers: req.headers, limits: { fileSize: 5 * 1024 * 1024 } });
+
+  let fileBuffer = null;
+  let fileName = null;
+  let fileMime = null;
+  let tooLarge = false;
+
+  bb.on("file", (fieldname, stream, info) => {
+    if (fieldname !== "file") { stream.resume(); return; }
+    fileName = info.filename;
+    fileMime = info.mimeType;
+    const chunks = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("limit", () => { tooLarge = true; });
+    stream.on("end", () => { fileBuffer = Buffer.concat(chunks); });
+  });
+
+  bb.on("finish", async () => {
+    try {
+      if (tooLarge) { res.status(400).send("File too large (max 5MB)"); return; }
+      if (!fileName || !fileBuffer) { res.status(400).send("Invalid filename!"); return; }
+
+      const extension = (fileName.split(".").pop() || "").toLowerCase();
+      if (!allowedExtensions.includes(extension)) {
+        res.status(400).send(`File type ${extension} not allowed!`);
+        return;
+      }
+
+      const safeName = `${Date.now()}-${fileName.replace(/[^a-zA-Z0-9_.-]/g, "")}`;
+      const storagePath = `builder-uploads/${safeName}`;
+      const bucket = admin.storage().bucket();
+      const token = crypto.randomUUID();
+
+      await bucket.file(storagePath).save(fileBuffer, {
+        metadata: {
+          contentType: fileMime || `image/${extension}`,
+          metadata: { firebaseStorageDownloadTokens: token }
+        }
+      });
+
+      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(storagePath)}?alt=media&token=${token}`;
+      // VvvebJs's media library concatenates mediaPath + this response text as the final <img src> —
+      // mediaPath is set to "" in editor.html, so returning the full URL here is what makes that work.
+      res.status(200).send(downloadUrl);
+    } catch (err) {
+      console.error("builderUploadImage error:", err);
+      res.status(500).send("Error uploading: " + err.message);
+    }
+  });
+
+  bb.end(req.rawBody);
+});
+
 exports.getElevenLabsVoices = onRequest({
   cors: true,
   invoker: "public",
