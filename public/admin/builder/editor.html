@@ -9,7 +9,12 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <link rel="icon" href="favicon.ico">
-  <base href="">
+  <!-- Forces every relative asset path (css/, js/, libs/, fonts/, img/) to resolve against
+       this folder regardless of the visible URL. Without this, visiting /admin/builder (no
+       trailing slash, via the hosting rewrite) makes the browser resolve "css/editor.css" as
+       a sibling of "builder" instead of inside it — i.e. /admin/css/editor.css, a 404 — which
+       cascades into every script 404ing and Vvveb never getting defined. -->
+  <base href="/admin/builder/">
   <title>VvvebJs</title>
 
   <link href="css/editor.css" rel="stylesheet">
