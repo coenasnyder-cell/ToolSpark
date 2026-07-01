@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey Map · ToolSpark</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark.co",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate("6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ", true); } catch (e) {}
+  const db = firebase.firestore();
+</script>
+<script src="js/auth.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f3eb;
+    --surface: rgba(255,255,255,0.84);
+    --surface-strong: #ffffff;
+    --ink: #1b1712;
+    --muted: #6f6355;
+    --gold: #c9a84c;
+    --gold-deep: #8a6e1e;
+    --line: rgba(27,23,18,0.10);
+    --line-strong: rgba(201,168,76,0.28);
+    --shadow: 0 18px 50px rgba(56,42,18,0.08);
+    --green: #315b43;
+    --green-bg: rgba(49,91,67,0.08);
+    --cream: #f2ede2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "DM Sans", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at top left, rgba(201,168,76,0.18), transparent 30%),
+      linear-gradient(180deg, #fbf8f1 0%, var(--bg) 100%);
+  }
+
+  a { color: inherit; }
+
+  .shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 20px 72px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .back-link,
+  .ghost-btn,
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .back-link,
+  .ghost-btn {
+    color: var(--muted);
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.56);
+  }
+
+  .primary-btn {
+    border: none;
+    background: var(--gold);
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(201,168,76,0.22);
+  }
+
+  .primary-btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  .hero {
+    margin-bottom: 24px;
+  }
+
+  .hero-card,
+  .panel,
+  .state-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    border-radius: 28px;
+  }
+
+  .hero-card {
+    padding: 34px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-card::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.24), transparent 68%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.24);
+    color: var(--gold-deep);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(34px, 4.8vw, 56px);
+    line-height: 1.04;
+    margin-bottom: 14px;
+    max-width: 12ch;
+  }
+
+  .hero-copy {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+
+  .hero-note {
+    margin-top: 22px;
+    font-family: "Caveat", cursive;
+    font-size: 26px;
+    color: var(--gold-deep);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(49,91,67,0.18);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .panel {
+    padding: 24px;
+    grid-column: span 6;
+  }
+
+  .panel-wide {
+    grid-column: span 8;
+  }
+
+  .panel-side {
+    grid-column: span 4;
+  }
+
+  .panel-full {
+    grid-column: span 12;
+  }
+
+  .panel h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .panel p,
+  .panel li {
+    color: var(--muted);
+    line-height: 1.72;
+    font-size: 15px;
+  }
+
+  .panel ul {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+  }
+
+  .mini-list li {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px 16px;
+  }
+
+  .transformation-panel h2 {
+    font-size: clamp(34px, 4vw, 48px);
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+
+  .transform-summary {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 15px;
+    max-width: 60ch;
+  }
+
+  .transformation {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 22px;
+  }
+
+  .transform-box {
+    padding: 22px;
+    border-radius: 24px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.78);
+  }
+
+  .transform-box strong {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 14px;
+    color: var(--gold-deep);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(201,168,76,0.10);
+    border: 1px solid rgba(201,168,76,0.18);
+  }
+
+  .transform-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-deep);
+    font-size: 30px;
+    padding: 0 6px;
+  }
+
+  .transform-points {
+    display: grid;
+    gap: 12px;
+  }
+
+  .transform-points li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--ink);
+  }
+
+  .transform-points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.66em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 5px rgba(201,168,76,0.14);
+  }
+
+  .transform-identity {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
+    border: 1px solid rgba(201,168,76,0.20);
+  }
+
+  .transform-identity-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--gold-deep);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .generate-panel {
+    display: grid;
+    gap: 18px;
+  }
+
+  .generate-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .generate-copy {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 15px;
+    max-width: 62ch;
+  }
+
+  .build-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .build-list li {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px 18px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .state-wrap {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 72vh;
+    padding: 20px;
+  }
+
+  .state-card {
+    max-width: 720px;
+    width: 100%;
+    padding: 36px 32px;
+  }
+
+  .state-card h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 34px;
+    margin-bottom: 12px;
+  }
+
+  .state-card p {
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+
+  .state-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .checklist {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .checklist li {
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px 16px;
+    color: var(--ink);
+  }
+
+  .loading {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 3px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  .helper {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--gold-deep);
+  }
+
+  .hidden { display: none !important; }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .back-link:hover,
+    .ghost-btn:hover,
+    .primary-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .back-link:hover,
+    .ghost-btn:hover {
+      color: var(--ink);
+      border-color: var(--line-strong);
+      background: rgba(255,255,255,0.88);
+    }
+
+    .primary-btn:hover {
+      background: #d8b866;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .panel {
+      grid-column: span 12;
+    }
+
+    .build-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .shell {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hero-card,
+    .panel,
+    .state-card {
+      padding: 22px;
+      border-radius: 22px;
+    }
+
+    .transformation {
+      grid-template-columns: 1fr;
+    }
+
+    .transform-arrow {
+      transform: rotate(90deg);
+      min-height: 28px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="state-wrap" id="loadingState" style="display:flex;">
+  <div class="state-card">
+    <div class="loading"></div>
+    <h2>Loading your journey ingredients</h2>
+    <p id="loadingMessage">Pulling in your Spark, Audience, and Transformation work now.</p>
+  </div>
+</div>
+
+<div class="state-wrap" id="blockedState">
+  <div class="state-card">
+    <div class="eyebrow">Journey Map</div>
+    <h2 id="blockedTitle">You are almost there.</h2>
+    <p id="blockedCopy">This page needs a little more of your foundation work before it can build a strong customer journey map.</p>
+    <ul class="checklist" id="blockedChecklist"></ul>
+    <div class="state-links" id="blockedLinks"></div>
+  </div>
+</div>
+
+<main class="shell hidden" id="appShell">
+  <div class="topbar">
+    <a class="back-link" href="discoverbreakthrough.html">&larr; Back to Breakthrough</a>
+    <div class="actions" style="margin-top:0;">
+      <a class="ghost-btn hidden" href="journeyresults.html" id="viewResultsBtn">View Saved Results</a>
+      <a class="ghost-btn" href="dashboard.html">Dashboard</a>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-card">
+      <div class="eyebrow">Phase 3</div>
+      <h1>Generate the journey your customer is really on.</h1>
+      <p class="hero-copy">
+        This page turns your transformation goal into a customer journey map you can actually build tools around.
+      </p>
+      <div class="hero-note">Your Spark and Audience are already loaded behind the scenes.</div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="panel panel-full transformation-panel">
+      <h2>The Transformation</h2>
+      <p class="transform-summary">You have figured out the transformation, now it's time to generate your journey map. Click the button below to get started.</p>
+      <div class="transformation">
+        <div class="transform-box">
+          <strong>Where they start</strong>
+          <ul class="transform-points" id="transformStart"></ul>
+        </div>
+        <div class="transform-arrow">&rarr;</div>
+        <div class="transform-box">
+          <strong>Where they want to be</strong>
+          <ul class="transform-points" id="transformEnd"></ul>
+        </div>
+      </div>
+      <div class="transform-identity">
+        <span class="transform-identity-label">Identity Shift</span>
+        <p id="transformIdentity"></p>
+      </div>
+    </article>
+
+    <article class="panel panel-full generate-panel">
+      <div class="generate-head">
+        <div>
+          <h2>Generate Your Journey Map</h2>
+          <p class="generate-copy">Review the destination, then create the map that shows how your customer moves from stuck to real momentum.</p>
+        </div>
+        <div class="status-pill hidden" id="savedStatus">Saved journey map found</div>
+      </div>
+      <ul class="mini-list build-list">
+        <li>A staged journey map from stuck to transformed.</li>
+        <li>The biggest obstacles that keep showing up along the way.</li>
+        <li>Specific tool opportunities for each stage of the journey.</li>
+      </ul>
+      <div class="actions">
+        <button class="primary-btn" id="generateBtn">Generate My Journey Map</button>
+        <a class="ghost-btn hidden" href="journeyresults.html" id="secondaryResultsBtn">Open Current Results</a>
+      </div>
+      <div class="helper" id="generateHelper">This will save into your journey map results.</div>
+    </article>
+  </section>
+</main>
+
+<script>
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+const MODEL = "claude-sonnet-4-6";
+
+let currentUser = null;
+let sparkData = null;
+let audienceData = null;
+let sessionData = null;
+let savedJourneyMap = null;
+
+function escHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function textOrFallback(value, fallback) {
+  const clean = String(value || "").trim();
+  return clean || fallback;
+}
+
+function buildSentenceListHtml(value, fallback) {
+  const source = textOrFallback(value, fallback);
+  const parts = source
+    .split(/(?<=[.!?])\s+/)
+    .map(function (item) { return item.trim(); })
+    .filter(Boolean)
+    .slice(0, 4);
+  const list = parts.length ? parts : [source];
+
+  return list.map(function (item) {
+    return "<li>" + escHtml(item) + "</li>";
+  }).join("");
+}
+
+function setLoading(message) {
+  document.getElementById("loadingMessage").textContent = message || "Loading...";
+}
+
+function showState(id) {
+  document.getElementById("loadingState").style.display = id === "loadingState" ? "flex" : "none";
+  document.getElementById("blockedState").style.display = id === "blockedState" ? "flex" : "none";
+  document.getElementById("appShell").classList.toggle("hidden", id !== "appShell");
+}
+
+function sortDocsByCreatedAtDesc(docs) {
+  return docs.slice().sort(function (a, b) {
+    const aTime = a && a.data && a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+    const bTime = b && b.data && b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+    return bTime - aTime;
+  });
+}
+
+function normalizeAudienceData(data) {
+  data = data || {};
+  const dreamOutcome = data.dreamOutcome || "";
+  const howSeen = data.howTheyWantToBeeSeen || "";
+  const combinedTransformation = [dreamOutcome, howSeen].filter(Boolean).join(" ");
+
+  return {
+    name: data.name || "",
+    whoYouHelp: data.whoYouHelp || data.whoTheyAre || "",
+    whatTheyreStrugglingWith: data.whatTheyreStrugglingWith || data.dailyFrustration || "",
+    theTriggerMoment: data.theTriggerMoment || data.whatTriggeredThem || "",
+    theTransformation: data.theTransformation || combinedTransformation || "",
+    whatTheyveAlreadyTried: data.whatTheyveAlreadyTried || data.whatTheyHaveTried || "",
+    wordsTheyUse: data.wordsTheyUse || data.theirWords || "",
+    yourIHelpStatement: data.yourIHelpStatement || data.iHelpStatement || ""
+  };
+}
+
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken() : "";
+  let appCheckToken = "";
+  try {
+    const result = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise(function (_, reject) { setTimeout(reject, 3000); })
+    ]);
+    appCheckToken = result && result.token ? result.token : "";
+  } catch (e) {}
+
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token,
+    "X-Firebase-AppCheck": appCheckToken
+  };
+}
+
+async function fetchLatestSparkDataForUser(user) {
+  const email = user && user.email ? user.email : "";
+  const latestSparkSessionId = localStorage.getItem("toolspark_latest_spark_session");
+  const sparkDocs = [];
+
+  try {
+    const byUser = await db.collection("spark_results").where("userId", "==", user.uid).limit(10).get();
+    if (byUser && !byUser.empty) sparkDocs.push.apply(sparkDocs, byUser.docs);
+  } catch (e) {
+    console.warn("Spark results lookup failed:", e);
+  }
+
+  if (sparkDocs.length) return sortDocsByCreatedAtDesc(sparkDocs)[0].data();
+
+  try {
+    const profilesByEmail = await db.collection("spark_profiles").where("email", "==", email).get();
+    if (profilesByEmail && !profilesByEmail.empty) sparkDocs.push.apply(sparkDocs, profilesByEmail.docs);
+  } catch (e) {
+    console.warn("Spark profile lookup failed:", e);
+  }
+
+  if (latestSparkSessionId) {
+    try {
+      const latestSnap = await db.collection("spark_profiles").doc(latestSparkSessionId).get();
+      if (latestSnap.exists) sparkDocs.push(latestSnap);
+    } catch (e) {
+      console.warn("Latest Spark session lookup failed:", e);
+    }
+  }
+
+  return sparkDocs.length ? sortDocsByCreatedAtDesc(sparkDocs)[0].data() : null;
+}
+
+async function fetchLatestAudienceDataForUser(user) {
+  const email = user && user.email ? user.email : "";
+  const latestAudienceSessionId = localStorage.getItem("toolspark_latest_audience_session");
+  const audienceDocs = [];
+
+  try {
+    const byUser = await db.collection("audience_results").where("userId", "==", user.uid).limit(10).get();
+    if (byUser && !byUser.empty) audienceDocs.push.apply(audienceDocs, byUser.docs);
+  } catch (e) {
+    console.warn("Audience results lookup failed:", e);
+  }
+
+  if (audienceDocs.length) return normalizeAudienceData(sortDocsByCreatedAtDesc(audienceDocs)[0].data());
+
+  try {
+    const profilesByEmail = await db.collection("audience_tool").where("email", "==", email).get();
+    if (profilesByEmail && !profilesByEmail.empty) audienceDocs.push.apply(audienceDocs, profilesByEmail.docs);
+  } catch (e) {
+    console.warn("Audience profile lookup failed:", e);
+  }
+
+  if (latestAudienceSessionId) {
+    try {
+      const latestSnap = await db.collection("audience_tool").doc(latestAudienceSessionId).get();
+      if (latestSnap.exists) audienceDocs.push(latestSnap);
+    } catch (e) {
+      console.warn("Latest Audience session lookup failed:", e);
+    }
+  }
+
+  return audienceDocs.length ? normalizeAudienceData(sortDocsByCreatedAtDesc(audienceDocs)[0].data()) : null;
+}
+
+function getSparkStatement() {
+  return sparkData && (
+    sparkData.statement ||
+    sparkData.sparkStatement ||
+    sparkData.yourSpark ||
+    sparkData.spark
+  ) || "";
+}
+
+function getSparkKnowledge() {
+  return sparkData && (
+    sparkData.whatYouKnow ||
+    sparkData.expertise ||
+    sparkData.WHAT_YOU_KNOW
+  ) || "";
+}
+
+function getSparkEdge() {
+  return sparkData && (
+    sparkData.yourEdge ||
+    sparkData.YOUR_EDGE ||
+    sparkData.resultYouCreate
+  ) || "";
+}
+
+function buildBlockedState(missingItems) {
+  const title = document.getElementById("blockedTitle");
+  const copy = document.getElementById("blockedCopy");
+  const checklist = document.getElementById("blockedChecklist");
+  const links = document.getElementById("blockedLinks");
+  checklist.innerHTML = "";
+  links.innerHTML = "";
+
+  title.textContent = "You need a little more groundwork first.";
+  copy.textContent = "This map works best when it can pull from your Spark, your audience insight, and your Transformation work together.";
+
+  missingItems.forEach(function (item) {
+    const li = document.createElement("li");
+    li.textContent = item.label;
+    checklist.appendChild(li);
+
+    const a = document.createElement("a");
+    a.className = "ghost-btn";
+    a.href = item.href;
+    a.textContent = item.cta;
+    links.appendChild(a);
+  });
+
+  showState("blockedState");
+}
+
+function renderReadyState() {
+  document.getElementById("transformStart").innerHTML = buildSentenceListHtml(
+    sessionData && sessionData.currentStateDraft,
+    "Current state not found."
+  );
+  document.getElementById("transformEnd").innerHTML = buildSentenceListHtml(
+    sessionData && sessionData.desiredOutcomeDraft,
+    "Desired outcome not found."
+  );
+  document.getElementById("transformIdentity").textContent = textOrFallback(
+    sessionData && sessionData.identityShift,
+    "Identity shift not added yet."
+  );
+
+  if (savedJourneyMap && hasJourneyMap(savedJourneyMap)) {
+    document.getElementById("savedStatus").classList.remove("hidden");
+    document.getElementById("viewResultsBtn").classList.remove("hidden");
+    document.getElementById("secondaryResultsBtn").classList.remove("hidden");
+    document.getElementById("generateHelper").textContent =
+      "A saved journey map already exists. You can open it or generate a fresh version.";
+  }
+
+  showState("appShell");
+}
+
+function hasJourneyMap(data) {
+  if (!data) return false;
+  if (Array.isArray(data.journeyStages) && data.journeyStages.length) return true;
+  return Boolean(data.customerStartingPoint && data.desiredTransformation);
+}
+
+function extractJsonObject(text) {
+  const cleaned = String(text || "")
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {}
+
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return JSON.parse(cleaned.slice(start, end + 1));
+  }
+
+  throw new Error("No valid JSON object returned.");
+}
+
+async function repairJourneyJson(rawText) {
+  const repairPrompt = [
+    "Convert the following into valid JSON.",
+    "Return ONLY valid JSON.",
+    "Do not add commentary.",
+    "Do not add markdown.",
+    "Preserve the meaning of the original content.",
+    "",
+    "Expected top-level keys:",
+    "- journeyTitle",
+    "- journeySummary",
+    "- transformation",
+    "- journeyStages",
+    "- coreObstacles",
+    "- toolOpportunities",
+    "- closingInsight",
+    "",
+    "Text to repair:",
+    String(rawText || "")
+  ].join("\n");
+
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 2400,
+      system: "You repair malformed JSON. Return only valid JSON.",
+      messages: [{ role: "user", content: repairPrompt }],
+      _meta: { tool: "journey-map-json-repair", userId: currentUser.uid }
+    })
+  });
+
+  if (!response.ok) throw new Error("Repair API error " + response.status);
+
+  const data = await response.json();
+  return (data.content || []).map(function (block) {
+    return block.type === "text" ? block.text : "";
+  }).join("").trim();
+}
+
+async function requestJourneyMapText(compactMode) {
+  const lines = [
+    "You are building a Journey Map for ToolSpark.",
+    "Your job is to map the CUSTOMER journey, not the founder's internal workflow.",
+    "Use the founder's Spark, Audience, and Transformation inputs to infer the path their customer moves through from stuck to transformed.",
+    "Return ONLY valid JSON. No markdown. No commentary. No code fences.",
+    "",
+    "Rules:",
+    compactMode ? "- Use exactly 4 stages." : "- Use 4 to 5 stages.",
+    "- Each stage must feel like a real moment in the customer's journey.",
+    "- Obstacles should include emotional resistance and practical friction.",
+    "- Tool opportunities should be specific things the founder could build to help that stage.",
+    "- Keep the language warm, plain, and grounded in the user's actual words when possible.",
+    "- Do not change who the audience is.",
+    compactMode ? "- Keep every field concise. Prefer 1 sentence per field." : "- Keep each field concise and readable.",
+    compactMode ? "- Do not exceed 3 core obstacles." : "- Do not exceed 4 core obstacles.",
+    "",
+    "Return this exact JSON shape with no extra keys:",
+    "{",
+    compactMode
+      ? '  "journeyTitle": "short title, 6 words or fewer",'
+      : '  "journeyTitle": "short title",',
+    compactMode
+      ? '  "journeySummary": "2 concise sentences about the overall journey",'
+      : '  "journeySummary": "2-3 sentences about the overall journey from where they are to where they want to be",',
+    '  "transformation": {',
+    compactMode
+      ? '    "from": "one concise sentence on where the customer starts",'
+      : '    "from": "one sentence on where the customer starts",',
+    compactMode
+      ? '    "to": "one concise sentence on where the customer wants to end up",'
+      : '    "to": "one sentence on where the customer wants to end up",',
+    '    "identityShift": "one sentence on who they become or how they want to feel/be seen"',
+    "  },",
+    '  "journeyStages": [',
+    "    {",
+    '      "stageOrder": 1,',
+    '      "stageName": "stage name",',
+    compactMode
+      ? '      "whatThisStageFeelsLike": "1 concise sentence",'
+      : '      "whatThisStageFeelsLike": "1-2 sentences",',
+    compactMode
+      ? '      "whatTheyNeedNow": "1 concise sentence",'
+      : '      "whatTheyNeedNow": "1-2 sentences",',
+    '      "obstacleToOvercome": "1 sentence",',
+    compactMode
+      ? '      "toolOpportunity": "specific tool or asset idea in 1 sentence"'
+      : '      "toolOpportunity": "specific tool or asset idea"',
+    "    }",
+    "  ],",
+    '  "coreObstacles": [',
+    "    {",
+    '      "obstacle": "short obstacle name",',
+    compactMode
+      ? '      "whyItMatters": "1 concise sentence",'
+      : '      "whyItMatters": "1-2 sentences",',
+    '      "showsUpInStages": "comma-separated stage names"',
+    "    }",
+    "  ],",
+    '  "toolOpportunities": [',
+    "    {",
+    '      "stageName": "stage name",',
+    '      "toolType": "type of tool",',
+    '      "idea": "specific tool name or concept",',
+    compactMode
+      ? '      "purpose": "1 concise sentence on why it helps here",'
+      : '      "purpose": "1-2 sentences on why it helps here",',
+    '      "whyThisFits": "1 sentence tying it to their Spark or audience insight"',
+    "    }",
+    "  ],",
+    '  "closingInsight": "2 concise sentences directly to the founder about what this map reveals"',
+    "}",
+    "",
+    "--- FOUNDER SPARK ---",
+    "Name: " + (((sparkData && sparkData.name) || (audienceData && audienceData.name) || "Friend")),
+    "Your Spark: " + getSparkStatement(),
+    "What You Know: " + getSparkKnowledge(),
+    "Your Edge: " + getSparkEdge(),
+    "",
+    "--- AUDIENCE ---",
+    "I Help Statement: " + ((audienceData && audienceData.yourIHelpStatement) || ""),
+    "Who You Help: " + ((audienceData && audienceData.whoYouHelp) || ""),
+    "What They Are Struggling With: " + ((audienceData && audienceData.whatTheyreStrugglingWith) || ""),
+    "Trigger Moment: " + ((audienceData && audienceData.theTriggerMoment) || ""),
+    "What They Have Already Tried: " + ((audienceData && audienceData.whatTheyveAlreadyTried) || ""),
+    "Transformation They Want: " + ((audienceData && audienceData.theTransformation) || ""),
+    "Words They Use: " + ((audienceData && audienceData.wordsTheyUse) || ""),
+    "",
+    "--- BREAKTHROUGH TRANSFORMATION ---",
+    "Current State: " + ((sessionData && sessionData.currentStateDraft) || ""),
+    "Emotional State: " + ((sessionData && sessionData.emotionalState) || ""),
+    "What They Have Tried: " + ((sessionData && sessionData.whatTheyveTriedEdited) || ""),
+    "Desired Outcome: " + ((sessionData && sessionData.desiredOutcomeDraft) || ""),
+    "Identity Shift: " + ((sessionData && sessionData.identityShift) || "")
+  ];
+
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: compactMode ? 1800 : 2400,
+      system: compactMode
+        ? "You are a strategic customer journey mapper. Be concise and return only valid JSON."
+        : "You are a strategic customer journey mapper. Return only valid JSON.",
+      messages: [{ role: "user", content: lines.join("\n") }],
+      _meta: { tool: compactMode ? "journey-map-compact" : "journey-map", userId: currentUser.uid }
+    })
+  });
+
+  if (!response.ok) throw new Error("API error " + response.status);
+
+  const data = await response.json();
+  return (data.content || []).map(function (block) {
+    return block.type === "text" ? block.text : "";
+  }).join("").trim();
+}
+
+function normalizeJourneyResponse(data) {
+  const normalized = Object.assign({}, data || {});
+  normalized.transformation = normalized.transformation || {};
+  normalized.journeyStages = Array.isArray(normalized.journeyStages) ? normalized.journeyStages : [];
+  normalized.coreObstacles = Array.isArray(normalized.coreObstacles) ? normalized.coreObstacles : [];
+  normalized.toolOpportunities = Array.isArray(normalized.toolOpportunities) ? normalized.toolOpportunities : [];
+
+  normalized.journeyStages = normalized.journeyStages.map(function (stage, index) {
+    return {
+      stageOrder: typeof stage.stageOrder === "number" ? stage.stageOrder : index + 1,
+      stageName: textOrFallback(stage.stageName, "Stage " + (index + 1)),
+      whatThisStageFeelsLike: textOrFallback(stage.whatThisStageFeelsLike, ""),
+      whatTheyNeedNow: textOrFallback(stage.whatTheyNeedNow, ""),
+      obstacleToOvercome: textOrFallback(stage.obstacleToOvercome, ""),
+      toolOpportunity: textOrFallback(stage.toolOpportunity, "")
+    };
+  });
+
+  return normalized;
+}
+
+function deriveLegacyTools(journeyMap) {
+  const stages = journeyMap.journeyStages || [];
+  const tools = journeyMap.toolOpportunities || [];
+
+  function build(index, fallbackName, whyKey) {
+    const stage = stages[index] || stages[stages.length - 1] || {};
+    const tool = tools[index] || {};
+    const name = tool.idea || tool.toolName || stage.toolOpportunity || ((stage.stageName || fallbackName) + " Tool");
+    const why = tool.purpose || stage.whatTheyNeedNow || journeyMap.journeySummary || "";
+    const how = tool.whyThisFits || stage.whatThisStageFeelsLike || stage.obstacleToOvercome || "";
+    const payload = { name: name };
+    payload[whyKey] = why;
+    payload.howItHelps = how;
+    return payload;
+  }
+
+  return {
+    leadMagnetTool: build(0, "Entry", "whyFirst"),
+    mvpTool: build(1, "Momentum", "whySecond"),
+    expansionTool: build(2, "Expansion", "whyThird")
+  };
+}
+
+function buildSavePayload(journeyMap) {
+  const normalized = normalizeJourneyResponse(journeyMap);
+  const legacy = deriveLegacyTools(normalized);
+  const fromState = normalized.transformation.from || (sessionData && sessionData.currentStateDraft) || "";
+  const toState = normalized.transformation.to || (sessionData && sessionData.desiredOutcomeDraft) || "";
+
+  return {
+    userId: currentUser.uid,
+    accountEmail: currentUser.email || "",
+    name: (sparkData && sparkData.name) || (audienceData && audienceData.name) || "Friend",
+    sparkStatement: getSparkStatement(),
+    yourIHelpStatement: audienceData && audienceData.yourIHelpStatement || "",
+    journeyTitle: normalized.journeyTitle || "Your Customer Journey Map",
+    journeySummary: normalized.journeySummary || "",
+    transformation: {
+      from: fromState,
+      to: toState,
+      identityShift: normalized.transformation.identityShift || (sessionData && sessionData.identityShift) || ""
+    },
+    journeyStages: normalized.journeyStages,
+    stages: normalized.journeyStages,
+    coreObstacles: normalized.coreObstacles,
+    obstacles: normalized.coreObstacles,
+    toolOpportunities: normalized.toolOpportunities,
+    closingInsight: normalized.closingInsight || "",
+    sourceSnapshot: {
+      spark: {
+        statement: getSparkStatement(),
+        whatYouKnow: getSparkKnowledge(),
+        yourEdge: getSparkEdge()
+      },
+      audience: audienceData || {},
+      transformation: {
+        currentStateDraft: sessionData && sessionData.currentStateDraft || "",
+        emotionalState: sessionData && sessionData.emotionalState || "",
+        whatTheyveTriedEdited: sessionData && sessionData.whatTheyveTriedEdited || "",
+        desiredOutcomeDraft: sessionData && sessionData.desiredOutcomeDraft || "",
+        identityShift: sessionData && sessionData.identityShift || ""
+      }
+    },
+    customerStartingPoint: fromState,
+    desiredTransformation: toState,
+    leadMagnetTool: legacy.leadMagnetTool,
+    mvpTool: legacy.mvpTool,
+    expansionTool: legacy.expansionTool,
+    journeyNarrative: normalized.journeySummary || normalized.closingInsight || "",
+    generatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    status: "completed"
+  };
+}
+
+async function loadContext(user) {
+  currentUser = user;
+  setLoading("Pulling in your Spark, Audience, Transformation, and any saved journey map.");
+
+  const results = await Promise.allSettled([
+    fetchLatestSparkDataForUser(user),
+    fetchLatestAudienceDataForUser(user),
+    db.collection("journey_sessions").doc(user.uid).get(),
+    db.collection("journey_maps").doc(user.uid).get()
+  ]);
+
+  sparkData = results[0].status === "fulfilled" ? results[0].value : null;
+  audienceData = results[1].status === "fulfilled" ? results[1].value : null;
+  sessionData = results[2].status === "fulfilled" && results[2].value.exists ? results[2].value.data() : null;
+  savedJourneyMap = results[3].status === "fulfilled" && results[3].value.exists ? results[3].value.data() : null;
+
+  const missing = [];
+  if (!sparkData) {
+    missing.push({ label: "Find Your Spark needs to be completed first.", href: "spark.html", cta: "Go to Spark" });
+  }
+  if (!audienceData) {
+    missing.push({ label: "Audience Deep Dive needs to be completed so the map knows who this journey belongs to.", href: "audiencetool.html", cta: "Go to Audience" });
+  }
+  if (!sessionData || !sessionData.currentStateDraft || !sessionData.desiredOutcomeDraft) {
+    missing.push({ label: "Discover Your Breakthrough needs a saved transformation first.", href: "discoverbreakthrough.html", cta: "Go to Breakthrough" });
+  }
+
+  if (missing.length) {
+    buildBlockedState(missing);
+    return;
+  }
+
+  renderReadyState();
+}
+
+async function generateJourneyMap() {
+  const btn = document.getElementById("generateBtn");
+  btn.disabled = true;
+  btn.textContent = "Generating...";
+  document.getElementById("generateHelper").textContent =
+    "Building your journey map now. This can take a few seconds.";
+
+  try {
+    let text = await requestJourneyMapText(false);
+    let parsed;
+    try {
+      parsed = extractJsonObject(text);
+    } catch (parseError) {
+      console.warn("Initial journey map JSON parse failed. Attempting compact retry.", parseError, text);
+      const compactText = await requestJourneyMapText(true);
+      try {
+        parsed = extractJsonObject(compactText);
+      } catch (compactError) {
+        console.warn("Compact journey map JSON parse failed. Attempting repair.", compactError, compactText);
+        const repairedText = await repairJourneyJson(compactText);
+        parsed = extractJsonObject(repairedText);
+      }
+    }
+
+    const journeyMap = normalizeJourneyResponse(parsed);
+    const payload = buildSavePayload(journeyMap);
+    await db.collection("journey_maps").doc(currentUser.uid).set(payload);
+
+    window.location.href = "journeyresults.html";
+  } catch (error) {
+    console.error("generateJourneyMap failed:", error);
+    btn.disabled = false;
+    btn.textContent = "Generate My Journey Map";
+    document.getElementById("generateHelper").textContent =
+      "Something went wrong while generating the map. Try again once more.";
+  }
+}
+
+document.getElementById("generateBtn").addEventListener("click", generateJourneyMap);
+
+window.addEventListener("tsUserReady", async function () {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    await loadContext(user);
+  } catch (error) {
+    console.error("journeymap load failed:", error);
+    buildBlockedState([
+      { label: "We hit a loading issue on this page. Your saved work is still safe.", href: "discoverbreakthrough.html", cta: "Back to Breakthrough" }
+    ]);
+  }
+});
+</script>
+</body>
+</html>
