@@ -31,7 +31,7 @@
 
 <style>
 :root {
-  --bg: #F4F2EE;
+  --bg: #ffffff;
   --ink: #1a1510;
   --muted: #6b5e50;
   --gold: #c9a84c;
@@ -40,6 +40,7 @@
   --shadow: 0 18px 44px rgba(44,34,18,0.08);
   --green: #2f5b45;
   --green-bg: rgba(47,91,69,0.08);
+  --ink-soft: rgba(26,20,10,0.52);
   /* Emil Kowalski custom easing */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -52,8 +53,8 @@ html, body { max-width: 100%; overflow-x: hidden; }
 body {
   font-family: "DM Sans", sans-serif;
   background:
-    radial-gradient(circle at top center, rgba(201,168,76,0.10), transparent 30%),
-    linear-gradient(180deg, #F4F2EE 0%, #F4F2EE 100%);
+    radial-gradient(circle at top center, rgba(201,168,76,0.07), transparent 30%),
+    #ffffff;
   color: #1a1510;
   min-height: 100vh;
 }
@@ -119,16 +120,16 @@ button, textarea { font: inherit; }
    INTRO SECTION
 ══════════════════════════════ */
 .intro-wrap {
-   max-width: 1360px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
   max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
 }
 
 /* ── Hero Banner Image ── */
 .intro-hero-banner {
   position: relative;
   width: 100%;
+  background-color: #2a2015;
   background-image: url('breakthrough-banner.png');
   background-size: cover;
   background-position: center 30%;
@@ -280,46 +281,40 @@ button, textarea { font: inherit; }
   flex: 1;
   height: 1.5px;
   min-width: 20px;
-  background: rgb(5, 5, 5);
+  background: rgba(26,20,10,0.10);
   position: relative;
-  top: -18px; /* align with center of circles */
+  top: -18px;
 }
-.step-connector.done { background: rgba(201,168,76,0.50); }
+.step-connector.done { background: rgba(201,168,76,0.45); }
 
 /* ── Choice Cards (dark) ── */
 .choices-outer {
- background: transparent;
+  background: transparent;
   border-radius: 0;
   padding: 0;
-  margin-bottom: 12px;
+  margin-bottom: 48px;
   box-shadow: none;
 }
 .choice-grid {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  border: 3px solid rgba(201,168,76,0.18);
-  border-radius: 10px;
-  }
-.choice-grid::after {
-  content: "";
-  position: absolute;
-  top: 24px;
-  bottom: 24px;
-  left: 50%;
-  width: 1px;
-  transform: translateX(-50%);
+  gap: 20px;
 }
 .choice-card {
-   display: flex;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   text-align: center;
   min-height: 320px;
   padding: 42px 36px;
-  }
+  background: #fafafa;
+  border: 1.5px solid rgba(26,20,10,0.08);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(26,20,10,0.06);
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 200ms var(--ease-out);
+}
 .choice-cta,
 .btn-gold,
 .btn-outline {
@@ -339,17 +334,16 @@ button, textarea { font: inherit; }
   align-items: center;
   gap: 10px;
   margin-top: auto;
-   min-height: 54px;
-   justify-content: flex-start;
+  justify-content: flex-end;
 }
 @media (hover: hover) and (pointer: fine) {
   .choice-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(201,168,76,0.45);
-    box-shadow:0 16px 40px rgba(0,0,0,.08);
+    transform: translateY(-3px);
+    border-color: rgba(201,168,76,0.40);
+    box-shadow: 0 8px 32px rgba(26,20,10,0.09);
   }
 }
-.choice-card:active { transform: scale(0.98); }
+.choice-card:active { transform: scale(0.98); transition-duration: 100ms; }
 .choice-card.has-draft { border-color: rgba(201,168,76,0.32); }
 .choice-icon {
   font-size: 20px;
@@ -403,6 +397,54 @@ button, textarea { font: inherit; }
   text-align: center;
 }
 
+/* ── Intro Bottom Banner ── */
+.intro-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #1a1510;
+  border-radius: 18px;
+  padding: 22px 28px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.banner-map {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.90;
+  filter: sepia(0.3) brightness(1.1);
+}
+.banner-copy {
+  flex: 1;
+  min-width: 0;
+}
+.banner-copy p {
+  color: rgba(255,255,255,0.88);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 3px;
+}
+.banner-copy em {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--gold);
+  font-weight: 500;
+}
+.banner-glow {
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 /* ── Define Section ── */
 .define-outer {
   padding: 20px 32px 56px;
@@ -427,32 +469,45 @@ button, textarea { font: inherit; }
   opacity: 0.25;
 }
 .divider-text {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.01em;
   color: var(--ink-soft);
-  text-transform: italic;
+  white-space: nowrap;
 }
 .define-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-    margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .define-card {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   grid-template-rows: auto auto;
   column-gap: 18px;
   align-items: center;
-  padding: 26px 24px;
+  padding: 28px 24px;
   text-align: left;
+  background: #fafafa;
+  border: 1px solid rgba(26,20,10,0.08);
+  border-radius: 18px;
+  box-shadow: 0 1px 8px rgba(26,20,10,0.04);
+  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .define-card:hover {
+    border-color: rgba(201,168,76,0.28);
+    box-shadow: 0 4px 18px rgba(26,20,10,0.07);
+  }
 }
 .define-icon-wrap {
   grid-column: 1;
   grid-row: 1 / span 2;
-   width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: rgba(201,168,76,0.10);
   border: 1px solid rgba(201,168,76,0.22);
@@ -460,29 +515,29 @@ button, textarea { font: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
+  flex-shrink: 0;
 }
 .define-icon-wrap svg {
-   width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   stroke-width: 2.2;
 }
 .define-title {
   grid-column: 2;
   grid-row: 1;
   font-family: "Playfair Display", serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 8px;
+  line-height: 1.15;
+  margin-bottom: 6px;
   color: #1a1510;
 }
 .define-desc {
   grid-column: 2;
   grid-row: 2;
-  font-size: 12px;
-  color: rgba(26,20,10,0.78);
-  line-height: 1.7;
+  font-size: 13px;
+  color: rgba(26,20,10,0.68);
+  line-height: 1.65;
   font-weight: 500;
 }
 
@@ -961,9 +1016,6 @@ button, textarea { font: inherit; }
   .recap-row { flex-direction: column; gap: 2px; }
   .recap-label { min-width: unset; }
 }
-.choice-grid::after {
-    display: none;
-  }
 
 </style>
 </head>
@@ -1043,8 +1095,8 @@ button, textarea { font: inherit; }
             <div class="choice-desc">You've been here before but need to make edits to your current transformation data. Let's continue building or pick up right where you left off.</div>
           </div>
           <div class="choice-footer">
-            <div class="choice-cta">Continue My Work →</div>
             <div class="choice-badge hidden" id="savedBadge">✓ Saved draft found</div>
+            <div class="choice-cta">Continue My Work →</div>
           </div>
         </div>
       </div>
@@ -1074,6 +1126,18 @@ button, textarea { font: inherit; }
         </div>
       </div>
     </div>
+
+    <!-- Bottom Banner -->
+    <div class="intro-banner reveal">
+      <div class="banner-glow"></div>
+      <img src="treasuremap.png" alt="" class="banner-map" aria-hidden="true">
+      <div class="banner-copy">
+        <p>A clear transformation leads to a powerful journey.</p>
+        <em>Let's map it out.</em>
+      </div>
+    </div>
+
+  </div><!-- /intro-wrap -->
 <!-- ── Chat ── -->
 <section id="chatSection" class="chat-section hidden">
   <div class="chat-wrap">
