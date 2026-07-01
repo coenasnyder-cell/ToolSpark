@@ -46,8 +46,8 @@
 
   // Cloud Function endpoints used by the Save button and Media Library upload.
   // Placeholders — swap for the real Cloud Run URLs after `firebase deploy --only functions:builderSavePage,functions:builderUploadImage`.
-  window.TS_BUILDER_SAVE_URL   = "REPLACE_AFTER_DEPLOY_builderSavePage";
-  window.TS_BUILDER_UPLOAD_URL = "REPLACE_AFTER_DEPLOY_builderUploadImage";
+  window.TS_BUILDER_SAVE_URL   = "https://buildersavepage-e6qya4oddq-uc.a.run.app";
+  window.TS_BUILDER_UPLOAD_URL = "https://builderuploadimage-e6qya4oddq-uc.a.run.app";
 
   // libs/media/media.js only self-assigns these if they're undefined when it loads (it loads
   // further down the page), so declaring them here — before that script tag — overrides it.
