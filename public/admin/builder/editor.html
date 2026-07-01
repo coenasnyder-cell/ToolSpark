@@ -2528,6 +2528,29 @@ Unzip the latest ckeditor release zip from https://github.com/ckeditor/ckeditor4
 
 	let pages = defaultPages;
 
+	// blob: URLs get an opaque/unpredictable origin when navigated into an iframe via .src in
+	// some browsers, which breaks VvvebJs's requirement of reading iframe.contentWindow.document
+	// as same-origin (SecurityError). srcdoc reliably inherits the parent page's real origin
+	// instead (this iframe has no sandbox attribute), so intercept .src on our specific marker
+	// value and redirect it to .srcdoc — every other src assignment passes through untouched.
+	const tsDraftHtml = {};
+	(function () {
+		const iframeEl = document.getElementById('iframe1');
+		const nativeSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+		Object.defineProperty(iframeEl, 'src', {
+			configurable: true,
+			get() { return nativeSrc.get.call(iframeEl); },
+			set(value) {
+				if (typeof value === 'string' && value.indexOf('ts-draft:') === 0) {
+					const key = value.slice('ts-draft:'.length).split('?')[0];
+					iframeEl.srcdoc = tsDraftHtml[key] || '';
+				} else {
+					nativeSrc.set.call(iframeEl, value);
+				}
+			}
+		});
+	})();
+
 	async function tsInitEditor() {
 		// If a saved draft exists for a page, load that instead of the live file — otherwise
 		// Save writes to Firestore correctly but reopening the editor always starts from the
@@ -2536,8 +2559,8 @@ Unzip the latest ckeditor release zip from https://github.com/ckeditor/ckeditor4
 			try {
 				const draftSnap = await tsDb.collection('page_drafts').doc(key).get();
 				if (draftSnap.exists && draftSnap.data().html) {
-					const blob = new Blob([draftSnap.data().html], { type: 'text/html' });
-					pages[key].url = URL.createObjectURL(blob);
+					tsDraftHtml[key] = draftSnap.data().html;
+					pages[key].url = 'ts-draft:' + key;
 				}
 			} catch (e) {
 				console.warn('Could not check for a saved draft of ' + key, e);
