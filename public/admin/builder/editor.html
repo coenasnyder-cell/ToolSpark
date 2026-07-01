@@ -2528,23 +2528,47 @@ Unzip the latest ckeditor release zip from https://github.com/ckeditor/ckeditor4
 
 	let pages = defaultPages;
 
-	let firstPage = Object.keys(pages)[0];
-	Vvveb.Builder.init(pages[firstPage]["url"], function () {
-		//load code after page is loaded here
-	});
+	async function tsInitEditor() {
+		// If a saved draft exists for a page, load that instead of the live file — otherwise
+		// Save writes to Firestore correctly but reopening the editor always starts from the
+		// untouched live file, making it look like the edit never persisted.
+		for (const key of Object.keys(pages)) {
+			try {
+				const draftSnap = await tsDb.collection('page_drafts').doc(key).get();
+				if (draftSnap.exists && draftSnap.data().html) {
+					const blob = new Blob([draftSnap.data().html], { type: 'text/html' });
+					pages[key].url = URL.createObjectURL(blob);
+				}
+			} catch (e) {
+				console.warn('Could not check for a saved draft of ' + key, e);
+			}
+		}
 
-	Vvveb.Gui.init();
-	Vvveb.FileManager.init();
-	Vvveb.SectionList.init();
-	Vvveb.StyleList.init();
-	Vvveb.TreeList.init();
-	Vvveb.Breadcrumb.init();
-	Vvveb.CssEditor.init();
+		let firstPage = Object.keys(pages)[0];
+		Vvveb.Builder.init(pages[firstPage]["url"], function () {
+			//load code after page is loaded here
+		});
 
-	Vvveb.FileManager.addPages(pages);
-	Vvveb.FileManager.loadPage(pages[firstPage]["name"]);
-	Vvveb.Gui.toggleRightColumn(false);
-	Vvveb.Breadcrumb.init();
+		Vvveb.Gui.init();
+		Vvveb.FileManager.init();
+		Vvveb.SectionList.init();
+		Vvveb.StyleList.init();
+		Vvveb.TreeList.init();
+		Vvveb.Breadcrumb.init();
+		Vvveb.CssEditor.init();
+
+		Vvveb.FileManager.addPages(pages);
+		Vvveb.FileManager.loadPage(pages[firstPage]["name"]);
+		Vvveb.Gui.toggleRightColumn(false);
+		Vvveb.Breadcrumb.init();
+	}
+
+	// Wait for the admin gate's Firestore access to be ready before touching page_drafts.
+	if (window.tsBuilderIdToken) {
+		tsInitEditor();
+	} else {
+		document.addEventListener('tsBuilderReady', tsInitEditor, { once: true });
+	}
 </script>
 
   <!-- Modal -->
