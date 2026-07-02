@@ -715,15 +715,13 @@
   }
 
 
-  .chat-section,
-  .form-section {
+  .chat-section {
     max-width: 900px;
     margin: 0 auto;
     padding: 0 24px 160px;
   }
 
-  .chat-wrap,
-  .form-wrap {
+  .chat-wrap {
     width: 100%;
   }
 
@@ -735,37 +733,6 @@
     max-width: 820px;
     margin: 0 auto;
     padding-bottom: 160px;
-  }
-
-  .form-wrap {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 28px;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(255,255,255,0.66);
-    box-shadow: var(--shadow);
-    border-radius: 28px;
-  }
-
-  .form-title {
-    font-family: "Playfair Display", serif;
-    font-size: clamp(30px, 4vw, 40px);
-    line-height: 1.08;
-    margin-bottom: 8px;
-  }
-
-  .form-sub {
-    color: var(--muted);
-    line-height: 1.8;
-    margin-bottom: 24px;
-    font-size: 15px;
-  }
-
-  .form-footer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
   }
 
   .message {
@@ -998,34 +965,6 @@
     box-shadow: 0 0 0 4px rgba(201,168,76,0.10);
   }
 
-  .text-input.error {
-    border-color: #c2410c;
-  }
-
-  .field-counter {
-    margin-top: 5px;
-    text-align: right;
-    color: var(--muted);
-    font-size: 11px;
-  }
-
-  .review-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 18px;
-  }
-
-  .review-section {
-    grid-column: span 6;
-    background: rgba(255,255,255,0.62);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 18px;
-  }
-
-  .review-section.full {
-    grid-column: span 12;
-  }
 
   .input-area {
     position: fixed;
@@ -1158,9 +1097,6 @@
   }
 
   @media (max-width: 920px) {
-    .review-section {
-      grid-column: span 12;
-    }
     .choice-grid,
     .define-grid {
       grid-template-columns: 1fr;
@@ -1170,14 +1106,12 @@
   @media (max-width: 680px) {
     .intro-wrap,
     .chat-section,
-    .form-section,
     .loading-state {
       padding-left: 16px;
       padding-right: 16px;
     }
 
     .recap-card,
-    .form-wrap,
     .gate-card {
       padding: 22px;
       border-radius: 22px;
@@ -1406,22 +1340,6 @@
   </div>
 </div>
 
-<!-- ── Form ── -->
-<section id="formSection" class="form-section hidden">
-  <div class="form-wrap">
-    <div class="form-header">
-      <div class="eyebrow">Transformation Review</div>
-      <h2 class="form-title">Here is your transformation draft.</h2>
-      <p class="form-sub">Edit anything that needs sharpening. This is the version Journey Map will use.</p>
-    </div>
-    <div id="formFields" class="review-grid"></div>
-    <div class="form-footer">
-      <button class="btn-gold" id="confirmBtn" onclick="lockInTransformation()">Save &amp; Continue to Journey Map</button>
-      <button class="btn-outline" onclick="regenerateTransformation()">Regenerate Draft</button>
-    </div>
-  </div>
-</section>
-
 <script>
 "use strict";
 
@@ -1521,7 +1439,6 @@ let currentPhase = "start";
 let currentQuestionIndex = -1;
 let awaitingFollowupFor = null;
 let isThinking = false;
-let autoSaveTimer = null;
 
 const answers = {
   finallyGetsIt: "",
@@ -1666,7 +1583,6 @@ function showScreen(name) {
   document.getElementById("introSection").classList.toggle("hidden", name !== "start");
   document.getElementById("chatSection").classList.toggle("hidden", name !== "chat");
   document.getElementById("generatingSection").classList.toggle("hidden", name !== "generating");
-  document.getElementById("formSection").classList.toggle("hidden", name !== "form");
 }
 
 function showBlockedState(items) {
@@ -2011,13 +1927,12 @@ function getFirstUnansweredQuestionIndex() {
 }
 
 async function startSession() {
-  showScreen("chat");
-
   if (journeyData && journeyData.transformationStatement && (journeyData.currentPhase === "review" || journeyData.currentPhase === "completed")) {
-    renderReview();
+    window.location.href = "transformationresults.html";
     return;
   }
 
+  showScreen("chat");
   beginRecap();
 }
 
@@ -2045,7 +1960,7 @@ async function startFreshSession() {
 
 function resumeToReview() {
   if (journeyData && journeyData.transformationStatement) {
-    renderReview();
+    window.location.href = "transformationresults.html";
     return;
   }
   startSession();
@@ -2344,70 +2259,7 @@ async function generateTransformationDraft() {
     status: "in_progress",
     resultsReviewed: false
   }));
-  renderReview();
-}
-
-function renderReview() {
-  currentPhase = "review";
-  activatePhase("phaseReview");
-  setInputVisible(false);
-  hideThinking();
-  showScreen("form");
-
-  const grid = document.getElementById("formFields");
-  grid.className = "review-grid";
-  grid.innerHTML = REVIEW_FIELDS.map(function (field) {
-    return (
-      '<div class="review-section' + (field.full ? " full" : "") + '">' +
-        '<label class="form-label" for="review-' + field.key + '">' + escHtml(field.label) + "</label>" +
-        '<div class="form-hint">' + escHtml(field.hint) + "</div>" +
-        '<textarea class="text-input" id="review-' + field.key + '" rows="' + field.rows + '" maxlength="' + field.max + '">' + escHtml(reviewData[field.key] || "") + "</textarea>" +
-        '<div class="field-counter" id="counter-' + field.key + '">' + String(reviewData[field.key] || "").length + " / " + field.max + "</div>" +
-      "</div>"
-    );
-  }).join("");
-
-  REVIEW_FIELDS.forEach(function (field) {
-    const el = document.getElementById("review-" + field.key);
-    const counter = document.getElementById("counter-" + field.key);
-    el.addEventListener("input", function () {
-      reviewData[field.key] = el.value;
-      counter.textContent = el.value.length + " / " + field.max;
-      scheduleReviewSave();
-    });
-    el.addEventListener("blur", saveReviewDraftNow);
-  });
-  document.getElementById("formSection").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function scheduleReviewSave() {
-  clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(saveReviewDraftNow, 700);
-}
-
-async function saveReviewDraftNow() {
-  if (currentPhase !== "review") return;
-  try {
-    await persistSession(Object.assign({}, buildAnswerPayload(), reviewData, {
-      sessionAudienceOverride: buildAudienceOverridePayload(),
-      currentPhase: "review",
-      status: "in_progress",
-      resultsReviewed: false
-    }));
-    showSavedIndicator();
-  } catch (error) {
-    console.warn("Failed to autosave review draft:", error);
-  }
-}
-
-async function regenerateTransformation() {
-  if (currentPhase !== "review") return;
-  showScreen("chat");
-  setInputVisible(true);
-  addPhaseDivider("Regenerate");
-  addAiMessage("I am taking another pass at the transformation draft using the same answers.");
-  showThinking();
-  await generateTransformationDraft();
+  window.location.href = "transformationresults.html";
 }
 
 function updateSendState() {
@@ -2453,63 +2305,6 @@ async function persistSession(extra) {
   };
 
   await journeySessionRef(currentUser.uid).set(Object.assign(base, extra), { merge: true });
-}
-
-async function lockInTransformation() {
-  const requiredKeys = [
-    "currentStateDraft",
-    "emotionalState",
-    "whatTheyveTriedEdited",
-    "desiredOutcomeDraft",
-    "transformationStatement",
-    "identityShift"
-  ];
-
-  let valid = true;
-  requiredKeys.forEach(function (key) {
-    const el = document.getElementById("review-" + key);
-    if (!el || !el.value.trim()) {
-      valid = false;
-      if (el) el.classList.add("error");
-    } else if (el) {
-      el.classList.remove("error");
-    }
-  });
-
-  if (!valid) {
-    return;
-  }
-
-  const btn = document.getElementById("confirmBtn");
-  btn.disabled = true;
-  btn.textContent = "Saving...";
-
-  REVIEW_FIELDS.forEach(function (field) {
-    const el = document.getElementById("review-" + field.key);
-    reviewData[field.key] = el ? el.value.trim() : reviewData[field.key];
-  });
-
-  try {
-    await persistSession(Object.assign({}, buildAnswerPayload(), reviewData, {
-      sessionAudienceOverride: buildAudienceOverridePayload(),
-      currentPhase: "completed",
-      status: "completed",
-      resultsReviewed: true,
-      breakthroughComplete: true,
-      completedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }));
-
-    await db.collection("users").doc(currentUser.uid).set({
-      breakthroughComplete: true,
-      breakthroughCompletedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-
-    window.location.href = "journeymap.html";
-  } catch (error) {
-    console.error("lockInTransformation failed:", error);
-    btn.disabled = false;
-    btn.textContent = "Save & Continue to Journey Map";
-  }
 }
 
 document.addEventListener('tsUserReady', function (e) {

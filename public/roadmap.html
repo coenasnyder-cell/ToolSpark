@@ -867,6 +867,7 @@
             </div>
             <div class="step-status-badge" id="transformation-badge"></div>
             <div class="section-btn-group">
+              <a href="transformationresults.html" class="btn-outline" id="transformation-results-btn" style="display:none;">View &amp; edit results</a>
               <a href="discoverbreakthrough.html" class="btn-fill">Open tool</a>
             </div>
           </div>
@@ -1599,6 +1600,8 @@
         if (curEl) curEl.textContent = journeyData.currentStateDraft || '—';
         const stEl = document.getElementById('transformation-statement');
         if (stEl) stEl.textContent = journeyData.transformationStatement || '—';
+        const transformationResultsBtn = document.getElementById('transformation-results-btn');
+        if (transformationResultsBtn) transformationResultsBtn.style.display = '';
       }
 
       updateStepStates(sparkDone, audienceDone, breakthroughDone, transformationDone);

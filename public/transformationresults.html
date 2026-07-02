@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Transformation · ToolSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark:        #0C0B09;
+    --dark2:       #141210;
+    --dark3:       #1C1A17;
+    --border-dark: #2A2720;
+    --gold:        #C9A84C;
+    --gold-light:  #E8D5A3;
+    --gold-dim:    rgba(201,168,76,0.12);
+    --bg:          #F7F4EE;
+    --surface:     #FFFFFF;
+    --border:      #E4E0D8;
+    --text:        #1A1714;
+    --text2:       #6B6560;
+    --text3:       #9E9891;
+    --radius:      14px;
+    --radius-sm:   8px;
+    --shadow:      0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+    --sidebar-width: 220px;
+    --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .main-wrap { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-content { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; padding: 1.75rem 2.5rem 3rem; max-width: 1180px; width: 100%; margin: 0 auto; }
+
+  @media (max-width: 900px) {
+    .main-wrap { margin-left: 0; }
+  }
+
+  /* ── Hero ── */
+  .hero-card {
+    background: var(--dark2);
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius);
+    padding: 2rem 2.25rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 400px; height: 100%;
+    background: radial-gradient(ellipse at right, rgba(201,168,76,0.10) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-col { display: flex; flex-direction: column; gap: 8px; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold); border-radius: 100px;
+    padding: 3px 12px; font-size: 12px; font-weight: 700;
+    color: var(--dark); text-transform: uppercase; letter-spacing: 0.1em;
+    width: fit-content;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 400;
+    color: #F0EDE6; line-height: 1.2;
+  }
+  .hero-title em { color: var(--gold); font-style: italic; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+  .hero-divider { width: 1px; background: rgba(255,255,255,0.08); align-self: stretch; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 8px;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    text-decoration: none; cursor: pointer; border: none;
+    transition: opacity 0.15s, transform 0.15s;
+    width: fit-content;
+  }
+  .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+  .btn-gold { background: var(--gold); color: var(--dark); }
+  .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: #F0EDE6; }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-outline-light { background: transparent; border: 1.5px solid var(--border); color: var(--text2); }
+  .btn-outline-light:hover { border-color: var(--gold); color: var(--text); }
+
+  /* ── Layout ── */
+  .content-row { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .content-row { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .card-sub { font-size: 13px; color: var(--text2); margin-bottom: 18px; line-height: 1.6; }
+
+  .main-col { display: flex; flex-direction: column; gap: 16px; }
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-widget { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .widget-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .widget-sub { font-size: 13px; color: var(--text2); margin-bottom: 14px; line-height: 1.5; }
+
+  /* ── Fields ── */
+  .review-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+  .review-section { grid-column: span 6; }
+  .review-section.full { grid-column: span 12; }
+  @media (max-width: 700px) { .review-section { grid-column: span 12; } }
+
+  .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-text, #8A6E1E); margin-bottom: 6px; }
+  .form-hint { color: var(--text2); font-size: 12px; line-height: 1.5; margin-bottom: 8px; font-style: italic; }
+  .text-input {
+    width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; color: var(--text); resize: vertical; min-height: 64px; line-height: 1.6;
+    font-family: inherit; font-size: 14px; outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .text-input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px var(--gold-dim); }
+  .text-input.error { border-color: #c2410c; }
+  .field-counter { margin-top: 5px; text-align: right; color: var(--text3); font-size: 11px; }
+
+  .saved-indicator {
+    position: fixed; top: 20px; right: 24px; z-index: 400;
+    background: var(--surface); border: 1px solid rgba(47,91,69,0.25); color: #2f5b45;
+    border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 700;
+    box-shadow: var(--shadow); opacity: 0; transform: translateY(-6px);
+    transition: opacity 180ms ease, transform 180ms ease; pointer-events: none;
+  }
+  .saved-indicator.show { opacity: 1; transform: translateY(0); }
+
+  /* ── States ── */
+  .state-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 48px 32px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .state-card h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500; color: var(--text); }
+  .state-card p { font-size: 14px; color: var(--text2); max-width: 44ch; line-height: 1.6; }
+  .hidden { display: none !important; }
+
+  /* ── Bottom CTA ── */
+  .bottom-section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px 24px; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+  }
+  .bottom-text h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .bottom-text p { font-size: 14px; color: var(--text2); max-width: 520px; line-height: 1.6; }
+
+  @media (max-width: 767px) {
+    .hero-card { grid-template-columns: 1fr; }
+    .hero-divider { display: none; }
+    .page-content { padding: 1.25rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div id="sidebar"></div>
+
+<div class="main-wrap">
+  <header class="top-header" id="top-header"></header>
+
+  <div class="page-content">
+
+    <div class="hero-card">
+      <div class="hero-col">
+        <span class="hero-eyebrow">ToolSpark</span>
+        <h1 class="hero-title">Your <em>Transformation</em></h1>
+        <p class="hero-sub">This is the shift your customer experiences — review it, sharpen the language, and continue when it feels right.</p>
+        <button class="btn btn-gold" id="continueBtn" onclick="continueToJourneyMap()" style="margin-top:8px;">Save &amp; Continue to Journey Map →</button>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-col" style="align-items:flex-end;">
+        <p style="font-size:13px; color:rgba(255,255,255,0.45); line-height:1.6; text-align:right;">Not landing right? Generate a fresh take using the same answers.</p>
+        <button class="btn btn-outline" id="regenerateBtn" onclick="regenerateDraft()" style="margin-top:12px;">Regenerate Draft</button>
+      </div>
+    </div>
+
+    <div id="loadingState" class="state-card">
+      <h2>Loading your transformation…</h2>
+      <p>Give it a second while we pull up your latest draft.</p>
+    </div>
+
+    <div id="emptyState" class="state-card hidden">
+      <h2>You have not generated a transformation draft yet.</h2>
+      <p>Run Discover Your Breakthrough first — it walks you through five questions and builds this draft from your answers.</p>
+      <a href="discoverbreakthrough.html" class="btn btn-gold">Go to Discover Your Breakthrough →</a>
+    </div>
+
+    <div id="resultsContent" class="content-row hidden">
+      <div class="main-col">
+        <div class="card">
+          <p class="card-title">Edit your draft</p>
+          <p class="card-sub">Changes save automatically as you type. Required fields are marked when you try to continue without them.</p>
+          <div class="review-grid" id="fieldsGrid"></div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="sidebar-widget">
+          <div class="widget-title">What happens next</div>
+          <p class="widget-sub">Once you continue, this transformation becomes the foundation Journey Map uses to lay out every step your customer takes to get there.</p>
+          <a href="roadmap.html" class="btn btn-outline-light" style="width:100%; justify-content:center;">← Back to My Roadmap</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-section hidden" id="bottomCta">
+      <div class="bottom-text">
+        <h2>Ready to map the journey?</h2>
+        <p>Save this transformation and move on to laying out the step-by-step path your customer follows to get there.</p>
+      </div>
+      <button class="btn btn-gold" onclick="continueToJourneyMap()">Save &amp; Continue to Journey Map →</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="saved-indicator" id="savedIndicator">Saved ✓</div>
+
+<!-- ── FIREBASE ── -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJ0aVMa7M_Bs_Rg7otoAuckI86OtsFUgE",
+    authDomain: "toolspark.co",
+    projectId: "toolspark-2d62d",
+    storageBucket: "toolspark-2d62d.firebasestorage.app",
+    messagingSenderId: "82966513396",
+    appId: "1:82966513396:web:f52b52b0ed2dc9537ac0a1",
+    measurementId: "G-F6NVJRMHV6"
+  };
+  firebase.initializeApp(firebaseConfig);
+  try { firebase.appCheck().activate("6LefuOcsAAAAAD1Pbu-O1q94rMf8u3bdPYoS82zJ", true); } catch (e) {}
+  const db = firebase.firestore();
+</script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script>
+"use strict";
+
+if (window.initNav) initNav('roadmap', 'Your Transformation');
+
+const FUNCTION_URL = "https://analyze-e6qya4oddq-uc.a.run.app";
+const MODEL = "claude-sonnet-4-6";
+
+const REVIEW_FIELDS = [
+  { key: "currentStateDraft", label: "Current State", hint: "Where they are now, in clear human language.", max: 500, rows: 5, full: true },
+  { key: "emotionalState", label: "Emotional State", hint: "How they feel before things click.", max: 200, rows: 2, full: false },
+  { key: "whatTheyveTriedEdited", label: "What They Have Already Tried", hint: "What they have attempted that did not really solve it.", max: 300, rows: 3, full: false },
+  { key: "desiredOutcomeDraft", label: "Desired Outcome", hint: "Where they want to be by the end of this work.", max: 500, rows: 5, full: true },
+  { key: "finallyGetsIt", label: "What Finally Clicks", hint: "The mental shift from Q1.", max: 300, rows: 3, full: false },
+  { key: "canNowDo", label: "What They Can Do Now", hint: "The capability from Q2.", max: 300, rows: 3, full: false },
+  { key: "stickyNote", label: "Sticky-Note Wisdom", hint: "The one lesson they wish they knew sooner.", max: 240, rows: 3, full: false },
+  { key: "secondNature", label: "What Becomes Second Nature", hint: "The behavior that becomes normal.", max: 300, rows: 3, full: false },
+  { key: "identityShift", label: "Identity Shift", hint: "The self-trust shift from Q5.", max: 200, rows: 2, full: false },
+  { key: "transformationStatement", label: "Transformation Statement", hint: "The polished synthesis that future tools and messaging can rally around.", max: 900, rows: 6, full: true }
+];
+
+let currentUser = null;
+let journeyData = null;
+let sparkData = null;
+let displayName = "Friend";
+let autoSaveTimer = null;
+
+const reviewData = {
+  currentStateDraft: "", emotionalState: "", whatTheyveTriedEdited: "", desiredOutcomeDraft: "",
+  finallyGetsIt: "", canNowDo: "", stickyNote: "", secondNature: "", identityShift: "",
+  transformationStatement: ""
+};
+
+function escHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sortDocsByCreatedAtDesc(docs) {
+  return docs.slice().sort(function (a, b) {
+    const aTime = a && a.data && a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+    const bTime = b && b.data && b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+    return bTime - aTime;
+  });
+}
+
+async function fetchLatestSparkDataForUser(user) {
+  const email = user && user.email ? user.email : "";
+  const latestSparkSessionId = localStorage.getItem("toolspark_latest_spark_session");
+  const sparkDocs = [];
+
+  try {
+    const byUser = await db.collection("spark_results").where("userId", "==", user.uid).limit(10).get();
+    if (byUser && !byUser.empty) sparkDocs.push.apply(sparkDocs, byUser.docs);
+  } catch (e) {}
+
+  if (sparkDocs.length) return sortDocsByCreatedAtDesc(sparkDocs)[0].data();
+
+  try {
+    const profilesByEmail = await db.collection("spark_profiles").where("email", "==", email).get();
+    if (profilesByEmail && !profilesByEmail.empty) sparkDocs.push.apply(sparkDocs, profilesByEmail.docs);
+  } catch (e) {}
+
+  if (latestSparkSessionId) {
+    try {
+      const latestSnap = await db.collection("spark_profiles").doc(latestSparkSessionId).get();
+      if (latestSnap.exists) {
+        const sessionEmail = latestSnap.data().email || "";
+        if (!email || sessionEmail === email) sparkDocs.push(latestSnap);
+      }
+    } catch (e) {}
+  }
+
+  return sparkDocs.length ? sortDocsByCreatedAtDesc(sparkDocs)[0].data() : null;
+}
+
+function getSparkStatement() {
+  return sparkData && (sparkData.statement || sparkData.sparkStatement || sparkData.yourSpark || sparkData.spark) || "";
+}
+function getSparkKnowledge() {
+  return sparkData && (sparkData.whatYouKnow || sparkData.expertise || sparkData.WHAT_YOU_KNOW) || "";
+}
+function getSparkEdge() {
+  return sparkData && (sparkData.yourEdge || sparkData.resultYouCreate || sparkData.YOUR_EDGE) || "";
+}
+
+async function authHeaders() {
+  const user = firebase.auth().currentUser;
+  const token = user ? await user.getIdToken() : "";
+  let appCheckToken = "";
+  try {
+    const result = await Promise.race([
+      firebase.appCheck().getToken(false),
+      new Promise(function (_, reject) { setTimeout(reject, 3000); })
+    ]);
+    appCheckToken = result && result.token ? result.token : "";
+  } catch (e) {}
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token,
+    "X-Firebase-AppCheck": appCheckToken
+  };
+}
+
+function extractJsonObject(text) {
+  const cleaned = String(text || "")
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {}
+
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    return JSON.parse(cleaned.slice(start, end + 1));
+  }
+
+  throw new Error("No valid JSON object returned.");
+}
+
+function normalizeDraftData(data) {
+  const normalized = Object.assign({}, data || {});
+  REVIEW_FIELDS.forEach(function (field) {
+    normalized[field.key] = String(normalized[field.key] || "").trim().slice(0, field.max);
+  });
+  return normalized;
+}
+
+function buildFallbackDraft() {
+  const ctx = (journeyData && journeyData.sessionAudienceOverride) || {};
+  const who = ctx.whoYouHelp || "they";
+  const struggle = ctx.whatTheyreStrugglingWith || "they feel stuck";
+  const trigger = ctx.theTriggerMoment || "";
+  const tried = ctx.whatTheyveAlreadyTried || "";
+  const desired = ctx.theTransformation || (journeyData && journeyData.canNowDo) || (journeyData && journeyData.secondNature) || "";
+
+  return normalizeDraftData({
+    currentStateDraft: "Right now, " + who + " are dealing with " + struggle + (trigger ? " " + trigger : "") + ". They know something needs to change, but they are still carrying the weight of what is not working.",
+    emotionalState: trigger || "Tired of second-guessing themselves.",
+    whatTheyveTriedEdited: tried || "They have already tried piecing this together on their own, but it has not created the shift they wanted.",
+    desiredOutcomeDraft: desired || "They want things to feel clearer, steadier, and more natural in real life.",
+    finallyGetsIt: (journeyData && journeyData.finallyGetsIt) || "",
+    canNowDo: (journeyData && journeyData.canNowDo) || "",
+    stickyNote: (journeyData && journeyData.stickyNote) || "",
+    secondNature: (journeyData && journeyData.secondNature) || "",
+    identityShift: (journeyData && journeyData.identityShift) || "",
+    transformationStatement: "By the end of this work, things finally click for them in a way that changes how they move. They are no longer just hoping they can do it - they start acting like someone who knows what they are doing."
+  });
+}
+
+async function requestNewDraft() {
+  const ctx = (journeyData && journeyData.sessionAudienceOverride) || {};
+  const promptLines = [
+    "You generate editable transformation draft fields for ToolSpark.",
+    "Return ONLY valid JSON. No markdown. No explanation. No code fences.",
+    "",
+    "Write in warm, specific language. Use the creator's words where possible.",
+    "Do not use generic coaching fluff.",
+    "Do not use these words: beautiful, amazing, game-changer, transformation journey.",
+    "",
+    "Return exactly these keys:",
+    "{",
+    '  "currentStateDraft": "3 to 5 sentences in second-person or close third-person language. Start with the emotional reality. Include one specific behavior or pattern. End with the tension that makes them ready for help. Max 500 characters.",',
+    '  "emotionalState": "One vivid phrase or short sentence capturing how they feel right now. Max 200 characters.",',
+    '  "whatTheyveTriedEdited": "What they have already attempted that did not really solve it. Max 300 characters.",',
+    '  "desiredOutcomeDraft": "3 to 5 sentences about the end state. First sentence: practical outcome. Middle: confidence or identity shift. Last: what starts to feel normal or what others notice. Max 500 characters.",',
+    '  "finallyGetsIt": "Polished version of what finally clicks for them. Max 300 characters.",',
+    '  "canNowDo": "Polished version of what they can now do confidently. Max 300 characters.",',
+    '  "stickyNote": "Polished version of the sticky-note wisdom. Max 240 characters.",',
+    '  "secondNature": "Polished version of what becomes second nature. Max 300 characters.",',
+    '  "identityShift": "One vivid phrase or short sentence about when self-trust becomes real. Max 200 characters.",',
+    '  "transformationStatement": "One paragraph, 4 to 6 sentences, that future tools, offers, and messaging can rally around. Max 900 characters."',
+    "}",
+    "",
+    "--- CREATOR CONTEXT ---",
+    "Name: " + displayName,
+    "Spark: " + getSparkStatement(),
+    "What they know: " + getSparkKnowledge(),
+    "Their edge: " + getSparkEdge(),
+    "",
+    "--- AUDIENCE CONTEXT ---",
+    "Who they help: " + (ctx.whoYouHelp || ""),
+    "Their struggle: " + (ctx.whatTheyreStrugglingWith || ""),
+    "Their trigger: " + (ctx.theTriggerMoment || ""),
+    "What they have already tried: " + (ctx.whatTheyveAlreadyTried || ""),
+    "Transformation they want: " + (ctx.theTransformation || ""),
+    "Words they use: " + (ctx.wordsTheyUse || ""),
+    "I help statement: " + (ctx.yourIHelpStatement || ""),
+    "",
+    "--- FIVE QUESTION ANSWERS ---",
+    "Q1 Finally Gets It: " + ((journeyData && journeyData.finallyGetsIt) || ""),
+    "Q2 Can Now Do: " + ((journeyData && journeyData.canNowDo) || ""),
+    "Q3 Sticky Note: " + ((journeyData && journeyData.stickyNote) || ""),
+    "Q4 Second Nature: " + ((journeyData && journeyData.secondNature) || ""),
+    "Q5 Identity Shift: " + ((journeyData && journeyData.identityShift) || "")
+  ];
+
+  let draft = null;
+
+  try {
+    const response = await fetch(FUNCTION_URL, {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1700,
+        system: "You are a warm, precise strategist who returns only valid JSON.",
+        messages: [{ role: "user", content: promptLines.join("\n") }],
+        _meta: { tool: "discover-breakthrough-v2", userId: currentUser.uid }
+      })
+    });
+
+    if (!response.ok) throw new Error("API error " + response.status);
+
+    const data = await response.json();
+    const text = (data.content || []).map(function (block) {
+      return block.type === "text" ? block.text : "";
+    }).join("").trim();
+
+    draft = normalizeDraftData(extractJsonObject(text));
+  } catch (error) {
+    console.error("requestNewDraft failed:", error);
+    draft = buildFallbackDraft();
+  }
+
+  return draft;
+}
+
+function journeySessionRef(uid) {
+  return db.collection("journey_sessions").doc(uid);
+}
+
+async function persistSession(extra) {
+  if (!currentUser) return;
+  await journeySessionRef(currentUser.uid).set(Object.assign({
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, extra), { merge: true });
+}
+
+function showSavedIndicator() {
+  const el = document.getElementById("savedIndicator");
+  el.classList.add("show");
+  clearTimeout(showSavedIndicator.timer);
+  showSavedIndicator.timer = setTimeout(function () {
+    el.classList.remove("show");
+  }, 1400);
+}
+
+function renderFields() {
+  const grid = document.getElementById("fieldsGrid");
+  grid.innerHTML = REVIEW_FIELDS.map(function (field) {
+    return (
+      '<div class="review-section' + (field.full ? " full" : "") + '">' +
+        '<label class="form-label" for="review-' + field.key + '">' + escHtml(field.label) + "</label>" +
+        '<div class="form-hint">' + escHtml(field.hint) + "</div>" +
+        '<textarea class="text-input" id="review-' + field.key + '" rows="' + field.rows + '" maxlength="' + field.max + '">' + escHtml(reviewData[field.key] || "") + "</textarea>" +
+        '<div class="field-counter" id="counter-' + field.key + '">' + String(reviewData[field.key] || "").length + " / " + field.max + "</div>" +
+      "</div>"
+    );
+  }).join("");
+
+  REVIEW_FIELDS.forEach(function (field) {
+    const el = document.getElementById("review-" + field.key);
+    const counter = document.getElementById("counter-" + field.key);
+    el.addEventListener("input", function () {
+      reviewData[field.key] = el.value;
+      counter.textContent = el.value.length + " / " + field.max;
+      el.classList.remove("error");
+      scheduleSave();
+    });
+    el.addEventListener("blur", saveNow);
+  });
+}
+
+function scheduleSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveNow, 700);
+}
+
+async function saveNow() {
+  if (!currentUser) return;
+  const isCompleted = Boolean(journeyData && journeyData.status === "completed");
+  try {
+    await persistSession(Object.assign({}, reviewData, {
+      currentPhase: isCompleted ? "completed" : "review",
+      status: isCompleted ? "completed" : "in_progress"
+    }));
+    showSavedIndicator();
+  } catch (error) {
+    console.warn("Failed to autosave transformation draft:", error);
+  }
+}
+
+async function regenerateDraft() {
+  const btn = document.getElementById("regenerateBtn");
+  btn.disabled = true;
+  btn.textContent = "Regenerating…";
+  try {
+    const draft = await requestNewDraft();
+    Object.assign(reviewData, draft);
+    renderFields();
+    const isCompleted = Boolean(journeyData && journeyData.status === "completed");
+    await persistSession(Object.assign({}, reviewData, {
+      currentPhase: isCompleted ? "completed" : "review",
+      status: isCompleted ? "completed" : "in_progress",
+      resultsReviewed: false
+    }));
+    showSavedIndicator();
+  } catch (error) {
+    console.error("regenerateDraft failed:", error);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Regenerate Draft";
+  }
+}
+
+async function continueToJourneyMap() {
+  const requiredKeys = ["currentStateDraft", "emotionalState", "whatTheyveTriedEdited", "desiredOutcomeDraft", "transformationStatement", "identityShift"];
+  let valid = true;
+  requiredKeys.forEach(function (key) {
+    const el = document.getElementById("review-" + key);
+    if (!el || !el.value.trim()) {
+      valid = false;
+      if (el) el.classList.add("error");
+    } else if (el) {
+      el.classList.remove("error");
+    }
+  });
+
+  if (!valid) return;
+
+  const buttons = document.querySelectorAll("#continueBtn, .bottom-section .btn-gold");
+  buttons.forEach(function (btn) { btn.disabled = true; });
+
+  REVIEW_FIELDS.forEach(function (field) {
+    const el = document.getElementById("review-" + field.key);
+    reviewData[field.key] = el ? el.value.trim() : reviewData[field.key];
+  });
+
+  try {
+    await persistSession(Object.assign({}, reviewData, {
+      currentPhase: "completed",
+      status: "completed",
+      resultsReviewed: true,
+      breakthroughComplete: true,
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }));
+
+    await db.collection("users").doc(currentUser.uid).set({
+      breakthroughComplete: true,
+      breakthroughCompletedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    window.location.href = "journeymap.html";
+  } catch (error) {
+    console.error("continueToJourneyMap failed:", error);
+    buttons.forEach(function (btn) { btn.disabled = false; });
+  }
+}
+
+document.addEventListener("tsUserReady", async function (e) {
+  const user = e.detail;
+  if (!user) { window.location.href = "signon.html"; return; }
+  currentUser = user;
+
+  try {
+    const [journeySnap, spark] = await Promise.all([
+      db.collection("journey_sessions").doc(user.uid).get(),
+      fetchLatestSparkDataForUser(user)
+    ]);
+    journeyData = journeySnap.exists ? journeySnap.data() : null;
+    sparkData = spark;
+
+    if (!journeyData || !journeyData.transformationStatement) {
+      document.getElementById("loadingState").classList.add("hidden");
+      document.getElementById("emptyState").classList.remove("hidden");
+      return;
+    }
+
+    displayName = journeyData.name || "Friend";
+    REVIEW_FIELDS.forEach(function (field) { reviewData[field.key] = journeyData[field.key] || ""; });
+
+    document.getElementById("loadingState").classList.add("hidden");
+    document.getElementById("resultsContent").classList.remove("hidden");
+    document.getElementById("bottomCta").classList.remove("hidden");
+    renderFields();
+  } catch (error) {
+    console.error("Failed to load transformation results:", error);
+    document.getElementById("loadingState").innerHTML = "<h2>Could not load your results right now.</h2>";
+  }
+});
+</script>
+</body>
+</html>
