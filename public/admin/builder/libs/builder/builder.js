@@ -159,6 +159,12 @@ function generateElements(html) {
   return template.content.children;
 }
 
+// getBoundingClientRect() is already relative to el's own containing viewport, which for an
+// iframe-internal element means the iframe's scroll position is already netted out here — two
+// call sites (highlightMove's #highlight-box and selectNode's #select-box) used to subtract
+// frameDoc.scrollTop/scrollLeft again on top of this, double-counting it. That only showed up
+// once you'd actually scrolled the canvas, which is exactly when a section already has enough
+// content to need scrolling - hence "the highlight box flies off when there's already stuff there".
 function offset(el) {
   box = el.getBoundingClientRect();
   docElem = document.documentElement;
@@ -1402,10 +1408,10 @@ Vvveb.Builder = {
 
 		try {
 			let pos = offset(target);
-			let top = (pos.top - (self.frameDoc.scrollTop ?? 0)  - self.selectPadding);
-				
-			SelectBox.style.top  = top + "px"; 
-			SelectBox.style.left = (pos.left - (self.frameDoc.scrollLeft ?? 0) - self.selectPadding) + "px"; 			
+			let top = (pos.top - self.selectPadding);
+
+			SelectBox.style.top  = top + "px";
+			SelectBox.style.left = (pos.left - self.selectPadding) + "px";
 			SelectBox.style.width = ((target.offsetWidth ?? target.clientWidth) + self.selectPadding * 2) + "px"; 			
 			SelectBox.style.height = ((target.offsetHeight ?? target.clientHeight) + self.selectPadding * 2) + "px";
 			SelectBox.style.display = "block";
@@ -1537,7 +1543,13 @@ Vvveb.Builder = {
 
 					let parent = self.highlightEl;
 
-					let isBlock = (window.getComputedStyle(parent).display == "block");
+					// display=="block" alone misses flex/grid containers (Bootstrap 5 cards, rows,
+					// columns - this project's components-bootstrap5.js/sections-bootstrap4.js are
+					// flex-heavy), so hovering one of those was falling into the append/prepend
+					// branch below and nesting the new element inside it instead of treating it as
+					// a sibling boundary like a plain block div.
+					let parentDisplay = window.getComputedStyle(parent).display;
+					let isBlock = ["block", "flex", "grid", "inline-flex", "inline-grid", "table", "list-item", "flow-root"].includes(parentDisplay);
 
 					if (self.dragType == "section") {
 						let closest = parent.closest("section, header, footer, body");
@@ -1608,8 +1620,8 @@ Vvveb.Builder = {
 					}
 						 
 					document.getElementById("highlight-box").setAttribute("style",
-						`top:${pos.top - (self.frameDoc.scrollTop ?? 0)}px; 
-						 left:${pos.left - (self.frameDoc.scrollLeft ?? 0)}px;
+						`top:${pos.top}px;
+						 left:${pos.left}px;
 						 width:${width}px; 
 						 height:${height}px;
 						 display:${event.target.hasAttribute('contenteditable') ? "none":"block"};
@@ -1747,13 +1759,24 @@ Vvveb.Builder = {
 					
 					document.getElementById("add-section-box").style.display = "none";
 					event.preventDefault();
+					// preventDefault() alone only cancels the browser's own default action (a link
+					// navigating, a submit button submitting) - it does NOT stop a click handler the
+					// page's own JS attached directly to this element (a real sign-out button, a
+					// delete action, a checkout trigger) from firing, because that handler runs
+					// during the bubble phase BEFORE this listener would ever get a chance to act,
+					// since it's registered on the outer frameBody. Listening in the capture phase
+					// instead (see addEventListener call below) means this runs FIRST, and
+					// stopPropagation() here keeps the event from ever reaching the real element's
+					// own handler at all - selection still works off event.target either way.
+					event.stopPropagation();
 					return false;
-				}	
-			}	
-			
+				}
+			}
+
 		};
-		
-		self.frameBody.addEventListener("click", highlightClick);
+
+		// true = capture phase, see comment above on why this can't be the (default) bubble phase.
+		self.frameBody.addEventListener("click", highlightClick, true);
 		
 	},
 	

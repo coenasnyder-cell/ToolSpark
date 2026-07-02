@@ -72,14 +72,19 @@ function () {
             if (request.status === 200) {
               resolve({url, href, filename, path, binary, data:request.response, status:request.status});
             } else {
-              //reject(Error('Error code:' + request.statusText));
-              console.error('Error code:' + request.statusText);
+              console.error('Skipping asset (status ' + request.status + '): ' + url);
               resolve({status:request.status});
             }
           };
 
           request.onerror = function() {
-              reject(Error('There was a network error.'));
+              // A single failed/CORS-blocked asset (a stray external font, a missing image, etc.)
+              // used to reject() here, which kills the whole Promise.all below and aborts the
+              // entire download silently — the button would appear to do nothing. Resolve as
+              // skipped instead, same as a bad HTTP status just above, so one bad asset doesn't
+              // block downloading everything else including the page's own HTML.
+              console.error('Skipping asset (network/CORS error): ' + url);
+              resolve({status: 0});
           };
 
           // Send the request
@@ -114,11 +119,15 @@ function () {
         }
         
         zip.file(Vvveb.FileManager.getCurrentFileName() ?? "index.html", html);
-        zip.generateAsync({type:"blob"})
+        // "return" so a failure here reaches the .catch below — without it, a rejection
+        // inside this inner chain is a silent unhandled rejection, same failure mode as
+        // the one just fixed above.
+        return zip.generateAsync({type:"blob"})
         .then(function(content) {
             saveAs(content, Vvveb.FileManager.getPageData("title") ?? Vvveb.FileManager.getCurrentPage());
         });
     }).catch((error) => {
-        console.log(error)
+        console.error(error);
+        displayToast("bg-danger", "Error", "Download failed: " + (error.message || error));
   })
 };

@@ -330,7 +330,7 @@ exports.builderUploadImage = onRequest({
       await bucket.file(storagePath).save(fileBuffer, {
         metadata: {
           contentType: fileMime || `image/${extension}`,
-          metadata: { firebaseStorageDownloadTokens: token }
+          metadata: { firebaseStorageDownloadTokens: token, originalName: fileName }
         }
       });
 
@@ -345,6 +345,134 @@ exports.builderUploadImage = onRequest({
   });
 
   bb.end(req.rawBody);
+});
+
+// Media Library list/delete/rename all identify a file by the full download URL the
+// client already has (there's no bare filename anywhere once builderUploadImage hands
+// back a tokened URL) — this pulls the bucket-relative object path back out of that URL
+// and refuses anything outside builder-uploads/, so these can't touch other storage paths.
+function builderMediaPathFromUrl(url) {
+  const match = /\/o\/([^?]+)/.exec(url || "");
+  if (!match) return null;
+  const storagePath = decodeURIComponent(match[1]);
+  return storagePath.startsWith("builder-uploads/") ? storagePath : null;
+}
+
+exports.builderScanMedia = onRequest({
+  cors: true,
+  invoker: "public"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  if (!await requireAppCheck(req, res)) return;
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  if (!await requireAdmin(decoded.uid, res)) return;
+
+  try {
+    const bucket = admin.storage().bucket();
+    const [files] = await bucket.getFiles({ prefix: "builder-uploads/" });
+
+    const items = files
+      .filter(f => !f.name.endsWith("/"))
+      .map(f => {
+        const custom = f.metadata?.metadata || {};
+        const token = custom.firebaseStorageDownloadTokens;
+        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(f.name)}?alt=media${token ? `&token=${token}` : ""}`;
+        const baseName = f.name.replace(/^builder-uploads\//, "").replace(/^\d+-/, "");
+
+        return {
+          name: custom.originalName || baseName,
+          path: downloadUrl,
+          type: "file",
+          size: Number(f.metadata?.size) || 0,
+          time: f.metadata?.timeCreated || ""
+        };
+      })
+      // newest first
+      .sort((a, b) => (a.time < b.time ? 1 : a.time > b.time ? -1 : 0));
+
+    // Media library expects one root folder node; there are no real subfolders here.
+    res.status(200).json({ name: "", path: "", type: "folder", items });
+  } catch (err) {
+    console.error("builderScanMedia error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+exports.builderDeleteMedia = onRequest({
+  cors: true,
+  invoker: "public"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  if (!await requireAppCheck(req, res)) return;
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  if (!await requireAdmin(decoded.uid, res)) return;
+
+  const storagePath = builderMediaPathFromUrl(req.body.file);
+  if (!storagePath) { res.status(400).send("Invalid or unrecognized file"); return; }
+
+  try {
+    await admin.storage().bucket().file(storagePath).delete();
+    res.status(200).send("Deleted");
+  } catch (err) {
+    if (err.code === 404) { res.status(200).send("Deleted"); return; }
+    console.error("builderDeleteMedia error:", err);
+    res.status(500).send("Error deleting: " + err.message);
+  }
+});
+
+exports.builderRenameMedia = onRequest({
+  cors: true,
+  invoker: "public"
+}, async (req, res) => {
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+
+  if (!await requireAppCheck(req, res)) return;
+  const decoded = await requireAuth(req, res);
+  if (!decoded) return;
+  if (!await requireAdmin(decoded.uid, res)) return;
+
+  const allowedExtensions = ["ico", "jpg", "jpeg", "png", "gif", "webp"];
+  const oldPath = builderMediaPathFromUrl(req.body.file);
+  const newName = (req.body.newfile || "").trim();
+
+  if (!oldPath) { res.status(400).send("Invalid or unrecognized file"); return; }
+  if (!newName) { res.status(400).send("Missing new file name"); return; }
+
+  const extension = (newName.split(".").pop() || "").toLowerCase();
+  if (!allowedExtensions.includes(extension)) {
+    res.status(400).send(`File type ${extension} not allowed!`);
+    return;
+  }
+
+  try {
+    const bucket = admin.storage().bucket();
+    const oldFile = bucket.file(oldPath);
+    const [exists] = await oldFile.exists();
+    if (!exists) { res.status(404).send("File not found"); return; }
+
+    const [oldMeta] = await oldFile.getMetadata();
+    const safeName = `${Date.now()}-${newName.replace(/[^a-zA-Z0-9_.-]/g, "")}`;
+    const newPath = `builder-uploads/${safeName}`;
+    const token = crypto.randomUUID();
+
+    await oldFile.copy(bucket.file(newPath), {
+      metadata: {
+        contentType: oldMeta.contentType,
+        metadata: { firebaseStorageDownloadTokens: token, originalName: newName }
+      }
+    });
+    await oldFile.delete();
+
+    const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(newPath)}?alt=media&token=${token}`;
+    res.status(200).send(downloadUrl);
+  } catch (err) {
+    console.error("builderRenameMedia error:", err);
+    res.status(500).send("Error renaming: " + err.message);
+  }
 });
 
 exports.getElevenLabsVoices = onRequest({

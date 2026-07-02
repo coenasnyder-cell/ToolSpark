@@ -49,17 +49,24 @@
 
   window.tsBuilderIdToken = null;
 
-  // Cloud Function endpoints used by the Save button and Media Library upload.
-  // Placeholders — swap for the real Cloud Run URLs after `firebase deploy --only functions:builderSavePage,functions:builderUploadImage`.
+  // Cloud Function endpoints used by the Save button and Media Library (upload/browse/delete/rename).
   window.TS_BUILDER_SAVE_URL   = "https://buildersavepage-e6qya4oddq-uc.a.run.app";
   window.TS_BUILDER_UPLOAD_URL = "https://builderuploadimage-e6qya4oddq-uc.a.run.app";
+  window.TS_BUILDER_SCAN_URL   = "https://us-central1-toolspark-2d62d.cloudfunctions.net/builderScanMedia";
+  window.TS_BUILDER_DELETE_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/builderDeleteMedia";
+  window.TS_BUILDER_RENAME_URL = "https://us-central1-toolspark-2d62d.cloudfunctions.net/builderRenameMedia";
 
-  // libs/media/media.js only self-assigns these if they're undefined when it loads (it loads
-  // further down the page), so declaring them here — before that script tag — overrides it.
-  // builderUploadImage returns the FULL tokened Firebase Storage download URL as plain text,
-  // and media.js does `mediaPath + <that response>` to build the final <img src> — so mediaPath
-  // must be empty (a GCS-prefix approach would need public bucket ACLs, which may be blocked
-  // under Uniform Bucket-Level Access; the download-token URL works regardless).
+  // libs/media/media.js wraps mediaPath/mediaScanUrl/uploadUrl in ONE combined guard —
+  // `if (typeof mediaScanUrl === "undefined") { var mediaPath=...; var mediaScanUrl=...; var uploadUrl=...; }`
+  // — so leaving mediaScanUrl undefined (as this file used to) makes that whole block run and
+  // silently clobbers uploadUrl/mediaPath back to its own PHP defaults ("upload.php", "/media/")
+  // right after we set them below. Defining all three here — before that script tag — trips the
+  // guard so our values survive.
+  // builderUploadImage/builderScanMedia return the FULL tokened Firebase Storage download URL as
+  // plain text/JSON, and media.js does `mediaPath + <that response>` to build the final <img src> —
+  // so mediaPath must be empty (a GCS-prefix approach would need public bucket ACLs, which may be
+  // blocked under Uniform Bucket-Level Access; the download-token URL works regardless).
+  var mediaScanUrl = window.TS_BUILDER_SCAN_URL;
   var uploadUrl  = window.TS_BUILDER_UPLOAD_URL;
   var mediaPath  = "";
 
@@ -92,10 +99,17 @@
   });
 
   // Attach the admin's ID token only on requests to our own builder endpoints — every other fetch (blocks, sections, etc.) passes through untouched.
+  const TS_BUILDER_URLS = [
+    window.TS_BUILDER_SAVE_URL,
+    window.TS_BUILDER_UPLOAD_URL,
+    window.TS_BUILDER_SCAN_URL,
+    window.TS_BUILDER_DELETE_URL,
+    window.TS_BUILDER_RENAME_URL
+  ];
   const tsOrigFetch = window.fetch.bind(window);
   window.fetch = function (input, init) {
     const url = typeof input === 'string' ? input : (input && input.url) || '';
-    if (window.tsBuilderIdToken && (url === window.TS_BUILDER_SAVE_URL || url === window.TS_BUILDER_UPLOAD_URL)) {
+    if (window.tsBuilderIdToken && TS_BUILDER_URLS.includes(url)) {
       init = init || {};
       init.headers = Object.assign({}, init.headers, { 'Authorization': 'Bearer ' + window.tsBuilderIdToken });
     }
@@ -110,7 +124,7 @@
 
       <div class="logo">
 
-        <a href="/" class="img" title="VvvebJs">
+        <a href="/admindashboard.html" class="img" title="ToolSpark Admin">
           <img src="img/logo.png" data-v-site-logo>
           <img src="img/logo.png" data-v-site-logo-dark>
         </a>
@@ -121,7 +135,7 @@
 
         <div class="logo">
           <!-- h1 class="display-5"><a href="#">M.</a></h1-->
-          <a href="/admin" class="img">
+          <a href="/admindashboard.html" class="img">
             <img src="img/logo.png" data-v-site-logo>
             <img src="img/logo.png" data-v-site-logo-dark>
           </a>
@@ -175,7 +189,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link d-none d-md-block " href="{$this.adminPath}index.php">
+              <a class="nav-link d-none d-md-block " href="/admindashboard.html">
                 <i class="icon-pie-chart-outline"></i>
                 <!--
 						<img src="#" class="icon-img">
@@ -1765,7 +1779,7 @@
 
   <script id="vvveb-input-colorinput" type="text/html">
 
-	<div class="clr-field" style="{% if (typeof value !== 'undefined' && value != false) { %}color: {%=value%}" {% } %}">
+	<div class="clr-field" {% if (typeof value !== 'undefined' && value != false) { %}style="color: {%=value%}"{% } %}>
 		<button type="button" aria-labelledby="clr-open-label"></button>
 		<input name="{%=key%}" type="text" {% if (typeof value !== 'undefined' && value != false) { %} value="{%=value%}" {% } %} class="coloris form-control"/>		
 	</div>
@@ -2507,8 +2521,8 @@ Unzip the latest ckeditor release zip from https://github.com/ckeditor/ckeditor4
   <!-- autocomplete plugin used by autocomplete input-->
   <script src="libs/autocomplete/autocomplete.js"></script>
   <script>
-	let renameUrl = 'save.php?action=rename';
-	let deleteUrl = 'save.php?action=delete';
+	let renameUrl = window.TS_BUILDER_RENAME_URL;
+	let deleteUrl = window.TS_BUILDER_DELETE_URL;
 	let saveReusableUrl = 'save.php?action=saveReusable';
 	let oEmbedProxyUrl = 'save.php?action=oembedProxy';
 	let chatgptOptions = { "key": "", "model": "gpt-3.5-turbo-instruct", "temperature": 0, "max_tokens": 300 };

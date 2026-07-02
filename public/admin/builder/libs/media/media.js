@@ -552,10 +552,16 @@ _
 						return response.text()
 					})
 					.then((data) => {
+						// builderUploadImage (Cloud Function) returns the full tokened Storage
+						// download URL as plain text, not a bare filename — joining that onto
+						// currentPath like the original PHP upload.php's response corrupts it
+						// into "/https://...". Use it as the path as-is, and fall back to the
+						// original filename (not the whole URL) for the display name.
+						let isAbsoluteUrl = data.indexOf("://") > -1;
 						let fileElement = Vvveb.MediaModal.addFile({
-							name:data,
+							name: isAbsoluteUrl ? file.name : data,
 							type:"file",
-							path: Vvveb.MediaModal.currentPath + "/" + data,
+							path: isAbsoluteUrl ? data : Vvveb.MediaModal.currentPath + "/" + data,
 							size:1
 						},true);
 						
@@ -582,61 +588,66 @@ _
 		deleteFile(el) {
 			let parent = el.closest("li");
 			let file = parent.querySelector('input[type ="hidden"]').value;
-			if (confirm(`Are you sure you want to delete "${file}"template?`)) {
-				
+			let displayName = parent.querySelector(".name")?.textContent ?? file;
+
+			if (confirm(`Are you sure you want to delete "${displayName}"?`)) {
+
 			fetch(deleteUrl, {method: "POST",  body: new URLSearchParams({file})})
 				.then((response) => {
 					if (!response.ok) {  return Promise.reject(response);  }
 					return response.text();
 				})
 				.then((data) => {
-					let bg = "bg-success";
-					if (data.success) {		
-					} else {
-						//bg = "bg-danger";
-					}
-
-					displayToast(bg, "Delete", data.message ?? data);
-				
-					parent.remove();	
+					displayToast("bg-success", "Delete", data);
+					parent.remove();
 				})
 				.catch(error => {
 					console.log(error);
-					let message = error.statusText ?? "Error deleting file!";
-					displayToast("bg-danger", "Error", message);
-					error.text().then( errorMessage => {
-						let message = errorMessage.substr(0, 200);
-						displayToast("bg-danger", "Error", message);
-					})	
-				});	
+					if (error && typeof error.text === "function" && !error.bodyUsed) {
+						error.text().then(errorMessage => {
+							displayToast("bg-danger", "Error", errorMessage.substr(0, 200));
+						});
+					} else {
+						displayToast("bg-danger", "Error", (error && error.statusText) || "Error deleting file!");
+					}
+				});
 			}
 		}
 
 		renameFile(el) {
 			let parent = el.closest("li");
 			let file = parent.querySelector('input[type ="hidden"]').value;
-			let newfile = prompt(`Enter new file name for "${file}"`, file);
+			let displayName = parent.querySelector(".name")?.textContent ?? file;
+			let newfile = prompt(`Enter new file name for "${displayName}"`, displayName);
 
 			if (newfile) {
-				fetch(renameUrl, {method: "POST",  body: {file, newfile}})
+				fetch(renameUrl, {method: "POST",  body: new URLSearchParams({file, newfile})})
 				.then((response) => {
-					console.log(response);
-					if (!response.ok) { throw new Error(response) }
-					return response.text()
+					if (!response.ok) {  return Promise.reject(response);  }
+					return response.text();
 				})
 				.then((data) => {
-					let bg = "bg-success";
-					if (data.success) {		
-					} else {
-						//bg = "bg-danger";
-					}
-					
-					displayToast(bg, "Save", data.message ?? data);
+					displayToast("bg-success", "Rename", "Renamed to " + newfile);
+
+					parent.remove();
+					let fileElement = Vvveb.MediaModal.addFile({
+						name: newfile,
+						type: "file",
+						path: data,
+						size: 1
+					}, true);
+					fileElement.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
 				})
 				.catch(error => {
 					console.log(error);
-					displayToast("bg-danger", "Error", "Error renaming file!");
-				});	
+					if (error && typeof error.text === "function" && !error.bodyUsed) {
+						error.text().then(errorMessage => {
+							displayToast("bg-danger", "Error", errorMessage.substr(0, 200));
+						});
+					} else {
+						displayToast("bg-danger", "Error", (error && error.statusText) || "Error renaming file!");
+					}
+				});
 			}
 		}
 		
