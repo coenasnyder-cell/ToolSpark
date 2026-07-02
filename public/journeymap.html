@@ -116,6 +116,91 @@
     border-radius: 12px;
   }
 
+  /* ── Roadmap (attached to bottom of hero) ── */
+  .roadmap-outer {
+    background: var(--surface);
+    border-left: 1px solid rgba(255,255,255,0.6);
+    border-right: 1px solid rgba(255,255,255,0.6);
+    box-shadow: var(--shadow);
+    padding: 18px 32px 22px;
+    margin-bottom: 0;
+  }
+  .roadmap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .roadmap::-webkit-scrollbar { display: none; }
+  .roadmap-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .step-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(26,20,10,0.16);
+    background: transparent;
+    color: #1a1510;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .roadmap-step.done .step-circle {
+    border-color: var(--gold);
+    color: #1a1510;
+  }
+  .roadmap-step.active .step-circle {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: #1a1510;
+    box-shadow: 0 0 18px rgba(201,168,76,0.45);
+  }
+  .step-circle svg {
+    width: 40px;
+    height: 40px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+  }
+  .step-label {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #1a1510;
+    white-space: nowrap;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .roadmap-step.done .step-label { color: rgba(201,168,76,0.65); }
+  .roadmap-step.active .step-label { color: var(--gold); }
+  .step-here {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    color: #1a1510;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .step-connector {
+    flex: 1;
+    height: 1.5px;
+    min-width: 20px;
+    background: rgba(26,20,10,0.10);
+    position: relative;
+    top: -18px;
+  }
+  .step-connector.done { background: rgba(201,168,76,0.45); }
+
   /* ── Hero Banner Image ── */
   .hero-card {
     position: relative;
@@ -430,9 +515,33 @@
     box-shadow: var(--shadow), 0 0 0 1px rgba(201,168,76,0.10) inset;
   }
 
-  .generate-head h2 {
-    text-align: center;
-  }
+.define-divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  position: relative;
+  overflow: hidden;
+}
+.divider-line::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.25;
+}
+.divider-text {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  white-space: nowrap;
+}
 
   .generate-copy {
     color: var(--muted);
@@ -639,6 +748,10 @@
       border-radius: 12px;
     }
 
+    .roadmap-outer {
+      padding: 16px 20px 18px;
+    }
+
     .hero-card {
       border-radius: 12px 12px 0 0;
       aspect-ratio: 4 / 3;
@@ -699,7 +812,6 @@
 </div>
 
 <main class="shell hidden" id="appShell">
-
   <section class="hero">
     <div class="hero-card">
       <div class="hero-overlay-text">
@@ -710,6 +822,42 @@
       </div>
     </div>
   </section>
+
+  <!-- Roadmap (attached to bottom of hero) -->
+  <div class="roadmap-outer">
+    <div class="roadmap">
+      <div class="roadmap-step done">
+        <div class="step-circle"><i data-lucide="zap" width="15" height="15"></i></div>
+        <div class="step-label">Spark</div>
+      </div>
+      <div class="step-connector done"></div>
+      <div class="roadmap-step done">
+        <div class="step-circle"><i data-lucide="users" width="15" height="15"></i></div>
+        <div class="step-label">Audience</div>
+      </div>
+      <div class="step-connector done"></div>
+      <div class="roadmap-step done">
+        <div class="step-circle"><i data-lucide="sparkles" width="15" height="15"></i></div>
+        <div class="step-label">Transformation</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="roadmap-step active">
+        <div class="step-here">YOU ARE HERE</div>
+        <div class="step-circle"><i data-lucide="map" width="15" height="15"></i></div>
+        <div class="step-label">Journey Map</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="roadmap-step">
+        <div class="step-circle"><i data-lucide="wrench" width="15" height="15"></i></div>
+        <div class="step-label">Tool Map</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="roadmap-step">
+        <div class="step-circle"><i data-lucide="rocket" width="15" height="15"></i></div>
+        <div class="step-label">Launch</div>
+      </div>
+    </div>
+  </div>
 
   <section class="grid">
     <article class="panel panel-full transformation-panel">
@@ -747,8 +895,10 @@
     </article>
 
     <article class="panel panel-full generate-panel">
-      <div class="generate-head">
-        <h2>Generate Your Journey Map</h2>
+      <div class="define-divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">Generate Your Journey Map</div>
+        <div class="divider-line"></div>
       </div>
       <ul class="mini-list build-list">
         <li>
@@ -1397,5 +1547,7 @@ window.addEventListener("tsUserReady", async function () {
 });
 </script>
 <script src="js/topbar.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

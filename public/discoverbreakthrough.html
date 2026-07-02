@@ -199,7 +199,7 @@
   background-image: url('breakthrough-banner.png');
   background-size: cover;
   background-position: center 30%;
-  border-radius: 28px;
+  border-radius: 28px 28px 0 0;
   overflow: hidden;
   aspect-ratio: 16 / 4.5;
   min-height: 0;
@@ -266,10 +266,9 @@
 
 /* ── Roadmap ── */
 .roadmap-outer {
-    background: transparent;
+  background: transparent;
   padding: 18px 32px 22px;
-  margin-bottom: 28px;
-
+  margin-bottom: 0;
 }
 .roadmap {
   display: flex;
@@ -353,53 +352,25 @@
 }
 .step-connector.done { background: rgba(201,168,76,0.45); }
 
-/* ── Choice Cards (dark) ── */
-.choices-outer {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  margin-bottom: 48px;
-  box-shadow: none;
-}
-.choice-grid {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-.choice-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  min-height: 320px;
-  padding: 42px 36px;
-  background: var(--surface-soft); 
-  border: 1.5px;
-  border-radius: 20px;
-  border-color: var(--line-strong); /* rgba(201,168,76,0.28) — was rgba(26,20,10,0.08) */
-
-  box-shadow: 0 2px 16px rgba(26,20,10,0.06);
-  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 200ms var(--ease-out);
-   min-height: 260px
-}
-.choice-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gold);
-  margin-bottom: 14px;
-}
-.choice-grid .choice-card:nth-child(2) { transition-delay: 80ms; }
 .define-grid .define-card:nth-child(2) { transition-delay: 80ms; }
 .define-grid .define-card:nth-child(3) { transition-delay: 160ms; }
 
-.choice-cta,
 .btn-gold,
 .btn-outline {
+  border-radius: 12px;
+}
+
+/* ── Start Choice Actions ── */
+.choice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.choice-actions .btn-primary,
+.choice-actions .btn-secondary {
   border-radius: 12px;
 }
 
@@ -461,89 +432,187 @@
   background: rgba(255,255,255,0.76);
   color: var(--muted);
 }
-.choice-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* ── Continuous white section (roadmap → transformation → define) ── */
+  .continuous-panel {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: var(--shadow);
+  }
+
+ .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .panel {
+    padding: 24px;
+    grid-column: span 6;
+  }
+
+  .panel-full {
+    grid-column: span 12;
+  }
+
+  .transformation-panel {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+.mini-list li {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .transformation-panel h2 {
+    font-size: clamp(34px, 4vw, 48px);
+    line-height: 1.05;
+    margin-bottom: 8px;
     text-align: center;
-  gap: 10px;
-}
-
-.choice-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: auto;
-  justify-content: flex-end;
-}
-@media (hover: hover) and (pointer: fine) {
-  .choice-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(201,168,76,0.40);
-    box-shadow: 0 8px 32px rgba(26,20,10,0.09);
   }
-}
-.choice-card:active { transform: scale(0.98); transition-duration: 100ms; }
-.choice-card.has-draft {  border-color: rgba(201,168,76,0.55);
- background: linear-gradient(180deg, rgba(201,168,76,0.06), var(--surface-soft) 40%);
-}
 
-.choice-label {
-  font-family: "Playfair Display", serif;
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.15;
-  color: #1a1510;
-  margin: 0;
-  text-align: center;
-}
-.choice-desc {
-  font-size: 18px;
-  line-height: 1.65;
-  color: rgba(26,20,10,0.78);
-  max-width: 30ch;
-  margin: 0;
-  text-align: center;
-}
-.choice-cta {
-   display: inline-block;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a1510;
-  background: var(--gold);
-  padding: 9px 18px;
-  border: 1.5px solid var(--gold);
-  border-radius: 12px;
-  transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 150ms var(--ease-out);
-  margin-top: 8px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .choice-cta:hover {
-  background: #d8b866;
-  border-color: #d8b866;
-  transform: translateY(-1px);
+  .transform-summary {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 15px;
+    max-width: 60ch;
+    margin: 0 auto;
+    text-align: center;
   }
-}
-.choice-badge {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--green);
-  letter-spacing: 0.03em;
-  display: block;
-  margin-top: 12px;
-  text-align: center;
-}
 
+  .transformation {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 22px;
+  }
+
+  .transform-box {
+    padding: 22px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.78);
+  }
+
+  .transform-box-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 8px 12px 8px 8px;
+    border-radius: 12px;
+    background: rgba(201,168,76,0.10);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-bottom: 2px solid rgba(201,168,76,0.35);
+    color: var(--gold-deep);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .transform-box-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #1A1510;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .transform-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-deep);
+    font-size: 30px;
+    padding: 0 6px;
+  }
+
+  .transform-points {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+  }
+
+  .transform-points li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--ink);
+  }
+
+  .transform-points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.66em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 5px rgba(201,168,76,0.14);
+  }
+
+  .transform-identity {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
+    border: 1px solid rgba(201,168,76,0.20);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .transform-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .transform-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .transform-identity-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .transform-identity-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--gold-deep);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 /* ── Intro Bottom Banner ── */
 .intro-banner {
   display: flex;
   align-items: center;
   gap: 20px;
   background: #1a1510;
-  border-radius: 18px;
+  border-radius: 0 0 18px 18px;
   padding: 22px 28px;
-  margin-top: 8px;
+  margin-top: 0;
   overflow: hidden;
   position: relative;
   justify-content: center; /* add this */
@@ -623,32 +692,21 @@
 }
 .define-card {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: 18px;
+  column-gap: 12px;
   align-items: center;
-  padding: 28px 24px;
+  padding: 16px 18px;
   text-align: left;
-   background: var(--surface-soft); /* was #fafafa */
-  border: 1px solid rgba(26,20,10,0.08);
-  border-radius: 18px;
-  box-shadow: 0 1px 8px rgba(26,20,10,0.04);
-  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .define-card:hover {
-    border-color: rgba(201,168,76,0.28);
-    box-shadow: 0 4px 18px rgba(26,20,10,0.07);
-  }
+  background: rgba(255,255,255,0.6);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 .define-icon-wrap {
   grid-column: 1;
   grid-row: 1 / span 2;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(201,168,76,0.10);
-  border: 1px solid rgba(201,168,76,0.22);
+  width: 34px;
+  height: 34px;
   color: var(--gold-deep);
   display: flex;
   align-items: center;
@@ -656,9 +714,9 @@
   flex-shrink: 0;
 }
 .define-icon-wrap svg {
-  width: 32px;
-  height: 32px;
-  stroke-width: 2.2;
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
 }
 .define-title {
   grid-column: 2;
@@ -1097,7 +1155,6 @@
   }
 
   @media (max-width: 920px) {
-    .choice-grid,
     .define-grid {
       grid-template-columns: 1fr;
     }
@@ -1118,9 +1175,13 @@
     }
 
     .intro-hero-banner {
-      border-radius: 10px;
+      border-radius: 10px 10px 0 0;
       aspect-ratio: 4 / 3;
       background-position: center 34%;
+    }
+
+    .intro-banner {
+      border-radius: 0 0 10px 10px;
     }
 
     .hero-overlay-text {
@@ -1139,30 +1200,6 @@
 
     .define-outer {
       padding: 24px 0 40px;
-    }
-
-    .define-card {
-      grid-template-columns: 64px minmax(0, 1fr);
-      column-gap: 14px;
-      padding: 22px 18px;
-    }
-
-    .define-icon-wrap {
-      width: 64px;
-      height: 64px;
-    }
-
-    .define-icon-wrap svg {
-      width: 28px;
-      height: 28px;
-    }
-
-    .choice-label {
-      font-size: 24px;
-    }
-
-    .choice-desc {
-      font-size: 16px;
     }
 
     .recap-row {
@@ -1217,6 +1254,8 @@
         <p class="hero-overlay-desc">You know your spark. You know your audience.<br>Now let's define exactly who your customer becomes on the other side.</p>
       </div>
     </div>
+    <!-- Continuous white section: roadmap → transformation → define -->
+    <div class="continuous-panel">
 
     <!-- Roadmap (attached to bottom of hero) -->
     <div class="roadmap-outer">
@@ -1253,30 +1292,43 @@
         </div>
       </div>
     </div>
-    <!-- Choice Cards -->
-    <div class="choices-outer">
-      <div class="choice-grid">
-        <div class="choice-card reveal" id="newCard" onclick="startFreshSession()">
-          <div class="choice-content">
-          <div class="choice-label">Just Getting Started</div>
-            <div class="choice-desc">First time here. We'll build your transformation from the ground up using everything we already know about you.</div>
+
+     <section class="grid">
+    <article class="panel panel-full transformation-panel">
+      <h2>The Transformation</h2>
+      <div class="transformation">
+        <div class="transform-box">
+          <div class="transform-box-title">
+            <span class="transform-box-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16v-2a2 2 0 0 0-4 0v2"/><path d="M9.5 15H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><rect x="13" y="16" width="8" height="5" rx=".899"/></svg>
+            </span>
+            Where they start
           </div>
-          <div class="choice-footer">
-            <div class="choice-cta" id="startBtn">Let's Get Started</div>
-          </div>
+          <ul class="transform-points" id="transformStart"></ul>
         </div>
-        <div class="choice-card reveal" id="returningCard" onclick="resumeToReview()">
-          <div class="choice-content">
-            <div class="choice-label">Been Here Before</div>
-            <div class="choice-desc">You've been here before but need to make changes. Let's continue building or pick up where you left off.</div>
+        <div class="transform-arrow">&rarr;</div>
+        <div class="transform-box">
+          <div class="transform-box-title">
+            <span class="transform-box-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.194 13.707 3.814 1.86-1.86 3.814"/><path d="M16.47214 7.52786 A 5 10 0 1 0 13 21.79796"/><path d="M21.79796 11 A 10 5 0 1 0 19 15.57071"/></svg>
+            </span>
+            Where they want to be
           </div>
-          <div class="choice-footer">
-            <div class="choice-badge hidden" id="savedBadge">✓ Saved draft found</div>
-            <div class="choice-cta" id="reviewBtn">Continue My Work →</div>
-          </div>
+          <ul class="transform-points" id="transformEnd"></ul>
         </div>
       </div>
-    </div>
+      <div class="transform-identity">
+        <span class="transform-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
+        </span>
+        <div class="transform-identity-body">
+          <span class="transform-identity-label">Identity Shift</span>
+          <p id="transformIdentity"></p>
+        </div>
+      </div>
+    </article>
+    </section>
+
  <!-- Define Section -->
     <div class="define-outer">
       <div class="define-divider reveal">
@@ -1301,7 +1353,13 @@
           <div class="define-desc">Who they see themselves as on the other side.</div>
         </div>
       </div>
+      <div class="choice-actions">
+        <button class="btn-primary" id="startBtn" onclick="startFreshSession()">Let's Get Started</button>
+        <button class="btn-secondary" id="reviewBtn" onclick="resumeToReview()">Continue My Work →</button>
+      </div>
     </div>
+
+    </div><!-- /continuous-panel -->
 
     <!-- Bottom Banner -->
     <div class="intro-banner reveal">
@@ -1433,6 +1491,7 @@ let sparkData = null;
 let audienceData = null;
 let journeyData = null;
 let sessionContext = null;
+let sessionData = null;
 let displayName = "Friend";
 let userInitial = "F";
 let currentPhase = "start";
@@ -1609,8 +1668,6 @@ function showBlockedState(items) {
 function updateStartState() {
   const startBtn = document.getElementById("startBtn");
   const reviewBtn = document.getElementById("reviewBtn");
-  const savedBadge = document.getElementById("savedBadge");
-  const returningCard = document.getElementById("returningCard");
 
   if (!audienceData) {
     return;
@@ -1622,23 +1679,15 @@ function updateStartState() {
 
   startBtn.textContent = "Let's Get Started";
   reviewBtn.textContent = "Continue My Work →";
-  savedBadge.classList.add("hidden");
-  returningCard.classList.remove("has-draft");
 
   if (isCompleted) {
     startBtn.textContent = "Start Over";
     reviewBtn.textContent = "Open Saved Draft →";
-    savedBadge.classList.remove("hidden");
-    returningCard.classList.add("has-draft");
   } else if (hasSavedReview) {
     startBtn.textContent = "Start Over";
     reviewBtn.textContent = "Review Saved Draft →";
-    savedBadge.classList.remove("hidden");
-    returningCard.classList.add("has-draft");
   } else if (hasPartialAnswers) {
     startBtn.textContent = "Start Over";
-    savedBadge.classList.remove("hidden");
-    returningCard.classList.add("has-draft");
   }
 }
 
@@ -1701,6 +1750,18 @@ async function loadUserData(user) {
     applySessionContext();
     loadSavedDraft();
     updateStartState();
+
+    sessionData = {
+      currentStateDraft: (journeyData && journeyData.currentStateDraft)
+        || (audienceData && audienceData.whatTheyreStrugglingWith)
+        || "",
+      desiredOutcomeDraft: (journeyData && journeyData.desiredOutcomeDraft)
+        || (audienceData && audienceData.theTransformation)
+        || "",
+      identityShift: (journeyData && journeyData.identityShift) || ""
+    };
+    renderTransformationPreview();
+
     showScreen("start");
     document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('revealed'); });
   } catch (error) {
@@ -1742,6 +1803,35 @@ function escHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function buildSentenceListHtml(value, fallback) {
+  const source = textOrFallback(value, fallback);
+  const parts = source
+    .split(/(?<=[.!?])\s+/)
+    .map(function (item) { return item.trim(); })
+    .filter(Boolean)
+    .slice(0, 4);
+  const list = parts.length ? parts : [source];
+
+  return list.map(function (item) {
+    return "<li>" + escHtml(item) + "</li>";
+  }).join("");
+}
+
+function renderTransformationPreview() {
+  document.getElementById("transformStart").innerHTML = buildSentenceListHtml(
+    sessionData && sessionData.currentStateDraft,
+    "Current state not found."
+  );
+  document.getElementById("transformEnd").innerHTML = buildSentenceListHtml(
+    sessionData && sessionData.desiredOutcomeDraft,
+    "Desired outcome not found."
+  );
+  document.getElementById("transformIdentity").textContent = textOrFallback(
+    sessionData && sessionData.identityShift,
+    "Identity shift not added yet."
+  );
 }
 
 function addPhaseDivider(label) {
