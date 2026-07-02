@@ -58,6 +58,12 @@
       radial-gradient(circle at top left, rgba(201,168,76,0.14), transparent 28%),
       linear-gradient(180deg, #fbf8f2 0%, var(--bg) 100%);
   }
+
+/* ── Screen-state utility (drives showScreen()/setInputVisible() toggling) ── */
+.hidden {
+  display: none !important;
+}
+
 /* ── Saved indicator ── */
 .saved-indicator {
   position: fixed;
@@ -94,6 +100,23 @@
   border-top-color: var(--gold);
   border-radius: 50%;
   animation: spin 900ms linear infinite;
+}
+
+/* ── Generating ── */
+.generating-state {
+  min-height: calc(100vh - 52px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  text-align: center;
+}
+.generating-label {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .gate-card {
@@ -165,7 +188,7 @@
 .intro-wrap {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 0 24px 24px;
+ padding: 20px 24px 24px;
 }
 
 /* ── Hero Banner Image ── */
@@ -232,10 +255,10 @@
   animation: heroTextUp 480ms var(--ease-out) 220ms forwards, shimmer 3.5s linear 900ms infinite;
 }
 .hero-overlay-desc {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.88); 
   font-size: 15px;
   line-height: 1.7;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 10px rgba(0,0,0,0.65);
   /* Stagger 3 */
   opacity: 0;
   animation: heroTextUp 480ms var(--ease-out) 300ms forwards;
@@ -352,12 +375,28 @@
   text-align: center;
   min-height: 320px;
   padding: 42px 36px;
-  background: #fafafa;
-  border: 1.5px solid rgba(26,20,10,0.08);
+  background: var(--surface-soft); 
+  border: 1.5px;
   border-radius: 20px;
+  border-color: var(--line-strong); /* rgba(201,168,76,0.28) — was rgba(26,20,10,0.08) */
+
   box-shadow: 0 2px 16px rgba(26,20,10,0.06);
   transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 200ms var(--ease-out);
+   min-height: 260px
 }
+.choice-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.choice-grid .choice-card:nth-child(2) { transition-delay: 80ms; }
+.define-grid .define-card:nth-child(2) { transition-delay: 80ms; }
+.define-grid .define-card:nth-child(3) { transition-delay: 160ms; }
+
 .choice-cta,
 .btn-gold,
 .btn-outline {
@@ -446,13 +485,10 @@
   }
 }
 .choice-card:active { transform: scale(0.98); transition-duration: 100ms; }
-.choice-card.has-draft { border-color: rgba(201,168,76,0.32); }
-.choice-icon {
-  font-size: 20px;
-  color: var(--gold);
-  margin-bottom: 14px;
-  line-height: 1;
+.choice-card.has-draft {  border-color: rgba(201,168,76,0.55);
+ background: linear-gradient(180deg, rgba(201,168,76,0.06), var(--surface-soft) 40%);
 }
+
 .choice-label {
   font-family: "Playfair Display", serif;
   font-size: 30px;
@@ -510,40 +546,40 @@
   margin-top: 8px;
   overflow: hidden;
   position: relative;
+  justify-content: center; /* add this */
 }
 .banner-map {
-  width: 72px;
-  height: 72px;
+  width: 88px;
+  height: 88px;
   object-fit: contain;
   flex-shrink: 0;
   opacity: 0.90;
   filter: sepia(0.3) brightness(1.1);
 }
-.banner-copy {
-  flex: 1;
-  min-width: 0;
-}
+
 .banner-copy p {
   color: rgba(255,255,255,0.88);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   line-height: 1.5;
   margin: 0 0 3px;
+    flex: 0 1 auto;
 }
 .banner-copy em {
   font-family: "Playfair Display", serif;
   font-style: italic;
-  font-size: 16px;
+  font-size: 28px;
   color: var(--gold);
   font-weight: 500;
+    
 }
 .banner-glow {
   position: absolute;
   right: -40px;
   top: -40px;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%);
+  width: 260px;
+  height: 260px;
+    background: radial-gradient(circle, rgba(201,168,76,0.28) 0%, transparent 70%); /* opacity 0.18 → 0.28 */
   pointer-events: none;
 }
 
@@ -572,7 +608,7 @@
 }
 .divider-text {
   font-family: "Playfair Display", serif;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 500;
   font-style: italic;
   letter-spacing: 0.01em;
@@ -593,7 +629,7 @@
   align-items: center;
   padding: 28px 24px;
   text-align: left;
-  background: #fafafa;
+   background: var(--surface-soft); /* was #fafafa */
   border: 1px solid rgba(26,20,10,0.08);
   border-radius: 18px;
   box-shadow: 0 1px 8px rgba(26,20,10,0.04);
@@ -1148,7 +1184,7 @@
     }
 
     .intro-hero-banner {
-      border-radius: 22px;
+      border-radius: 10px;
       aspect-ratio: 4 / 3;
       background-position: center 34%;
     }
@@ -1203,6 +1239,13 @@
     .recap-label {
       min-width: unset;
     }
+    .reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
   }
 </style>
 </head>
@@ -1279,9 +1322,9 @@
     <!-- Choice Cards -->
     <div class="choices-outer">
       <div class="choice-grid">
-        <div class="choice-card reveal" id="newCard" onclick="startSession()">
+        <div class="choice-card reveal" id="newCard" onclick="startFreshSession()">
           <div class="choice-content">
-            <div class="choice-label">Just Getting Started</div>
+          <div class="choice-label">Just Getting Started</div>
             <div class="choice-desc">First time here. We'll build your transformation from the ground up using everything we already know about you.</div>
           </div>
           <div class="choice-footer">
@@ -1291,7 +1334,7 @@
         <div class="choice-card reveal" id="returningCard" onclick="resumeToReview()">
           <div class="choice-content">
             <div class="choice-label">Been Here Before</div>
-            <div class="choice-desc">You've been here before but need to make edits to your current transformation data. Let's continue building or pick up right where you left off.</div>
+            <div class="choice-desc">You've been here before but need to make changes. Let's continue building or pick up where you left off.</div>
           </div>
           <div class="choice-footer">
             <div class="choice-badge hidden" id="savedBadge">✓ Saved draft found</div>
@@ -1314,7 +1357,7 @@
           <div class="define-desc">The truth or clarity that changes everything for your customer.</div>
         </div>
         <div class="define-card reveal">
-          <div class="define-icon-wrap"><i data-lucide="dumbbell" width="20" height="20"></i></div>
+          <div class="define-icon-wrap"><i data-lucide="trending-up" width="20" height="20"></i></div>
           <div class="define-title">New Ability</div>
           <div class="define-desc">What they can do confidently when your solution is in place.</div>
         </div>
@@ -1329,14 +1372,14 @@
     <!-- Bottom Banner -->
     <div class="intro-banner reveal">
       <div class="banner-glow"></div>
-      <img src="treasuremap.png" alt="" class="banner-map" aria-hidden="true">
-      <div class="banner-copy">
-        <p>A clear transformation leads to a powerful journey.</p>
-        <em>Let's map it out.</em>
+           <div class="banner-copy">
+        <p>A clear transformation leads to a powerful journey. <em> Let's map it out.</em></p>
       </div>
     </div>
 
   </div><!-- /intro-wrap -->
+</section><!-- close introSection — this was missing -->
+
 <!-- ── Chat ── -->
 <section id="chatSection" class="chat-section hidden">
   <div class="chat-wrap">
@@ -1667,17 +1710,17 @@ function updateStartState() {
   returningCard.classList.remove("has-draft");
 
   if (isCompleted) {
-    startBtn.textContent = "Review the Transformation";
+    startBtn.textContent = "Start Over";
     reviewBtn.textContent = "Open Saved Draft →";
     savedBadge.classList.remove("hidden");
     returningCard.classList.add("has-draft");
   } else if (hasSavedReview) {
-    startBtn.textContent = "Continue the Conversation";
+    startBtn.textContent = "Start Over";
     reviewBtn.textContent = "Review Saved Draft →";
     savedBadge.classList.remove("hidden");
     returningCard.classList.add("has-draft");
   } else if (hasPartialAnswers) {
-    startBtn.textContent = "Continue the Transformation";
+    startBtn.textContent = "Start Over";
     savedBadge.classList.remove("hidden");
     returningCard.classList.add("has-draft");
   }
@@ -1743,6 +1786,7 @@ async function loadUserData(user) {
     loadSavedDraft();
     updateStartState();
     showScreen("start");
+    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('revealed'); });
   } catch (error) {
     console.error("discoverbreakthrough load failed:", error);
     showBlockedState([
@@ -1977,6 +2021,28 @@ async function startSession() {
   beginRecap();
 }
 
+async function startFreshSession() {
+  QUESTION_FLOW.forEach(function (item) { answers[item.key] = ""; });
+  Object.keys(followupsAsked).forEach(function (key) { delete followupsAsked[key]; });
+  REVIEW_FIELDS.forEach(function (field) { reviewData[field.key] = ""; });
+  currentQuestionIndex = -1;
+  awaitingFollowupFor = null;
+
+  showScreen("chat");
+
+  const wipe = {};
+  QUESTION_FLOW.forEach(function (item) { wipe[item.key] = ""; });
+  REVIEW_FIELDS.forEach(function (field) { wipe[field.key] = ""; });
+
+  await persistSession(Object.assign({}, wipe, {
+    currentPhase: "recap",
+    status: "in_progress",
+    resultsReviewed: false
+  }));
+
+  beginRecap();
+}
+
 function resumeToReview() {
   if (journeyData && journeyData.transformationStatement) {
     renderReview();
@@ -2020,12 +2086,15 @@ async function beginChatFlow() {
     return;
   }
 
-  await persistSession({
-    currentPhase: "chat",
-    status: "in_progress",
-    sessionAudienceOverride: buildAudienceOverridePayload(),
-    answers: buildAnswerPayload()
-  });
+  try {
+    await persistSession(Object.assign({}, buildAnswerPayload(), {
+      currentPhase: "chat",
+      status: "in_progress",
+      sessionAudienceOverride: buildAudienceOverridePayload()
+    }));
+  } catch (error) {
+    console.warn("Failed to persist chat start state:", error);
+  }
   askQuestion(currentQuestionIndex);
 }
 
@@ -2101,21 +2170,19 @@ async function handleSend() {
   if (awaitingFollowupFor === item.key) {
     answers[item.key] = [answers[item.key], text].filter(Boolean).join(" ");
     awaitingFollowupFor = null;
-    await persistSession({
+    await persistSession(Object.assign({}, buildAnswerPayload(), {
       currentPhase: "chat",
-      status: "in_progress",
-      answers: buildAnswerPayload()
-    });
+      status: "in_progress"
+    }));
     nextQuestion();
     return;
   }
 
   answers[item.key] = text;
-  await persistSession({
+  await persistSession(Object.assign({}, buildAnswerPayload(), {
     currentPhase: "chat",
-    status: "in_progress",
-    answers: buildAnswerPayload()
-  });
+    status: "in_progress"
+  }));
 
   if (isThinAnswer(text) && !followupsAsked[item.key]) {
     followupsAsked[item.key] = true;
@@ -2134,11 +2201,10 @@ async function handleSend() {
 async function finishQuestions() {
   setInputVisible(false);
   currentPhase = "generating";
-  await persistSession({
+  await persistSession(Object.assign({}, buildAnswerPayload(), {
     currentPhase: "generating",
-    status: "in_progress",
-    answers: buildAnswerPayload()
-  });
+    status: "in_progress"
+  }));
 
   addPhaseDivider("Generate");
   addAiMessage("Let me turn everything you've shared into a transformation your future tools, lessons, and marketing can all rally around.");
@@ -2454,5 +2520,7 @@ document.addEventListener('tsUserReady', function (e) {
 </script>
 <script src="js/auth.js"></script>
 <script src="js/topbar.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

@@ -854,6 +854,38 @@
       </div>
     </div>
   </div><!-- end step 3 -->
+
+  <div class="roadmap-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <div id="transformation-section">
+        <div class="spark-section-card">
+          <div class="spark-section-header">
+            <div class="header-text">
+              <div class="spark-section-title">Map your transformation</div>
+              <div class="spark-section-desc">The shift your customer experiences</div>
+            </div>
+            <div class="step-status-badge" id="transformation-badge"></div>
+            <div class="section-btn-group">
+              <a href="discoverbreakthrough.html" class="btn-fill">Open tool</a>
+            </div>
+          </div>
+          <div class="spark-section-body">
+            <div class="summary-inner two-col" id="transformation-summary-inner">
+              <div>
+                <div class="spark-field-label">Current State</div>
+                <div class="spark-field-value" id="transformation-current-state">Run Discover Your Breakthrough to define where your customer is starting from.</div>
+              </div>
+              <div>
+                <div class="spark-field-label">The Transformation</div>
+                <div class="spark-field-value" id="transformation-statement">Once you complete the tool, your transformation statement will appear here.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end step 4 -->
 </div><!-- end roadmap-steps -->
 
     <div id="content" style="display:none;">
@@ -1351,13 +1383,13 @@
     btn.textContent = isCollapsed ? 'Show less ▲' : 'Show full summary ▾';
   }
 
-  function updateHeroProgress(sparkDone, audienceDone, breakthroughDone) {
-    const count = [sparkDone, audienceDone, breakthroughDone].filter(Boolean).length;
-    const pct = (count / 3) * 100;
+  function updateHeroProgress(sparkDone, audienceDone, breakthroughDone, transformationDone) {
+    const count = [sparkDone, audienceDone, breakthroughDone, transformationDone].filter(Boolean).length;
+    const pct = (count / 4) * 100;
     const fill = document.getElementById('hero-progress-fill');
     const label = document.getElementById('hero-progress-label');
     if (fill) fill.style.width = pct + '%';
-    if (label) label.textContent = count + ' of 3 steps complete';
+    if (label) label.textContent = count + ' of 4 steps complete';
   }
 
   function applyCardState(sectionId, badgeId, summaryInnerId, state, prevStepName, continueUrl) {
@@ -1400,14 +1432,16 @@
     }
   }
 
-  function updateStepStates(sparkDone, audienceDone, breakthroughDone) {
-    updateHeroProgress(sparkDone, audienceDone, breakthroughDone);
+  function updateStepStates(sparkDone, audienceDone, breakthroughDone, transformationDone) {
+    updateHeroProgress(sparkDone, audienceDone, breakthroughDone, transformationDone);
     applyCardState('spark-section', 'spark-badge', 'spark-summary-inner',
       sparkDone ? 'complete' : 'in-progress', null, 'spark.html');
     applyCardState('audience-section', 'audience-badge', 'audience-summary-inner',
       audienceDone ? 'complete' : (sparkDone ? 'in-progress' : 'locked'), 'Find Your Spark', 'audiencetool.html');
     applyCardState('breakthrough-section', 'breakthrough-badge', 'breakthrough-summary-inner',
       breakthroughDone ? 'complete' : (audienceDone ? 'in-progress' : 'locked'), 'Audience Deep Dive', 'clarity.html');
+    applyCardState('transformation-section', 'transformation-badge', 'transformation-summary-inner',
+      transformationDone ? 'complete' : (audienceDone ? 'in-progress' : 'locked'), 'Audience Deep Dive', 'discoverbreakthrough.html');
   }
 
   window.addEventListener('tsUserReady', async function() {
@@ -1433,7 +1467,8 @@
         sparkByUser, sparkByEmail, sparkByEmailLower,
         audienceByUser, audienceByEmail, audienceByEmailLower,
         clarityByUser, clarityByEmail, clarityByEmailLower, clarityByEmailNorm,
-        promptResultDoc
+        promptResultDoc,
+        journeySessionDoc
       ] = await Promise.all([
         db.collection('spark_results').where('userId', '==', user.uid).get(),
         db.collection('spark_results').where('accountEmail', '==', user.email).get(),
@@ -1445,7 +1480,8 @@
         db.collection('clarity_sessions').where('clientEmail', '==', user.email).get(),
         db.collection('clarity_sessions').where('clientEmail', '==', userEmailLower).get(),
         db.collection('clarity_sessions').where('clientEmailLower', '==', userEmailLower).get(),
-        db.collection('prompt_results').doc(user.uid).get()
+        db.collection('prompt_results').doc(user.uid).get(),
+        db.collection('journey_sessions').doc(user.uid).get()
       ]);
 
       // Render Spark section from most recent spark_results doc
@@ -1556,7 +1592,16 @@
         }
       }
 
-      updateStepStates(sparkDone, audienceDone, breakthroughDone);
+      const journeyData = journeySessionDoc.exists ? journeySessionDoc.data() : null;
+      const transformationDone = Boolean(journeyData && journeyData.status === 'completed');
+      if (journeyData && journeyData.transformationStatement) {
+        const curEl = document.getElementById('transformation-current-state');
+        if (curEl) curEl.textContent = journeyData.currentStateDraft || '—';
+        const stEl = document.getElementById('transformation-statement');
+        if (stEl) stEl.textContent = journeyData.transformationStatement || '—';
+      }
+
+      updateStepStates(sparkDone, audienceDone, breakthroughDone, transformationDone);
     } catch(e) {
       console.error('Roadmap load error:', e);
       document.getElementById('loading').textContent = 'Could not load your roadmap right now.';
